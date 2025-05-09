@@ -1,16 +1,22 @@
-[project]
+[tool.poetry]
 name        = "insightspike-ai"
 version     = "0.1.0"
 description = ""
 readme      = "README.md"
-authors     = [
-  "miyauchikazuyoshi <miyauchikazuyoshi@gmail.com>",
+license     = "InsightSpike-OpenRAIL-M-1.0"
+authors     = ["miyauchikazuyoshi <miyauchikazuyoshi@gmail.com>"]
+packages = [
+  { include = "insightspike", from = "src" }
 ]
+
 [tool.poetry.dependencies]
-python = ">=3.11,<3.13"
-torch   = "^2.0.0"
-networkx        = "^3.4.2"
-torch-geometric = "^2.6.1"
+python                   = ">=3.10,<3.13"
+networkx                 = "3.4.2"
+joblib                   = "1.3.2"
+
+[tool.poetry.dev-dependencies]
+pytest      = "^8.3"
+pytest-cov  = "^6.1"
 
 [build-system]
 requires    = ["poetry-core>=2.0.0,<3.0.0"]

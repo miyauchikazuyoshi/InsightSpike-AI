@@ -32,3 +32,36 @@ Phase	Goal	Status
 📄 License
 InsightSpike Open RAIL-M (research-only) – commercial use requires written permission.
 See LICENSE for details.
+
+## PoC の動かし方
+
+```bash
+## 環境構築
+
+以下の順番で実行してください。
+
+```bash
+## 環境構築
+
+まずはリポジトリをクローンし、スクリプトを実行してください：
+
+```bash
+git clone https://github.com/your-username/InsightSpike-AI.git
+cd InsightSpike-AI
+chmod +x scripts/setup.sh
+./scripts/setup.sh
+
+
+# 2) Poetry 管理下の残りの依存をインストール
+poetry install
+
+# サンプルデータを用いたデモ実行
+python examples/demo.py
+
+# あるいは Notebook で確認
+jupyter notebook examples/demo.ipynb
+yaml
+コピーする
+編集する
+
+[![CI](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/InsightSpike-AI/actions/workflows/ci.yml)

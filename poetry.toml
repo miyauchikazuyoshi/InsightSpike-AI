@@ -1,4 +1,0 @@
-[virtualenvs]
-create = true
-gmatch4py = { git = "https://github.com/tisimstims/gmatch4py.git", tag = "v0.2.1" }
-in-project = true
