@@ -24,7 +24,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        poetry install --no-root
+        poetry install
         poetry run pip install torch torch-geometric vector-quantize-pytorch
 
     - name: Run tests
