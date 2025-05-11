@@ -2,9 +2,11 @@ from insightspike.data_loader import load_raw_documents
 from insightspike.retrieval import build_index
 from insightspike.quantizer import Quantizer
 
-def embeddings(texts):
-    # TODO: ここに Embedding モデル呼び出しを書く
-    return []
+import numpy as np
+
+def embeddings(texts, dim=16):
+    # texts の数 × dim のランダムベクトルを返す
+    return np.random.RandomState(0).randn(len(texts), dim).astype(np.float32)
 
 if __name__ == "__main__":
     docs = load_raw_documents("data/raw/")

@@ -1,26 +1,24 @@
-from insightspike.data_loader import load_sample_data
-from insightspike.quantizer    import Quantizer
-from insightspike.retrieval    import Retriever
-from insightspike.predict      import Predictor
+from scripts.prepare_episodes import embeddings
+from insightspike.data_loader import load_raw_documents
+from insightspike.retrieval import SimpleRetrieval
+# from insightspike.quantizer import Quantizer  
+# → 後で「量子化をかました例」を入れるときに使います
+from insightspike.quantizer import Quantizer  
 
-def main():
-    # 1) サンプルデータ読み込み
-    data = load_sample_data("examples/sample_input.json")
+# 1) 実際のファイルからドキュメントを読み込む
+docs = load_raw_documents("data/raw")
 
-    # 2) ベクトル量子化
-    q = Quantizer(...)
-    episodes = q.quantize(data)
+# 2) 埋め込みを計算
+vecs = embeddings(docs, dim=16)
 
-    # 3) 検索・RAG
-    r = Retriever(...)
-    context = r.retrieve(episodes)
+# 3) インデックスを作成
+retriever = SimpleRetrieval(vecs)
 
-    # 4) 推論
-    p = Predictor(...)
-    result = p.predict(context)
+# 4) クエリに対する検索例
+q = "テスト用クエリ"
+qvec = embeddings([q], dim=16)[0]
 
-    print("=== PoC Demo Result ===")
-    print(result)
-
-if __name__ == "__main__":
-    main()
+ids, sims = retriever.query(qvec, topk=3)
+print("Top results:")
+for i, s in zip(ids, sims):
+    print(f"  doc#{i} (score={s:.3f}): {docs[i]}")
