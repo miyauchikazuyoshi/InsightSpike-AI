@@ -33,6 +33,7 @@ EurekaSpike fires when **ΔGED drops ≥ 0.5** *and* **ΔIG rises ≥ 0.2**.
 ---
 
 ## Quick‑start (local CPU/MPS)
+Poetry が未インストールの場合は `pip install poetry` を実行してください。
 ```bash
 poetry install --no-root        # 依存を入れる
 poetry run insightspike embed   # L1+L2 初期化
@@ -74,12 +75,6 @@ See LICENSE for details.
 
 ## PoC の動かし方
 
-```bash
-## 環境構築
-
-以下の順番で実行してください。
-
-```bash
 ## 環境構築
 
 まずはリポジトリをクローンし、スクリプトを実行してください：
@@ -95,6 +90,7 @@ python examples/demo.py
 
 # あるいは Notebook で確認
 jupyter notebook examples/demo.ipynb
+[![CI](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci.yml)
 ```
 
-[![CI](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci.yml)
+

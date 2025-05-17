@@ -24,22 +24,14 @@ jobs:
 
     - name: Install dependencies
       run: |
-<<<<<<< HEAD
-        python -m pip install --upgrade pip
-        pip install torch==2.2.2
-        pip install torch-scatter==2.1.2 -f https://data.pyg.org/whl/torch-2.2.2+cpu.html
-        pip install torch-sparse==0.6.18 -f https://data.pyg.org/whl/torch-2.2.2+cpu.html
-        pip install torch-cluster==1.6.3 -f https://data.pyg.org/whl/torch-2.2.2+cpu.html
-        pip install torch-geometric==2.5.2 vector-quantize-pytorch
+<<<<<<< codex/setup-sh-pyproject-yaml-tsp1xv
+        python -m pip install torch==2.2.2
+        python -m pip install torch-scatter==2.1.2 -f https://data.pyg.org/whl/torch-2.2.2+cpu.html
+        python -m pip install torch-sparse==0.6.18 -f https://data.pyg.org/whl/torch-2.2.2+cpu.html
+        python -m pip install torch-cluster==1.6.3 -f https://data.pyg.org/whl/torch-2.2.2+cpu.html
+        python -m pip install torch-geometric==2.5.2 vector-quantize-pytorch
         poetry install --no-interaction
-=======
-        poetry install --no-interaction
-        poetry run pip install torch==2.2.2
-        poetry run pip install torch-scatter==2.1.2 -f https://data.pyg.org/whl/torch-2.2.2+cpu.html
-        poetry run pip install torch-sparse==0.6.18 -f https://data.pyg.org/whl/torch-2.2.2+cpu.html
-        poetry run pip install torch-cluster==1.6.3 -f https://data.pyg.org/whl/torch-2.2.2+cpu.html
-        poetry run pip install torch-geometric==2.5.2 vector-quantize-pytorch
->>>>>>> aab9e5b73558e543cc6343d0a636fff7555807f0
+
 
     - name: Run tests
       run: |
