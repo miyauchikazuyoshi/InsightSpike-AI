@@ -33,11 +33,14 @@ EurekaSpike fires when **ΔGED drops ≥ 0.5** *and* **ΔIG rises ≥ 0.2**.
 ---
 
 ## Quick‑start (local CPU/MPS)
+Poetry が未インストールの場合は `pip install poetry` を実行してください。
 ```bash
 poetry install --no-root        # 依存を入れる
 poetry run insightspike embed   # L1+L2 初期化
 poetry run insightspike graph   # L3 グラフ初期化
 poetry run insightspike loop "光速不変が崩れたら？"
+```
+
 🔬 Research Roadmap
 
 ## Quick‑start on GoogleColab(GPU)
@@ -73,33 +76,21 @@ See LICENSE for details.
 
 ## PoC の動かし方
 
-```bash
-## 環境構築
-
-以下の順番で実行してください。
-
-```bash
 ## 環境構築
 
 まずはリポジトリをクローンし、スクリプトを実行してください：
 
 ```bash
-git clone https://github.com/your-username/InsightSpike-AI.git
+git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
 cd InsightSpike-AI
 chmod +x scripts/setup.sh
 ./scripts/setup.sh
-
-
-# 2) Poetry 管理下の残りの依存をインストール
-poetry install
 
 # サンプルデータを用いたデモ実行
 python examples/demo.py
 
 # あるいは Notebook で確認
 jupyter notebook examples/demo.ipynb
-yaml
-コピーする
-編集する
+[![CI](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci.yml)
+```
 
-[![CI](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/InsightSpike-AI/actions/workflows/ci.yml)
