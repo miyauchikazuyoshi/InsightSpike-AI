@@ -3,7 +3,11 @@ name = "insightspike-ai"
 version = "0.2.0"
 description = "InsightSpike prototype with PyG-based GNN layers"
 authors = ["YOUR NAME <you@example.com>"]
+<<<<<<< HEAD
 packages = [{ include = "insightspike", from = "src" }]
+=======
+packages = [{include = "insightspike", from = "src"}]
+>>>>>>> aab9e5b73558e543cc6343d0a636fff7555807f0
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -31,10 +35,13 @@ colab = ["torch", "torch-geometric", "faiss-gpu"]
 name = "pypi"
 url = "https://pypi.org/simple"
 priority = "default"
+<<<<<<< HEAD
 
 [[tool.poetry.source]]
 name = "pytorch-cu118"
 url  = "https://download.pytorch.org/whl/cu118/"
+=======
+>>>>>>> aab9e5b73558e543cc6343d0a636fff7555807f0
 
 [tool.poetry.scripts]
 insightspike = "insightspike.cli:app"
