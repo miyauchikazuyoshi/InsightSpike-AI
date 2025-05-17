@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List
 
 from .config import DATA_DIR
-from .utils  import iter_text, clean_text
+from .utils import iter_text, clean_text
 
 __all__ = ["load_corpus"]
 

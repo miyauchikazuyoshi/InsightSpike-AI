@@ -50,7 +50,9 @@ class Memory:
         meta_path.write_text(json.dumps(meta, ensure_ascii=False))
         return meta_path
     
+    @classmethod
     def load(cls, path: Path = INDEX_FILE):
+        """Load memory state from disk."""
         index = faiss.read_index(str(path))
         meta = json.loads(path.with_suffix(".json").read_text())
         mem = cls(index.d)
