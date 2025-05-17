@@ -1,12 +1,22 @@
-/.DS_Store
-# macOS
-.DS_Store
-**/.DS_Store
-
-# Byte-compiled / optimized / DLL files
+# virtual env / editor junk
+.venv/
 __pycache__/
-*.py[cod]
-*$py.class
+*.pyc
 
-# pytest cache
-.pytest_cache/
+# data artefacts (keep directory but ignore contents)
+/data/*
+!/data/.gitkeep
+!/data/raw/
+!/data/raw/.gitkeep
+```gitignore
+# virtual env / editor junk
+.venv/
+__pycache__/
+*.pyc
+# data artefacts
+/data/index.faiss*
+/data/graph_*.pt
+/data/logs/*
+!/data/logs/.gitkeep
+/data/raw/*
+!/data/raw/.gitkeep

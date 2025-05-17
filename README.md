@@ -15,14 +15,52 @@ InsightSpike-AI models this process and exposes the *spike* as an internal rewar
 
 <!-- <p align="center"><img src="docs/diagram/overview_v0.png" width="70%"></p> -->
 
-## 📦 Quick start (Docker)
-```bash
-git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
-cd InsightSpike-AI
-docker compose up --build
-python demo_cli.py
+# InsightSpike AI (v0.7‑Eureka)
 
+# InsightSpike AI (v0.7-Eureka)
+
+Proof‑of‑concept brain‑inspired architecture with a 4‑layer subcortical loop.
+
+| Layer | Brain analog  | Main file(s)                  |
+|-------|---------------|-------------------------------|
+| L1    | Cerebellum    | layer1_error_monitor.py       |
+| L2    | LC + Hippocampus | layer2_memory_manager.py  |
+| L3    | PFC           | layer3_graph_pyg.py,<br>layer3_reasoner_gnn.py |
+| L4    | Language area | layer4_llm.py                 |
+
+EurekaSpike fires when **ΔGED drops ≥ 0.5** *and* **ΔIG rises ≥ 0.2**.
+
+---
+
+## Quick‑start (local CPU/MPS)
+```bash
+poetry install --no-root        # 依存を入れる
+poetry run insightspike embed   # L1+L2 初期化
+poetry run insightspike graph   # L3 グラフ初期化
+poetry run insightspike loop "光速不変が崩れたら？"
 🔬 Research Roadmap
+
+## Quick‑start on GoogleColab(GPU)
+```bash
+# 1. リポジトリを Drive 経由で展開（または PAT で clone）
+!unzip -q /content/drive/MyDrive/insightspike-ai.zip -d .
+%cd insightspike-ai
+
+# 2. GPU 版バイナリをインストール
+!pip install -q torch==2.2.2+cu118 torchvision torchaudio \
+                --index-url https://download.pytorch.org/whl/cu118
+!pip install -q torch-geometric==2.6.1 -f https://data.pyg.org/whl/torch-2.2.0+cu118.html
+!pip install -q faiss-gpu==1.7.4.post118
+
+# 3. 残りの依存
+!pip install -q sentence-transformers transformers rich typer scikit-learn networkx
+
+# 4. コーパスを置き、パイプラインを実行
+!python -m insightspike.cli embed
+!python -m insightspike.cli graph
+!python -m insightspike.cli loop "ブラックホールは情報を失うのか？"
+
+
 
 Phase	Goal	Status
 0	License / README / Contrib guide	✅
