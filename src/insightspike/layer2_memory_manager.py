@@ -57,7 +57,18 @@ class Memory:
         meta = json.loads(path.with_suffix(".json").read_text())
         mem = cls(index.d)
         mem.index = index
-        mem.episodes = [Episode(np.zeros(index.d), m["text"], m["c"]) for m in meta]
+
+        # Reconstruct stored vectors so that the memory can be retrained
+        # without losing information after loading.  If reconstruction is
+        # unavailable, fall back to zero vectors as before.
+        if hasattr(index, "reconstruct"):
+            vecs = [index.reconstruct(i) for i in range(index.ntotal)]
+        else:
+            vecs = [np.zeros(index.d, dtype=np.float32) for _ in meta]
+
+        mem.episodes = [
+            Episode(v, m["text"], m["c"]) for v, m in zip(vecs, meta)
+        ]
         return mem
 
     # ── retrieval ──────────────────────────────────
