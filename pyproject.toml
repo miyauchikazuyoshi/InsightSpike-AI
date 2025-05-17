@@ -26,13 +26,15 @@ rich                 = "^13.6"
 [tool.poetry.extras]
 colab = ["torch", "torch-geometric", "faiss-gpu"]
 
-# [[tool.poetry.source]]
-# name = "pypi"
-# url = "https://pypi.org/simple"
+# Default PyPI source
+[[tool.poetry.source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+default = true
 
 [[tool.poetry.source]]
 name = "pytorch-cu118"
-url  = "https://download.pytorch.org/whl/cu118"
+url  = "https://download.pytorch.org/whl/cu118/"
 
 [tool.poetry.scripts]
 insightspike = "insightspike.cli:app"
