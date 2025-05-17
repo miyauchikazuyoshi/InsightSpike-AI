@@ -4,18 +4,28 @@ from rich import print
 import numpy as np, networkx as nx
 
 from .embedder              import get_model
-from .loader                import load_corpus
 from .prompt_builder        import build_prompt
 from .layer1_error_monitor  import uncertainty
 from .layer2_memory_manager import Memory
-from .layer3_graph_pyg      import build_graph, load_graph
-from .layer3_reasoner_gnn   import retrieve_gnn
+from .layer3_graph_pyg      import build_graph
 from .graph_metrics         import delta_ged, delta_ig
 from .layer4_llm            import generate
 from .config                import (TOP_K, SPIKE_GED, SPIKE_IG, ETA_SPIKE, LOG_DIR, MERGE_GED, SPLIT_IG, PRUNE_C, INACTIVE_N, timestamp,)
 __all__ = ["cycle"]
 
 def cycle(memory: Memory, question: str, g_old: nx.Graph | None = None):
+    """Run a single reasoning cycle.
+
+    Parameters
+    ----------
+    memory : Memory
+        Episode memory store.
+    question : str
+        User question text.
+    g_old : nx.Graph | None, optional
+        Previous similarity graph for ΔGED calculation.
+    """
+
     time_id = timestamp()
     # --- save question text ---
     (LOG_DIR / f"{time_id}_question.txt").write_text(question, encoding="utf-8")
