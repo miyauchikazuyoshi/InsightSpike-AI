@@ -89,10 +89,6 @@ cd InsightSpike-AI
 chmod +x scripts/setup.sh
 ./scripts/setup.sh
 
-
-# 2) Poetry 管理下の残りの依存をインストール
-poetry install
-
 # サンプルデータを用いたデモ実行
 python examples/demo.py
 

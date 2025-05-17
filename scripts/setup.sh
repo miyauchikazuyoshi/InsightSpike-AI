@@ -12,17 +12,14 @@ echo "=== 3) torch を先にインストール ==="
 pip install torch==2.2.2
 
 echo "=== 4) PyG関連を1つずつインストール（CPU版）==="
-pip install torch-scatter==2.1.2 -f https://data.pyg.org/whl/torch-2.2.0+cpu.html
-pip install torch-sparse==0.6.18 -f https://data.pyg.org/whl/torch-2.2.0+cpu.html
-pip install torch-cluster==1.6.3 -f https://data.pyg.org/whl/torch-2.2.0+cpu.html
+pip install torch-scatter==2.1.2 -f https://data.pyg.org/whl/torch-2.2.2+cpu.html
+pip install torch-sparse==0.6.18 -f https://data.pyg.org/whl/torch-2.2.2+cpu.html
+pip install torch-cluster==1.6.3 -f https://data.pyg.org/whl/torch-2.2.2+cpu.html
 pip install torch-geometric==2.5.2
 
 echo "=== 5) Poetry依存をインストール ==="
 poetry lock --no-cache --regenerate
 poetry install --no-root
 
-echo "=== 6) NumPyを <2.0 に固定 ==="
-poetry run pip uninstall -y numpy
-poetry run pip install "numpy<2.0"
-
 echo "✅ 環境構築 完了"
+
