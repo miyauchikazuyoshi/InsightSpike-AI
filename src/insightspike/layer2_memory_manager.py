@@ -68,6 +68,7 @@ class Memory:
         # Reconstruct stored vectors so that the memory can be retrained
         # without losing information after loading.  If reconstruction is
         # unavailable, fall back to zero vectors as before.
+
         if hasattr(index, "reconstruct_n"):
             vecs = index.reconstruct_n(0, index.ntotal)
         elif hasattr(index, "reconstruct"):
