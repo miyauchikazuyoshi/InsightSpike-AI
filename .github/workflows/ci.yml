@@ -24,7 +24,8 @@ jobs:
 
     - name: Install dependencies
       run: |
-        poetry install
+        poetry config repositories.pytorch-cu118 https://download.pytorch.org/whl/cu118/
+        poetry install --no-interaction
         poetry run pip install torch torch-geometric vector-quantize-pytorch
 
     - name: Run tests
