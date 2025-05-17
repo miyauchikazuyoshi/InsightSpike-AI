@@ -40,7 +40,9 @@ class Memory:
     def train_index(self):
         vecs = np.vstack([e.vec for e in self.episodes])
         self.index.reset()
-        self.index.train(vecs); self.index.add(vecs)
+        # Separate training and adding for clarity
+        self.index.train(vecs)
+        self.index.add(vecs)
 
     # ── persistence ────────────────────────────────
     def save(self, path: Path = INDEX_FILE):
@@ -57,16 +59,29 @@ class Memory:
         meta = json.loads(path.with_suffix(".json").read_text())
         mem = cls(index.d)
         mem.index = index
-        mem.episodes = [Episode(np.zeros(index.d), m["text"], m["c"]) for m in meta]
+
+        # Reconstruct stored vectors so that the memory can be retrained
+        # without losing information after loading.  Use bulk reconstruction
+        # when available for efficiency.
+        if hasattr(index, "reconstruct_n"):
+            vecs = index.reconstruct_n(0, index.ntotal)
+        elif hasattr(index, "reconstruct"):
+            vecs = [index.reconstruct(i) for i in range(index.ntotal)]
+        else:
+            vecs = [np.zeros(index.d, dtype=np.float32) for _ in meta]
+
+        mem.episodes = [
+            Episode(v, m["text"], m["c"]) for v, m in zip(vecs, meta)
+        ]
         return mem
 
     # ── retrieval ──────────────────────────────────
     def search(self, q: np.ndarray, top_k: int = 5, gamma: float = 1.0):
         D, I = self.index.search(q.astype(np.float32), top_k*5)
-        scored: list[tuple[float,int]] = []
-        for d,i in zip(D[0], I[0]):
-            c = self.episodes[i].c
-            scored.append((float(d) * (c ** gamma), i))
+        scored: list[tuple[float, int]] = []
+        for dist, idx in zip(D[0], I[0]):
+            c_val = self.episodes[idx].c
+            scored.append((float(dist) * (c_val ** gamma), idx))
         scored.sort(reverse=True)
         return scored[:top_k]
 
