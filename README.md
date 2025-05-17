@@ -62,8 +62,7 @@ poetry run insightspike loop "光速不変が崩れたら？"
 !python -m insightspike.cli embed
 !python -m insightspike.cli graph
 !python -m insightspike.cli loop "ブラックホールは情報を失うのか？"
-
-
+```
 
 Phase	Goal	Status
 0	License / README / Contrib guide	✅
@@ -93,4 +92,5 @@ python examples/demo.py
 jupyter notebook examples/demo.ipynb
 [![CI](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci.yml)
 ```
+
 

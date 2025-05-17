@@ -4,11 +4,7 @@ __pycache__/
 *.pyc
 .DS_Store
 
-# data artefacts (keep directory but ignore contents)
-/data/*
-!/data/.gitkeep
-!/data/raw/
-!/data/raw/.gitkeep
+
 /data/index.faiss*
 /data/graph_*.pt
 /data/logs/*

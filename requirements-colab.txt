@@ -1,0 +1,13 @@
+torch==2.2.2+cu118 --index-url https://download.pytorch.org/whl/cu118
+torch-scatter==2.1.2 -f https://data.pyg.org/whl/torch-2.2.2+cu118.html
+torch-sparse==0.6.18 -f https://data.pyg.org/whl/torch-2.2.2+cu118.html
+torch-cluster==1.6.3 -f https://data.pyg.org/whl/torch-2.2.2+cu118.html
+torch-geometric==2.5.2
+faiss-gpu==1.7.4.post118
+sentence-transformers
+transformers
+rich
+typer
+scikit-learn
+networkx
+
