@@ -46,6 +46,8 @@ class Memory:
     def train_index(self):
         vecs = np.vstack([e.vec for e in self.episodes])
         self.index.reset()
+
+        # Separate training and adding for clarity
         self.index.train(vecs)
         self.index.add(vecs)
 
@@ -66,6 +68,7 @@ class Memory:
         mem.index = index
 
         # Reconstruct stored vectors so that the memory can be retrained
+
         # without losing information after loading.  If reconstruction is
         # unavailable, fall back to zero vectors as before.
 
@@ -81,6 +84,7 @@ class Memory:
 
     # ── retrieval ──────────────────────────────────
     def search(self, q: np.ndarray, top_k: int = 5, gamma: float = 1.0):
+
         D, indices = self.index.search(q.astype(np.float32), top_k * 5)
         scored: list[tuple[float, int]] = []
         for d, i in zip(D[0], indices[0]):

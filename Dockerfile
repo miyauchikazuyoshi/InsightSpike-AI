@@ -15,7 +15,7 @@ RUN pip install poetry && \
 # application source
 COPY . .
 RUN pip install git+https://github.com/timothybrooks/fsq.git@v0.1.0#egg=fsq-pytorch \
-        networkx torch-geometric gmatch4py faiss-gpu ragatouille
+        networkx torch-geometric gmatch4py faiss-gpu-cu11 ragatouille
 
 CMD ["python", "-m", "insightspike.cli"]
 
