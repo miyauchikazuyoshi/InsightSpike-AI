@@ -2,17 +2,8 @@
 .venv/
 __pycache__/
 *.pyc
+.DS_Store
 
-# data artefacts (keep directory but ignore contents)
-/data/*
-!/data/.gitkeep
-!/data/raw/
-!/data/raw/.gitkeep
-```gitignore
-# virtual env / editor junk
-.venv/
-__pycache__/
-*.pyc
 # data artefacts
 /data/index.faiss*
 /data/graph_*.pt
@@ -20,3 +11,4 @@ __pycache__/
 !/data/logs/.gitkeep
 /data/raw/*
 !/data/raw/.gitkeep
+
