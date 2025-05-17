@@ -3,7 +3,7 @@ name = "insightspike-ai"
 version = "0.2.0"
 description = "InsightSpike prototype with PyG-based GNN layers"
 authors = ["YOUR NAME <you@example.com>"]
-packages = [{include = "insightspike"}]
+packages = [{ include = "insightspike", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
