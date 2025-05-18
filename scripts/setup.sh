@@ -8,7 +8,8 @@ echo
 
 echo "=== 2) pip, setuptools, wheel, torch, PyG関連をインストール ==="
 pip install --upgrade pip
-pip install -r requirements-pip.txt
+pip install -r requirements-torch.txt
+pip install -r requirements-PyG.txt
 
 echo "=== 3) Poetry依存をインストール ==="
 poetry lock --no-cache --regenerate
