@@ -18,25 +18,9 @@ accelerate           = "^0.29"
 networkx             = "^3.3"
 typer                = "^0.12"
 rich                 = "^13.6"
-# ↓ pipで管理するのでコメントアウト
-# torch = "2.2.2"
-# torch-geometric = "^2.5"
-# torch-scatter = "^2.1"
-# torch-sparse = "^0.6"
-# torch-cluster = "^1.6"
 
 [tool.poetry.extras]
 colab = ["torch", "torch-geometric", "faiss-gpu-cu11"]
-
-# Default PyPI source
-[[tool.poetry.source]]
-name = "pypi"
-url = "https://pypi.org/simple"
-
-# [[tool.poetry.source]]
-# name = "pytorch-cu118"
-# url  = "https://download.pytorch.org/whl/cu118/"
-
 
 [tool.poetry.scripts]
 insightspike = "insightspike.cli:app"
