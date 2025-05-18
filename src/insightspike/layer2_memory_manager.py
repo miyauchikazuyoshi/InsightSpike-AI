@@ -5,7 +5,8 @@ from pathlib import Path
 from typing import List
 import json
 
-import faiss, numpy as np
+import faiss
+import numpy as np
 
 from .embedder import get_model
 from .config import INDEX_FILE
@@ -45,6 +46,8 @@ class Memory:
     def train_index(self):
         vecs = np.vstack([e.vec for e in self.episodes])
         self.index.reset()
+
+        # Separate training and adding for clarity
         self.index.train(vecs)
         self.index.add(vecs)
 
@@ -65,9 +68,13 @@ class Memory:
         mem.index = index
 
         # Reconstruct stored vectors so that the memory can be retrained
+
         # without losing information after loading.  If reconstruction is
         # unavailable, fall back to zero vectors as before.
-        if hasattr(index, "reconstruct"):
+
+        if hasattr(index, "reconstruct_n"):
+            vecs = index.reconstruct_n(0, index.ntotal)
+        elif hasattr(index, "reconstruct"):
             vecs = [index.reconstruct(i) for i in range(index.ntotal)]
         else:
             vecs = [np.zeros(index.d, dtype=np.float32) for _ in meta]
@@ -77,11 +84,10 @@ class Memory:
 
     # ── retrieval ──────────────────────────────────
     def search(self, q: np.ndarray, top_k: int = 5, gamma: float = 1.0):
-        D, I = self.index.search(q.astype(np.float32), top_k * 5)
+
+        D, indices = self.index.search(q.astype(np.float32), top_k * 5)
         scored: list[tuple[float, int]] = []
-        for d, i in zip(D[0], I[0]):
-            if i == -1:
-                break
+        for d, i in zip(D[0], indices[0]):
             c = self.episodes[i].c
             scored.append((float(d) * (c**gamma), i))
         scored.sort(reverse=True)
