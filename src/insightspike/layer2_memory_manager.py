@@ -88,6 +88,8 @@ class Memory:
         D, indices = self.index.search(q.astype(np.float32), top_k * 5)
         scored: list[tuple[float, int]] = []
         for d, i in zip(D[0], indices[0]):
+            if i < 0:
+                continue
             c = self.episodes[i].c
             scored.append((float(d) * (c**gamma), i))
         scored.sort(reverse=True)
