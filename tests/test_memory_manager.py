@@ -42,6 +42,8 @@ def test_merge_trains_once():
     mem.train_index = train
     mem.merge([0, 1])
     assert calls == 1
+    # episodesが増えていることも確認
+    assert len(mem.episodes) == 3
 
 
 def test_split_trains_twice():
@@ -56,3 +58,5 @@ def test_split_trains_twice():
     with patch("insightspike.layer2_memory_manager.KMeans"):
         mem.split(0)
     assert calls == 2
+    # episodesが増えていることも確認
+    assert len(mem.episodes) == 4

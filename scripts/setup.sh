@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "=== 1) 仮想環境の有効化を確認してください ==="
-echo "    (.venvが有効でなければ python3.11 -m venv .venv && source .venv/bin/activate )"
-echo "    (Poetry が未インストールなら: pip install poetry)"
+echo "=== 1) Ensure poetry is installed and venv is active ==="
+echo "    (If not: pip install poetry)"
 echo
 
-echo "=== 2) pip, setuptools, wheel, torch, PyG関連をインストール ==="
-pip install --upgrade pip
-pip install -r requirements-torch.txt
-pip install -r requirements-PyG.txt
-
-echo "=== 3) Poetry依存をインストール ==="
+echo "=== 2) Install poetry dependencies and create venv ==="
 poetry lock --no-cache --regenerate
 poetry install --no-root
+
+echo "=== 3) Install pip dependencies inside poetry venv ==="
+poetry run pip install --upgrade pip
+poetry run pip install -r requirements-torch.txt
+poetry run pip install -r requirements-PyG.txt

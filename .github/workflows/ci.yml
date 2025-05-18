@@ -30,16 +30,15 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-pip.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
-            
-    - name: Install torch
-      run: python -m pip install -r requirements-torch.txt
-
-    - name: Install PyG
-      run: python -m pip install -r requirements-PyG.txt
 
     - name: Poetry install
       run: poetry install --no-interaction
 
+    - name: Install torch (inside poetry env)
+      run: poetry run pip install -r requirements-torch.txt
+
+    - name: Install PyG (inside poetry env)
+      run: poetry run pip install -r requirements-PyG.txt
 
     - name: Run tests
       run: poetry run pytest --maxfail=1 --disable-warnings -q --cov=src
