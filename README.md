@@ -53,7 +53,7 @@ poetry run insightspike loop "光速不変が崩れたら？"
 !pip install -q torch==2.2.2+cu118 torchvision torchaudio \
                 --index-url https://download.pytorch.org/whl/cu118
 !pip install -q torch-geometric==2.6.1 -f https://data.pyg.org/whl/torch-2.2.0+cu118.html
-!pip install -q faiss-gpu==1.7.4.post118
+!pip install -q faiss-gpu-cu11
 
 # 3. 残りの依存
 !pip install -q sentence-transformers transformers rich typer scikit-learn networkx

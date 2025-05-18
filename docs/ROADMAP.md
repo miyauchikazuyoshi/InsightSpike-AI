@@ -15,7 +15,7 @@
 
 ## Milestone 1 🛠️ 開発環境 & CI/CD
 ### Epic 1-1 Docker & dependency baseline `area:infra`
-- [ ] Write **Dockerfile** (python 3.11 / cuda-base / pytorch / faiss-gpu)
+- [ ] Write **Dockerfile** (python 3.11 / cuda-base / pytorch / faiss-gpu-cu11)
 - [ ] Pin **requirements.txt / poetry.lock**
 - [ ] VS Code **dev-container** 設定 (optional)
 
