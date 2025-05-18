@@ -4,18 +4,31 @@
 > Quantized RAG ＋ GNN ＋ Internal Reward (ΔGED/ΔIG)  
 > Implementing a cerebellum–LC–hippocampus–VTA loop to study *insight*.
 
-[![License: InsightSpike-OpenRAIL-M](https://img.shields.io/badge/License-InsightSpike--OpenRAIL--M-blue)](./LICENSE)
+[![License: InsightSpike-OpenRAIL-M](https://img.shields.io/badge/License-InsightSpike--OpenRAIL--M-blue)](./LICENSE)  <a href="https://arxiv.org/abs/YYMM.NNNNN"><img src="https://img.shields.io/badge/arXiv-YYMM.NNNNN-b31b1b.svg" alt="arXiv"></a>  <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/releases"><img src="https://img.shields.io/github/v/release/miyauchikazuyoshi/InsightSpike-AI"></a>
+
+## Patent Notice
+The core ΔGED/ΔIG intrinsic-reward mechanism and the hierarchical VQ memory module
+are **patent-pending** in Japan.
+
+- JP Application No. **特願2025-082988** — “ΔGED/ΔIG 内発報酬生成方法”
+- JP Application No. **特願2025-082989** — “階層ベクトル量子化による動的メモリ方法”
+
+<br> Further filings (US/PCT) will follow within the priority year.
+
+---
+
+### ✨ Features
+* **ΔGED** – Graph-edit distance between successive RAG search graphs  
+* **ΔIG** – Entropy gain from*
 
 ## ✨ Why
 Human “aha!” moments often arise from abrupt structural re-arrangements of episodic memory.  
 InsightSpike-AI models this process and exposes the *spike* as an internal reward signal.
 
 ## 🧠 Architecture (MVP)
-<br>L1 Error Monitor (τ_err)<br>L2 Quantum-RAG + C-value (Faiss)<br>L3 GNN + ΔGED/ΔIG + Conflict Score<br>L4 LLM interface<br>
+L1 Error Monitor (τ_err)<br>L2 Quantum-RAG + C-value (Faiss)<br>L3 GNN + ΔGED/ΔIG + Conflict Score<br>L4 LLM interface<br>
 
 <!-- <p align="center"><img src="docs/diagram/overview_v0.png" width="70%"></p> -->
-
-# InsightSpike AI (v0.7‑Eureka)
 
 # InsightSpike AI (v0.7-Eureka)
 
