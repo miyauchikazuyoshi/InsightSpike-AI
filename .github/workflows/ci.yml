@@ -24,7 +24,6 @@ jobs:
 
     - name: Install dependencies
       run: |
-<<<<<<< codex/setup-sh-pyproject-yaml-tsp1xv
         python -m pip install torch==2.2.2
         python -m pip install torch-scatter==2.1.2 -f https://data.pyg.org/whl/torch-2.2.2+cpu.html
         python -m pip install torch-sparse==0.6.18 -f https://data.pyg.org/whl/torch-2.2.2+cpu.html
