@@ -9,20 +9,23 @@ Commercial contributions require written consent.
 - [ ] Code passes `ruff` / `black` / `pytest`.
 - [ ] Added or updated unit tests if applicable.
 - [ ] Docs / examples updated.
+- [ ] **All public functions and classes have type hints.**
+- [ ] **Code is formatted with `black` and imports are sorted with `isort`.**
 
 ## Branching flow
-text<br>main (protected) ← develop ← feature/xxx<br>
-
+main (protected) ← develop ← feature/xxx
 
 1. `git checkout -b feature/my-fix`
 2. Commit (+ conventional-commit prefix, e.g. `feat:` `fix:` `docs:`)
 3. Open PR → 1 reviewer approval → squash & merge
-mai
+
 ## Setting up locally
 
+```bash
 poetry install --with dev
 pre-commit install
 pytest
+```
 
 ### 2-3 Issue & PR テンプレ (GUI 内で OK)
 
@@ -35,17 +38,6 @@ pytest
 
 ---
 
-## 3. 次のアクション
-
-| 優先 | やること |
-|------|----------|
-| ★ | 上の README / CONTRIBUTING をコピペ → *Commit* |
-| ★ | Settings › Features → “Set up templates” → 3 種類を GUI で作成 |
-| ★ | Settings › Branches → “Add rule” → `main` → Require 1 review |
-| ☆ | Projects タブ → *New project* → **InsightSpike Roadmap** → 列：To do ／ In-progress ／ Review ／ Done |
-
-これで **Milestone 0 が完全終了**。  
-さらなるブレークダウンや次フェーズ（Docker & CI）に進むタイミングでまた声をかけてください！
 
 
 

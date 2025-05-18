@@ -25,6 +25,10 @@ colab = ["torch", "torch-geometric", "faiss-gpu-cu11"]
 [tool.poetry.scripts]
 insightspike = "insightspike.cli:app"
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2"
+matplotlib = "^3.8"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

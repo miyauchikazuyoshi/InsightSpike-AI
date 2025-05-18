@@ -8,9 +8,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # install Python deps
 WORKDIR /app
 COPY pyproject.toml poetry.lock ./
-RUN pip install poetry && \
-    poetry config virtualenvs.create false && \
-    poetry install --no-dev --no-interaction
+RUN pip install --upgrade pip \
+    && pip install poetry \
+    && poetry config virtualenvs.create false \
+    && poetry install --no-dev --no-interaction
+
+# (Optional) Upgrade torch to 2.2.2 if strict version match is needed
+RUN pip install --upgrade torch==2.2.2
 
 # application source
 COPY . .

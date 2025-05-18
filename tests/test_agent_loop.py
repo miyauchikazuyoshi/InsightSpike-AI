@@ -1,0 +1,8 @@
+from insightspike.agent_loop import cycle
+from insightspike.layer2_memory_manager import Memory
+
+def test_cycle_runs():
+    mem = Memory.build(["a", "b"])
+    result = cycle(mem, "test question", None)
+    assert isinstance(result, dict)
+    assert "graph" in result
