@@ -117,17 +117,17 @@ class Memory:
         self.add_episode(new_vec, new_text, min(1.0, max_c + gain))
         for i in idxs:
             self.episodes[i].c *= 0.5  # 下げる
-        self.train_index()
 
     # ── split incoherent episode ───────────────────────
     def split(self, idx: int):
+        from sklearn.cluster import KMeans
+
         ep = self.episodes[idx]
         # ここでは dummy: vec を 2 コピー + 小ノイズ
         noise = np.random.randn(2, self.dim) * 1e-4
         for v in ep.vec + noise:
             self.add_episode(v, ep.text, ep.c / 2)
         ep.c *= 0.5
-        self.train_index()
 
     # ── prune low-C & inactive episodes ────────────────
     def prune(self, c_thresh: float, inactive_n: int):
