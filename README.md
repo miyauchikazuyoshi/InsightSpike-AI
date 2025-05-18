@@ -77,14 +77,43 @@ See LICENSE for details.
 
 ## 環境構築
 
-まずはリポジトリをクローンし、スクリプトを実行してください：
+### ローカル環境 (CPU)
+以下のスクリプトで Python 3.11 の仮想環境と依存ライブラリを整えます。
 
 ```bash
 git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
 cd InsightSpike-AI
 chmod +x scripts/setup.sh
 ./scripts/setup.sh
+```
 
+`setup.sh` の処理順序は次の通りです。
+1. `.venv` がなければ `python3.11 -m venv .venv` を作成し `source .venv/bin/activate`
+2. `pip`, `setuptools`, `wheel` を最新版へ更新
+3. `torch==2.2.2` (CPU版) をインストール
+4. `torch-scatter` など PyG 関連パッケージを個別に導入
+5. `poetry lock --no-cache --regenerate` と `poetry install --no-root` を実行
+
+### Google Colab (GPU)
+Colab 上では次を実行します。
+
+```bash
+bash scripts/setup_colab.sh
+```
+
+`requirements-colab.txt` で CUDA 11.8 対応の PyTorch 2.2.2 と PyG を導入後、
+`python -m insightspike.cli embed` が走ります。
+
+### Docker
+同梱の `Dockerfile` は `pytorch/pytorch:2.2.0-cuda12.1-cudnn8-runtime` をベースに、
+Poetry で `pyproject.toml` の依存を入れた後、追加で `torch-geometric` などを
+`pip` でインストールします。ローカルのスクリプトでは `torch==2.2.2` を用いる
+ため、バージョン差に注意してください。ベースイメージは **Python 3.10** のた
+め、`pyproject.toml` で要求する 3.11 系とは異なります。また Poetry で `faiss-cpu`
+を入れた後に `faiss-gpu-cu11` を追加しているため、不要であれば CPU 版をアンイ
+ンストールしてください。
+
+```bash
 # サンプルデータを用いたデモ実行
 python examples/demo.py
 
