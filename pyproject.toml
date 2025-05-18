@@ -28,6 +28,7 @@ insightspike = "insightspike.cli:app"
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2"
 matplotlib = "^3.8"
+pytest-cov = "^5.0"
 
 [build-system]
 requires = ["poetry-core"]
