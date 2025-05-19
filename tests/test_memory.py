@@ -8,8 +8,12 @@ def test_memory_build_and_save(tmp_path):
         docs = [line.strip() for line in f if line.strip()]
     with patch("insightspike.layer2_memory_manager.Memory.train_index"):
         mem = Memory.build(docs)
-    assert len(mem.episodes) == len(docs)
+    print("mem.episodes:", len(mem.episodes))
     save_path = tmp_path / "memory_test.pkl"
     mem.save(save_path)
+    print("Saved to:", save_path)
+    print("File exists?", save_path.exists())
     loaded = Memory.load(save_path)
+    print("loaded.episodes:", len(loaded.episodes))
+    assert len(loaded.episodes) == len(docs)
     assert loaded.episodes[0].text == docs[0]

@@ -54,5 +54,10 @@ def cache(action: str):
     else:
         print("Unknown action")
 
+@app.command()
+def list_memory_files():
+    import os
+    os.system("ls -lh data/")
+
 if __name__ == "__main__":
     app()
