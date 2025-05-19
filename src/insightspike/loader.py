@@ -19,7 +19,15 @@ def load_corpus(path: Path | None = None) -> List[str]:
             print(f"文字コードエラー: {path} はUTF-8で保存してください")
             return []
     root = path or DATA_DIR
-    docs = [clean_text(p.read_text("utf-8")) for p in iter_text(root)]
+    docs = []
+    for file in iter_text(root):
+        try:
+            with file.open(encoding="utf-8") as f:
+                docs.extend([line.strip() for line in f if line.strip()])
+        except FileNotFoundError:
+            print(f"ファイルが見つかりません: {file}")
+        except UnicodeDecodeError:
+            print(f"文字コードエラー: {file} はUTF-8で保存してください")
     if not docs:
         raise RuntimeError(f"No docs under {root}")
     return docs
