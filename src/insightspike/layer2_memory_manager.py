@@ -48,7 +48,8 @@ class Memory:
         n_clusters = min(256, len(vecs))
         if n_clusters < 2:
             raise ValueError(f"クラスタ数が2未満です（文書数: {len(vecs)}）。より多くの文書を用意してください。")
-        self.index = faiss.IndexIVFPQ(self.dim, n_clusters, 16, 8)
+        quantizer = faiss.IndexFlatL2(self.dim)
+        self.index = faiss.IndexIVFPQ(quantizer, self.dim, n_clusters, 16, 8)
         self.index.train(vecs)
         self.index.add(vecs)
 
