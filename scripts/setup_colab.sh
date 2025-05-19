@@ -8,6 +8,6 @@ poetry run pip install -q torch-sparse==0.6.18 -f https://data.pyg.org/whl/torch
 poetry run pip install -q torch-cluster==1.6.3 -f https://data.pyg.org/whl/torch-2.2.2+cu118.html
 poetry run pip install -q torch-geometric==2.5.2
 
-pip install -q -r requirements-colab.txt  # その他依存のみ
+poetry run pip install -q -r requirements-colab.txt  # その他依存のみ
 
 python -m insightspike.cli embed
