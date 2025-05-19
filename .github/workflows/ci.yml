@@ -39,5 +39,9 @@ jobs:
         mkdir -p data/raw
         for i in $(seq 1 10); do echo "This is sentence $i." >> data/raw/test_sentences.txt; done
 
+    - name: Build test Memory (for tests)
+      run: |
+        poetry run insightspike embed --path data/raw/test_sentences.txt
+
     - name: Run tests
       run: PYTHONPATH=src poetry run pytest --maxfail=1 --disable-warnings -q --cov=src
