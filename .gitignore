@@ -16,4 +16,4 @@ data/*.pt
 !data/graph_loop.pt
 
 # Test sample
-!tests/sample_texts.txt
+!data/raw/test_sentences.txt
