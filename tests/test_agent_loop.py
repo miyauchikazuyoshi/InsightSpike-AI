@@ -1,6 +1,7 @@
 from unittest.mock import patch
 from insightspike.agent_loop import cycle
 from insightspike.layer2_memory_manager import Memory
+import networkx as nx
 
 def test_cycle_runs():
     with open("data/raw/test_sentences.txt") as f:
@@ -11,5 +12,4 @@ def test_cycle_runs():
          patch("insightspike.graph_metrics.silhouette_score", return_value=0.5):
         mem = Memory.build(docs)
         result = cycle(mem, "test question", None)
-        assert isinstance(result, dict)
-        assert "graph" in result
+        assert isinstance(result, nx.Graph)
