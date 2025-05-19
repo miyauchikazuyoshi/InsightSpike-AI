@@ -51,11 +51,6 @@ jobs:
         poetry run pip install -r requirements-torch.txt
         poetry run pip install -r requirements-PyG.txt
 
-    - name: Generate sample_texts.txt
-      run: |
-        mkdir -p data/raw
-        cp tests/sample_texts.txt data/raw/sample_texts.txt
-
     - name: Build test Memory (for tests)
       run: |
         poetry run insightspike embed --path data/raw
