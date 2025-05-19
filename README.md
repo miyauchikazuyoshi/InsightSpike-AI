@@ -151,3 +151,12 @@ To run the PoC pipeline after data preparation, follow these steps:
     You can adjust parameters such as thresholds for ΔGED and ΔIG in the configuration files (e.g., `config.yaml`) to observe different behaviors.
 
 For detailed experiments or custom runs, refer to the scripts in the `experiments/` directory.
+
+## Makefile コマンド例
+- `make test` ... テスト実行
+- `make embed` ... テスト用Memory生成
+- `make clean` ... テスト成果物の削除
+
+## .envファイルについて
+- `PYTHONPATH=src` など、環境変数を一元管理できます。
+- 必要に応じて `DATA_DIR` や `API_KEY` などを追加してください。

@@ -6,8 +6,9 @@ echo "    (If not: pip install poetry)"
 echo
 
 echo "=== 2) Install poetry dependencies and create venv ==="
+poetry config virtualenvs.in-project true 
 poetry lock --no-cache --regenerate
-poetry install --no-root
+poetry install 
 
 echo "=== 3) Install pip dependencies inside poetry venv ==="
 poetry run pip install --upgrade pip

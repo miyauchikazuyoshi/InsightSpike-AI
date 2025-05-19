@@ -18,21 +18,38 @@ jobs:
       with:
         python-version: "3.11"
 
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Cache Poetry
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pypoetry
+        key: ${{ runner.os }}-pypoetry-${{ hashFiles('**/poetry.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pypoetry-
+
     - name: Upgrade pip & Install Poetry
       run: |
         python -m pip install --upgrade pip
         pip install poetry
 
-    - name: Cache pip
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-pip.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
+    - name: Set Poetry venv location
+      run: poetry config virtualenvs.in-project true
 
-    - name: Setup project (run setup.sh)
-      run: bash scripts/setup.sh
+    - name: Install dependencies
+      run: poetry install
+
+    - name: Install additional dependencies
+      run: |
+        poetry run pip install --upgrade pip
+        poetry run pip install -r requirements-torch.txt
+        poetry run pip install -r requirements-PyG.txt
 
     - name: Generate test_sentences.txt
       run: |
@@ -45,3 +62,8 @@ jobs:
 
     - name: Run tests
       run: PYTHONPATH=src poetry run pytest --maxfail=1 --disable-warnings -q --cov=src
+
+    - name: Cleanup test data and artifacts
+      run: |
+        rm -rf data/raw/test_sentences.txt
+        rm -rf data/memory* data/*.pt data/*.json
