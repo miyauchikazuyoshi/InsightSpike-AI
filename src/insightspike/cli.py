@@ -8,6 +8,7 @@ from .loader                import load_corpus
 from .layer2_memory_manager import Memory
 from .layer3_graph_pyg      import build_graph
 from .agent_loop            import cycle
+from insightspike import cache_manager
 
 app = typer.Typer()
 
@@ -40,6 +41,18 @@ def loop(q: str):
     import torch
     torch.save(g_new, "data/graph_loop.pt")
     mem.save()
+
+@app.command()
+def cache(action: str):
+    if action == "save":
+        # graph, memory = ... # 現在のオブジェクトを取得
+        cache_manager.save_cache(graph, memory)
+    elif action == "load":
+        cache_manager.load_cache()
+    elif action == "clear":
+        cache_manager.clear_cache()
+    else:
+        print("Unknown action")
 
 if __name__ == "__main__":
     app()

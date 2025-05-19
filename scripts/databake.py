@@ -2,8 +2,8 @@ import os
 from pathlib import Path
 from datasets import load_dataset
 from sentence_transformers import SentenceTransformer
-import faiss
-import numpy as np
+
+from insightspike.layer2_memory_manager import Memory
 
 RAW_DIR = Path("data/raw")
 RAW_DIR.mkdir(parents=True, exist_ok=True)
@@ -17,16 +17,9 @@ with open(RAW_FILE, "w") as f:
     for s in sentences:
         f.write(s.replace("\n", " ") + "\n")
 
-# 2. sentence-transformersでベクトル化
-print("Embedding sentences...")
-model = SentenceTransformer("all-MiniLM-L6-v2")
-embeddings = model.encode(sentences, show_progress_bar=True, batch_size=64)
-np.save(RAW_DIR / "wiki_embeddings.npy", embeddings)
+# 2. Memoryを構築して保存
+print("Building Memory and saving FAISS index & metadata...")
+mem = Memory.build(sentences)
+mem.save()  # デフォルトのINDEX_FILEに保存
 
-# 3. faissでインデックス化
-print("Building FAISS index...")
-index = faiss.IndexFlatL2(embeddings.shape[1])
-index.add(np.array(embeddings, dtype=np.float32))
-faiss.write_index(index, str(RAW_DIR / "wiki_faiss.index"))
-
-print("Done! Data saved in:", RAW_DIR)
+print("Done! Memory and index saved.")

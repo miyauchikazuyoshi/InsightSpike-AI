@@ -31,14 +31,13 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
 
-    - name: Poetry install
-      run: poetry install --no-interaction
+    - name: Setup project (run setup.sh)
+      run: bash scripts/setup.sh
 
-    - name: Install torch (inside poetry env)
-      run: poetry run pip install -r requirements-torch.txt
-
-    - name: Install PyG (inside poetry env)
-      run: poetry run pip install -r requirements-PyG.txt
+    - name: Generate test_sentences.txt
+      run: |
+        mkdir -p data/raw
+        for i in $(seq 1 10); do echo "This is sentence $i." >> data/raw/test_sentences.txt; done
 
     - name: Run tests
       run: poetry run pytest --maxfail=1 --disable-warnings -q --cov=src

@@ -81,13 +81,15 @@ The included `Dockerfile` is based on `pytorch/pytorch:2.2.0-cuda12.1-cudnn8-run
 # 1. Clone and set up environment
 git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
 cd InsightSpike-AI
-poetry install
+chmod +x scripts/setup.sh
+./scripts/setup.sh
 
 # 2. Prepare data (download & vectorize Wikipedia sentences)
 poetry run databake
 
-# 3. Embed your own corpus (optional)
-poetry run insightspike embed --path data/raw/wiki_sentences.txt
+# 3. Embed your own corpus (任意のテキストファイルを指定)
+# 例: data/raw/your_corpus.txt をMemory化
+poetry run insightspike embed --path data/raw/your_corpus.txt
 
 # 4. Build similarity graph
 poetry run insightspike graph
