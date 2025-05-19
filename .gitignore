@@ -12,3 +12,8 @@ __pycache__/
 /data/raw/*
 !/data/raw/.gitkeep
 
+data/*.pt
+!data/graph_loop.pt
+
+# Test sample
+!tests/sample_texts.txt

@@ -51,10 +51,10 @@ jobs:
         poetry run pip install -r requirements-torch.txt
         poetry run pip install -r requirements-PyG.txt
 
-    - name: Generate test_sentences.txt
+    - name: Generate sample_texts.txt
       run: |
         mkdir -p data/raw
-        for i in $(seq 1 350); do echo "This is sentence $i." >> data/raw/test_sentences.txt; done
+        cp tests/sample_texts.txt data/raw/sample_texts.txt
 
     - name: Build test Memory (for tests)
       run: |
@@ -65,5 +65,5 @@ jobs:
 
     - name: Cleanup test data and artifacts
       run: |
-        rm -rf data/raw/test_sentences.txt
+        rm -rf data/raw/sample_texts.txt
         rm -rf data/memory* data/*.pt data/*.json
