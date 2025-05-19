@@ -34,9 +34,9 @@ class Memory:
 
     # ── construction ────────────────────────────────
     @classmethod
-    def build(cls, docs: List[str]):
+    def build(cls, docs: List[str], batch_size=32):
         model = get_model()
-        vecs = model.encode(docs, convert_to_numpy=True, normalize_embeddings=True)
+        vecs = model.encode(docs, batch_size=batch_size, show_progress_bar=True, convert_to_numpy=True, normalize_embeddings=True)
         mem = cls(vecs.shape[1])
         for v, t in zip(vecs, docs):
             mem.episodes.append(Episode(v, t))
@@ -45,9 +45,10 @@ class Memory:
 
     def train_index(self):
         vecs = np.vstack([e.vec for e in self.episodes])
-        self.index.reset()
-
-        # Separate training and adding for clarity
+        n_clusters = min(256, len(vecs))
+        if n_clusters < 2:
+            raise ValueError(f"クラスタ数が2未満です（文書数: {len(vecs)}）。より多くの文書を用意してください。")
+        self.index = faiss.IndexIVFPQ(self.dim, n_clusters, 16, 8)
         self.index.train(vecs)
         self.index.add(vecs)
 
