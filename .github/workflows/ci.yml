@@ -40,4 +40,4 @@ jobs:
         for i in $(seq 1 10); do echo "This is sentence $i." >> data/raw/test_sentences.txt; done
 
     - name: Run tests
-      run: poetry run pytest --maxfail=1 --disable-warnings -q --cov=src
+      run: PYTHONPATH=src poetry run pytest --maxfail=1 --disable-warnings -q --cov=src
