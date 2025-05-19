@@ -87,8 +87,9 @@ chmod +x scripts/setup.sh
 # 2. Prepare data (download & vectorize Wikipedia sentences)
 poetry run databake
 
-# 3. Embed your own corpus (任意のテキストファイルを指定)
-# 例: data/raw/your_corpus.txt をMemory化
+# 3. Embed your own corpus (Specify any text file)
+# Example: Convert data/raw/your_corpus.txt into episodic memory
+# *Note: Each line in the text file is treated as a separate document.*
 poetry run insightspike embed --path data/raw/your_corpus.txt
 
 # 4. Build similarity graph
