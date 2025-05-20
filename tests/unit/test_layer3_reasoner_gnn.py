@@ -1,9 +1,14 @@
 import sys, types, importlib
 import numpy as np
 
+class DummyModule:
+    pass
+
 # Stub dependencies
 sys.modules['faiss'] = types.SimpleNamespace(IndexFlatIP=lambda d: types.SimpleNamespace(add=lambda x: None, search=lambda q,k:(np.zeros((1,k)), np.zeros((1,k), dtype=int))))
-sys.modules['torch'] = types.SimpleNamespace(no_grad=lambda: types.SimpleNamespace(__enter__=lambda *a, **k: None, __exit__=lambda *a, **k: None))
+sys.modules['torch'] = types.SimpleNamespace(
+    nn=types.SimpleNamespace(Module=DummyModule)
+)
 sys.modules['torch_geometric.nn'] = types.SimpleNamespace(SAGEConv=lambda d1,d2: types.SimpleNamespace())
 sys.modules['torch_geometric.data'] = types.SimpleNamespace(Data=object)
 
