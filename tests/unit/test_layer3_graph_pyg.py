@@ -14,8 +14,15 @@ class DummyTorch(types.SimpleNamespace):
     def save(self, obj, path):
         pass
 
+class DummyNoGrad:
+    def __enter__(self): return self
+    def __exit__(self, exc_type, exc_val, exc_tb): return False
+
 torch_mod = DummyTorch()
-sys.modules['torch'] = torch_mod
+sys.modules['torch'] = types.SimpleNamespace(
+    nn=types.SimpleNamespace(Module=DummyModule),
+    no_grad=DummyNoGrad  # ← ここを追加
+)
 sys.modules['torch_geometric.data'] = types.SimpleNamespace(Data=lambda x, edge_index: types.SimpleNamespace(x=x, edge_index=edge_index, num_node_features=len(x.data)))
 sys.modules['sklearn.metrics.pairwise'] = types.SimpleNamespace(
     cosine_similarity=lambda x, y=None: np.ones((x.shape[0], x.shape[0]))
