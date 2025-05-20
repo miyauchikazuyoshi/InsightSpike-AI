@@ -8,7 +8,10 @@ class DummyModule:
 # Stub dependencies
 sys.modules['faiss'] = types.SimpleNamespace(IndexFlatIP=lambda d: types.SimpleNamespace(add=lambda x: None, search=lambda q,k:(np.zeros((1,k)), np.zeros((1,k), dtype=int))))
 sys.modules['torch'] = types.SimpleNamespace(
-    nn=types.SimpleNamespace(Module=DummyModule)
+    tensor=torch_mod.tensor,
+    float32=torch_mod.float32,
+    nn=types.SimpleNamespace(Module=DummyModule),
+    no_grad=DummyNoGrad  
 )
 sys.modules['torch_geometric.nn'] = types.SimpleNamespace(SAGEConv=lambda d1,d2: types.SimpleNamespace())
 sys.modules['torch_geometric.data'] = types.SimpleNamespace(Data=object)

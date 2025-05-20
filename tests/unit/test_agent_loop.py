@@ -5,9 +5,21 @@ import numpy as np
 sys.modules['networkx'] = types.SimpleNamespace(Graph=lambda: types.SimpleNamespace(add_nodes_from=lambda x: None, add_edges_from=lambda x: None))
 sys.modules['rich'] = types.SimpleNamespace(print=lambda *a, **k: None)
 
+# カスタムPathクラスを追加
+class MockPath:
+    def __init__(self, path):
+        self.path = path
+    
+    def replace(self, target):
+        # 何もせずに成功を装う
+        return MockPath(target)
+    
+    def __str__(self):
+        return self.path
+
 embed_mod = types.SimpleNamespace(get_model=lambda: types.SimpleNamespace(encode=lambda x, normalize_embeddings=True: [[0.0]]))
 layer1 = types.SimpleNamespace(uncertainty=lambda x: 0.0)
-layer2 = types.SimpleNamespace(Memory=types.SimpleNamespace(search=lambda self, q, k: [(1.0,0)], update_c=lambda self, idxs, r, eta=0.1: None, train_index=lambda self: None, merge=lambda self, idxs: None, split=lambda self, idx: None, prune=lambda self,c,i: None, add_episode=lambda self,v,t,c_init=0.2: None, save=lambda self: importlib.import_module('pathlib').Path('p')))
+layer2 = types.SimpleNamespace(Memory=types.SimpleNamespace(search=lambda self, q, k: [(1.0,0)], update_c=lambda self, idxs, r, eta=0.1: None, train_index=lambda self: None, merge=lambda self, idxs: None, split=lambda self, idx: None, prune=lambda self,c,i: None, add_episode=lambda self,v,t,c_init=0.2: None, save=lambda self: MockPath('p')))
 layer3 = types.SimpleNamespace(
     build_graph=lambda vecs: (
         types.SimpleNamespace(
@@ -33,6 +45,16 @@ agent_loop = importlib.import_module('insightspike.agent_loop')
 
 
 def test_cycle():
-    mem = types.SimpleNamespace(search=lambda q,k: [(1.0,0)], update_c=lambda idxs,r,eta=0.1: None, train_index=lambda: None, merge=lambda idxs: None, split=lambda idx: None, prune=lambda c,i: None, add_episode=lambda v,t,c_init=0.2: None, save=lambda: importlib.import_module('pathlib').Path('p'), episodes=[types.SimpleNamespace(vec=np.array([0]), text='t')])
+    mem = types.SimpleNamespace(
+        search=lambda q,k: [(1.0,0)], 
+        update_c=lambda idxs,r,eta=0.1: None, 
+        train_index=lambda: None, 
+        merge=lambda idxs: None, 
+        split=lambda idx: None, 
+        prune=lambda c,i: None, 
+        add_episode=lambda v,t,c_init=0.2: None, 
+        save=lambda: MockPath('p'),  # ここもMockPathを返すように変更
+        episodes=[types.SimpleNamespace(vec=np.array([0]), text='t')]
+    )
     g = agent_loop.cycle(mem, 'q')
     assert hasattr(g, 'add_nodes_from')
