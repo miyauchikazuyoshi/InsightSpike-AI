@@ -19,6 +19,7 @@ networkx             = "^3.3"
 typer                = "^0.12"
 rich                 = "^13.6"
 datasets             = "^2.5"
+scikit-learn = "^1.4"
 
 [tool.poetry.extras]
 colab = ["torch", "torch-geometric", "faiss-gpu-cu11"]

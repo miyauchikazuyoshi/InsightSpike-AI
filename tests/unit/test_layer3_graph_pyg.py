@@ -16,6 +16,9 @@ class DummyTorch(types.SimpleNamespace):
 torch_mod = DummyTorch()
 sys.modules['torch'] = torch_mod
 sys.modules['torch_geometric.data'] = types.SimpleNamespace(Data=lambda x, edge_index: types.SimpleNamespace(x=x, edge_index=edge_index, num_node_features=len(x.data)))
+sys.modules['sklearn.metrics.pairwise'] = types.SimpleNamespace(
+    cosine_similarity=lambda x, y=None: np.ones((x.shape[0], x.shape[0]))
+)
 
 lgp = importlib.import_module('insightspike.layer3_graph_pyg')
 

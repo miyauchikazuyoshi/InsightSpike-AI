@@ -3056,4 +3056,4 @@ colab = ["torch"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "2c1edaa1f415ed0e25d9495a4a2d0a2a7b89772435b35ff83a5dc5449acc5dec"
+content-hash = "8bf1810ddedf01aaf18351ce7f9c4ca9f910ef08a5dbb1b1614e3c3113ac1ee2"
