@@ -1,5 +1,7 @@
 # Agent Contribution Guidelines
 
+`bash scripts/setup.sh`
+
 - **Testing**: Before committing changes, run `python -m pytest -q`.
   If `pytest` is missing or tests fail, mention this in the PR.
 - **Committing**: Use clear commit messages describing the change.
