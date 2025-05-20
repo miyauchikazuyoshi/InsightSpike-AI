@@ -18,6 +18,10 @@ class DummyNoGrad:
     def __enter__(self): return self
     def __exit__(self, exc_type, exc_val, exc_tb): return False
 
+class DummyModule:
+    def eval(self):
+        return self
+
 torch_mod = DummyTorch()
 sys.modules['torch'] = types.SimpleNamespace(
     nn=types.SimpleNamespace(Module=DummyModule),
