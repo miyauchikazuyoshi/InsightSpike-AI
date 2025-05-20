@@ -21,3 +21,4 @@ def clear_cache():
         GRAPH_PATH.unlink()
     if MEMORY_JSON.exists():
         MEMORY_JSON.unlink()
+        

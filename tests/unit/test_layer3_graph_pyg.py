@@ -8,6 +8,7 @@ class DummyTensor:
         return self.data
 
 class DummyTorch(types.SimpleNamespace):
+    float32 = "float32"  # 追加
     def tensor(self, data, dtype=None):
         return DummyTensor(data, dtype)
     def save(self, obj, path):
@@ -19,6 +20,17 @@ sys.modules['torch_geometric.data'] = types.SimpleNamespace(Data=lambda x, edge_
 sys.modules['sklearn.metrics.pairwise'] = types.SimpleNamespace(
     cosine_similarity=lambda x, y=None: np.ones((x.shape[0], x.shape[0]))
 )
+
+class DummyKMeans:
+    def __init__(self, k):
+        self.k = k
+        self.labels_ = None
+    def fit(self, x):
+        self.labels_ = [0] * len(x)
+        return self
+
+sys.modules['sklearn.cluster'] = types.SimpleNamespace(KMeans=DummyKMeans)
+sys.modules['sklearn.metrics'] = types.SimpleNamespace(silhouette_score=lambda x, labels=None: 0.5)
 
 lgp = importlib.import_module('insightspike.layer3_graph_pyg')
 

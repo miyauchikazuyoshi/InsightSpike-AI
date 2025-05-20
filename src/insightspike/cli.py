@@ -45,7 +45,19 @@ def loop(q: str):
 @app.command()
 def cache(action: str):
     if action == "save":
-        # graph, memory = ... # 現在のオブジェクトを取得
+        # obtain or build memory
+        try:
+            memory = Memory.load()
+        except FileNotFoundError:
+            memory = Memory.build(load_corpus())
+
+        # obtain or build graph
+        try:
+            graph = load_graph()
+        except Exception:  # FileNotFoundError or corrupted graph
+            vecs = np.vstack([e.vec for e in memory.episodes])
+            graph, _ = build_graph(vecs)
+
         cache_manager.save_cache(graph, memory)
     elif action == "load":
         cache_manager.load_cache()
