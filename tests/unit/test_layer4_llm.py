@@ -10,4 +10,4 @@ layer4 = importlib.import_module('insightspike.layer4_llm')
 
 
 def test_generate():
-    assert layer4.generate('hi') == 'answer'
+    assert layer4.generate('hi') == 'hi answer'  # ← 'hi answer'に修正

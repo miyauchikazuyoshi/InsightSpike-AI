@@ -2,7 +2,8 @@ import sys, types, importlib
 import numpy as np
 
 class DummyModule:
-    pass
+    def eval(self):
+        return self
 
 # Stub dependencies
 sys.modules['faiss'] = types.SimpleNamespace(IndexFlatIP=lambda d: types.SimpleNamespace(add=lambda x: None, search=lambda q,k:(np.zeros((1,k)), np.zeros((1,k), dtype=int))))

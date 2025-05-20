@@ -1,4 +1,5 @@
 import sys, types, importlib
+import numpy as np
 
 # Patch dependencies
 sys.modules['networkx'] = types.SimpleNamespace(Graph=lambda: types.SimpleNamespace(add_nodes_from=lambda x: None, add_edges_from=lambda x: None))
@@ -22,6 +23,6 @@ agent_loop = importlib.import_module('insightspike.agent_loop')
 
 
 def test_cycle():
-    mem = types.SimpleNamespace(search=lambda q,k: [(1.0,0)], update_c=lambda idxs,r,eta=0.1: None, train_index=lambda: None, merge=lambda idxs: None, split=lambda idx: None, prune=lambda c,i: None, add_episode=lambda v,t,c_init=0.2: None, save=lambda: importlib.import_module('pathlib').Path('p'), episodes=[types.SimpleNamespace(vec=[0], text='t')])
+    mem = types.SimpleNamespace(search=lambda q,k: [(1.0,0)], update_c=lambda idxs,r,eta=0.1: None, train_index=lambda: None, merge=lambda idxs: None, split=lambda idx: None, prune=lambda c,i: None, add_episode=lambda v,t,c_init=0.2: None, save=lambda: importlib.import_module('pathlib').Path('p'), episodes=[types.SimpleNamespace(vec=np.array([0]), text='t')])
     g = agent_loop.cycle(mem, 'q')
     assert hasattr(g, 'add_nodes_from')
