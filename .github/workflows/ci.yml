@@ -55,8 +55,14 @@ jobs:
       run: |
         poetry run insightspike embed --path data/raw
 
-    - name: Run tests
-      run: PYTHONPATH=src poetry run pytest --maxfail=1 --disable-warnings -q --cov=src
+    - name: Run low level tests
+      run: PYTHONPATH=src poetry run pytest tests/unit/test_init.py tests/unit/test_config.py tests/unit/test_utils.py tests/unit/test_data_loader.py tests/unit/test_prompt_builder.py tests/unit/test_predict.py tests/unit/test_quantizer.py tests/unit/test_retrieval.py tests/unit/test_train.py tests/unit/test_loader.py tests/unit/test_cache_manager.py -q --disable-warnings
+
+    - name: Run mid level tests
+      run: PYTHONPATH=src poetry run pytest tests/unit/test_embedder.py tests/unit/test_graph_metrics.py tests/unit/test_layer1_error_monitor.py tests/unit/test_layer2_memory_manager.py tests/unit/test_layer3_graph_pyg.py -q --disable-warnings
+
+    - name: Run high level tests
+      run: PYTHONPATH=src poetry run pytest tests/unit/test_layer3_reasoner_gnn.py tests/unit/test_layer4_llm.py tests/unit/test_agent_loop.py tests/unit/test_cli.py -q --disable-warnings
 
     - name: Cleanup test data and artifacts
       run: |
