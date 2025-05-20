@@ -8,7 +8,7 @@ class DummyTensor:
         return self.data
 
 class DummyTorch(types.SimpleNamespace):
-    float32 = "float32"  # 追加
+    float32 = "float32"
     def tensor(self, data, dtype=None):
         return DummyTensor(data, dtype)
     def save(self, obj, path):
@@ -24,10 +24,11 @@ class DummyModule:
 
 torch_mod = DummyTorch()
 sys.modules['torch'] = types.SimpleNamespace(
-    tensor=torch_mod.tensor,      # ← ここを追加
-    float32=torch_mod.float32,    # ← ここを追加
+    tensor=torch_mod.tensor,
+    float32=torch_mod.float32,
     nn=types.SimpleNamespace(Module=DummyModule),
-    no_grad=DummyNoGrad
+    no_grad=DummyNoGrad,
+    save=torch_mod.save
 )
 sys.modules['torch_geometric.data'] = types.SimpleNamespace(Data=lambda x, edge_index: types.SimpleNamespace(x=x, edge_index=edge_index, num_node_features=len(x.data)))
 sys.modules['sklearn.metrics.pairwise'] = types.SimpleNamespace(
