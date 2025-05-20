@@ -24,8 +24,10 @@ class DummyModule:
 
 torch_mod = DummyTorch()
 sys.modules['torch'] = types.SimpleNamespace(
+    tensor=torch_mod.tensor,      # ← ここを追加
+    float32=torch_mod.float32,    # ← ここを追加
     nn=types.SimpleNamespace(Module=DummyModule),
-    no_grad=DummyNoGrad  # ← ここを追加
+    no_grad=DummyNoGrad
 )
 sys.modules['torch_geometric.data'] = types.SimpleNamespace(Data=lambda x, edge_index: types.SimpleNamespace(x=x, edge_index=edge_index, num_node_features=len(x.data)))
 sys.modules['sklearn.metrics.pairwise'] = types.SimpleNamespace(
