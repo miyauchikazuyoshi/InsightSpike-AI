@@ -50,7 +50,6 @@ jobs:
         poetry run pip install --upgrade pip
         poetry run pip install -r requirements-torch.txt
         poetry run pip install -r requirements-PyG.txt
-        poetry run pip install datasets  
 
     - name: Build test Memory (for tests)
       run: |
