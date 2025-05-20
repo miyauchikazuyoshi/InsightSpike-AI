@@ -1,10 +1,16 @@
-import types, sys
+import sys, types
+import numpy as np
 
-# Patch sklearn components
-sk_module = types.SimpleNamespace(KMeans=lambda k: types.SimpleNamespace(fit=lambda x: None, labels_=[0]*len(x)),
-                                 silhouette_score=lambda x, labels=None: 0.5)
-sys.modules['sklearn.cluster'] = types.SimpleNamespace(KMeans=sk_module.KMeans)
-sys.modules['sklearn.metrics'] = types.SimpleNamespace(silhouette_score=sk_module.silhouette_score)
+class DummyKMeans:
+    def __init__(self, k):
+        self.k = k
+        self.labels_ = None
+    def fit(self, x):
+        self.labels_ = [0] * len(x)
+        return self
+
+sys.modules['sklearn.cluster'] = types.SimpleNamespace(KMeans=DummyKMeans)
+sys.modules['sklearn.metrics'] = types.SimpleNamespace(silhouette_score=lambda x, labels=None: 0.5)
 sys.modules['sklearn.metrics.pairwise'] = types.SimpleNamespace()
 
 import networkx as nx
@@ -18,6 +24,5 @@ def test_delta_ged():
 
 
 def test_delta_ig():
-    import numpy as np
     vecs = np.zeros((2,2))
     assert isinstance(graph_metrics.delta_ig(vecs, vecs, k=2), float)
