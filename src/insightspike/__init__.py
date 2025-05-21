@@ -3,36 +3,53 @@ class About:
     NAME = "InsightSpike-AI"
     VERSION = "0.7-Eureka"
 
-# 直接関数をスタブとして定義（モジュールのインポートを回避）
+# 実装をモジュールから分離し、直接定義
 def build_graph(vectors, dest=None):
-    """スタブ実装：グラフを構築"""
-    try:
-        # 実際のモジュールが利用可能な場合は、そちらを使用
-        from .layer3_graph_pyg import build_graph as real_build_graph
-        return real_build_graph(vectors, dest)
-    except (ImportError, AttributeError):
-        # フォールバック実装（テスト用）
-        from torch_geometric.data import Data
-        import torch
-        return Data(x=torch.tensor(vectors)), None
+    """グラフ構築のスタブ関数"""
+    import numpy as np
+    import torch
+    from torch_geometric.data import Data
+    from sklearn.metrics.pairwise import cosine_similarity
+    from .config import SIM_THRESHOLD
+    
+    # コア機能を最小限の依存関係で実装
+    n = len(vectors)
+    sims = cosine_similarity(vectors)
+    src, dst = [], []
+    for i in range(n):
+        for j in range(i + 1, n):
+            if sims[i, j] >= SIM_THRESHOLD:
+                src += [i, j]; dst += [j, i]
+    edge_index = torch.tensor([src, dst])
+    data = Data(x=torch.tensor(vectors, dtype=torch.float32), edge_index=edge_index)
+    
+    if dest is not None:
+        save_graph(data, dest)
+    
+    return data, edge_index
 
 def load_graph(path=None):
-    """スタブ実装：グラフを読み込み"""
-    try:
-        from .layer3_graph_pyg import load_graph as real_load_graph
-        return real_load_graph(path)
-    except (ImportError, AttributeError):
-        # フォールバック
-        return None
+    """グラフ読み込みのスタブ関数"""
+    import torch
+    from torch_geometric.data import Data
+    from pathlib import Path
+    from .config import GRAPH_FILE
+    
+    src = path or GRAPH_FILE
+    if not Path(src).exists():
+        raise FileNotFoundError(f"Graph file not found at {src}")
+    return torch.load(src)
 
 def save_graph(data, path=None):
-    """スタブ実装：グラフを保存"""
-    try:
-        from .layer3_graph_pyg import save_graph as real_save_graph
-        return real_save_graph(data, path)
-    except (ImportError, AttributeError):
-        # フォールバック
-        return path
+    """グラフ保存のスタブ関数"""
+    import torch
+    from pathlib import Path
+    from .config import GRAPH_FILE
+    
+    dest = path or GRAPH_FILE
+    Path(dest).parent.mkdir(parents=True, exist_ok=True)
+    torch.save(data, dest)
+    return dest
 
 # エクスポートする名前を明示
 __all__ = ["About", "build_graph", "load_graph", "save_graph"]
