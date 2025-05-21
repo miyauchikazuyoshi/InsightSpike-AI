@@ -6,11 +6,15 @@ from rich import print
 from .embedder              import get_model
 from .loader                import load_corpus
 from .layer2_memory_manager import Memory
+# try-except で両方のインポート方法を試す
 try:
     from .layer3_graph_pyg import build_graph, load_graph, save_graph
-except ImportError:
-    # 絶対インポートを試す
-    from insightspike.layer3_graph_pyg import build_graph, load_graph, save_graph
+except (ImportError, AttributeError):
+    # 直接モジュール全体をインポート
+    from . import layer3_graph_pyg
+    build_graph = layer3_graph_pyg.build_graph
+    load_graph = layer3_graph_pyg.load_graph 
+    save_graph = layer3_graph_pyg.save_graph
 from .agent_loop            import cycle
 from insightspike import cache_manager
 from .graph_metrics import delta_ged, delta_ig

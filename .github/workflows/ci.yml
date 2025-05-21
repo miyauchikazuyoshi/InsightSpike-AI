@@ -55,10 +55,15 @@ jobs:
       run: |
         poetry run insightspike embed --path data/raw
 
+    - name: Set PYTHONPATH
+      run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
+
     - name: Debug module imports
       run: |
-        python -c "import sys; print(sys.path)"
-        python -c "import importlib.util; spec = importlib.util.find_spec('insightspike.layer3_graph_pyg'); print(f'Module spec: {spec}')"
+        # 通常のPythonではなくPoetry環境内でデバッグを実行
+        poetry run python -c "import sys; print('Poetry環境のPythonパス:', sys.path)"
+        poetry run python -c "from pathlib import Path; print('現在の作業ディレクトリ:', Path.cwd())"
+        poetry run python -c "import importlib.util; import sys; sys.path.append('src'); spec = importlib.util.find_spec('insightspike.layer3_graph_pyg'); print(f'Module spec: {spec}')"
         ls -la src/insightspike/
 
     - name: Run low level tests

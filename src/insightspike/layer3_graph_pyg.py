@@ -38,4 +38,4 @@ def build_graph(vectors: np.ndarray, dest: Optional[Path] = None):  # 型アノ�
     if dest is not None:
         save_graph(data, dest)
     
-    return data, edge_index
+    return data, edge_index  # 明示的に戻り値を返す
