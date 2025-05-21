@@ -6,7 +6,11 @@ from rich import print
 from .embedder              import get_model
 from .loader                import load_corpus
 from .layer2_memory_manager import Memory
-from .layer3_graph_pyg      import build_graph, load_graph, save_graph
+try:
+    from .layer3_graph_pyg import build_graph, load_graph, save_graph
+except ImportError:
+    # 絶対インポートを試す
+    from insightspike.layer3_graph_pyg import build_graph, load_graph, save_graph
 from .agent_loop            import cycle
 from insightspike import cache_manager
 from .graph_metrics import delta_ged, delta_ig

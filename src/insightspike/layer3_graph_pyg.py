@@ -3,26 +3,27 @@ from pathlib import Path
 import numpy as np, torch
 from torch_geometric.data import Data
 from sklearn.metrics.pairwise import cosine_similarity
+from typing import Optional  # この行を追加
 
 from .config import GRAPH_FILE, SIM_THRESHOLD
 
 __all__ = ["build_graph", "load_graph", "save_graph"]
 
-def save_graph(data, path: Path | None = None):
+def save_graph(data, path: Optional[Path] = None):  # 型アノテーション変更
     """Save graph data to file."""
     dest = path or GRAPH_FILE
     dest.parent.mkdir(parents=True, exist_ok=True)
     torch.save(data, dest)
     return dest
 
-def load_graph(path: Path | None = None):
+def load_graph(path: Optional[Path] = None):  # 型アノテーション変更
     """Load graph data from file."""
     src = path or GRAPH_FILE
     if not src.exists():
         raise FileNotFoundError(f"Graph file not found at {src}")
     return torch.load(src)
 
-def build_graph(vectors: np.ndarray, dest: Path | None = None):
+def build_graph(vectors: np.ndarray, dest: Optional[Path] = None):  # 型アノテーション変更
     n = len(vectors)
     sims = cosine_similarity(vectors)
     src, dst = [], []

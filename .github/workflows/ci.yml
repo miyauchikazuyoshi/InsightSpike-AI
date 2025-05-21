@@ -55,6 +55,12 @@ jobs:
       run: |
         poetry run insightspike embed --path data/raw
 
+    - name: Debug module imports
+      run: |
+        python -c "import sys; print(sys.path)"
+        python -c "import importlib.util; spec = importlib.util.find_spec('insightspike.layer3_graph_pyg'); print(f'Module spec: {spec}')"
+        ls -la src/insightspike/
+
     - name: Run low level tests
       run: PYTHONPATH=src poetry run pytest tests/unit/test_init.py tests/unit/test_config.py tests/unit/test_utils.py tests/unit/test_data_loader.py tests/unit/test_prompt_builder.py tests/unit/test_predict.py tests/unit/test_quantizer.py tests/unit/test_retrieval.py tests/unit/test_train.py tests/unit/test_loader.py tests/unit/test_cache_manager.py -q --disable-warnings
 
