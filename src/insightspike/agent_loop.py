@@ -35,7 +35,10 @@ def cycle(memory: Memory, question: str, g_old: nx.Graph | None = None, top_k=TO
     try:
         vecs_new = np.vstack([memory.episodes[i].vec for i in ids])
         g_pyg, _ = build_graph(vecs_new)
-        # 以下は同じ...
+        
+        # docs変数の定義を追加 - これが欠けていた
+        docs = [memory.episodes[i].text for i in ids]
+        
     except (IndexError, AttributeError):
         # エラー時は空のグラフを返す
         return nx.Graph()
@@ -56,6 +59,7 @@ def cycle(memory: Memory, question: str, g_old: nx.Graph | None = None, top_k=TO
     else:
         memory.update_c(list(ids), reward)
 
+    # 正しく定義されたdocs変数を使用
     answer = generate(build_prompt(question, docs))
 
     print(f"ΔGED {-d_ged:.3f}  ΔIG {d_ig:.3f}  Unc {unc:.3f}  R {reward:.3f}")

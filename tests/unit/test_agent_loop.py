@@ -93,10 +93,13 @@ def test_cycle_with_single_document():
     """1つのドキュメントでも機能することを確認"""
     class MockMemory:
         def __init__(self):
-            self.episodes = [type('obj', (object,), {'vec': np.random.random(384)})]
+            # text 属性がないのでエラーになる - 追加する
+            self.episodes = [type('obj', (object,), {
+                'vec': np.random.random(384), 
+                'text': 'Sample document text'  # text属性を追加
+            })]
         def search(self, vec, k):
             return [0.8], [0]
-        # 変更点: 必要なメソッドを追加
         def update_c(self, idxs, r, eta=0.1):
             pass
         def train_index(self):
