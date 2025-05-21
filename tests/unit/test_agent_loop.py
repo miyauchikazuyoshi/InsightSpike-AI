@@ -58,3 +58,37 @@ def test_cycle():
     )
     g = agent_loop.cycle(mem, 'q')
     assert hasattr(g, 'add_nodes_from')
+
+
+# tests/unit/test_agent_loop.py
+import pytest
+from insightspike.agent_loop import cycle
+from insightspike.layer2_memory_manager import Memory
+import numpy as np
+
+def test_cycle_with_empty_memory():
+    """空のメモリでも機能することを確認"""
+    # 空のメモリオブジェクトをモック
+    class MockMemory:
+        def __init__(self):
+            self.episodes = []
+        def search(self, vec, k):
+            return [], []
+    
+    mem = MockMemory()
+    result = cycle(mem, "What is quantum physics?")
+    # クラッシュせずに何らかの結果を返すことを確認
+    assert result is not None
+
+def test_cycle_with_single_document():
+    """1つのドキュメントでも機能することを確認"""
+    # 1つのドキュメントを持つメモリをモック
+    class MockMemory:
+        def __init__(self):
+            self.episodes = [type('obj', (object,), {'vec': np.random.random(384)})]
+        def search(self, vec, k):
+            return [0.8], [0]
+    
+    mem = MockMemory()
+    result = cycle(mem, "What is a single document?")
+    assert result is not None

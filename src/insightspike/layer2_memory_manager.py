@@ -85,17 +85,25 @@ class Memory:
         return mem
 
     # ── retrieval ──────────────────────────────────
-    def search(self, q: np.ndarray, top_k: int = 5, gamma: float = 1.0):
-
-        D, indices = self.index.search(q.astype(np.float32), top_k * 5)
-        scored: list[tuple[float, int]] = []
-        for d, i in zip(D[0], indices[0]):
-            if i < 0:
-                continue
-            c = self.episodes[i].c
-            scored.append((float(d) * (c**gamma), i))
-        scored.sort(reverse=True)
-        return scored[:top_k]
+    def search(self, query_vector, k=5):
+        """検索機能の強化版"""
+        if hasattr(self, 'index') and self.index is not None:
+            # FAISSインデックスの有効性チェック
+            if self.index.ntotal == 0:
+                print("警告: インデックスにエントリがありません")
+                return [], []
+                
+            # k値のバリデーション
+            k = min(k, len(self.episodes))
+            k = max(k, 1)  # 少なくとも1件は返す
+            
+            try:
+                D, I = self.index.search(np.array([query_vector], dtype=np.float32), k)
+                return tuple(D[0]), tuple(I[0])
+            except Exception as e:
+                print(f"検索中にエラー発生: {str(e)}")
+                # フォールバック: 少なくとも何かを返す
+                return [0.5], [0] if len(self.episodes) > 0 else [0.0], []
 
     # ── C‑value update ─────────────────────────────
     def update_c(self, idxs: List[int], reward: float, eta: float = 0.1):

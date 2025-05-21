@@ -13,6 +13,8 @@ from .layer4_llm            import generate
 from .config                import (TOP_K, SPIKE_GED, SPIKE_IG, ETA_SPIKE, LOG_DIR, MERGE_GED, SPLIT_IG, PRUNE_C, INACTIVE_N, timestamp,)
 __all__ = ["cycle"]
 
+TOP_K = 15  # 検索結果として取得するドキュメント数
+
 def cycle(memory: Memory, question: str, g_old: nx.Graph | None = None):
     """Run a single reasoning cycle.
 
@@ -30,10 +32,8 @@ def cycle(memory: Memory, question: str, g_old: nx.Graph | None = None):
     # --- save question text ---
     (LOG_DIR / f"{time_id}_question.txt").write_text(question, encoding="utf-8")
 
-    model = get_model(); q_vec = model.encode([question], normalize_embeddings=True)
-    hits = memory.search(q_vec, TOP_K)
-    ids, raw_scores = zip(*[(i, s) for s, i in hits])
-    docs   = [memory.episodes[i].text for i in ids]
+    model = get_model(); q_vec = model.encode([question], normalize_embeddings=True)[0]
+    raw_scores, ids = memory.search(q_vec, TOP_K)
     scores = list(raw_scores)
 
     vecs_new = np.vstack([memory.episodes[i].vec for i in ids]) if memory.episodes[0].vec.any() else None
