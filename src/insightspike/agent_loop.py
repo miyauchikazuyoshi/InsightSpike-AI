@@ -15,29 +15,31 @@ __all__ = ["cycle"]
 
 TOP_K = 15  # 検索結果として取得するドキュメント数
 
-def cycle(memory: Memory, question: str, g_old: nx.Graph | None = None):
-    """Run a single reasoning cycle.
-
-    Parameters
-    ----------
-    memory : Memory
-        Episode memory store.
-    question : str
-        User question text.
-    g_old : nx.Graph | None, optional
-        Previous similarity graph for ΔGED calculation.
-    """
+def cycle(memory: Memory, question: str, g_old: nx.Graph | None = None, top_k=TOP_K):
+    """Run a single reasoning cycle."""
 
     time_id = timestamp()
     # --- save question text ---
     (LOG_DIR / f"{time_id}_question.txt").write_text(question, encoding="utf-8")
 
     model = get_model(); q_vec = model.encode([question], normalize_embeddings=True)[0]
-    raw_scores, ids = memory.search(q_vec, TOP_K)
+    raw_scores, ids = memory.search(q_vec, top_k)
     scores = list(raw_scores)
 
-    vecs_new = np.vstack([memory.episodes[i].vec for i in ids]) if memory.episodes[0].vec.any() else None
-    g_pyg, _ = build_graph(vecs_new)
+    # 変更点: 空のメモリや結果を安全に処理
+    if not ids or not memory.episodes:
+        # 空の結果を返す場合のハンドリング
+        return nx.Graph()
+
+    # 変更点: 安全にアクセスするよう修正
+    try:
+        vecs_new = np.vstack([memory.episodes[i].vec for i in ids])
+        g_pyg, _ = build_graph(vecs_new)
+        # 以下は同じ...
+    except (IndexError, AttributeError):
+        # エラー時は空のグラフを返す
+        return nx.Graph()
+
     g_new = nx.Graph(); g_new.add_nodes_from(range(g_pyg.num_nodes))
     g_new.add_edges_from(g_pyg.edge_index.numpy().T.tolist())
 

@@ -44,16 +44,19 @@ sys.modules['insightspike.layer4_llm'] = layer4
 agent_loop = importlib.import_module('insightspike.agent_loop')
 
 
+# test_cycle 関数の修正
 def test_cycle():
     mem = types.SimpleNamespace(
-        search=lambda q,k: [(1.0,0)], 
-        update_c=lambda idxs,r,eta=0.1: None, 
-        train_index=lambda: None, 
-        merge=lambda idxs: None, 
-        split=lambda idx: None, 
-        prune=lambda c,i: None, 
-        add_episode=lambda v,t,c_init=0.2: None, 
-        save=lambda: MockPath('p'),  # ここもMockPathを返すように変更
+        # 変更点: [(1.0, 0)] ではなく ([1.0], [0]) を返すように修正
+        search=lambda q,k: ([1.0], [0]),
+        update_c=lambda idxs,r,eta=0.1: None,
+        # 他の属性は同じまま
+        train_index=lambda: None,
+        merge=lambda idxs: None,
+        split=lambda idx: None,
+        prune=lambda c,i: None,
+        add_episode=lambda v,t,c_init=0.2: None,
+        save=lambda: MockPath('p'),
         episodes=[types.SimpleNamespace(vec=np.array([0]), text='t')]
     )
     g = agent_loop.cycle(mem, 'q')
@@ -66,29 +69,39 @@ from insightspike.agent_loop import cycle
 from insightspike.layer2_memory_manager import Memory
 import numpy as np
 
+# test_cycle_with_empty_memory 関数の修正
 def test_cycle_with_empty_memory():
     """空のメモリでも機能することを確認"""
-    # 空のメモリオブジェクトをモック
     class MockMemory:
         def __init__(self):
             self.episodes = []
         def search(self, vec, k):
             return [], []
-    
+        # 変更点: 必要なメソッドを追加
+        def update_c(self, idxs, r, eta=0.1):
+            pass
+        def train_index(self):
+            pass
+
     mem = MockMemory()
     result = cycle(mem, "What is quantum physics?")
     # クラッシュせずに何らかの結果を返すことを確認
     assert result is not None
 
+# test_cycle_with_single_document 関数の修正
 def test_cycle_with_single_document():
     """1つのドキュメントでも機能することを確認"""
-    # 1つのドキュメントを持つメモリをモック
     class MockMemory:
         def __init__(self):
             self.episodes = [type('obj', (object,), {'vec': np.random.random(384)})]
         def search(self, vec, k):
             return [0.8], [0]
-    
+        # 変更点: 必要なメソッドを追加
+        def update_c(self, idxs, r, eta=0.1):
+            pass
+        def train_index(self):
+            pass
+
     mem = MockMemory()
     result = cycle(mem, "What is a single document?")
     assert result is not None
