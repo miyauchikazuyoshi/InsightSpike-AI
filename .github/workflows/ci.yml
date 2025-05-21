@@ -66,6 +66,12 @@ jobs:
         poetry run python -c "import importlib.util; import sys; sys.path.append('src'); spec = importlib.util.find_spec('insightspike.layer3_graph_pyg'); print(f'Module spec: {spec}')"
         ls -la src/insightspike/
 
+    - name: Advanced debug
+      run: |
+        poetry run python -c "import sys, pathlib; print('モジュールサーチパス:', sys.path)"
+        poetry run python -c "import importlib.util, pathlib; path = pathlib.Path('src/insightspike/layer3_graph_pyg.py'); print(f'ファイル存在: {path.exists()}')"
+        poetry run python -c "import inspect, importlib, types; try: import src.insightspike.layer3_graph_pyg as m; print(f'モジュールタイプ: {type(m)}, 関数: {dir(m)}'); except Exception as e: print(f'インポートエラー: {e}')"
+
     - name: Run low level tests
       run: PYTHONPATH=src poetry run pytest tests/unit/test_init.py tests/unit/test_config.py tests/unit/test_utils.py tests/unit/test_data_loader.py tests/unit/test_prompt_builder.py tests/unit/test_predict.py tests/unit/test_quantizer.py tests/unit/test_retrieval.py tests/unit/test_train.py tests/unit/test_loader.py tests/unit/test_cache_manager.py -q --disable-warnings
 
