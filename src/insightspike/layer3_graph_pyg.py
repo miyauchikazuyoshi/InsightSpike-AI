@@ -13,7 +13,23 @@ def save_graph(data, path: Optional[Path] = None):  # 型アノテーション�
     """Save graph data to file."""
     dest = path or GRAPH_FILE
     dest.parent.mkdir(parents=True, exist_ok=True)
-    torch.save(data, dest)
+    
+    # Data オブジェクトを分解して保存する
+    try:
+        # 通常の方法でまず試す
+        torch.save(data, dest)
+    except Exception as e:
+        if hasattr(data, 'edge_index') and hasattr(data, 'x'):
+            # エラー発生時: PyG Data オブジェクトを分解
+            save_data = {
+                'x': data.x.detach().cpu().numpy() if torch.is_tensor(data.x) else data.x,
+                'edge_index': data.edge_index.detach().cpu().numpy() if torch.is_tensor(data.edge_index) else data.edge_index
+            }
+            torch.save(save_data, dest)
+        else:
+            # その他のオブジェクトの場合はエラーを再発生
+            raise e
+    
     return dest
 
 def load_graph(path: Optional[Path] = None):  # 型アノテーション変更
@@ -21,7 +37,18 @@ def load_graph(path: Optional[Path] = None):  # 型アノテーション変更
     src = path or GRAPH_FILE
     if not src.exists():
         raise FileNotFoundError(f"Graph file not found at {src}")
-    return torch.load(src)
+    
+    loaded = torch.load(src)
+    
+    # 保存されたデータが辞書形式かチェック
+    if isinstance(loaded, dict) and 'x' in loaded and 'edge_index' in loaded:
+        # PyTorch Geometric Data オブジェクトに変換
+        x = torch.tensor(loaded['x']) if not torch.is_tensor(loaded['x']) else loaded['x']
+        edge_index = torch.tensor(loaded['edge_index']) if not torch.is_tensor(loaded['edge_index']) else loaded['edge_index']
+        return Data(x=x, edge_index=edge_index)
+    
+    # そのまま返す
+    return loaded
 
 def build_graph(vectors: np.ndarray, dest: Optional[Path] = None):  # 型アノテーション変更
     n = len(vectors)
@@ -38,4 +65,4 @@ def build_graph(vectors: np.ndarray, dest: Optional[Path] = None):  # 型アノ�
     if dest is not None:
         save_graph(data, dest)
     
-    return data, edge_index  # 明示的に戻り値を返す
+    return data, edge_index
