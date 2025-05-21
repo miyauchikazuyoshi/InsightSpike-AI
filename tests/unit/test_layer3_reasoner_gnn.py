@@ -1,9 +1,28 @@
 import sys, types, importlib
 import numpy as np
 
+class DummyTensor:
+    def __init__(self, data, dtype=None):
+        self.data = np.array(data)
+    def numpy(self):
+        return self.data
+
+class DummyTorch(types.SimpleNamespace):
+    float32 = "float32"
+    def tensor(self, data, dtype=None):
+        return DummyTensor(data, dtype)
+    def save(self, obj, path):
+        pass
+
+class DummyNoGrad:
+    def __enter__(self): return self
+    def __exit__(self, exc_type, exc_val, exc_tb): return False
+
 class DummyModule:
     def eval(self):
         return self
+
+torch_mod = DummyTorch()
 
 # Stub dependencies
 sys.modules['faiss'] = types.SimpleNamespace(IndexFlatIP=lambda d: types.SimpleNamespace(add=lambda x: None, search=lambda q,k:(np.zeros((1,k)), np.zeros((1,k), dtype=int))))
