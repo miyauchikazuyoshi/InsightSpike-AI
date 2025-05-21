@@ -93,10 +93,9 @@ def test_cycle_with_single_document():
     """1つのドキュメントでも機能することを確認"""
     class MockMemory:
         def __init__(self):
-            # text 属性がないのでエラーになる - 追加する
             self.episodes = [type('obj', (object,), {
                 'vec': np.random.random(384), 
-                'text': 'Sample document text'  # text属性を追加
+                'text': 'Sample document text'
             })]
         def search(self, vec, k):
             return [0.8], [0]
@@ -104,6 +103,17 @@ def test_cycle_with_single_document():
             pass
         def train_index(self):
             pass
+        # 不足していたメソッドを追加
+        def prune(self, c, i):
+            pass
+        def merge(self, idxs):
+            pass
+        def split(self, idx):
+            pass
+        def add_episode(self, vec, text, c_init=0.2):
+            pass
+        def save(self):
+            return MockPath('test_path')
 
     mem = MockMemory()
     result = cycle(mem, "What is a single document?")
