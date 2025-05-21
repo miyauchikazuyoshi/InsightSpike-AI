@@ -1,9 +1,10 @@
 """Build PyG similarity graph"""
-from pathlib import Path
-import numpy as np, torch
+from pathlib import Path  # ここを明示的に最初に
+import numpy as np
+import torch  # 分割されたインポートを修正
 from torch_geometric.data import Data
 from sklearn.metrics.pairwise import cosine_similarity
-from typing import Optional  # この行を追加
+from typing import Optional
 
 from .config import GRAPH_FILE, SIM_THRESHOLD
 

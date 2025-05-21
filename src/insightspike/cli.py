@@ -8,7 +8,7 @@ from .loader                import load_corpus
 from .layer2_memory_manager import Memory
 # try-except で両方のインポート方法を試す
 try:
-    from .layer3_graph_pyg import build_graph, load_graph, save_graph
+    from insightspike import build_graph, load_graph, save_graph  # パッケージから直接インポート
 except (ImportError, AttributeError):
     # 直接モジュール全体をインポート
     from . import layer3_graph_pyg
