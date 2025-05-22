@@ -27,7 +27,7 @@ from .layer1_error_monitor  import uncertainty
 from .layer2_memory_manager import Memory
 from .layer3_graph_pyg      import build_graph
 from .graph_metrics         import delta_ged, delta_ig
-from .layer4_llm            import generate
+from .layer4_llm            import generate, clear_model
 from .config                import (TOP_K, SPIKE_GED, SPIKE_IG, ETA_SPIKE, LOG_DIR, MERGE_GED, SPLIT_IG, PRUNE_C, INACTIVE_N, timestamp,)
 __all__ = ["cycle"]
 
@@ -79,6 +79,7 @@ def cycle(memory: Memory, question: str, g_old: nx.Graph | None = None, top_k=TO
 
     # 正しく定義されたdocs変数を使用
     answer = generate(build_prompt(question, docs))
+    clear_model()
 
     print(f"ΔGED {-d_ged:.3f}  ΔIG {d_ig:.3f}  Unc {unc:.3f}  R {reward:.3f}")
     print("[bold magenta]Answer:[/bold magenta]", answer, "")
@@ -147,6 +148,7 @@ def cycle_with_status(memory: Memory, question: str, g_old: nx.Graph | None = No
         memory.update_c(list(ids), reward)
         
     answer = generate(build_prompt(question, docs))
+    clear_model()
 
     print(f"ΔGED {-d_ged:.3f}  ΔIG {d_ig:.3f}  Unc {unc:.3f}  R {reward:.3f}")
     print("[bold magenta]Answer:[/bold magenta]", answer, "")
