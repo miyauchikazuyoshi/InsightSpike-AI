@@ -30,7 +30,10 @@ insightspike = "insightspike.cli:app"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2"
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 pytest-cov = "^5.0"
 
 [build-system]
