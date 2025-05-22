@@ -119,6 +119,8 @@ def test_cycle_with_single_document():
     result = cycle(mem, "What is a single document?")
     assert result is not None
 
+from unittest.mock import patch
+
 # adaptive_loopのテスト
 def test_adaptive_loop():
     """検索範囲を拡張する適応型ループのテスト"""
@@ -163,11 +165,10 @@ def test_adaptive_loop():
             return MockPath('adaptive_test')
     
     mem = AdaptiveMemory()
-    
-    # adaptive_loopがまだ実装されていなければコメントアウト
-    result, iterations = agent_loop.adaptive_loop(
-        mem, "What causes quantum entanglement?", 5, 20, 5
-    )
+    with patch("torch.load", return_value=None), patch("torch.save", return_value=None):
+        result, iterations = agent_loop.adaptive_loop(
+            mem, "What causes quantum entanglement?", 5, 20, 5
+        )
     
     # 検証
     assert len(current_k_values) == 3  # 3回目で成功するはず
@@ -210,12 +211,11 @@ def test_adaptive_loop_max_iterations():
             return MockPath('max_test')
     
     mem = NoEurekaMemory()
-    
-    # adaptive_loopがまだ実装されていなければコメントアウト
-    result, iterations = agent_loop.adaptive_loop(
-        mem, "Why is quantum physics so strange?",
-        initial_k=5, max_k=20, step_k=5
-    )
+    with patch("torch.load", return_value=None), patch("torch.save", return_value=None):
+        result, iterations = agent_loop.adaptive_loop(
+            mem, "Why is quantum physics so strange?",
+            initial_k=5, max_k=20, step_k=5
+        )
     
     # 検証
     assert len(current_k_values) == 4  # 5,10,15,20の4回
