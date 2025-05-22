@@ -81,11 +81,13 @@ The included `Dockerfile` is based on `pytorch/pytorch:2.2.0-cuda12.1-cudnn8-run
 # 1. Clone and set up environment
 git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
 cd InsightSpike-AI
-chmod +x scripts/setup.sh
+chmod +x scripts/colab_setup.sh
 ./scripts/setup.sh
+!chmod +x scripts/databake.py
+!chmod +x scripts/run_poc.py
 
 # 2. Prepare data (download & vectorize Wikipedia sentences)
-poetry run databake
+poetry run python scripts/databake.py
 
 # 3. Embed your own corpus (Specify any text file)
 # Example: Convert data/raw/your_corpus.txt into episodic memory
@@ -99,7 +101,7 @@ poetry run insightspike graph
 poetry run insightspike loop "What is quantum entanglement?"
 
 # 6. Run the PoC pipeline (with visualization)
-poetry run run-poc
+poetry run python scripts/run_poc.py
 ```
 
 ---

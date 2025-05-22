@@ -84,48 +84,75 @@ def reorganize(iterations: int = 5):
     """インプットなしでメモリの再編成とグラフ最適化を実行"""
     from .layer3_graph_pyg import load_graph, save_graph
     from .graph_metrics import delta_ged, delta_ig
-    
+
     mem = Memory.load()
     g = load_graph()
     print(f"Starting memory reorganization for {iterations} iterations")
-    
+
     for i in range(iterations):
         print(f"Iteration {i+1}/{iterations}")
-        
+
         # 1. グラフから重要なノードを特定
         important_nodes = [i for i in range(min(10, len(mem.episodes)))]  # 簡易実装：最初の10ノード
-        
+
         # 2. 重要なノードに対応するエピソードの重要度を上げる
         for node_id in important_nodes:
             mem.update_c([node_id], reward=0.2)  # 自己報酬
-        
+
         # 3. 類似度の高いエピソードをマージ検討
-        if len(mem.episodes) > 5:  # 十分なエピソードがある場合
-            # 簡易実装：最初の2つをマージ
+        if len(mem.episodes) > 5:
             mem.merge([0, 1])
-        
-        # 4. グラフを再構築して変化を評価
+
+        # 4. layer2: C値が低い/非アクティブなエピソードをprune
+        mem.prune(c_thresh=0.1, inactive_n=10)
+
+        # 5. layer2: C値が高すぎるノードをsplit（例: c>0.95）
+        for idx, ep in enumerate(mem.episodes):
+            if ep.c > 0.95:
+                mem.split(idx)
+
+        # 6. layer2: 新規エピソード追加例（ダミー）
+        #if i == iterations - 1:
+            # 最終イテレーションでダミー追加
+        #    dummy_vec = np.random.randn(mem.dim).astype(np.float32)
+        #    mem.add_episode(dummy_vec, f"Dummy episode {i}", c_init=0.2)
+
+        # 7. グラフを再構築して変化を評価
         vecs = np.vstack([e.vec for e in mem.episodes])
         new_g = build_graph(vecs)
-        
-        # 5. GED/IGの変化を計算
+
+        # 8. GED/IGの変化を計算
         ged_change = delta_ged(g, new_g)
-        old_vecs = vecs.copy()  # 簡易比較用
+        old_vecs = vecs.copy()
         ig_change = delta_ig(old_vecs, vecs)
-        
-        # 6. 進捗を出力
+
+        # 9. 進捗を出力
         print(f"  ΔGED: {ged_change:.5f}, ΔIG: {ig_change:.5f}")
-        
-        # 7. グラフを更新
+
+        # 10. グラフを更新
         g = new_g
-        
-        # 8. メモリインデックスを再訓練
+
+        # 11. メモリインデックスを再訓練
         mem.train_index()
-    
+
     # 最終結果を保存
     mem.save()
     save_graph(g)
     print("Memory reorganization complete")
+
+@app.command()
+def ask_LLM(q: str):
+    """質問を直接Layer4 LLMに投げて回答を得る"""
+    from .layer4_llm import generate
+    answer = generate(q)
+    print("[bold magenta]Answer:[/bold magenta]", answer)
+
+@app.command()
+def adaptive(q: str, initial_k: int = 5, max_k: int = 50, step_k: int = 5):
+    """内発報酬が出るまでadaptive loopで推論"""
+    from .agent_loop import adaptive_loop
+    g_new, iteration_count = adaptive_loop(q, initial_k=initial_k, max_k=max_k, step_k=step_k)
+    print(f"[green]Adaptive loop finished in {iteration_count} iterations.[/green]")
 
 if __name__ == "__main__":
     app()

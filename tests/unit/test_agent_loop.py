@@ -118,3 +118,108 @@ def test_cycle_with_single_document():
     mem = MockMemory()
     result = cycle(mem, "What is a single document?")
     assert result is not None
+
+# adaptive_loopのテスト
+def test_adaptive_loop():
+    """検索範囲を拡張する適応型ループのテスト"""
+    eureka_triggers = []  # 呼び出し記録
+    current_k_values = [] # k値の変化記録
+    
+    class AdaptiveMemory:
+        def __init__(self):
+            self.episodes = [type('obj', (object,), {
+                'vec': np.random.random(384),
+                'text': 'Sample document'
+            })]
+        
+        def search(self, vec, k):
+            current_k_values.append(k)  # 現在のk値を記録
+            return [0.5], [0]  # 常に同じ結果を返す
+        
+        def update_c(self, idxs, r, eta=0.1):
+            # 3回目の呼び出しでのみ内発報酬を発生させる
+            if len(current_k_values) == 3:
+                eureka_triggers.append(True)
+                return True
+            eureka_triggers.append(False)
+            return False
+            
+        def train_index(self):
+            pass
+            
+        def prune(self, c, i):
+            pass
+            
+        def merge(self, idxs):
+            pass
+            
+        def split(self, idx):
+            pass
+            
+        def add_episode(self, vec, text, c_init=0.2):
+            pass
+            
+        def save(self):
+            return MockPath('adaptive_test')
+    
+    mem = AdaptiveMemory()
+    
+    # adaptive_loopがまだ実装されていなければコメントアウト
+    result, iterations = agent_loop.adaptive_loop(
+        mem, "What causes quantum entanglement?", 
+        initial_k=5, max_k=20, step_k=5
+    )
+    
+    # 検証
+    assert len(current_k_values) == 3  # 3回目で成功するはず
+    assert current_k_values == [5, 10, 15]  # kが期待通り増加
+    assert eureka_triggers[-1] is True  # 最後の呼び出しで内発報酬発生
+    assert iterations == 3  # 3回の試行
+    assert result is not None  # 有効な結果を返す
+
+# 最大試行回数のテスト
+def test_adaptive_loop_max_iterations():
+    """最大試行回数に達した場合のテスト"""
+    current_k_values = []
+    
+    class NoEurekaMemory:
+        def __init__(self):
+            self.episodes = [type('obj', (object,), {
+                'vec': np.random.random(384),
+                'text': 'Sample text'
+            })]
+        
+        def search(self, vec, k):
+            current_k_values.append(k)
+            return [0.3], [0]
+            
+        def update_c(self, idxs, r, eta=0.1):
+            return False  # 内発報酬は発生しない
+            
+        # 他の必要なメソッド
+        def train_index(self):
+            pass
+        def prune(self, c, i):
+            pass
+        def merge(self, idxs):
+            pass
+        def split(self, idx):
+            pass
+        def add_episode(self, vec, text, c_init=0.2):
+            pass
+        def save(self):
+            return MockPath('max_test')
+    
+    mem = NoEurekaMemory()
+    
+    # adaptive_loopがまだ実装されていなければコメントアウト
+    result, iterations = agent_loop.adaptive_loop(
+        mem, "Why is quantum physics so strange?",
+        initial_k=5, max_k=20, step_k=5
+    )
+    
+    # 検証
+    assert len(current_k_values) == 4  # 5,10,15,20の4回
+    assert current_k_values[-1] == 20  # 最大のk値
+    assert iterations == 4  # 4回の試行
+    assert result is not None  # 有効な結果を返す
