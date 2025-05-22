@@ -5,7 +5,7 @@
 pip install -q poetry
 
 # 2. Poetry依存インストール（プロジェクト本体もインストール）
-poetry install　--with colab
+poetry install 
 
 # 3. pipでPyGやColab固有依存を追加
 poetry run pip install -q --upgrade pip
