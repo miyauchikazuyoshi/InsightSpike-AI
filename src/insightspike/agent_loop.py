@@ -2,7 +2,6 @@
 from __future__ import annotations
 from rich import print
 import numpy as np, networkx as nx
-import torch
 from typer import Typer, Option
 
 from .embedder              import get_model
@@ -155,6 +154,7 @@ def cycle_with_status(memory: Memory, question: str, g_old: nx.Graph | None = No
 @app.command()
 def adaptive_loop(memory, question, initial_k=5, max_k=50, step_k=5):
     """内発報酬が出るまで検索範囲を拡張するアダプティブループ"""
+    import torch
     try:
         g_old = torch.load("data/graph_loop.pt")
     except (FileNotFoundError, RuntimeError):
