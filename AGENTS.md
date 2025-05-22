@@ -1,5 +1,12 @@
 # Agent Contribution Guidelines
 
+> ⚠️ Codex等のオフライン環境では、ネットワークが使えるうちに全依存パッケージのwheelファイルをダウンロードし、  
+> セットアップ時は `pip install --no-index --find-links=./wheels ...` でインストールしてください。
+
+- **Testing**: Before committing changes, run `python -m pytest -q`.
+  If `pytest` is missing or tests fail, mention this in the PR.
+
+- **Setup**:
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -17,8 +24,6 @@ poetry run pip install --upgrade pip
 poetry run pip install -r requirements-torch.txt
 poetry run pip install -r requirements-PyG.txt
 
-
-- **Testing**: Before committing changes, run `python -m pytest -q`.
-  If `pytest` is missing or tests fail, mention this in the PR.
 - **Committing**: Use clear commit messages describing the change.
+
 - **PR Summary**: Include a short summary of changes and test results.
