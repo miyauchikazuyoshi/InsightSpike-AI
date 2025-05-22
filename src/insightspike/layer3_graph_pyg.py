@@ -1,8 +1,6 @@
 """Build PyG similarity graph"""
 from pathlib import Path  # ここを明示的に最初に
 import numpy as np
-import torch  # 分割されたインポートを修正
-from torch_geometric.data import Data
 from sklearn.metrics.pairwise import cosine_similarity
 from typing import Optional
 
@@ -12,6 +10,7 @@ __all__ = ["build_graph", "load_graph", "save_graph"]
 
 def save_graph(data, path: Optional[Path] = None):  # 型アノテーション変更
     """Save graph data to file."""
+    import torch
     dest = path or GRAPH_FILE
     dest.parent.mkdir(parents=True, exist_ok=True)
     
@@ -35,6 +34,8 @@ def save_graph(data, path: Optional[Path] = None):  # 型アノテーション�
 
 def load_graph(path: Optional[Path] = None):  # 型アノテーション変更
     """Load graph data from file."""
+    import torch
+    from torch_geometric.data import Data
     src = path or GRAPH_FILE
     if not src.exists():
         raise FileNotFoundError(f"Graph file not found at {src}")
@@ -52,6 +53,8 @@ def load_graph(path: Optional[Path] = None):  # 型アノテーション変更
     return loaded
 
 def build_graph(vectors: np.ndarray, dest: Optional[Path] = None):  # 型アノテーション変更
+    import torch
+    from torch_geometric.data import Data
     n = len(vectors)
     sims = cosine_similarity(vectors)
     src, dst = [], []

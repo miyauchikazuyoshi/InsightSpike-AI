@@ -1,0 +1,11 @@
+Requirement already satisfied: pip in ./.venv/lib/python3.11/site-packages (25.1.1)
+Collecting setuptools
+  Downloading setuptools-80.8.0-py3-none-any.whl.metadata (6.6 kB)
+Collecting wheel
+  Downloading wheel-0.45.1-py3-none-any.whl.metadata (2.3 kB)
+Downloading setuptools-80.8.0-py3-none-any.whl (1.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 21.2 MB/s eta 0:00:00
+Downloading wheel-0.45.1-py3-none-any.whl (72 kB)
+Installing collected packages: wheel, setuptools
+
+Successfully installed setuptools-80.8.0 wheel-0.45.1

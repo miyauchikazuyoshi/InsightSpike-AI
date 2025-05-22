@@ -2,7 +2,21 @@
 from __future__ import annotations
 from rich import print
 import numpy as np, networkx as nx
-import torch
+
+# Provide a module-level torch object so tests can patch
+try:  # pragma: no cover - optional dependency
+    import torch as torch  # attempt real torch
+except Exception:  # torch not installed
+    class _DummyTorch:
+        """Fallback torch stub providing load/save stubs."""
+
+        def load(self, *_, **__):
+            raise ModuleNotFoundError("torch is required")
+
+        def save(self, *_, **__):
+            raise ModuleNotFoundError("torch is required")
+
+    torch = _DummyTorch()
 from typer import Typer, Option
 
 from .embedder              import get_model
@@ -154,7 +168,7 @@ def cycle_with_status(memory: Memory, question: str, g_old: nx.Graph | None = No
 
 @app.command()
 def adaptive_loop(memory, question, initial_k=5, max_k=50, step_k=5):
-    """内発報酬が出るまで検索範囲を拡張するアダプティブループ"""
+    """Increase search range until an intrinsic reward is triggered."""
     try:
         g_old = torch.load("data/graph_loop.pt")
     except (FileNotFoundError, RuntimeError):
@@ -166,7 +180,7 @@ def adaptive_loop(memory, question, initial_k=5, max_k=50, step_k=5):
     iteration_count = 0
     for i in range(max_iterations):
         print(f"試行 {i+1}/{max_iterations}: k={current_k}")
-        g_new, reward, eureka = cycle_with_status(mem, q, g_old, current_k)  
+        g_new, reward, eureka = cycle_with_status(memory, question, g_old, current_k)
         
         iteration_count += 1  #
 

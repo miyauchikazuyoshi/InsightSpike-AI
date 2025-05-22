@@ -1,9 +1,7 @@
 """CLI entrypoints"""
-import torch  # このインポートを追加
 from pathlib import Path
 import typer
-from pathlib import Path
-import typer, numpy as np
+import numpy as np
 from rich import print
 
 from .embedder              import get_model
@@ -39,6 +37,7 @@ def graph():
 @app.command()
 def loop(q: str, k: int = 15):
     """質問に対して推論ループを実行"""
+    import torch
     mem = Memory.load()
     
     try:

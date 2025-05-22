@@ -1,14 +1,15 @@
 from pathlib import Path
-import torch
 
 GRAPH_PATH = Path("data/graph_pyg.pt")
 MEMORY_JSON = Path("data/memory.json")
 
 def save_cache(graph, memory):
+    import torch
     torch.save(graph, GRAPH_PATH)
     memory.save(MEMORY_JSON)
 
 def load_cache():
+    import torch
     if GRAPH_PATH.exists() and MEMORY_JSON.exists():
         graph = torch.load(GRAPH_PATH)
         # memory = Memory.load(MEMORY_JSON)  # 実装に合わせて
