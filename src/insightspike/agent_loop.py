@@ -155,8 +155,6 @@ def cycle_with_status(memory: Memory, question: str, g_old: nx.Graph | None = No
 @app.command()
 def adaptive_loop(memory, question, initial_k=5, max_k=50, step_k=5):
     """内発報酬が出るまで検索範囲を拡張するアダプティブループ"""
-    mem = Memory.load()
-    
     try:
         g_old = torch.load("data/graph_loop.pt")
     except (FileNotFoundError, RuntimeError):

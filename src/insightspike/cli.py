@@ -149,9 +149,10 @@ def ask_LLM(q: str):
 
 @app.command()
 def adaptive(q: str, initial_k: int = 5, max_k: int = 50, step_k: int = 5):
-    """内発報酬が出るまでadaptive loopで推論"""
+    from .layer2_memory_manager import Memory
+    mem = Memory.load()
     from .agent_loop import adaptive_loop
-    g_new, iteration_count = adaptive_loop(q, initial_k=initial_k, max_k=max_k, step_k=step_k)
+    g_new, iteration_count = adaptive_loop(mem, q, initial_k=initial_k, max_k=max_k, step_k=step_k)
     print(f"[green]Adaptive loop finished in {iteration_count} iterations.[/green]")
 
 if __name__ == "__main__":
