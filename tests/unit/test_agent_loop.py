@@ -43,6 +43,11 @@ sys.modules['insightspike.layer4_llm'] = layer4
 
 agent_loop = importlib.import_module('insightspike.agent_loop')
 
+import types
+dummy_torch = types.SimpleNamespace()
+dummy_torch.load = lambda *a, **k: None
+dummy_torch.save = lambda *a, **k: None
+sys.modules['torch'] = dummy_torch
 
 # test_cycle 関数の修正
 def test_cycle():
@@ -165,7 +170,8 @@ def test_adaptive_loop():
             return MockPath('adaptive_test')
     
     mem = AdaptiveMemory()
-    with patch("torch.load", return_value=None), patch("torch.save", return_value=None):
+    with patch("insightspike.agent_loop.torch.load", return_value=None), \
+         patch("insightspike.agent_loop.torch.save", return_value=None):
         result, iterations = agent_loop.adaptive_loop(
             mem, "What causes quantum entanglement?", 5, 20, 5
         )
@@ -211,7 +217,8 @@ def test_adaptive_loop_max_iterations():
             return MockPath('max_test')
     
     mem = NoEurekaMemory()
-    with patch("torch.load", return_value=None), patch("torch.save", return_value=None):
+    with patch("insightspike.agent_loop.torch.load", return_value=None), \
+         patch("insightspike.agent_loop.torch.save", return_value=None):
         result, iterations = agent_loop.adaptive_loop(
             mem, "Why is quantum physics so strange?",
             initial_k=5, max_k=20, step_k=5
