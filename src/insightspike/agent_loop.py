@@ -153,9 +153,7 @@ def cycle_with_status(memory: Memory, question: str, g_old: nx.Graph | None = No
     return g_new, reward, eureka  # 3つの値を返す
 
 @app.command()
-def adaptive_loop(q: str, initial_k: int = Option(5, help="初期検索k数"), 
-                max_k: int = Option(50, help="最大検索k数"),
-                step_k: int = Option(5, help="kの増分")):
+def adaptive_loop(memory, question, initial_k=5, max_k=50, step_k=5):
     """内発報酬が出るまで検索範囲を拡張するアダプティブループ"""
     mem = Memory.load()
     
