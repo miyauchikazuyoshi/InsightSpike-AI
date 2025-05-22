@@ -166,8 +166,7 @@ def test_adaptive_loop():
     
     # adaptive_loopがまだ実装されていなければコメントアウト
     result, iterations = agent_loop.adaptive_loop(
-        mem, "What causes quantum entanglement?", 
-        initial_k=5, max_k=20, step_k=5
+        mem, "What causes quantum entanglement?", 5, 20, 5
     )
     
     # 検証
