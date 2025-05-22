@@ -17,3 +17,6 @@ data/*.pt
 
 # Test sample
 !data/raw/test_sentences.txt
+
+
+!data/graph_pyg.pt
