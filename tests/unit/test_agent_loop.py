@@ -1,16 +1,14 @@
 import sys
 import types
+
+dummy_torch = types.SimpleNamespace()
+dummy_torch.load = lambda *a, **k: None
+dummy_torch.save = lambda *a, **k: None
+sys.modules['torch'] = dummy_torch
+
 import importlib
 import numpy as np
 import pytest
-
-# --- 依存モジュールのダミー化 ---
-@pytest.fixture(autouse=True)
-def patch_torch_module(monkeypatch):
-    dummy_torch = types.SimpleNamespace()
-    dummy_torch.load = lambda *a, **k: None
-    dummy_torch.save = lambda *a, **k: None
-    monkeypatch.setitem(sys.modules, 'torch', dummy_torch)
 
 # 他の依存モジュールもダミー化
 sys.modules['networkx'] = types.SimpleNamespace(
