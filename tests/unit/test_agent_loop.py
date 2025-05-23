@@ -181,9 +181,8 @@ def test_adaptive_loop():
             return MockPath('adaptive_test')
     
     mem = AdaptiveMemory()
-    with patch("insightspike.agent_loop.torch.load", return_value=None):
-        result = agent_loop.adaptive_loop(mem, "Test adaptive loop")
-        assert result is not None  # 有効な結果を返す
+    result = agent_loop.adaptive_loop(mem, "Test adaptive loop")
+    assert result is not None  # 有効な結果を返す
 
 # 最大試行回数のテスト
 def test_adaptive_loop_max_iterations():
@@ -219,12 +218,10 @@ def test_adaptive_loop_max_iterations():
             return MockPath('max_test')
     
     mem = NoEurekaMemory()
-    with patch("insightspike.agent_loop.torch.load", return_value=None), \
-         patch("insightspike.agent_loop.torch.save", return_value=None):
-        result, iterations = agent_loop.adaptive_loop(
-            mem, "Why is quantum physics so strange?",
-            initial_k=5, max_k=20, step_k=5
-        )
+    result, iterations = agent_loop.adaptive_loop(
+        mem, "Why is quantum physics so strange?",
+        initial_k=5, max_k=20, step_k=5
+    )
     
     # 検証
     assert len(current_k_values) == 4  # 5,10,15,20の4回
