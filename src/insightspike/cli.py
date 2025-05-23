@@ -29,6 +29,20 @@ def embed(path: Path | None = typer.Option(None)):
     print(f"Embedded {len(docs)} docs.")
 
 @app.command()
+def basegraph(input_path: str, output_path: str, sim_threshold: float = 0.8):
+    """
+    全組み合わせで初期グラフを構築し保存するCLIコマンド
+    """
+    import numpy as np
+    from insightspike import build_base_graph
+
+    vectors = np.load(input_path)
+    data, edge_index = build_base_graph(vectors, sim_threshold)
+    import torch
+    torch.save(data, output_path)
+    print(f"Base graph saved to {output_path}")
+
+@app.command()
 def graph():
     mem = Memory.load(); vecs = np.vstack([e.vec for e in mem.episodes])
     build_graph(vecs)
@@ -153,6 +167,7 @@ def adaptive(q: str, initial_k: int = 5, max_k: int = 50, step_k: int = 5):
     from .agent_loop import adaptive_loop
     g_new, iteration_count = adaptive_loop(mem, q, initial_k=initial_k, max_k=max_k, step_k=step_k)
     print(f"[green]Adaptive loop finished in {iteration_count} iterations.[/green]")
+
 
 if __name__ == "__main__":
     app()
