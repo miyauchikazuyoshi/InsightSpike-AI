@@ -178,6 +178,24 @@ def adaptive(q: str, initial_k: int = 5, max_k: int = 50, step_k: int = 5):
     g_new, iteration_count = adaptive_loop(mem, q, initial_k=initial_k, max_k=max_k, step_k=step_k)
     print(f"[green]Adaptive loop finished in {iteration_count} iterations.[/green]")
 
+@app.command()
+def add_data_baked(
+    baked_path: str = typer.Argument(..., help="追加するembedding npyファイルのパス")
+):
+    """既存Memoryやグラフにembedding済みデータを追加"""
+    import numpy as np
+    from insightspike.layer2_memory_manager import Memory
+
+    # 既存Memoryをロード
+    mem = Memory.load()
+    # 追加embeddingをロード
+    new_vecs = np.load(baked_path)
+    # 追加データをMemoryにappend（実装によってはadd_episode等を使う）
+    for vec in new_vecs:
+        mem.add_episode(vec, text="追加データ", c_init=0.2)
+    mem.save()
+    print(f"追加embedding({len(new_vecs)})件をMemoryに統合しました。")
+
 
 if __name__ == "__main__":
     app()

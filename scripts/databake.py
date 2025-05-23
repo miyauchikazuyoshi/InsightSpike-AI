@@ -23,4 +23,9 @@ print("Building Memory and saving FAISS index & metadata...")
 mem = Memory.build(sentences)
 mem.save()  # デフォルトのINDEX_FILEに保存
 
-print("Done! Memory and index saved.")
+# 追加: embeddingベクトルをnpyで保存
+import numpy as np
+vecs = np.vstack([e.vec for e in mem.episodes])
+np.save("data/embedding/input.npy", vecs)
+
+print("Done! Memory, index, and embedding vectors saved.")
