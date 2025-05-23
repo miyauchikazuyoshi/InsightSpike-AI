@@ -3,6 +3,7 @@ from pathlib import Path
 import typer
 import numpy as np
 from rich import print
+import pathlib
 from typing import Optional
 
 from .embedder              import get_model
