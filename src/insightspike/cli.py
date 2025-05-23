@@ -3,6 +3,7 @@ from pathlib import Path
 import typer
 import numpy as np
 from rich import print
+from typing import Optional
 
 from .embedder              import get_model
 from .loader                import load_corpus
@@ -23,7 +24,13 @@ from .graph_metrics import delta_ged, delta_ig
 app = typer.Typer()
 
 @app.command()
-def embed(path: Path | None = typer.Option(None)):
+def embed(path: Optional[pathlib.Path] = None):
+    """Embeddingを実行"""
+    if path is not None:
+        # pathlib.Pathとして使える
+        print(f"Embedding for: {path}")
+    else:
+        print("No path specified")
     docs = load_corpus(path)
     Memory.build(docs).save()   # 戻り値を無視
     print(f"Embedded {len(docs)} docs.")
