@@ -29,16 +29,18 @@ def embed(path: Path | None = typer.Option(None)):
     print(f"Embedded {len(docs)} docs.")
 
 @app.command()
-def basegraph(input_path: str, output_path: str, sim_threshold: float = 0.8):
-    """
-    全組み合わせで初期グラフを構築し保存するCLIコマンド
-    """
+def basegraph(
+    input_path: str = typer.Argument(..., help="入力npyファイルパス"),
+    output_path: str = typer.Argument(..., help="出力ptファイルパス"),
+    sim_threshold: float = typer.Argument(0.8, help="類似度しきい値")
+):
+    """全組み合わせで初期グラフを構築し保存"""
     import numpy as np
     from insightspike import build_base_graph
+    import torch
 
     vectors = np.load(input_path)
-    data, edge_index = build_base_graph(vectors, sim_threshold)
-    import torch
+    data, _ = build_base_graph(vectors, sim_threshold)
     torch.save(data, output_path)
     print(f"Base graph saved to {output_path}")
 
