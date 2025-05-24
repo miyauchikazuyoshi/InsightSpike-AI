@@ -27,10 +27,10 @@ def main():
     mem.save()  # デフォルトのINDEX_FILEに保存
 
     # 3. embeddingベクトルをnpyで保存
-    out_dir = Path("data/embedding")
-    out_dir.mkdir(parents=True, exist_ok=True)
+    EMBED_DIR = Path("data/embedding")
+    EMBED_DIR.mkdir(parents=True, exist_ok=True)
     vecs = np.vstack([e.vec for e in mem.episodes])
-    np.save(out_dir / "input.npy", vecs)
+    np.save(EMBED_DIR / "input.npy", vecs)
 
     print("Done! Memory, index, and embedding vectors saved.")
 

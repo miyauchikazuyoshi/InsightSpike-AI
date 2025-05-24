@@ -25,7 +25,9 @@ mem.save()  # デフォルトのINDEX_FILEに保存
 
 # 追加: embeddingベクトルをnpyで保存
 import numpy as np
+EMBED_DIR = Path("data/embedding")
+EMBED_DIR.mkdir(parents=True, exist_ok=True)
 vecs = np.vstack([e.vec for e in mem.episodes])
-np.save("data/embedding/input.npy", vecs)
+np.save(EMBED_DIR / "input.npy", vecs)
 
 print("Done! Memory, index, and embedding vectors saved.")
