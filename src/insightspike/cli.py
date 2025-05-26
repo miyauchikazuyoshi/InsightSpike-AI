@@ -25,15 +25,14 @@ from .graph_metrics import delta_ged, delta_ig
 app = typer.Typer()
 
 @app.command()
-def embed(path: Optional[pathlib.Path] = None):
+def embed(path: Optional[pathlib.Path] = typer.Option(None, help="テキストファイルのパス")):
     """Embeddingを実行"""
-    if path is not None:
-        # pathlib.Pathとして使える
-        print(f"Embedding for: {path}")
-    else:
-        print("No path specified")
+    if path is None:
+        print("[red]Error: --path オプションで入力ファイルを指定してください[/red]")
+        raise typer.Exit(code=1)
+    print(f"Embedding for: {path}")
     docs = load_corpus(path)
-    Memory.build(docs).save()   # 戻り値を無視
+    Memory.build(docs).save()
     print(f"Embedded {len(docs)} docs.")
 
 @app.command()

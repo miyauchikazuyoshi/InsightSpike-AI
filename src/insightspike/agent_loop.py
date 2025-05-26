@@ -33,14 +33,23 @@ __all__ = ["cycle"]
 
 app = Typer()
 
-def cycle(memory: Memory, question: str, g_old: nx.Graph | None = None, top_k=TOP_K):
+def cycle(memory: Memory, question: str, g_old: nx.Graph | None = None, top_k=TOP_K, device=None):
     """Run a single reasoning cycle."""
 
     time_id = timestamp()
-    # --- save question text ---
     (LOG_DIR / f"{time_id}_question.txt").write_text(question, encoding="utf-8")
 
-    model = get_model(); q_vec = model.encode([question], normalize_embeddings=True)[0]
+    # デバイス設定
+    if device is None:
+        import torch
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    model = get_model()
+    if hasattr(model, "to"):
+        model = model.to(device)
+    q_vec = model.encode([question], normalize_embeddings=True)[0]
+    if hasattr(q_vec, "to"):
+        q_vec = q_vec.to(device)
     raw_scores, ids = memory.search(q_vec, top_k)
     scores = list(raw_scores)
 
@@ -52,7 +61,9 @@ def cycle(memory: Memory, question: str, g_old: nx.Graph | None = None, top_k=TO
     # 変更点: 安全にアクセスするよう修正
     try:
         vecs_new = np.vstack([memory.episodes[i].vec for i in ids])
-        g_pyg, _ = build_graph(vecs_new)
+        import torch
+        vecs_new_tensor = torch.tensor(vecs_new).to(device)
+        g_pyg, _ = build_graph(vecs_new_tensor)
         
         # docs変数の定義を追加 - これが欠けていた
         docs = [memory.episodes[i].text for i in ids]
@@ -62,7 +73,7 @@ def cycle(memory: Memory, question: str, g_old: nx.Graph | None = None, top_k=TO
         return nx.Graph()
 
     g_new = nx.Graph(); g_new.add_nodes_from(range(g_pyg.num_nodes))
-    g_new.add_edges_from(g_pyg.edge_index.numpy().T.tolist())
+    g_new.add_edges_from(g_pyg.edge_index.cpu().numpy().T.tolist())
 
     d_ged = delta_ged(g_old, g_new) if g_old is not None else 0.0
     d_ig  = delta_ig(vecs_new, vecs_new) if vecs_new is not None else 0.0
@@ -92,6 +103,8 @@ def cycle(memory: Memory, question: str, g_old: nx.Graph | None = None, top_k=TO
 
     # --- add new episode from LLM hypothesis --------------------
     answer_vec = model.encode([answer], normalize_embeddings=True)[0]
+    if hasattr(answer_vec, "to"):
+        answer_vec = answer_vec.to(device)
     memory.add_episode(answer_vec, answer, c_init=0.2)
 
     # --- save memory snapshot ---
@@ -103,41 +116,52 @@ def cycle(memory: Memory, question: str, g_old: nx.Graph | None = None, top_k=TO
     print(f"Snapshot saved → {snapshot_name.name}\n")
     return g_new
 
-def cycle_with_status(memory: Memory, question: str, g_old: nx.Graph | None = None, top_k=TOP_K):
+def cycle_with_status(memory: Memory, question: str, g_old: nx.Graph | None = None, top_k=TOP_K, device=None):
     """cycle関数を拡張して報酬と内発報酬の状態も返す"""
     time_id = timestamp()
-    # --- save question text ---
     (LOG_DIR / f"{time_id}_question.txt").write_text(question, encoding="utf-8")
-    
-    model = get_model(); q_vec = model.encode([question], normalize_embeddings=True)[0]
+
+    # デバイス設定
+    if device is None:
+        import torch
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    model = get_model()
+    if hasattr(model, "to"):
+        model = model.to(device)
+    q_vec = model.encode([question], normalize_embeddings=True)[0]
+    if hasattr(q_vec, "to"):
+        q_vec = q_vec.to(device)
     raw_scores, ids = memory.search(q_vec, top_k)
     scores = list(raw_scores)
-    
+
     # 空のメモリや結果を安全に処理
     if not ids or not memory.episodes:
         # 空の結果を返す場合
         return nx.Graph(), 0.0, False
-    
+
     # 安全にアクセス
     try:
         vecs_new = np.vstack([memory.episodes[i].vec for i in ids])
-        g_pyg, _ = build_graph(vecs_new)
+        import torch
+        vecs_new_tensor = torch.tensor(vecs_new).to(device)
+        g_pyg, _ = build_graph(vecs_new_tensor)
         docs = [memory.episodes[i].text for i in ids]
     except (IndexError, AttributeError):
         # エラー時
         return nx.Graph(), 0.0, False
-    
+
     g_new = nx.Graph(); g_new.add_nodes_from(range(g_pyg.num_nodes))
-    g_new.add_edges_from(g_pyg.edge_index.numpy().T.tolist())
-    
+    g_new.add_edges_from(g_pyg.edge_index.cpu().numpy().T.tolist())
+
     d_ged = delta_ged(g_old, g_new) if g_old is not None else 0.0
     d_ig  = delta_ig(vecs_new, vecs_new) if vecs_new is not None else 0.0
     unc   = uncertainty(scores)
     reward = (-d_ged) + d_ig - unc
-    
+
     # 内発報酬の判定
     eureka = (d_ged < -SPIKE_GED) and (d_ig > SPIKE_IG)
-    
+
     # 残りの処理も同様に実装
     if eureka:
         print("⚡ [yellow]EurekaSpike![/yellow]")
@@ -145,7 +169,7 @@ def cycle_with_status(memory: Memory, question: str, g_old: nx.Graph | None = No
         memory.train_index()
     else:
         memory.update_c(list(ids), reward)
-        
+
     answer = generate(build_prompt(question, docs))
 
     print(f"ΔGED {-d_ged:.3f}  ΔIG {d_ig:.3f}  Unc {unc:.3f}  R {reward:.3f}")
@@ -158,6 +182,8 @@ def cycle_with_status(memory: Memory, question: str, g_old: nx.Graph | None = No
     memory.prune(PRUNE_C, INACTIVE_N)
 
     answer_vec = model.encode([answer], normalize_embeddings=True)[0]
+    if hasattr(answer_vec, "to"):
+        answer_vec = answer_vec.to(device)
     memory.add_episode(answer_vec, answer, c_init=0.2)
 
     meta_path = memory.save()
@@ -165,37 +191,38 @@ def cycle_with_status(memory: Memory, question: str, g_old: nx.Graph | None = No
     meta_path.replace(snapshot_name)
 
     print(f"Snapshot saved → {snapshot_name.name}\n")
-    
-    return g_new, reward, eureka  # 3つの値を返す
+
+    return g_new, reward, eureka
 
 @app.command()
 def adaptive_loop(memory, question, initial_k=5, max_k=50, step_k=5):
-
     """Increase search range until an intrinsic reward is triggered."""
+    import torch
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     try:
-        g_old = torch.load("data/graph_loop.pt")
+        g_old = torch.load("data/graph_loop.pt", map_location=device)
     except (FileNotFoundError, RuntimeError):
-        g_old = None  # 他の例外は捕捉されない
-    
+        g_old = None
+
     current_k = initial_k
     max_iterations = (max_k - initial_k) // step_k + 1
-    
+
     iteration_count = 0
     for i in range(max_iterations):
         print(f"試行 {i+1}/{max_iterations}: k={current_k}")
-        g_new, reward, eureka = cycle_with_status(memory, question, g_old, current_k)
-        
-        iteration_count += 1  #
+        g_new, reward, eureka = cycle_with_status(memory, question, g_old, current_k, device=device)
+
+        iteration_count += 1
 
         if eureka:
             print("⚡ EurekaSpike検出! 探索終了")
             break
-            
+
         current_k += step_k
         if current_k > max_k:
             print("最大検索範囲に到達")
             break
-    
+
     torch.save(g_new, "data/graph_loop.pt")
-    return g_new, iteration_count  # 戻り値を追加
+    return g_new, iteration_count
