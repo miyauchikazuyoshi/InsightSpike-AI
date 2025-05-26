@@ -24,4 +24,4 @@ poetry run pip install -q torch-geometric==2.5.2
 poetry run pip install -q -r requirements-colab.txt
 
 # 6. テスト用Memory生成など
-python -m insightspike.cli embed
+PYTHONPATH=src poetry run python -m insightspike.cli embed
