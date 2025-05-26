@@ -4,6 +4,8 @@ import types
 dummy_torch = types.SimpleNamespace()
 dummy_torch.load = lambda *a, **k: None
 dummy_torch.save = lambda *a, **k: None
+dummy_torch.device = lambda x: "cpu"  # ← 追加
+dummy_torch.cuda = types.SimpleNamespace(is_available=lambda: False)  # ← 追加
 sys.modules['torch'] = dummy_torch
 
 import importlib
@@ -45,7 +47,9 @@ layer3 = types.SimpleNamespace(
         types.SimpleNamespace(
             num_nodes=0,
             edge_index=types.SimpleNamespace(
-                numpy=lambda: np.array([[0, 1], [1, 0]])
+                cpu=lambda: types.SimpleNamespace(
+                    numpy=lambda: np.array([[0, 1], [1, 0]])
+                )
             )
         ),
         None
