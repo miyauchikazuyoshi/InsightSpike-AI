@@ -26,13 +26,16 @@ def main():
     mem = Memory.build(sentences)
     mem.save()  # デフォルトのINDEX_FILEに保存
 
-    # 3. embeddingベクトルをnpyで保存
+    # 3. embeddingベクトルとsourcesをnpyで保存
     EMBED_DIR = Path("data/embedding")
     EMBED_DIR.mkdir(parents=True, exist_ok=True)
     vecs = np.vstack([e.vec for e in mem.episodes])
     np.save(EMBED_DIR / "input.npy", vecs)
+    # sources.npyも保存（customの場合はファイル名を全てのソースとする）
+    sources = [input_path.name] * len(sentences)
+    np.save(EMBED_DIR / "sources.npy", np.array(sources))
 
-    print("Done! Memory, index, and embedding vectors saved.")
+    print("Done! Memory, index, embedding vectors, and sources saved.")
 
 if __name__ == "__main__":
     main()

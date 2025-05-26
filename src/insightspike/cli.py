@@ -28,9 +28,23 @@ app = typer.Typer()
 def embed(path: Optional[pathlib.Path] = typer.Option(None, help="テキストファイルのパス")):
     """Embeddingを実行"""
     if path is None:
-        print("[red]Error: --path オプションで入力ファイルを指定してください[/red]")
-        raise typer.Exit(code=1)
-    print(f"Embedding for: {path}")
+        raw_dir = Path("data/raw")
+        txt_files = sorted(raw_dir.glob("*.txt"))
+        if not txt_files:
+            print("[red]Error: --path オプション未指定、かつ data/raw/ 内にテキストファイルがありません[/red]")
+            raise typer.Exit(code=1)
+        print("[yellow]--path未指定のため、data/raw/内のテキストファイルを選択してください:[/yellow]")
+        for i, f in enumerate(txt_files):
+            print(f"  [{i}] {f.name}")
+        idx = typer.prompt("番号を入力", type=int)
+        if not (0 <= idx < len(txt_files)):
+            print("[red]Error: 無効な番号です[/red]")
+            raise typer.Exit(code=1)
+        path = txt_files[idx]
+        print(f"[green]{path} を使用します[/green]")
+    else:
+        print(f"Embedding for: {path}")
+
     docs = load_corpus(path)
     Memory.build(docs).save()
     print(f"Embedded {len(docs)} docs.")
