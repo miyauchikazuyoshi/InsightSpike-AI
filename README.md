@@ -70,6 +70,7 @@ For development, PoC, or experiments, please make sure to install all dependenci
 Or, if you want to explicitly include only dev dependencies:```poetry install --with dev```
 
 This will ensure that packages like matplotlib (for visualization) and pytest (for testing) are available in your environment.
+When running `run_poc.py` offline, set the environment variable `EMBED_MODEL_PATH` to a locally downloaded SentenceTransformer model directory.
 
 ### Docker
 ---
@@ -126,6 +127,7 @@ poetry run python scripts/run_poc.py
 | `FileNotFoundError: ... episodic memory ...`       | Run `poetry run insightspike embed` or `poetry run databake` to generate the required data files.|
 | `torch version mismatch`                           | Ensure Docker and local environments use the same torch version (see Dockerfile notes).          |
 | `CUDA not available`                               | If running on CPU, make sure to use CPU versions of torch/faiss; for GPU, check CUDA drivers.    |
+| `RuntimeError: Failed to load embedding model`     | Pre-download the SentenceTransformer model and set `EMBED_MODEL_PATH` to its directory.           |
 
 ---
 
