@@ -1,8 +1,26 @@
 '#!/usr/bin/env python'
 import sys
 from pathlib import Path
-import matplotlib.pyplot as plt
+try:
+    import matplotlib.pyplot as plt
+except ModuleNotFoundError:  # pragma: no cover - optional
+    plt = None
 import logging
+
+def check_dependencies():
+    """Exit with message if required packages are missing."""
+    missing = []
+    for mod in ("faiss", "torch", "sentence_transformers"):
+        try:
+            __import__(mod)
+        except ModuleNotFoundError:
+            missing.append(mod)
+    if missing:
+        print(
+            "[ERROR] Missing dependencies: " + ", ".join(missing) +
+            "\nRun 'poetry install' and related setup scripts before executing."
+        )
+        sys.exit(1)
 from insightspike.layer2_memory_manager import Memory
 from insightspike.agent_loop import cycle
 from insightspike.loader import load_corpus
@@ -23,6 +41,7 @@ def ensure_memory():
 
 def main():
     try:
+        check_dependencies()
         # 1. 質問文投入
         question = get_question()
 
@@ -53,22 +72,25 @@ def main():
             print(f"更新エピソード数: {len(updated)}")
 
         # 4. ビジュアライズ
-        plt.figure(figsize=(10, 4))
-        plt.subplot(1, 2, 1)
-        plt.plot(ged_list, label="ΔGED")
-        plt.plot(ig_list, label="ΔIG")
-        plt.xlabel("Loop")
-        plt.ylabel("Value")
-        plt.legend()
-        plt.title("グラフ更新量の推移")
+        if plt is not None:
+            plt.figure(figsize=(10, 4))
+            plt.subplot(1, 2, 1)
+            plt.plot(ged_list, label="ΔGED")
+            plt.plot(ig_list, label="ΔIG")
+            plt.xlabel("Loop")
+            plt.ylabel("Value")
+            plt.legend()
+            plt.title("グラフ更新量の推移")
 
-        plt.subplot(1, 2, 2)
-        plt.bar(range(loop_num), [int(e) for e in eureka_spikes])
-        plt.xlabel("Loop")
-        plt.ylabel("Eureka Spike")
-        plt.title("エウレカスパイク発生タイミング")
-        plt.tight_layout()
-        plt.show()
+            plt.subplot(1, 2, 2)
+            plt.bar(range(loop_num), [int(e) for e in eureka_spikes])
+            plt.xlabel("Loop")
+            plt.ylabel("Eureka Spike")
+            plt.title("エウレカスパイク発生タイミング")
+            plt.tight_layout()
+            plt.show()
+        else:
+            print("[WARN] matplotlib not installed: skipping plot display")
 
         # 更新エピソードのサマリ表示
         print("\n=== 更新されたエピソード一覧 ===")
