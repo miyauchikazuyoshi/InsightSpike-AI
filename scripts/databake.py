@@ -16,6 +16,7 @@ dataset = load_dataset("wikipedia", "20220301.en", split="train[:10000]", trust_
 
 # nltkで文分割
 nltk.download('punkt')
+nltk.download('punkt_tab')
 
 sentences = []
 sources = []

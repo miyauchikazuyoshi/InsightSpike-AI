@@ -2,8 +2,12 @@
 import sys
 from pathlib import Path
 import numpy as np
+import nltk
 
 from insightspike.layer2_memory_manager import Memory
+
+nltk.download('punkt')
+nltk.download('punkt_tab')
 
 def main():
     if len(sys.argv) < 2:
