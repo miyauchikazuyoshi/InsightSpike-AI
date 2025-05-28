@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from datasets import load_dataset
 import nltk
+import nltk.tokenize
 
 from insightspike.layer2_memory_manager import Memory
 
