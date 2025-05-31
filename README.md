@@ -118,7 +118,7 @@ poetry install --with dev
 poetry run insightspike loop "What is quantum entanglement?"
 ```
 
-#### ☁️ Google Colab Environment (faiss-gpu)
+#### ☁️ Google Colab Environment (faiss-gpu-cu12)
 **Best for**: GPU acceleration, large-scale experiments, research
 ```bash
 # Method 1: Enhanced setup script (recommended)

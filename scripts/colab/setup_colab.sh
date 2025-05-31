@@ -34,16 +34,16 @@ curl -sSL https://install.python-poetry.org | python3 -
 export PATH="/root/.local/bin:$PATH"
 poetry --version
 
-# 4. PyTorch with GPU Support (with NumPy constraint)
+# 4. PyTorch with GPU Support (CUDA 12.x optimized)
 echo ""
-echo "🔥 Installing PyTorch with CUDA support..."
-pip install -q torch==2.2.2+cu118 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+echo "🔥 Installing PyTorch with CUDA 12.x support..."
+pip install -q torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 python -c "import torch; print(f'✅ PyTorch {torch.__version__} installed, CUDA: {torch.cuda.is_available()}')"
 
-# 5. PyTorch Geometric for Graph Neural Networks
+# 5. PyTorch Geometric for Graph Neural Networks (CUDA 12.x)
 echo ""
 echo "🌐 Installing PyTorch Geometric..."
-pip install -q torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-2.2.2+cu118.html
+pip install -q torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric
 python -c "import torch_geometric; print(f'✅ PyTorch Geometric {torch_geometric.__version__} installed')"
 
 # 6. Hugging Face Ecosystem
@@ -55,10 +55,36 @@ python -c "import transformers; print(f'✅ Transformers {transformers.__version
 # 7. Vector Database and Search (GPU optimized)
 echo ""
 echo "🔍 Installing vector search libraries..."
-# Colabでfaiss (GPU機能統合版) とsentence-transformersを先にインストール
+# Colabで最適なfaissインストール戦略 (CUDA 12.x対応)
 echo "📦 Installing Faiss with GPU support for CUDA 12.x..."
-pip install -q faiss sentence-transformers
-echo "🔍 Verifying Faiss GPU functionality..."
+
+# Modern Faiss GPU installation with CUDA 12.x support
+echo "🚀 Installing faiss-gpu-cu12 for optimal Colab performance..."
+pip install -q faiss-gpu-cu12 sentence-transformers
+
+# Verify installation before fallback
+python -c "
+import faiss
+print(f'✅ Faiss {faiss.__version__} installed')
+if hasattr(faiss, 'get_num_gpus'):
+    print(f'GPU support available: {faiss.get_num_gpus()} GPUs detected')
+else:
+    print('GPU support check: method not available')
+" || {
+    echo "⚠️ faiss-gpu-cu12 installation failed, trying fallback options..."
+    
+    # Fallback 1: Try conda if available
+    if command -v conda &> /dev/null; then
+        echo "🐍 Attempting conda-based faiss-gpu installation..."
+        conda install -c conda-forge faiss-gpu -y || echo "⚠️ Conda faiss-gpu failed"
+    fi
+    
+    # Fallback 2: CPU version as last resort
+    echo "📦 Installing faiss-cpu as fallback..."
+    pip install -q faiss-cpu
+}
+
+echo "🔍 Verifying Faiss functionality..."
 python -c "
 import faiss
 print(f'✅ Faiss {faiss.__version__} installed')
@@ -72,11 +98,17 @@ try:
     
     # StandardGpuResourcesの確認
     if hasattr(faiss, 'StandardGpuResources'):
+        gpu_res = faiss.StandardGpuResources()
         print('✅ GPU resources class available')
+        # 簡単なGPUテスト
+        index = faiss.IndexFlatL2(128)
+        gpu_index = faiss.index_cpu_to_gpu(gpu_res, 0, index)
+        print('✅ GPU acceleration confirmed working')
     else:
         print('⚠️  GPU resources not available - CPU-only version')
 except Exception as e:
     print(f'⚠️  Faiss GPU test error: {e}')
+    print('ℹ️  Using CPU version for vector operations')
 "
 
 # 8. Scientific Computing and Visualization

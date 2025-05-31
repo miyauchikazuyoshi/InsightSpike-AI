@@ -1,4 +1,4 @@
-faiss-gpu-cu11
+faiss-gpu-cu12
 sentence-transformers
 transformers
 rich

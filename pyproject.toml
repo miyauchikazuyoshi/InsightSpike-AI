@@ -29,14 +29,15 @@ pytest-cov = "^4.0"
 black = "^23.0"
 isort = "^5.0"
 flake8 = "^6.0"
-faiss-cpu = "^1.7"  # 開発環境用
+faiss-cpu = "^1.11"  # CPU版faiss（ローカル開発・本番）
 
 [tool.poetry.group.ci.dependencies]
 pytest = "^8.0"
-# CIでは faiss は手動インストール
+# CIでは faiss は手動インストール（LITE_MODE使用）
 
 [tool.poetry.group.colab.dependencies]
-faiss-gpu = "^1.7"  # Colab専用
+# Colabでは setup_colab.sh で faiss を事前インストール
+# Poetry競合を避けるため、ここでは指定しない
 
 [tool.poetry.scripts]
 insightspike = "insightspike.cli:app"

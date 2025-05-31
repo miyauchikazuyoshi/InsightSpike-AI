@@ -11,7 +11,7 @@ InsightSpike-AI employs a sophisticated dependency management strategy that addr
 | Environment | Primary Use | faiss Package | GPU Support | Key Features |
 |-------------|-------------|---------------|-------------|--------------|
 | **Local Development** | Development, Testing | faiss-cpu | No | Full Poetry environment, comprehensive testing |
-| **Google Colab** | Research, Large-scale experiments | faiss-gpu | Yes | GPU acceleration, CLI access, performance optimization |
+| **Google Colab** | Research, Large-scale experiments | faiss-gpu-cu12 | Yes | GPU acceleration, CLI access, performance optimization |
 | **CI/CD** | Automated testing | faiss-cpu | No | Minimal dependencies, fast execution, LITE_MODE |
 
 ## 🏠 Local Development Environment
@@ -57,11 +57,11 @@ python -c "from insightspike import InsightSpikeAI; ai = InsightSpikeAI()"
 
 ## ☁️ Google Colab Environment
 
-### Key Innovation: faiss-gpu Priority Installation
+### Key Innovation: faiss-gpu-cu12 Priority Installation
 
 Our Colab setup script (`scripts/colab/setup_colab.sh`) implements a critical optimization:
 
-1. **faiss-gpu installed FIRST** via pip (ensures GPU support)
+1. **faiss-gpu-cu12 installed FIRST** via pip (ensures CUDA 12.x GPU support)
 2. **Poetry configured** for global environment usage
 3. **Project dependencies** installed without conflicts
 4. **Comprehensive validation** of GPU functionality
@@ -80,7 +80,7 @@ Our Colab setup script (`scripts/colab/setup_colab.sh`) implements a critical op
 ### Installation Method 2: Pre-configured Notebook
 Open `InsightSpike_Colab_Demo.ipynb` which includes:
 - Automated environment setup
-- faiss-gpu validation tests
+- faiss-gpu-cu12 validation tests
 - CLI access verification
 - Performance comparison (CPU vs GPU)
 
@@ -113,7 +113,7 @@ The setup includes automatic validation:
 
 Tests:
 - PyTorch GPU functionality
-- faiss-gpu acceleration
+- faiss-gpu-cu12 acceleration
 - SentenceTransformers compatibility
 - CLI command access
 
@@ -149,9 +149,9 @@ python -m pytest development/tests/unit/ -v
 
 ## 🚨 Common Issues and Solutions
 
-### Issue 1: faiss-gpu Installation Conflicts
+### Issue 1: faiss-gpu-cu12 Installation Conflicts
 **Problem**: Poetry tries to install both faiss-cpu and faiss-gpu
-**Solution**: Use our Colab setup script which installs faiss-gpu first
+**Solution**: Use our Colab setup script which installs faiss-gpu-cu12 first
 
 ### Issue 2: CLI Commands Not Found in Colab
 **Problem**: Poetry not properly installed or configured
@@ -200,7 +200,7 @@ print(f'LITE_MODE: {os.getenv(\"INSIGHTSPIKE_LITE_MODE\")}')
 | Environment | faiss Package | Search Speed | Memory Usage | Setup Time |
 |-------------|---------------|--------------|--------------|------------|
 | Local | faiss-cpu | 1x | Low | Fast |
-| Colab | faiss-gpu | 10-50x | High | Medium |
+| Colab | faiss-gpu-cu12 | 10-50x | High | Medium |
 | CI | faiss-cpu (mock) | N/A | Minimal | Very Fast |
 
 ## 🔄 Migration Between Environments
