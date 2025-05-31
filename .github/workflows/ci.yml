@@ -36,8 +36,8 @@ jobs:
 
     - name: Test core functionality (no heavy dependencies)
       run: |
-        # Test basic imports and utilities only
-        python -m pytest tests/unit/test_init.py tests/unit/test_config.py tests/unit/test_utils.py tests/unit/test_data_loader.py tests/unit/test_prompt_builder.py tests/unit/test_predict.py tests/unit/test_quantizer.py tests/unit/test_retrieval.py tests/unit/test_train.py tests/unit/test_loader.py -v --tb=short
+        # Test all unit tests in the directory (auto-discover)
+        python -m pytest development/tests/unit/ -v --tb=short
 
   test-integration:
     runs-on: ubuntu-latest
@@ -79,7 +79,7 @@ jobs:
     - name: Test with mocked dependencies
       run: |
         # Test with mocked PyTorch/transformers for integration testing
-        poetry run python -m pytest tests/unit/test_cache_manager.py -v --tb=short
+        poetry run python -m pytest development/tests/unit/ -v --tb=short
 
     - name: Run system validation script
       run: |
