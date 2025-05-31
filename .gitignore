@@ -25,6 +25,11 @@ __pycache__/
 !data/processed/test_questions.json
 !data/processed/simple_metadata.json
 
+# 実験データ生成物
+/data/processed/episodes
+/data/processed/*.png
+/data/processed/graph_visualizations/
+
 # 生データ（全除外、ただしサンプルは含める）
 /data/raw/*
 !/data/raw/.gitkeep
