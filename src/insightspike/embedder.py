@@ -1,7 +1,34 @@
 """Sentence‑Transformer embedder"""
 import os
 import warnings
-from sentence_transformers import SentenceTransformer
+import numpy as np
+
+# Lite mode check
+if os.getenv('INSIGHTSPIKE_LITE_MODE') == '1':
+    # Lite mode: use mock SentenceTransformer
+    class SentenceTransformer:
+        def __init__(self, model_name=None):
+            self.model_name = model_name or 'mock-model'
+        
+        def encode(self, sentences, **kwargs):
+            # Return dummy embeddings
+            if isinstance(sentences, str):
+                sentences = [sentences]
+            return np.random.rand(len(sentences), 384).astype('float32')
+else:
+    # Full mode: use real SentenceTransformer
+    try:
+        from sentence_transformers import SentenceTransformer
+    except ImportError:
+        # Fallback to mock if not available
+        class SentenceTransformer:
+            def __init__(self, model_name=None):
+                self.model_name = model_name or 'fallback-model'
+            
+            def encode(self, sentences, **kwargs):
+                if isinstance(sentences, str):
+                    sentences = [sentences]
+                return np.random.rand(len(sentences), 384).astype('float32')
 
 # Import from the legacy config for compatibility
 try:
@@ -32,3 +59,15 @@ def get_model():
             _model = SentenceTransformer(model_name, device="cpu")
             print("📦 Embedding model loaded on CPU (fallback)")
     return _model
+
+class Embedder:
+    def __init__(self, model_name='all-MiniLM-L6-v2'):
+        self.model = SentenceTransformer(model_name)
+    
+    def embed(self, texts):
+        if isinstance(texts, str):
+            texts = [texts]
+        return self.model.encode(texts)
+    
+    def embed_single(self, text):
+        return self.embed([text])[0]
