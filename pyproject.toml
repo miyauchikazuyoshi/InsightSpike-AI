@@ -10,7 +10,7 @@ python = "^3.11"
 torch = "2.2.2"
 sentence-transformers = "^2.5"
 scipy = "^1.12"
-numpy = "<2.0"  # ← 修正: NumPy 2.0を回避
+numpy = "<2.0"
 transformers = "<4.40"
 accelerate = "^0.29"
 networkx = "^3.3"
@@ -23,14 +23,16 @@ matplotlib = "^3.8"
 nltk = "^3.8"
 pyyaml = "^6.0"
 
-[tool.poetry.group.colab]
-optional = true
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0"
+pytest-cov = "^4.0"
+black = "^23.0"
+isort = "^5.0"
+flake8 = "^6.0"
+faiss-cpu = "^1.7"  # 開発環境用
 
 [tool.poetry.group.colab.dependencies]
-faiss-gpu = "^1.7"  # ← Colab専用でfaiss-gpu
-
-[tool.poetry.group.dev.dependencies]
-faiss-cpu = "^1.7"  # ← 開発環境用にfaiss-cpu
+faiss-gpu = "^1.7"  # Colab専用
 
 [tool.poetry.scripts]
 insightspike = "insightspike.cli:app"
