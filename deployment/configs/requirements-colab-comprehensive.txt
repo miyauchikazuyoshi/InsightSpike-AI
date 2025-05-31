@@ -20,8 +20,10 @@ tokenizers>=0.13.0
 accelerate>=0.20.0
 evaluate>=0.4.0
 
-# Vector Search and Embeddings
-faiss-gpu
+# Vector Search and Embeddings - Fixed FAISS-GPU with explicit CUDA dependencies
+faiss-gpu-cu12>=1.11.0
+nvidia-cuda-runtime-cu12>=12.1
+nvidia-cublas-cu12>=12.1
 sentence-transformers>=2.2.0
 
 # Scientific Computing

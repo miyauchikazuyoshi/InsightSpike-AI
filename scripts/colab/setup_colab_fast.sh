@@ -78,15 +78,40 @@ install_with_timeout "torch-geometric" 120 || {
     echo "ℹ️ Continuing without PyG - basic functionality will work"
 }
 
-# 4. FAISS with GPU support (critical for performance)
+# 4. FAISS with GPU support (critical for performance) - Improved dependency handling
 echo ""
 echo "🔍 Installing FAISS with GPU support..."
-install_with_timeout "faiss-gpu-cu12" 120 || {
-    echo "🔄 Fallback: Installing faiss-cpu..."
-    pip install -q faiss-cpu
+
+# First ensure CUDA runtime libraries are installed
+echo "📦 Installing CUDA runtime libraries..."
+pip install -q nvidia-cuda-runtime-cu12 nvidia-cublas-cu12
+
+# Install FAISS-GPU with explicit version and dependency checking
+install_with_timeout "faiss-gpu-cu12>=1.11.0" 180 || {
+    echo "⚠️ FAISS-GPU installation failed, trying without version constraint..."
+    install_with_timeout "faiss-gpu-cu12" 120 || {
+        echo "🔄 Fallback: Installing faiss-cpu..."
+        pip install -q faiss-cpu
+        echo "ℹ️ Using CPU-only FAISS - GPU acceleration unavailable"
+    }
 }
 
-verify_package "faiss" "faiss"
+# Verify FAISS installation with detailed error reporting
+python -c "
+try:
+    import faiss
+    print(f'✅ FAISS {faiss.__version__} installed successfully')
+    
+    # Test GPU availability
+    try:
+        res = faiss.StandardGpuResources()
+        print('🚀 FAISS GPU support available')
+    except Exception as e:
+        print(f'⚠️ FAISS GPU unavailable (using CPU): {e}')
+except ImportError as e:
+    print(f'❌ FAISS import failed: {e}')
+    exit(1)
+"
 
 # 5. Hugging Face (essential for datasets)
 echo ""

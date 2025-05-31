@@ -58,9 +58,11 @@ def test_faiss_gpu():
     except ImportError as e:
         print(f"❌ FAISS import failed: {e}")
         print("🔧 Fix: Run setup script or install manually:")
+        print("   # For GPU support (recommended):")
+        print("   !pip install nvidia-cuda-runtime-cu12 nvidia-cublas-cu12")
+        print("   !pip install 'faiss-gpu-cu12>=1.11.0'")
+        print("   # OR for CPU-only:")
         print("   !pip install faiss-cpu")
-        print("   # OR for GPU support:")
-        print("   !pip install faiss-gpu")
         return False
 
 def test_torch_gpu():
