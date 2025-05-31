@@ -1,0 +1,141 @@
+%% InsightSpike-AI Technical Architecture Flow
+%% 技術的な実装フローの詳細
+
+flowchart LR
+    %% User Interaction Layer
+    subgraph "👤 User Layer"
+        U1[Terminal/CLI]
+        U2[Python API]
+        U3[Jupyter Notebook]
+    end
+    
+    %% Application Layer
+    subgraph "🖥️ Application Layer"
+        direction TB
+        CLI_App[CLI Application<br/>typer + rich]
+        Agent_Loop[Agent Loop<br/>agent_loop.py]
+        Main_Agent[MainAgent<br/>main_agent.py]
+    end
+    
+    %% Core Processing Layers
+    subgraph "🧠 Core Intelligence Layers"
+        direction TB
+        
+        subgraph "Layer 1: Input"
+            L1_Input[Input Processing]
+            L1_Valid[Validation]
+            L1_Format[Formatting]
+        end
+        
+        subgraph "Layer 2: Memory"
+            L2_Episode[Episode Retrieval]
+            L2_Vector[Vector Search]
+            L2_Context[Context Building]
+        end
+        
+        subgraph "Layer 3: Reasoning"
+            L3_Graph[Graph Analysis]
+            L3_Concept[Concept Mapping]
+            L3_Relation[Relationship Discovery]
+        end
+        
+        subgraph "Layer 4: Generation"
+            L4_LLM[LLM Processing]
+            L4_Local[LocalProvider]
+            L4_Response[Response Generation]
+        end
+    end
+    
+    %% Insight Discovery System
+    subgraph "💡 Insight Discovery System"
+        direction TB
+        Extract[Insight Extraction<br/>NLP Analysis]
+        Quality[Quality Assessment<br/>Multi-criteria Scoring]
+        
+        subgraph "Quality Metrics"
+            Q1[Confidence Score]
+            Q2[Novelty Score]
+            Q3[Coherence Score]
+            Q4[Specificity Score]
+        end
+        
+        Registry[InsightFactRegistry<br/>Central Management]
+    end
+    
+    %% Storage Layer
+    subgraph "💾 Storage Layer"
+        direction TB
+        
+        subgraph "SQLite Databases"
+            DB1[(insight_facts.db<br/>洞察データベース)]
+            DB2[(unknown_learning.db<br/>学習データベース)]
+            DB3[(Memory Cache<br/>エピソード)]
+        end
+        
+        subgraph "Graph Storage"
+            Graph_Data[(graph_pyg.pt<br/>PyTorchグラフ)]
+            Graph_Cache[Graph Cache<br/>NetworkX]
+        end
+        
+        subgraph "Configuration"
+            Config_Local[local.yaml]
+            Config_Prod[production.yaml]
+            Config_Colab[colab.yaml]
+        end
+    end
+    
+    %% Data Flow Connections
+    U1 --> CLI_App
+    U2 --> Agent_Loop
+    U3 --> Main_Agent
+    
+    CLI_App --> Main_Agent
+    Agent_Loop --> Main_Agent
+    Main_Agent --> L1_Input
+    
+    %% Layer Flow
+    L1_Input --> L1_Valid --> L1_Format
+    L1_Format --> L2_Episode
+    L2_Episode --> L2_Vector --> L2_Context
+    L2_Context --> L3_Graph
+    L3_Graph --> L3_Concept --> L3_Relation
+    L3_Relation --> L4_LLM
+    L4_LLM --> L4_Local --> L4_Response
+    
+    %% Insight Flow
+    L4_Response --> Extract
+    Extract --> Quality
+    Quality --> Q1
+    Quality --> Q2
+    Quality --> Q3
+    Quality --> Q4
+    Q1 --> Registry
+    Q2 --> Registry
+    Q3 --> Registry
+    Q4 --> Registry
+    
+    %% Storage Connections
+    L2_Vector -.-> DB3
+    L3_Graph -.-> Graph_Data
+    L3_Graph -.-> Graph_Cache
+    Registry --> DB1
+    Main_Agent -.-> DB2
+    Main_Agent -.-> Config_Local
+    
+    %% Feedback Loops
+    Registry -.-> L2_Context
+    Registry -.-> L3_Concept
+    DB1 -.-> L2_Episode
+    
+    %% Styling
+    classDef userLayer fill:#e3f2fd
+    classDef appLayer fill:#f3e5f5
+    classDef coreLayer fill:#e8f5e8
+    classDef insightLayer fill:#fff8e1
+    classDef storageLayer fill:#fafafa
+    
+    class U1,U2,U3 userLayer
+    class CLI_App,Agent_Loop,Main_Agent appLayer
+    class L1_Input,L2_Episode,L3_Graph,L4_LLM coreLayer
+    class Extract,Quality,Registry insightLayer
+    class DB1,DB2,DB3,Graph_Data storageLayer

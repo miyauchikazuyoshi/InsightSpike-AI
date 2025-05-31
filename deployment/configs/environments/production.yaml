@@ -1,0 +1,28 @@
+# Production configuration
+models:
+  device: "cuda"
+  batch_size: 64
+  embedding_model: "sentence-transformers/all-MiniLM-L6-v2"
+
+memory:
+  max_episodes: 50000
+  top_k: 10
+
+graph:
+  gnn_hidden_dim: 512
+  gnn_num_layers: 4
+
+loop:
+  max_loops: 20
+  timeout_seconds: 1800
+
+spike:
+  ged_threshold: 0.3
+  ig_threshold: 0.25
+
+logging:
+  log_level: "INFO"
+  enable_wandb: true
+  save_artifacts: true
+
+debug: false

@@ -14,7 +14,12 @@ LLM_NAME         = "TinyLlama/TinyLlama-1.1B-intermediate-step-1431k-3T"
 
 # ─── Retrieval & Graph ─────────────────────────────────
 SIM_THRESHOLD = 0.35
-TOP_K         = 5
+TOP_K         = 15  # Increased from 5 to enable higher graph density and chain reactions
+
+# ─── Layer-specific topK values for optimized performance ───
+LAYER1_TOP_K = 20   # Layer1 initial retrieval - cast wide net for analysis
+LAYER2_TOP_K = 15   # Layer2 memory search - balance relevance and diversity  
+LAYER3_TOP_K = 12   # Layer3 GNN reasoning - focus on quality connections
 
 # ─── Eureka Spike thresholds ───────────────────────────
 SPIKE_GED  = 0.5

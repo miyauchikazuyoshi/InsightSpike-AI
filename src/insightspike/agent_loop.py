@@ -1,228 +1,283 @@
-"""Subcortical 4-loop with EurekaSpike"""
+"""
+Legacy agent_loop module - Migration wrapper with EurekaSpike integration
+========================================================================
+
+This module provides backward compatibility for code that uses the old cycle function.
+Now includes integrated EurekaSpike detection for complete insight detection.
+"""
 from __future__ import annotations
-from rich import print
-import numpy as np, networkx as nx
+from typing import Dict, Any, Optional
+import logging
 
+# Graceful imports for optional dependencies
+try:
+    import networkx as nx
+except ImportError:
+    nx = None
 
-# Provide a module-level torch object so tests can patch
-try:  # pragma: no cover - optional dependency
-    import torch as torch  # attempt real torch
-except Exception:  # torch not installed
-    class _DummyTorch:
-        """Fallback torch stub providing load/save stubs."""
+try:
+    import numpy as np
+except ImportError:
+    np = None
 
-        def load(self, *_, **__):
-            raise ModuleNotFoundError("torch is required")
+# Import core components
+try:
+    from .core.agents.main_agent import MainAgent
+    USE_NEW_AGENT = True
+except ImportError:
+    USE_NEW_AGENT = False
 
-        def save(self, *_, **__):
-            raise ModuleNotFoundError("torch is required")
+from .graph_metrics import delta_ged, delta_ig
+from .eureka_spike import EurekaDetector
+from .layer1_error_monitor import analyze_input, KnownUnknownAnalysis
+from .adaptive_topk import calculate_adaptive_topk, estimate_chain_reaction_potential
+from .unknown_learner import UnknownLearner
+from .insight_fact_registry import InsightFactRegistry
 
-    torch = _DummyTorch()
+logger = logging.getLogger(__name__)
 
-from typer import Typer, Option
+# Initialize global insight fact registry
+insight_registry = InsightFactRegistry()
 
-from .embedder              import get_model
-from .prompt_builder        import build_prompt
-from .layer1_error_monitor  import uncertainty
-from .layer2_memory_manager import Memory
-from .layer3_graph_pyg      import build_graph
-from .graph_metrics         import delta_ged, delta_ig
-from .layer4_llm            import generate
-from .config                import (TOP_K, SPIKE_GED, SPIKE_IG, ETA_SPIKE, LOG_DIR, MERGE_GED, SPLIT_IG, PRUNE_C, INACTIVE_N, timestamp,)
-__all__ = ["cycle"]
-
-app = Typer()
-
-def cycle(memory: Memory, question: str, g_old: nx.Graph | None = None, top_k=TOP_K, device=None):
-    """Run a single reasoning cycle."""
-
-    time_id = timestamp()
-    (LOG_DIR / f"{time_id}_question.txt").write_text(question, encoding="utf-8")
-
-    # デバイス設定
-    if device is None:
-        import torch
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    model = get_model()
-    if hasattr(model, "to"):
-        model = model.to(device)
-    q_vec = model.encode([question], normalize_embeddings=True)[0]
-    if hasattr(q_vec, "to"):
-        q_vec = q_vec.to(device)
-    raw_scores, ids = memory.search(q_vec, top_k)
-    scores = list(raw_scores)
-
-    # 変更点: 空のメモリや結果を安全に処理
-    if not ids or not memory.episodes:
-        # 空の結果を返す場合のハンドリング
-        return nx.Graph()
-
-    # 変更点: 安全にアクセスするよう修正
-    try:
-        vecs_new = np.vstack([memory.episodes[i].vec for i in ids])
-        import torch
-        vecs_new_tensor = torch.tensor(vecs_new).to(device)
-        g_pyg, _ = build_graph(vecs_new_tensor)
+def cycle(memory, question: str, g_old=None, top_k=10, device=None, **kwargs) -> Dict[str, Any]:
+    """
+    Legacy cycle function - migrated to use new MainAgent.
+    
+    Args:
+        memory: Legacy Memory object (will be converted)
+        question: Question to process
+        g_old: Previous graph (legacy parameter, ignored)
+        top_k: Number of documents to retrieve (used in config)
+        device: Device to use (used in config)
+        **kwargs: Additional parameters (mostly ignored)
         
-        # docs変数の定義を追加 - これが欠けていた
-        docs = [memory.episodes[i].text for i in ids]
+    Returns:
+        Dictionary with legacy format results
+    """
+    try:
+        logger.info(f"Processing question with legacy cycle function: {question[:50]}...")
         
-    except (IndexError, AttributeError):
-        # エラー時は空のグラフを返す
-        return nx.Graph()
+        # ===== INITIALIZE UNKNOWN LEARNER =====
+        unknown_learner = UnknownLearner()
+        
+        # ===== LAYER 1: Known/Unknown Information Separation =====
+        logger.info("🔍 Layer1: Analyzing input for known/unknown information separation")
+        
+        # Prepare context from existing memory
+        context_docs = []
+        kb_stats = None
+        
+        if hasattr(memory, 'episodes') and memory.episodes:
+            context_docs = [getattr(ep, 'text', str(ep)) for ep in memory.episodes[:20]]  # Sample for analysis
+            
+            # Build simple knowledge base statistics
+            all_words = []
+            for doc in context_docs:
+                all_words.extend(doc.lower().split())
+            
+            from collections import Counter
+            word_counts = Counter(all_words)
+            kb_stats = {
+                'concept_frequencies': dict(word_counts.most_common(100)),
+                'total_concepts': len(word_counts)
+            }
+        
+        # Perform Layer1 analysis with unknown learner integration
+        l1_analysis = analyze_input(question, context_docs, kb_stats, unknown_learner)
+        
+        # ===== ADAPTIVE TOPK CALCULATION =====
+        # Calculate optimal topK values based on Layer1 analysis
+        adaptive_topk_result = calculate_adaptive_topk(l1_analysis.__dict__)
+        adaptive_topk = {k: v for k, v in adaptive_topk_result.items() if not k.startswith('adaptation')}
+        adaptation_factors = adaptive_topk_result['adaptation_factors']
+        
+        # Estimate chain reaction potential
+        chain_reaction_potential = estimate_chain_reaction_potential(l1_analysis.__dict__, adaptive_topk)
+        
+        logger.info(f"L1 Analysis - Known: {len(l1_analysis.known_elements)}, "
+                   f"Unknown: {len(l1_analysis.unknown_elements)}, "
+                   f"Synthesis Required: {l1_analysis.requires_synthesis}, "
+                   f"Complexity: {l1_analysis.query_complexity:.3f}")
+        
+        logger.info(f"Adaptive topK - L1:{adaptive_topk['layer1_k']}, "
+                   f"L2:{adaptive_topk['layer2_k']}, L3:{adaptive_topk['layer3_k']}, "
+                   f"Chain Potential: {chain_reaction_potential:.3f}")
+        
+        # ===== MAIN AGENT PROCESSING =====
+        # Create new agent
+        agent = MainAgent()
+        
+        # Initialize agent with Layer1 insights
+        if not agent.initialize():
+            logger.error("Failed to initialize MainAgent")
+            return _legacy_error_result(question, "Failed to initialize agent")
+        
+        # Migrate memory data if provided
+        if hasattr(memory, 'episodes') and memory.episodes:
+            logger.info(f"Migrating {len(memory.episodes)} episodes to new memory system")
+            for episode in memory.episodes:
+                try:
+                    c_value = getattr(episode, 'c', 0.5)
+                    text = getattr(episode, 'text', str(episode))
+                    agent.add_document(text, c_value)
+                except Exception as e:
+                    logger.warning(f"Failed to migrate episode: {e}")
+        
+        # Process question with adaptive topK and Layer1 insights
+        # Adjust processing parameters based on Layer1 analysis and chain reaction potential
+        max_cycles = 5 if l1_analysis.requires_synthesis else 3
+        if chain_reaction_potential > 0.7:
+            max_cycles += 2  # Allow more cycles for high chain reaction potential
+            
+        enhanced_processing = l1_analysis.query_complexity > 0.6 or chain_reaction_potential > 0.5
+        
+        logger.info(f"Processing with {max_cycles} max cycles, enhanced={enhanced_processing}, "
+                   f"using adaptive topK values")
+        
+        # Pass adaptive topK to agent (if supported)
+        processing_kwargs = {
+            'max_cycles': max_cycles, 
+            'verbose': enhanced_processing,
+            'adaptive_topk': adaptive_topk,
+            'chain_reaction_potential': chain_reaction_potential
+        }
+        
+        result = agent.process_question(question, **processing_kwargs)
+        
+        # ===== INSIGHT FACT EXTRACTION AND REGISTRATION =====
+        # Extract and register insights from the agent's response
+        try:
+            response_text = result.get('response', '')
+            reasoning_quality = result.get('reasoning_quality', 0.0)
+            
+            # Extract graphs for optimization evaluation if available
+            graph_before = g_old  # Previous graph from legacy parameter
+            graph_after = result.get('graph')  # Current graph from agent result
+            
+            if response_text and reasoning_quality > 0.3:  # Only process quality responses
+                discovered_insights = insight_registry.extract_insights_from_response(
+                    question=question,
+                    response=response_text,
+                    l1_analysis=l1_analysis,
+                    reasoning_quality=reasoning_quality,
+                    graph_before=graph_before,
+                    graph_after=graph_after
+                )
+                
+                # Log insight discovery
+                if discovered_insights:
+                    logger.info(f"🧠 Discovered {len(discovered_insights)} insights from response")
+                    for insight in discovered_insights:
+                        logger.info(f"  - {insight.relationship_type}: {insight.text[:80]}...")
+                        logger.info(f"    Quality: {insight.quality_score:.3f}, "
+                                   f"GED: {insight.ged_optimization:.3f}, "
+                                   f"IG: {insight.ig_improvement:.3f}")
+                else:
+                    logger.debug("No qualifying insights extracted from response")
+                    
+        except Exception as e:
+            logger.warning(f"Insight extraction failed: {e}")
+            discovered_insights = []
+        
+        # ===== ENHANCED RESULT WITH LAYER1 INSIGHTS =====
+        # Convert to legacy format with Layer1 insights
+        legacy_result = {
+            'answer': result.get('response', ''),
+            'documents': result.get('documents', []),
+            'graph': result.get('graph'),
+            'metrics': result.get('metrics', {}),
+            'conflicts': result.get('conflicts', {}),
+            'reward': result.get('reward', {}),
+            'spike_detected': result.get('spike_detected', False),
+            'reasoning_quality': result.get('reasoning_quality', 0.0),
+            'success': result.get('success', True),
+            
+            # Layer1 analysis results
+            'l1_analysis': {
+                'known_elements': l1_analysis.known_elements,
+                'unknown_elements': l1_analysis.unknown_elements,
+                'certainty_scores': l1_analysis.certainty_scores,
+                'query_complexity': l1_analysis.query_complexity,
+                'requires_synthesis': l1_analysis.requires_synthesis,
+                'error_threshold': l1_analysis.error_threshold,
+                'analysis_confidence': l1_analysis.analysis_confidence
+            },
+            
+            # Adaptive topK results
+            'adaptive_topk': {
+                'layer1_k': adaptive_topk['layer1_k'],
+                'layer2_k': adaptive_topk['layer2_k'],
+                'layer3_k': adaptive_topk['layer3_k'],
+                'adaptation_factors': adaptation_factors,
+                'chain_reaction_potential': chain_reaction_potential
+            },
+            
+            # Legacy fields
+            'delta_ged': result.get('metrics', {}).get('delta_ged', 0.0),
+            'delta_ig': result.get('metrics', {}).get('delta_ig', 0.0),
+            'eureka': result.get('spike_detected', False),
+            'confidence': result.get('reasoning_quality', 0.5),
+            'updated_episodes': result.get('documents', []),
+            
+            # Insight fact extraction results
+            'discovered_insights': discovered_insights,
+            'insight_count': len(discovered_insights),
+            'insight_quality_avg': sum(i.quality_score for i in discovered_insights) / len(discovered_insights) if discovered_insights else 0.0,
+            'insight_optimization_avg': sum(i.ged_optimization for i in discovered_insights) / len(discovered_insights) if discovered_insights else 0.0
+        }
+        
+        logger.info(f"Legacy cycle completed - Quality: {legacy_result['reasoning_quality']:.3f}, "
+                   f"L1 Confidence: {l1_analysis.analysis_confidence:.3f}, "
+                   f"Chain Potential: {chain_reaction_potential:.3f}, "
+                   f"Insights Discovered: {len(discovered_insights)}")
+        return legacy_result
+        
+    except Exception as e:
+        logger.error(f"Legacy cycle function failed: {e}")
+        return _legacy_error_result(question, str(e))
 
-    g_new = nx.Graph(); g_new.add_nodes_from(range(g_pyg.num_nodes))
-    g_new.add_edges_from(g_pyg.edge_index.cpu().numpy().T.tolist())
+def _legacy_error_result(question: str, error: str) -> Dict[str, Any]:
+    """Generate legacy-compatible error result"""
+    return {
+        'answer': f"Error processing question: {error}",
+        'documents': [],
+        'graph': None,
+        'metrics': {},
+        'conflicts': {},
+        'reward': {},
+        'spike_detected': False,
+        'reasoning_quality': 0.0,
+        'success': False,
+        'delta_ged': 0.0,
+        'delta_ig': 0.0,
+        'eureka': False,
+        'confidence': 0.0,
+        'updated_episodes': [],
+        'error': error
+    }
 
-    d_ged = delta_ged(g_old, g_new) if g_old is not None else 0.0
-    d_ig  = delta_ig(vecs_new, vecs_new) if vecs_new is not None else 0.0
-    unc   = uncertainty(scores)
-    reward = (-d_ged) + d_ig - unc
+# Legacy adaptive_loop function
+def adaptive_loop(memory, questions, max_iterations=10, **kwargs):
+    """
+    Legacy adaptive_loop function - processes multiple questions.
+    """
+    results = []
+    
+    for i, question in enumerate(questions):
+        try:
+            result = cycle(memory, question, **kwargs)
+            results.append(result)
+            
+            # Early stopping if high quality achieved
+            if result.get('reasoning_quality', 0) > 0.8:
+                logger.info(f"High quality achieved at iteration {i+1}, stopping adaptive loop")
+                break
+                
+        except Exception as e:
+            logger.error(f"Adaptive loop iteration {i+1} failed: {e}")
+            results.append(_legacy_error_result(question, str(e)))
+    
+    return results
 
-    eureka = (d_ged < -SPIKE_GED) and (d_ig > SPIKE_IG)
-    if eureka:
-        print("⚡ [yellow]EurekaSpike![/yellow]")
-        memory.update_c(list(ids), reward, eta=ETA_SPIKE)
-        memory.train_index()
-    else:
-        memory.update_c(list(ids), reward)
-
-    # 正しく定義されたdocs変数を使用
-    answer = generate(build_prompt(question, docs))
-
-    print(f"ΔGED {-d_ged:.3f}  ΔIG {d_ig:.3f}  Unc {unc:.3f}  R {reward:.3f}")
-    print("[bold magenta]Answer:[/bold magenta]", answer, "")
-
-    # --- Merge / Split triggers ---------------------------------
-    if d_ged < -MERGE_GED:
-        memory.merge(list(ids))
-    elif d_ig < SPLIT_IG:
-        memory.split(ids[0])          # とりあえず先頭を分裂
-    memory.prune(PRUNE_C, INACTIVE_N)
-
-    # --- add new episode from LLM hypothesis --------------------
-    answer_vec = model.encode([answer], normalize_embeddings=True)[0]
-    if hasattr(answer_vec, "to"):
-        answer_vec = answer_vec.to(device)
-    memory.add_episode(answer_vec, answer, c_init=0.2)
-
-    # --- save memory snapshot ---
-    meta_path = memory.save()  # returns Path
-    snapshot_name = LOG_DIR / f"{time_id}_index.json"
-    meta_path.replace(snapshot_name)
-
-    # --- output & return ---
-    print(f"Snapshot saved → {snapshot_name.name}\n")
-    return g_new
-
-def cycle_with_status(memory: Memory, question: str, g_old: nx.Graph | None = None, top_k=TOP_K, device=None):
-    """cycle関数を拡張して報酬と内発報酬の状態も返す"""
-    time_id = timestamp()
-    (LOG_DIR / f"{time_id}_question.txt").write_text(question, encoding="utf-8")
-
-    # デバイス設定
-    if device is None:
-        import torch
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    model = get_model()
-    if hasattr(model, "to"):
-        model = model.to(device)
-    q_vec = model.encode([question], normalize_embeddings=True)[0]
-    if hasattr(q_vec, "to"):
-        q_vec = q_vec.to(device)
-    raw_scores, ids = memory.search(q_vec, top_k)
-    scores = list(raw_scores)
-
-    # 空のメモリや結果を安全に処理
-    if not ids or not memory.episodes:
-        # 空の結果を返す場合
-        return nx.Graph(), 0.0, False
-
-    # 安全にアクセス
-    try:
-        vecs_new = np.vstack([memory.episodes[i].vec for i in ids])
-        import torch
-        vecs_new_tensor = torch.tensor(vecs_new).to(device)
-        g_pyg, _ = build_graph(vecs_new_tensor)
-        docs = [memory.episodes[i].text for i in ids]
-    except (IndexError, AttributeError):
-        # エラー時
-        return nx.Graph(), 0.0, False
-
-    g_new = nx.Graph(); g_new.add_nodes_from(range(g_pyg.num_nodes))
-    g_new.add_edges_from(g_pyg.edge_index.cpu().numpy().T.tolist())
-
-    d_ged = delta_ged(g_old, g_new) if g_old is not None else 0.0
-    d_ig  = delta_ig(vecs_new, vecs_new) if vecs_new is not None else 0.0
-    unc   = uncertainty(scores)
-    reward = (-d_ged) + d_ig - unc
-
-    # 内発報酬の判定
-    eureka = (d_ged < -SPIKE_GED) and (d_ig > SPIKE_IG)
-
-    # 残りの処理も同様に実装
-    if eureka:
-        print("⚡ [yellow]EurekaSpike![/yellow]")
-        memory.update_c(list(ids), reward, eta=ETA_SPIKE)
-        memory.train_index()
-    else:
-        memory.update_c(list(ids), reward)
-
-    answer = generate(build_prompt(question, docs))
-
-    print(f"ΔGED {-d_ged:.3f}  ΔIG {d_ig:.3f}  Unc {unc:.3f}  R {reward:.3f}")
-    print("[bold magenta]Answer:[/bold magenta]", answer, "")
-
-    if d_ged < -MERGE_GED:
-        memory.merge(list(ids))
-    elif d_ig < SPLIT_IG:
-        memory.split(ids[0])
-    memory.prune(PRUNE_C, INACTIVE_N)
-
-    answer_vec = model.encode([answer], normalize_embeddings=True)[0]
-    if hasattr(answer_vec, "to"):
-        answer_vec = answer_vec.to(device)
-    memory.add_episode(answer_vec, answer, c_init=0.2)
-
-    meta_path = memory.save()
-    snapshot_name = LOG_DIR / f"{time_id}_index.json"
-    meta_path.replace(snapshot_name)
-
-    print(f"Snapshot saved → {snapshot_name.name}\n")
-
-    return g_new, reward, eureka
-
-@app.command()
-def adaptive_loop(memory, question, initial_k=5, max_k=50, step_k=5):
-    """Increase search range until an intrinsic reward is triggered."""
-    import torch
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    try:
-        g_old = torch.load("data/graph_loop.pt", map_location=device)
-    except (FileNotFoundError, RuntimeError):
-        g_old = None
-
-    current_k = initial_k
-    max_iterations = (max_k - initial_k) // step_k + 1
-
-    iteration_count = 0
-    for i in range(max_iterations):
-        print(f"試行 {i+1}/{max_iterations}: k={current_k}")
-        g_new, reward, eureka = cycle_with_status(memory, question, g_old, current_k, device=device)
-
-        iteration_count += 1
-
-        if eureka:
-            print("⚡ EurekaSpike検出! 探索終了")
-            break
-
-        current_k += step_k
-        if current_k > max_k:
-            print("最大検索範囲に到達")
-            break
-
-    torch.save(g_new, "data/graph_loop.pt")
-    return g_new, iteration_count
+# Export for backward compatibility
+__all__ = ["cycle", "adaptive_loop"]

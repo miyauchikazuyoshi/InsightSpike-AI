@@ -1,0 +1,43 @@
+{
+  "demo_type": "true_insight_showcase",
+  "results": [
+    {
+      "question": "In the Monty Hall problem, why should you switch doors?",
+      "insight_potential": 1.0,
+      "synthesis_attempted": true,
+      "insight_detected": true,
+      "quality": 1.0,
+      "response": "By connecting conditional probability with game show dynamics and information theory, we can analyze this systematically. The initial choice has 1/3 probability. When the host opens an empty door, they provide information that concentrates the remaining 2/3 probability on the other door. This insight emerges from recognizing that the host's action is not random but constrained by rules, creating an asymmetric information situation where switching becomes the optimal strategy."
+    },
+    {
+      "question": "How can Zeno's paradox be resolved?",
+      "insight_potential": 1.0,
+      "synthesis_attempted": true,
+      "insight_detected": true,
+      "quality": 0.9500000000000001,
+      "response": "By synthesizing convergence mathematics with motion analysis, we resolve this ancient puzzle. While the runner covers infinite discrete steps, these form a geometric series that converges to a finite time. Modern calculus shows that infinite processes can produce finite results - the key insight is that each step takes proportionally less time, allowing the infinite sum to converge and the runner to finish the race."
+    },
+    {
+      "question": "Is the Ship of Theseus the same ship after all parts are replaced?",
+      "insight_potential": 0.6,
+      "synthesis_attempted": true,
+      "insight_detected": true,
+      "quality": 1.0,
+      "response": "By integrating identity philosophy with practical considerations, we can analyze different criteria. Physical continuity suggests gradual replacement maintains identity, while functional persistence emphasizes operational equivalence. The insight emerges from recognizing that identity depends on which properties we consider essential - spatial, temporal, or functional continuity each provide different frameworks for determining identity persistence."
+    },
+    {
+      "question": "What is the weather like today?",
+      "insight_potential": 0.0,
+      "synthesis_attempted": false,
+      "insight_detected": false,
+      "quality": 0.6,
+      "response": "Based on the available information: Probability is a measure of uncertainty between 0 and 1. Information theory quantifies the amount of information in data. Mathematical series can converge to finite values... However, the specific question requires connecting concepts that may not be directly addressed in the available data."
+    }
+  ],
+  "summary": {
+    "synthesis_rate": 0.75,
+    "average_quality": 0.8875000000000001,
+    "total_questions": 4
+  },
+  "timestamp": "2025-05-31T15:59:03.406120"
+}

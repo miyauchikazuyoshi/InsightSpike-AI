@@ -1,0 +1,20 @@
+# Local development configuration
+models:
+  device: "cpu"
+  batch_size: 16
+  embedding_model: "sentence-transformers/all-MiniLM-L6-v2"
+
+memory:
+  max_episodes: 5000
+  top_k: 3
+
+loop:
+  max_loops: 5
+  timeout_seconds: 120
+
+logging:
+  log_level: "DEBUG"
+  enable_wandb: false
+  save_artifacts: true
+
+debug: true

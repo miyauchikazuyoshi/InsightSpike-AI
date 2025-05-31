@@ -1,0 +1,174 @@
+%% Insight Lifecycle Flow
+%% 洞察の発見から活用までのライフサイクル
+
+flowchart TD
+    %% Input Stage
+    subgraph "📥 Input Stage"
+        Question[❓ ユーザーの質問]
+        Context[📋 既存コンテキスト]
+    end
+    
+    %% Processing Stage
+    subgraph "⚙️ Processing Stage"
+        Agent[🤖 MainAgent処理]
+        Layers[🧠 4層アーキテクチャ]
+        Response[📝 応答生成]
+    end
+    
+    %% Insight Discovery
+    subgraph "💡 Insight Discovery"
+        direction TB
+        Extract[🔍 洞察抽出]
+        
+        subgraph "抽出パターン"
+            Pattern1[因果関係<br/>A causes B]
+            Pattern2[類推関係<br/>A is like B]
+            Pattern3[統合関係<br/>A + B = C]
+            Pattern4[構造関係<br/>A contains B]
+        end
+        
+        Extract --> Pattern1
+        Extract --> Pattern2
+        Extract --> Pattern3
+        Extract --> Pattern4
+    end
+    
+    %% Quality Assessment
+    subgraph "📊 Quality Assessment"
+        direction TB
+        Evaluate[品質評価エンジン]
+        
+        subgraph "評価基準"
+            Conf[信頼度<br/>0.0-1.0]
+            Novel[新規性<br/>0.0-1.0]
+            Coher[一貫性<br/>0.0-1.0]
+            Spec[具体性<br/>0.0-1.0]
+        end
+        
+        Evaluate --> Conf
+        Evaluate --> Novel
+        Evaluate --> Coher
+        Evaluate --> Spec
+        
+        Score[総合スコア計算]
+        Conf --> Score
+        Novel --> Score
+        Coher --> Score
+        Spec --> Score
+    end
+    
+    %% Registration Decision
+    subgraph "✅ Registration Decision"
+        Filter{品質フィルタ<br/>スコア >= 0.6}
+        Accept[✅ 登録承認]
+        Reject[❌ 登録拒否]
+    end
+    
+    %% Storage & Indexing
+    subgraph "💾 Storage & Indexing"
+        direction TB
+        Store[データベース保存]
+        Index[インデックス作成]
+        
+        subgraph "保存項目"
+            ID[Insight ID]
+            Text[洞察テキスト]
+            Concepts[関連概念]
+            Meta[メタデータ]
+            Timestamp[タイムスタンプ]
+        end
+        
+        Store --> ID
+        Store --> Text
+        Store --> Concepts
+        Store --> Meta
+        Store --> Timestamp
+    end
+    
+    %% Insight Utilization
+    subgraph "🔄 Insight Utilization"
+        direction TB
+        
+        subgraph "検索・活用"
+            Search[概念検索]
+            Context_Build[コンテキスト構築]
+            Reasoning[推論支援]
+        end
+        
+        subgraph "管理・最適化"
+            Validate[手動検証]
+            Update[品質更新]
+            Cleanup[低品質除去]
+        end
+    end
+    
+    %% Feedback Loop
+    subgraph "🔄 Feedback Loop"
+        Learn[継続学習]
+        Improve[品質向上]
+        Adapt[適応的調整]
+    end
+    
+    %% Flow Connections
+    Question --> Agent
+    Context --> Agent
+    Agent --> Layers
+    Layers --> Response
+    Response --> Extract
+    
+    Pattern1 --> Evaluate
+    Pattern2 --> Evaluate
+    Pattern3 --> Evaluate
+    Pattern4 --> Evaluate
+    
+    Score --> Filter
+    Filter -->|スコア >= 0.6| Accept
+    Filter -->|スコア < 0.6| Reject
+    
+    Accept --> Store
+    Store --> Index
+    Index --> Search
+    
+    Search --> Context_Build
+    Context_Build --> Reasoning
+    Reasoning --> Learn
+    
+    Validate --> Update
+    Update --> Improve
+    Cleanup --> Adapt
+    
+    Learn -.-> Context
+    Improve -.-> Evaluate
+    Adapt -.-> Filter
+    
+    %% CLI Commands Integration
+    subgraph "🖥️ CLI Commands"
+        CMD1[insights<br/>統計表示]
+        CMD2[insights-search<br/>概念検索]
+        CMD3[insights-validate<br/>手動検証]
+        CMD4[insights-cleanup<br/>品質管理]
+    end
+    
+    Index --> CMD1
+    Search --> CMD2
+    Validate --> CMD3
+    Cleanup --> CMD4
+    
+    %% Styling
+    classDef input fill:#e3f2fd
+    classDef process fill:#e8f5e8
+    classDef discovery fill:#fff3e0
+    classDef quality fill:#f3e5f5
+    classDef storage fill:#fafafa
+    classDef utilization fill:#e0f2f1
+    classDef feedback fill:#fce4ec
+    classDef cli fill:#f1f8e9
+    
+    class Question,Context input
+    class Agent,Layers,Response process
+    class Extract,Pattern1,Pattern2,Pattern3,Pattern4 discovery
+    class Evaluate,Conf,Novel,Coher,Spec,Score,Filter quality
+    class Store,Index,ID,Text,Concepts,Meta,Timestamp storage
+    class Search,Context_Build,Reasoning,Validate,Update,Cleanup utilization
+    class Learn,Improve,Adapt feedback
+    class CMD1,CMD2,CMD3,CMD4 cli

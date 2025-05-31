@@ -1,6 +1,20 @@
 """TinyLlama wrapper"""
 from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
-from .config import LLM_NAME
+
+# Import from the legacy config.py file using the same pattern as __init__.py
+import os
+import importlib.util
+
+try:
+    # Import from the legacy config.py file explicitly 
+    _config_file = os.path.join(os.path.dirname(__file__), 'config.py')
+    _spec = importlib.util.spec_from_file_location("legacy_config", _config_file)
+    _config = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(_config)
+    LLM_NAME = _config.LLM_NAME
+except (ImportError, AttributeError):
+    # Fallback for testing or if config is not available
+    LLM_NAME = "TinyLlama/TinyLlama-1.1B-intermediate-step-1431k-3T"
 
 __all__ = ["generate"]
 

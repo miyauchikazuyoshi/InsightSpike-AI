@@ -1,0 +1,64 @@
+[
+  {
+    "id": "monty_hall_test",
+    "question": "In the Monty Hall problem, what is the optimal strategy and why?",
+    "expected_insights": [
+      "conditional probability",
+      "information gain",
+      "counter-intuitive result"
+    ],
+    "category": "probability_paradox",
+    "difficulty": "medium"
+  },
+  {
+    "id": "zeno_resolution",
+    "question": "How does modern mathematics resolve Zeno's paradox of Achilles and the tortoise?",
+    "expected_insights": [
+      "infinite series convergence",
+      "limit theory",
+      "continuous vs discrete"
+    ],
+    "category": "mathematical_paradox",
+    "difficulty": "medium"
+  },
+  {
+    "id": "identity_philosophy",
+    "question": "What does the Ship of Theseus paradox reveal about the nature of identity?",
+    "expected_insights": [
+      "relational identity",
+      "context dependence",
+      "essentialism critique"
+    ],
+    "category": "philosophical_paradox",
+    "difficulty": "hard"
+  },
+  {
+    "id": "math_abstraction",
+    "question": "Describe the progression from arithmetic to abstract algebra.",
+    "expected_insights": [
+      "abstraction levels",
+      "symbolic thinking",
+      "structural mathematics"
+    ],
+    "category": "concept_hierarchy",
+    "difficulty": "medium"
+  },
+  {
+    "id": "physics_paradigms",
+    "question": "How did quantum mechanics change our understanding of reality?",
+    "expected_insights": [
+      "paradigm shift",
+      "measurement problem",
+      "probabilistic nature"
+    ],
+    "category": "conceptual_revolution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "control_weather",
+    "question": "What factors influence daily weather patterns?",
+    "expected_insights": [],
+    "category": "control",
+    "difficulty": "easy"
+  }
+]

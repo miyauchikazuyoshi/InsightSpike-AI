@@ -4,12 +4,34 @@ from __future__ import annotations
 from pathlib import Path
 from typing import List
 import json
+import warnings
+import os
 
-import faiss
+try:
+    import faiss
+except ImportError:
+    warnings.warn("FAISS not available, using fallback memory")
+    faiss = None
+
 import numpy as np
 
 from .embedder import get_model
-from .config import INDEX_FILE
+
+# Import from the legacy config.py file using the same pattern as other modules
+import importlib.util
+try:
+    # Import from the legacy config.py file explicitly 
+    _config_file = os.path.join(os.path.dirname(__file__), 'config.py')
+    _spec = importlib.util.spec_from_file_location("legacy_config", _config_file)
+    _config = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(_config)
+    INDEX_FILE = _config.INDEX_FILE
+    LAYER2_TOP_K = getattr(_config, 'LAYER2_TOP_K', 15)  # Import new Layer2 topK setting
+except (ImportError, AttributeError):
+    # Fallback for testing or if config is not available
+    from pathlib import Path
+    INDEX_FILE = Path("data/index.faiss")
+    LAYER2_TOP_K = 15  # Fallback to optimized value
 
 __all__ = ["Episode", "Memory"]
 
@@ -85,8 +107,8 @@ class Memory:
         return mem
 
     # ── retrieval ──────────────────────────────────
-    def search(self, query_vector, k=5):
-        """検索機能の強化版"""
+    def search(self, query_vector, k=LAYER2_TOP_K):
+        """検索機能の強化版 - Layer2用に最適化されたtopK値を使用"""
         if hasattr(self, 'index') and self.index is not None:
             # FAISSインデックスの有効性チェック
             if self.index.ntotal == 0:

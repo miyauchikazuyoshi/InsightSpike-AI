@@ -2,8 +2,8 @@
 from pathlib import Path
 from typing import List
 
-from .config import DATA_DIR
-from .utils import iter_text, clean_text
+from .config import get_config
+from .utils.text_utils import iter_text, clean_text
 
 __all__ = ["load_corpus"]
 
@@ -18,7 +18,8 @@ def load_corpus(path: Path | None = None) -> List[str]:
         except UnicodeDecodeError:
             print(f"文字コードエラー: {path} はUTF-8で保存してください")
             return []
-    root = path or DATA_DIR
+    config = get_config()
+    root = path or config.paths.data_dir
     docs = []
     for file in iter_text(root):
         try:

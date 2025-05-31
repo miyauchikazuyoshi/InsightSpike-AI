@@ -1,0 +1,94 @@
+%% InsightSpike-AI Workflow Tree
+%% 洞察発見・登録・活用の完全ワークフロー
+
+flowchart TD
+    %% Entry Points
+    User[👤 ユーザー] --> CLI{🖥️ CLI Interface}
+    User --> API{🔌 API Interface}
+    
+    %% CLI Commands
+    CLI --> Ask[❓ ask "質問"]
+    CLI --> Insights[🧠 insights]
+    CLI --> Search[🔍 insights-search]
+    CLI --> Validate[✅ insights-validate]
+    CLI --> Cleanup[🧹 insights-cleanup]
+    CLI --> Stats[📊 stats]
+    
+    %% Main Processing Flow
+    Ask --> MainAgent[🤖 MainAgent]
+    API --> MainAgent
+    
+    %% 4-Layer Architecture
+    MainAgent --> Layer1[📥 Layer 1: Input Processing]
+    Layer1 --> Layer2[🔍 Layer 2: Memory Retrieval]
+    Layer2 --> Layer3[🧮 Layer 3: Graph Reasoning]
+    Layer3 --> Layer4[🤖 Layer 4: LLM Provider]
+    
+    %% Layer Details
+    Layer1 --> InputValidation[入力検証]
+    Layer1 --> ContextFormatting[コンテキスト整形]
+    
+    Layer2 --> EpisodeSearch[エピソード検索]
+    Layer2 --> VectorRetrieval[ベクトル検索]
+    Layer2 --> MemoryDB[(🗃️ Memory Database)]
+    
+    Layer3 --> GraphAnalysis[グラフ解析]
+    Layer3 --> ConceptMapping[概念マッピング]
+    Layer3 --> GraphDB[(🕸️ Graph Database)]
+    
+    Layer4 --> LocalLLM[🏠 Local LLM]
+    Layer4 --> ModelProcessing[モデル処理]
+    
+    %% Response Processing
+    Layer4 --> ResponseGeneration[📝 応答生成]
+    ResponseGeneration --> InsightExtraction[💡 洞察抽出]
+    
+    %% Insight Registration System
+    InsightExtraction --> QualityAssessment[📋 品質評価]
+    QualityAssessment --> InsightRegistry[🧠 InsightFactRegistry]
+    
+    %% Quality Criteria
+    QualityAssessment --> Confidence[信頼度]
+    QualityAssessment --> Novelty[新規性]
+    QualityAssessment --> Coherence[一貫性]
+    QualityAssessment --> Specificity[具体性]
+    
+    %% Insight Storage
+    InsightRegistry --> InsightDB[(💾 Insight Database)]
+    InsightDB --> SQLiteStorage[SQLite ストレージ]
+    
+    %% Insight Management
+    Insights --> ShowStats[統計表示]
+    Search --> ConceptSearch[概念検索]
+    Validate --> ManualValidation[手動検証]
+    Cleanup --> QualityFiltering[品質フィルタリング]
+    
+    %% Feedback Loop
+    InsightRegistry --> FeedbackLoop[🔄 フィードバックループ]
+    FeedbackLoop --> Layer2
+    FeedbackLoop --> Layer3
+    
+    %% Output to User
+    ResponseGeneration --> UserResponse[📤 ユーザーへの応答]
+    ShowStats --> UserResponse
+    ConceptSearch --> UserResponse
+    ManualValidation --> UserResponse
+    
+    %% Configuration System
+    Config[⚙️ Configuration] --> MainAgent
+    Config --> LLMConfig[🤖 LLM設定]
+    Config --> MemoryConfig[🧠 メモリ設定]
+    Config --> GraphConfig[🕸️ グラフ設定]
+    
+    %% Data Flow Styling
+    classDef userInterface fill:#e1f5fe
+    classDef processing fill:#f3e5f5
+    classDef storage fill:#e8f5e8
+    classDef insight fill:#fff3e0
+    classDef feedback fill:#fce4ec
+    
+    class User,CLI,API userInterface
+    class MainAgent,Layer1,Layer2,Layer3,Layer4 processing
+    class MemoryDB,GraphDB,InsightDB,SQLiteStorage storage
+    class InsightExtraction,QualityAssessment,InsightRegistry insight
+    class FeedbackLoop feedback

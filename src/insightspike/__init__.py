@@ -1,68 +1,41 @@
 """InsightSpike package metadata"""
+import importlib.util
+import os
+
 class About:
     NAME = "InsightSpike-AI"
     VERSION = "0.7-Eureka"
 
-# 実装をモジュールから分離し、直接定義
-def build_base_graph(vectors, sim_threshold):
-    # 全組み合わせでcosine_similarity
-    from sklearn.metrics.pairwise import cosine_similarity
-    import torch
-    from torch_geometric.data import Data
+# Export new main agent for easy access
+try:
+    from .core.agents.main_agent import MainAgent
+except ImportError:
+    # Define a placeholder if main_agent is not available
+    class MainAgent:
+        def __init__(self):
+            pass
+        def initialize(self):
+            return False
+        def process_question(self, question, **kwargs):
+            return {"response": "MainAgent not available", "success": False}
 
-    sims = cosine_similarity(vectors)
-    src, dst = [], []
-    n = len(vectors)
-    for i in range(n):
-        for j in range(i + 1, n):
-            if sims[i, j] >= sim_threshold:
-                src += [i, j]; dst += [j, i]
-    edge_index = torch.tensor([src, dst])
-    data = Data(x=torch.tensor(vectors, dtype=torch.float32), edge_index=edge_index)
-    return data, edge_index
+# Legacy compatibility exports - import the config.py file specifically
+from .config import get_config
 
-def build_graph(vectors, top_k=10):
-    # faiss等で近傍探索し、近傍のみでグラフ再編集
-    import faiss
-    import numpy as np
-    import torch
-    from torch_geometric.data import Data
+# Import the legacy config.py module explicitly to avoid conflict with config/ directory
+_config_file = os.path.join(os.path.dirname(__file__), 'config.py')
+_spec = importlib.util.spec_from_file_location("legacy_config", _config_file)
+config = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(config)
 
-    index = faiss.IndexFlatL2(vectors.shape[1])
-    index.add(np.array(vectors, dtype=np.float32))
-    D, I = index.search(np.array(vectors, dtype=np.float32), top_k+1)
-    src, dst = [], []
-    n = len(vectors)
-    for i in range(n):
-        for j in I[i][1:]:  # 0番目は自分自身
-            src.append(i)
-            dst.append(j)
-    edge_index = torch.tensor([src, dst])
-    data = Data(x=torch.tensor(vectors, dtype=torch.float32), edge_index=edge_index)
-    return data, edge_index
+# Legacy module exports for compatibility
+from . import embedder
+from . import graph_metrics
+from . import eureka_spike
+from . import utils
 
-def load_graph(path=None):
-    """グラフ読み込みのスタブ関数"""
-    import torch
-    from torch_geometric.data import Data
-    from pathlib import Path
-    from .config import GRAPH_FILE
-    
-    src = path or GRAPH_FILE
-    if not Path(src).exists():
-        raise FileNotFoundError(f"Graph file not found at {src}")
-    return torch.load(src)
+# Version info
+__version__ = About.VERSION
 
-def save_graph(data, path=None):
-    """グラフ保存のスタブ関数"""
-    import torch
-    from pathlib import Path
-    from .config import GRAPH_FILE
-    
-    dest = path or GRAPH_FILE
-    Path(dest).parent.mkdir(parents=True, exist_ok=True)
-    torch.save(data, dest)
-    return dest
-
-# エクスポートする名前を明示
-__all__ = ["About", "build_base_graph", "build_graph", "load_graph", "save_graph"]
+# Main exports
+__all__ = ["MainAgent", "CycleResult", "get_config", "About", "embedder", "graph_metrics", "eureka_spike", "config", "utils"]

@@ -1,22 +1,42 @@
-# virtual env / editor junk
+# 仮想環境・キャッシュ・エディタ
 .venv/
 __pycache__/
 *.pyc
 .DS_Store
 
-
+# データ生成物（除外）
 /data/index.faiss*
 /data/graph_*.pt
 /data/logs/*
 !/data/logs/.gitkeep
+/data/embedding/*
+!/data/embedding/.gitkeep
+/data/models/*
+!/data/models/.gitkeep
+/data/processed/*
+!/data/processed/.gitkeep
+/data/cache/*
+!/data/cache/.gitkeep
+
+# 生データ（全除外、ただしサンプルは含める）
 /data/raw/*
 !/data/raw/.gitkeep
+!data/raw/test_sentences.txt
+!data/raw/indirect_knowledge.txt
+!data/raw/simple_dataset.txt
+!data/raw/insight_dataset.txt
 
-data/*.pt
+# processed配下のサンプルやテンプレートを含めたい場合
+!data/processed/test_questions.json
+!data/processed/simple_metadata.json
+
+# グラフファイル（必要なものだけ含める）
+!data/graph_pyg.pt
 !data/graph_loop.pt
 
-# Test sample
-!data/raw/test_sentences.txt
+# DBファイル（必要なら解除）
+/data/insight_facts.db
+/data/unknown_learning.db
 
-
-!data/graph_pyg.pt
+# その他
+*.swp

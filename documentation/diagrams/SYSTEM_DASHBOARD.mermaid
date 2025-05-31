@@ -1,0 +1,143 @@
+%% InsightSpike-AI System Status Dashboard
+%% 現在のシステム状態ダッシュボード
+
+graph TD
+    %% System Status
+    subgraph "🎛️ System Status Dashboard"
+        direction TB
+        
+        subgraph "✅ Operational Components"
+            C1[🤖 MainAgent: ONLINE]
+            C2[🧠 InsightRegistry: ACTIVE]
+            C3[💾 SQLite DB: CONNECTED]
+            C4[🖥️ CLI Interface: READY]
+            C5[⚙️ Configuration: LOADED]
+        end
+        
+        subgraph "📊 Current Metrics"
+            M1[📈 Total Insights: 6]
+            M2[⭐ Avg Quality: 0.67]
+            M3[🔍 Search Index: BUILT]
+            M4[🔄 Feedback Loop: ACTIVE]
+            M5[🧹 Auto Cleanup: ENABLED]
+        end
+        
+        subgraph "🧠 Insight Types Distribution"
+            T1[🔗 Analogical: 2 insights]
+            T2[🧩 Synthetic: 3 insights]
+            T3[➡️ Causal: 1 insight]
+            T4[🏗️ Structural: 0 insights]
+        end
+        
+        subgraph "📈 Quality Distribution"
+            Q1[🌟 High Quality ≥0.8: 1]
+            Q2[⚡ Good Quality ≥0.7: 2]
+            Q3[✅ Acceptable ≥0.6: 3]
+            Q4[⚠️ Low Quality <0.6: 0]
+        end
+    end
+    
+    %% Available Operations
+    subgraph "🛠️ Available Operations"
+        direction LR
+        
+        subgraph "👤 User Commands"
+            U1[💬 ask "question"]
+            U2[🧠 insights]
+            U3[🔍 insights-search]
+            U4[✅ insights-validate]
+            U5[🧹 insights-cleanup]
+        end
+        
+        subgraph "🔧 System Operations"
+            S1[📊 stats]
+            S2[⚙️ config-info]
+            S3[🗂️ load-docs]
+            S4[🧪 test workflows]
+        end
+    end
+    
+    %% Data Flow Status
+    subgraph "🌊 Data Flow Status"
+        direction TD
+        
+        F1[📥 Input Processing: ✅]
+        F2[🔍 Memory Retrieval: ✅]
+        F3[🧮 Graph Reasoning: ⚠️ PyTorch N/A]
+        F4[🤖 LLM Processing: ✅]
+        F5[💡 Insight Extraction: ✅]
+        F6[📋 Quality Assessment: ✅]
+        F7[💾 Database Storage: ✅]
+        
+        F1 --> F2 --> F3 --> F4 --> F5 --> F6 --> F7
+    end
+    
+    %% Recent Activity
+    subgraph "📝 Recent Activity Log"
+        direction TB
+        
+        A1[🕐 Last Question: Test workflows]
+        A2[💡 Last Insight: Synthesis concepts]
+        A3[🔍 Last Search: 'entanglement']
+        A4[✅ Last Validation: None]
+        A5[🧹 Last Cleanup: Auto cleanup]
+    end
+    
+    %% Configuration Status
+    subgraph "⚙️ Configuration Status"
+        direction TB
+        
+        subgraph "🤖 LLM Config"
+            L1[Provider: local ✅]
+            L2[Model: TinyLlama ✅]
+            L3[GPU Usage: false ✅]
+        end
+        
+        subgraph "🧠 Memory Config"
+            Mem1[Max Docs: 15 ✅]
+            Mem2[Cache: Active ✅]
+            Mem3[Episodes: Stored ✅]
+        end
+        
+        subgraph "🕸️ Graph Config"
+            G1[NetworkX: Available ✅]
+            G2[PyTorch: Not Available ⚠️]
+            G3[Fallback: Active ✅]
+        end
+    end
+    
+    %% Health Indicators
+    subgraph "💚 Health Indicators"
+        direction LR
+        
+        H1[🟢 Core System: HEALTHY]
+        H2[🟢 Database: HEALTHY]
+        H3[🟡 Graph Layer: DEGRADED]
+        H4[🟢 Insights: HEALTHY]
+        H5[🟢 CLI: HEALTHY]
+    end
+    
+    %% Next Actions
+    subgraph "🎯 Recommended Next Actions"
+        direction TB
+        
+        N1[🔥 Install PyTorch for full graph reasoning]
+        N2[📚 Add more training questions]
+        N3[🧪 Test with complex scenarios]
+        N4[📊 Monitor insight quality trends]
+        N5[🚀 Deploy to production environment]
+    end
+    
+    %% Styling
+    classDef operational fill:#c8e6c9
+    classDef metrics fill:#e1f5fe
+    classDef warning fill:#fff3e0
+    classDef healthy fill:#e8f5e8
+    classDef degraded fill:#fff8e1
+    classDef action fill:#f3e5f5
+    
+    class C1,C2,C3,C4,C5,F1,F2,F4,F5,F6,F7,H1,H2,H4,H5 operational
+    class M1,M2,M3,M4,M5,T1,T2,T3,T4,Q1,Q2,Q3,Q4 metrics
+    class F3,G2,H3 warning
+    class L1,L2,L3,Mem1,Mem2,Mem3,G1,G3 healthy
+    class N1,N2,N3,N4,N5 action
