@@ -98,11 +98,49 @@ chmod +x scripts/setup.sh
 
 ### Development & PoC/Experiment Environment Setup
 ---
-For development, PoC, or experiments, please make sure to install all dependencies including dev packages:
-```poetry install```<br>
-Or, if you want to explicitly include only dev dependencies:```poetry install --with dev```
+## 🚀 Quick Start
 
-This will ensure that packages like matplotlib (for visualization) and pytest (for testing) are available in your environment.
+### Environment-Specific Installation
+
+#### 🏠 Local Development Environment (faiss-cpu)
+```bash
+# Clone repository
+git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
+cd InsightSpike-AI
+
+# Install dependencies for local development
+poetry install --with dev
+```
+
+#### ☁️ Google Colab Environment (faiss-gpu)
+```bash
+# Run the enhanced Colab setup script
+!git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
+%cd InsightSpike-AI
+!chmod +x scripts/colab/setup_colab.sh
+!bash scripts/colab/setup_colab.sh
+
+# Or use our pre-configured notebook
+# Open: InsightSpike_Colab_Demo.ipynb
+```
+
+#### 🔧 CI/Testing Environment (minimal dependencies)
+```bash
+# Minimal installation for CI
+pip install pytest numpy pyyaml networkx scikit-learn psutil faiss-cpu typer rich click
+pip install -e .
+export INSIGHTSPIKE_LITE_MODE=1
+```
+
+### Dependency Groups
+- **`dev`**: Local development with faiss-cpu, testing tools
+- **`colab`**: Google Colab with faiss-gpu for GPU acceleration
+- **`ci`**: Minimal dependencies for continuous integration
+
+For development, PoC, or experiments, please make sure to install all dependencies including dev packages:
+```poetry install --with dev```
+
+This ensures packages like matplotlib (for visualization) and pytest (for testing) are available.
 When running `run_poc.py` offline, set the environment variable `EMBED_MODEL_PATH` to a locally downloaded SentenceTransformer model directory.
 
 ### Docker

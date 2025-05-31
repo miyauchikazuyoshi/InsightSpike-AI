@@ -3,20 +3,27 @@
 __pycache__/
 *.pyc
 .DS_Store
+.vscode/
 
-# データ生成物（除外）
+# データ生成物（実験結果・モデル・インデックス - 全除外）
 /data/index.faiss*
 /data/graph_*.pt
+/data/*.db
 /data/logs/*
 !/data/logs/.gitkeep
 /data/embedding/*
 !/data/embedding/.gitkeep
 /data/models/*
 !/data/models/.gitkeep
-/data/processed/*
-!/data/processed/.gitkeep
 /data/cache/*
 !/data/cache/.gitkeep
+
+# 実験結果ファイル（重要でない生成物）
+/data/processed/*.json
+!/data/processed/.gitkeep
+# 必要最小限のサンプルファイルのみ保持
+!data/processed/test_questions.json
+!data/processed/simple_metadata.json
 
 # 生データ（全除外、ただしサンプルは含める）
 /data/raw/*
@@ -26,17 +33,34 @@ __pycache__/
 !data/raw/simple_dataset.txt
 !data/raw/insight_dataset.txt
 
-# processed配下のサンプルやテンプレートを含めたい場合
-!data/processed/test_questions.json
-!data/processed/simple_metadata.json
+# アーカイブ実験結果（生成物なので除外）
+/archive_old_experiments/*.json
+/archive_old_experiments/*.png
 
-# グラフファイル（必要なものだけ含める）
-!data/graph_pyg.pt
-!data/graph_loop.pt
+# スクリプト内生成ファイル
+/scripts/data/
 
-# DBファイル（必要なら解除）
-/data/insight_facts.db
-/data/unknown_learning.db
+# 実行結果・レポート（一時的な生成物）
+/validation_results/
+/hf_dataset_integration_report.json
+/VISUAL_SUMMARY.txt
+/documentation/reports/VISUAL_SUMMARY.txt
+
+# バックアップファイル
+*.backup
+*.bak
+
+# 作業ログ・レポート（AI作業記録は除外）
+/documentation/reports/*_SUMMARY.md
+/documentation/reports/*_VALIDATION_SUMMARY.md
+/documentation/reports/*_REORGANIZATION.md
+/documentation/reports/PROJECT_STRUCTURE_REORGANIZATION.md
+/documentation/reports/COLAB_FAISS_VALIDATION_SUMMARY.md
+
+# AI作業ログの一般的なパターン（今後追加される可能性）
+/documentation/reports/*_WORK_LOG.md
+/documentation/reports/*_SESSION_LOG.md
+/documentation/reports/AI_WORK_*.md
 
 # その他
 *.swp

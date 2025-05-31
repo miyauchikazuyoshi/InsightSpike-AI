@@ -55,6 +55,7 @@ python -c "import transformers; print(f'✅ Transformers {transformers.__version
 # 7. Vector Database and Search (GPU optimized)
 echo ""
 echo "🔍 Installing vector search libraries..."
+# Colabでfaiss-gpuとsentence-transformersを先にインストール
 pip install -q faiss-gpu sentence-transformers
 python -c "import faiss; print(f'✅ Faiss-GPU {faiss.__version__} installed')"
 
@@ -64,11 +65,19 @@ echo "📊 Installing scientific libraries..."
 pip install -q pandas matplotlib seaborn plotly scikit-learn networkx
 pip install -q jupyter ipywidgets tqdm
 
-# 9. InsightSpike-AI Core Dependencies via Poetry
+# 9. InsightSpike-AI Core Dependencies (Poetry環境設定も含む)
 echo ""
-echo "🎯 Installing InsightSpike-AI via Poetry..."
-poetry config virtualenvs.create false  # Colabの既存環境を使用
-poetry install --with colab  # Colab専用依存関係をインストール
+echo "🎯 Installing InsightSpike-AI dependencies..."
+# Poetry設定: Colabの既存環境を使用
+poetry config virtualenvs.create false
+# 直接必要なパッケージをpipでインストール
+pip install -q typer rich click pyyaml psutil
+
+# プロジェクトを開発モードでインストール
+pip install -q -e .
+
+# Poetry環境でも同様に利用可能になるよう、poetry installを実行（依存関係競合を避けるため--no-deps）
+poetry install --no-deps
 
 # 10. Environment Validation
 echo ""
@@ -94,7 +103,19 @@ try:
     import torch_geometric; print(f'✅ PyTorch Geometric: {torch_geometric.__version__}')
     import transformers; print(f'✅ Transformers: {transformers.__version__}')
     import datasets; print(f'✅ Datasets: {datasets.__version__}')
-    import faiss; print(f'✅ Faiss: {faiss.__version__}')
+    import faiss
+    print(f'✅ Faiss: {faiss.__version__}')
+    # GPU対応テスト
+    try:
+        index = faiss.IndexFlatL2(128)
+        if hasattr(faiss, 'StandardGpuResources'):
+            gpu_res = faiss.StandardGpuResources()
+            gpu_index = faiss.index_cpu_to_gpu(gpu_res, 0, index)
+            print('✅ Faiss-GPU: GPU acceleration available')
+        else:
+            print('⚠️ Faiss-GPU: GPU functions not available')
+    except Exception as e:
+        print(f'⚠️ Faiss GPU test failed: {e}')
     import networkx; print(f'✅ NetworkX: {networkx.__version__}')
     import numpy; print(f'✅ NumPy: {numpy.__version__}')
     print('✅ All core libraries validated')
@@ -120,13 +141,16 @@ print('✅ NLTK data downloaded')
 echo ""
 echo "🎉 Enhanced Colab setup complete!"
 echo "🚀 Ready for large-scale experiments with CLI support!"
+
+# 環境テスト実行
+echo ""
+echo "🔬 Running comprehensive environment validation..."
+python scripts/colab/test_colab_env.py
+
 echo ""
 echo "📝 Next steps:"
 echo "   🔬 Run system validation:"
-echo "     PYTHONPATH=src poetry run python scripts/production/system_validation.py"
+echo "     PYTHONPATH=src python scripts/production/system_validation.py"
 echo ""
 echo "   🧪 Use CLI commands:"
-echo "     PYTHONPATH=src poetry run python -m insightspike.cli loop 'What is quantum entanglement?'"
-echo ""
-echo "   📊 Environment diagnostics:"
-echo "     PYTHONPATH=src poetry run python scripts/colab_diagnostic.py"
+echo "     PYTHONPATH=src python -m insightspike.cli loop 'What is quantum entanglement?'"
