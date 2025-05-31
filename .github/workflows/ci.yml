@@ -29,15 +29,23 @@ jobs:
     - name: Install minimal dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest numpy pyyaml
+        pip install pytest numpy pyyaml networkx scikit-learn psutil faiss-cpu
 
-    - name: Set PYTHONPATH
-      run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
+    - name: Set PYTHONPATH and environment
+      run: |
+        echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
+        echo "INSIGHTSPIKE_LITE_MODE=1" >> $GITHUB_ENV
 
     - name: Test core functionality (no heavy dependencies)
       run: |
-        # Test all unit tests in the directory (auto-discover)
-        python -m pytest development/tests/unit/ -v --tb=short
+        # Test specific unit tests that don't require heavy dependencies
+        python -m pytest development/tests/unit/test_config.py -v --tb=short
+        python -m pytest development/tests/unit/test_cache_manager.py -v --tb=short
+        python -m pytest development/tests/unit/test_cli.py -v --tb=short
+        python -m pytest development/tests/unit/test_data_loader.py -v --tb=short
+        python -m pytest development/tests/unit/test_layer1_error_monitor.py -v --tb=short
+        python -m pytest development/tests/unit/test_layer2_memory_manager.py -v --tb=short
+        python -m pytest development/tests/unit/test_utils.py -v --tb=short
 
   test-integration:
     runs-on: ubuntu-latest

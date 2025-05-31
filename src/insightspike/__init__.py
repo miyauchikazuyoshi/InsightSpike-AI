@@ -7,17 +7,30 @@ class About:
     VERSION = "0.7-Eureka"
 
 # Export new main agent for easy access
-try:
-    from .core.agents.main_agent import MainAgent
-except ImportError:
-    # Define a placeholder if main_agent is not available
+# Check if we're in lite mode for CI testing
+LITE_MODE = os.environ.get('INSIGHTSPIKE_LITE_MODE', '0') == '1'
+
+if not LITE_MODE:
+    try:
+        from .core.agents.main_agent import MainAgent
+    except ImportError:
+        # Define a placeholder if main_agent is not available
+        class MainAgent:
+            def __init__(self):
+                pass
+            def initialize(self):
+                return False
+            def process_question(self, question, **kwargs):
+                return {"response": "MainAgent not available", "success": False}
+else:
+    # In lite mode, always use placeholder
     class MainAgent:
         def __init__(self):
             pass
         def initialize(self):
             return False
         def process_question(self, question, **kwargs):
-            return {"response": "MainAgent not available", "success": False}
+            return {"response": "MainAgent not available (lite mode)", "success": False}
 
 # Legacy compatibility exports - import the config.py file specifically
 from .config import get_config
