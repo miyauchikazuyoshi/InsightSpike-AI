@@ -88,13 +88,44 @@ poetry run insightspike demo
 
 This demo showcases InsightSpike's ability to synthesize insights across domains like probability theory, mathematics, and philosophy - even when the knowledge base contains no direct answers to the questions!
 
-## Quick‑start on GoogleColab(GPU)
+## ⚡ Quick Start on Google Colab (GPU)
+
+### 🎯 Fast Setup (Recommended - 3-5 minutes)
 ```bash
 git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
 cd InsightSpike-AI
-chmod +x scripts/setup.sh
-./scripts/setup.sh
+chmod +x scripts/colab/setup_colab_fast.sh
+./scripts/colab/setup_colab_fast.sh
 ```
+
+### 🚀 Alternative Setup Options
+
+#### Ultra-Fast Setup (<60 seconds)
+```bash
+# Essential dependencies only, no PyTorch Geometric
+chmod +x scripts/colab/setup_colab_minimal.sh
+./scripts/colab/setup_colab_minimal.sh
+```
+
+#### Debug Setup (15-20 minutes with detailed logs)
+```bash
+# For troubleshooting installation issues
+chmod +x scripts/colab/setup_colab_debug.sh
+./scripts/colab/setup_colab_debug.sh
+```
+
+#### Full Setup (8-15 minutes, may hang)
+```bash
+# Original comprehensive setup
+chmod +x scripts/colab/setup_colab.sh
+./scripts/colab/setup_colab.sh
+```
+
+### 📔 Interactive Notebook
+Open [`InsightSpike_Colab_Demo.ipynb`](InsightSpike_Colab_Demo.ipynb) in Google Colab for guided setup and testing.
+
+### 🔧 Troubleshooting
+If you encounter issues, see our [Colab Troubleshooting Guide](documentation/guides/COLAB_TROUBLESHOOTING_GUIDE.md).
 
 ### Development & PoC/Experiment Environment Setup
 ---
