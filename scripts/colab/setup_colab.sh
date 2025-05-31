@@ -55,9 +55,29 @@ python -c "import transformers; print(f'✅ Transformers {transformers.__version
 # 7. Vector Database and Search (GPU optimized)
 echo ""
 echo "🔍 Installing vector search libraries..."
-# Colabでfaiss-gpuとsentence-transformersを先にインストール
-pip install -q faiss-gpu sentence-transformers
-python -c "import faiss; print(f'✅ Faiss-GPU {faiss.__version__} installed')"
+# Colabでfaiss (GPU機能統合版) とsentence-transformersを先にインストール
+echo "📦 Installing Faiss with GPU support for CUDA 12.x..."
+pip install -q faiss sentence-transformers
+echo "🔍 Verifying Faiss GPU functionality..."
+python -c "
+import faiss
+print(f'✅ Faiss {faiss.__version__} installed')
+try:
+    # GPU機能の確認
+    if hasattr(faiss, 'get_num_gpus'):
+        num_gpus = faiss.get_num_gpus()
+        print(f'✅ Number of GPUs detected by Faiss: {num_gpus}')
+    else:
+        print('⚠️  GPU detection method not available in this Faiss version')
+    
+    # StandardGpuResourcesの確認
+    if hasattr(faiss, 'StandardGpuResources'):
+        print('✅ GPU resources class available')
+    else:
+        print('⚠️  GPU resources not available - CPU-only version')
+except Exception as e:
+    print(f'⚠️  Faiss GPU test error: {e}')
+"
 
 # 8. Scientific Computing and Visualization
 echo ""
