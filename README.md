@@ -90,39 +90,48 @@ This demo showcases InsightSpike's ability to synthesize insights across domains
 
 ## ⚡ Quick Start on Google Colab (GPU)
 
-### 🎯 Fast Setup (Recommended - 3-5 minutes)
+### 🎯 One-Click Setup (Recommended)
+The easiest way to get started is with our simplified Colab notebook:
+
+1. **Open the notebook**: [`InsightSpike_Colab_Demo.ipynb`](InsightSpike_Colab_Demo.ipynb) in Google Colab
+2. **Choose GPU runtime**: Runtime > Change runtime type > GPU  
+3. **Run cells in order**: The notebook guides you through setup and demo
+
+### 🚀 Manual Setup Options
+
+#### ⚡ Fast Setup (3-5 minutes, recommended)
 ```bash
 git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
 cd InsightSpike-AI
-chmod +x scripts/colab/setup_colab_fast.sh
-./scripts/colab/setup_colab_fast.sh
+scripts/colab/setup_colab.sh fast
 ```
 
-### 🚀 Alternative Setup Options
-
-#### Ultra-Fast Setup (<60 seconds)
+#### 🚀 Ultra-Fast Setup (<60 seconds)
 ```bash
-# Essential dependencies only, no PyTorch Geometric
-chmod +x scripts/colab/setup_colab_minimal.sh
-./scripts/colab/setup_colab_minimal.sh
+# Essential dependencies only, good for testing
+scripts/colab/setup_colab.sh minimal
 ```
 
-#### Debug Setup (15-20 minutes with detailed logs)
+#### 📋 Standard Setup (8-12 minutes)
 ```bash
-# For troubleshooting installation issues
-chmod +x scripts/colab/setup_colab_debug.sh
-./scripts/colab/setup_colab_debug.sh
+# Complete installation with all features
+scripts/colab/setup_colab.sh standard
 ```
 
-#### Full Setup (8-15 minutes, may hang)
+#### 🔍 Debug Setup (15-20 minutes)
 ```bash
-# Original comprehensive setup
-chmod +x scripts/colab/setup_colab.sh
-./scripts/colab/setup_colab.sh
+# Detailed logging for troubleshooting
+scripts/colab/setup_colab.sh debug
 ```
 
 ### 📔 Interactive Notebook
-Open [`InsightSpike_Colab_Demo.ipynb`](InsightSpike_Colab_Demo.ipynb) in Google Colab for guided setup and testing.
+Our simplified [`InsightSpike_Colab_Demo.ipynb`](InsightSpike_Colab_Demo.ipynb) provides:
+- **One-click setup** with 4 options (fast/minimal/standard/debug)
+- **Guided demo** with preset questions
+- **Built-in troubleshooting** guide
+- **Clean interface** - no complex menus or redundant options
+
+💡 **Simplified**: We've streamlined the Colab experience! The new notebook uses our comprehensive setup script, eliminating redundant setup options and complex menus for a much cleaner user experience.
 
 ### 🔧 Troubleshooting
 If you encounter issues, see our [Colab Troubleshooting Guide](documentation/guides/COLAB_TROUBLESHOOTING_GUIDE.md).
