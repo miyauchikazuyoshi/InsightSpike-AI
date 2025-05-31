@@ -56,16 +56,16 @@ __pycache__/
 *.bak
 
 # 作業ログ・レポート（AI作業記録は除外）
-/documentation/reports/*_SUMMARY.md
-/documentation/reports/*_VALIDATION_SUMMARY.md
-/documentation/reports/*_REORGANIZATION.md
-/documentation/reports/PROJECT_STRUCTURE_REORGANIZATION.md
-/documentation/reports/COLAB_FAISS_VALIDATION_SUMMARY.md
+documentation/reports/
+documentation/report/
 
 # AI作業ログの一般的なパターン（今後追加される可能性）
-/documentation/reports/*_WORK_LOG.md
-/documentation/reports/*_SESSION_LOG.md
-/documentation/reports/AI_WORK_*.md
+documentation/reports/*_WORK_LOG.md
+documentation/reports/*_SESSION_LOG.md
+documentation/reports/AI_WORK_*.md
+documentation/report/*_WORK_LOG.md
+documentation/report/*_SESSION_LOG.md
+documentation/report/AI_WORK_*.md
 
 # その他
 *.swp
