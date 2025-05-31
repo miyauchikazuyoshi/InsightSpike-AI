@@ -100,9 +100,12 @@ chmod +x scripts/setup.sh
 ---
 ## 🚀 Quick Start
 
-### Environment-Specific Installation
+### 🔧 Three-Environment Installation Strategy
+
+InsightSpike-AI supports three distinct environments, each optimized for specific use cases:
 
 #### 🏠 Local Development Environment (faiss-cpu)
+**Best for**: Development, testing, CPU-only machines
 ```bash
 # Clone repository
 git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
@@ -110,32 +113,42 @@ cd InsightSpike-AI
 
 # Install dependencies for local development
 poetry install --with dev
+
+# Run CLI commands
+poetry run insightspike loop "What is quantum entanglement?"
 ```
 
 #### ☁️ Google Colab Environment (faiss-gpu)
+**Best for**: GPU acceleration, large-scale experiments, research
 ```bash
-# Run the enhanced Colab setup script
+# Method 1: Enhanced setup script (recommended)
 !git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
 %cd InsightSpike-AI
 !chmod +x scripts/colab/setup_colab.sh
 !bash scripts/colab/setup_colab.sh
 
-# Or use our pre-configured notebook
+# Method 2: Use pre-configured notebook
 # Open: InsightSpike_Colab_Demo.ipynb
 ```
 
 #### 🔧 CI/Testing Environment (minimal dependencies)
+**Best for**: Continuous integration, automated testing
 ```bash
 # Minimal installation for CI
 pip install pytest numpy pyyaml networkx scikit-learn psutil faiss-cpu typer rich click
 pip install -e .
 export INSIGHTSPIKE_LITE_MODE=1
+
+# Run tests
+python -m pytest development/tests/unit/ -v
 ```
 
-### Dependency Groups
-- **`dev`**: Local development with faiss-cpu, testing tools
-- **`colab`**: Google Colab with faiss-gpu for GPU acceleration
-- **`ci`**: Minimal dependencies for continuous integration
+### 📦 Dependency Strategy
+- **`dev`**: Local development with faiss-cpu, full testing suite
+- **`colab`**: Google Colab optimized with faiss-gpu priority installation
+- **`ci`**: Minimal dependencies for fast CI/CD pipelines
+
+**Key Innovation**: Our setup prioritizes faiss-gpu installation in Colab before Poetry operations, ensuring GPU acceleration while maintaining compatibility across all environments.
 
 For development, PoC, or experiments, please make sure to install all dependencies including dev packages:
 ```poetry install --with dev```
