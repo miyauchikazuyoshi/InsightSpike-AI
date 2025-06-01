@@ -7,7 +7,7 @@ set -e
 echo "🧠 InsightSpike-AI Colab Setup"
 echo "=============================="
 echo "🎯 Single optimized setup for Google Colab"
-echo "🔧 NumPy 2.x (TensorFlow/Numba compatible) + PyTorch 2.4+"
+echo "🔧 NumPy 1.x (FAISS + thinc compatible) + PyTorch 2.4+"
 echo "=============================="
 
 # Setup mode (can be passed as argument)
@@ -36,9 +36,9 @@ echo "✅ Environment ready"
 # ==========================================
 echo "📋 Step 2/5: Installing GPU-Critical Packages"
 
-# Install NumPy 2.x first
-echo "🔢 Installing NumPy 2.x (TensorFlow/Numba compatible)..."
-pip install "numpy>=2.0.0,<2.1.0" --upgrade --progress-bar on
+# Install NumPy 1.x first (FAISS compatible)
+echo "🔢 Installing NumPy 1.x (FAISS + thinc compatible)..."
+pip install "numpy==1.26.4" --upgrade --progress-bar on
 
 # Install PyTorch with CUDA support  
 echo "🔥 Installing PyTorch with CUDA (this may take 3-5 minutes)..."
@@ -48,11 +48,11 @@ timeout 600 pip install torch>=2.4.0 torchvision torchaudio --index-url https://
     pip install torch>=2.4.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 }
 
-# Install FAISS with GPU support
-echo "🚀 Installing FAISS GPU..."
-pip install -q faiss-gpu-cu12 || {
+# Install FAISS with GPU support (NumPy 1.x compatible version)
+echo "🚀 Installing FAISS GPU (NumPy 1.x compatible)..."
+pip install -q "faiss-gpu-cu12==1.11.0" || {
     echo "🔄 Fallback to CPU FAISS..."
-    pip install -q faiss-cpu
+    pip install -q "faiss-cpu==1.11.0"
 }
 
 # Install PyTorch Geometric (only for standard/debug mode)
@@ -109,6 +109,12 @@ import sys
 print(f'✅ Python: {sys.version.split()[0]}')
 
 try:
+    import numpy
+    print(f'✅ NumPy: {numpy.__version__}')
+except ImportError:
+    print('❌ NumPy failed')
+
+try:
     import torch
     print(f'✅ PyTorch: {torch.__version__} (CUDA: {torch.cuda.is_available()})')
 except ImportError:
@@ -126,12 +132,38 @@ try:
 except ImportError:
     print('❌ Transformers failed')
 
+try:
+    import spacy
+    print(f'✅ spaCy: {spacy.__version__}')
+except ImportError:
+    print('❌ spaCy failed')
+
+try:
+    import thinc
+    print(f'✅ thinc: {thinc.__version__}')
+except ImportError:
+    print('❌ thinc failed')
+
 if '$SETUP_MODE' != 'minimal':
     try:
         import torch_geometric
         print(f'✅ PyTorch Geometric: {torch_geometric.__version__}')
     except ImportError:
         print('⚠️ PyTorch Geometric: Not available (OK for minimal mode)')
+
+# Validate compatibility
+print('')
+print('🔍 Compatibility Check:')
+try:
+    import numpy, faiss, thinc
+    np_version = tuple(map(int, numpy.__version__.split('.')[:2]))
+    print(f'✅ NumPy {numpy.__version__} + FAISS {faiss.__version__} + thinc {thinc.__version__}: Compatible')
+    if np_version >= (2, 0):
+        print('⚠️ Warning: NumPy 2.x detected - may cause FAISS issues')
+    else:
+        print('✅ NumPy 1.x confirmed - optimal for FAISS compatibility')
+except Exception as e:
+    print(f'❌ Compatibility issue: {e}')
 "
 
 # Test CLI
@@ -152,7 +184,7 @@ echo "🎉 Setup Complete in ${setup_time}s!"
 echo "=============================="
 echo "📋 Mode: $SETUP_MODE"
 echo "🔧 Dependencies: pip-only (no Poetry conflicts)"
-echo "🚀 GPU packages: Latest with CUDA 12.1"
+echo "🚀 GPU packages: NumPy 1.x + FAISS + PyTorch with CUDA 12.1"
 echo ""
 echo "📝 Quick Start:"
 echo "   • Test: insightspike --help"

@@ -9,11 +9,11 @@ packages = [{ include = "insightspike", from = "src" }]
 python = "^3.11"
 # Environment-specific packages excluded from Poetry:
 # - torch (installed via pip with environment-specific versions)
-# - numpy (version conflicts between local 1.x and Colab 2.x)
+# - numpy (version conflicts: local 1.x vs Colab 1.x, managed by setup scripts)
 # - faiss (GPU vs CPU variants)
+numpy = ">=1.24.0,<2.0.0"  # Unified NumPy 1.x for FAISS compatibility
 sentence-transformers = "^2.5"
 scipy = "^1.12"
-# numpy = ">=1.24.0,<3.0.0"  # Excluded - installed separately by setup scripts
 transformers = "<4.40"
 accelerate = "^0.29"
 networkx = "^3.3"
@@ -25,6 +25,8 @@ scikit-learn = "^1.4"
 matplotlib = "^3.8"
 nltk = "^3.8"
 pyyaml = "^6.0"
+spacy = ">=3.7.0,<3.8.0"  # Compatible with thinc 8.2.x
+thinc = ">=8.2.0,<8.3.0"  # NumPy 1.x compatible version
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0"
@@ -45,8 +47,8 @@ pytest = "^8.0"
 [tool.poetry.group.colab.dependencies]
 # Colab環境では、以下はsetup_colab.shで先行インストール:
 # - torch>=2.4.0 (with CUDA 12.1)
-# - numpy>=2.0.0
-# - faiss-gpu-cu12
+# - numpy==1.26.4 (FAISS + thinc compatible)
+# - faiss-gpu-cu12==1.11.0
 # - torch-geometric (optional)
 ipywidgets = "^8.0"  # Jupyter widget support for Colab
 
