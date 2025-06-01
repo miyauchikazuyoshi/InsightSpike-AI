@@ -27,25 +27,36 @@ fi
 poetry --version
 echo "✅ Poetry confirmed working"
 
-# Step 2: Configure Poetry for system environment
-echo "📋 Step 2/5: Configuring Poetry..."
+# Step 2: Clear Poetry cache and lock file for clean environment
+echo "📋 Step 2/6: Clearing Poetry cache for clean environment..."
+rm -rf ~/.cache/pypoetry || true
+rm -f poetry.lock || true
+echo "✅ Poetry cache cleared"
+
+# Step 3: Configure Poetry for system environment
+echo "📋 Step 3/6: Configuring Poetry..."
 poetry config virtualenvs.create false
 poetry config installer.parallel true
 echo "✅ Poetry configured for Colab"
 
-# Step 3: Install GPU-optimized PyTorch (individual installation)
-echo "📋 Step 3/5: Installing PyTorch with CUDA support..."
+# Step 4: Install GPU-optimized PyTorch (individual installation)
+echo "📋 Step 4/6: Installing PyTorch with CUDA support..."
 pip install -q torch==2.2.2 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 echo "✅ PyTorch with CUDA installed"
 
-# Step 4: Install FAISS GPU (with CPU fallback)
-echo "📋 Step 4/5: Installing FAISS GPU..."
+# Step 5: Install FAISS GPU (with CPU fallback)
+echo "📋 Step 5/6: Installing FAISS GPU..."
 pip install -q faiss-gpu-cu12 || pip install -q faiss-cpu
 echo "✅ FAISS GPU installed"
 
-# Step 5: Install Poetry dependencies (without torch/faiss to avoid conflicts)
-echo "📋 Step 5/5: Installing remaining dependencies via Poetry..."
+# Step 6: Install Poetry dependencies (without torch/faiss to avoid conflicts)
+echo "📋 Step 6/6: Installing remaining dependencies via Poetry..."
 echo "📝 Using requirements-colab.txt (excludes torch/faiss for conflict avoidance)"
+
+# Regenerate lock file to ensure compatibility
+echo "🔄 Regenerating Poetry lock file..."
+poetry lock --no-update
+echo "✅ Lock file regenerated"
 
 poetry install --only main
 echo "✅ Poetry dependencies installed"

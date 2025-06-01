@@ -176,6 +176,12 @@ fi
 export PATH="/root/.local/bin:$PATH"
 if command -v poetry &> /dev/null; then
     echo "✅ Poetry available"
+    
+    # Clear Poetry cache for clean environment
+    echo "🧹 Clearing Poetry cache..."
+    rm -rf ~/.cache/pypoetry || true
+    rm -f poetry.lock || true
+    
     poetry config virtualenvs.create false
     
     echo "📦 Installing remaining dependencies with Poetry..."

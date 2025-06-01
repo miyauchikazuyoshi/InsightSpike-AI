@@ -258,6 +258,12 @@ export PATH="/root/.local/bin:$PATH"
 
 if command -v poetry &> /dev/null; then
     log_info "Poetry installation successful"
+    
+    # Clear Poetry cache for clean environment
+    log_info "Clearing Poetry cache for clean environment..."
+    rm -rf ~/.cache/pypoetry || true
+    rm -f poetry.lock || true
+    
     poetry config virtualenvs.create false
     
     # Install remaining dependencies via Poetry
