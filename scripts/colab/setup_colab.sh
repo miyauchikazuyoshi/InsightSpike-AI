@@ -27,7 +27,8 @@ python --version
 pip --version
 
 # Clean cache for fresh installation
-pip cache purge || true
+echo "🧹 Cleaning pip cache..."
+pip cache purge 2>/dev/null || echo "Cache already clean"
 echo "✅ Environment ready"
 
 # ==========================================
@@ -37,11 +38,15 @@ echo "📋 Step 2/5: Installing GPU-Critical Packages"
 
 # Install NumPy 2.x first
 echo "🔢 Installing NumPy 2.x (TensorFlow/Numba compatible)..."
-pip install -q "numpy>=2.0.0,<2.1.0" --upgrade
+pip install "numpy>=2.0.0,<2.1.0" --upgrade --progress-bar on
 
 # Install PyTorch with CUDA support  
-echo "🔥 Installing PyTorch with CUDA..."
-pip install -q torch>=2.4.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+echo "🔥 Installing PyTorch with CUDA (this may take 3-5 minutes)..."
+timeout 600 pip install torch>=2.4.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 --progress-bar on || {
+    echo "⚠️ PyTorch installation timed out or failed"
+    echo "🔄 Trying CPU version as fallback..."
+    pip install torch>=2.4.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+}
 
 # Install FAISS with GPU support
 echo "🚀 Installing FAISS GPU..."
