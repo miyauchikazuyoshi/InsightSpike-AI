@@ -1,10 +1,10 @@
 # InsightSpike-AI Google Colab Requirements
-# Optimized for NumPy 2.x + PyTorch 2.4+ compatibility
+# Optimized for NumPy 2.x (TensorFlow/Numba compatible) + PyTorch 2.4+
 # 
 # ⚠️ IMPORTANT: torch, numpy, faiss are intentionally EXCLUDED from this file
 # to prevent version conflicts with GPU-optimized installations
 # - torch>=2.4.0 (via pip with CUDA 12.1 support)
-# - numpy>=2.0.0 (Colab-compatible version)
+# - numpy>=2.0.0,<2.1.0 (TensorFlow 2.18.0/Numba 0.60.0 compatible)
 # - faiss-gpu-cu12>=1.7.2 (with CPU fallback)
 
 # ==========================================
@@ -27,7 +27,7 @@ tokenizers>=0.13.0
 accelerate>=0.29
 
 # Scientific Computing
-# numpy>=2.0.0,<2.5.0  # NumPy 2.x installed separately in setup script
+# numpy>=2.0.0,<2.1.0  # NumPy 2.x installed separately (TensorFlow/Numba compatible)
 pandas>=2.0.0
 scipy>=1.12.0
 scikit-learn>=1.4.0

@@ -25,7 +25,7 @@ poetry run pip install --upgrade pip
 
 # Install NumPy 1.x for local development
 echo "🔢 Installing NumPy 1.x (local development)..."
-poetry run pip install "numpy>=1.24.0,<2.0.0"
+poetry run pip install "numpy>=1.26.0,<2.0.0"
 
 # Install PyTorch CPU version for local development
 echo "🔥 Installing PyTorch 2.2.2 (CPU version for local)..."

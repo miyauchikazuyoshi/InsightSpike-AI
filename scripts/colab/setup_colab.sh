@@ -7,7 +7,7 @@ set -e
 echo "🧠 InsightSpike-AI Colab Setup"
 echo "=============================="
 echo "🎯 Single optimized setup for Google Colab"
-echo "🔧 NumPy 2.x + PyTorch 2.4+ compatibility"
+echo "🔧 NumPy 2.x (TensorFlow/Numba compatible) + PyTorch 2.4+"
 echo "=============================="
 
 # Setup mode (can be passed as argument)
@@ -36,8 +36,8 @@ echo "✅ Environment ready"
 echo "📋 Step 2/5: Installing GPU-Critical Packages"
 
 # Install NumPy 2.x first
-echo "🔢 Installing NumPy 2.x..."
-pip install -q "numpy>=2.0.0,<2.5.0" --upgrade
+echo "🔢 Installing NumPy 2.x (TensorFlow/Numba compatible)..."
+pip install -q "numpy>=2.0.0,<2.1.0" --upgrade
 
 # Install PyTorch with CUDA support  
 echo "🔥 Installing PyTorch with CUDA..."
