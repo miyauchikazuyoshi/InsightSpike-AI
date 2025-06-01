@@ -37,7 +37,7 @@ install_with_timeout() {
     
     echo "📦 Installing $description..."
     
-    timeout $timeout pip install -q "$package" || {
+    timeout $timeout pip install -q $package || {
         echo "⚠️ $description installation failed or timed out"
         return 1
     }
@@ -58,7 +58,7 @@ check_gpu() {
 
 # Core dependencies (always installed)
 echo "📋 Step 1/5: Installing core dependencies..."
-install_with_timeout "torch torchvision" 180 "PyTorch"
+install_with_timeout "torch torchvision torchaudio" 180 "PyTorch"
 install_with_timeout "numpy pandas" 60 "NumPy and Pandas"
 echo "✅ Core dependencies completed"
 
