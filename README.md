@@ -99,20 +99,20 @@ The easiest way to get started is with our simplified Colab notebook:
 
 ### 🚀 Validated Setup Scripts
 
-#### ⚡ Fast Setup (3-5 minutes, recommended)
+#### ⚡ Standard Setup (8-12 minutes, recommended)
 ```bash
 !git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
 %cd InsightSpike-AI
-!chmod +x scripts/colab/setup_colab_fast.sh
-!./scripts/colab/setup_colab_fast.sh
+!chmod +x scripts/colab/setup_colab.sh
+!./scripts/colab/setup_colab.sh
 ```
 
 #### 🔥 Minimal Setup (<60 seconds, for testing)
 ```bash
 !git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
 %cd InsightSpike-AI
-!chmod +x scripts/colab/setup_colab_minimal.sh
-!./scripts/colab/setup_colab_minimal.sh
+!chmod +x scripts/colab/setup_colab.sh
+!./scripts/colab/setup_colab.sh minimal
 ```
 
 #### 📋 Production Setup (10-15 minutes, complete)
@@ -201,9 +201,9 @@ poetry run insightspike loop "What is quantum entanglement?"
 
 **Setup Options**:
 - `setup_colab.sh` - Standard coordinated setup (8-12 min)
-- `setup_colab_fast.sh` - Fast setup with timeout protection (3-5 min)  
-- `setup_colab_minimal.sh` - Ultra-fast essential only (<60 sec)
-- `setup_colab_debug.sh` - Detailed logging for troubleshooting (15-20 min)
+- `setup_colab.sh minimal` - Ultra-fast essential only (<60 sec)
+- `setup_colab.sh debug` - Detailed logging for troubleshooting (15-20 min)
+- `setup_colab_debug.sh` - Alternative debug script with comprehensive diagnostics
 
 **Coordination Strategy**:
 1. **GPU-critical packages** (PyTorch, FAISS) installed first via pip with CUDA support

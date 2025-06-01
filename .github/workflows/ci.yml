@@ -18,6 +18,13 @@ jobs:
       with:
         python-version: "3.11"
 
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: 1.8.0
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+
     - name: Cache pip
       uses: actions/cache@v4
       with:
@@ -26,10 +33,21 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
 
-    - name: Install minimal dependencies
+    - name: Install dependencies using setup script
       run: |
-        python -m pip install --upgrade pip
-        pip install pytest numpy pyyaml networkx scikit-learn psutil faiss-cpu typer rich click
+        # Use our standardized setup script for CI
+        bash scripts/setup/setup.sh
+        
+    - name: Verify installation
+      run: |
+        poetry run python -c "
+        import torch, numpy, transformers, faiss
+        print(f'PyTorch: {torch.__version__}')
+        print(f'NumPy: {numpy.__version__}')
+        print(f'Transformers: {transformers.__version__}')
+        print(f'FAISS: {faiss.__version__}')
+        print('✅ All dependencies installed successfully')
+        "
 
     - name: Set PYTHONPATH and environment
       run: |
@@ -39,13 +57,13 @@ jobs:
     - name: Test core functionality (no heavy dependencies)
       run: |
         # Test specific unit tests that don't require heavy dependencies
-        python -m pytest development/tests/unit/test_config.py -v --tb=short
-        python -m pytest development/tests/unit/test_cache_manager.py -v --tb=short
-        python -m pytest development/tests/unit/test_cli.py -v --tb=short
-        python -m pytest development/tests/unit/test_data_loader.py -v --tb=short
-        python -m pytest development/tests/unit/test_layer1_error_monitor.py -v --tb=short
-        python -m pytest development/tests/unit/test_layer2_memory_manager.py -v --tb=short
-        python -m pytest development/tests/unit/test_utils.py -v --tb=short
+        poetry run pytest development/tests/unit/test_config.py -v --tb=short
+        poetry run pytest development/tests/unit/test_cache_manager.py -v --tb=short
+        poetry run pytest development/tests/unit/test_cli.py -v --tb=short
+        poetry run pytest development/tests/unit/test_data_loader.py -v --tb=short
+        poetry run pytest development/tests/unit/test_layer1_error_monitor.py -v --tb=short
+        poetry run pytest development/tests/unit/test_layer2_memory_manager.py -v --tb=short
+        poetry run pytest development/tests/unit/test_utils.py -v --tb=short
 
   test-integration:
     runs-on: ubuntu-latest
@@ -60,15 +78,17 @@ jobs:
       with:
         python-version: "3.11"
 
-    - name: Install all dependencies manually for CI
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: 1.8.0
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+
+    - name: Install dependencies using setup script
       run: |
-        python -m pip install --upgrade pip
-        # 基本的な依存関係を手動でインストール
-        pip install pytest numpy "transformers<4.40" scipy "torch==2.2.2" sentence-transformers
-        pip install networkx scikit-learn matplotlib nltk pyyaml datasets accelerate
-        pip install typer rich click faiss-cpu
-        # プロジェクトを開発モードでインストール
-        pip install -e .
+        # Use our standardized setup script for CI integration tests
+        bash scripts/setup/setup.sh
 
     - name: Set PYTHONPATH and environment
       run: |
@@ -90,19 +110,19 @@ jobs:
     - name: Test with mocked dependencies
       run: |
         # Test with mocked PyTorch/transformers for integration testing
-        python -m pytest development/tests/unit/ -v --tb=short
+        poetry run pytest development/tests/unit/ -v --tb=short
 
     - name: Generate minimal faiss index
       run: |
-        python scripts/production/create_minimal_index.py
+        poetry run python scripts/production/create_minimal_index.py
 
     - name: Run system validation script
       run: |
-        python scripts/production/system_validation.py || exit 1
+        poetry run python scripts/production/system_validation.py || exit 1
 
     - name: Run PoC simple script
       run: |
-        python scripts/run_poc_simple.py || exit 1
+        poetry run python scripts/run_poc_simple.py || exit 1
 
   lint-and-format:
     runs-on: ubuntu-latest
@@ -116,16 +136,22 @@ jobs:
       with:
         python-version: "3.11"
 
-    - name: Install linting tools
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: 1.8.0
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+
+    - name: Install dev dependencies with Poetry
       run: |
-        python -m pip install --upgrade pip
-        pip install flake8 black isort
+        poetry install --with dev
 
     - name: Check code formatting
       run: |
-        black --check src/ tests/ || echo "Run 'black src/ tests/' to fix formatting"
-        isort --check-only src/ tests/ || echo "Run 'isort src/ tests/' to fix imports"
+        poetry run black --check src/ development/tests/ || echo "Run 'poetry run black src/ development/tests/' to fix formatting"
+        poetry run isort --check-only src/ development/tests/ || echo "Run 'poetry run isort src/ development/tests/' to fix imports"
 
     - name: Lint code
       run: |
-        flake8 src/ tests/ --max-line-length=100 --ignore=E203,W503 || echo "Fix linting issues"
+        poetry run flake8 src/ development/tests/ --max-line-length=100 --ignore=E203,W503 || echo "Fix linting issues"

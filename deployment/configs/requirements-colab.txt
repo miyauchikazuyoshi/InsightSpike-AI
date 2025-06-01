@@ -1,33 +1,63 @@
-# InsightSpike-AI Colab Requirements
-# Core dependencies for Poetry installation
+# InsightSpike-AI Google Colab Requirements
+# Optimized for NumPy 2.x + PyTorch 2.4+ compatibility
 # 
-# STRATEGIC COORDINATION:
-# - This file excludes torch and faiss to prevent installation conflicts
-# - GPU-critical packages (torch, faiss) are installed separately via pip in setup scripts
-# - Complete dependency list available in requirements-colab-comprehensive.txt
-# - Use setup_colab.sh for coordinated installation
-#
-# Note: torch and faiss are installed separately in setup script for GPU optimization
+# ⚠️ IMPORTANT: torch, numpy, faiss are intentionally EXCLUDED from this file
+# to prevent version conflicts with GPU-optimized installations
+# - torch>=2.4.0 (via pip with CUDA 12.1 support)
+# - numpy>=2.0.0 (Colab-compatible version)
+# - faiss-gpu-cu12>=1.7.2 (with CPU fallback)
 
-# Core ML libraries (without torch - installed separately with CUDA)
-sentence-transformers>=2.5
+# ==========================================
+# Core ML/AI Libraries  
+# ==========================================
+# PyTorch (installed separately in setup script with CUDA)
+# torch>=2.4.0 (via pip with CUDA 12.1 support)
+
+# PyTorch Geometric (installed separately)  
+# torch-geometric, torch-scatter, torch-sparse, torch-cluster, torch-spline-conv
+
+# Vector Search (installed separately)
+# faiss-gpu-cu12>=1.7.2 (with CPU fallback)
+
+# Hugging Face Ecosystem
 transformers>=4.30.0,<4.40.0
+sentence-transformers>=2.5
+datasets>=2.12.0
+tokenizers>=0.13.0
 accelerate>=0.29
-scipy>=1.12
-scikit-learn>=1.4
-numpy>=1.24.0,<3.0.0
 
-# CLI and utilities
-rich>=13.6
+# Scientific Computing
+# numpy>=2.0.0,<2.5.0  # NumPy 2.x installed separately in setup script
+pandas>=2.0.0
+scipy>=1.12.0
+scikit-learn>=1.4.0
+
+# ==========================================
+# CLI and Interface
+# ==========================================
 typer>=0.7,<0.10
 click>=8.0,<8.2
+rich>=13.6
+
+# ==========================================
+# Data Processing and Analysis
+# ==========================================
 networkx>=3.3
-datasets>=2.5
-matplotlib>=3.8
 nltk>=3.8
+matplotlib>=3.8
 pyyaml>=6.0
 
-# Note: The following are installed separately for GPU optimization:
-# - torch==2.2.2 (with CUDA support)
-# - faiss-gpu-cu12 (with CPU fallback)
+# ==========================================
+# Dependencies for datasets package
+# ==========================================
+pyarrow
+requests
+aiohttp
+dill
+
+# ==========================================
+# CUDA Dependencies (installed separately)
+# ==========================================
+# nvidia-cuda-runtime-cu12>=12.1
+# nvidia-cublas-cu12
 

@@ -29,10 +29,7 @@ class ColabSetupValidator:
         logger.info("🔍 Validating requirements files...")
         
         required_files = [
-            "requirements-torch.txt",
-            "requirements-PyG.txt", 
-            "requirements-colab.txt",
-            "requirements-colab-comprehensive.txt"
+            "requirements-colab.txt"
         ]
         
         results = {}
@@ -128,8 +125,6 @@ class ColabSetupValidator:
         
         required_scripts = [
             "setup_colab.sh",
-            "setup_colab_fast.sh", 
-            "setup_colab_minimal.sh",
             "setup_colab_debug.sh"
         ]
         
@@ -158,8 +153,9 @@ class ColabSetupValidator:
                 if not (content.strip().startswith('#!/bin/bash') or content.strip().startswith('#!/usr/bin/env bash')):
                     issues.append(f"{script} missing shebang")
                     
-                if 'poetry install' not in content and script not in ['setup_colab_minimal.sh']:
-                    issues.append(f"{script} missing poetry install command")
+                # Check for pip install command instead of poetry
+                if 'pip install' not in content:
+                    issues.append(f"{script} missing pip install command")
                     
             except Exception as e:
                 issues.append(f"Error validating {script}: {str(e)}")
@@ -173,30 +169,22 @@ class ColabSetupValidator:
         logger.info("✅ All setup scripts validated")
         return True
         
-    def check_poetry_integration(self) -> bool:
-        """Check Poetry configuration and dependency groups."""
-        logger.info("🔍 Checking Poetry integration...")
+    def check_project_configuration(self) -> bool:
+        """Check project configuration files."""
+        logger.info("🔍 Checking project configuration...")
         
         pyproject_path = self.project_root / "pyproject.toml"
         if not pyproject_path.exists():
             logger.error("❌ pyproject.toml not found")
             return False
             
-        try:
-            with open(pyproject_path, 'r') as f:
-                content = f.read()
+        setup_py_path = self.project_root / "setup.py"
+        if not setup_py_path.exists():
+            logger.warning("⚠️  setup.py not found - CLI commands may not work")
+        else:
+            logger.info("✅ setup.py configured for CLI entry points")
                 
-            # Check for dependency groups
-            if '[tool.poetry.group.' not in content:
-                logger.warning("⚠️  No Poetry dependency groups found")
-            else:
-                logger.info("✅ Poetry dependency groups configured")
-                
-            return True
-            
-        except Exception as e:
-            logger.error(f"❌ Error reading pyproject.toml: {str(e)}")
-            return False
+        return True
             
     def run_validation(self) -> bool:
         """Run complete validation suite."""
@@ -215,8 +203,8 @@ class ColabSetupValidator:
         if not self.validate_setup_scripts():
             return False
             
-        # Step 4: Check Poetry integration
-        if not self.check_poetry_integration():
+        # Step 4: Check project configuration
+        if not self.check_project_configuration():
             return False
             
         logger.info("🎉 All validations passed! Colab setup coordination is properly configured.")
@@ -228,21 +216,25 @@ class ColabSetupValidator:
 📋 InsightSpike-AI Colab Setup Scripts Usage Guide
 
 🚀 Available Setup Scripts:
-1. setup_colab.sh - Standard setup (10-15 min)
+1. setup_colab.sh - Standard setup (8-12 min)
    - Complete installation with full logging
    - Best for production and development
+   - Usage: ./setup_colab.sh [standard|minimal|debug]
    
-2. setup_colab_fast.sh - Fast setup (3-5 min)  
-   - Optimized installation with timeout protection
-   - Good for quick testing and demos
-   
-3. setup_colab_minimal.sh - Minimal setup (<60 sec)
+2. setup_colab.sh minimal - Minimal setup (<60 sec)
    - Essential dependencies only
    - Perfect for rapid prototyping
+   - Usage: ./setup_colab.sh minimal
    
-4. setup_colab_debug.sh - Debug setup (15-20 min)
+3. setup_colab.sh debug - Debug setup (15-20 min)
    - Comprehensive logging and diagnostics
    - Use for troubleshooting installation issues
+   - Usage: ./setup_colab.sh debug
+   
+4. setup_colab_debug.sh - Alternative debug script (15-20 min)
+   - Separate comprehensive debug script
+   - Creates detailed diagnostic logs
+   - Usage: ./setup_colab_debug.sh
 
 🔧 Strategic Coordination:
 - GPU packages (PyTorch, FAISS) installed first via pip

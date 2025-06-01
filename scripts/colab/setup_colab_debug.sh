@@ -266,11 +266,18 @@ if command -v poetry &> /dev/null; then
     
     poetry config virtualenvs.create false
     
-    # Install remaining dependencies via Poetry
-    log_info "Installing coordinated dependencies via Poetry..."
-    poetry install --only main
+    # Install remaining dependencies via pip to avoid thinc conflicts
+    log_info "Installing dependencies via pip (avoiding thinc conflicts)..."
+    pip install -q "datasets>=2.5" --no-deps
+    pip install -q pyarrow requests aiohttp dill
+    
+    # Try Poetry as backup
+    log_info "Attempting Poetry installation as backup..."
+    poetry install --only main 2>/dev/null || log_warning "Poetry installation skipped"
 else
     log_warning "Poetry installation failed - falling back to pip"
+    pip install -q "datasets>=2.5" --no-deps
+    pip install -q pyarrow requests aiohttp dill
 fi
 
 echo "=== POETRY INSTALLATION END ==="

@@ -1,9 +1,0 @@
-# PyTorch with CUDA support for GPU acceleration
-# This file is referenced by scripts/setup/setup.sh
-
-torch==2.2.2
-torchvision
-torchaudio
-
-# For CPU-only environments, use:
-# torch==2.2.2+cpu torchvision+cpu torchaudio+cpu -f https://download.pytorch.org/whl/torch_stable.html

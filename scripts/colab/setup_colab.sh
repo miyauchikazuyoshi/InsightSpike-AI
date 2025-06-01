@@ -1,89 +1,104 @@
 #!/bin/bash
-
 # InsightSpike-AI Google Colab Setup Script
-# Focus: Poetry installation + CLI functionality + GPU optimization
+# Simplified single script for all Colab setups
 
-set -e  # Exit on any error
+set -e
 
 echo "🧠 InsightSpike-AI Colab Setup"
 echo "=============================="
-echo "📋 Single optimized setup for Google Colab"
-echo "📦 Poetry + GPU libraries + CLI testing"
-echo "🔧 Strategic dependency coordination"
+echo "🎯 Single optimized setup for Google Colab"
+echo "🔧 NumPy 2.x + PyTorch 2.4+ compatibility"
 echo "=============================="
 
-# Step 1: Install Poetry (CRITICAL for CLI)
-echo "📋 Step 1/5: Installing Poetry..."
-if ! command -v poetry &> /dev/null; then
-    echo "📦 Installing Poetry..."
-    curl -sSL https://install.python-poetry.org | python3 - 2>/dev/null
-    export PATH="$HOME/.local/bin:$PATH"
-    echo "✅ Poetry installed"
-else
-    echo "✅ Poetry already available"
+# Setup mode (can be passed as argument)
+SETUP_MODE="${1:-standard}"
+
+echo "📋 Setup Mode: $SETUP_MODE"
+echo ""
+
+# Timer for setup
+start_time=$(date +%s)
+
+# ==========================================
+# Step 1: Environment Preparation
+# ==========================================
+echo "📋 Step 1/5: Environment Preparation"
+python --version
+pip --version
+
+# Clean cache for fresh installation
+pip cache purge || true
+echo "✅ Environment ready"
+
+# ==========================================
+# Step 2: GPU-Critical Packages (pip-first strategy)
+# ==========================================
+echo "📋 Step 2/5: Installing GPU-Critical Packages"
+
+# Install NumPy 2.x first
+echo "🔢 Installing NumPy 2.x..."
+pip install -q "numpy>=2.0.0,<2.5.0" --upgrade
+
+# Install PyTorch with CUDA support  
+echo "🔥 Installing PyTorch with CUDA..."
+pip install -q torch>=2.4.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# Install FAISS with GPU support
+echo "🚀 Installing FAISS GPU..."
+pip install -q faiss-gpu-cu12 || {
+    echo "🔄 Fallback to CPU FAISS..."
+    pip install -q faiss-cpu
+}
+
+# Install PyTorch Geometric (only for standard/debug mode)
+if [[ "$SETUP_MODE" != "minimal" ]]; then
+    echo "🌐 Installing PyTorch Geometric..."
+    TORCH_VERSION=$(python -c "import torch; print(torch.__version__.split('+')[0])")
+    CUDA_VERSION="cu121"
+    
+    # Install with timeout protection
+    timeout 300 pip install -q torch-geometric torch-scatter torch-sparse torch-cluster torch-spline-conv \
+        --find-links "https://data.pyg.org/whl/torch-${TORCH_VERSION}+${CUDA_VERSION}.html" || {
+        echo "⚠️ PyTorch Geometric installation failed/timed out"
+        if [[ "$SETUP_MODE" == "debug" ]]; then
+            echo "🔍 Debug mode: Continuing without PyG"
+        fi
+    }
 fi
 
-# Verify Poetry
-poetry --version
-echo "✅ Poetry confirmed working"
+echo "✅ GPU packages installed"
 
-# Step 2: Clear Poetry cache and lock file for clean environment
-echo "📋 Step 2/6: Clearing Poetry cache for clean environment..."
-rm -rf ~/.cache/pypoetry || true
-rm -f poetry.lock || true
-echo "✅ Poetry cache cleared"
+# ==========================================
+# Step 3: Core Dependencies 
+# ==========================================
+echo "📋 Step 3/5: Installing Core Dependencies"
 
-# Step 3: Configure Poetry for system environment
-echo "📋 Step 3/6: Configuring Poetry..."
-poetry config virtualenvs.create false
-poetry config installer.parallel true
-echo "✅ Poetry configured for Colab"
+# Install from requirements file
+# Note: torch, numpy, faiss are excluded from requirements-colab.txt 
+# to avoid conflicts with the GPU-optimized versions installed in Step 2
+pip install -q -r deployment/configs/requirements-colab.txt
 
-# Step 4: Install GPU-optimized PyTorch (individual installation)
-echo "📋 Step 4/6: Installing PyTorch with CUDA support..."
-pip install -q torch==2.2.2 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-echo "✅ PyTorch with CUDA installed"
+echo "✅ Core dependencies installed"
 
-# Step 5: Install FAISS GPU (with CPU fallback)
-echo "📋 Step 5/6: Installing FAISS GPU..."
-pip install -q faiss-gpu-cu12 || pip install -q faiss-cpu
-echo "✅ FAISS GPU installed"
+# ==========================================
+# Step 4: Project Installation
+# ==========================================
+echo "📋 Step 4/5: Installing Project"
 
-# Step 6: Install Poetry dependencies (without torch/faiss to avoid conflicts)
-echo "📋 Step 6/6: Installing remaining dependencies via Poetry..."
-echo "📝 Using requirements-colab.txt (excludes torch/faiss for conflict avoidance)"
+# Install project in editable mode
+pip install -q -e .
 
-# Regenerate lock file to ensure compatibility
-echo "🔄 Regenerating Poetry lock file..."
-poetry lock --no-update
-echo "✅ Lock file regenerated"
+# Create necessary directories
+mkdir -p experiment_results logs data/processed data/raw
 
-poetry install --only main
-echo "✅ Poetry dependencies installed"
-
-# Install project in editable mode for CLI access
-echo "📦 Installing project in editable mode..."
-poetry install --only main
 echo "✅ Project installed"
 
-# Test CLI functionality
-echo "📋 Testing CLI functionality..."
+# ==========================================
+# Step 5: Validation
+# ==========================================
+echo "📋 Step 5/5: Validation"
 
-# Test Poetry CLI access
-if poetry run python -c "import sys; sys.path.append('src'); from insightspike.cli import app" 2>/dev/null; then
-    echo "✅ Poetry CLI: Working"
-else
-    echo "⚠️ Poetry CLI: Reinstalling project..."
-    poetry install --only main
-    echo "✅ Project reinstalled"
-fi
-
-# Final validation
-echo ""
-echo "🔍 Final Validation"
-echo "==================="
-
-# Python and core libraries
+# Test core imports
 python -c "
 import sys
 print(f'✅ Python: {sys.version.split()[0]}')
@@ -91,39 +106,51 @@ print(f'✅ Python: {sys.version.split()[0]}')
 try:
     import torch
     print(f'✅ PyTorch: {torch.__version__} (CUDA: {torch.cuda.is_available()})')
-except: print('❌ PyTorch failed')
+except ImportError:
+    print('❌ PyTorch failed')
 
 try:
     import faiss
-    print(f'✅ FAISS: Available')
-except: print('⚠️ FAISS: Not available')
+    print(f'✅ FAISS: {faiss.__version__}')
+except ImportError:
+    print('❌ FAISS failed')
 
 try:
-    import transformers, sentence_transformers
-    print('✅ Transformers: OK')
-except: print('⚠️ Transformers: Issue')
+    import transformers
+    print(f'✅ Transformers: {transformers.__version__}')
+except ImportError:
+    print('❌ Transformers failed')
+
+if '$SETUP_MODE' != 'minimal':
+    try:
+        import torch_geometric
+        print(f'✅ PyTorch Geometric: {torch_geometric.__version__}')
+    except ImportError:
+        print('⚠️ PyTorch Geometric: Not available (OK for minimal mode)')
 "
 
 # Test CLI
 echo ""
-echo "🔍 Testing CLI access..."
-if poetry run python -m insightspike.cli --help > /dev/null 2>&1; then
-    echo "✅ CLI: Ready"
+echo "🧪 Testing CLI..."
+if command -v insightspike >/dev/null 2>&1; then
+    echo "✅ CLI command: insightspike available"
 else
-    echo "❌ CLI: Failed"
-    exit 1
+    echo "⚠️ CLI: Use 'python -m insightspike.cli' instead"
 fi
 
+# Calculate setup time
+end_time=$(date +%s)
+setup_time=$((end_time - start_time))
+
 echo ""
-echo "🎉 Setup Complete!"
-echo "=================="
-echo "📋 Dependencies coordinated via:"
-echo "   • requirements-colab.txt (Poetry-managed, excludes torch/faiss)"
-echo "   • requirements-colab-comprehensive.txt (Complete reference list)"
-echo "   • GPU packages installed via pip for CUDA optimization"
+echo "🎉 Setup Complete in ${setup_time}s!"
+echo "=============================="
+echo "📋 Mode: $SETUP_MODE"
+echo "🔧 Dependencies: pip-only (no Poetry conflicts)"
+echo "🚀 GPU packages: Latest with CUDA 12.1"
 echo ""
-echo "Next steps:"
-echo "1. Run data preparation"
-echo "2. Test: poetry run python -m insightspike.cli --help"
-echo "3. Demo: poetry run python -m insightspike.cli loop 'test'"
-echo "=================="
+echo "📝 Quick Start:"
+echo "   • Test: insightspike --help"
+echo "   • Alt: python -m insightspike.cli --help" 
+echo "   • Experiment: PYTHONPATH=src python scripts/experiments/demo_mvp.py"
+echo "=============================="

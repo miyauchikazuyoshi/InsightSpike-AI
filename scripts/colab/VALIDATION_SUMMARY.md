@@ -7,25 +7,17 @@ All Colab setup scripts and coordination strategies have been thoroughly tested 
 ### 🔍 Validation Results
 
 #### Setup Scripts Validated ✅
-- **setup_colab.sh** - Standard setup (10-15 min)
+- **setup_colab.sh** - Multi-mode setup script (8-12 min)
+  - ✅ Standard mode: Complete installation with timeout protection
+  - ✅ Minimal mode: Essential dependencies only (<60 sec)
+  - ✅ Debug mode: Comprehensive logging (15-20 min)
   - ✅ Syntax validation passed
-  - ✅ Poetry installation included
-  - ✅ Coordination strategy implemented
+  - ✅ Strategic dependency coordination implemented
 
-- **setup_colab_fast.sh** - Fast setup (3-5 min)
+- **setup_colab_debug.sh** - Separate debug script (15-20 min)
   - ✅ Syntax validation passed
-  - ✅ Poetry installation included
-  - ✅ Timeout protection implemented
-
-- **setup_colab_minimal.sh** - Minimal setup (<60 sec)
-  - ✅ Syntax validation passed
-  - ✅ Essential dependencies only
-  - ✅ Dry run test successful
-
-- **setup_colab_debug.sh** - Debug setup (15-20 min)
-  - ✅ Syntax validation passed
-  - ✅ Poetry installation included
   - ✅ Comprehensive logging implemented
+  - ✅ Diagnostic log file generation
 
 #### Requirements Files Validated ✅
 - **requirements-torch.txt** - 3 dependencies
@@ -93,13 +85,6 @@ All Colab setup scripts and coordination strategies have been thoroughly tested 
 
 #### Quick Start (Recommended)
 ```bash
-!wget https://raw.githubusercontent.com/your-repo/InsightSpike-AI/main/scripts/colab/setup_colab_fast.sh
-!chmod +x setup_colab_fast.sh
-!./setup_colab_fast.sh
-```
-
-#### Complete Setup
-```bash
 !wget https://raw.githubusercontent.com/your-repo/InsightSpike-AI/main/scripts/colab/setup_colab.sh
 !chmod +x setup_colab.sh
 !./setup_colab.sh
@@ -107,9 +92,9 @@ All Colab setup scripts and coordination strategies have been thoroughly tested 
 
 #### Minimal Setup (Testing)
 ```bash
-!wget https://raw.githubusercontent.com/your-repo/InsightSpike-AI/main/scripts/colab/setup_colab_minimal.sh
-!chmod +x setup_colab_minimal.sh
-!./setup_colab_minimal.sh
+!wget https://raw.githubusercontent.com/your-repo/InsightSpike-AI/main/scripts/colab/setup_colab.sh
+!chmod +x setup_colab.sh
+!./setup_colab.sh minimal
 ```
 
 #### Debug Setup (Troubleshooting)

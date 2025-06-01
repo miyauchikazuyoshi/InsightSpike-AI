@@ -8,19 +8,19 @@
 **Root Cause**: CUDA extension compilation takes too long
 **Solutions**:
 
-#### Option A: Use Fast Setup (Recommended)
+#### Option A: Use Standard Setup (Recommended)
 ```bash
-!chmod +x scripts/colab/setup_colab_fast.sh
-!./scripts/colab/setup_colab_fast.sh
+!chmod +x scripts/colab/setup_colab.sh
+!./scripts/colab/setup_colab.sh
 ```
-- Skips PyTorch Geometric with timeouts
-- Core functionality preserved
-- Setup time: 3-5 minutes
+- Complete functionality with timeout protection
+- Includes PyTorch Geometric with fallback
+- Setup time: 8-12 minutes
 
 #### Option B: Use Minimal Setup (Ultra-Fast)
 ```bash
-!chmod +x scripts/colab/setup_colab_minimal.sh
-!./scripts/colab/setup_colab_minimal.sh
+!chmod +x scripts/colab/setup_colab.sh
+!./scripts/colab/setup_colab.sh minimal
 ```
 - Essential dependencies only
 - No graph neural networks
@@ -98,11 +98,11 @@ except:
 ```
 Start
   ├─ Need full PyTorch Geometric? 
-  │   ├─ Yes → Try debug setup first
-  │   └─ No → Use fast setup ✅
+  │   ├─ Yes → Try standard setup first
+  │   └─ No → Use minimal setup ✅
   │
   ├─ Setup hanging >10 minutes?
-  │   ├─ Yes → Stop, use fast setup
+  │   ├─ Yes → Stop, use minimal setup
   │   └─ No → Continue waiting
   │
   ├─ Just need basic testing?
@@ -116,10 +116,9 @@ Start
 
 | Setup Type | Time | PyTorch Geometric | FAISS GPU | HuggingFace | Use Case |
 |------------|------|------------------|-----------|-------------|----------|
-| **Fast** | 3-5 min | ⚠️ Timeout fallback | ✅ | ✅ | Development & testing |
+| **Standard** | 8-12 min | ✅ With timeout | ✅ | ✅ | Production & development |
 | **Minimal** | <60 sec | ❌ | ✅ | ✅ | Quick validation |
 | **Debug** | 15-20 min | 🔍 Detailed logs | ✅ | ✅ | Troubleshooting |
-| **Full** | 8-15 min | ✅ (may hang) | ✅ | ✅ | Production (if stable) |
 
 ## 🚀 Quick Validation Script
 
@@ -202,7 +201,7 @@ validate_setup()
 ```bash
 # Force CPU mode for development
 export CUDA_VISIBLE_DEVICES=""
-./scripts/colab/setup_colab_minimal.sh
+./scripts/colab/setup_colab.sh minimal
 ```
 
 ## 📞 Getting Help
