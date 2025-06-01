@@ -1,4 +1,12 @@
-torch-scatter==2.1.2 --find-links https://data.pyg.org/whl/torch-2.2.2+cpu.html
-torch-sparse==0.6.18 --find-links https://data.pyg.org/whl/torch-2.2.2+cpu.html
-torch-cluster==1.6.3 --find-links https://data.pyg.org/whl/torch-2.2.2+cpu.html
-torch-geometric==2.5.2
+# PyTorch Geometric dependencies
+# This file is referenced by scripts/setup/setup.sh
+
+# PyTorch Geometric - depends on PyTorch version
+torch-geometric
+torch-scatter
+torch-sparse
+torch-cluster
+torch-spline-conv
+
+# Alternative installation for specific PyTorch versions:
+# pip install torch-geometric torch-scatter torch-sparse torch-cluster torch-spline-conv -f https://data.pyg.org/whl/torch-2.2.2+cpu.html

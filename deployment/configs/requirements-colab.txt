@@ -1,18 +1,33 @@
-# FAISS with explicit CUDA 12 support and dependencies
-faiss-gpu-cu12>=1.11.0
-nvidia-cuda-runtime-cu12
-nvidia-cublas-cu12
+# InsightSpike-AI Colab Requirements
+# Core dependencies for Poetry installation
+# 
+# STRATEGIC COORDINATION:
+# - This file excludes torch and faiss to prevent installation conflicts
+# - GPU-critical packages (torch, faiss) are installed separately via pip in setup scripts
+# - Complete dependency list available in requirements-colab-comprehensive.txt
+# - Use setup_colab.sh for coordinated installation
+#
+# Note: torch and faiss are installed separately in setup script for GPU optimization
 
-# Core ML libraries
-sentence-transformers>=2.2.0
+# Core ML libraries (without torch - installed separately with CUDA)
+sentence-transformers>=2.5
 transformers>=4.30.0,<4.40.0
-torch>=2.2.0
-accelerate>=0.20.0
+accelerate>=0.29
+scipy>=1.12
+scikit-learn>=1.4
+numpy<2.0
 
 # CLI and utilities
-rich>=13.0.0
-typer>=0.9.0
-scikit-learn>=1.3.0
-networkx>=3.1
-numpy<2.0
+rich>=13.6
+typer>=0.7,<0.10
+click>=8.0,<8.2
+networkx>=3.3
+datasets>=2.5
+matplotlib>=3.8
+nltk>=3.8
+pyyaml>=6.0
+
+# Note: The following are installed separately for GPU optimization:
+# - torch==2.2.2 (with CUDA support)
+# - faiss-gpu-cu12 (with CPU fallback)
 

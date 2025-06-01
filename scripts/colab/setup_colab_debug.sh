@@ -7,6 +7,7 @@ set -e
 echo "🔍 InsightSpike-AI Debug Setup for Google Colab"
 echo "🛠️ Diagnostic mode with detailed logging"
 echo "📊 Identifying PyTorch Geometric installation issues"
+echo "🔧 Strategic dependency coordination analysis"
 
 # Create log file
 LOG_FILE="colab_debug_$(date +%Y%m%d_%H%M%S).log"
@@ -51,6 +52,12 @@ which python
 which pip
 pip list | head -20
 
+echo ""
+echo "=== DEPENDENCY COORDINATION STRATEGY ==="
+log_info "1. GPU-critical packages installed first via pip"
+log_info "2. Poetry dependencies from requirements-colab.txt (excludes torch/faiss)"
+log_info "3. Complete reference: requirements-colab-comprehensive.txt"
+
 # 1. Environment Preparation
 log_info "Preparing environment..."
 pip install -q --upgrade pip setuptools wheel
@@ -61,7 +68,7 @@ log_info "Installing PyTorch with CUDA support..."
 echo "=== PYTORCH INSTALLATION START ==="
 start_time=$(date +%s)
 
-pip install -q torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+pip install -q torch==2.2.2 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
 end_time=$(date +%s)
 pytorch_time=$((end_time - start_time))
@@ -136,7 +143,34 @@ free -h
 df -h
 pip list | grep -E "(torch|pyg|geometric)"
 
-# 5. Installation Validation
+# 5. FAISS Installation with Debug
+log_info "Installing FAISS with GPU support (debug mode)..."
+echo "=== FAISS INSTALLATION START ==="
+
+# Install CUDA dependencies first
+pip install -q nvidia-cuda-runtime-cu12 nvidia-cublas-cu12
+
+# Install FAISS-GPU with detailed monitoring
+timeout 300 pip install -v faiss-gpu-cu12 || {
+    log_warning "FAISS-GPU installation failed, trying CPU fallback..."
+    pip install -v faiss-cpu
+}
+
+# Test FAISS functionality
+python -c "
+import faiss
+print(f'FAISS version: {faiss.__version__}')
+try:
+    # Test GPU
+    res = faiss.StandardGpuResources()
+    print('✅ FAISS GPU support working')
+except Exception as e:
+    print(f'⚠️ FAISS GPU not available: {e}')
+"
+
+echo "=== FAISS INSTALLATION END ==="
+
+# 6. Installation Validation
 log_info "Running comprehensive validation..."
 echo "=== VALIDATION RESULTS ==="
 
@@ -180,7 +214,7 @@ except Exception as e:
     print(f'❌ GPU test failed: {e}')
 "
 
-# 6. Detailed Build Information
+# 7. Detailed Build Information
 log_info "Collecting build environment information..."
 echo "=== BUILD ENVIRONMENT ==="
 gcc --version 2>/dev/null || log_warning "GCC not available"
@@ -196,7 +230,7 @@ for key, value in sysconfig.get_config_vars().items():
         print(f'  {key}: {value}')
 "
 
-# 7. Network and Download Speed Test
+# 8. Network and Download Speed Test
 log_info "Testing network connectivity to PyG servers..."
 echo "=== NETWORK DIAGNOSTICS ==="
 curl -I "https://data.pyg.org/whl/" 2>/dev/null | head -5 || log_warning "PyG server unreachable"
@@ -209,32 +243,48 @@ time_end=$(date +%s)
 download_time=$((time_end - time_start))
 log_info "PyG server response time: ${download_time}s"
 
-# 8. Summary Report
-echo ""
-echo "=== INSTALLATION SUMMARY ==="
-log_info "Setup debug analysis complete"
-log_info "Total PyTorch installation time: ${pytorch_time}s"
-log_info "Log file saved as: $LOG_FILE"
+# 9. Install remaining dependencies
+log_info "Installing remaining dependencies..."
+pip install -q transformers datasets tokenizers sentence-transformers
+pip install -q typer rich click pyyaml networkx scikit-learn matplotlib
 
-echo ""
-echo "📋 Key Findings:"
-echo "   • PyTorch installation: ${pytorch_time}s"
-echo "   • GPU availability: $(python -c 'import torch; print(torch.cuda.is_available())')"
-echo "   • PyG component status:"
+# 9. Install Poetry and remaining dependencies
+log_info "Installing Poetry and coordinated dependencies..."
+echo "=== POETRY INSTALLATION START ==="
 
-for component in torch_geometric torch_scatter torch_sparse torch_cluster; do
-    status=$(python -c "
-try:
-    import $component
-    print('✅ AVAILABLE')
-except:
-    print('❌ MISSING')
-" 2>/dev/null)
-    echo "     - $component: $status"
-done
+# Install Poetry
+curl -sSL https://install.python-poetry.org | python3 -
+export PATH="/root/.local/bin:$PATH"
 
+if command -v poetry &> /dev/null; then
+    log_info "Poetry installation successful"
+    poetry config virtualenvs.create false
+    
+    # Install remaining dependencies via Poetry
+    log_info "Installing coordinated dependencies via Poetry..."
+    poetry install --only main
+else
+    log_warning "Poetry installation failed - falling back to pip"
+fi
+
+echo "=== POETRY INSTALLATION END ==="
+
+# 10. Install project and test
+pip install -q -e .
+mkdir -p experiment_results logs data/processed data/raw
+
+# Final summary
 echo ""
-echo "📝 Recommendations:"
+echo "=== DIAGNOSTIC SUMMARY ==="
+log_info "Debug setup completed"
+echo "📝 Detailed logs saved to: $LOG_FILE"
+echo ""
+echo "🔍 Key findings:"
+echo "   • PyTorch installation time: ${pytorch_time}s"
+echo "   • PyG server response time: ${download_time}s"
+echo "   • Log file contains detailed bottleneck analysis"
+echo ""
+echo "💡 Recommendations:"
 echo "   • Use fast setup script for development: setup_colab_fast.sh"
 echo "   • For production: Consider prebaked Docker image"
 echo "   • Specific issues identified in: $LOG_FILE"
@@ -244,3 +294,9 @@ echo "🔗 Next steps:"
 echo "   • Review log file for specific bottlenecks"
 echo "   • Use timeout-based installation strategy"
 echo "   • Consider PyTorch Geometric alternatives if needed"
+
+echo ""
+echo "📋 Dependencies coordinated via:"
+echo "   • GPU packages installed first via pip (torch, faiss)"
+echo "   • Strategic timing analysis for optimization"
+echo "   • Complete diagnostic logging for troubleshooting"

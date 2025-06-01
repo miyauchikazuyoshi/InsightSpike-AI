@@ -7,6 +7,7 @@ set -e
 echo "⚡ InsightSpike-AI Minimal Setup for Google Colab"
 echo "🎯 Essential dependencies only - 60 second setup"
 echo "⚠️ PyTorch Geometric skipped for speed"
+echo "🔧 Strategic dependency coordination"
 
 # Timer for setup
 start_time=$(date +%s)
@@ -20,7 +21,7 @@ pip install -q "numpy<2.0"
 # Core ML framework (fast prebuilt)
 echo ""
 echo "🔥 Installing PyTorch (CUDA 12.1)..."
-pip install -q torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+pip install -q torch==2.2.2 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
 # Vector search (critical for performance)
 echo ""
@@ -80,6 +81,11 @@ setup_time=$((end_time - start_time))
 echo ""
 echo "⚡ Minimal setup complete in ${setup_time}s!"
 echo ""
+echo "📋 Dependencies coordinated via:"
+echo "   • GPU packages installed first (torch, faiss)"
+echo "   • Essential dependencies only"
+echo "   • No Poetry coordination (direct pip)"
+echo ""
 echo "🚀 Ready for:"
 echo "   • Basic insight detection"
 echo "   • Vector search operations"
@@ -92,3 +98,6 @@ echo "   • Advanced graph analysis"
 echo ""
 echo "📝 Quick test:"
 echo "   PYTHONPATH=src python -c 'from insightspike.core.config import get_config; print(\"Ready!\")'"
+
+# Save setup log
+echo "$(date): Minimal setup completed in ${setup_time}s" >> logs/colab_setup.log

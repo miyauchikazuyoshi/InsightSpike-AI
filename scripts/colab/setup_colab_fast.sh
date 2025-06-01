@@ -7,6 +7,7 @@ set -e
 echo "⚡ InsightSpike-AI Fast Setup for Google Colab"
 echo "🎯 Optimized for quick testing and development"
 echo "📦 Using prebuilt wheels and timeout handling"
+echo "🔧 Coordinated dependency strategy"
 
 # Function to install with timeout
 install_with_timeout() {
@@ -44,7 +45,7 @@ pip install -q "numpy<2.0" pandas matplotlib
 # 2. PyTorch with CUDA (fast prebuilt wheels)
 echo ""
 echo "🔥 Installing PyTorch (CUDA 12.1 optimized)..."
-install_with_timeout "torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121" 300
+install_with_timeout "torch==2.2.2 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121" 300
 
 verify_package "torch" "torch"
 
@@ -176,6 +177,9 @@ export PATH="/root/.local/bin:$PATH"
 if command -v poetry &> /dev/null; then
     echo "✅ Poetry available"
     poetry config virtualenvs.create false
+    
+    echo "📦 Installing remaining dependencies with Poetry..."
+    poetry install --only main
 else
     echo "⚠️ Poetry not available - using pip only"
 fi
@@ -224,6 +228,11 @@ except:
 echo ""
 echo "⚡ Fast setup complete!"
 echo "🎯 Total setup time: ~3-5 minutes"
+echo ""
+echo "📋 Dependencies coordinated via:"
+echo "   • GPU packages installed first via pip (torch, faiss)"
+echo "   • Remaining dependencies via Poetry (when available)"
+echo "   • Strategic conflict avoidance"
 echo ""
 echo "📝 Quick start commands:"
 echo "   🔬 Test basic functionality:"

@@ -97,14 +97,42 @@ The easiest way to get started is with our simplified Colab notebook:
 2. **Choose GPU runtime**: Runtime > Change runtime type > GPU  
 3. **Run cells in order**: The notebook guides you through setup and demo
 
-### 🚀 Manual Setup Options
+### 🚀 Validated Setup Scripts
 
 #### ⚡ Fast Setup (3-5 minutes, recommended)
 ```bash
-git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
-cd InsightSpike-AI
-scripts/colab/setup_colab.sh fast
+!git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
+%cd InsightSpike-AI
+!chmod +x scripts/colab/setup_colab_fast.sh
+!./scripts/colab/setup_colab_fast.sh
 ```
+
+#### 🔥 Minimal Setup (<60 seconds, for testing)
+```bash
+!git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
+%cd InsightSpike-AI
+!chmod +x scripts/colab/setup_colab_minimal.sh
+!./scripts/colab/setup_colab_minimal.sh
+```
+
+#### 📋 Production Setup (10-15 minutes, complete)
+```bash
+!git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
+%cd InsightSpike-AI
+!chmod +x scripts/colab/setup_colab.sh
+!./scripts/colab/setup_colab.sh
+```
+
+#### 🔍 Debug Setup (15-20 minutes, troubleshooting)
+```bash
+!git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
+%cd InsightSpike-AI
+!chmod +x scripts/colab/setup_colab_debug.sh
+!./scripts/colab/setup_colab_debug.sh
+```
+
+> **✅ All setup scripts are fully tested and validated**  
+> See [`scripts/colab/VALIDATION_SUMMARY.md`](scripts/colab/VALIDATION_SUMMARY.md) for detailed validation results.
 
 #### 🚀 Ultra-Fast Setup (<60 seconds)
 ```bash
@@ -160,14 +188,31 @@ poetry run insightspike loop "What is quantum entanglement?"
 
 #### ☁️ Google Colab Environment (faiss-gpu-cu12)
 **Best for**: GPU acceleration, large-scale experiments, research
+
+**Strategic Dependency Coordination**: Our Colab setup implements sophisticated coordination between pip and Poetry to avoid GPU package conflicts:
+
 ```bash
-# Method 1: Enhanced setup script (recommended)
+# Method 1: Automated setup script (recommended)
 !git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
 %cd InsightSpike-AI
 !chmod +x scripts/colab/setup_colab.sh
 !bash scripts/colab/setup_colab.sh
+```
 
-# Method 2: Use pre-configured notebook
+**Setup Options**:
+- `setup_colab.sh` - Standard coordinated setup (8-12 min)
+- `setup_colab_fast.sh` - Fast setup with timeout protection (3-5 min)  
+- `setup_colab_minimal.sh` - Ultra-fast essential only (<60 sec)
+- `setup_colab_debug.sh` - Detailed logging for troubleshooting (15-20 min)
+
+**Coordination Strategy**:
+1. **GPU-critical packages** (PyTorch, FAISS) installed first via pip with CUDA support
+2. **Remaining dependencies** installed via Poetry using `requirements-colab.txt`
+3. **Conflict avoidance**: `requirements-colab.txt` excludes torch/faiss
+4. **Complete reference**: `requirements-colab-comprehensive.txt` documents all dependencies
+
+```bash
+# Method 2: Use pre-configured notebook (simplified)
 # Open: InsightSpike_Colab_Demo.ipynb
 ```
 
@@ -183,12 +228,28 @@ export INSIGHTSPIKE_LITE_MODE=1
 python -m pytest development/tests/unit/ -v
 ```
 
-### 📦 Dependency Strategy
+### 📦 Strategic Dependency Management
+
+Our multi-environment approach ensures optimal performance across different deployment contexts:
+
 - **`dev`**: Local development with faiss-cpu, full testing suite
-- **`colab`**: Google Colab optimized with faiss-gpu priority installation
+- **`colab`**: Google Colab optimized with strategic faiss-gpu priority installation  
 - **`ci`**: Minimal dependencies for fast CI/CD pipelines
 
-**Key Innovation**: Our setup prioritizes faiss-gpu installation in Colab before Poetry operations, ensuring GPU acceleration while maintaining compatibility across all environments.
+**Key Innovation**: 
+- **Colab Coordination**: GPU-critical packages (torch, faiss) installed first via pip to ensure CUDA compatibility
+- **Poetry Integration**: Remaining dependencies managed via Poetry using curated requirements files
+- **Conflict Prevention**: `requirements-colab.txt` strategically excludes torch/faiss to prevent version conflicts
+- **Complete Documentation**: `requirements-colab-comprehensive.txt` serves as authoritative dependency reference
+
+**Requirements File Structure**:
+```
+deployment/configs/
+├── requirements-colab.txt              # Poetry-managed (excludes torch/faiss)
+├── requirements-colab-comprehensive.txt # Complete reference documentation
+├── requirements-torch.txt              # PyTorch with CUDA support
+└── requirements-PyG.txt                # PyTorch Geometric components
+```
 
 For development, PoC, or experiments, please make sure to install all dependencies including dev packages:
 ```poetry install --with dev```

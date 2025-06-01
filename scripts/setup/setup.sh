@@ -12,5 +12,5 @@ poetry install
 
 echo "=== 3) Install pip dependencies inside poetry venv ==="
 poetry run pip install --upgrade pip
-poetry run pip install -r requirements-torch.txt
-poetry run pip install -r requirements-PyG.txt
+poetry run pip install -r deployment/configs/requirements-torch.txt
+poetry run pip install -r deployment/configs/requirements-PyG.txt
