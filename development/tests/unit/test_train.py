@@ -1,4 +1,4 @@
-from insightspike.train import train
+from insightspike.training.train import train
 
 
 def test_train_noop():

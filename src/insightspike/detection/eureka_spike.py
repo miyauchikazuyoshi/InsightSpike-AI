@@ -9,14 +9,12 @@ import os
 import importlib.util
 
 try:
-    # Import from the legacy config.py file explicitly 
-    _config_file = os.path.join(os.path.dirname(__file__), 'config.py')
-    _spec = importlib.util.spec_from_file_location("legacy_config", _config_file)
-    _config = importlib.util.module_from_spec(_spec)
-    _spec.loader.exec_module(_config)
-    SPIKE_GED = _config.SPIKE_GED
-    SPIKE_IG = _config.SPIKE_IG
-    ETA_SPIKE = _config.ETA_SPIKE
+    # Import from the unified config system
+    from ..config import get_legacy_config
+    legacy_config = get_legacy_config()
+    SPIKE_GED = legacy_config.get('SPIKE_GED', 0.5)
+    SPIKE_IG = legacy_config.get('SPIKE_IG', 0.2)
+    ETA_SPIKE = legacy_config.get('ETA_SPIKE', 0.2)
 except (ImportError, AttributeError):
     # Fallback for testing or if config is not available
     SPIKE_GED = 0.5

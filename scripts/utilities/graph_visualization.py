@@ -18,7 +18,7 @@ from matplotlib.patches import Rectangle
 
 # Try importing InsightSpike components
 try:
-    from insightspike.graph_metrics import delta_ged, delta_ig
+    from insightspike.metrics.graph_metrics import delta_ged, delta_ig
     from insightspike.core.layers.layer3_graph_reasoner import L3GraphReasoner
     
     # Create a graph builder for compatibility
@@ -74,8 +74,8 @@ class GraphVisualizationDemo:
         """Setup sentence embedder for vector generation"""
         if INSIGHTSPIKE_AVAILABLE:
             try:
-                self.embedder = SentenceEmbedder()
-                print("✅ Using InsightSpike SentenceEmbedder")
+                self.embedder = EmbeddingManager()
+                print("✅ Using InsightSpike EmbeddingManager")
             except:
                 self.embedder = None
         
@@ -286,7 +286,7 @@ class GraphVisualizationDemo:
             print(f"   ΔIG: {result['delta_ig']:.3f}")
             
             # Insight detection logic
-            insight_detected = result['delta_ged'] >= 0.5 and result['delta_ig'] >= 0.2
+            insight_detected = bool(result['delta_ged'] >= 0.5 and result['delta_ig'] >= 0.2)
             print(f"   Insight: {'✅ DETECTED' if insight_detected else '❌ Not detected'}")
             
             # Create visualization
@@ -307,8 +307,8 @@ class GraphVisualizationDemo:
             results.append({
                 "question": question_info['question'],
                 "type": question_info['type'],
-                "delta_ged": result['delta_ged'],
-                "delta_ig": result['delta_ig'],
+                "delta_ged": float(result['delta_ged']),
+                "delta_ig": float(result['delta_ig']),
                 "insight_detected": insight_detected,
                 "visualization_path": str(filepath)
             })
@@ -324,8 +324,8 @@ class GraphVisualizationDemo:
                 "results": results,
                 "summary": {
                     "insight_questions": sum(1 for r in results if r['insight_detected']),
-                    "avg_delta_ged": sum(r['delta_ged'] for r in results) / len(results),
-                    "avg_delta_ig": sum(r['delta_ig'] for r in results) / len(results)
+                    "avg_delta_ged": float(sum(r['delta_ged'] for r in results) / len(results)),
+                    "avg_delta_ig": float(sum(r['delta_ig'] for r in results) / len(results))
                 }
             }, f, indent=2)
         

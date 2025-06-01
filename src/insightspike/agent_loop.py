@@ -27,12 +27,12 @@ try:
 except ImportError:
     USE_NEW_AGENT = False
 
-from .graph_metrics import delta_ged, delta_ig
-from .eureka_spike import EurekaDetector
+from .metrics.graph_metrics import delta_ged, delta_ig
+from .detection.eureka_spike import EurekaDetector
 from .core.layers.layer1_error_monitor import analyze_input, KnownUnknownAnalysis
-from .adaptive_topk import calculate_adaptive_topk, estimate_chain_reaction_potential
-from .unknown_learner import UnknownLearner
-from .insight_fact_registry import InsightFactRegistry
+from .learning.adaptive_topk import calculate_adaptive_topk, estimate_chain_reaction_potential
+from .learning.unknown_learner import UnknownLearner
+from .detection.insight_registry import InsightFactRegistry
 
 logger = logging.getLogger(__name__)
 

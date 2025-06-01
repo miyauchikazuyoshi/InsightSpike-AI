@@ -8,7 +8,7 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from insightspike.insight_fact_registry import InsightFactRegistry, InsightFact
+from insightspike.detection.insight_registry import InsightFactRegistry, InsightFact
 from insightspike.layer1_error_monitor import analyze_input
 import time
 

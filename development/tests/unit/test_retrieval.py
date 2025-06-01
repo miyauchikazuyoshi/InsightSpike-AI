@@ -1,4 +1,4 @@
-from insightspike.retrieval import retrieve
+from insightspike.processing.retrieval import retrieve
 
 
 def test_retrieve():

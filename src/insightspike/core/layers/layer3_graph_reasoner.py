@@ -16,7 +16,7 @@ from torch_geometric.data import Data
 from torch_geometric.nn import GCNConv, global_mean_pool
 from sklearn.metrics.pairwise import cosine_similarity
 
-from ..interfaces import L3GraphReasonerInterface
+from ..interfaces import L3GraphReasonerInterface, LayerInput, LayerOutput
 from ..config import get_config
 from ...utils.graph_metrics import delta_ged, delta_ig
 
@@ -185,6 +185,8 @@ class L3GraphReasoner(L3GraphReasonerInterface):
     """
     
     def __init__(self, config=None):
+        # Set layer_id for LayerInterface
+        super().__init__("layer3_graph_reasoner", config)
         self.config = config or get_config()
         self.graph_builder = GraphBuilder(config)
         self.conflict_scorer = ConflictScore(config)
@@ -195,6 +197,43 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         if self.config.reasoning.use_gnn:
             self._init_gnn()
     
+    def initialize(self) -> bool:
+        """Initialize the layer"""
+        try:
+            # Any initialization needed
+            self._is_initialized = True
+            logger.info("L3GraphReasoner initialized successfully")
+            return True
+        except Exception as e:
+            logger.error(f"L3GraphReasoner initialization failed: {e}")
+            return False
+    
+    def process(self, input_data) -> Any:
+        """Process input through this layer"""
+        try:
+            # Handle LayerInput format if provided
+            if hasattr(input_data, 'data'):
+                documents = input_data.data
+                context = input_data.context or {}
+            else:
+                documents = input_data
+                context = {}
+            
+            return self.analyze_documents(documents, context)
+        except Exception as e:
+            logger.error(f"L3GraphReasoner processing failed: {e}")
+            return self._fallback_result()
+    
+    def cleanup(self):
+        """Cleanup resources"""
+        try:
+            self.previous_graph = None
+            self.gnn = None
+            self._is_initialized = False
+            logger.info("L3GraphReasoner cleaned up successfully")
+        except Exception as e:
+            logger.error(f"L3GraphReasoner cleanup failed: {e}")
+
     def analyze_documents(self, documents: List[Dict[str, Any]], 
                          context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Analyze documents and detect insights through graph reasoning."""

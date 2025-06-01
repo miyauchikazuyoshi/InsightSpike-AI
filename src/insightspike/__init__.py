@@ -60,16 +60,27 @@ try:
 except ImportError:
     L3GraphReasoner = None
 
-# Import the legacy config.py module explicitly to avoid conflict with config/ directory
-_config_file = os.path.join(os.path.dirname(__file__), 'config.py')
-_spec = importlib.util.spec_from_file_location("legacy_config", _config_file)
-config = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(config)
+# Import the unified config system
+from .config import get_config
 
-# Legacy module exports for compatibility
-from . import graph_metrics
-from . import eureka_spike
+# Create a legacy config module object for backward compatibility  
+class LegacyConfigModule:
+    def __init__(self):
+        from .config import get_legacy_config
+        legacy = get_legacy_config()
+        for key, value in legacy.items():
+            setattr(self, key, value)
+    
+    def timestamp(self):
+        from datetime import datetime
+        return datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+
+config = LegacyConfigModule()
+
+# Legacy module exports for compatibility - new organized structure
 from . import utils
+from .metrics import graph_metrics  
+from .detection import eureka_spike
 
 # Version info
 __version__ = About.VERSION

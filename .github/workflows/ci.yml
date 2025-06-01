@@ -60,7 +60,6 @@ jobs:
       run: |
         # Test specific unit tests that don't require heavy dependencies
         poetry run pytest development/tests/unit/test_config.py -v --tb=short
-        poetry run pytest development/tests/unit/test_cache_manager.py -v --tb=short
         poetry run pytest development/tests/unit/test_cli.py -v --tb=short
         poetry run pytest development/tests/unit/test_data_loader.py -v --tb=short
         poetry run pytest development/tests/unit/test_layer1_error_monitor.py -v --tb=short

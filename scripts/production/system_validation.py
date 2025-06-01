@@ -89,7 +89,7 @@ class SystemValidator:
             imports["MainAgent"] = False
             
         try:
-            from insightspike.insight_fact_registry import InsightFactRegistry
+            from insightspike.detection.insight_registry import InsightFactRegistry
             imports["InsightFactRegistry"] = True
         except ImportError:
             imports["InsightFactRegistry"] = False
@@ -145,7 +145,7 @@ class SystemValidator:
     
     def validate_database(self) -> Dict[str, Any]:
         """Validate database connectivity and integrity"""
-        from insightspike.insight_fact_registry import InsightFactRegistry
+        from insightspike.detection.insight_registry import InsightFactRegistry
         
         registry = InsightFactRegistry()
         
@@ -202,7 +202,7 @@ class SystemValidator:
         """Validate insight registry functionality"""
         if CI_MODE or INSIGHTSPIKE_LITE_MODE:
             # In CI mode, just verify the class can be imported
-            from insightspike.insight_fact_registry import InsightFactRegistry
+            from insightspike.detection.insight_registry import InsightFactRegistry
             registry = InsightFactRegistry()
             return {
                 "extraction_working": "skipped_in_ci",
@@ -211,7 +211,7 @@ class SystemValidator:
                 "registry_functional": True
             }
         
-        from insightspike.insight_fact_registry import InsightFactRegistry
+        from insightspike.detection.insight_registry import InsightFactRegistry
         
         registry = InsightFactRegistry()
         
@@ -278,7 +278,7 @@ class SystemValidator:
         memory_increase = current_memory - self.initial_memory
         
         # Test memory under load
-        from insightspike.insight_fact_registry import InsightFactRegistry
+        from insightspike.detection.insight_registry import InsightFactRegistry
         
         registries = []
         for i in range(10):
@@ -322,7 +322,7 @@ class SystemValidator:
                 "total_test_questions": 0
             }
         
-        from insightspike.insight_fact_registry import InsightFactRegistry
+        from insightspike.detection.insight_registry import InsightFactRegistry
         from insightspike.core.agents.main_agent import MainAgent
         
         # Test insight extraction performance
@@ -373,7 +373,7 @@ class SystemValidator:
             }
         
         from insightspike.core.agents.main_agent import MainAgent
-        from insightspike.insight_fact_registry import InsightFactRegistry
+        from insightspike.detection.insight_registry import InsightFactRegistry
         
         # Test full workflow
         agent = MainAgent()

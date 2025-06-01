@@ -47,13 +47,18 @@ __pycache__/
 
 # 実行結果・レポート（一時的な生成物）
 /validation_results/
-/hf_dataset_integration_report.json
-/VISUAL_SUMMARY.txt
+/documentation/reports/
+*.json
+*REPORT*.md
+*SUMMARY*.txt
+PROJECT_STRUCTURE_*.md
 /documentation/reports/VISUAL_SUMMARY.txt
 
 # バックアップファイル
 *.backup
 *.bak
+archive_old_experiments/
+archive_legacy_compatibility/
 
 # 作業ログ・レポート（AI作業記録は除外）
 documentation/reports/

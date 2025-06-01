@@ -85,7 +85,7 @@ def test_insight_extraction():
     print("\nTesting insight extraction...")
     
     try:
-        from insightspike.insight_fact_registry import InsightFactRegistry
+        from insightspike.detection.insight_registry import InsightFactRegistry
         
         registry = InsightFactRegistry()
         print("✓ Created InsightFactRegistry")

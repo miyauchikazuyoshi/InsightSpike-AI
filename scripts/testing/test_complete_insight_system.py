@@ -91,7 +91,7 @@ def test_cli_insights_commands():
     print("\nTesting CLI insight management commands...")
     
     try:
-        from insightspike.insight_fact_registry import InsightFactRegistry
+        from insightspike.detection.insight_registry import InsightFactRegistry
         
         # Create registry and add some test insights
         registry = InsightFactRegistry()
@@ -137,7 +137,7 @@ def test_insight_quality_evaluation():
     print("\nTesting insight quality evaluation...")
     
     try:
-        from insightspike.insight_fact_registry import InsightFactRegistry
+        from insightspike.detection.insight_registry import InsightFactRegistry
         
         registry = InsightFactRegistry()
         
@@ -179,7 +179,7 @@ def test_database_operations():
     print("\nTesting database operations...")
     
     try:
-        from insightspike.insight_fact_registry import InsightFactRegistry
+        from insightspike.detection.insight_registry import InsightFactRegistry
         
         registry = InsightFactRegistry()
         

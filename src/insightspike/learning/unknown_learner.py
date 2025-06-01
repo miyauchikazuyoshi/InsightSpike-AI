@@ -63,7 +63,9 @@ class UnknownLearner:
     def __init__(self, db_path: Optional[Path] = None):
         """Initialize the unknown learner with persistent storage"""
         if db_path is None:
-            db_path = Path(__file__).parent.parent.parent / "data" / "unknown_learning.db"
+            from ..core.config import get_config
+            config = get_config()
+            db_path = config.paths.root_dir / "data" / "unknown_learning.db"
         
         self.db_path = db_path
         self.db_path.parent.mkdir(parents=True, exist_ok=True)

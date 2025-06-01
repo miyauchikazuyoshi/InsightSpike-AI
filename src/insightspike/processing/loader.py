@@ -2,13 +2,15 @@
 from pathlib import Path
 from typing import List
 
-from .core.config import get_config
-from .utils.text_utils import iter_text, clean_text
+from ..core.config import get_config
+from ..utils.text_utils import iter_text, clean_text
 
 __all__ = ["load_corpus"]
 
 def load_corpus(path: Path | None = None) -> List[str]:
-    p = Path(path)
+    config = get_config()
+    root = path or config.paths.data_dir
+    p = Path(root)
     if p.is_file():
         try:
             return [line.strip() for line in p.open(encoding="utf-8") if line.strip()]

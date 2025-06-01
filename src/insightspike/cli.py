@@ -11,8 +11,8 @@ import json
 # New imports for refactored structure
 from .core.agents.main_agent import MainAgent
 from .core.config import get_config
-from .loader import load_corpus
-from .insight_fact_registry import InsightFactRegistry
+from .processing.loader import load_corpus
+from .detection.insight_registry import InsightFactRegistry
 
 app = typer.Typer()
 

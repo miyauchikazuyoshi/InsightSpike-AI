@@ -18,9 +18,9 @@ from matplotlib.patches import Rectangle
 
 # Try importing InsightSpike components
 try:
-    from insightspike.graph_metrics import delta_ged, delta_ig
+    from insightspike.metrics.graph_metrics import delta_ged, delta_ig
     from insightspike.layer3_graph_pyg import build_graph, load_graph
-    from insightspike.embedder import SentenceEmbedder
+    from insightspike.utils.embedder import EmbeddingManager
     INSIGHTSPIKE_AVAILABLE = True
 except ImportError:
     INSIGHTSPIKE_AVAILABLE = False
@@ -69,8 +69,8 @@ class GraphVisualizationDemo:
         """Setup sentence embedder for vector generation"""
         if INSIGHTSPIKE_AVAILABLE:
             try:
-                self.embedder = SentenceEmbedder()
-                print("✅ Using InsightSpike SentenceEmbedder")
+                self.embedder = EmbeddingManager()
+                print("✅ Using InsightSpike EmbeddingManager")
             except:
                 self.embedder = None
         

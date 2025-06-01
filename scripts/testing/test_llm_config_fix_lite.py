@@ -76,7 +76,7 @@ def test_end_to_end_with_insight():
     try:
         from insightspike.cli import ask
         from insightspike.core.agents.main_agent import MainAgent
-        from insightspike.insight_fact_registry import InsightFactRegistry
+        from insightspike.detection.insight_registry import InsightFactRegistry
         
         # Test that components can be imported and created
         agent = MainAgent()

@@ -1,4 +1,4 @@
-from insightspike.predict import predict
+from insightspike.training.predict import predict
 
 
 def test_predict():
