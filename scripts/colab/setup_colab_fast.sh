@@ -40,7 +40,7 @@ nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null || ec
 echo ""
 echo "🐍 Installing essential Python packages..."
 pip install -q --upgrade pip setuptools wheel
-pip install -q "numpy<2.0" pandas matplotlib
+pip install -q "numpy>=1.24.0,<3.0.0" pandas matplotlib
 
 # 2. PyTorch with CUDA (fast prebuilt wheels)
 echo ""

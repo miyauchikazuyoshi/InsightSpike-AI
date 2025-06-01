@@ -16,7 +16,7 @@ start_time=$(date +%s)
 echo ""
 echo "🐍 Updating Python environment..."
 pip install -q --upgrade pip setuptools wheel
-pip install -q "numpy<2.0"
+pip install -q "numpy>=1.24.0,<3.0.0"
 
 # Core ML framework (fast prebuilt)
 echo ""

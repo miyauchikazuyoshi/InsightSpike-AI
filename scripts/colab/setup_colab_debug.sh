@@ -61,7 +61,7 @@ log_info "3. Complete reference: requirements-colab-comprehensive.txt"
 # 1. Environment Preparation
 log_info "Preparing environment..."
 pip install -q --upgrade pip setuptools wheel
-pip install -q "numpy<2.0"
+pip install -q "numpy>=1.24.0,<3.0.0"
 
 # 2. PyTorch Installation with Debug
 log_info "Installing PyTorch with CUDA support..."

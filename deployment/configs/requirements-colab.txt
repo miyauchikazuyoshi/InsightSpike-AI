@@ -15,7 +15,7 @@ transformers>=4.30.0,<4.40.0
 accelerate>=0.29
 scipy>=1.12
 scikit-learn>=1.4
-numpy<2.0
+numpy>=1.24.0,<3.0.0
 
 # CLI and utilities
 rich>=13.6
