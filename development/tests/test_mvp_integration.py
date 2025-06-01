@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 # Test imports
 from insightspike.graph_metrics import delta_ged, delta_ig
 from insightspike.eureka_spike import EurekaDetector, detect_eureka_spike
-from insightspike.layer2_memory_manager import Memory, Episode
+from insightspike.core.layers.layer2_memory_manager import L2MemoryManager as Memory, Episode
 
 
 class TestInsightSpikeMVP:

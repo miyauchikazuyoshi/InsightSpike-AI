@@ -12,7 +12,7 @@ LITE_MODE = os.environ.get('INSIGHTSPIKE_LITE_MODE', '0') == '1'
 
 if not LITE_MODE:
     try:
-        from .core.agents.main_agent import MainAgent
+        from .core.agents.main_agent import MainAgent, CycleResult
     except ImportError:
         # Define a placeholder if main_agent is not available
         class MainAgent:
@@ -22,6 +22,10 @@ if not LITE_MODE:
                 return False
             def process_question(self, question, **kwargs):
                 return {"response": "MainAgent not available", "success": False}
+        
+        class CycleResult:
+            def __init__(self, **kwargs):
+                pass
 else:
     # In lite mode, always use placeholder
     class MainAgent:
@@ -31,9 +35,30 @@ else:
             return False
         def process_question(self, question, **kwargs):
             return {"response": "MainAgent not available (lite mode)", "success": False}
+    
+    class CycleResult:
+        def __init__(self, **kwargs):
+            pass
 
 # Legacy compatibility exports - import the config.py file specifically
 from .core.config import get_config
+
+# New unified layer exports (recommended for new code)
+try:
+    from .core.layers.layer1_error_monitor import ErrorMonitor
+    from .core.layers.layer2_memory_manager import L2MemoryManager
+    from .core.layers.layer4_llm_provider import get_llm_provider
+except ImportError:
+    # Fallback if core layers are not available
+    ErrorMonitor = None
+    L2MemoryManager = None
+    get_llm_provider = None
+
+# Optional Layer3 with PyTorch dependency
+try:
+    from .core.layers.layer3_graph_reasoner import L3GraphReasoner
+except ImportError:
+    L3GraphReasoner = None
 
 # Import the legacy config.py module explicitly to avoid conflict with config/ directory
 _config_file = os.path.join(os.path.dirname(__file__), 'config.py')
@@ -42,7 +67,6 @@ config = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(config)
 
 # Legacy module exports for compatibility
-from . import embedder
 from . import graph_metrics
 from . import eureka_spike
 from . import utils
@@ -51,4 +75,4 @@ from . import utils
 __version__ = About.VERSION
 
 # Main exports
-__all__ = ["MainAgent", "CycleResult", "get_config", "About", "embedder", "graph_metrics", "eureka_spike", "config", "utils"]
+__all__ = ["MainAgent", "CycleResult", "get_config", "About", "graph_metrics", "eureka_spike", "config", "utils"]

@@ -22,7 +22,7 @@ import faiss, numpy as np, torch
 from torch_geometric.nn import SAGEConv
 from torch_geometric.data import Data
 
-from .utils.embedder      import get_model
+from .embedder            import get_model
 from .layer3_graph_pyg    import load_graph
 from .loader              import load_corpus
 from .config              import LAYER3_TOP_K

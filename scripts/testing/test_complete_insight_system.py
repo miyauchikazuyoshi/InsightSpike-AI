@@ -30,7 +30,7 @@ def test_agent_loop_with_insights():
     
     try:
         from insightspike.agent_loop import cycle
-        from insightspike.layer2_memory_manager import Memory
+        from insightspike.core.layers.layer2_memory_manager import L2MemoryManager as Memory
         
         # Create minimal memory
         memory = Memory(dim=384)

@@ -23,9 +23,8 @@ poetry install --with dev  # localグループは空のため除外
 echo "=== 3) Install environment-specific packages ==="
 poetry run pip install --upgrade pip
 
-# Install NumPy 1.x for local development
-echo "🔢 Installing NumPy 1.x (local development)..."
-poetry run pip install "numpy>=1.26.0,<2.0.0"
+# Note: NumPy is managed by pyproject.toml (>=1.24.0,<2.0.0)
+# No need to install separately as Poetry handles it
 
 # Install PyTorch CPU version for local development
 echo "🔥 Installing PyTorch 2.2.2 (CPU version for local)..."

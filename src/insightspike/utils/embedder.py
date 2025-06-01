@@ -6,6 +6,7 @@ Provides flexible text embedding with multiple model support.
 """
 
 import logging
+import os
 from typing import List, Optional, Union
 import numpy as np
 
@@ -21,11 +22,16 @@ class EmbeddingManager:
     """Manages text embedding models with caching and fallback support."""
     
     def __init__(self, model_name: str = None, config=None):
-        from ...config import get_config
-        
-        self.config = config or get_config()
-        self.model_name = model_name or self.config.embedding.model_name
-        self.dimension = self.config.embedding.dimension
+        try:
+            from ...config import get_config
+            self.config = config or get_config()
+            self.model_name = model_name or self.config.embedding.model_name
+            self.dimension = self.config.embedding.dimension
+        except ImportError:
+            # Fallback configuration
+            self.config = None
+            self.model_name = model_name or "sentence-transformers/all-MiniLM-L6-v2"
+            self.dimension = 384
         self._model = None
         
     def get_model(self):
@@ -39,12 +45,18 @@ class EmbeddingManager:
             self._model = _model_cache[self.model_name]
             return self._model
         
+        # Check for safe mode
+        if os.getenv('INSIGHTSPIKE_SAFE_MODE') == '1':
+            logger.info("Safe mode enabled, using fallback embedder")
+            return self._fallback_model()
+        
         try:
             # Try sentence-transformers first
             from sentence_transformers import SentenceTransformer
             
             logger.info(f"Loading embedding model: {self.model_name}")
-            model = SentenceTransformer(self.model_name)
+            # Explicitly use CPU to avoid GPU segfaults
+            model = SentenceTransformer(self.model_name, device='cpu')
             
             _model_cache[self.model_name] = model
             self._model = model

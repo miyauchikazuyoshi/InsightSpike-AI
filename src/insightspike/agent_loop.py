@@ -29,7 +29,7 @@ except ImportError:
 
 from .graph_metrics import delta_ged, delta_ig
 from .eureka_spike import EurekaDetector
-from .layer1_error_monitor import analyze_input, KnownUnknownAnalysis
+from .core.layers.layer1_error_monitor import analyze_input, KnownUnknownAnalysis
 from .adaptive_topk import calculate_adaptive_topk, estimate_chain_reaction_potential
 from .unknown_learner import UnknownLearner
 from .insight_fact_registry import InsightFactRegistry

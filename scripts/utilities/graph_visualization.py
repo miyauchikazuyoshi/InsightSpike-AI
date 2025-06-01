@@ -19,8 +19,13 @@ from matplotlib.patches import Rectangle
 # Try importing InsightSpike components
 try:
     from insightspike.graph_metrics import delta_ged, delta_ig
-    from insightspike.layer3_graph_pyg import build_graph, load_graph
-    from insightspike.embedder import SentenceEmbedder
+    from insightspike.core.layers.layer3_graph_reasoner import L3GraphReasoner
+    
+    # Create a graph builder for compatibility
+    graph_builder = L3GraphReasoner().graph_builder
+    build_graph = lambda docs: graph_builder.build_graph(docs)
+    load_graph = lambda path: None  # Placeholder
+    from insightspike.utils.embedder import EmbeddingManager
     INSIGHTSPIKE_AVAILABLE = True
 except ImportError:
     INSIGHTSPIKE_AVAILABLE = False

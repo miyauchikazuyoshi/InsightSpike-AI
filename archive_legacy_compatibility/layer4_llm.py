@@ -1,5 +1,23 @@
-"""TinyLlama wrapper"""
+"""
+Layer4 LLM - Compatibility Layer
+===============================
+
+This module provides backward compatibility for the old LLM functions.
+New code should use: from insightspike.core.layers.layer4_llm_provider import get_llm_provider
+
+DEPRECATED: This file will be removed in a future version.
+Use the new structured approach in core/layers/ instead.
+"""
+import warnings
 from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
+
+# Issue deprecation warning
+warnings.warn(
+    "insightspike.layer4_llm is deprecated. "
+    "Use insightspike.core.layers.layer4_llm_provider instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 # Import from the legacy config.py file using the same pattern as __init__.py
 import os

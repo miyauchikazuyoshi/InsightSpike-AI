@@ -52,8 +52,16 @@ class GraphConfig:
 @dataclass
 class ReasoningConfig:
     """Configuration for reasoning layer"""
+    similarity_threshold: float = 0.3
     spike_ged_threshold: float = 0.5
     spike_ig_threshold: float = 0.2
+    conflict_threshold: float = 0.6
+    use_gnn: bool = False
+    weight_ged: float = 1.0
+    weight_ig: float = 1.0
+    weight_conflict: float = 0.5
+    gnn_hidden_dim: int = 64
+    graph_file: str = "data/graph_pyg.pt"
 
 @dataclass
 class MemoryConfig:
@@ -63,6 +71,13 @@ class MemoryConfig:
     prune_c: float = 0.05
     inactive_n: int = 30
     max_retrieved_docs: int = 15
+    min_similarity: float = 0.3
+    nlist: int = 256
+    pq_segments: int = 16
+    c_value_gamma: float = 0.5
+    c_value_min: float = 0.0
+    c_value_max: float = 1.0
+    index_file: str = "data/index.faiss"
 
 @dataclass
 class PathConfig:

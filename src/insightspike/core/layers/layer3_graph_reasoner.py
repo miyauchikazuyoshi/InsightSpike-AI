@@ -16,8 +16,8 @@ from torch_geometric.data import Data
 from torch_geometric.nn import GCNConv, global_mean_pool
 from sklearn.metrics.pairwise import cosine_similarity
 
-from ..interfaces import L3GraphInterface
-from ...config import get_config
+from ..interfaces import L3GraphReasonerInterface
+from ..config import get_config
 from ...utils.graph_metrics import delta_ged, delta_ig
 
 logger = logging.getLogger(__name__)
@@ -173,7 +173,7 @@ class GraphBuilder:
         return Data(x=torch.empty(0, 384), edge_index=torch.empty(2, 0, dtype=torch.long))
 
 
-class L3GraphReasoner(L3GraphInterface):
+class L3GraphReasoner(L3GraphReasonerInterface):
     """
     Enhanced graph reasoning layer with GNN processing and spike detection.
     
@@ -419,4 +419,35 @@ class L3GraphReasoner(L3GraphInterface):
         except Exception as e:
             logger.error(f"Failed to load graph: {e}")
             
+        return None
+    
+    # Interface methods implementation
+    def build_graph(self, vectors: np.ndarray) -> Any:
+        """Build similarity graph from vectors"""
+        # Convert vectors to documents format
+        documents = [{'vector': vec, 'text': f'doc_{i}'} for i, vec in enumerate(vectors)]
+        return self.graph_builder.build_graph(documents, vectors)
+    
+    def calculate_ged(self, graph1: Any, graph2: Any) -> float:
+        """Calculate graph edit distance"""
+        try:
+            return delta_ged(graph1, graph2)
+        except Exception as e:
+            logger.error(f"GED calculation failed: {e}")
+            return 0.0
+    
+    def calculate_ig(self, old_state: Any, new_state: Any) -> float:
+        """Calculate information gain"""
+        try:
+            return delta_ig(old_state, new_state)
+        except Exception as e:
+            logger.error(f"IG calculation failed: {e}")
+            return 0.0
+    
+    def detect_eureka_spike(self, delta_ged: float, delta_ig: float) -> bool:
+        """Detect if current state constitutes a eureka spike"""
+        metrics = {'delta_ged': delta_ged, 'delta_ig': delta_ig}
+        conflicts = {'total': 0.0}  # No conflicts for direct call
+        return self._detect_spike(metrics, conflicts)
+
         return None

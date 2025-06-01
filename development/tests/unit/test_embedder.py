@@ -12,11 +12,11 @@ def test_get_model_singleton():
     import importlib
     
     # Force reimport to ensure clean state
-    if 'insightspike.embedder' in sys.modules:
-        del sys.modules['insightspike.embedder']
+    if 'insightspike.utils.embedder' in sys.modules:
+        del sys.modules['insightspike.utils.embedder']
     
     # Import embedder module after environment is set
-    embedder = importlib.import_module('insightspike.embedder')
+    embedder = importlib.import_module('insightspike.utils.embedder')
     
     # Debug information for CI
     lite_mode = os.getenv('INSIGHTSPIKE_LITE_MODE') == '1'

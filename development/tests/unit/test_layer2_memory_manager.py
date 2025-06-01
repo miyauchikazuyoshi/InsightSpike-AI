@@ -15,12 +15,12 @@ def test_memory_init():
 
     # Mock faiss.index_factory to return our dummy index
     with patch('faiss.index_factory') as mock_factory:
-        mock_factory.return_value = DummyIndex(1)
+        mock_factory.return_value = DummyIndex(8)  # Use dimension compatible with PQ
         
         # Import the module after setting up mocks
-        from insightspike.layer2_memory_manager import Memory
+        from insightspike.core.layers.layer2_memory_manager import L2MemoryManager as Memory
         
-        mem = Memory(1)
-        assert mem.dim == 1
+        mem = Memory(8)  # Use compatible dimension
+        assert mem.dim == 8
         assert hasattr(mem, 'episodes')
         assert hasattr(mem, 'index')

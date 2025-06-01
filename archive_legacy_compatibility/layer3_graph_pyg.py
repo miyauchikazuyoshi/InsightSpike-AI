@@ -1,8 +1,26 @@
-"""Build PyG similarity graph"""
+"""
+Layer3 Graph PyG - Compatibility Layer
+=====================================
+
+This module provides backward compatibility for the old PyG graph functions.
+New code should use: from insightspike.core.layers.layer3_graph_reasoner import L3GraphReasoner
+
+DEPRECATED: This file will be removed in a future version.
+Use the new structured approach in core/layers/ instead.
+"""
+import warnings
 from pathlib import Path  # ここを明示的に最初に
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from typing import Optional, Tuple, Any
+
+# Issue deprecation warning
+warnings.warn(
+    "insightspike.layer3_graph_pyg is deprecated. "
+    "Use insightspike.core.layers.layer3_graph_reasoner instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 # Check PyTorch availability
 try:

@@ -1,8 +1,26 @@
-"""L1 – Error Monitor with Known/Unknown Information Separation"""
+"""
+L1 Error Monitor - Compatibility Layer
+=====================================
+
+This module provides backward compatibility for the old layer1 functions.
+New code should use: from insightspike.core.layers.layer1_error_monitor import ErrorMonitor
+
+DEPRECATED: This file will be removed in a future version.
+Use the new structured approach in core/layers/ instead.
+"""
+import warnings
 import numpy as np
 import re
 from typing import Sequence, Dict, List, Tuple, Any, Optional
 from dataclasses import dataclass
+
+# Issue deprecation warning
+warnings.warn(
+    "insightspike.layer1_error_monitor is deprecated. "
+    "Use insightspike.core.layers.layer1_error_monitor instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 __all__ = ["uncertainty", "analyze_input", "KnownUnknownAnalysis"]
 

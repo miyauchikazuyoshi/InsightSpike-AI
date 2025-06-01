@@ -2,7 +2,7 @@
 Test layer1_error_monitor functionality
 """
 import pytest
-from insightspike.layer1_error_monitor import uncertainty
+from insightspike.core.layers.layer1_error_monitor import uncertainty
 
 def test_uncertainty():
     """Test uncertainty calculation"""

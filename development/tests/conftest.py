@@ -63,15 +63,20 @@ dummy_torch = types.SimpleNamespace(
     device=lambda x: "cpu",
     cuda=types.SimpleNamespace(is_available=lambda: False),
     tensor=lambda x: MagicMock(),
+    Tensor=MagicMock,  # Add Tensor class for type annotations
     nn=types.SimpleNamespace(
         Module=object,
         Linear=lambda *a, **k: MagicMock(),
         ReLU=lambda: MagicMock(),
+        Sequential=lambda *args: MagicMock(),  # Add Sequential for GNN initialization
         functional=types.SimpleNamespace(
             relu=lambda x: x,
-            softmax=lambda x, dim=None: x
+            softmax=lambda x, dim=None: x,
+            cosine_similarity=lambda x, y, dim=1: MagicMock(),
+            normalize=lambda x, p=2, dim=1: x,
         )
-    )
+    ),
+    __version__="2.2.2"  # Add version attribute
 )
 
 # Mock networkx
@@ -115,7 +120,10 @@ dummy_datasets = types.SimpleNamespace(
 # Mock scikit-learn
 dummy_sklearn = types.SimpleNamespace(
     metrics=types.SimpleNamespace(
-        pairwise_distances=lambda x, y=None, metric='cosine': np.random.random((len(x), len(y) if y is not None else len(x)))
+        pairwise_distances=lambda x, y=None, metric='cosine': np.random.random((len(x), len(y) if y is not None else len(x))),
+        pairwise=types.SimpleNamespace(
+            cosine_similarity=lambda x, y=None: np.random.random((len(x), len(y) if y is not None else len(x)))
+        )
     )
 )
 
@@ -148,6 +156,8 @@ def mock_dependencies():
     
     # System modules that need to be mocked
     sys.modules['torch'] = dummy_torch
+    sys.modules['torch.nn'] = dummy_torch.nn
+    sys.modules['torch.nn.functional'] = dummy_torch.nn.functional
     sys.modules['networkx'] = dummy_networkx
     sys.modules['faiss'] = dummy_faiss
     sys.modules['faiss-cpu'] = dummy_faiss
@@ -157,6 +167,17 @@ def mock_dependencies():
     sys.modules['datasets'] = dummy_datasets
     sys.modules['sklearn'] = dummy_sklearn
     sys.modules['sklearn.metrics'] = dummy_sklearn.metrics
+    sys.modules['sklearn.metrics.pairwise'] = dummy_sklearn.metrics.pairwise
+    
+    # Mock torch_geometric modules
+    sys.modules['torch_geometric'] = types.SimpleNamespace()
+    sys.modules['torch_geometric.data'] = types.SimpleNamespace(
+        Data=lambda **kwargs: types.SimpleNamespace(**kwargs)
+    )
+    sys.modules['torch_geometric.nn'] = types.SimpleNamespace(
+        GCNConv=lambda in_channels, out_channels: MagicMock(),
+        global_mean_pool=lambda x, batch: MagicMock()
+    )
     
     # InsightSpike modules
     sys.modules['insightspike.embedder'] = types.SimpleNamespace(

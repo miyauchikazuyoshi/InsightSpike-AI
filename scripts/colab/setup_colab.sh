@@ -32,13 +32,17 @@ pip cache purge 2>/dev/null || echo "Cache already clean"
 echo "✅ Environment ready"
 
 # ==========================================
-# Step 2: GPU-Critical Packages (pip-first strategy)
+# Step 2: Strategic Package Installation
 # ==========================================
-echo "📋 Step 2/5: Installing GPU-Critical Packages"
+echo "📋 Step 2/5: Strategic Package Installation"
 
-# Install NumPy 1.x first (FAISS compatible)
-echo "🔢 Installing NumPy 1.x (FAISS + thinc compatible)..."
-pip install "numpy==1.26.4" --upgrade --progress-bar on
+# Strategy: Install thinc first with NumPy 1.x constraint to prevent
+# automatic NumPy 2.0 upgrade that breaks FAISS compatibility
+echo "🧠 Installing thinc with NumPy 1.x constraint (prevents FAISS conflicts)..."
+pip install "thinc>=8.1.0,<9.0.0" "numpy>=1.24.0,<2.0.0" --upgrade --progress-bar on
+
+# Note: NumPy is now properly constrained by thinc installation
+# This ensures FAISS compatibility throughout the installation process
 
 # Install PyTorch with CUDA support  
 echo "🔥 Installing PyTorch with CUDA (this may take 3-5 minutes)..."

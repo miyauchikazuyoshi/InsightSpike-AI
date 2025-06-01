@@ -54,6 +54,19 @@ class MemoryConfig:
     c_value_boost: float = 1.1
     max_episodes: int = 10000
     quantization_levels: int = 256
+    # Additional attributes for L2MemoryManager
+    merge_ged: float = 0.4
+    split_ig: float = -0.15
+    prune_c: float = 0.05
+    inactive_n: int = 30
+    max_retrieved_docs: int = 15
+    min_similarity: float = 0.3
+    nlist: int = 256
+    pq_segments: int = 16
+    c_value_gamma: float = 0.5
+    c_value_min: float = 0.0
+    c_value_max: float = 1.0
+    index_file: str = "data/index.faiss"
 
 
 @dataclass

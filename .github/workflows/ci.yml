@@ -36,6 +36,8 @@ jobs:
     - name: Install dependencies using setup script
       run: |
         # Use our standardized setup script for CI
+        # Note: NumPy dependency management has been optimized to avoid 
+        # redundant installations (now managed via pyproject.toml)
         bash scripts/setup/setup.sh
         
     - name: Verify installation

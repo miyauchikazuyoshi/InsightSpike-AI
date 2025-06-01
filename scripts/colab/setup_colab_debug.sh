@@ -61,7 +61,10 @@ log_info "3. Complete reference: requirements-colab-comprehensive.txt"
 # 1. Environment Preparation
 log_info "Preparing environment..."
 pip install -q --upgrade pip setuptools wheel
-pip install -q "numpy>=1.24.0,<3.0.0"
+
+# Strategic thinc + NumPy installation to prevent FAISS conflicts
+log_info "Installing thinc with NumPy 1.x constraint (prevents FAISS conflicts)..."
+pip install -q "thinc>=8.1.0,<9.0.0" "numpy>=1.24.0,<2.0.0"
 
 # 2. PyTorch Installation with Debug
 log_info "Installing PyTorch with CUDA support..."

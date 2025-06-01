@@ -9,8 +9,8 @@ packages = [{ include = "insightspike", from = "src" }]
 python = "^3.11"
 # Environment-specific packages excluded from Poetry:
 # - torch (installed via pip with environment-specific versions)
-# - numpy (version conflicts: local 1.x vs Colab 1.x, managed by setup scripts)
 # - faiss (GPU vs CPU variants)
+# Note: NumPy is managed here to ensure consistent FAISS compatibility
 numpy = ">=1.24.0,<2.0.0"  # Unified NumPy 1.x for FAISS compatibility
 sentence-transformers = "^2.5"
 scipy = "^1.12"

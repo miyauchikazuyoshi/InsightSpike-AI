@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 from ...config import get_config
 from ..config import Config, get_config as get_new_config
 from ..layers.layer1_error_monitor import ErrorMonitor
-from ...layer2_memory_manager import Memory  # Use legacy Memory class that works
+from ..layers.layer2_memory_manager import L2MemoryManager as Memory  # Use new unified implementation
 from ..layers.layer4_llm_provider import get_llm_provider
 
 try:
