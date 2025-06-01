@@ -109,10 +109,19 @@ class MainAgent:
         try:
             logger.info("Initializing MainAgent components...")
             
-            # Initialize LLM
-            if not self.l4_llm.initialize():
-                logger.error("Failed to initialize LLM provider")
-                return False
+            # Initialize LLM with safe fallback
+            try:
+                if not self.l4_llm.initialize():
+                    logger.error("Failed to initialize LLM provider")
+                    return False
+            except Exception as e:
+                logger.warning(f"LLM initialization failed ({e}), switching to safe mode")
+                # Try to reinitialize with mock provider
+                from .layers.mock_llm_provider import MockLLMProvider
+                self.l4_llm = MockLLMProvider(self.config)
+                if not self.l4_llm.initialize():
+                    logger.error("Even mock LLM provider failed to initialize")
+                    return False
             
             # Try to load existing memory
             if not self.l2_memory.load():

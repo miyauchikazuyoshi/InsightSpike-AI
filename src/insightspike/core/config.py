@@ -25,6 +25,7 @@ class LLMConfig:
     temperature: float = 0.7
     device: str = "cpu"
     use_gpu: bool = False
+    safe_mode: bool = False  # Use mock provider to avoid model loading issues
 
 @dataclass
 class RetrievalConfig:

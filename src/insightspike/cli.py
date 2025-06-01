@@ -10,7 +10,7 @@ import json
 
 # New imports for refactored structure
 from .core.agents.main_agent import MainAgent
-from .config import get_config
+from .core.config import get_config
 from .loader import load_corpus
 from .insight_fact_registry import InsightFactRegistry
 
@@ -119,7 +119,7 @@ def config_info():
         print("[bold blue]Current Configuration:[/bold blue]")
         print(f"  Environment: {config.environment}")
         print(f"  LLM Provider: {config.llm.provider}")
-        print(f"  Model: {config.llm.model}")
+        print(f"  Model: {config.llm.model_name}")
         print(f"  Memory max docs: {config.memory.max_retrieved_docs}")
         print(f"  Graph spike thresholds - GED: {config.graph.spike_ged_threshold}, IG: {config.graph.spike_ig_threshold}")
         
@@ -593,4 +593,41 @@ def insights_cleanup():
         
     except Exception as e:
         print(f"[red]Error during cleanup: {e}[/red]")
+        raise typer.Exit(code=1)
+
+@app.command()
+def test_safe(question: str = typer.Argument("What is artificial intelligence?", help="Test question")):
+    """Test the agent with mock LLM provider (safe mode - no model loading)"""
+    try:
+        print(f"[bold blue]Testing Question:[/bold blue] {question}")
+        print("[yellow]Using safe mode with mock LLM provider...[/yellow]")
+        
+        # Import mock provider directly
+        from .core.layers.mock_llm_provider import MockLLMProvider
+        from .core.config import get_config
+        
+        config = get_config()
+        mock_llm = MockLLMProvider(config)
+        
+        # Test mock provider
+        if not mock_llm.initialize():
+            print("[red]Failed to initialize mock LLM provider[/red]")
+            raise typer.Exit(code=1)
+        
+        # Generate test response
+        result = mock_llm.generate_response({}, question)
+        
+        # Display results
+        print(f"\n[bold green]Mock Response:[/bold green] {result.get('response', 'No response generated')}")
+        print(f"[dim]Quality: {result.get('reasoning_quality', 0):.3f}, "
+              f"Confidence: {result.get('confidence', 0):.3f}, "
+              f"Model: {result.get('model_used', 'unknown')}[/dim]")
+        
+        if result.get('success', False):
+            print("[green]✓ Safe mode test successful[/green]")
+        else:
+            print("[red]✗ Safe mode test failed[/red]")
+            
+    except Exception as e:
+        print(f"[red]Error: {e}[/red]")
         raise typer.Exit(code=1)

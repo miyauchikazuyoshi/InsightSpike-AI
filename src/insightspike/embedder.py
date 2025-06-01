@@ -30,9 +30,11 @@ else:
                     sentences = [sentences]
                 return np.random.rand(len(sentences), 384).astype('float32')
 
-# Import from the legacy config for compatibility
+# Import from the new config for compatibility
 try:
-    from .config import EMBED_MODEL_NAME
+    from .core.config import get_config
+    config = get_config()
+    EMBED_MODEL_NAME = config.embedding.model_name
 except ImportError:
     # Fallback if new config structure doesn't have it
     EMBED_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"

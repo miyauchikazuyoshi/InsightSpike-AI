@@ -18,7 +18,10 @@ except ImportError:
             self.edge_index = edge_index
 
 try:
-    from .config import GRAPH_FILE, SIM_THRESHOLD
+    from .core.config import get_config
+    config = get_config()
+    GRAPH_FILE = config.paths.graph_file
+    SIM_THRESHOLD = config.retrieval.similarity_threshold
 except ImportError:
     # Fallback values for testing
     GRAPH_FILE = Path("data/graph_pyg.pt")

@@ -7,7 +7,7 @@ from typing import Optional
 
 # New imports for refactored structure
 from .core.agents.main_agent import MainAgent
-from .config import get_config
+from .core.config import get_config
 from .loader import load_corpus
 
 app = typer.Typer()
@@ -115,7 +115,7 @@ def config_info():
         print("[bold blue]Current Configuration:[/bold blue]")
         print(f"  Environment: {config.environment}")
         print(f"  LLM Provider: {config.llm.provider}")
-        print(f"  Model: {config.llm.model}")
+        print(f"  Model: {config.llm.model_name}")
         print(f"  Memory max docs: {config.memory.max_retrieved_docs}")
         print(f"  Graph spike thresholds - GED: {config.graph.spike_ged_threshold}, IG: {config.graph.spike_ig_threshold}")
         

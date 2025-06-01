@@ -33,7 +33,7 @@ else:
             return {"response": "MainAgent not available (lite mode)", "success": False}
 
 # Legacy compatibility exports - import the config.py file specifically
-from .config import get_config
+from .core.config import get_config
 
 # Import the legacy config.py module explicitly to avoid conflict with config/ directory
 _config_file = os.path.join(os.path.dirname(__file__), 'config.py')

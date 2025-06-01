@@ -331,9 +331,17 @@ You are a helpful AI assistant. Answer the question based on the provided contex
         return response
 
 
-def get_llm_provider(config=None) -> L4LLMProvider:
+def get_llm_provider(config=None, safe_mode=False) -> L4LLMProvider:
     """Get appropriate LLM provider based on configuration."""
     config = config or get_config()
+    
+    # Check for safe mode from config or parameter
+    use_safe_mode = safe_mode or getattr(config.llm, 'safe_mode', False) or getattr(config, 'environment', 'local') == 'testing'
+    
+    if use_safe_mode:
+        from .mock_llm_provider import MockLLMProvider
+        logger.info("Using mock LLM provider for safe operation")
+        return MockLLMProvider(config)
     
     provider_type = config.llm.provider.lower()
     
