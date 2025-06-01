@@ -16,7 +16,7 @@ echo "=============================="
 echo "📋 Step 1/5: Installing Poetry..."
 if ! command -v poetry &> /dev/null; then
     echo "📦 Installing Poetry..."
-    curl -sSL https://install.python-poetry.org | python3 - --quiet
+    curl -sSL https://install.python-poetry.org | python3 - 2>/dev/null
     export PATH="$HOME/.local/bin:$PATH"
     echo "✅ Poetry installed"
 else
