@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  insightspike-colab:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.colab
+    container_name: insightspike-colab
+    ports:
+      - "8888:8888"
+    volumes:
+      # Colab風のマウント
+      - ../notebooks:/content/InsightSpike-AI/notebooks
+      - ../data:/content/InsightSpike-AI/data
+      - ../experiments:/content/InsightSpike-AI/experiments
+      - ../src:/content/InsightSpike-AI/src
+    environment:
+      - INSIGHTSPIKE_LITE_MODE=1
+      - JUPYTER_ENABLE_LAB=yes
+      - PYTHONPATH=/content/InsightSpike-AI/src
+    restart: unless-stopped
+    networks:
+      - insightspike-net
+
+  # 開発用追加サービス（オプション）
+  insightspike-dev:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      target: development
+    container_name: insightspike-dev
+    ports:
+      - "8889:8888"
+    volumes:
+      - ..:/app
+    environment:
+      - INSIGHTSPIKE_MODE=development
+      - PYTHONPATH=/app/src
+    profiles:
+      - dev
+    networks:
+      - insightspike-net
+
+networks:
+  insightspike-net:
+    driver: bridge
