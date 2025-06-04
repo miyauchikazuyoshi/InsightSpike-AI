@@ -48,7 +48,27 @@ __pycache__/
 # 実行結果・レポート（一時的な生成物）
 /validation_results/
 /documentation/reports/
+
+# トップディレクトリの実験結果ファイル（一時生成物）
+educational_*.json
+*_export_*.json
+*_demo_*.json
+*_report_*.json
+
+# 作業用・実験用Jupyter Notebook（トップディレクトリ）
+Colab_Dependency_Investigation.ipynb
+InsightSpike_Bypass_Notebook.ipynb
+*_Investigation.ipynb
+*_Bypass_*.ipynb
+test_colab_*.py
+
+# 一般的な実験出力ファイル
 *.json
+!package.json
+!package-lock.json
+!pyproject.toml
+!poetry.lock
+!CITATION.cff
 *REPORT*.md
 *SUMMARY*.txt
 PROJECT_STRUCTURE_*.md

@@ -1,0 +1,35 @@
+# 実験出力ファイル（一時的な結果）
+outputs/*.json
+outputs/*.png
+outputs/*.csv
+outputs/*.txt
+results/*.json
+results/*.png
+results/*.csv
+data/temp_*
+
+# 作業用Jupyter Notebook
+notebooks/*_Investigation.ipynb
+notebooks/*_Bypass_*.ipynb
+notebooks/*_Test_*.ipynb
+notebooks/*_Debug_*.ipynb
+
+# 実験用Pythonスクリプト（テスト目的）
+test_*.py
+debug_*.py
+*_test.py
+*_debug.py
+*_temp.py
+
+# 各カテゴリの一時ファイル
+*/temp_*
+*/debug_*
+*/test_*
+
+# 例外：重要なベースラインファイルは保持
+!notebooks/InsightSpike_Colab_Demo.ipynb
+!outputs/.gitkeep
+!notebooks/.gitkeep
+!results/.gitkeep
+!data/.gitkeep
+!*/README.md

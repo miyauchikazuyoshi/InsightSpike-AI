@@ -39,7 +39,7 @@ echo "📋 Step 2/5: Strategic Package Installation"
 # Strategy: Install thinc first with NumPy 1.x constraint to prevent
 # automatic NumPy 2.0 upgrade that breaks FAISS compatibility
 echo "🧠 Installing thinc with NumPy 1.x constraint (prevents FAISS conflicts)..."
-pip install "thinc>=8.1.0,<9.0.0" "numpy>=1.24.0,<2.0.0" --upgrade --progress-bar on
+pip install "thinc>=8.1.0,<8.3.6" "numpy>=1.24.0,<2.0.0" --upgrade --progress-bar on
 
 # Note: NumPy is now properly constrained by thinc installation
 # This ensures FAISS compatibility throughout the installation process
