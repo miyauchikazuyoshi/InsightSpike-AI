@@ -55,10 +55,14 @@ jupyter = "^1.0"     # Jupyter notebook support
 notebook = "^7.0"    # Notebook interface
 
 [tool.poetry.group.docker.dependencies]
-# Docker環境専用依存関係
+# Docker環境専用依存関係 - torch/faissは事前にpip installするため除外
 jupyter = "^1.0"
 notebook = "^7.0"
 ipywidgets = "^8.0"
+
+[tool.poetry.group.docker-minimal.dependencies]
+# 軽量Docker CI用 - 重いML依存関係を除外
+pytest = "^8.0"
 
 [tool.poetry.scripts]
 insightspike = "insightspike.cli:app"

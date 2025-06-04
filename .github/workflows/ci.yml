@@ -226,7 +226,7 @@ jobs:
 
   docker-build-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30  # Increased timeout for Docker builds
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
     steps:
@@ -234,18 +234,56 @@ jobs:
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
+      with:
+        driver-opts: |
+          network=host
 
-    - name: Build production Docker image
+    # First, test lightweight CI build
+    - name: Build lightweight CI test image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: docker/Dockerfile.ci
+        tags: insightspike-ai:ci-test
+        push: false
+        cache-from: type=gha,scope=ci
+        cache-to: type=gha,mode=max,scope=ci
+
+    - name: Test lightweight CI container
       run: |
-        docker build --target production -t insightspike-ai:test .
+        docker run --rm insightspike-ai:ci-test
+
+    # Then test production build
+    - name: Build production Docker image with cache
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: docker/Dockerfile.main
+        target: production
+        tags: insightspike-ai:test
+        push: false
+        cache-from: type=gha,scope=production
+        cache-to: type=gha,mode=max,scope=production
+        build-args: |
+          BUILDKIT_INLINE_CACHE=1
 
     - name: Test Docker container
       run: |
         docker run --rm insightspike-ai:test python -c "import insightspike; print('Docker build successful')"
 
-    - name: Build development Docker image
-      run: |
-        docker build --target development -t insightspike-ai:dev .
+    # Only build development image if production succeeds
+    - name: Build development Docker image with cache
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: docker/Dockerfile.main
+        target: development
+        tags: insightspike-ai:dev
+        push: false
+        cache-from: type=gha,scope=development
+        cache-to: type=gha,mode=max,scope=development
+        build-args: |
+          BUILDKIT_INLINE_CACHE=1
 
     - name: Test development container
       run: |

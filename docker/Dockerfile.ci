@@ -1,0 +1,31 @@
+# Lightweight Docker build for CI testing
+FROM python:3.11-slim as ci-test
+
+WORKDIR /app
+
+# Install minimal system dependencies
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
+# Install Poetry
+RUN pip install --no-cache-dir poetry==1.7.1
+
+# Configure Poetry for CI
+ENV POETRY_NO_INTERACTION=1 \
+    POETRY_VENV_IN_PROJECT=1 \
+    POETRY_CACHE_DIR=/tmp/poetry_cache
+
+# Copy Poetry files
+COPY pyproject.toml poetry.lock* ./
+
+# Copy source code
+COPY src/ ./src/
+
+# Install lightweight dependencies only (skip heavy ML packages)
+RUN poetry install --with docker-minimal --no-dev && rm -rf $POETRY_CACHE_DIR
+
+# Set environment
+ENV PYTHONPATH=/app/src:$PYTHONPATH
+ENV INSIGHTSPIKE_LITE_MODE=1
+
+# Test command
+CMD ["python", "-c", "import insightspike; print('CI test successful')"]

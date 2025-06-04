@@ -352,25 +352,35 @@ When running `run_poc.py` offline, set the environment variable `EMBED_MODEL_PAT
 
 ### Docker
 ---
-**🎯 New Organized Docker Structure**
+**🎯 Optimized Docker Structure with Performance Improvements**
 
-All Docker files are now organized under the `docker/` directory:
+All Docker files are now organized under the `docker/` directory with enhanced build performance:
 
 ```
 docker/
-├── Dockerfile.main           # Main production environment
+├── Dockerfile.main           # Main production environment (optimized)
 ├── Dockerfile.colab          # Google Colab optimized
+├── Dockerfile.ci             # Lightweight CI testing
 ├── docker-compose.yml        # Main orchestration
 └── docker-compose.colab.yml  # Colab environment
 ```
 
-**Quick Start Options:**
+**🚀 Quick Start Options:**
 
 1. **Main Environment**: `cd docker && docker-compose up`
 2. **Google Colab**: Use the [Colab Notebook](InsightSpike_Docker_Colab_Setup.ipynb)
-3. **Specific Target**: `docker build -f docker/Dockerfile.main --target production -t insightspike .`
+3. **Production Build**: `docker build -f docker/Dockerfile.main --target production -t insightspike .`
+4. **Test All Builds**: `./scripts/testing/test_docker_builds.sh`
 
-The main Dockerfile supports multi-stage builds with production, development, and testing targets. All environments use Python 3.11 and latest dependency versions for consistency.
+**⚡ Performance Optimizations:**
+
+- Pre-installed PyTorch and FAISS to avoid Poetry conflicts
+- Multi-stage builds with optimized layer caching
+- Lightweight CI dockerfile for fast testing
+- Enhanced .dockerignore to reduce build context
+- GitHub Actions integration with build caching
+
+The main Dockerfile supports multi-stage builds (production, development, colab) with Python 3.11 and optimized dependency management for faster CI/CD performance.
 
 ## ✅ Minimal Working Example (Dependency Conflicts Resolved)
 

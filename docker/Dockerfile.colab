@@ -22,13 +22,13 @@ WORKDIR /content/InsightSpike-AI
 # 依存関係ファイルをコピー
 COPY pyproject.toml poetry.lock* ./
 
+# ソースコードをコピー（Poetry installに必要）
+COPY src/ ./src/
+
 # 依存関係インストール（Colab用軽量版）
 RUN poetry config virtualenvs.create false && \
     poetry install --no-dev && \
     rm -rf $POETRY_CACHE_DIR
-
-# ソースコードをコピー
-COPY src/ ./src/
 COPY data/ ./data/
 COPY scripts/ ./scripts/
 # Create notebooks directory for Colab environment

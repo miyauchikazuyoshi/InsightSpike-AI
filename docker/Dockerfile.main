@@ -4,29 +4,39 @@ FROM python:3.11-slim as base
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies in minimal layers
 RUN apt-get update && apt-get install -y \
     git \
     build-essential \
     curl \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
-# Install Poetry
-RUN pip install poetry==1.7.1
+# Install Poetry with specific version
+RUN pip install --no-cache-dir poetry==1.7.1
 
-# Configure Poetry
+# Configure Poetry for optimal performance
 ENV POETRY_NO_INTERACTION=1 \
     POETRY_VENV_IN_PROJECT=1 \
-    POETRY_CACHE_DIR=/tmp/poetry_cache
+    POETRY_CACHE_DIR=/tmp/poetry_cache \
+    POETRY_INSTALLER_PARALLEL=true \
+    POETRY_INSTALLER_MAX_WORKERS=4
 
-# Copy Poetry files
+# Copy Poetry files for dependency resolution
 COPY pyproject.toml poetry.lock* ./
+
+# Install CPU-optimized PyTorch and FAISS first (before Poetry)
+# This avoids conflicts and reduces build time
+RUN pip install --no-cache-dir \
+    torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu \
+    faiss-cpu \
+    && pip cache purge
 
 # Copy source code (needed for Poetry to install the package)
 COPY src/ ./src/
 
-# Install dependencies
-RUN poetry install --only=main && rm -rf $POETRY_CACHE_DIR
+# Install main dependencies only, excluding torch and faiss (already installed)
+RUN poetry install --only=main --no-dev && rm -rf $POETRY_CACHE_DIR
 
 # Production stage
 FROM base as production
@@ -34,12 +44,6 @@ FROM base as production
 # Copy additional data and experiments
 COPY data/ ./data/
 COPY experiments/ ./experiments/
-
-# Install PyTorch CPU version for production
-RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-
-# Install FAISS CPU version
-RUN pip install faiss-cpu
 
 # Set environment variables
 ENV PYTHONPATH=/app/src:$PYTHONPATH
@@ -60,11 +64,7 @@ CMD ["poetry", "run", "python", "-m", "insightspike", "--help"]
 FROM base as development
 
 # Install development dependencies
-RUN poetry install && rm -rf $POETRY_CACHE_DIR
-
-# Install development tools
-RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-RUN pip install faiss-cpu
+RUN poetry install --with dev && rm -rf $POETRY_CACHE_DIR
 
 # Copy everything for development
 COPY . .
@@ -81,10 +81,6 @@ FROM base as colab
 
 # Install Colab-specific dependencies
 RUN poetry install --with colab --with docker && rm -rf $POETRY_CACHE_DIR
-
-# Install PyTorch CPU for Colab
-RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-RUN pip install faiss-cpu
 
 # Copy source and notebooks
 COPY . .
