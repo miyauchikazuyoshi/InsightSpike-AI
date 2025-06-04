@@ -6,12 +6,13 @@ services:
   # Production service
   insightspike-prod:
     build:
-      context: .
+      context: ..
+      dockerfile: docker/Dockerfile.main
       target: production
     container_name: insightspike-production
     volumes:
-      - ./experiments/results:/app/experiments/results
-      - ./data/samples:/app/data/samples:ro
+      - ../experiments/results:/app/experiments/results
+      - ../data/samples:/app/data/samples:ro
     environment:
       - INSIGHTSPIKE_MODE=production
       - PYTHONPATH=/app/src
@@ -27,11 +28,12 @@ services:
   # Development service
   insightspike-dev:
     build:
-      context: .
+      context: ..
+      dockerfile: docker/Dockerfile.main
       target: development
     container_name: insightspike-development
     volumes:
-      - .:/app
+      - ..:/app
       - poetry-cache:/root/.cache/pypoetry
     environment:
       - INSIGHTSPIKE_MODE=development
@@ -46,11 +48,12 @@ services:
   # Testing service
   insightspike-test:
     build:
-      context: .
+      context: ..
+      dockerfile: docker/Dockerfile.main
       target: development
     container_name: insightspike-test
     volumes:
-      - .:/app
+      - ..:/app
     environment:
       - INSIGHTSPIKE_MODE=test
       - PYTHONPATH=/app/src
@@ -59,12 +62,13 @@ services:
   # Benchmark service
   insightspike-benchmark:
     build:
-      context: .
+      context: ..
+      dockerfile: docker/Dockerfile.main
       target: development
     container_name: insightspike-benchmark
     volumes:
-      - .:/app
-      - ./benchmarks/results:/app/benchmarks/results
+      - ..:/app
+      - ../benchmarks/results:/app/benchmarks/results
     environment:
       - INSIGHTSPIKE_MODE=benchmark
       - PYTHONPATH=/app/src

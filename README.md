@@ -352,9 +352,25 @@ When running `run_poc.py` offline, set the environment variable `EMBED_MODEL_PAT
 
 ### Docker
 ---
-The included `Dockerfile` is based on `pytorch/pytorch:2.2.0-cuda12.1-cudnn8-runtime`. It installs dependencies from `pyproject.toml` using Poetry, and then installs additional packages such as `torch-geometric` via `pip`. Note that local scripts use `torch==2.2.2`, so be aware of version differences. The base image uses **Python 3.10**, which differs from the Python 3.11 series required in `pyproject.toml`. Also, after installing `faiss-cpu` with Poetry, `faiss-gpu-cu11` is added; if you do not need the CPU version, please uninstall it.
+**🎯 New Organized Docker Structure**
 
-**Note**: Docker configuration needs updating for NumPy 1.x compatibility. Use local or Colab environments for immediate usage.
+All Docker files are now organized under the `docker/` directory:
+
+```
+docker/
+├── Dockerfile.main           # Main production environment
+├── Dockerfile.colab          # Google Colab optimized
+├── docker-compose.yml        # Main orchestration
+└── docker-compose.colab.yml  # Colab environment
+```
+
+**Quick Start Options:**
+
+1. **Main Environment**: `cd docker && docker-compose up`
+2. **Google Colab**: Use the [Colab Notebook](InsightSpike_Docker_Colab_Setup.ipynb)
+3. **Specific Target**: `docker build -f docker/Dockerfile.main --target production -t insightspike .`
+
+The main Dockerfile supports multi-stage builds with production, development, and testing targets. All environments use Python 3.11 and latest dependency versions for consistency.
 
 ## ✅ Minimal Working Example (Dependency Conflicts Resolved)
 

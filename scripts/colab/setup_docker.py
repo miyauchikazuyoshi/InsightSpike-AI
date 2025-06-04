@@ -4,7 +4,7 @@ Google Colab用 InsightSpike-AI 簡単セットアップスクリプト
 Docker経由で1分環境構築
 
 使用方法:
-    !wget https://raw.githubusercontent.com/your-username/InsightSpike-AI/main/scripts/colab/setup_docker.py
+    !wget https://raw.githubusercontent.com/miyauchikazuyoshi/InsightSpike-AI/main/scripts/colab/setup_docker.py
     !python setup_docker.py
 
 著者: InsightSpike-AI Team
@@ -20,8 +20,8 @@ class ColabDockerSetup:
     """Colab環境でInsightSpike-AIをDockerで起動するセットアップクラス"""
     
     def __init__(self):
-        self.repo_url = "https://github.com/your-username/InsightSpike-AI.git"
-        self.docker_image = "ghcr.io/your-username/insightspike-ai:colab"
+        self.repo_url = "https://github.com/miyauchikazuyoshi/InsightSpike-AI.git"
+        self.docker_image = "ghcr.io/miyauchikazuyoshi/insightspike-ai:colab"
         self.container_name = "insightspike-colab"
         
     def run_command(self, command, description="実行中"):

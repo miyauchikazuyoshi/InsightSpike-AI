@@ -49,6 +49,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
+        file: docker/Dockerfile.main
         target: production
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
@@ -60,7 +61,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        target: colab
+        file: docker/Dockerfile.colab
         push: ${{ github.event_name != 'pull_request' }}
         tags: |
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:colab
@@ -73,6 +74,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
+        file: docker/Dockerfile.main
         target: development
         push: ${{ github.event_name != 'pull_request' }}
         tags: |
