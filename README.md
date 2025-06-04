@@ -94,7 +94,23 @@ This demo showcases InsightSpike's ability to synthesize insights across domains
 
 ## ⚡ Quick Start on Google Colab (GPU)
 
-### 🎯 One-Click Setup (Recommended)
+### 🐳 Docker版 - 超高速セットアップ（推奨）
+最新のDocker版により、1分で完全環境構築が可能になりました！
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/miyauchikazuyoshi/InsightSpike-AI/blob/main/InsightSpike_Docker_Colab_Setup.ipynb)
+
+**特徴:**
+- ⚡ **1分セットアップ**: 複雑な依存関係管理不要
+- 🔒 **完全再現性**: Docker環境による一貫した動作
+- 🚀 **即座利用**: Pre-built Imageで最速起動
+- 🛠️ **開発対応**: ソースからのカスタマイズも可能
+
+```python
+# Colab内で1行実行
+!wget https://raw.githubusercontent.com/miyauchikazuyoshi/InsightSpike-AI/main/scripts/colab/setup_docker.py && python setup_docker.py
+```
+
+### 🎯 従来版 - One-Click Setup
 The easiest way to get started is with our simplified Colab notebook:
 
 1. **Open the notebook**: [`InsightSpike_Colab_Demo.ipynb`](InsightSpike_Colab_Demo.ipynb) in Google Colab

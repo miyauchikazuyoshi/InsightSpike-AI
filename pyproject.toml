@@ -51,6 +51,14 @@ pytest = "^8.0"
 # - faiss-gpu-cu12==1.11.0
 # - torch-geometric (optional)
 ipywidgets = "^8.0"  # Jupyter widget support for Colab
+jupyter = "^1.0"     # Jupyter notebook support
+notebook = "^7.0"    # Notebook interface
+
+[tool.poetry.group.docker.dependencies]
+# Docker環境専用依存関係
+jupyter = "^1.0"
+notebook = "^7.0"
+ipywidgets = "^8.0"
 
 [tool.poetry.scripts]
 insightspike = "insightspike.cli:app"

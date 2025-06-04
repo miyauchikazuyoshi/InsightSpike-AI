@@ -75,3 +75,37 @@ ENV INSIGHTSPIKE_MODE=development
 
 # Default command for development
 CMD ["poetry", "shell"]
+
+# Colab stage
+FROM base as colab
+
+# Install Colab-specific dependencies
+RUN poetry install --with colab --with docker && rm -rf $POETRY_CACHE_DIR
+
+# Install PyTorch CPU for Colab
+RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+RUN pip install faiss-cpu
+
+# Copy source and notebooks
+COPY . .
+
+# Colab-style environment variables
+ENV PYTHONPATH=/app/src:$PYTHONPATH
+ENV INSIGHTSPIKE_LITE_MODE=1
+ENV JUPYTER_ENABLE_LAB=yes
+
+# Create Colab-compatible user
+RUN useradd -m -u 1000 colab && chown -R colab:colab /app
+USER colab
+
+# Expose Jupyter port
+EXPOSE 8888
+
+# Default command for Colab
+CMD ["jupyter", "notebook", \
+     "--ip=0.0.0.0", \
+     "--port=8888", \
+     "--no-browser", \
+     "--allow-root", \
+     "--NotebookApp.token=''", \
+     "--NotebookApp.password=''"]
