@@ -22,14 +22,16 @@ ENV POETRY_NO_INTERACTION=1 \
 # Copy Poetry files
 COPY pyproject.toml poetry.lock* ./
 
+# Copy source code (needed for Poetry to install the package)
+COPY src/ ./src/
+
 # Install dependencies
 RUN poetry install --only=main && rm -rf $POETRY_CACHE_DIR
 
 # Production stage
 FROM base as production
 
-# Copy source code
-COPY src/ ./src/
+# Copy additional data and experiments
 COPY data/ ./data/
 COPY experiments/ ./experiments/
 

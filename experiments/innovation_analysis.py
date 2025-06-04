@@ -1,8 +1,4 @@
-#"""
-InsightSpike-AI新規性分析レポート
-=================================
-
-InsightSpike-AIが持つ新規性と革新性を包括的に分析し、/bin/env python3
+#!/usr/bin/env python3
 """
 InsightSpike-AI革命的新規性分析レポート
 =====================================
