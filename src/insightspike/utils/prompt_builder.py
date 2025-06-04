@@ -104,7 +104,7 @@ Always base your responses on the provided context and clearly distinguish betwe
             
         spike_detected = graph_info.get('spike_detected', False)
         if spike_detected:
-            lines.append("\n🧠 **INSIGHT SPIKE DETECTED** - This query may represent a significant breakthrough in understanding!")
+            lines.append("\n🧠 **INSIGHT SPIKE DETECTED** - This query may represent a significant improvement in understanding!")
         
         reasoning_quality = graph_info.get('reasoning_quality', 0)
         if reasoning_quality > 0:

@@ -105,7 +105,7 @@ def main():
     print("📊 Generating Visual Summary...")
     
     # Load results
-    results_path = "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/data/processed/experiment_results.json"
+    results_path = "data/processed/experiment_results.json"
     with open(results_path, 'r') as f:
         results = json.load(f)
     
@@ -153,7 +153,7 @@ def main():
     )
     
     # Save visual summary
-    output_path = "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/VISUAL_SUMMARY.txt"
+    output_path = "VISUAL_SUMMARY.txt"
     with open(output_path, 'w') as f:
         f.write(visual_summary)
     

@@ -1,8 +1,12 @@
 # Supplementary Materials: InsightSpike-AI geDIG Technical Specifications
 
+> **⚠️ PROOF-OF-CONCEPT TECHNICAL DOCUMENTATION**: This document provides technical specifications for an experimental cognitive architecture framework. Current implementations are at proof-of-concept stage with significant optimization requirements. Performance metrics reflect experimental validation rather than production-ready capabilities.
+>
+> **📋 IMPLEMENTATION STATUS**: Core components range from 60-70% completion with identified optimization needs. See implementation status tables for detailed component readiness levels.
+
 ## Document Overview
 
-This supplementary document provides detailed technical specifications, experimental data, and implementation details supporting the InsightSpike-AI research paper. It serves as a comprehensive technical reference for researchers seeking to understand, replicate, or extend the revolutionary geDIG implementation.
+This supplementary document provides technical specifications, experimental validation data, and implementation details supporting the InsightSpike-AI research framework. It serves as a technical reference for researchers seeking to understand, replicate, or extend the experimental geDIG implementation approach.
 
 ## Table of Contents
 

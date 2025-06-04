@@ -140,13 +140,13 @@ The experimental validation provides strong evidence for the InsightSpike-AI arc
 4. **Reliability**: Zero false positives on control questions
 5. **Scalability**: Robust performance across diverse cognitive domains
 
-These results support the viability of the ΔGED/ΔIG mechanism for real-world cognitive AI applications, particularly in domains requiring breakthrough thinking, creative problem-solving, and paradigm recognition.
+These results support the viability of the ΔGED/ΔIG mechanism for real-world cognitive AI applications, particularly in domains requiring creative problem-solving and pattern recognition.
 
 ## Next Steps
 
 1. **Scale Testing**: Expand to larger datasets and more complex domains
 2. **Real-World Integration**: Test with actual production systems
-3. **Baseline Comparison**: Compare against state-of-the-art cognitive AI systems
+3. **Baseline Comparison**: Compare against established cognitive AI systems
 4. **Performance Optimization**: Fine-tune spike detection thresholds
 5. **Domain Expansion**: Test in scientific discovery, creative writing, and strategic planning
 
@@ -161,14 +161,14 @@ def main():
     logger.info("Starting InsightSpike-AI results analysis...")
     
     # Load results
-    results_path = "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/data/processed/experiment_results.json"
+    results_path = "data/processed/experiment_results.json"
     results = load_results(results_path)
     
     # Generate comprehensive report
     report = generate_summary_report(results)
     
     # Save report
-    report_path = "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/EXPERIMENTAL_VALIDATION_REPORT.md"
+    report_path = "EXPERIMENTAL_VALIDATION_REPORT.md"
     with open(report_path, 'w') as f:
         f.write(report)
     

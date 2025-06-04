@@ -245,7 +245,7 @@ def main():
     if len(sys.argv) > 1:
         project_root = sys.argv[1]
     else:
-        project_root = "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI"
+        project_root = "."
     
     tester = ColabSetupTester(project_root)
     

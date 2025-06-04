@@ -47,12 +47,21 @@ class L4LLMProvider(L4LLMInterface):
                 }
             else:
                 response = self._generate_sync(prompt)
+                confidence = self._estimate_confidence(response, context)
+                
+                # Enhanced insight analysis
+                insight_analysis = self.analyze_insight_potential(question, response)
+                
                 return {
                     'response': response,
                     'prompt': prompt,
                     'streaming': False,
                     'success': True,
-                    'confidence': self._estimate_confidence(response, context)
+                    'confidence': confidence,
+                    'reasoning_quality': confidence * 0.8 + insight_analysis['insight_potential'] * 0.2,
+                    'insight_analysis': insight_analysis,
+                    'synthesis_detected': insight_analysis['synthesis_detected'],
+                    'cross_domain_score': insight_analysis['cross_domain_score']
                 }
                 
         except Exception as e:
@@ -79,8 +88,7 @@ class L4LLMProvider(L4LLMInterface):
             yield char
     
     def _estimate_confidence(self, response: str, context: Dict[str, Any]) -> float:
-        """Estimate confidence in the response."""
-        # Simple heuristics for confidence estimation
+        """Enhanced confidence estimation with insight analysis."""
         
         # Length-based confidence (very short or very long responses are less confident)
         length_score = min(1.0, len(response) / 200) * min(1.0, 500 / max(len(response), 1))
@@ -91,13 +99,71 @@ class L4LLMProvider(L4LLMInterface):
             num_docs = len(context['retrieved_documents'])
             relevance_score = min(1.0, num_docs / 3)  # More docs = higher confidence
         
-        # Uncertainty indicators in response
+        # Insight indicators boost confidence
+        insight_indicators = [
+            'by connecting', 'synthesis', 'insight emerges', 'key insight',
+            'bridging', 'integrating', 'cross-domain', 'framework'
+        ]
+        insight_boost = sum(0.05 for indicator in insight_indicators if indicator in response.lower())
+        insight_boost = min(0.3, insight_boost)  # Cap the boost
+        
+        # Uncertainty indicators reduce confidence
         uncertainty_keywords = ['maybe', 'perhaps', 'might', 'could', 'uncertain', 'not sure']
         uncertainty_count = sum(1 for word in uncertainty_keywords if word in response.lower())
         uncertainty_penalty = min(0.5, uncertainty_count * 0.1)
         
-        confidence = (length_score + relevance_score) / 2 - uncertainty_penalty
+        # Synthesis quality indicators
+        synthesis_indicators = [
+            'connecting multiple', 'systematic analysis', 'demonstrates that',
+            'emerges from recognizing', 'reveals that', 'by examining'
+        ]
+        synthesis_boost = sum(0.08 for indicator in synthesis_indicators if indicator in response.lower())
+        synthesis_boost = min(0.2, synthesis_boost)
+        
+        confidence = (length_score + relevance_score) / 2 + insight_boost + synthesis_boost - uncertainty_penalty
         return max(0.0, min(1.0, confidence))
+    
+    def analyze_insight_potential(self, question: str, response: str) -> Dict[str, Any]:
+        """Analyze whether the response demonstrates insight or synthesis."""
+        
+        question_lower = question.lower()
+        response_lower = response.lower()
+        
+        # Cross-domain indicators
+        domain_keywords = {
+            'probability': ['probability', 'conditional', 'bayes'],
+            'mathematics': ['infinite', 'convergence', 'series', 'limit'],
+            'philosophy': ['identity', 'criteria', 'existence', 'continuity'],
+            'physics': ['quantum', 'measurement', 'uncertainty', 'reality'],
+            'information': ['information', 'entropy', 'asymmetric'],
+            'systems': ['emergence', 'complexity', 'feedback', 'non-linear']
+        }
+        
+        # Count domains mentioned
+        domains_in_question = sum(1 for domain, keywords in domain_keywords.items() 
+                                 if any(kw in question_lower for kw in keywords))
+        domains_in_response = sum(1 for domain, keywords in domain_keywords.items() 
+                                 if any(kw in response_lower for kw in keywords))
+        
+        # Synthesis indicators
+        synthesis_patterns = [
+            'by connecting', 'by synthesizing', 'by integrating',
+            'synthesis emerges', 'insight emerges', 'key insight',
+            'bridging', 'connecting multiple', 'cross-domain'
+        ]
+        synthesis_detected = any(pattern in response_lower for pattern in synthesis_patterns)
+        
+        # Calculate insight metrics
+        cross_domain_score = min(1.0, domains_in_response / max(domains_in_question, 1))
+        synthesis_score = 1.0 if synthesis_detected else 0.0
+        
+        return {
+            'cross_domain_score': cross_domain_score,
+            'synthesis_score': synthesis_score,
+            'domains_mentioned': domains_in_response,
+            'synthesis_detected': synthesis_detected,
+            'insight_potential': (cross_domain_score + synthesis_score) / 2
+        }
 
 
 class OpenAIProvider(L4LLMProvider):

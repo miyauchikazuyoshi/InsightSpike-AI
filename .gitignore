@@ -74,11 +74,23 @@ test_colab_*.py
 PROJECT_STRUCTURE_*.md
 /documentation/reports/VISUAL_SUMMARY.txt
 
-# バックアップファイル
+# バックアップファイル・アーカイブ（開発履歴、プッシュ不要）
 *.backup
 *.bak
+
+# アーカイブディレクトリ（全除外 - 開発履歴や古いコード保管）
 archive_old_experiments/
 archive_legacy_compatibility/
+archive*/
+*_archive/
+legacy*/
+deprecated*/
+
+# 実験データ・結果アーカイブ（生成物、プッシュ不要）
+/archive_old_experiments/
+/data/archive/
+/experiments/archive/
+*_backup_*/
 
 # 作業ログ・レポート（AI作業記録は除外）
 documentation/reports/
@@ -94,3 +106,18 @@ documentation/report/AI_WORK_*.md
 
 # その他
 *.swp
+
+# Personal and environment-specific paths
+/Users/*/
+*miyauchikazuyoshi*
+
+# IDE and environment files
+.env
+.secrets*
+*.swp
+*.swo
+*~
+
+# OS-specific files
+Thumbs.db
+.DS_Store

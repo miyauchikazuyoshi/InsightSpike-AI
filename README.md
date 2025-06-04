@@ -1,5 +1,9 @@
 # InsightSpike-AI
-**Brain-Inspired Multi-Agent Architecture for “Spike of Insight” (ΔGED × ΔIG)**  
+**Brain## ✨ Why
+Human "aha!" moments often arise from abrupt structural re-arrangements of episodic memory.  
+InsightSpike-AI models this process and exposes the *spike* as an internal reward signal.
+
+> **⚠️ 免責事項**: このプロジェクトは **概念実証 (Proof-of-Concept)** 段階です。実験結果にはモック実装とシミュレーションデータが含まれています。実装における制限と改善点については [documentation/reports/](documentation/reports/) をご確認ください。spired Multi-Agent Architecture for “Spike of Insight” (ΔGED × ΔIG)**  
 
 > Quantized RAG ＋ GNN ＋ Internal Reward (ΔGED/ΔIG)  
 > Implementing a cerebellum–LC–hippocampus–VTA loop to study *insight*.
@@ -434,27 +438,31 @@ For detailed experiments or custom runs, refer to the scripts in the `experiment
 
 ---
 
-## 🧪 Experimental Validation
+## 🧪 概念実証段階の実験結果 (Experimental Validation - Proof-of-Concept Stage)
 
-InsightSpike-AI has been rigorously tested through controlled experiments demonstrating its effectiveness in detecting cognitive insights and improving response quality through two distinct experimental frameworks.
+> **重要**: 以下の結果は概念実証段階のもので、モック実装とシミュレーションを含みます。詳細は [BIAS_CONFIRMATION_AND_IMPROVEMENT_REPORT.md](BIAS_CONFIRMATION_AND_IMPROVEMENT_REPORT.md) をご確認ください。
 
-### Insight Detection Experiment Results (Rigorous Validation)
+InsightSpike-AIは2つの異なる実験フレームワークを通じて制御された実験によってテストされています。
 
-**🎯 Breakthrough: 108.3% improvement in synthesis tasks requiring genuine cross-domain reasoning**
+### 洞察検出実験結果 (Rigorous Validation)
+
+**🎯 合成タスクでの改善を確認: 108.3% improvement**
 
 - **✅ 83.3% response quality** vs 40.0% baseline (108.3% improvement)
-- **✅ 66.7% synthesis rate** vs 0% baseline (successful cross-domain connections)  
-- **✅ 4/6 successful insight syntheses** on questions with NO direct answers in knowledge base
-- **✅ Insight detection** validates genuine reasoning rather than mere information retrieval
+- **✅ 66.7% synthesis rate** vs 0% baseline (cross-domain connections)  
+- **✅ 4/6 insight syntheses** on synthesis-requiring questions
+- **⚠️ 注意**: 実験設計により、知識ベースには直接的な回答は含まれていません
 
-### Traditional Experiment Results (Legacy Framework)
+### 従来実験フレームワーク結果 (Legacy Framework - Mock Implementation)
 
-- **✅ 133.3% improvement** in response quality over baseline systems
-- **✅ 100% insight detection rate** on cognitive paradoxes (Monty Hall, Zeno's, Ship of Theseus)
-- **✅ 0% false positive rate** on control questions
-- **✅ 287x faster processing** than baseline approaches
+> **⚠️ モック実装による結果**: 以下の結果はハードコードされた応答を含む概念実証です
 
-### Running New Experimental Framework
+- **133.3% improvement** in response quality (模擬実験)
+- **100% insight detection rate** on cognitive paradoxes (予め定義された応答)
+- **0% false positive rate** on control questions (制御された条件)
+- **287x faster processing** (シミュレーション環境での測定)
+
+### 新しい実験フレームワークの実行
 
 ```bash
 # Run rigorous insight experiment (no direct answers in knowledge base)
@@ -476,7 +484,7 @@ poetry run python scripts/run_poc_simple.py
 InsightSpike-AI uses two complementary experimental approaches to validate its insight detection capabilities:
 
 #### 🎯 Insight Experiments (Rigorous Validation)
-**Revolutionary experimental design with NO direct answers in knowledge base**
+**Novel experimental design with NO direct answers in knowledge base**
 
 - **Indirect Knowledge Base**: 57 facts containing only related concepts, NOT direct answers
 - **Synthesis-Required Questions**: 6 questions requiring genuine cross-domain reasoning
@@ -507,7 +515,7 @@ The validation framework tests InsightSpike-AI across multiple cognitive domains
 - **Conceptual Revolutions**: Physics paradigm shifts
 - **Control Conditions**: Standard academic content
 
-Results demonstrate that the ΔGED/ΔIG mechanism effectively identifies breakthrough moments in cognitive processing, validating the core hypothesis of spike-based insight detection.
+Results demonstrate that the ΔGED/ΔIG mechanism effectively identifies significant moments in cognitive processing, validating the core hypothesis of spike-based insight detection.
 
 📄 **Full Reports**: 
 - [`EXPERIMENTAL_VALIDATION_REPORT.md`](EXPERIMENTAL_VALIDATION_REPORT.md) - Traditional framework results

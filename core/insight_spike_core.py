@@ -1,19 +1,33 @@
 """
-InsightSpike-AI コア技術実装
+InsightSpike-AI Core Technology Implementation
 
-このモジュールは、InsightSpike-AIの革新的な洞察検出機能を実装します。
-特許出願中の技術（JP特願2025-082988, JP特願2025-082989）を含みます。
+This module implements the insight detection capabilities of InsightSpike-AI,
+including patent-pending technologies (JP Application 2025-082988, JP Application 2025-082989).
 
-主要機能:
-1. ΔGED (Global Exploration Difficulty) 計算
-2. ΔIG (Information Gain) 計算  
-3. リアルタイム洞察検出
-4. 適応的学習機構
-5. 脳科学ベースアーキテクチャ
+⚠️ IMPLEMENTATION STATUS ⚠️
+Current core implementation is transitioning from proof-of-concept to medium-term stage
+現在のコア実装は概念実証段階から中期段階への移行期にあります
 
-Author: 宮内和美
+🔬 GENUINE IMPLEMENTATIONS (True Implementations):
+- ΔGED/ΔIG calculation algorithms: Mathematically grounded insight detection
+- AdaptiveLearning: Brain science-based learning rate adjustment mechanism
+- BrainInspiredArchitecture: 4-layer processing based on neuroscience principles
+
+📋 ENHANCEMENT OPPORTUNITIES (Improvement Areas):
+- More sophisticated state representation models
+- Dynamic graph structure optimization
+- Extended real-world environment validation
+
+Key Features:
+1. ΔGED (Global Exploration Difficulty) calculation
+2. ΔIG (Information Gain) calculation  
+3. Real-time insight detection
+4. Adaptive learning mechanism
+5. Brain science-based architecture
+
+Author: Kazuyoshi Miyauchi
 Date: 2025-06-04
-Patent: JP特願2025-082988, JP特願2025-082989
+Patent: JP Application 2025-082988, JP Application 2025-082989
 """
 
 import numpy as np
@@ -186,7 +200,7 @@ class InsightDetector:
         # 主要洞察条件: 探索効率低下 + 高情報ゲイン
         if dged < self.dged_threshold and dig > self.dig_threshold:
             insight_detected = True
-            description = f"Strategic Breakthrough: Exploration efficiency change={dged:.3f}, Info gain={dig:.3f}"
+            description = f"Strategic Insight: Exploration efficiency change={dged:.3f}, Info gain={dig:.3f}"
         
         # 副次洞察条件: ゴール発見
         elif reward > 50:

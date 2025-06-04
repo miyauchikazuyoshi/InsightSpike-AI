@@ -1,0 +1,79 @@
+# Docker Compose configuration for InsightSpike-AI
+
+version: '3.8'
+
+services:
+  # Production service
+  insightspike-prod:
+    build:
+      context: .
+      target: production
+    container_name: insightspike-production
+    volumes:
+      - ./experiments/results:/app/experiments/results
+      - ./data/samples:/app/data/samples:ro
+    environment:
+      - INSIGHTSPIKE_MODE=production
+      - PYTHONPATH=/app/src
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import insightspike; print('OK')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Development service
+  insightspike-dev:
+    build:
+      context: .
+      target: development
+    container_name: insightspike-development
+    volumes:
+      - .:/app
+      - poetry-cache:/root/.cache/pypoetry
+    environment:
+      - INSIGHTSPIKE_MODE=development
+      - PYTHONPATH=/app/src
+    ports:
+      - "8001:8000"
+      - "8888:8888"  # Jupyter notebook
+    stdin_open: true
+    tty: true
+    command: /bin/bash
+
+  # Testing service
+  insightspike-test:
+    build:
+      context: .
+      target: development
+    container_name: insightspike-test
+    volumes:
+      - .:/app
+    environment:
+      - INSIGHTSPIKE_MODE=test
+      - PYTHONPATH=/app/src
+    command: poetry run pytest tests/ -v --cov=insightspike --cov-report=html
+
+  # Benchmark service
+  insightspike-benchmark:
+    build:
+      context: .
+      target: development
+    container_name: insightspike-benchmark
+    volumes:
+      - .:/app
+      - ./benchmarks/results:/app/benchmarks/results
+    environment:
+      - INSIGHTSPIKE_MODE=benchmark
+      - PYTHONPATH=/app/src
+    command: poetry run python benchmarks/performance_suite.py
+
+volumes:
+  poetry-cache:
+    driver: local
+
+networks:
+  default:
+    name: insightspike-network

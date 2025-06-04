@@ -227,7 +227,7 @@ class InsightSpikeAgent:
         if dged > self.dged_threshold and dig > self.dig_threshold:
             insight_detected = True
             insight_type = "strategic_breakthrough"
-            description = f"Revolutionary exploration strategy discovered at {state}"
+            description = f"Effective exploration strategy discovered at {state}"
             performance_impact = 0.8
         
         # Goal discovery insight

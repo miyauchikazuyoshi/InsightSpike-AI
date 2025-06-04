@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 """
 🧠 InsightSpike-AI vs ベースラインアルゴリズム - 包括的実証実験
-Revolutionary Comparison: InsightSpike-AI vs T        return maze
-    
-    def _place_treasures(self) -> List[Tuple[int, int]]:ethods
+Advanced Comparison: InsightSpike-AI vs Traditional RL Methods
 
 この実験では、InsightSpike-AIの革新的な洞察検出機能を
-複数の複雑な環境で実証し、従来手法との圧倒的な性能差を明確に示します。
+複数の複雑な環境で実証し、従来手法との性能差を明確に示します。
 
 Author: Miyauchi Kazuyoshi
 Date: 2025年6月4日
@@ -432,7 +430,7 @@ class InsightSpikeAgent(BaseRLAgent):
                 description = f"Goal-reaching strategy discovered! ΔGED={dged:.3f}, ΔIG={dig:.3f}"
             elif reward > 1.0:
                 insight_type = "strategic_breakthrough"  
-                description = f"Strategic breakthrough achieved! ΔGED={dged:.3f}, ΔIG={dig:.3f}"
+                description = f"Strategic insight achieved! ΔGED={dged:.3f}, ΔIG={dig:.3f}"
             elif exploration_factor > 1.2:
                 insight_type = "exploration_insight"
                 description = f"Exploration efficiency improved! ΔGED={dged:.3f}, ΔIG={dig:.3f}"
@@ -443,7 +441,7 @@ class InsightSpikeAgent(BaseRLAgent):
         
         elif dig >= self.dig_threshold * 1.5:  # 高いIG単独でも洞察と判定
             insight_type = "information_breakthrough"
-            description = f"Information processing breakthrough! ΔIG={dig:.3f}"
+            description = f"Information processing insight! ΔIG={dig:.3f}"
             insight_detected = True
             
         elif dged <= self.dged_threshold * 1.5:  # 大幅な効率向上
@@ -628,7 +626,7 @@ def create_comprehensive_visualization(results: Dict[str, ExperimentResults]) ->
     ax5 = axes[1, 1]
     insights = [results[alg].insights_detected for alg in algorithms]
     bars5 = ax5.bar(algorithms, insights, color=colors)
-    ax5.set_title('🧠 Insights Detected (Revolutionary Feature)', fontweight='bold')
+    ax5.set_title('🧠 Insights Detected (Advanced Feature)', fontweight='bold')
     ax5.set_ylabel('Number of Insights')
     
     for bar, insight in zip(bars5, insights):
@@ -788,7 +786,7 @@ InsightSpike-AI は実験期間中に **{results['InsightSpike-AI'].insights_det
 4. **説明可能な AI による意思決定の透明性**
 
 InsightSpike-AI は、人工知能が真に「理解」し「洞察」する新たな時代を切り拓く
-**革命的技術** であることが実証されました。
+**高度な技術** であることが実証されました。
 
 ---
 **Contact**: miyauchi.kazuyoshi@example.com

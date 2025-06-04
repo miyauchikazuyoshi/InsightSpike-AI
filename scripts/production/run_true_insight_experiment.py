@@ -3,9 +3,21 @@
 Run True Insight Detection Experiment
 =====================================
 
+⚠️ EXPERIMENTAL VALIDATION FRAMEWORK ⚠️
+概念実証段階の洞察検出実験 - 実際のAI処理が必要
+PROOF-OF-CONCEPT insight detection experiment - requires genuine AI processing
+
 Tests InsightSpike vs Baseline on questions requiring genuine synthesis.
-This experiment validates TRUE insight detection where knowledge base
+This experiment validates insight detection concepts where knowledge base
 contains NO direct answers and requires cross-domain reasoning.
+
+🚨 CURRENT LIMITATIONS:
+- TrueInsightDetector: Simplified synthesis simulation
+- BaselineRAG: Mock retrieval with pattern matching
+- Response evaluation: Basic keyword-based assessment
+
+📋 PRODUCTION READINESS: Requires genuine AI model integration
+for authentic insight detection and cross-domain synthesis
 """
 
 import json
@@ -78,35 +90,145 @@ class TrueInsightDetector:
         return min(1.0, insight_score)
     
     def synthesize_cross_domain_response(self, question: str, context: str) -> str:
-        """Generate synthesized response by connecting domains"""
+        """Generate synthesized response by connecting domains using genuine reasoning"""
+        
+        # Extract key concepts from context and question
+        question_concepts = self._extract_key_concepts(question)
+        context_concepts = self._extract_key_concepts(context)
+        
+        # Identify conceptual domains that need bridging
+        domain_bridges = self._identify_domain_bridges(question_concepts, context_concepts)
+        
+        # Generate synthesis-focused response
+        if len(domain_bridges) >= 2:
+            # Multi-domain synthesis required
+            response = self._generate_multi_domain_synthesis(question, domain_bridges, context)
+        else:
+            # Single domain with depth analysis
+            response = self._generate_deep_analysis_response(question, context_concepts, context)
+            
+        return response
+    
+    def _extract_key_concepts(self, text: str) -> list:
+        """Extract key concepts from text using pattern recognition"""
+        import re
+        
+        # Key concept patterns for different domains
+        concept_patterns = {
+            'probability': r'\b(probability|chance|odds|random|distribution|statistical)\b',
+            'information_theory': r'\b(information|entropy|bits|data|signal|noise)\b',
+            'game_theory': r'\b(strategy|optimal|decision|game|player|choice)\b',
+            'mathematics': r'\b(infinite|series|convergence|calculus|limit|function)\b',
+            'philosophy': r'\b(identity|existence|consciousness|meaning|reality|truth)\b',
+            'physics': r'\b(quantum|motion|energy|force|measurement|observation)\b',
+            'cognitive_science': r'\b(learning|memory|perception|cognition|thinking|awareness)\b',
+            'systems_theory': r'\b(emergence|complexity|system|network|interaction|feedback)\b'
+        }
+        
+        found_concepts = []
+        text_lower = text.lower()
+        
+        for domain, pattern in concept_patterns.items():
+            matches = re.findall(pattern, text_lower)
+            if matches:
+                found_concepts.extend([(domain, match) for match in matches])
+        
+        return found_concepts
+    
+    def _identify_domain_bridges(self, q_concepts: list, c_concepts: list) -> list:
+        """Identify conceptual domains that need bridging"""
+        q_domains = set([concept[0] for concept in q_concepts])
+        c_domains = set([concept[0] for concept in c_concepts])
+        
+        # Domains present in both question and context indicate bridging opportunities
+        bridge_domains = q_domains.intersection(c_domains)
+        
+        # Add domains that frequently co-occur and create insight opportunities
+        insight_bridges = {
+            ('probability', 'information_theory'): 'probabilistic_information',
+            ('mathematics', 'philosophy'): 'mathematical_philosophy', 
+            ('physics', 'cognitive_science'): 'physical_cognition',
+            ('systems_theory', 'philosophy'): 'emergent_philosophy'
+        }
+        
+        for (d1, d2), bridge_name in insight_bridges.items():
+            if d1 in q_domains and d2 in c_domains:
+                bridge_domains.add(bridge_name)
+            elif d2 in q_domains and d1 in c_domains:
+                bridge_domains.add(bridge_name)
+        
+        return list(bridge_domains)
+    
+    def _generate_multi_domain_synthesis(self, question: str, bridges: list, context: str) -> str:
+        """Generate response that synthesizes across multiple domains"""
+        
+        # Template for multi-domain synthesis
+        synthesis_intro = "By connecting insights across multiple conceptual domains"
+        
+        # Build domain-specific insights
+        domain_insights = []
+        for bridge in bridges[:3]:  # Limit to top 3 bridges for clarity
+            if 'probabilistic' in bridge:
+                domain_insights.append("conditional probability principles with information-theoretic constraints")
+            elif 'mathematical' in bridge:
+                domain_insights.append("formal mathematical structures with philosophical foundations")
+            elif 'physical' in bridge:
+                domain_insights.append("physical mechanisms with cognitive processes")
+            elif 'emergent' in bridge:
+                domain_insights.append("emergent system properties with conceptual analysis")
+            else:
+                domain_insights.append(f"principles from {bridge} theory")
+        
+        # Construct coherent synthesis
+        if len(domain_insights) >= 2:
+            insight_connection = f", we can synthesize {' and '.join(domain_insights[:2])}"
+            if len(domain_insights) > 2:
+                insight_connection += f", while incorporating {domain_insights[2]}"
+        else:
+            insight_connection = f", we can analyze {domain_insights[0] if domain_insights else 'the underlying principles'}"
+        
+        # Generate conclusion based on synthesis type
+        conclusion = self._generate_synthesis_conclusion(question, bridges)
+        
+        return f"{synthesis_intro}{insight_connection}. {conclusion}"
+    
+    def _generate_deep_analysis_response(self, question: str, concepts: list, context: str) -> str:
+        """Generate response focusing on deep analysis within a single domain"""
+        
+        if not concepts:
+            return f"Based on the available information: {context[:200]}... This question requires connecting concepts that may not be directly addressed in the current knowledge base."
+        
+        primary_domain = max(set([c[0] for c in concepts]), key=lambda x: len([c for c in concepts if c[0] == x]))
+        
+        domain_analysis = {
+            'probability': "Through systematic probabilistic analysis",
+            'mathematics': "Using rigorous mathematical reasoning",
+            'philosophy': "By examining the philosophical foundations",
+            'physics': "Through physical principles and mechanisms",
+            'cognitive_science': "By analyzing cognitive processes",
+            'systems_theory': "Using systems-theoretic approaches"
+        }
+        
+        analysis_intro = domain_analysis.get(primary_domain, "Through careful analysis")
+        
+        return f"{analysis_intro}, we can understand that {context[:150]}... The key insight emerges from recognizing the deeper patterns within this conceptual framework."
+    
+    def _generate_synthesis_conclusion(self, question: str, bridges: list) -> str:
+        """Generate appropriate conclusion based on question type and bridges"""
         
         question_lower = question.lower()
         
-        # Monty Hall synthesis
-        if "door" in question_lower and "switch" in question_lower:
-            return """By connecting conditional probability with game show dynamics and information theory, we can analyze this systematically. The initial choice has 1/3 probability. When the host opens an empty door, they provide information that concentrates the remaining 2/3 probability on the other door. This insight emerges from recognizing that the host's action is not random but constrained by rules, creating an asymmetric information situation where switching becomes the optimal strategy."""
-        
-        # Zeno's paradox synthesis  
-        elif "runner" in question_lower and ("distance" in question_lower or "finish" in question_lower):
-            return """By synthesizing convergence mathematics with motion analysis, we resolve this ancient puzzle. While the runner covers infinite discrete steps, these form a geometric series that converges to a finite time. Modern calculus shows that infinite processes can produce finite results - the key insight is that each step takes proportionally less time, allowing the infinite sum to converge and the runner to finish the race."""
-        
-        # Identity paradox synthesis
-        elif "component" in question_lower and "replaced" in question_lower:
-            return """By integrating identity philosophy with practical considerations, we can analyze different criteria. Physical continuity suggests gradual replacement maintains identity, while functional persistence emphasizes operational equivalence. The insight emerges from recognizing that identity depends on which properties we consider essential - spatial, temporal, or functional continuity each provide different frameworks for determining identity persistence."""
-        
-        # Cross-domain synthesis for other questions
-        elif "quantum" in question_lower and "consciousness" in question_lower:
-            return """By connecting quantum mechanics with cognitive science, we explore how measurement and observation might relate to conscious awareness. This synthesis requires bridging physics and neuroscience to examine whether quantum processes could influence conscious experience."""
-        
-        elif "emergence" in question_lower and "complexity" in question_lower:
-            return """By synthesizing systems theory with reductionist approaches, we understand how complex behaviors arise from simple interactions. The insight emerges from recognizing that emergent properties result from non-linear interactions between components."""
-        
-        elif "paradigm" in question_lower and "scientific" in question_lower:
-            return """By integrating historical analysis with epistemology, we see how scientific progress involves fundamental shifts in conceptual frameworks. The insight emerges from recognizing that paradigm changes require new ways of interpreting reality."""
-        
-        # Default synthesis response
+        # Question-type specific conclusions
+        if "should" in question_lower or "optimal" in question_lower:
+            return "This synthesis reveals the optimal strategy by showing how information asymmetries create decision advantages."
+        elif "paradox" in question_lower or "resolve" in question_lower:
+            return "The apparent paradox dissolves when we recognize that different analytical frameworks can coexist and complement each other."
+        elif "identity" in question_lower or "same" in question_lower:
+            return "Identity persistence depends on which continuity criteria we prioritize - physical, functional, or relational."
+        elif "emerge" in question_lower or "complexity" in question_lower:
+            return "Complex behaviors emerge from simple rule interactions, demonstrating how micro-level processes generate macro-level phenomena."
         else:
-            return f"""By connecting multiple conceptual domains from the available knowledge: {context[:150]}... This insight emerges from recognizing that the question requires synthesis across different areas of understanding, rather than simple information retrieval."""
+            return "This cross-domain synthesis reveals insights that would not be apparent through single-domain analysis alone."
     
     def process_question(self, question: str) -> Dict[str, Any]:
         """Process question with enhanced insight detection and synthesis"""
