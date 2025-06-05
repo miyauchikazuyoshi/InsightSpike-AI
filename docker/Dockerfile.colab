@@ -14,7 +14,8 @@ RUN pip install poetry==1.7.1
 # Poetry設定（Colab最適化）
 ENV POETRY_NO_INTERACTION=1 \
     POETRY_VENV_IN_PROJECT=0 \
-    POETRY_CACHE_DIR=/tmp/poetry_cache
+    POETRY_CACHE_DIR=/tmp/poetry_cache \
+    POETRY_KEYRING_PROVIDER=import
 
 # 作業ディレクトリ設定（Colabスタイル）
 WORKDIR /content/InsightSpike-AI
