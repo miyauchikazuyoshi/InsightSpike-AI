@@ -20,23 +20,24 @@ ENV POETRY_NO_INTERACTION=1 \
     POETRY_VENV_IN_PROJECT=1 \
     POETRY_CACHE_DIR=/tmp/poetry_cache \
     POETRY_INSTALLER_PARALLEL=true \
-    POETRY_INSTALLER_MAX_WORKERS=4
+    POETRY_INSTALLER_MAX_WORKERS=4 \
+    POETRY_KEYRING_PROVIDER=import
 
 # Copy Poetry files for dependency resolution
 COPY pyproject.toml poetry.lock* ./
 
-# Install CPU-optimized PyTorch and FAISS first (before Poetry)
-# This avoids conflicts and reduces build time
+# Install CPU-optimized PyTorch first, then FAISS separately
+# This avoids conflicts with PyTorch index-url
 RUN pip install --no-cache-dir \
     torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu \
-    faiss-cpu \
+    && pip install --no-cache-dir faiss-cpu \
     && pip cache purge
 
 # Copy source code (needed for Poetry to install the package)
 COPY src/ ./src/
 
 # Install main dependencies only, excluding torch and faiss (already installed)
-RUN poetry install --only=main --no-dev && rm -rf $POETRY_CACHE_DIR
+RUN poetry install --only=main && rm -rf $POETRY_CACHE_DIR
 
 # Production stage
 FROM base as production
@@ -64,7 +65,7 @@ CMD ["poetry", "run", "python", "-m", "insightspike", "--help"]
 FROM base as development
 
 # Install development dependencies
-RUN poetry install --with dev && rm -rf $POETRY_CACHE_DIR
+RUN poetry install --with=dev && rm -rf $POETRY_CACHE_DIR
 
 # Copy everything for development
 COPY . .
