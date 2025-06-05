@@ -40,7 +40,7 @@ documentation/
 
 ### For Colab Users
 1. **[Colab Troubleshooting](guides/COLAB_TROUBLESHOOTING_GUIDE.md)** - Colab-specific solutions
-2. **[Quick Start](guides/QUICK_START.md)** - Docker and pip installation options
+2. **[Quick Start](guides/QUICK_START.md)** - Poetry and pip installation options
 
 ## 📚 Documentation Categories
 

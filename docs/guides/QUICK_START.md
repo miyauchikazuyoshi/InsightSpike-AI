@@ -46,20 +46,6 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-### Option 3: Docker
-
-```bash
-# Clone the repository
-git clone https://github.com/your-username/InsightSpike-AI.git
-cd InsightSpike-AI
-
-# Build Docker image
-docker build -t insightspike-ai .
-
-# Run container
-docker run -it --rm -v $(pwd):/workspace insightspike-ai
-```
-
 ## Quick Test
 
 Verify your installation works:

@@ -94,23 +94,7 @@ This demo showcases InsightSpike's ability to synthesize insights across domains
 
 ## ⚡ Quick Start on Google Colab (GPU)
 
-### 🐳 Docker版 - 超高速セットアップ（推奨）
-最新のDocker版により、1分で完全環境構築が可能になりました！
-
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/miyauchikazuyoshi/InsightSpike-AI/blob/main/InsightSpike_Docker_Colab_Setup.ipynb)
-
-**特徴:**
-- ⚡ **1分セットアップ**: 複雑な依存関係管理不要
-- 🔒 **完全再現性**: Docker環境による一貫した動作
-- 🚀 **即座利用**: Pre-built Imageで最速起動
-- 🛠️ **開発対応**: ソースからのカスタマイズも可能
-
-```python
-# Colab内で1行実行
-!wget https://raw.githubusercontent.com/miyauchikazuyoshi/InsightSpike-AI/main/scripts/colab/setup_docker.py && python setup_docker.py
-```
-
-### 🎯 従来版 - One-Click Setup
+### 🎯 One-Click Setup
 The easiest way to get started is with our simplified Colab notebook:
 
 1. **Open the notebook**: [`InsightSpike_Colab_Demo.ipynb`](InsightSpike_Colab_Demo.ipynb) in Google Colab
@@ -349,38 +333,6 @@ For development, PoC, or experiments, the full development environment includes:
 - ✅ All resolved dependencies with NumPy 1.x ecosystem
 
 When running `run_poc.py` offline, set the environment variable `EMBED_MODEL_PATH` to a locally downloaded SentenceTransformer model directory.
-
-### Docker
----
-**🎯 Optimized Docker Structure with Performance Improvements**
-
-All Docker files are now organized under the `docker/` directory with enhanced build performance:
-
-```
-docker/
-├── Dockerfile.main           # Main production environment (optimized)
-├── Dockerfile.colab          # Google Colab optimized
-├── Dockerfile.ci             # Lightweight CI testing
-├── docker-compose.yml        # Main orchestration
-└── docker-compose.colab.yml  # Colab environment
-```
-
-**🚀 Quick Start Options:**
-
-1. **Main Environment**: `cd docker && docker-compose up`
-2. **Google Colab**: Use the [Colab Notebook](InsightSpike_Docker_Colab_Setup.ipynb)
-3. **Production Build**: `docker build -f docker/Dockerfile.main --target production -t insightspike .`
-4. **Test All Builds**: `./scripts/testing/test_docker_builds.sh`
-
-**⚡ Performance Optimizations:**
-
-- Pre-installed PyTorch and FAISS to avoid Poetry conflicts
-- Multi-stage builds with optimized layer caching
-- Lightweight CI dockerfile for fast testing
-- Enhanced .dockerignore to reduce build context
-- GitHub Actions integration with build caching
-
-The main Dockerfile supports multi-stage builds (production, development, colab) with Python 3.11 and optimized dependency management for faster CI/CD performance.
 
 ## ✅ Minimal Working Example (Dependency Conflicts Resolved)
 
