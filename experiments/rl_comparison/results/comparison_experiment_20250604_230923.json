@@ -1,0 +1,152 @@
+{
+  "config": {
+    "episodes": 200,
+    "max_steps_per_episode": 100,
+    "environments": [
+      "simple_4x4",
+      "complex_8x8"
+    ],
+    "random_seed": 42
+  },
+  "results": {
+    "simple_4x4": {
+      "vanilla_q": {
+        "algorithm": "Vanilla Q-Learning",
+        "environment": "Simple 4x4 Maze",
+        "episodes": 200,
+        "success_rate": 1.0,
+        "avg_steps_to_goal": 7.96,
+        "avg_total_reward": 93.04,
+        "convergence_episode": 10,
+        "insights_detected": 0,
+        "learning_efficiency": 0.1
+      },
+      "epsilon_decay": {
+        "algorithm": "Epsilon-Decay Q-Learning",
+        "environment": "Simple 4x4 Maze",
+        "episodes": 200,
+        "success_rate": 0.985,
+        "avg_steps_to_goal": 14.040609137055837,
+        "avg_total_reward": 84.155,
+        "convergence_episode": 10,
+        "insights_detected": 0,
+        "learning_efficiency": 0.1
+      },
+      "sarsa": {
+        "algorithm": "SARSA",
+        "environment": "Simple 4x4 Maze",
+        "episodes": 200,
+        "success_rate": 1.0,
+        "avg_steps_to_goal": 7.815,
+        "avg_total_reward": 93.185,
+        "convergence_episode": 10,
+        "insights_detected": 0,
+        "learning_efficiency": 0.1
+      },
+      "nec": {
+        "algorithm": "Neural Episodic Control",
+        "environment": "Simple 4x4 Maze",
+        "episodes": 200,
+        "success_rate": 1.0,
+        "avg_steps_to_goal": 7.975,
+        "avg_total_reward": 93.025,
+        "convergence_episode": 10,
+        "insights_detected": 0,
+        "learning_efficiency": 0.1
+      },
+      "insightspike": {
+        "algorithm": "InsightSpike-AI",
+        "environment": "Simple 4x4 Maze",
+        "episodes": 200,
+        "success_rate": 1.0,
+        "avg_steps_to_goal": 7.765,
+        "avg_total_reward": 93.235,
+        "convergence_episode": 10,
+        "insights_detected": 5,
+        "learning_efficiency": 0.1
+      }
+    },
+    "complex_8x8": {
+      "vanilla_q": {
+        "algorithm": "Vanilla Q-Learning",
+        "environment": "Complex 8x8 Maze",
+        "episodes": 200,
+        "success_rate": 0.91,
+        "avg_steps_to_goal": 26.23076923076923,
+        "avg_total_reward": 150.04,
+        "convergence_episode": 27,
+        "insights_detected": 0,
+        "learning_efficiency": 0.037037037037037035
+      },
+      "epsilon_decay": {
+        "algorithm": "Epsilon-Decay Q-Learning",
+        "environment": "Complex 8x8 Maze",
+        "episodes": 200,
+        "success_rate": 0.83,
+        "avg_steps_to_goal": 34.28313253012048,
+        "avg_total_reward": 121.375,
+        "convergence_episode": 48,
+        "insights_detected": 0,
+        "learning_efficiency": 0.020833333333333332
+      },
+      "sarsa": {
+        "algorithm": "SARSA",
+        "environment": "Complex 8x8 Maze",
+        "episodes": 200,
+        "success_rate": 0.925,
+        "avg_steps_to_goal": 26.264864864864865,
+        "avg_total_reward": 154.13,
+        "convergence_episode": 28,
+        "insights_detected": 0,
+        "learning_efficiency": 0.03571428571428571
+      },
+      "nec": {
+        "algorithm": "Neural Episodic Control",
+        "environment": "Complex 8x8 Maze",
+        "episodes": 200,
+        "success_rate": 0.925,
+        "avg_steps_to_goal": 26.61081081081081,
+        "avg_total_reward": 153.81,
+        "convergence_episode": 32,
+        "insights_detected": 0,
+        "learning_efficiency": 0.03125
+      },
+      "insightspike": {
+        "algorithm": "InsightSpike-AI",
+        "environment": "Complex 8x8 Maze",
+        "episodes": 200,
+        "success_rate": 0.895,
+        "avg_steps_to_goal": 26.726256983240223,
+        "avg_total_reward": 145.475,
+        "convergence_episode": 31,
+        "insights_detected": 44,
+        "learning_efficiency": 0.03225806451612903
+      }
+    }
+  },
+  "analysis": {
+    "overall_performance": {
+      "simple_4x4": {
+        "insightspike_rank": 4,
+        "success_improvement_vs_baseline": 0.0,
+        "efficiency_improvement_vs_baseline": 0.0,
+        "unique_insights": 5
+      },
+      "complex_8x8": {
+        "insightspike_rank": 4,
+        "success_improvement_vs_baseline": -1.6483516483516498,
+        "efficiency_improvement_vs_baseline": -12.90322580645161,
+        "unique_insights": 44
+      }
+    },
+    "insightspike_advantages": {},
+    "statistical_significance": {},
+    "unique_capabilities": {
+      "total_insights_detected": 49,
+      "insight_detection_capability": "Only InsightSpike-AI can detect learning insights",
+      "cognitive_modeling": "Brain-inspired architecture with ΔGED/ΔIG metrics",
+      "explainable_learning": "Real-time visualization of learning process"
+    }
+  },
+  "timestamp": "2025-06-04T23:09:23.002404"
+}

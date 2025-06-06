@@ -1,0 +1,151 @@
+{
+  "timestamp": "2025-06-06 09:48:43",
+  "baseline_results": [
+    {
+      "question_id": "monty_hall_test",
+      "category": "probability_paradox",
+      "response_quality": 0.0,
+      "insight_detected": false,
+      "response_time": 0.10404300689697266,
+      "spike_count": 0
+    },
+    {
+      "question_id": "zeno_resolution",
+      "category": "mathematical_paradox",
+      "response_quality": 0.26666666666666666,
+      "insight_detected": false,
+      "response_time": 0.10194611549377441,
+      "spike_count": 0
+    },
+    {
+      "question_id": "identity_philosophy",
+      "category": "philosophical_paradox",
+      "response_quality": 0.13333333333333333,
+      "insight_detected": false,
+      "response_time": 0.10474395751953125,
+      "spike_count": 0
+    },
+    {
+      "question_id": "math_abstraction",
+      "category": "concept_hierarchy",
+      "response_quality": 0.0,
+      "insight_detected": false,
+      "response_time": 0.10462164878845215,
+      "spike_count": 0
+    },
+    {
+      "question_id": "physics_paradigms",
+      "category": "conceptual_revolution",
+      "response_quality": 0.0,
+      "insight_detected": false,
+      "response_time": 0.10278511047363281,
+      "spike_count": 0
+    },
+    {
+      "question_id": "control_weather",
+      "category": "control",
+      "response_quality": 0.6,
+      "insight_detected": false,
+      "response_time": 0.10257315635681152,
+      "spike_count": 0
+    }
+  ],
+  "insightspike_results": [
+    {
+      "question_id": "monty_hall_test",
+      "category": "probability_paradox",
+      "response_quality": 0.13333333333333333,
+      "insight_detected": true,
+      "response_time": 0.0009188652038574219,
+      "spike_count": 0,
+      "memory_updates": 1,
+      "avg_delta_ged": 0.5831210581613553,
+      "avg_delta_ig": 0.5535209387804159
+    },
+    {
+      "question_id": "zeno_resolution",
+      "category": "mathematical_paradox",
+      "response_quality": 0.13333333333333333,
+      "insight_detected": true,
+      "response_time": 8.20159912109375e-05,
+      "spike_count": 0,
+      "memory_updates": 1,
+      "avg_delta_ged": 0.6604173671629223,
+      "avg_delta_ig": 0.6745407865190347
+    },
+    {
+      "question_id": "identity_philosophy",
+      "category": "philosophical_paradox",
+      "response_quality": 0.13333333333333333,
+      "insight_detected": true,
+      "response_time": 0.00011491775512695312,
+      "spike_count": 0,
+      "memory_updates": 1,
+      "avg_delta_ged": 0.7972485599060103,
+      "avg_delta_ig": 0.750677696654715
+    },
+    {
+      "question_id": "math_abstraction",
+      "category": "concept_hierarchy",
+      "response_quality": 0.4,
+      "insight_detected": false,
+      "response_time": 7.390975952148438e-05,
+      "spike_count": 0,
+      "memory_updates": 1,
+      "avg_delta_ged": 0.1189809145685892,
+      "avg_delta_ig": 0.08914987695624692
+    },
+    {
+      "question_id": "physics_paradigms",
+      "category": "conceptual_revolution",
+      "response_quality": 0.4,
+      "insight_detected": true,
+      "response_time": 0.00010895729064941406,
+      "spike_count": 4,
+      "memory_updates": 8,
+      "avg_delta_ged": 0.7457473374965993,
+      "avg_delta_ig": 0.7901459931803672
+    },
+    {
+      "question_id": "control_weather",
+      "category": "control",
+      "response_quality": 0.6,
+      "insight_detected": false,
+      "response_time": 0.00010395050048828125,
+      "spike_count": 0,
+      "memory_updates": 1,
+      "avg_delta_ged": 0.11167758084045651,
+      "avg_delta_ig": 0.08958142721404233
+    }
+  ],
+  "analysis": {
+    "summary": {
+      "total_questions": 6,
+      "insight_questions": 5,
+      "control_questions": 1
+    },
+    "response_quality": {
+      "insightspike_avg": 0.30000000000000004,
+      "baseline_avg": 0.16666666666666666,
+      "insight_improvement": 0.16000000000000003,
+      "control_difference": 0.0
+    },
+    "insight_detection": {
+      "insightspike_rate": 0.8,
+      "baseline_rate": 0.0,
+      "false_positive_rate": 0.0
+    },
+    "processing_metrics": {
+      "avg_response_time_is": 0.00023376941680908203,
+      "avg_response_time_baseline": 0.10345216592152913,
+      "avg_memory_updates": 2.1666666666666665,
+      "avg_spikes_per_question": 0.8
+    },
+    "improvements": {
+      "response_quality_improvement_pct": 80.00000000000004,
+      "insight_detection_advantage": 0.8,
+      "demonstrates_insight_capability": true,
+      "low_false_positives": true
+    }
+  }
+}
