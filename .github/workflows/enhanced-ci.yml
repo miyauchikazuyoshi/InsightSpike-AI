@@ -50,24 +50,26 @@ jobs:
         export INSIGHTSPIKE_LITE_MODE=1
         export FORCE_CPU_ONLY=1
         
-        # Install base dependencies with Poetry
-        poetry install --only main --no-root
+        # CRITICAL FIX: Skip Poetry lock file to avoid faiss-gpu conflicts
+        # Install minimal dependencies directly with pip to avoid lock file conflicts
+        poetry run pip install --upgrade pip
         
-        # Force NumPy 1.x for FAISS compatibility (critical fix)
-        poetry run pip install "numpy>=1.21,<2.0" --force-reinstall
+        # Install core dependencies with CPU-only constraints
+        poetry run pip install "numpy>=1.21,<2.0" 
+        poetry run pip install faiss-cpu==1.7.4
+        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
         
-        # Force CPU-only packages (override any GPU packages)
-        poetry run pip install "numpy>=1.21,<2.0" --force-reinstall
-        poetry run pip install faiss-cpu==1.7.4 --force-reinstall
-        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu --force-reinstall
+        # Install other required dependencies
+        poetry run pip install typer rich click pyyaml scipy scikit-learn networkx
+        poetry run pip install transformers sentence-transformers datasets nltk matplotlib spacy
         
         # Install CI tools in Poetry environment
-        poetry run pip install pytest pytest-cov black isort flake8 mypy bandit PyYAML
+        poetry run pip install pytest pytest-cov black isort flake8 mypy bandit
         
-        # Install project in development mode
-        poetry install --only-root
+        # Install project in development mode (no dependencies to avoid conflicts)
+        poetry run pip install -e . --no-deps
         
-        echo "✅ CI dependencies installed consistently with Poetry (CPU-only, NumPy 1.x)"
+        echo "✅ CI dependencies installed with Poetry + pip (CPU-only, avoiding lock file)"
     
     - name: Run code formatting check
       run: |
@@ -141,30 +143,32 @@ jobs:
         restore-keys: |
           poetry-${{ runner.os }}-${{ env.PYTHON_VERSION }}-
     
-    - name: Install dependencies with Poetry (CI - CPU only)
+    - name: Install CI dependencies with Poetry (CPU-only)
       run: |
-        # Use Poetry consistently but force CPU-only dependencies
+        # Use Poetry consistently but force CPU-only dependencies  
         export INSIGHTSPIKE_LITE_MODE=1
         export FORCE_CPU_ONLY=1
         
-        # Install base dependencies with Poetry
-        poetry install --only main --no-root
+        # CRITICAL FIX: Skip Poetry lock file to avoid faiss-gpu conflicts
+        # Install minimal dependencies directly with pip to avoid lock file conflicts
+        poetry run pip install --upgrade pip
         
-        # Force NumPy 1.x for FAISS compatibility (critical fix)
-        poetry run pip install "numpy>=1.21,<2.0" --force-reinstall
+        # Install core dependencies with CPU-only constraints
+        poetry run pip install "numpy>=1.21,<2.0" 
+        poetry run pip install faiss-cpu==1.7.4
+        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
         
-        # Force CPU-only packages (override any GPU packages)
-        poetry run pip install "numpy>=1.21,<2.0" --force-reinstall
-        poetry run pip install faiss-cpu==1.7.4 --force-reinstall
-        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu --force-reinstall
+        # Install other required dependencies
+        poetry run pip install typer rich click pyyaml scipy scikit-learn networkx
+        poetry run pip install transformers sentence-transformers datasets nltk matplotlib spacy
         
         # Install CI tools in Poetry environment
         poetry run pip install pytest pytest-cov
         
-        # Install project in development mode
-        poetry install --only-root
+        # Install project in development mode (no dependencies to avoid conflicts)
+        poetry run pip install -e . --no-deps
         
-        echo "✅ CI environment: Poetry-based CPU-only dependencies (NumPy 1.x)"
+        echo "✅ CI dependencies installed with Poetry + pip (CPU-only, avoiding lock file)"
     
     - name: Set environment variables
       run: |
@@ -249,14 +253,22 @@ jobs:
         export INSIGHTSPIKE_LITE_MODE=1
         export FORCE_CPU_ONLY=1
         
-        # Install dependencies with Poetry (CPU-only)
-        poetry install --only main --no-root
-        poetry run pip install "numpy>=1.21,<2.0" --force-reinstall
-        poetry run pip install faiss-cpu==1.7.4 --force-reinstall
-        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu --force-reinstall
-        poetry install --only-root
+        # CRITICAL FIX: Skip Poetry lock file to avoid faiss-gpu conflicts
+        poetry run pip install --upgrade pip
         
-        echo "✅ Poetry validation dependencies installed (CPU-only)"
+        # Install core dependencies with CPU-only constraints
+        poetry run pip install "numpy>=1.21,<2.0" 
+        poetry run pip install faiss-cpu==1.7.4
+        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+        
+        # Install other required dependencies
+        poetry run pip install typer rich click pyyaml scipy scikit-learn networkx
+        poetry run pip install transformers sentence-transformers datasets nltk matplotlib spacy
+        
+        # Install project in development mode (no dependencies to avoid conflicts)
+        poetry run pip install -e . --no-deps
+        
+        echo "✅ Poetry validation dependencies installed (CPU-only, avoiding lock file)"
     
     - name: Run Poetry CLI Resolution Validation
       run: |
@@ -306,14 +318,22 @@ jobs:
         export INSIGHTSPIKE_LITE_MODE=1
         export FORCE_CPU_ONLY=1
         
-        # Install dependencies with Poetry (CPU-only)
-        poetry install --only main --no-root
-        poetry run pip install "numpy>=1.21,<2.0" --force-reinstall
-        poetry run pip install faiss-cpu==1.7.4 --force-reinstall
-        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu --force-reinstall
-        poetry install --only-root
+        # CRITICAL FIX: Skip Poetry lock file to avoid faiss-gpu conflicts
+        poetry run pip install --upgrade pip
         
-        echo "✅ Template validation dependencies installed (CPU-only)"
+        # Install core dependencies with CPU-only constraints
+        poetry run pip install "numpy>=1.21,<2.0" 
+        poetry run pip install faiss-cpu==1.7.4
+        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+        
+        # Install other required dependencies
+        poetry run pip install typer rich click pyyaml scipy scikit-learn networkx
+        poetry run pip install transformers sentence-transformers datasets nltk matplotlib spacy
+        
+        # Install project in development mode (no dependencies to avoid conflicts)
+        poetry run pip install -e . --no-deps
+        
+        echo "✅ Template validation dependencies installed (CPU-only, avoiding lock file)"
     
     - name: Validate Production Templates
       run: |
@@ -371,14 +391,22 @@ jobs:
         export INSIGHTSPIKE_LITE_MODE=1
         export FORCE_CPU_ONLY=1
         
-        # Install dependencies with Poetry (CPU-only)
-        poetry install --only main --no-root
-        poetry run pip install "numpy>=1.21,<2.0" --force-reinstall
-        poetry run pip install faiss-cpu==1.7.4 --force-reinstall
-        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu --force-reinstall
-        poetry install --only-root
+        # CRITICAL FIX: Skip Poetry lock file to avoid faiss-gpu conflicts
+        poetry run pip install --upgrade pip
         
-        echo "✅ Performance benchmark dependencies installed (CPU-only)"
+        # Install core dependencies with CPU-only constraints
+        poetry run pip install "numpy>=1.21,<2.0" 
+        poetry run pip install faiss-cpu==1.7.4
+        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+        
+        # Install other required dependencies
+        poetry run pip install typer rich click pyyaml scipy scikit-learn networkx
+        poetry run pip install transformers sentence-transformers datasets nltk matplotlib spacy
+        
+        # Install project in development mode (no dependencies to avoid conflicts)
+        poetry run pip install -e . --no-deps
+        
+        echo "✅ Performance benchmark dependencies installed (CPU-only, avoiding lock file)"
     
     - name: Run Performance Benchmarks
       run: |
@@ -430,17 +458,25 @@ jobs:
         export INSIGHTSPIKE_LITE_MODE=1
         export FORCE_CPU_ONLY=1
         
-        # Install dependencies with Poetry (CPU-only)
-        poetry install --only main --no-root
-        poetry run pip install "numpy>=1.21,<2.0" --force-reinstall
-        poetry run pip install faiss-cpu==1.7.4 --force-reinstall
-        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu --force-reinstall
-        poetry install --only-root
+        # CRITICAL FIX: Skip Poetry lock file to avoid faiss-gpu conflicts
+        poetry run pip install --upgrade pip
+        
+        # Install core dependencies with CPU-only constraints
+        poetry run pip install "numpy>=1.21,<2.0" 
+        poetry run pip install faiss-cpu==1.7.4
+        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+        
+        # Install other required dependencies
+        poetry run pip install typer rich click pyyaml scipy scikit-learn networkx
+        poetry run pip install transformers sentence-transformers datasets nltk matplotlib spacy
+        
+        # Install project in development mode (no dependencies to avoid conflicts)
+        poetry run pip install -e . --no-deps
         
         # Install security tools
         poetry run pip install safety pip-licenses
         
-        echo "✅ Security check dependencies installed (CPU-only)"
+        echo "✅ Security check dependencies installed (CPU-only, avoiding lock file)"
     
     - name: Run dependency vulnerability scan
       run: |
@@ -498,17 +534,25 @@ jobs:
         export INSIGHTSPIKE_LITE_MODE=1
         export FORCE_CPU_ONLY=1
         
-        # Install dependencies with Poetry (CPU-only)
-        poetry install --only main --no-root
-        poetry run pip install "numpy>=1.21,<2.0" --force-reinstall
-        poetry run pip install faiss-cpu==1.7.4 --force-reinstall
-        poetry run pip install torch --index-url https://download.pytorch.org/whl/cpu --force-reinstall
-        poetry install --only-root
+        # CRITICAL FIX: Skip Poetry lock file to avoid faiss-gpu conflicts
+        poetry run pip install --upgrade pip
+        
+        # Install core dependencies with CPU-only constraints
+        poetry run pip install "numpy>=1.21,<2.0" 
+        poetry run pip install faiss-cpu==1.7.4
+        poetry run pip install torch --index-url https://download.pytorch.org/whl/cpu
+        
+        # Install other required dependencies
+        poetry run pip install typer rich click pyyaml scipy scikit-learn networkx
+        poetry run pip install transformers sentence-transformers datasets nltk matplotlib spacy
+        
+        # Install project in development mode (no dependencies to avoid conflicts)
+        poetry run pip install -e . --no-deps
         
         # Install monitoring tools
         poetry run pip install psutil requests
         
-        echo "✅ Monitoring integration dependencies installed (CPU-only)"
+        echo "✅ Monitoring integration dependencies installed (CPU-only, avoiding lock file)"
     
     - name: Test Monitoring System
       run: |
