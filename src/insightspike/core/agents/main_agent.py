@@ -5,21 +5,26 @@ Main Agent Orchestrator
 Simplified main agent that coordinates all layers for clean execution.
 """
 
-from typing import Dict, Any, Optional, List
-import numpy as np
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
 from ...config import get_config
-from ..config import Config, get_config as get_new_config
+from ..config import Config
+from ..config import get_config as get_new_config
 from ..layers.layer1_error_monitor import ErrorMonitor
-from ..layers.layer2_memory_manager import L2MemoryManager as Memory  # Use new unified implementation
+from ..layers.layer2_memory_manager import (
+    L2MemoryManager as Memory,
+)  # Use new unified implementation
 from ..layers.layer4_llm_provider import get_llm_provider
 
 try:
     from ..layers.layer3_graph_reasoner import L3GraphReasoner
+
     GRAPH_REASONER_AVAILABLE = True
 except ImportError:
     GRAPH_REASONER_AVAILABLE = False
@@ -29,6 +34,7 @@ except ImportError:
 @dataclass
 class CycleResult:
     """Result from one reasoning cycle"""
+
     question: str
     retrieved_documents: List[Dict[str, Any]]
     graph_analysis: Dict[str, Any]
@@ -38,35 +44,35 @@ class CycleResult:
     error_state: Dict[str, Any]
     cycle_number: int
     success: bool = True
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for backward compatibility"""
         return {
-            'question': self.question,
-            'documents': self.retrieved_documents,
-            'graph': self.graph_analysis.get('graph'),
-            'response': self.response,
-            'metrics': self.graph_analysis.get('metrics', {}),
-            'conflicts': self.graph_analysis.get('conflicts', {}),
-            'reward': self.graph_analysis.get('reward', {}),
-            'spike_detected': self.spike_detected,
-            'reasoning_quality': self.reasoning_quality,
-            'cycle': self.cycle_number,
-            'success': self.success
+            "question": self.question,
+            "documents": self.retrieved_documents,
+            "graph": self.graph_analysis.get("graph"),
+            "response": self.response,
+            "metrics": self.graph_analysis.get("metrics", {}),
+            "conflicts": self.graph_analysis.get("conflicts", {}),
+            "reward": self.graph_analysis.get("reward", {}),
+            "spike_detected": self.spike_detected,
+            "reasoning_quality": self.reasoning_quality,
+            "cycle": self.cycle_number,
+            "success": self.success,
         }
 
 
 class MainAgent:
     """
     Main orchestrating agent that coordinates all layers.
-    
+
     Simplified architecture:
     - L1: Error monitoring and uncertainty
-    - L2: Memory search and update  
+    - L2: Memory search and update
     - L3: Graph reasoning and spike detection
     - L4: Language generation
     """
-    
+
     def __init__(self, config=None):
         # Try new config structure first, fallback to legacy
         if config is None:
@@ -76,200 +82,222 @@ class MainAgent:
                 logger.warning(f"Failed to load new config: {e}, using fallback")
                 # Fallback to legacy config structure
                 legacy_config = get_config()
-                self.config = type('Config', (), {
-                    'embedding': type('EmbeddingConfig', (), {'dimension': 384})(),
-                    'llm': type('LLMConfig', (), {'provider': 'local'})(),
-                    'retrieval': type('RetrievalConfig', (), {})(),
-                    'paths': type('PathConfig', (), {})()
-                })()
+                self.config = type(
+                    "Config",
+                    (),
+                    {
+                        "embedding": type("EmbeddingConfig", (), {"dimension": 384})(),
+                        "llm": type("LLMConfig", (), {"provider": "local"})(),
+                        "retrieval": type("RetrievalConfig", (), {})(),
+                        "paths": type("PathConfig", (), {})(),
+                    },
+                )()
         else:
             self.config = config
-        
+
         # Initialize layers
         self.l1_error_monitor = ErrorMonitor(self.config)
-        
+
         # Safe memory initialization
         memory_dim = 384
-        if hasattr(self.config, 'embedding') and hasattr(self.config.embedding, 'dimension'):
+        if hasattr(self.config, "embedding") and hasattr(
+            self.config.embedding, "dimension"
+        ):
             memory_dim = self.config.embedding.dimension
         self.l2_memory = Memory(dim=memory_dim)
-        
-        self.l3_graph = L3GraphReasoner(self.config) if GRAPH_REASONER_AVAILABLE else None
+
+        self.l3_graph = (
+            L3GraphReasoner(self.config) if GRAPH_REASONER_AVAILABLE else None
+        )
         self.l4_llm = get_llm_provider(self.config)
-        
+
         # State tracking
         self.cycle_count = 0
         self.previous_state = {}
         self.reasoning_history = []
-        
+
         self._initialized = False
 
     def initialize(self) -> bool:
         """Initialize all components"""
         try:
             logger.info("Initializing MainAgent components...")
-            
+
             # Initialize LLM with safe fallback
             try:
                 if not self.l4_llm.initialize():
                     logger.error("Failed to initialize LLM provider")
                     return False
             except Exception as e:
-                logger.warning(f"LLM initialization failed ({e}), switching to safe mode")
+                logger.warning(
+                    f"LLM initialization failed ({e}), switching to safe mode"
+                )
                 # Try to reinitialize with mock provider
                 from .layers.mock_llm_provider import MockLLMProvider
+
                 self.l4_llm = MockLLMProvider(self.config)
                 if not self.l4_llm.initialize():
                     logger.error("Even mock LLM provider failed to initialize")
                     return False
-            
+
             # Try to load existing memory
             if not self.l2_memory.load():
                 logger.info("No existing memory found, starting fresh")
-            
+
             # Initialize error monitor
             self.l1_error_monitor.reset()
-            
+
             self._initialized = True
             logger.info("MainAgent initialization complete")
             return True
-            
+
         except Exception as e:
             logger.error(f"MainAgent initialization failed: {e}")
             return False
 
-    def process_question(self, question: str, max_cycles: int = 10, verbose: bool = False) -> Dict[str, Any]:
+    def process_question(
+        self, question: str, max_cycles: int = 10, verbose: bool = False
+    ) -> Dict[str, Any]:
         """
         Process a question through multiple reasoning cycles until convergence.
-        
+
         Args:
             question: The question to process
             max_cycles: Maximum number of reasoning cycles
             verbose: Whether to log detailed information
-            
+
         Returns:
             Dictionary containing complete results and reasoning trace
         """
         if not self._initialized:
             if not self.initialize():
                 return self._error_result(question, "Failed to initialize agent")
-        
+
         results = []
         convergence_reached = False
-        
+
         for cycle in range(max_cycles):
             try:
                 # Execute one reasoning cycle
                 cycle_result = self._execute_cycle(question, verbose=verbose)
                 results.append(cycle_result)
-                
+
                 if verbose:
-                    logger.info(f"Cycle {cycle + 1}: Quality={cycle_result.reasoning_quality:.3f}, "
-                              f"Spike={cycle_result.spike_detected}")
-                
+                    logger.info(
+                        f"Cycle {cycle + 1}: Quality={cycle_result.reasoning_quality:.3f}, "
+                        f"Spike={cycle_result.spike_detected}"
+                    )
+
                 # Check for convergence or high-quality answer
-                if (cycle_result.reasoning_quality > 0.8 or 
-                    cycle_result.spike_detected or 
-                    cycle > 0 and self._check_convergence(results[-2:], question)):
+                if (
+                    cycle_result.reasoning_quality > 0.8
+                    or cycle_result.spike_detected
+                    or cycle > 0
+                    and self._check_convergence(results[-2:], question)
+                ):
                     convergence_reached = True
                     break
-                    
+
             except Exception as e:
                 logger.error(f"Cycle {cycle + 1} failed: {e}")
                 cycle_result = self._error_cycle_result(question, cycle + 1, str(e))
                 results.append(cycle_result)
                 break
-        
+
         # Compile results
         result = self._compile_results(results, convergence_reached, verbose)
-        
+
         # Update reasoning history
-        self.reasoning_history.append({
-            'question': question,
-            'cycles': len(results),
-            'quality': result.get('reasoning_quality', 0.0),
-            'converged': convergence_reached
-        })
-        
+        self.reasoning_history.append(
+            {
+                "question": question,
+                "cycles": len(results),
+                "quality": result.get("reasoning_quality", 0.0),
+                "converged": convergence_reached,
+            }
+        )
+
         return result
 
     def _execute_cycle(self, question: str, verbose: bool = False) -> CycleResult:
         """Execute one complete reasoning cycle"""
         self.cycle_count += 1
-        
+
         try:
             # L1: Error monitoring and uncertainty calculation
             error_state = self.l1_error_monitor.analyze_uncertainty(
                 question, self.previous_state
             )
-            
+
             # L2: Memory search and retrieval
             memory_results = self._search_memory(question)
-            retrieved_docs = memory_results['documents']
-            
+            retrieved_docs = memory_results["documents"]
+
             # L3: Graph reasoning and analysis
             graph_context = {
-                'previous_state': self.previous_state,
-                'error_state': error_state,
-                'memory_stats': memory_results.get('stats', {})
+                "previous_state": self.previous_state,
+                "error_state": error_state,
+                "memory_stats": memory_results.get("stats", {}),
             }
-            
+
             # L3: Graph analysis (optional)
             if self.l3_graph:
-                graph_analysis = self.l3_graph.analyze_documents(retrieved_docs, graph_context)
+                graph_analysis = self.l3_graph.analyze_documents(
+                    retrieved_docs, graph_context
+                )
             else:
                 # Fallback when graph reasoner is not available
                 graph_analysis = {
-                    'graph': None,
-                    'metrics': {'delta_ged': 0.0, 'delta_ig': 0.0},
-                    'conflicts': {'total_conflicts': 0, 'conflict_types': {}},
-                    'reward': {'insight_reward': 0.0, 'quality_bonus': 0.0},
-                    'reasoning_quality': 0.5,  # Neutral quality without graph analysis
-                    'spike_detected': False
+                    "graph": None,
+                    "metrics": {"delta_ged": 0.0, "delta_ig": 0.0},
+                    "conflicts": {"total_conflicts": 0, "conflict_types": {}},
+                    "reward": {"insight_reward": 0.0, "quality_bonus": 0.0},
+                    "reasoning_quality": 0.5,  # Neutral quality without graph analysis
+                    "spike_detected": False,
                 }
-            
+
             # L4: Language generation
             llm_context = {
-                'retrieved_documents': retrieved_docs,
-                'graph_analysis': graph_analysis,
-                'previous_state': self.previous_state,
-                'reasoning_quality': graph_analysis.get('reasoning_quality', 0.0)
+                "retrieved_documents": retrieved_docs,
+                "graph_analysis": graph_analysis,
+                "previous_state": self.previous_state,
+                "reasoning_quality": graph_analysis.get("reasoning_quality", 0.0),
             }
-            
+
             llm_result = self.l4_llm.generate_response(llm_context, question)
-            
+
             # Calculate overall reasoning quality
             reasoning_quality = self._calculate_reasoning_quality(
                 error_state, memory_results, graph_analysis, llm_result
             )
-            
+
             # Create cycle result
             cycle_result = CycleResult(
                 question=question,
                 retrieved_documents=retrieved_docs,
                 graph_analysis=graph_analysis,
-                response=llm_result.get('response', ''),
+                response=llm_result.get("response", ""),
                 reasoning_quality=reasoning_quality,
-                spike_detected=graph_analysis.get('spike_detected', False),
+                spike_detected=graph_analysis.get("spike_detected", False),
                 error_state=error_state,
                 cycle_number=self.cycle_count,
-                success=llm_result.get('success', True)
+                success=llm_result.get("success", True),
             )
-            
+
             # Update memory with reward signal if spike detected
             if cycle_result.spike_detected:
                 self._update_memory_rewards(retrieved_docs, graph_analysis)
-            
+
             # Update previous state for next cycle
             self.previous_state = {
-                'last_response': cycle_result.response,
-                'reasoning_quality': reasoning_quality,
-                'graph_state': graph_analysis.get('graph'),
-                'cycle_count': self.cycle_count
+                "last_response": cycle_result.response,
+                "reasoning_quality": reasoning_quality,
+                "graph_state": graph_analysis.get("graph"),
+                "cycle_count": self.cycle_count,
             }
-            
+
             return cycle_result
-            
+
         except Exception as e:
             logger.error(f"Cycle execution failed: {e}")
             return self._error_cycle_result(question, self.cycle_count, str(e))
@@ -278,51 +306,47 @@ class MainAgent:
         """Search episodic memory for relevant documents"""
         try:
             documents = self.l2_memory.search_episodes(
-                question, 
+                question,
                 k=self.config.memory.max_retrieved_docs,
-                min_similarity=self.config.memory.min_similarity
+                min_similarity=self.config.memory.min_similarity,
             )
-            
+
             stats = self.l2_memory.get_memory_stats()
-            
-            return {
-                'documents': documents,
-                'stats': stats,
-                'success': True
-            }
-            
+
+            return {"documents": documents, "stats": stats, "success": True}
+
         except Exception as e:
             logger.error(f"Memory search failed: {e}")
-            return {
-                'documents': [],
-                'stats': {},
-                'success': False,
-                'error': str(e)
-            }
+            return {"documents": [], "stats": {}, "success": False, "error": str(e)}
 
-    def _calculate_reasoning_quality(self, error_state: Dict, memory_results: Dict, 
-                                   graph_analysis: Dict, llm_result: Dict) -> float:
+    def _calculate_reasoning_quality(
+        self,
+        error_state: Dict,
+        memory_results: Dict,
+        graph_analysis: Dict,
+        llm_result: Dict,
+    ) -> float:
         """Calculate overall reasoning quality score"""
         try:
             # Error component (lower error = higher quality)
-            error_score = 1.0 - error_state.get('uncertainty', 0.5)
-            
+            error_score = 1.0 - error_state.get("uncertainty", 0.5)
+
             # Memory component (more relevant docs = higher quality)
-            memory_score = min(1.0, len(memory_results.get('documents', [])) / 3)
-            
+            memory_score = min(1.0, len(memory_results.get("documents", [])) / 3)
+
             # Graph component
-            graph_score = graph_analysis.get('reasoning_quality', 0.0)
-            
+            graph_score = graph_analysis.get("reasoning_quality", 0.0)
+
             # LLM component
-            llm_score = llm_result.get('confidence', 0.5)
-            
+            llm_score = llm_result.get("confidence", 0.5)
+
             # Weighted combination
             weights = [0.2, 0.3, 0.3, 0.2]  # error, memory, graph, llm
             scores = [error_score, memory_score, graph_score, llm_score]
-            
+
             quality = sum(w * s for w, s in zip(weights, scores))
             return max(0.0, min(1.0, quality))
-            
+
         except Exception as e:
             logger.error(f"Quality calculation failed: {e}")
             return 0.3  # Default moderate quality
@@ -330,46 +354,48 @@ class MainAgent:
     def _update_memory_rewards(self, documents: List[Dict], graph_analysis: Dict):
         """Update memory C-values based on reasoning rewards"""
         try:
-            reward_info = graph_analysis.get('reward', {})
-            total_reward = reward_info.get('total', 0.0)
-            
+            reward_info = graph_analysis.get("reward", {})
+            total_reward = reward_info.get("total", 0.0)
+
             if total_reward > 0:
                 # Increase C-values for retrieved documents
                 for doc in documents:
-                    if 'index' in doc:
-                        current_c = doc.get('c_value', 0.5)
+                    if "index" in doc:
+                        current_c = doc.get("c_value", 0.5)
                         boost = min(0.1, total_reward * 0.05)  # Small positive boost
                         new_c = current_c + boost
-                        
-                        self.l2_memory.update_c_value(doc['index'], new_c)
-                        
+
+                        self.l2_memory.update_c_value(doc["index"], new_c)
+
                 logger.debug(f"Updated memory rewards with boost: {total_reward:.3f}")
-                
+
         except Exception as e:
             logger.error(f"Memory reward update failed: {e}")
 
-    def _check_convergence(self, recent_results: List[CycleResult], question: str) -> bool:
+    def _check_convergence(
+        self, recent_results: List[CycleResult], question: str
+    ) -> bool:
         """Check if reasoning has converged"""
         if len(recent_results) < 2:
             return False
-        
+
         try:
             # Check quality stability
             qualities = [r.reasoning_quality for r in recent_results]
             quality_diff = abs(qualities[-1] - qualities[-2])
-            
+
             # Check response similarity (simple heuristic)
             responses = [r.response for r in recent_results]
             response_similarity = self._text_similarity(responses[-1], responses[-2])
-            
+
             # Convergence if quality is stable and responses are similar
             converged = quality_diff < 0.1 and response_similarity > 0.8
-            
+
             if converged:
                 logger.info("Reasoning convergence detected")
-                
+
             return converged
-            
+
         except Exception as e:
             logger.error(f"Convergence check failed: {e}")
             return False
@@ -378,52 +404,58 @@ class MainAgent:
         """Calculate simple text similarity"""
         if not text1 or not text2:
             return 0.0
-        
+
         # Simple token overlap similarity
         tokens1 = set(text1.lower().split())
         tokens2 = set(text2.lower().split())
-        
+
         if not tokens1 and not tokens2:
             return 1.0
         if not tokens1 or not tokens2:
             return 0.0
-        
+
         intersection = len(tokens1.intersection(tokens2))
         union = len(tokens1.union(tokens2))
-        
+
         return intersection / union if union > 0 else 0.0
 
-    def _compile_results(self, results: List[CycleResult], converged: bool, verbose: bool) -> Dict[str, Any]:
+    def _compile_results(
+        self, results: List[CycleResult], converged: bool, verbose: bool
+    ) -> Dict[str, Any]:
         """Compile results from all cycles"""
         if not results:
             return self._error_result("", "No results generated")
-        
+
         # Use the best result (highest quality)
         best_result = max(results, key=lambda r: r.reasoning_quality)
-        
+
         result_dict = best_result.to_dict()
-        result_dict.update({
-            'total_cycles': len(results),
-            'converged': converged,
-            'cycle_history': [r.to_dict() for r in results] if verbose else [],
-            'agent_stats': {
-                'memory_episodes': self.l2_memory.get_memory_stats().get('total_episodes', 0),
-                'total_processed': len(self.reasoning_history)
+        result_dict.update(
+            {
+                "total_cycles": len(results),
+                "converged": converged,
+                "cycle_history": [r.to_dict() for r in results] if verbose else [],
+                "agent_stats": {
+                    "memory_episodes": self.l2_memory.get_memory_stats().get(
+                        "total_episodes", 0
+                    ),
+                    "total_processed": len(self.reasoning_history),
+                },
             }
-        })
-        
+        )
+
         return result_dict
 
     def _error_result(self, question: str, error: str) -> Dict[str, Any]:
         """Generate error result"""
         return {
-            'question': question,
-            'response': f"I apologize, but I encountered an error: {error}",
-            'success': False,
-            'error': error,
-            'reasoning_quality': 0.0,
-            'spike_detected': False,
-            'total_cycles': 0
+            "question": question,
+            "response": f"I apologize, but I encountered an error: {error}",
+            "success": False,
+            "error": error,
+            "reasoning_quality": 0.0,
+            "spike_detected": False,
+            "total_cycles": 0,
         }
 
     def _error_cycle_result(self, question: str, cycle: int, error: str) -> CycleResult:
@@ -435,23 +467,27 @@ class MainAgent:
             response=f"Error in cycle {cycle}: {error}",
             reasoning_quality=0.0,
             spike_detected=False,
-            error_state={'error': error},
+            error_state={"error": error},
             cycle_number=cycle,
-            success=False
+            success=False,
         )
 
-    def add_document(self, text: str, c_value: float = 0.5, metadata: Optional[Dict] = None) -> bool:
+    def add_document(
+        self, text: str, c_value: float = 0.5, metadata: Optional[Dict] = None
+    ) -> bool:
         """Add a document to memory"""
         return self.l2_memory.store_episode(text, c_value, metadata)
 
     def get_stats(self) -> Dict[str, Any]:
         """Get agent statistics"""
         return {
-            'initialized': self._initialized,
-            'total_cycles': self.cycle_count,
-            'memory_stats': self.l2_memory.get_memory_stats(),
-            'reasoning_history_length': len(self.reasoning_history),
-            'average_quality': np.mean([h['quality'] for h in self.reasoning_history]) if self.reasoning_history else 0.0
+            "initialized": self._initialized,
+            "total_cycles": self.cycle_count,
+            "memory_stats": self.l2_memory.get_memory_stats(),
+            "reasoning_history_length": len(self.reasoning_history),
+            "average_quality": np.mean([h["quality"] for h in self.reasoning_history])
+            if self.reasoning_history
+            else 0.0,
         }
 
 
@@ -459,39 +495,39 @@ class MainAgent:
 def cycle(memory, question: str, previous_graph=None, **kwargs) -> Dict[str, Any]:
     """
     Backward compatible cycle function.
-    
+
     Note: This creates a new agent each time, which is not optimal.
     Consider using MainAgent directly for better performance.
     """
     try:
         # Create temporary agent
         agent = MainAgent()
-        
+
         # If memory is provided, try to extract documents
-        if hasattr(memory, 'episodes') and memory.episodes:
+        if hasattr(memory, "episodes") and memory.episodes:
             for episode in memory.episodes:
                 agent.add_document(episode.text, episode.c)
-        
+
         # Process question
         result = agent.process_question(question, max_cycles=3, verbose=False)
-        
+
         # Return in old format
         return {
-            'answer': result.get('response', ''),
-            'documents': result.get('documents', []),
-            'graph': result.get('graph'),
-            'metrics': result.get('metrics', {}),
-            'success': result.get('success', True)
+            "answer": result.get("response", ""),
+            "documents": result.get("documents", []),
+            "graph": result.get("graph"),
+            "metrics": result.get("metrics", {}),
+            "success": result.get("success", True),
         }
-        
+
     except Exception as e:
         logger.error(f"Legacy cycle function failed: {e}")
         return {
-            'answer': f"Error: {e}",
-            'documents': [],
-            'graph': None,
-            'metrics': {},
-            'success': False
+            "answer": f"Error: {e}",
+            "documents": [],
+            "graph": None,
+            "metrics": {},
+            "success": False,
         }
 
 

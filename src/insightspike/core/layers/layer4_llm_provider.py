@@ -5,13 +5,13 @@ L4 LLM Interface - Enhanced Language Model Integration
 Provides flexible LLM integration with multiple providers and enhanced prompt building.
 """
 
-from typing import Dict, Any, Optional, List, Iterator
 import logging
 from pathlib import Path
+from typing import Any, Dict, Iterator, List, Optional
 
-from ..interfaces import L4LLMInterface
 from ...config import get_config
 from ...utils.prompt_builder import PromptBuilder
+from ..interfaces import L4LLMInterface
 
 logger = logging.getLogger(__name__)
 
@@ -20,216 +20,268 @@ __all__ = ["L4LLMProvider", "OpenAIProvider", "LocalProvider", "get_llm_provider
 
 class L4LLMProvider(L4LLMInterface):
     """Base class for LLM providers."""
-    
+
     def __init__(self, config=None):
         self.config = config or get_config()
         self.prompt_builder = PromptBuilder(config)
         self._initialized = False
-    
-    def generate_response(self, context: Dict[str, Any], question: str, 
-                         streaming: bool = False) -> Dict[str, Any]:
+
+    def generate_response(
+        self, context: Dict[str, Any], question: str, streaming: bool = False
+    ) -> Dict[str, Any]:
         """Generate response using the LLM."""
         if not self._initialized:
             self.initialize()
-        
+
         try:
             # Build enhanced prompt
             prompt = self.prompt_builder.build_prompt(context, question)
-            
+
             # Generate response
             if streaming:
                 response_iter = self._generate_streaming(prompt)
                 return {
-                    'response': response_iter,
-                    'prompt': prompt,
-                    'streaming': True,
-                    'success': True
+                    "response": response_iter,
+                    "prompt": prompt,
+                    "streaming": True,
+                    "success": True,
                 }
             else:
                 response = self._generate_sync(prompt)
                 confidence = self._estimate_confidence(response, context)
-                
+
                 # Enhanced insight analysis
                 insight_analysis = self.analyze_insight_potential(question, response)
-                
+
                 return {
-                    'response': response,
-                    'prompt': prompt,
-                    'streaming': False,
-                    'success': True,
-                    'confidence': confidence,
-                    'reasoning_quality': confidence * 0.8 + insight_analysis['insight_potential'] * 0.2,
-                    'insight_analysis': insight_analysis,
-                    'synthesis_detected': insight_analysis['synthesis_detected'],
-                    'cross_domain_score': insight_analysis['cross_domain_score']
+                    "response": response,
+                    "prompt": prompt,
+                    "streaming": False,
+                    "success": True,
+                    "confidence": confidence,
+                    "reasoning_quality": confidence * 0.8
+                    + insight_analysis["insight_potential"] * 0.2,
+                    "insight_analysis": insight_analysis,
+                    "synthesis_detected": insight_analysis["synthesis_detected"],
+                    "cross_domain_score": insight_analysis["cross_domain_score"],
                 }
-                
+
         except Exception as e:
             logger.error(f"Response generation failed: {e}")
             return {
-                'response': "I apologize, but I encountered an error while processing your question.",
-                'error': str(e),
-                'success': False
+                "response": "I apologize, but I encountered an error while processing your question.",
+                "error": str(e),
+                "success": False,
             }
-    
+
     def initialize(self) -> bool:
         """Initialize the LLM provider."""
         raise NotImplementedError
-    
+
     def _generate_sync(self, prompt: str) -> str:
         """Generate response synchronously."""
         raise NotImplementedError
-    
+
     def _generate_streaming(self, prompt: str) -> Iterator[str]:
         """Generate response with streaming."""
         # Fallback to sync generation
         response = self._generate_sync(prompt)
         for char in response:
             yield char
-    
+
     def _estimate_confidence(self, response: str, context: Dict[str, Any]) -> float:
         """Enhanced confidence estimation with insight analysis."""
-        
+
         # Length-based confidence (very short or very long responses are less confident)
-        length_score = min(1.0, len(response) / 200) * min(1.0, 500 / max(len(response), 1))
-        
+        length_score = min(1.0, len(response) / 200) * min(
+            1.0, 500 / max(len(response), 1)
+        )
+
         # Context relevance (if we have relevant documents)
         relevance_score = 1.0
-        if 'retrieved_documents' in context and context['retrieved_documents']:
-            num_docs = len(context['retrieved_documents'])
+        if "retrieved_documents" in context and context["retrieved_documents"]:
+            num_docs = len(context["retrieved_documents"])
             relevance_score = min(1.0, num_docs / 3)  # More docs = higher confidence
-        
+
         # Insight indicators boost confidence
         insight_indicators = [
-            'by connecting', 'synthesis', 'insight emerges', 'key insight',
-            'bridging', 'integrating', 'cross-domain', 'framework'
+            "by connecting",
+            "synthesis",
+            "insight emerges",
+            "key insight",
+            "bridging",
+            "integrating",
+            "cross-domain",
+            "framework",
         ]
-        insight_boost = sum(0.05 for indicator in insight_indicators if indicator in response.lower())
+        insight_boost = sum(
+            0.05 for indicator in insight_indicators if indicator in response.lower()
+        )
         insight_boost = min(0.3, insight_boost)  # Cap the boost
-        
+
         # Uncertainty indicators reduce confidence
-        uncertainty_keywords = ['maybe', 'perhaps', 'might', 'could', 'uncertain', 'not sure']
-        uncertainty_count = sum(1 for word in uncertainty_keywords if word in response.lower())
+        uncertainty_keywords = [
+            "maybe",
+            "perhaps",
+            "might",
+            "could",
+            "uncertain",
+            "not sure",
+        ]
+        uncertainty_count = sum(
+            1 for word in uncertainty_keywords if word in response.lower()
+        )
         uncertainty_penalty = min(0.5, uncertainty_count * 0.1)
-        
+
         # Synthesis quality indicators
         synthesis_indicators = [
-            'connecting multiple', 'systematic analysis', 'demonstrates that',
-            'emerges from recognizing', 'reveals that', 'by examining'
+            "connecting multiple",
+            "systematic analysis",
+            "demonstrates that",
+            "emerges from recognizing",
+            "reveals that",
+            "by examining",
         ]
-        synthesis_boost = sum(0.08 for indicator in synthesis_indicators if indicator in response.lower())
+        synthesis_boost = sum(
+            0.08 for indicator in synthesis_indicators if indicator in response.lower()
+        )
         synthesis_boost = min(0.2, synthesis_boost)
-        
-        confidence = (length_score + relevance_score) / 2 + insight_boost + synthesis_boost - uncertainty_penalty
+
+        confidence = (
+            (length_score + relevance_score) / 2
+            + insight_boost
+            + synthesis_boost
+            - uncertainty_penalty
+        )
         return max(0.0, min(1.0, confidence))
-    
+
     def analyze_insight_potential(self, question: str, response: str) -> Dict[str, Any]:
         """Analyze whether the response demonstrates insight or synthesis."""
-        
+
         question_lower = question.lower()
         response_lower = response.lower()
-        
+
         # Cross-domain indicators
         domain_keywords = {
-            'probability': ['probability', 'conditional', 'bayes'],
-            'mathematics': ['infinite', 'convergence', 'series', 'limit'],
-            'philosophy': ['identity', 'criteria', 'existence', 'continuity'],
-            'physics': ['quantum', 'measurement', 'uncertainty', 'reality'],
-            'information': ['information', 'entropy', 'asymmetric'],
-            'systems': ['emergence', 'complexity', 'feedback', 'non-linear']
+            "probability": ["probability", "conditional", "bayes"],
+            "mathematics": ["infinite", "convergence", "series", "limit"],
+            "philosophy": ["identity", "criteria", "existence", "continuity"],
+            "physics": ["quantum", "measurement", "uncertainty", "reality"],
+            "information": ["information", "entropy", "asymmetric"],
+            "systems": ["emergence", "complexity", "feedback", "non-linear"],
         }
-        
+
         # Count domains mentioned
-        domains_in_question = sum(1 for domain, keywords in domain_keywords.items() 
-                                 if any(kw in question_lower for kw in keywords))
-        domains_in_response = sum(1 for domain, keywords in domain_keywords.items() 
-                                 if any(kw in response_lower for kw in keywords))
-        
+        domains_in_question = sum(
+            1
+            for domain, keywords in domain_keywords.items()
+            if any(kw in question_lower for kw in keywords)
+        )
+        domains_in_response = sum(
+            1
+            for domain, keywords in domain_keywords.items()
+            if any(kw in response_lower for kw in keywords)
+        )
+
         # Synthesis indicators
         synthesis_patterns = [
-            'by connecting', 'by synthesizing', 'by integrating',
-            'synthesis emerges', 'insight emerges', 'key insight',
-            'bridging', 'connecting multiple', 'cross-domain'
+            "by connecting",
+            "by synthesizing",
+            "by integrating",
+            "synthesis emerges",
+            "insight emerges",
+            "key insight",
+            "bridging",
+            "connecting multiple",
+            "cross-domain",
         ]
-        synthesis_detected = any(pattern in response_lower for pattern in synthesis_patterns)
-        
+        synthesis_detected = any(
+            pattern in response_lower for pattern in synthesis_patterns
+        )
+
         # Calculate insight metrics
         cross_domain_score = min(1.0, domains_in_response / max(domains_in_question, 1))
         synthesis_score = 1.0 if synthesis_detected else 0.0
-        
+
         return {
-            'cross_domain_score': cross_domain_score,
-            'synthesis_score': synthesis_score,
-            'domains_mentioned': domains_in_response,
-            'synthesis_detected': synthesis_detected,
-            'insight_potential': (cross_domain_score + synthesis_score) / 2
+            "cross_domain_score": cross_domain_score,
+            "synthesis_score": synthesis_score,
+            "domains_mentioned": domains_in_response,
+            "synthesis_detected": synthesis_detected,
+            "insight_potential": (cross_domain_score + synthesis_score) / 2,
         }
 
 
 class OpenAIProvider(L4LLMProvider):
     """OpenAI GPT provider."""
-    
+
     def initialize(self) -> bool:
         """Initialize OpenAI client."""
         try:
             import openai
-            
+
             api_key = self.config.llm.openai_api_key
             if not api_key:
                 logger.error("OpenAI API key not found in config")
                 return False
-            
+
             self.client = openai.OpenAI(api_key=api_key)
             self.model = self.config.llm.openai_model
             self._initialized = True
-            
+
             logger.info(f"Initialized OpenAI provider with model: {self.model}")
             return True
-            
+
         except ImportError:
             logger.error("OpenAI package not installed. Run: pip install openai")
             return False
         except Exception as e:
             logger.error(f"OpenAI initialization failed: {e}")
             return False
-    
+
     def _generate_sync(self, prompt: str) -> str:
         """Generate response using OpenAI API."""
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
-                    {"role": "system", "content": "You are a helpful AI assistant specialized in answering questions based on provided context."},
-                    {"role": "user", "content": prompt}
+                    {
+                        "role": "system",
+                        "content": "You are a helpful AI assistant specialized in answering questions based on provided context.",
+                    },
+                    {"role": "user", "content": prompt},
                 ],
                 max_tokens=self.config.llm.max_tokens,
-                temperature=self.config.llm.temperature
+                temperature=self.config.llm.temperature,
             )
-            
+
             return response.choices[0].message.content.strip()
-            
+
         except Exception as e:
             logger.error(f"OpenAI generation failed: {e}")
             raise
-    
+
     def _generate_streaming(self, prompt: str) -> Iterator[str]:
         """Generate streaming response using OpenAI API."""
         try:
             stream = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
-                    {"role": "system", "content": "You are a helpful AI assistant specialized in answering questions based on provided context."},
-                    {"role": "user", "content": prompt}
+                    {
+                        "role": "system",
+                        "content": "You are a helpful AI assistant specialized in answering questions based on provided context.",
+                    },
+                    {"role": "user", "content": prompt},
                 ],
                 max_tokens=self.config.llm.max_tokens,
                 temperature=self.config.llm.temperature,
-                stream=True
+                stream=True,
             )
-            
+
             for chunk in stream:
                 if chunk.choices[0].delta.content is not None:
                     yield chunk.choices[0].delta.content
-                    
+
         except Exception as e:
             logger.error(f"OpenAI streaming failed: {e}")
             yield f"Error: {e}"
@@ -237,28 +289,29 @@ class OpenAIProvider(L4LLMProvider):
 
 class LocalProvider(L4LLMProvider):
     """Local model provider using transformers."""
-    
+
     def initialize(self) -> bool:
         """Initialize local model."""
         try:
-            from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
-            
+            from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+
             model_name = self.config.llm.model_name
-            
+
             logger.info(f"Loading local model: {model_name}")
-            
+
             # Load tokenizer and model
             self.tokenizer = AutoTokenizer.from_pretrained(
-                model_name, 
-                trust_remote_code=True
+                model_name, trust_remote_code=True
             )
-            
+
             self.model = AutoModelForCausalLM.from_pretrained(
                 model_name,
                 trust_remote_code=True,
-                device_map="auto" if hasattr(self.config.llm, 'use_gpu') and self.config.llm.use_gpu else "cpu"
+                device_map="auto"
+                if hasattr(self.config.llm, "use_gpu") and self.config.llm.use_gpu
+                else "cpu",
             )
-            
+
             # Create pipeline
             self.pipeline = pipeline(
                 "text-generation",
@@ -266,48 +319,50 @@ class LocalProvider(L4LLMProvider):
                 tokenizer=self.tokenizer,
                 max_new_tokens=self.config.llm.max_tokens,
                 temperature=self.config.llm.temperature,
-                do_sample=True if self.config.llm.temperature > 0 else False
+                do_sample=True if self.config.llm.temperature > 0 else False,
             )
-            
+
             self._initialized = True
             logger.info(f"Initialized local model: {model_name}")
             return True
-            
+
         except ImportError:
-            logger.error("Transformers package not installed. Run: pip install transformers torch")
+            logger.error(
+                "Transformers package not installed. Run: pip install transformers torch"
+            )
             return False
         except Exception as e:
             logger.error(f"Local model initialization failed: {e}")
             return False
-    
+
     def _generate_sync(self, prompt: str) -> str:
         """Generate response using local model."""
         try:
             # Add instruction formatting for better results
             formatted_prompt = self._format_prompt(prompt)
-            
+
             outputs = self.pipeline(
                 formatted_prompt,
                 max_new_tokens=self.config.llm.max_tokens,
                 temperature=self.config.llm.temperature,
                 do_sample=True if self.config.llm.temperature > 0 else False,
-                pad_token_id=self.tokenizer.eos_token_id
+                pad_token_id=self.tokenizer.eos_token_id,
             )
-            
+
             generated_text = outputs[0]["generated_text"]
-            
+
             # Extract only the new part (after the prompt)
-            response = generated_text[len(formatted_prompt):].strip()
-            
+            response = generated_text[len(formatted_prompt) :].strip()
+
             # Clean up common artifacts
             response = self._clean_response(response)
-            
+
             return response
-            
+
         except Exception as e:
             logger.error(f"Local generation failed: {e}")
             raise
-    
+
     def _format_prompt(self, prompt: str) -> str:
         """Format prompt for better local model performance."""
         return f"""<|system|>
@@ -318,61 +373,64 @@ You are a helpful AI assistant. Answer the question based on the provided contex
 
 <|assistant|>
 """
-    
+
     def format_context(self, episodes: List[Dict[str, Any]]) -> str:
         """Format episodes into context string."""
         if not episodes:
             return ""
-        
+
         context_parts = []
-        for i, episode in enumerate(episodes[:10]):  # Limit to 10 most relevant episodes
-            text = episode.get('text', str(episode))
-            c_value = episode.get('c', 0.5)
+        for i, episode in enumerate(
+            episodes[:10]
+        ):  # Limit to 10 most relevant episodes
+            text = episode.get("text", str(episode))
+            c_value = episode.get("c", 0.5)
             context_parts.append(f"Context {i+1} (relevance: {c_value:.2f}):\n{text}")
-        
+
         return "\n\n".join(context_parts)
 
     def process(self, input_data) -> Dict[str, Any]:
         """Process input through LLM layer."""
         from ..interfaces import LayerInput, LayerOutput
-        
+
         if isinstance(input_data, LayerInput):
             context = input_data.context or {}
             question = input_data.data
         else:
             # Handle direct dict input for backward compatibility
-            context = input_data.get('context', {})
-            question = input_data.get('question', str(input_data))
-        
+            context = input_data.get("context", {})
+            question = input_data.get("question", str(input_data))
+
         result = self.generate_response(context, question)
-        
+
         if isinstance(input_data, LayerInput):
             return LayerOutput(
-                result=result['response'],
-                confidence=0.8 if result['success'] else 0.0,
-                metadata=result
+                result=result["response"],
+                confidence=0.8 if result["success"] else 0.0,
+                metadata=result,
             )
         else:
             return result
-    
+
     def cleanup(self):
         """Cleanup resources."""
         try:
-            if hasattr(self, 'model'):
+            if hasattr(self, "model"):
                 del self.model
-            if hasattr(self, 'tokenizer'):
+            if hasattr(self, "tokenizer"):
                 del self.tokenizer
-            if hasattr(self, 'pipeline'):
+            if hasattr(self, "pipeline"):
                 del self.pipeline
-            
+
             # Clear GPU memory if using CUDA
             try:
                 import torch
+
                 if torch.cuda.is_available():
                     torch.cuda.empty_cache()
             except ImportError:
                 pass
-                
+
             logger.info("LocalProvider cleanup completed")
         except Exception as e:
             logger.warning(f"Error during LocalProvider cleanup: {e}")
@@ -381,36 +439,41 @@ You are a helpful AI assistant. Answer the question based on the provided contex
         """Clean up response artifacts."""
         # Remove common stop sequences
         stop_sequences = ["<|", "</s>", "<s>", "[END]", "[STOP]"]
-        
+
         for stop in stop_sequences:
             if stop in response:
                 response = response.split(stop)[0]
-        
+
         # Remove excessive whitespace
         response = response.strip()
-        
+
         # Remove incomplete sentences at the end
-        sentences = response.split('. ')
-        if len(sentences) > 1 and not sentences[-1].endswith('.'):
-            response = '. '.join(sentences[:-1]) + '.'
-        
+        sentences = response.split(". ")
+        if len(sentences) > 1 and not sentences[-1].endswith("."):
+            response = ". ".join(sentences[:-1]) + "."
+
         return response
 
 
 def get_llm_provider(config=None, safe_mode=False) -> L4LLMProvider:
     """Get appropriate LLM provider based on configuration."""
     config = config or get_config()
-    
+
     # Check for safe mode from config or parameter
-    use_safe_mode = safe_mode or getattr(config.llm, 'safe_mode', False) or getattr(config, 'environment', 'local') == 'testing'
-    
+    use_safe_mode = (
+        safe_mode
+        or getattr(config.llm, "safe_mode", False)
+        or getattr(config, "environment", "local") == "testing"
+    )
+
     if use_safe_mode:
         from .mock_llm_provider import MockLLMProvider
+
         logger.info("Using mock LLM provider for safe operation")
         return MockLLMProvider(config)
-    
+
     provider_type = config.llm.provider.lower()
-    
+
     if provider_type == "openai":
         return OpenAIProvider(config)
     elif provider_type == "local":
@@ -426,12 +489,12 @@ def generate(prompt: str) -> str:
     try:
         provider = get_llm_provider()
         result = provider.generate_response({}, prompt)
-        
-        if result['success']:
-            return result['response']
+
+        if result["success"]:
+            return result["response"]
         else:
             return "Error generating response."
-            
+
     except Exception as e:
         logger.error(f"Legacy generate failed: {e}")
         return "Error generating response."

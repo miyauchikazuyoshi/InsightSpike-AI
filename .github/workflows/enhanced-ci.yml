@@ -48,14 +48,15 @@ jobs:
       run: |
         # Install minimal dependencies for CI (avoid faiss-gpu issues)
         export INSIGHTSPIKE_LITE_MODE=1
+        # Skip Poetry groups and install directly with pip to avoid faiss-gpu conflicts
         python -m pip install --upgrade pip
         pip install pytest pytest-cov black isort flake8 mypy bandit
-        pip install typer rich click
-        pip install numpy==1.26.4 scipy scikit-learn networkx pyyaml
-        pip install faiss-cpu==1.7.4  # Force CPU version for CI
-        pip install torch --index-url https://download.pytorch.org/whl/cpu
+        pip install typer rich click pyyaml numpy scipy scikit-learn networkx
+        pip install transformers sentence-transformers datasets nltk matplotlib spacy
+        pip install faiss-cpu==1.7.4 --force-reinstall
+        pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
         pip install -e . --no-deps  # Install project without dependencies
-        echo "✅ CI dependencies installed"
+        echo "✅ CI dependencies installed (pip-based, CPU-only)"
     
     - name: Run code formatting check
       run: |
@@ -131,16 +132,17 @@ jobs:
     
     - name: Install dependencies with Poetry (CI - CPU only)
       run: |
-        # Use Poetry but force CPU versions for CI
+        # Use pip-based installation to avoid faiss-gpu conflicts
         export INSIGHTSPIKE_LITE_MODE=1
-        # Install base project dependencies with Poetry
-        poetry install --only main
-        # Override GPU packages with CPU versions
-        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-        poetry run pip install faiss-cpu==1.7.4 --force-reinstall
-        # Install dev dependencies for testing
-        poetry run pip install pytest pytest-cov black isort flake8 mypy bandit
-        echo "✅ CI environment: Poetry + CPU-only dependencies"
+        # Install minimal dependencies for testing
+        python -m pip install --upgrade pip
+        pip install pytest pytest-cov black isort flake8 mypy bandit
+        pip install typer rich click pyyaml numpy scipy scikit-learn networkx
+        pip install transformers sentence-transformers datasets nltk matplotlib spacy
+        pip install faiss-cpu==1.7.4 --force-reinstall
+        pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+        pip install -e . --no-deps  # Install project without dependencies
+        echo "✅ CI environment: pip-based CPU-only dependencies"
     
     - name: Set environment variables
       run: |
@@ -223,8 +225,7 @@ jobs:
     - name: Install dependencies
       run: |
         export INSIGHTSPIKE_LITE_MODE=1
-        poetry install --only main
-        poetry run pip install faiss-cpu==1.7.4 torch --index-url https://download.pytorch.org/whl/cpu
+        poetry install --only main --with cpu-preset
         echo "✅ Poetry validation dependencies installed"
     
     - name: Run Poetry CLI Resolution Validation
@@ -273,8 +274,7 @@ jobs:
     - name: Install dependencies
       run: |
         export INSIGHTSPIKE_LITE_MODE=1
-        poetry install --only main
-        poetry run pip install faiss-cpu==1.7.4 torch --index-url https://download.pytorch.org/whl/cpu
+        poetry install --only main --with cpu-preset
         echo "✅ Template validation dependencies installed"
     
     - name: Validate Production Templates
@@ -331,8 +331,7 @@ jobs:
     - name: Install dependencies
       run: |
         export INSIGHTSPIKE_LITE_MODE=1
-        poetry install --only main
-        poetry run pip install faiss-cpu==1.7.4 torch --index-url https://download.pytorch.org/whl/cpu
+        poetry install --only main --with cpu-preset
         echo "✅ Performance benchmark dependencies installed"
     
     - name: Run Performance Benchmarks
@@ -383,7 +382,7 @@ jobs:
     - name: Install dependencies
       run: |
         export INSIGHTSPIKE_LITE_MODE=1
-        poetry install --only main
+        poetry install --only main --with cpu-preset
         poetry run pip install safety pip-licenses
         echo "✅ Security check dependencies installed"
     

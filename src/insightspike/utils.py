@@ -1,7 +1,7 @@
 """Generic helpers"""
+import re
 from pathlib import Path
 from typing import Iterable
-import re
 
 __all__ = ["iter_text", "clean_text"]
 
