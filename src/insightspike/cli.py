@@ -14,7 +14,13 @@ from .core.config import get_config
 from .processing.loader import load_corpus
 from .detection.insight_registry import InsightFactRegistry
 
+# Import dependency management commands
+from .cli.deps_typer import deps_app
+
 app = typer.Typer()
+
+# Add dependency management commands as a subcommand group
+app.add_typer(deps_app, name="deps")
 
 @app.command()
 def ask(question: str = typer.Argument(..., help="Ask a question to the AI agent")):

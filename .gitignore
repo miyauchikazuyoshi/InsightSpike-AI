@@ -13,27 +13,37 @@ __pycache__/
 *.log
 backup/
 
-# テスト・デバッグファイル
+# テスト・デバッグファイル（実験用）
 tests/debug/
 tests/integration/test_*.py
 !tests/integration/test_mvp_integration.py  # メインの統合テストは保持
 debug_*.py
 test_*.py
 
-# Jupyter Notebook（実験用）
-notebooks/
-*.ipynb
+# Jupyter Notebook（実験用ノートブックは除外、本番ノートブックは保持）
+notebooks/*_Debug*.ipynb
+notebooks/*_Test*.ipynb
+notebooks/*_Experiment*.ipynb
+!notebooks/Colab_Dependency_Investigation.ipynb  # 本番使用ノートブック
+!notebooks/InsightSpike_Bypass_Notebook.ipynb   # 本番使用ノートブック
 !notebooks/README.md  # 説明ファイルは保持
 
-# レポート・ドキュメント（動的生成）
-docs/reports/*_REPORT.md
-docs/reports/*_COMPLETION*.md
-docs/reports/PROJECT_RESTRUCTURE*.md
+# レポート・ドキュメント（動的生成・作業記録）
+reports/
+docs/reports/
+docs/archive/
+docs/guides/*REPORT*.md
+docs/guides/*COMPLETION*.md
+docs/guides/PROJECT_STRUCTURE_REORGANIZATION.md
+docs/guides/dependency-resolution-final-report.md
+docs/guides/project-reorganization-final-report.md
+documentation/
+*_COMPLETION_REPORT.md
+*_REPORT.md
+PROJECT_RESTRUCTURE*.md
 
-# データ生成物（実験結果・モデル・インデックス - 全除外）
+# データ生成物（実験結果・モデル・インデックス）
 /data/index.faiss*
-/data/graph_*.pt
-/data/*.db
 /data/logs/*
 !/data/logs/.gitkeep
 /data/embedding/*
@@ -43,8 +53,24 @@ docs/reports/PROJECT_RESTRUCTURE*.md
 /data/cache/*
 !/data/cache/.gitkeep
 
+# データベースファイル（実験用は除外、本番用は保持）
+/data/*_experimental.db
+/data/*_test.db
+/data/*_debug.db
+# 本番データベースは保持
+!data/insight_facts.db
+!data/unknown_learning.db
+
+# グラフファイル（本番使用は保持、実験用は除外）
+/data/graph_experimental_*.pt
+/data/graph_test_*.pt
+/data/graph_debug_*.pt
+!data/graph_pyg.pt  # 本番使用グラフファイルは保持
+
 # 実験結果ファイル（重要でない生成物）
-/data/processed/*.json
+/data/processed/*_experimental*.json
+/data/processed/*_test*.json
+/data/processed/*_debug*.json
 !/data/processed/.gitkeep
 # 必要最小限のサンプルファイルのみ保持
 !data/processed/test_questions.json
@@ -74,93 +100,26 @@ docs/reports/PROJECT_RESTRUCTURE*.md
 /validation_results/
 /documentation/reports/
 
-# 一時・バックアップファイル
-*.backup
-*.tmp
-*.log
-backup/
-
-# テスト・デバッグファイル（実験用）
-tests/debug/
-tests/integration/test_*.py
-!tests/integration/test_mvp_integration.py  # メインの統合テストは保持
-debug_*.py
-test_*.py
-
-# Jupyter Notebook（実験用）
-notebooks/
-*.ipynb
-!notebooks/README.md  # 説明ファイルは保持
-
-# レポート・ドキュメント（動的生成）
-docs/reports/*_REPORT.md
-docs/reports/*_COMPLETION*.md
-docs/reports/PROJECT_RESTRUCTURE*.md
-*_COMPLETION_REPORT.md
-*_REPORT.md
-PROJECT_RESTRUCTURE*.md
-
-# トップディレクトリの実験結果ファイル（一時生成物）
-educational_*.json
-*_export_*.json
-*_demo_*.json
-*_report_*.json
-
-# 作業用・実験用Jupyter Notebook（トップディレクトリ）
-Colab_Dependency_Investigation.ipynb
-InsightSpike_Bypass_Notebook.ipynb
-*_Investigation.ipynb
-*_Bypass_*.ipynb
-test_colab_*.py
-
-# 一般的な実験出力ファイル
-*.json
+# 実験出力ファイル（実験用JSONのみ除外）
+*_experimental*.json
+*_test*.json
+*_debug*.json
+*_REPORT.json
+# 重要な設定ファイルは保持
 !package.json
 !package-lock.json
 !pyproject.toml
 !poetry.lock
 !CITATION.cff
-*REPORT*.md
-*SUMMARY*.txt
-PROJECT_STRUCTURE_*.md
-/documentation/reports/VISUAL_SUMMARY.txt
+!tsconfig.json
+!**/config.json
 
-# バックアップファイル・アーカイブ（開発履歴、プッシュ不要）
-*.backup
-*.bak
-
-# アーカイブディレクトリ（全除外 - 開発履歴や古いコード保管）
+# アーカイブディレクトリ（全除外）
 archive_old_experiments/
-archive_legacy_compatibility/
 archive*/
 *_archive/
 legacy*/
 deprecated*/
-
-# 実験データ・結果アーカイブ（生成物、プッシュ不要）
-/archive_old_experiments/
-/data/archive/
-/experiments/archive/
-*_backup_*/
-
-# 作業ログ・レポート（AI作業記録は除外）
-documentation/reports/
-documentation/report/
-
-# AI作業ログの一般的なパターン（今後追加される可能性）
-documentation/reports/*_WORK_LOG.md
-documentation/reports/*_SESSION_LOG.md
-documentation/reports/AI_WORK_*.md
-documentation/report/*_WORK_LOG.md
-documentation/report/*_SESSION_LOG.md
-documentation/report/AI_WORK_*.md
-
-# その他
-*.swp
-
-# Personal and environment-specific paths
-/Users/*/
-*miyauchikazuyoshi*
 
 # IDE and environment files
 .env
@@ -171,4 +130,7 @@ documentation/report/AI_WORK_*.md
 
 # OS-specific files
 Thumbs.db
-.DS_Store
+
+# Work reports and documentation (exclude from repository)
+docs/reports/
+docs/archive/

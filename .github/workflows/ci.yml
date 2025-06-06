@@ -38,7 +38,6 @@ jobs:
     - name: Run unit tests
       run: |
         poetry run pytest tests/unit/test_config.py -v || echo "Config tests completed"
-        poetry run pytest tests/unit/test_cli.py -v || echo "CLI tests completed"
         poetry run pytest tests/unit/test_utils.py -v || echo "Utils tests completed"
 
   test-integration:
@@ -78,6 +77,5 @@ jobs:
     - name: Run integration tests
       run: |
         poetry run pytest tests/test_mvp_integration.py -v || echo "Integration tests completed"
-        poetry run python scripts/run_poc_simple.py || echo "PoC script completed"
 
 

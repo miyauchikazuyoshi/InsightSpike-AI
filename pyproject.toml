@@ -46,6 +46,7 @@ nltk = "^3.8"
 pyyaml = "^6.0"
 spacy = ">=3.7.0,<3.8.0"  # Compatible with thinc 8.2.x
 thinc = ">=8.2.0,<8.3.0"  # NumPy 1.x compatible version
+toml = "^0.10.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0"
@@ -87,10 +88,40 @@ click = ">=8.0,<8.2"
 rich = "^13.6"
 pyyaml = "^6.0"
 
+[tool.poetry.group.ml-preset.dependencies]
+# ML research preset - includes additional ML libraries
+jupyter = "^1.0"
+notebook = "^7.0"
+ipywidgets = "^8.0"
+pandas = "^2.0"
+seaborn = "^0.12"
+plotly = "^5.0"
+optuna = "^3.0"
+wandb = "^0.16"
+
+[tool.poetry.group.gpu-preset.dependencies]
+# GPU-optimized preset - CUDA-enabled versions
+torch = { version = ">=2.4.0", markers = "platform_machine == 'x86_64' and sys_platform == 'linux'" }
+faiss-gpu = { version = ">=1.7.0", markers = "platform_machine == 'x86_64' and sys_platform == 'linux'" }
+
+[tool.poetry.group.cpu-preset.dependencies]
+# CPU-only preset for development/testing
+torch = ">=2.2.0"
+faiss-cpu = ">=1.7.0"
+
+[tool.poetry.group.platform-tools.dependencies]
+# Platform-specific dependency management tools
+psutil = "^5.9"  # System information
+packaging = "^23.0"  # Version parsing
+distlib = "^0.3"  # Distribution utilities
+
 [tool.poetry.extras]
 # Manual override options for specific environments  
 cpu-only = ["torch", "torchvision", "torchaudio", "faiss-cpu"]
 gpu-latest = ["torch", "torchvision", "torchaudio", "faiss-gpu"]
+ml-full = ["torch", "torchvision", "torchaudio", "faiss-cpu", "jupyter", "pandas", "seaborn", "plotly"]
+basic = ["torch", "torchvision", "torchaudio", "numpy", "scipy"]
+platform-tools = ["psutil", "packaging", "distlib"]
 
 [tool.poetry.scripts]
 insightspike = "insightspike.cli:app"
