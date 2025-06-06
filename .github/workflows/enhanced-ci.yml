@@ -44,19 +44,26 @@ jobs:
         poetry config solver.lazy-wheel true
         echo "Poetry configuration completed (matching local environment)"
     
-    - name: Install CI dependencies
+    - name: Install CI dependencies with Poetry (CPU-only)
       run: |
-        # Install minimal dependencies for CI (avoid faiss-gpu issues)
+        # Use Poetry consistently but force CPU-only dependencies  
         export INSIGHTSPIKE_LITE_MODE=1
-        # Skip Poetry groups and install directly with pip to avoid faiss-gpu conflicts
-        python -m pip install --upgrade pip
-        pip install pytest pytest-cov black isort flake8 mypy bandit
-        pip install typer rich click pyyaml numpy scipy scikit-learn networkx
-        pip install transformers sentence-transformers datasets nltk matplotlib spacy
-        pip install faiss-cpu==1.7.4 --force-reinstall
-        pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-        pip install -e . --no-deps  # Install project without dependencies
-        echo "✅ CI dependencies installed (pip-based, CPU-only)"
+        export FORCE_CPU_ONLY=1
+        
+        # Install base dependencies with Poetry
+        poetry install --only main --no-root
+        
+        # Force CPU-only packages (override any GPU packages)
+        poetry run pip install faiss-cpu==1.7.4 --force-reinstall
+        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu --force-reinstall
+        
+        # Install CI tools in Poetry environment
+        poetry run pip install pytest pytest-cov black isort flake8 mypy bandit
+        
+        # Install project in development mode
+        poetry install --only-root
+        
+        echo "✅ CI dependencies installed consistently with Poetry (CPU-only)"
     
     - name: Run code formatting check
       run: |
@@ -132,17 +139,24 @@ jobs:
     
     - name: Install dependencies with Poetry (CI - CPU only)
       run: |
-        # Use pip-based installation to avoid faiss-gpu conflicts
+        # Use Poetry consistently but force CPU-only dependencies
         export INSIGHTSPIKE_LITE_MODE=1
-        # Install minimal dependencies for testing
-        python -m pip install --upgrade pip
-        pip install pytest pytest-cov black isort flake8 mypy bandit
-        pip install typer rich click pyyaml numpy scipy scikit-learn networkx
-        pip install transformers sentence-transformers datasets nltk matplotlib spacy
-        pip install faiss-cpu==1.7.4 --force-reinstall
-        pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-        pip install -e . --no-deps  # Install project without dependencies
-        echo "✅ CI environment: pip-based CPU-only dependencies"
+        export FORCE_CPU_ONLY=1
+        
+        # Install base dependencies with Poetry
+        poetry install --only main --no-root
+        
+        # Force CPU-only packages (override any GPU packages)
+        poetry run pip install faiss-cpu==1.7.4 --force-reinstall
+        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu --force-reinstall
+        
+        # Install CI tools in Poetry environment
+        poetry run pip install pytest pytest-cov
+        
+        # Install project in development mode
+        poetry install --only-root
+        
+        echo "✅ CI environment: Poetry-based CPU-only dependencies"
     
     - name: Set environment variables
       run: |
@@ -225,8 +239,15 @@ jobs:
     - name: Install dependencies
       run: |
         export INSIGHTSPIKE_LITE_MODE=1
-        poetry install --only main --with cpu-preset
-        echo "✅ Poetry validation dependencies installed"
+        export FORCE_CPU_ONLY=1
+        
+        # Install dependencies with Poetry (CPU-only)
+        poetry install --only main --no-root
+        poetry run pip install faiss-cpu==1.7.4 --force-reinstall
+        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu --force-reinstall
+        poetry install --only-root
+        
+        echo "✅ Poetry validation dependencies installed (CPU-only)"
     
     - name: Run Poetry CLI Resolution Validation
       run: |
@@ -274,8 +295,15 @@ jobs:
     - name: Install dependencies
       run: |
         export INSIGHTSPIKE_LITE_MODE=1
-        poetry install --only main --with cpu-preset
-        echo "✅ Template validation dependencies installed"
+        export FORCE_CPU_ONLY=1
+        
+        # Install dependencies with Poetry (CPU-only)
+        poetry install --only main --no-root
+        poetry run pip install faiss-cpu==1.7.4 --force-reinstall
+        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu --force-reinstall
+        poetry install --only-root
+        
+        echo "✅ Template validation dependencies installed (CPU-only)"
     
     - name: Validate Production Templates
       run: |
@@ -331,8 +359,15 @@ jobs:
     - name: Install dependencies
       run: |
         export INSIGHTSPIKE_LITE_MODE=1
-        poetry install --only main --with cpu-preset
-        echo "✅ Performance benchmark dependencies installed"
+        export FORCE_CPU_ONLY=1
+        
+        # Install dependencies with Poetry (CPU-only)
+        poetry install --only main --no-root
+        poetry run pip install faiss-cpu==1.7.4 --force-reinstall
+        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu --force-reinstall
+        poetry install --only-root
+        
+        echo "✅ Performance benchmark dependencies installed (CPU-only)"
     
     - name: Run Performance Benchmarks
       run: |
@@ -382,9 +417,18 @@ jobs:
     - name: Install dependencies
       run: |
         export INSIGHTSPIKE_LITE_MODE=1
-        poetry install --only main --with cpu-preset
+        export FORCE_CPU_ONLY=1
+        
+        # Install dependencies with Poetry (CPU-only)
+        poetry install --only main --no-root
+        poetry run pip install faiss-cpu==1.7.4 --force-reinstall
+        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu --force-reinstall
+        poetry install --only-root
+        
+        # Install security tools
         poetry run pip install safety pip-licenses
-        echo "✅ Security check dependencies installed"
+        
+        echo "✅ Security check dependencies installed (CPU-only)"
     
     - name: Run dependency vulnerability scan
       run: |
@@ -440,10 +484,18 @@ jobs:
     - name: Install dependencies
       run: |
         export INSIGHTSPIKE_LITE_MODE=1
-        poetry install --only main
-        poetry run pip install psutil requests faiss-cpu==1.7.4
-        poetry run pip install torch --index-url https://download.pytorch.org/whl/cpu
-        echo "✅ Monitoring integration dependencies installed"
+        export FORCE_CPU_ONLY=1
+        
+        # Install dependencies with Poetry (CPU-only)
+        poetry install --only main --no-root
+        poetry run pip install faiss-cpu==1.7.4 --force-reinstall
+        poetry run pip install torch --index-url https://download.pytorch.org/whl/cpu --force-reinstall
+        poetry install --only-root
+        
+        # Install monitoring tools
+        poetry run pip install psutil requests
+        
+        echo "✅ Monitoring integration dependencies installed (CPU-only)"
     
     - name: Test Monitoring System
       run: |
