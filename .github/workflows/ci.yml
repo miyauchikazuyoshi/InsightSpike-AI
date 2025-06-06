@@ -28,13 +28,12 @@ jobs:
 
     - name: Install dependencies (CI - CPU only)
       run: |
-        # Skip problematic dependencies that require GPU in CI
-        export PIP_NO_DEPS=1
-        poetry install --no-dev || echo "Main install completed with warnings"
+        # Install with CI-specific dependencies (includes pytest)
+        poetry install --with ci || echo "Main install completed with warnings"
         # Manually install essential dependencies for CI
         poetry run pip install faiss-cpu==1.11.0
         poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-        echo "✅ CI environment: CPU-only dependencies installed"
+        echo "✅ CI environment: CPU-only dependencies with pytest installed"
 
     - name: Set environment variables
       run: |
@@ -49,12 +48,14 @@ jobs:
     - name: Run tests
       run: |
         echo "🧪 Running CI tests (CPU-only environment)..."
+        echo "Verifying pytest installation..."
+        poetry run pytest --version
         echo "Running unit tests..."
-        poetry run pytest tests/unit/test_config.py -v || echo "Config tests completed"
-        poetry run pytest tests/unit/test_utils.py -v || echo "Utils tests completed"
+        poetry run pytest tests/unit/test_config.py -v
+        poetry run pytest tests/unit/test_utils.py -v  
         echo "Running integration tests..."
         # Skip GPU-dependent tests in CI
-        poetry run pytest tests/test_mvp_integration.py -v -k "not gpu" || echo "Integration tests completed"
-        echo "✅ All CI tests completed"
+        poetry run pytest tests/test_mvp_integration.py -v -k "not gpu"
+        echo "✅ All CI tests completed successfully"
 
 
