@@ -4,6 +4,31 @@ __pycache__/
 *.pyc
 .DS_Store
 .vscode/
+.pytest_cache/
+.ruff_cache/
+
+# 一時・バックアップファイル
+*.backup
+*.tmp
+*.log
+backup/
+
+# テスト・デバッグファイル
+tests/debug/
+tests/integration/test_*.py
+!tests/integration/test_mvp_integration.py  # メインの統合テストは保持
+debug_*.py
+test_*.py
+
+# Jupyter Notebook（実験用）
+notebooks/
+*.ipynb
+!notebooks/README.md  # 説明ファイルは保持
+
+# レポート・ドキュメント（動的生成）
+docs/reports/*_REPORT.md
+docs/reports/*_COMPLETION*.md
+docs/reports/PROJECT_RESTRUCTURE*.md
 
 # データ生成物（実験結果・モデル・インデックス - 全除外）
 /data/index.faiss*
@@ -48,6 +73,32 @@ __pycache__/
 # 実行結果・レポート（一時的な生成物）
 /validation_results/
 /documentation/reports/
+
+# 一時・バックアップファイル
+*.backup
+*.tmp
+*.log
+backup/
+
+# テスト・デバッグファイル（実験用）
+tests/debug/
+tests/integration/test_*.py
+!tests/integration/test_mvp_integration.py  # メインの統合テストは保持
+debug_*.py
+test_*.py
+
+# Jupyter Notebook（実験用）
+notebooks/
+*.ipynb
+!notebooks/README.md  # 説明ファイルは保持
+
+# レポート・ドキュメント（動的生成）
+docs/reports/*_REPORT.md
+docs/reports/*_COMPLETION*.md
+docs/reports/PROJECT_RESTRUCTURE*.md
+*_COMPLETION_REPORT.md
+*_REPORT.md
+PROJECT_RESTRUCTURE*.md
 
 # トップディレクトリの実験結果ファイル（一時生成物）
 educational_*.json
