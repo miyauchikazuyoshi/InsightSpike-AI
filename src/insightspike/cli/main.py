@@ -9,13 +9,13 @@ import sys
 import json
 
 # New imports for refactored structure
-from .core.agents.main_agent import MainAgent
-from .core.config import get_config
-from .processing.loader import load_corpus
-from .detection.insight_registry import InsightFactRegistry
+from ..core.agents.main_agent import MainAgent
+from ..core.config import get_config
+from ..processing.loader import load_corpus
+from ..detection.insight_registry import InsightFactRegistry
 
 # Import dependency management commands
-from .cli.deps_typer import deps_app
+from .deps_typer import deps_app
 
 app = typer.Typer()
 
@@ -609,8 +609,8 @@ def test_safe(question: str = typer.Argument("What is artificial intelligence?",
         print("[yellow]Using safe mode with mock LLM provider...[/yellow]")
         
         # Import mock provider directly
-        from .core.layers.mock_llm_provider import MockLLMProvider
-        from .core.config import get_config
+        from ..core.layers.mock_llm_provider import MockLLMProvider
+        from ..core.config import get_config
         
         config = get_config()
         mock_llm = MockLLMProvider(config)
