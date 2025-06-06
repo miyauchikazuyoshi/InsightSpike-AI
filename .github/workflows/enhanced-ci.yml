@@ -11,7 +11,7 @@ on:
 
 env:
   PYTHON_VERSION: "3.11.12"
-  POETRY_VERSION: "2.1.3"
+  POETRY_VERSION: "1.8.3"
 
 jobs:
   # Job 1: Code Quality and Linting
@@ -54,8 +54,9 @@ jobs:
         # Install minimal dependencies directly with pip to avoid lock file conflicts
         poetry run pip install --upgrade pip
         
-        # CRITICAL: Force NumPy 1.x strictly to prevent FAISS incompatibility
-        poetry run pip install "numpy>=1.21.6,<2.0" --force-reinstall
+        # CRITICAL: Uninstall any existing NumPy first, then force NumPy 1.x installation
+        poetry run pip uninstall numpy -y || true
+        poetry run pip install "numpy>=1.21.6,<2.0" --no-cache-dir --force-reinstall
         poetry run pip install faiss-cpu==1.7.4
         poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
         
@@ -156,8 +157,9 @@ jobs:
         # Install minimal dependencies directly with pip to avoid lock file conflicts
         poetry run pip install --upgrade pip
         
-        # CRITICAL: Force NumPy 1.x strictly to prevent FAISS incompatibility
-        poetry run pip install "numpy>=1.21.6,<2.0" --force-reinstall
+        # CRITICAL: Uninstall any existing NumPy first, then force NumPy 1.x installation
+        poetry run pip uninstall numpy -y || true
+        poetry run pip install "numpy>=1.21.6,<2.0" --no-cache-dir --force-reinstall
         poetry run pip install faiss-cpu==1.7.4
         poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
         
@@ -277,6 +279,9 @@ jobs:
         # CRITICAL FIX: Skip Poetry lock file to avoid faiss-gpu conflicts
         poetry run pip install --upgrade pip
         
+        # CRITICAL: Remove any existing NumPy installation to prevent conflicts
+        poetry run pip uninstall numpy -y || true
+        
         # CRITICAL: Force NumPy 1.x strictly to prevent FAISS incompatibility
         poetry run pip install "numpy>=1.21.6,<2.0" --force-reinstall
         poetry run pip install faiss-cpu==1.7.4
@@ -344,6 +349,9 @@ jobs:
         
         # CRITICAL FIX: Skip Poetry lock file to avoid faiss-gpu conflicts
         poetry run pip install --upgrade pip
+        
+        # CRITICAL: Remove any existing NumPy installation to prevent conflicts
+        poetry run pip uninstall numpy -y || true
         
         # CRITICAL: Force NumPy 1.x strictly to prevent FAISS incompatibility
         poetry run pip install "numpy>=1.21.6,<2.0" --force-reinstall
@@ -421,6 +429,9 @@ jobs:
         # CRITICAL FIX: Skip Poetry lock file to avoid faiss-gpu conflicts
         poetry run pip install --upgrade pip
         
+        # CRITICAL: Remove any existing NumPy installation to prevent conflicts
+        poetry run pip uninstall numpy -y || true
+        
         # CRITICAL: Force NumPy 1.x strictly to prevent FAISS incompatibility
         poetry run pip install "numpy>=1.21.6,<2.0" --force-reinstall
         poetry run pip install faiss-cpu==1.7.4
@@ -490,6 +501,9 @@ jobs:
         
         # CRITICAL FIX: Skip Poetry lock file to avoid faiss-gpu conflicts
         poetry run pip install --upgrade pip
+        
+        # CRITICAL: Remove any existing NumPy installation to prevent conflicts
+        poetry run pip uninstall numpy -y || true
         
         # CRITICAL: Force NumPy 1.x strictly to prevent FAISS incompatibility
         poetry run pip install "numpy>=1.21.6,<2.0" --force-reinstall
@@ -569,6 +583,9 @@ jobs:
         
         # CRITICAL FIX: Skip Poetry lock file to avoid faiss-gpu conflicts
         poetry run pip install --upgrade pip
+        
+        # CRITICAL: Remove any existing NumPy installation to prevent conflicts
+        poetry run pip uninstall numpy -y || true
         
         # CRITICAL: Force NumPy 1.x strictly to prevent FAISS incompatibility
         poetry run pip install "numpy>=1.21.6,<2.0" --force-reinstall
