@@ -53,17 +53,21 @@ jobs:
         # Install base dependencies with Poetry
         poetry install --only main --no-root
         
+        # Force NumPy 1.x for FAISS compatibility (critical fix)
+        poetry run pip install "numpy>=1.21,<2.0" --force-reinstall
+        
         # Force CPU-only packages (override any GPU packages)
+        poetry run pip install "numpy>=1.21,<2.0" --force-reinstall
         poetry run pip install faiss-cpu==1.7.4 --force-reinstall
         poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu --force-reinstall
         
         # Install CI tools in Poetry environment
-        poetry run pip install pytest pytest-cov black isort flake8 mypy bandit
+        poetry run pip install pytest pytest-cov black isort flake8 mypy bandit PyYAML
         
         # Install project in development mode
         poetry install --only-root
         
-        echo "✅ CI dependencies installed consistently with Poetry (CPU-only)"
+        echo "✅ CI dependencies installed consistently with Poetry (CPU-only, NumPy 1.x)"
     
     - name: Run code formatting check
       run: |
@@ -146,7 +150,11 @@ jobs:
         # Install base dependencies with Poetry
         poetry install --only main --no-root
         
+        # Force NumPy 1.x for FAISS compatibility (critical fix)
+        poetry run pip install "numpy>=1.21,<2.0" --force-reinstall
+        
         # Force CPU-only packages (override any GPU packages)
+        poetry run pip install "numpy>=1.21,<2.0" --force-reinstall
         poetry run pip install faiss-cpu==1.7.4 --force-reinstall
         poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu --force-reinstall
         
@@ -156,7 +164,7 @@ jobs:
         # Install project in development mode
         poetry install --only-root
         
-        echo "✅ CI environment: Poetry-based CPU-only dependencies"
+        echo "✅ CI environment: Poetry-based CPU-only dependencies (NumPy 1.x)"
     
     - name: Set environment variables
       run: |
@@ -243,6 +251,7 @@ jobs:
         
         # Install dependencies with Poetry (CPU-only)
         poetry install --only main --no-root
+        poetry run pip install "numpy>=1.21,<2.0" --force-reinstall
         poetry run pip install faiss-cpu==1.7.4 --force-reinstall
         poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu --force-reinstall
         poetry install --only-root
@@ -299,6 +308,7 @@ jobs:
         
         # Install dependencies with Poetry (CPU-only)
         poetry install --only main --no-root
+        poetry run pip install "numpy>=1.21,<2.0" --force-reinstall
         poetry run pip install faiss-cpu==1.7.4 --force-reinstall
         poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu --force-reinstall
         poetry install --only-root
@@ -363,6 +373,7 @@ jobs:
         
         # Install dependencies with Poetry (CPU-only)
         poetry install --only main --no-root
+        poetry run pip install "numpy>=1.21,<2.0" --force-reinstall
         poetry run pip install faiss-cpu==1.7.4 --force-reinstall
         poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu --force-reinstall
         poetry install --only-root
@@ -421,6 +432,7 @@ jobs:
         
         # Install dependencies with Poetry (CPU-only)
         poetry install --only main --no-root
+        poetry run pip install "numpy>=1.21,<2.0" --force-reinstall
         poetry run pip install faiss-cpu==1.7.4 --force-reinstall
         poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu --force-reinstall
         poetry install --only-root
@@ -488,6 +500,7 @@ jobs:
         
         # Install dependencies with Poetry (CPU-only)
         poetry install --only main --no-root
+        poetry run pip install "numpy>=1.21,<2.0" --force-reinstall
         poetry run pip install faiss-cpu==1.7.4 --force-reinstall
         poetry run pip install torch --index-url https://download.pytorch.org/whl/cpu --force-reinstall
         poetry install --only-root
