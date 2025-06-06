@@ -440,16 +440,35 @@ def demo():
     print()
     
     try:
-        result = subprocess.run([
-            sys.executable, "scripts/demo_true_insight.py"
-        ], cwd=".", capture_output=False, text=True)
-        
-        if result.returncode != 0:
-            print(f"[red]Demo failed: {result.stderr}[/red]")
+        # Initialize agent
+        print("[yellow]Initializing AI agent...[/yellow]")
+        agent = MainAgent()
+        if not agent.initialize():
+            print("[red]Failed to initialize agent[/red]")
             raise typer.Exit(code=1)
         
+        # Demo questions that require synthesis
+        demo_questions = [
+            "What is the relationship between probability and information theory?",
+            "How does mathematical infinity relate to physical reality?",
+            "What connects memory formation and decision making in the brain?"
+        ]
+        
+        for i, question in enumerate(demo_questions, 1):
+            print(f"\n[bold cyan]Demo Question {i}:[/bold cyan] {question}")
+            print("[yellow]Processing...[/yellow]")
+            
+            result = agent.process_question(question, max_cycles=3, verbose=False)
+            
+            print(f"[green]Response:[/green] {result.get('response', 'No response')[:200]}...")
+            print(f"[dim]Quality: {result.get('reasoning_quality', 0):.3f}, "
+                  f"Spike: {result.get('spike_detected', False)}[/dim]")
+            
+            if result.get('spike_detected', False):
+                print("[bold yellow]⚡ INSIGHT SPIKE DETECTED![/bold yellow]")
+        
         print("\n[green]✅ Demo completed successfully![/green]")
-        print("[blue]📄 Results saved to: data/processed/demo_results.json[/blue]")
+        print("[blue]Demo showcased InsightSpike's synthesis capabilities[/blue]")
         
     except Exception as e:
         print(f"[red]Error running demo: {e}[/red]")
