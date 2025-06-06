@@ -1,0 +1,32 @@
+{
+  "name": "Real-Time Insight Detection",
+  "description": "Low-latency insight detection for streaming data",
+  "data_sources": [
+    "live_feeds",
+    "streaming_apis",
+    "message_queues",
+    "webhook_data",
+    "sensor_data"
+  ],
+  "processing_config": {
+    "batch_size": 10,
+    "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+    "similarity_threshold": 0.8,
+    "max_context_length": 512,
+    "insight_detection_level": "realtime",
+    "latency_target": "< 100ms"
+  },
+  "deployment": {
+    "environment": "edge_computing",
+    "gpu_requirements": "GPU recommended for low latency",
+    "memory_requirements": "16GB+",
+    "estimated_processing_time": "< 50ms per item"
+  },
+  "realtime_features": [
+    "stream_processing",
+    "event_triggers",
+    "real_time_alerts",
+    "dashboard_integration"
+  ],
+  "integration_code": "\n# Real-Time Insight Detection Integration Code\nimport insightspike\nfrom insightspike.integrations.realtime import RealtimeProcessor\nfrom insightspike.streaming import StreamManager\n\ndef setup_realtime_processor():\n    # Initialize low-latency realtime processor\n    processor = RealtimeProcessor(\n        embedding_model=\"sentence-transformers/all-MiniLM-L6-v2\",\n        batch_size=10,\n        similarity_threshold=0.8,\n        latency_target=100  # milliseconds\n    )\n    \n    # Configure streaming\n    stream_manager = StreamManager()\n    stream_manager.configure_streams(\n        input_streams=[\"kafka\", \"websocket\", \"api\"],\n        output_streams=[\"alerts\", \"dashboard\", \"database\"],\n        buffer_size=1000\n    )\n    \n    processor.set_stream_manager(stream_manager)\n    \n    return processor\n\ndef setup_realtime_pipeline(processor):\n    # Setup real-time processing pipeline\n    pipeline = processor.create_pipeline(\n        input_stage=\"stream_ingestion\",\n        processing_stage=\"insight_detection\",\n        output_stage=\"alert_generation\"\n    )\n    \n    # Configure event triggers\n    pipeline.configure_triggers(\n        insight_threshold=0.8,\n        alert_conditions=[\"high_confidence\", \"novel_insight\"],\n        notification_targets=[\"dashboard\", \"webhook\", \"email\"]\n    )\n    \n    return pipeline\n\ndef process_realtime_stream(processor, stream_data):\n    # Process streaming data in real-time\n    insights = processor.process_stream(\n        stream_data=stream_data,\n        real_time=True,\n        low_latency=True\n    )\n    \n    # Generate real-time alerts\n    alerts = processor.generate_alerts(\n        insights=insights,\n        urgency_level=\"immediate\",\n        include_context=True\n    )\n    \n    return insights, alerts\n\ndef monitor_realtime_performance(processor):\n    # Monitor real-time processing performance\n    metrics = processor.get_realtime_metrics()\n    latency_stats = processor.get_latency_statistics()\n    \n    return metrics, latency_stats\n\n# Usage example\nif __name__ == \"__main__\":\n    processor = setup_realtime_processor()\n    pipeline = setup_realtime_pipeline(processor)\n    insights, alerts = process_realtime_stream(processor, stream_data)\n    metrics, latency = monitor_realtime_performance(processor)\n"
+}
