@@ -7,10 +7,29 @@ packages = [{ include = "insightspike", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-# Environment-specific packages excluded from Poetry:
-# - torch (installed via pip with environment-specific versions)
-# - faiss (GPU vs CPU variants)
-# Note: NumPy is managed here to ensure consistent FAISS compatibility
+
+# Platform-specific ML dependencies
+# macOS (Intel/AMD) - CPU-only versions for compatibility
+torch = [
+  { version = "==2.2.2", markers = "sys_platform == 'darwin'" },
+  { version = ">=2.4.0,<3.0.0", markers = "sys_platform != 'darwin'" }
+]
+torchvision = [
+  { version = "==0.17.2", markers = "sys_platform == 'darwin'" },
+  { version = ">=0.19.0", markers = "sys_platform != 'darwin'" }
+]
+torchaudio = [
+  { version = "==2.2.2", markers = "sys_platform == 'darwin'" },
+  { version = ">=2.4.0", markers = "sys_platform != 'darwin'" }
+]
+faiss-cpu = [
+  { version = ">=1.11.0", markers = "sys_platform == 'darwin'" }
+]
+faiss-gpu = [
+  { version = ">=1.7.0", markers = "sys_platform != 'darwin'" }
+]
+
+# Cross-platform dependencies
 numpy = ">=1.24.0,<2.0.0"  # Unified NumPy 1.x for FAISS compatibility
 sentence-transformers = "^2.5"
 scipy = "^1.12"
@@ -34,7 +53,7 @@ pytest-cov = "^4.0"
 black = "^23.0"
 isort = "^5.0"
 flake8 = "^6.0"
-faiss-cpu = "^1.11"  # CPU版faiss（ローカル開発用）
+# faiss is now managed in main dependencies with platform markers
 
 [tool.poetry.group.local.dependencies]
 # ローカル開発環境用 - setup.shで個別インストール
@@ -67,6 +86,11 @@ typer = ">=0.7,<0.10"
 click = ">=8.0,<8.2"
 rich = "^13.6"
 pyyaml = "^6.0"
+
+[tool.poetry.extras]
+# Manual override options for specific environments  
+cpu-only = ["torch", "torchvision", "torchaudio", "faiss-cpu"]
+gpu-latest = ["torch", "torchvision", "torchaudio", "faiss-gpu"]
 
 [tool.poetry.scripts]
 insightspike = "insightspike.cli:app"

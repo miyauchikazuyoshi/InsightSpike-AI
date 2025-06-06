@@ -176,29 +176,45 @@ If you encounter issues, see our [Colab Troubleshooting Guide](documentation/gui
 
 InsightSpike-AI supports three distinct environments, each optimized for specific use cases:
 
-#### 🏠 Local Development Environment (faiss-cpu)
+#### 🏠 Local Development Environment (Platform-Optimized)
 **Best for**: Development, testing, CPU-only machines
 
-**✅ DEPENDENCY CONFLICTS RESOLVED**: NumPy 1.x compatibility across all packages
+**✅ AUTOMATIC PLATFORM DETECTION**: Poetry automatically installs CPU/GPU variants based on platform
 ```bash
 # Clone repository
 git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
 cd InsightSpike-AI
 
-# Automated setup with dependency resolution
-./scripts/setup/setup.sh
-
-# Alternative: Manual Poetry setup
+# Automated setup with platform detection
 poetry install --with dev
 
-# Verify installation
+# Verify platform-specific installation
+poetry run python -c "import torch; print(f'PyTorch: {torch.__version__}')"
+poetry run python -c "import faiss; print(f'FAISS: {faiss.__version__}')"
+
+# Run tests and CLI
 poetry run insightspike --help
-poetry run config-info
+poetry run pytest tests/unit/ -v
+```
+
+**Platform-Specific Installation**:
+- 🍎 **macOS**: torch==2.2.2 + faiss-cpu (Intel/AMD compatibility)
+- 🐧 **Linux**: torch>=2.4.0 + faiss-gpu (CI/GPU environments)
+- 🪟 **Windows**: torch>=2.4.0 + faiss-cpu (fallback)
+
+**Manual Override Options**:
+```bash
+# Force CPU-only installation (any platform)
+poetry install -E cpu-only
+
+# Force GPU installation (Linux with CUDA)
+poetry install -E gpu-latest
 ```
 
 **Key Benefits**:
-- ✅ NumPy 1.26.4 + FAISS 1.11.0 + spaCy 3.7.5 compatibility 
-- ✅ Poetry-managed dependencies with resolved lock file
+- ✅ Automatic platform detection with PEP-508 markers
+- ✅ NumPy 1.x + FAISS + spaCy compatibility guaranteed
+- ✅ Poetry-managed dependencies with locked versions
 - ✅ Full development environment with testing tools
 
 #### ☁️ Google Colab Environment (2025 T4 GPU Optimized)
