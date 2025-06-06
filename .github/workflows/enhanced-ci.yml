@@ -11,7 +11,7 @@ on:
 
 env:
   PYTHON_VERSION: "3.11"
-  POETRY_VERSION: "latest"
+  POETRY_VERSION: "1.8.5"
 
 jobs:
   # Job 1: Code Quality and Linting
@@ -28,11 +28,20 @@ jobs:
         python-version: ${{ env.PYTHON_VERSION }}
     
     - name: Install Poetry
-      uses: snok/install-poetry@v1
+      uses: snok/install-poetry@v1.4.1
       with:
         version: ${{ env.POETRY_VERSION }}
         virtualenvs-create: true
         virtualenvs-in-project: true
+        installer-parallel: true
+    
+    - name: Setup Poetry environment
+      run: |
+        poetry config virtualenvs.create true
+        poetry config virtualenvs.in-project true
+        poetry config installer.parallel true
+        poetry config installer.max-workers 10
+        echo "Poetry configuration completed"
     
     - name: Install dependencies for linting
       run: |
@@ -87,11 +96,18 @@ jobs:
         python-version: ${{ env.PYTHON_VERSION }}
     
     - name: Install Poetry
-      uses: snok/install-poetry@v1
+      uses: snok/install-poetry@v1.4.1
       with:
         version: ${{ env.POETRY_VERSION }}
         virtualenvs-create: true
         virtualenvs-in-project: true
+        installer-parallel: true
+    
+    - name: Setup Poetry environment
+      run: |
+        poetry config virtualenvs.create true
+        poetry config virtualenvs.in-project true
+        echo "Poetry configuration completed"
     
     - name: Cache Poetry dependencies
       uses: actions/cache@v4
@@ -173,7 +189,7 @@ jobs:
         python-version: ${{ env.PYTHON_VERSION }}
     
     - name: Install Poetry
-      uses: snok/install-poetry@v1
+      uses: snok/install-poetry@v1.4.1
       with:
         version: ${{ env.POETRY_VERSION }}
         virtualenvs-create: true
@@ -212,7 +228,7 @@ jobs:
         python-version: ${{ env.PYTHON_VERSION }}
     
     - name: Install Poetry
-      uses: snok/install-poetry@v1
+      uses: snok/install-poetry@v1.4.1
       with:
         version: ${{ env.POETRY_VERSION }}
         virtualenvs-create: true
@@ -257,7 +273,7 @@ jobs:
         python-version: ${{ env.PYTHON_VERSION }}
     
     - name: Install Poetry
-      uses: snok/install-poetry@v1
+      uses: snok/install-poetry@v1.4.1
       with:
         version: ${{ env.POETRY_VERSION }}
         virtualenvs-create: true
@@ -298,7 +314,7 @@ jobs:
         python-version: ${{ env.PYTHON_VERSION }}
     
     - name: Install Poetry
-      uses: snok/install-poetry@v1
+      uses: snok/install-poetry@v1.4.1
       with:
         version: ${{ env.POETRY_VERSION }}
         virtualenvs-create: true
@@ -343,7 +359,7 @@ jobs:
         python-version: ${{ env.PYTHON_VERSION }}
     
     - name: Install Poetry
-      uses: snok/install-poetry@v1
+      uses: snok/install-poetry@v1.4.1
       with:
         version: ${{ env.POETRY_VERSION }}
         virtualenvs-create: true
