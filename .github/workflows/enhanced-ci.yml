@@ -54,14 +54,17 @@ jobs:
         # Install minimal dependencies directly with pip to avoid lock file conflicts
         poetry run pip install --upgrade pip
         
-        # Install core dependencies with CPU-only constraints
-        poetry run pip install "numpy>=1.21,<2.0" 
+        # CRITICAL: Force NumPy 1.x strictly to prevent FAISS incompatibility
+        poetry run pip install "numpy>=1.21.6,<2.0" --force-reinstall
         poetry run pip install faiss-cpu==1.7.4
         poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
         
         # Install other required dependencies
         poetry run pip install typer rich click pyyaml scipy scikit-learn networkx
         poetry run pip install transformers sentence-transformers datasets nltk matplotlib spacy
+        
+        # CRITICAL: Add psutil for monitoring system
+        poetry run pip install psutil
         
         # Install CI tools in Poetry environment
         poetry run pip install pytest pytest-cov black isort flake8 mypy bandit
@@ -153,14 +156,17 @@ jobs:
         # Install minimal dependencies directly with pip to avoid lock file conflicts
         poetry run pip install --upgrade pip
         
-        # Install core dependencies with CPU-only constraints
-        poetry run pip install "numpy>=1.21,<2.0" 
+        # CRITICAL: Force NumPy 1.x strictly to prevent FAISS incompatibility
+        poetry run pip install "numpy>=1.21.6,<2.0" --force-reinstall
         poetry run pip install faiss-cpu==1.7.4
         poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
         
         # Install other required dependencies
         poetry run pip install typer rich click pyyaml scipy scikit-learn networkx
         poetry run pip install transformers sentence-transformers datasets nltk matplotlib spacy
+        
+        # CRITICAL: Add psutil for monitoring system
+        poetry run pip install psutil
         
         # Install CI tools in Poetry environment
         poetry run pip install pytest pytest-cov
@@ -175,6 +181,21 @@ jobs:
         echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
         echo "INSIGHTSPIKE_LITE_MODE=1" >> $GITHUB_ENV
         echo "CI_ENVIRONMENT=true" >> $GITHUB_ENV
+    
+    - name: Verify NumPy version compatibility
+      run: |
+        echo "🔍 Verifying NumPy version compatibility..."
+        poetry run python -c "
+        import numpy as np
+        print(f'NumPy version: {np.__version__}')
+        major, minor = map(int, np.__version__.split('.')[:2])
+        if major >= 2:
+            print('❌ CRITICAL: NumPy 2.x detected - this will cause FAISS compatibility issues!')
+            exit(1)
+        else:
+            print('✅ NumPy 1.x confirmed - FAISS compatible')
+        "
+        echo "✅ NumPy version verification passed"
     
     - name: Create test data
       run: |
@@ -256,14 +277,17 @@ jobs:
         # CRITICAL FIX: Skip Poetry lock file to avoid faiss-gpu conflicts
         poetry run pip install --upgrade pip
         
-        # Install core dependencies with CPU-only constraints
-        poetry run pip install "numpy>=1.21,<2.0" 
+        # CRITICAL: Force NumPy 1.x strictly to prevent FAISS incompatibility
+        poetry run pip install "numpy>=1.21.6,<2.0" --force-reinstall
         poetry run pip install faiss-cpu==1.7.4
         poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
         
         # Install other required dependencies
         poetry run pip install typer rich click pyyaml scipy scikit-learn networkx
         poetry run pip install transformers sentence-transformers datasets nltk matplotlib spacy
+        
+        # CRITICAL: Add psutil for monitoring system
+        poetry run pip install psutil
         
         # Install project in development mode (no dependencies to avoid conflicts)
         poetry run pip install -e . --no-deps
@@ -321,14 +345,17 @@ jobs:
         # CRITICAL FIX: Skip Poetry lock file to avoid faiss-gpu conflicts
         poetry run pip install --upgrade pip
         
-        # Install core dependencies with CPU-only constraints
-        poetry run pip install "numpy>=1.21,<2.0" 
+        # CRITICAL: Force NumPy 1.x strictly to prevent FAISS incompatibility
+        poetry run pip install "numpy>=1.21.6,<2.0" --force-reinstall
         poetry run pip install faiss-cpu==1.7.4
         poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
         
         # Install other required dependencies
         poetry run pip install typer rich click pyyaml scipy scikit-learn networkx
         poetry run pip install transformers sentence-transformers datasets nltk matplotlib spacy
+        
+        # CRITICAL: Add psutil for monitoring system
+        poetry run pip install psutil
         
         # Install project in development mode (no dependencies to avoid conflicts)
         poetry run pip install -e . --no-deps
@@ -394,14 +421,17 @@ jobs:
         # CRITICAL FIX: Skip Poetry lock file to avoid faiss-gpu conflicts
         poetry run pip install --upgrade pip
         
-        # Install core dependencies with CPU-only constraints
-        poetry run pip install "numpy>=1.21,<2.0" 
+        # CRITICAL: Force NumPy 1.x strictly to prevent FAISS incompatibility
+        poetry run pip install "numpy>=1.21.6,<2.0" --force-reinstall
         poetry run pip install faiss-cpu==1.7.4
         poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
         
         # Install other required dependencies
         poetry run pip install typer rich click pyyaml scipy scikit-learn networkx
         poetry run pip install transformers sentence-transformers datasets nltk matplotlib spacy
+        
+        # CRITICAL: Add psutil for monitoring system
+        poetry run pip install psutil
         
         # Install project in development mode (no dependencies to avoid conflicts)
         poetry run pip install -e . --no-deps
@@ -461,14 +491,17 @@ jobs:
         # CRITICAL FIX: Skip Poetry lock file to avoid faiss-gpu conflicts
         poetry run pip install --upgrade pip
         
-        # Install core dependencies with CPU-only constraints
-        poetry run pip install "numpy>=1.21,<2.0" 
+        # CRITICAL: Force NumPy 1.x strictly to prevent FAISS incompatibility
+        poetry run pip install "numpy>=1.21.6,<2.0" --force-reinstall
         poetry run pip install faiss-cpu==1.7.4
         poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
         
         # Install other required dependencies
         poetry run pip install typer rich click pyyaml scipy scikit-learn networkx
         poetry run pip install transformers sentence-transformers datasets nltk matplotlib spacy
+        
+        # CRITICAL: Add psutil for monitoring system
+        poetry run pip install psutil
         
         # Install project in development mode (no dependencies to avoid conflicts)
         poetry run pip install -e . --no-deps
@@ -537,8 +570,8 @@ jobs:
         # CRITICAL FIX: Skip Poetry lock file to avoid faiss-gpu conflicts
         poetry run pip install --upgrade pip
         
-        # Install core dependencies with CPU-only constraints
-        poetry run pip install "numpy>=1.21,<2.0" 
+        # CRITICAL: Force NumPy 1.x strictly to prevent FAISS incompatibility
+        poetry run pip install "numpy>=1.21.6,<2.0" --force-reinstall
         poetry run pip install faiss-cpu==1.7.4
         poetry run pip install torch --index-url https://download.pytorch.org/whl/cpu
         
@@ -546,11 +579,14 @@ jobs:
         poetry run pip install typer rich click pyyaml scipy scikit-learn networkx
         poetry run pip install transformers sentence-transformers datasets nltk matplotlib spacy
         
+        # CRITICAL: Add psutil for monitoring system
+        poetry run pip install psutil
+        
         # Install project in development mode (no dependencies to avoid conflicts)
         poetry run pip install -e . --no-deps
         
         # Install monitoring tools
-        poetry run pip install psutil requests
+        poetry run pip install requests
         
         echo "✅ Monitoring integration dependencies installed (CPU-only, avoiding lock file)"
     

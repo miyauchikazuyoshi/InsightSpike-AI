@@ -18,8 +18,8 @@ from ..config import Config
 from ..config import get_config as get_new_config
 from ..layers.layer1_error_monitor import ErrorMonitor
 from ..layers.layer2_memory_manager import (
-    L2MemoryManager as Memory,
-)  # Use new unified implementation
+    L2MemoryManager as Memory,  # Use new unified implementation
+)
 from ..layers.layer4_llm_provider import get_llm_provider
 
 try:
