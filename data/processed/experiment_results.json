@@ -1,12 +1,12 @@
 {
-  "timestamp": "2025-06-06 09:48:43",
+  "timestamp": "2025-06-07 10:04:30",
   "baseline_results": [
     {
       "question_id": "monty_hall_test",
       "category": "probability_paradox",
       "response_quality": 0.0,
       "insight_detected": false,
-      "response_time": 0.10404300689697266,
+      "response_time": 0.10191988945007324,
       "spike_count": 0
     },
     {
@@ -14,7 +14,7 @@
       "category": "mathematical_paradox",
       "response_quality": 0.26666666666666666,
       "insight_detected": false,
-      "response_time": 0.10194611549377441,
+      "response_time": 0.10348176956176758,
       "spike_count": 0
     },
     {
@@ -22,7 +22,7 @@
       "category": "philosophical_paradox",
       "response_quality": 0.13333333333333333,
       "insight_detected": false,
-      "response_time": 0.10474395751953125,
+      "response_time": 0.10260987281799316,
       "spike_count": 0
     },
     {
@@ -30,7 +30,7 @@
       "category": "concept_hierarchy",
       "response_quality": 0.0,
       "insight_detected": false,
-      "response_time": 0.10462164878845215,
+      "response_time": 0.10363030433654785,
       "spike_count": 0
     },
     {
@@ -38,7 +38,7 @@
       "category": "conceptual_revolution",
       "response_quality": 0.0,
       "insight_detected": false,
-      "response_time": 0.10278511047363281,
+      "response_time": 0.10293412208557129,
       "spike_count": 0
     },
     {
@@ -46,7 +46,7 @@
       "category": "control",
       "response_quality": 0.6,
       "insight_detected": false,
-      "response_time": 0.10257315635681152,
+      "response_time": 0.10491609573364258,
       "spike_count": 0
     }
   ],
@@ -56,66 +56,66 @@
       "category": "probability_paradox",
       "response_quality": 0.13333333333333333,
       "insight_detected": true,
-      "response_time": 0.0009188652038574219,
+      "response_time": 0.0011670589447021484,
       "spike_count": 0,
       "memory_updates": 1,
-      "avg_delta_ged": 0.5831210581613553,
-      "avg_delta_ig": 0.5535209387804159
+      "avg_delta_ged": 0.5477161967046089,
+      "avg_delta_ig": 0.599246369680049
     },
     {
       "question_id": "zeno_resolution",
       "category": "mathematical_paradox",
       "response_quality": 0.13333333333333333,
       "insight_detected": true,
-      "response_time": 8.20159912109375e-05,
+      "response_time": 0.00014019012451171875,
       "spike_count": 0,
       "memory_updates": 1,
-      "avg_delta_ged": 0.6604173671629223,
-      "avg_delta_ig": 0.6745407865190347
+      "avg_delta_ged": 0.6636339186865103,
+      "avg_delta_ig": 0.689591219184369
     },
     {
       "question_id": "identity_philosophy",
       "category": "philosophical_paradox",
       "response_quality": 0.13333333333333333,
       "insight_detected": true,
-      "response_time": 0.00011491775512695312,
+      "response_time": 0.00021123886108398438,
       "spike_count": 0,
       "memory_updates": 1,
-      "avg_delta_ged": 0.7972485599060103,
-      "avg_delta_ig": 0.750677696654715
+      "avg_delta_ged": 0.8363536577911691,
+      "avg_delta_ig": 0.7838692919188668
     },
     {
       "question_id": "math_abstraction",
       "category": "concept_hierarchy",
       "response_quality": 0.4,
       "insight_detected": false,
-      "response_time": 7.390975952148438e-05,
+      "response_time": 0.00018286705017089844,
       "spike_count": 0,
       "memory_updates": 1,
-      "avg_delta_ged": 0.1189809145685892,
-      "avg_delta_ig": 0.08914987695624692
+      "avg_delta_ged": 0.12365444328626009,
+      "avg_delta_ig": 0.10440596416773258
     },
     {
       "question_id": "physics_paradigms",
       "category": "conceptual_revolution",
       "response_quality": 0.4,
       "insight_detected": true,
-      "response_time": 0.00010895729064941406,
+      "response_time": 7.390975952148438e-05,
       "spike_count": 4,
       "memory_updates": 8,
-      "avg_delta_ged": 0.7457473374965993,
-      "avg_delta_ig": 0.7901459931803672
+      "avg_delta_ged": 0.7412691868771668,
+      "avg_delta_ig": 0.7238801110678181
     },
     {
       "question_id": "control_weather",
       "category": "control",
       "response_quality": 0.6,
       "insight_detected": false,
-      "response_time": 0.00010395050048828125,
+      "response_time": 0.00020003318786621094,
       "spike_count": 0,
       "memory_updates": 1,
-      "avg_delta_ged": 0.11167758084045651,
-      "avg_delta_ig": 0.08958142721404233
+      "avg_delta_ged": 0.14806696009146275,
+      "avg_delta_ig": 0.10045980658959298
     }
   ],
   "analysis": {
@@ -136,8 +136,8 @@
       "false_positive_rate": 0.0
     },
     "processing_metrics": {
-      "avg_response_time_is": 0.00023376941680908203,
-      "avg_response_time_baseline": 0.10345216592152913,
+      "avg_response_time_is": 0.00032921632130940753,
+      "avg_response_time_baseline": 0.10324867566426595,
       "avg_memory_updates": 2.1666666666666665,
       "avg_spikes_per_question": 0.8
     },

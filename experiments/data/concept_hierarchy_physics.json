@@ -1,0 +1,30 @@
+[
+  {
+    "level": 1,
+    "concept": "Newton's Laws",
+    "example": "F = ma. Force equals mass times acceleration in classical mechanics.",
+    "prerequisite": null,
+    "abstraction_level": "classical"
+  },
+  {
+    "level": 2,
+    "concept": "Special Relativity",
+    "example": "E = mc\u00b2. Energy and mass are equivalent at high speeds.",
+    "prerequisite": "Newton's Laws",
+    "abstraction_level": "relativistic"
+  },
+  {
+    "level": 3,
+    "concept": "Quantum Mechanics",
+    "example": "H\u03a8 = E\u03a8. The Schr\u00f6dinger equation describes quantum states.",
+    "prerequisite": "Special Relativity",
+    "abstraction_level": "quantum"
+  },
+  {
+    "level": 4,
+    "concept": "Quantum Field Theory",
+    "example": "Lagrangian formalism unifies quantum mechanics and relativity.",
+    "prerequisite": "Quantum Mechanics",
+    "abstraction_level": "field_theoretic"
+  }
+]

@@ -1,0 +1,30 @@
+[
+  {
+    "level": 1,
+    "concept": "Basic Arithmetic",
+    "example": "1 + 1 = 2. Addition combines quantities.",
+    "prerequisite": null,
+    "abstraction_level": "concrete"
+  },
+  {
+    "level": 2,
+    "concept": "Algebraic Equations",
+    "example": "x + 1 = 2, therefore x = 1. Variables represent unknown quantities.",
+    "prerequisite": "Basic Arithmetic",
+    "abstraction_level": "symbolic"
+  },
+  {
+    "level": 3,
+    "concept": "Differential Equations",
+    "example": "dx/dt = -x describes exponential decay. Derivatives show rate of change.",
+    "prerequisite": "Algebraic Equations",
+    "abstraction_level": "dynamic"
+  },
+  {
+    "level": 4,
+    "concept": "Partial Differential Equations",
+    "example": "\u2202u/\u2202t = \u2207\u00b2u is the heat equation. Multiple variables change simultaneously.",
+    "prerequisite": "Differential Equations",
+    "abstraction_level": "multidimensional"
+  }
+]
