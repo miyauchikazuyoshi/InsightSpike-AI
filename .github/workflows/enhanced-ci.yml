@@ -170,20 +170,32 @@ jobs:
         mkdir -p data/raw logs
         echo "Sample text for InsightSpike analysis" > data/raw/sample.txt
         
-        # Test basic InsightSpike functionality
+        # Test basic InsightSpike functionality with actual existing modules
         poetry run python -c "
         import sys
         sys.path.append('src')
-        from insightspike.core.engine import InsightEngine
-        from insightspike.core.data_processor import DataProcessor
         
-        print('✅ InsightSpike imports successful')
+        # Test actual existing modules
+        from insightspike.agent_loop import cycle
+        from insightspike.core.agents.main_agent import MainAgent, CycleResult
+        from insightspike.core.config import get_config
+        from insightspike.detection.eureka_spike import EurekaDetector
         
-        # Test basic functionality
-        processor = DataProcessor()
-        print('✅ DataProcessor initialized')
+        print('✅ InsightSpike core imports successful')
         
-        print('✅ Real InsightSpike workflow test completed')
+        # Test basic functionality with real modules
+        config = get_config()
+        print('✅ Config loaded successfully')
+        
+        # Test agent initialization
+        agent = MainAgent(config)
+        print('✅ MainAgent initialized')
+        
+        # Test EurekaDetector
+        detector = EurekaDetector()
+        print('✅ EurekaDetector initialized')
+        
+        print('✅ Real InsightSpike workflow test completed with actual modules')
         "
         
         echo "✅ Real workflow validation completed"
