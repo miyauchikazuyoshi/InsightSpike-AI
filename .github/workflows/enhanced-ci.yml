@@ -40,9 +40,7 @@ jobs:
         poetry config virtualenvs.create true
         poetry config virtualenvs.in-project true
         poetry config installer.parallel true
-        poetry config installer.re-resolve true
-        poetry config solver.lazy-wheel true
-        echo "Poetry configuration completed (matching local environment)"
+        echo "Poetry configuration completed (compatible with Poetry 1.8.3)"
     
     - name: Install CI dependencies with Poetry (CPU-only)
       run: |
@@ -135,9 +133,7 @@ jobs:
         poetry config virtualenvs.create true
         poetry config virtualenvs.in-project true
         poetry config installer.parallel true
-        poetry config installer.re-resolve true
-        poetry config solver.lazy-wheel true
-        echo "Poetry configuration completed (matching local environment)"
+        echo "Poetry configuration completed (compatible with Poetry 1.8.3)"
     
     - name: Cache Poetry dependencies
       uses: actions/cache@v4
@@ -267,9 +263,7 @@ jobs:
         poetry config virtualenvs.create true
         poetry config virtualenvs.in-project true
         poetry config installer.parallel true
-        poetry config installer.re-resolve true
-        poetry config solver.lazy-wheel true
-        echo "Poetry configuration completed (matching local environment)"
+        echo "Poetry configuration completed (compatible with Poetry 1.8.3)"
     
     - name: Install dependencies
       run: |
@@ -338,9 +332,7 @@ jobs:
         poetry config virtualenvs.create true
         poetry config virtualenvs.in-project true
         poetry config installer.parallel true
-        poetry config installer.re-resolve true
-        poetry config solver.lazy-wheel true
-        echo "Poetry configuration completed (matching local environment)"
+        echo "Poetry configuration completed (compatible with Poetry 1.8.3)"
     
     - name: Install dependencies
       run: |
@@ -417,9 +409,7 @@ jobs:
         poetry config virtualenvs.create true
         poetry config virtualenvs.in-project true
         poetry config installer.parallel true
-        poetry config installer.re-resolve true
-        poetry config solver.lazy-wheel true
-        echo "Poetry configuration completed (matching local environment)"
+        echo "Poetry configuration completed (compatible with Poetry 1.8.3)"
     
     - name: Install dependencies
       run: |
@@ -490,9 +480,7 @@ jobs:
         poetry config virtualenvs.create true
         poetry config virtualenvs.in-project true
         poetry config installer.parallel true
-        poetry config installer.re-resolve true
-        poetry config solver.lazy-wheel true
-        echo "Poetry configuration completed (matching local environment)"
+        echo "Poetry configuration completed (compatible with Poetry 1.8.3)"
     
     - name: Install dependencies
       run: |
@@ -572,9 +560,7 @@ jobs:
         poetry config virtualenvs.create true
         poetry config virtualenvs.in-project true
         poetry config installer.parallel true
-        poetry config installer.re-resolve true
-        poetry config solver.lazy-wheel true
-        echo "Poetry configuration completed (matching local environment)"
+        echo "Poetry configuration completed (compatible with Poetry 1.8.3)"
     
     - name: Install dependencies
       run: |
