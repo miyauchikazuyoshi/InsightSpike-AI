@@ -1,0 +1,97 @@
+# InsightSpike-AI Google Colab Requirements (2025年最適化版)
+# NumPy 2.x対応 - Colab 2025年標準環境
+# 
+# ⚠️ IMPORTANT: torch, numpy, faiss are intentionally EXCLUDED from this file
+# to prevent version conflicts with GPU-optimized installations
+# - torch>=2.5.0 (Colab標準 with CUDA 12.4 support)
+# - numpy>=2.2.0 (Colab 2025年標準)
+# - faiss-gpu>=1.8.0 (NumPy 2.x対応版)
+
+# ==========================================
+# Core ML/AI Libraries (2025年対応)
+# ==========================================
+
+# Hugging Face Ecosystem (NumPy 2.x対応)
+transformers>=4.45.0
+sentence-transformers>=3.0.0
+datasets>=2.20.0
+tokenizers>=0.19.0
+accelerate>=0.34.0
+
+# PyTorch Geometric (2025年版 - 別途インストール)
+# torch-geometric>=2.6.0
+# torch-scatter>=2.2.0 
+# torch-sparse>=0.6.18
+# torch-cluster>=1.6.3
+
+# NLP Libraries (NumPy 2.x対応)
+spacy>=3.8.0
+nltk>=3.9
+thinc>=9.0.0
+
+# Scientific Computing (NumPy 2.x Native)
+# numpy>=2.2.0  # Colab 2025年標準
+pandas>=2.2.0
+scipy>=1.14.0
+scikit-learn>=1.5.0
+
+# ==========================================
+# CLI and Interface
+# ==========================================
+typer>=0.12.0
+click>=8.1.0
+rich>=13.8.0
+
+# ==========================================
+# Data Processing and Analysis
+# ==========================================
+networkx>=3.4
+matplotlib>=3.9.0
+seaborn>=0.13.0
+
+# ==========================================
+# Configuration and Utilities
+# ==========================================
+pyyaml>=6.0.1
+python-dotenv>=1.0.0
+pydantic>=2.8.0
+
+# ==========================================
+# Development and Testing (optional)
+# ==========================================
+pytest>=8.0.0
+pytest-asyncio>=0.24.0
+jupyterlab>=4.2.0
+
+# ==========================================
+# Optional: Enhanced Features
+# ==========================================
+# plotly>=5.22.0  # Advanced visualization
+# dash>=2.17.0    # Interactive dashboards
+# streamlit>=1.37.0  # Web apps
+# gradio>=4.44.0  # ML interfaces
+
+# ==========================================
+# Performance and Monitoring
+# ==========================================
+tqdm>=4.66.0
+psutil>=6.0.0
+memory-profiler>=0.61.0
+
+# ==========================================
+# Compatibility Notes
+# ==========================================
+# This requirements file is specifically optimized for:
+# - Google Colab 2025 environment
+# - Python 3.10+ (Colab standard)
+# - NumPy 2.x native support
+# - CUDA 12.4+ GPU acceleration
+# - Minimal dependency conflicts
+# 
+# Installation order in setup notebook:
+# 1. System check (Python, GPU, NumPy version)
+# 2. PyTorch with CUDA support
+# 3. FAISS with GPU/CPU auto-detection
+# 4. This requirements.txt
+# 5. InsightSpike-AI development install
+# 6. Verification and testing

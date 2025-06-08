@@ -2,10 +2,13 @@
 .venv/
 __pycache__/
 *.pyc
+*.pyo
 .DS_Store
 .vscode/
 .pytest_cache/
 .ruff_cache/
+.coverage
+*.egg-info/
 
 # 一時・バックアップファイル
 *.backup
@@ -15,10 +18,10 @@ backup/
 
 # テスト・デバッグファイル（実験用）
 tests/debug/
-tests/integration/test_*.py
-!tests/integration/test_mvp_integration.py  # メインの統合テストは保持
 debug_*.py
-test_*.py
+# 開発用テストファイル（整理済み）
+tests/development/test_*_poc.py
+tests/development/test_*_debug.py
 
 # Jupyter Notebook（実験用ノートブックは除外、本番ノートブックは保持）
 notebooks/*_Debug*.ipynb
