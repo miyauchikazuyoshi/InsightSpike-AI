@@ -1,0 +1,306 @@
+{
+  "system_info": {
+    "name": "InsightSpike-Educational-AI",
+    "version": "1.0.0",
+    "export_timestamp": "2025-06-08T12:02:47.390334"
+  },
+  "students": {
+    "student_001": {
+      "id": "student_001",
+      "name": "山田太郎 (Taro Yamada)",
+      "age": 12,
+      "grade_level": 7,
+      "learning_style": "visual",
+      "performance_history": [
+        {
+          "date": "2025-06-08T12:02:42.385299",
+          "concept": "basic_counting",
+          "score": 0.5707760725483598,
+          "insights": 0
+        },
+        {
+          "date": "2025-06-08T12:02:43.385846",
+          "concept": "fractions_intro",
+          "score": 0.7342878832837618,
+          "insights": 1
+        }
+      ],
+      "strengths": [],
+      "challenges": [
+        "basic_counting"
+      ]
+    },
+    "student_002": {
+      "id": "student_002",
+      "name": "佐藤花子 (Hanako Sato)",
+      "age": 13,
+      "grade_level": 8,
+      "learning_style": "reading_writing",
+      "performance_history": [
+        {
+          "date": "2025-06-08T12:02:44.386623",
+          "concept": "basic_counting",
+          "score": 0.7098165266030441,
+          "insights": 0
+        },
+        {
+          "date": "2025-06-08T12:02:45.387660",
+          "concept": "fractions_intro",
+          "score": 0.5936386267165765,
+          "insights": 0
+        }
+      ],
+      "strengths": [],
+      "challenges": [
+        "fractions_intro"
+      ]
+    },
+    "student_003": {
+      "id": "student_003",
+      "name": "田中次郎 (Jiro Tanaka)",
+      "age": 11,
+      "grade_level": 6,
+      "learning_style": "kinesthetic",
+      "performance_history": [
+        {
+          "date": "2025-06-08T12:02:46.388243",
+          "concept": "basic_counting",
+          "score": 0.659285101140285,
+          "insights": 0
+        },
+        {
+          "date": "2025-06-08T12:02:47.388882",
+          "concept": "fractions_intro",
+          "score": 0.781292024902049,
+          "insights": 1
+        }
+      ],
+      "strengths": [],
+      "challenges": []
+    }
+  },
+  "learning_paths": {
+    "student_001": {
+      "student_id": "student_001",
+      "subject": "mathematics",
+      "current_level": 7,
+      "target_level": 10,
+      "recommended_concepts": [
+        "advanced_algebra",
+        "trigonometry_basics",
+        "probability"
+      ],
+      "estimated_duration": 35,
+      "success_probability": 0.95,
+      "adaptive_checkpoints": [
+        {
+          "week": 2,
+          "concept": "advanced_algebra",
+          "assessment_type": "adaptive_quiz",
+          "mastery_threshold": 0.75,
+          "remediation_plan": "review_advanced_algebra_fundamentals"
+        },
+        {
+          "week": 4,
+          "concept": "trigonometry_basics",
+          "assessment_type": "adaptive_quiz",
+          "mastery_threshold": 0.75,
+          "remediation_plan": "review_trigonometry_basics_fundamentals"
+        },
+        {
+          "week": 6,
+          "concept": "probability",
+          "assessment_type": "adaptive_quiz",
+          "mastery_threshold": 0.75,
+          "remediation_plan": "review_probability_fundamentals"
+        }
+      ]
+    },
+    "student_002": {
+      "student_id": "student_002",
+      "subject": "mathematics",
+      "current_level": 8,
+      "target_level": 10,
+      "recommended_concepts": [
+        "calculus_preparation",
+        "complex_functions",
+        "mathematical_modeling"
+      ],
+      "estimated_duration": 35,
+      "success_probability": 0.95,
+      "adaptive_checkpoints": [
+        {
+          "week": 2,
+          "concept": "calculus_preparation",
+          "assessment_type": "adaptive_quiz",
+          "mastery_threshold": 0.75,
+          "remediation_plan": "review_calculus_preparation_fundamentals"
+        },
+        {
+          "week": 4,
+          "concept": "complex_functions",
+          "assessment_type": "adaptive_quiz",
+          "mastery_threshold": 0.75,
+          "remediation_plan": "review_complex_functions_fundamentals"
+        },
+        {
+          "week": 6,
+          "concept": "mathematical_modeling",
+          "assessment_type": "adaptive_quiz",
+          "mastery_threshold": 0.75,
+          "remediation_plan": "review_mathematical_modeling_fundamentals"
+        }
+      ]
+    },
+    "student_003": {
+      "student_id": "student_003",
+      "subject": "mathematics",
+      "current_level": 6,
+      "target_level": 9,
+      "recommended_concepts": [
+        "linear_equations",
+        "quadratic_intro",
+        "statistical_concepts"
+      ],
+      "estimated_duration": 36,
+      "success_probability": 0.88,
+      "adaptive_checkpoints": [
+        {
+          "week": 2,
+          "concept": "linear_equations",
+          "assessment_type": "adaptive_quiz",
+          "mastery_threshold": 0.75,
+          "remediation_plan": "review_linear_equations_fundamentals"
+        },
+        {
+          "week": 4,
+          "concept": "quadratic_intro",
+          "assessment_type": "adaptive_quiz",
+          "mastery_threshold": 0.75,
+          "remediation_plan": "review_quadratic_intro_fundamentals"
+        },
+        {
+          "week": 6,
+          "concept": "statistical_concepts",
+          "assessment_type": "adaptive_quiz",
+          "mastery_threshold": 0.75,
+          "remediation_plan": "review_statistical_concepts_fundamentals"
+        }
+      ]
+    }
+  },
+  "assessment_history": [
+    {
+      "student_id": "student_001",
+      "concept": "basic_counting",
+      "mastery_score": 0.5707760725483598,
+      "insight_moments": [],
+      "cross_domain_connections": [
+        "physics_measurements",
+        "art_symmetry"
+      ],
+      "recommendation": "Concept needs reinforcement. Consider alternative teaching approaches.",
+      "next_steps": [
+        "Intensive review of prerequisite concepts",
+        "One-on-one tutoring session",
+        "Use multimedia learning resources",
+        "Consider different learning modality"
+      ],
+      "timestamp": "2025-06-08T12:02:42.385299"
+    },
+    {
+      "student_id": "student_001",
+      "concept": "fractions_intro",
+      "mastery_score": 0.7342878832837618,
+      "insight_moments": [
+        "Visual pattern recognition improvement"
+      ],
+      "cross_domain_connections": [
+        "music_rhythm",
+        "cooking_recipes",
+        "engineering_ratios"
+      ],
+      "recommendation": "Good progress. Practice with varied problems to solidify understanding.",
+      "next_steps": [
+        "Additional practice with current concept",
+        "Review related prerequisite concepts",
+        "Try alternative problem-solving approaches"
+      ],
+      "timestamp": "2025-06-08T12:02:43.385846"
+    },
+    {
+      "student_id": "student_002",
+      "concept": "basic_counting",
+      "mastery_score": 0.7098165266030441,
+      "insight_moments": [],
+      "cross_domain_connections": [
+        "physics_measurements",
+        "art_symmetry"
+      ],
+      "recommendation": "Good progress. Practice with varied problems to solidify understanding.",
+      "next_steps": [
+        "Additional practice with current concept",
+        "Review related prerequisite concepts",
+        "Try alternative problem-solving approaches"
+      ],
+      "timestamp": "2025-06-08T12:02:44.386623"
+    },
+    {
+      "student_id": "student_002",
+      "concept": "fractions_intro",
+      "mastery_score": 0.5936386267165765,
+      "insight_moments": [],
+      "cross_domain_connections": [
+        "music_rhythm",
+        "cooking_recipes",
+        "engineering_ratios"
+      ],
+      "recommendation": "Concept needs reinforcement. Consider alternative teaching approaches.",
+      "next_steps": [
+        "Intensive review of prerequisite concepts",
+        "One-on-one tutoring session",
+        "Use multimedia learning resources",
+        "Consider different learning modality"
+      ],
+      "timestamp": "2025-06-08T12:02:45.387660"
+    },
+    {
+      "student_id": "student_003",
+      "concept": "basic_counting",
+      "mastery_score": 0.659285101140285,
+      "insight_moments": [],
+      "cross_domain_connections": [
+        "physics_measurements",
+        "art_symmetry"
+      ],
+      "recommendation": "Basic understanding present. Additional practice and review recommended.",
+      "next_steps": [
+        "Additional practice with current concept",
+        "Review related prerequisite concepts",
+        "Try alternative problem-solving approaches"
+      ],
+      "timestamp": "2025-06-08T12:02:46.388243"
+    },
+    {
+      "student_id": "student_003",
+      "concept": "fractions_intro",
+      "mastery_score": 0.781292024902049,
+      "insight_moments": [
+        "Hands-on experimentation led to understanding"
+      ],
+      "cross_domain_connections": [
+        "music_rhythm",
+        "cooking_recipes",
+        "engineering_ratios"
+      ],
+      "recommendation": "Good progress. Practice with varied problems to solidify understanding.",
+      "next_steps": [
+        "Additional practice with current concept",
+        "Review related prerequisite concepts",
+        "Try alternative problem-solving approaches"
+      ],
+      "timestamp": "2025-06-08T12:02:47.388882"
+    }
+  ],
+  "integration_log": []
+}

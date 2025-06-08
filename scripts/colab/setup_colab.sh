@@ -111,20 +111,27 @@ else:
     print('🖥️ CPU-only FAISS installed')
 " || echo "⚠️ FAISS verification failed"
 
-# Install PyTorch Geometric (only for standard/debug mode)
+# Install PyTorch Geometric (required for GNN functionality)
 if [[ "$SETUP_MODE" != "minimal" ]]; then
-    echo "🌐 Installing PyTorch Geometric..."
+    echo "🌐 Installing PyTorch Geometric (required for GNN functionality)..."
     TORCH_VERSION=$(python -c "import torch; print(torch.__version__.split('+')[0])")
     CUDA_VERSION="cu121"
     
-    # Install with timeout protection
+    # Install with timeout protection and fallback
     timeout 300 pip install -q torch-geometric torch-scatter torch-sparse torch-cluster torch-spline-conv \
         --find-links "https://data.pyg.org/whl/torch-${TORCH_VERSION}+${CUDA_VERSION}.html" || {
-        echo "⚠️ PyTorch Geometric installation failed/timed out"
-        if [[ "$SETUP_MODE" == "debug" ]]; then
-            echo "🔍 Debug mode: Continuing without PyG"
-        fi
+        echo "⚠️ PyTorch Geometric installation failed/timed out, trying fallback..."
+        pip install -q torch-geometric==2.4.0 || {
+            echo "❌ PyTorch Geometric fallback also failed"
+            if [[ "$SETUP_MODE" == "debug" ]]; then
+                echo "🔍 Debug mode: Continuing without PyG for analysis"
+            else
+                echo "   This may affect torch-geometric integration features"
+            fi
+        }
     }
+else
+    echo "⚠️ Minimal mode: Skipping PyTorch Geometric (torch-geometric features disabled)"
 fi
 
 echo "✅ GPU packages installed"

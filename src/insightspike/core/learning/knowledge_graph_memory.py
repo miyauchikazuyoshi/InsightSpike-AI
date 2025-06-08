@@ -7,10 +7,30 @@ from typing import List, Optional
 
 import numpy as np
 import torch
-from torch_geometric.data import Data
-from torch_geometric.utils import subgraph
 
 logger = logging.getLogger(__name__)
+
+# Try importing torch-geometric, with fallback for environments where it's not available
+try:
+    from torch_geometric.data import Data
+    from torch_geometric.utils import subgraph
+    TORCH_GEOMETRIC_AVAILABLE = True
+except ImportError:
+    TORCH_GEOMETRIC_AVAILABLE = False
+    logger.warning("torch-geometric not available, using basic torch functionality")
+    
+    # Fallback implementation for when torch-geometric is not available
+    class Data:
+        """Fallback Data class for basic graph functionality without torch-geometric."""
+        def __init__(self, x=None, edge_index=None):
+            self.x = x if x is not None else torch.empty((0, 0))
+            self.edge_index = edge_index if edge_index is not None else torch.empty((2, 0), dtype=torch.long)
+            self.num_nodes = self.x.size(0) if self.x.numel() > 0 else 0
+    
+    def subgraph(node_tensor, edge_index, relabel_nodes=True, num_nodes=None):
+        """Fallback subgraph function for basic functionality without torch-geometric."""
+        # Simple fallback: return empty edge_index for subgraph
+        return torch.empty((2, 0), dtype=torch.long), None
 
 
 class KnowledgeGraphMemory:
@@ -67,8 +87,17 @@ class KnowledgeGraphMemory:
         """Return an induced subgraph of the given node indices."""
         if not indices or self.graph.x.numel() == 0:
             return Data(x=torch.empty((0, self.embedding_dim)), edge_index=torch.empty((2, 0), dtype=torch.long))
+        
         node_tensor = torch.tensor(indices, dtype=torch.long)
-        edge_index, _ = subgraph(node_tensor, self.graph.edge_index, relabel_nodes=True)
+        
+        # Handle case where there are no edges
+        if self.graph.edge_index.numel() == 0:
+            x = self.graph.x[node_tensor]
+            sub = Data(x=x, edge_index=torch.empty((2, 0), dtype=torch.long))
+            sub.num_nodes = x.size(0)
+            return sub
+        
+        edge_index, _ = subgraph(node_tensor, self.graph.edge_index, relabel_nodes=True, num_nodes=self.graph.x.size(0))
         x = self.graph.x[node_tensor]
         sub = Data(x=x, edge_index=edge_index)
         sub.num_nodes = x.size(0)
