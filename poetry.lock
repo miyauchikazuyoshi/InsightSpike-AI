@@ -37,7 +37,7 @@ version = "2.6.1"
 description = "Happy Eyeballs for asyncio"
 optional = false
 python-versions = ">=3.9"
-groups = ["main", "cpu-preset", "gpu-preset", "ml-preset"]
+groups = ["main"]
 files = [
     {file = "aiohappyeyeballs-2.6.1-py3-none-any.whl", hash = "sha256:f349ba8f4b75cb25c99c5c2d84e997e485204d2902a9597802b0371f09331fb8"},
     {file = "aiohappyeyeballs-2.6.1.tar.gz", hash = "sha256:c3f9d0113123803ccadfdf3f0faa505bc78e6a72d1cc4806cbd719826e943558"},
@@ -49,7 +49,7 @@ version = "3.12.9"
 description = "Async http client/server framework (asyncio)"
 optional = false
 python-versions = ">=3.9"
-groups = ["main", "cpu-preset", "gpu-preset", "ml-preset"]
+groups = ["main"]
 files = [
     {file = "aiohttp-3.12.9-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:abb01935bb606bbc080424799bfda358d38374c45a7cbbc89f9bb330deb1db26"},
     {file = "aiohttp-3.12.9-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:e2337516411cd15b7257736484dfd5101fa0e6b11ef2086b4bb6db9365373dcb"},
@@ -157,7 +157,7 @@ version = "1.3.2"
 description = "aiosignal: a list of registered asynchronous callbacks"
 optional = false
 python-versions = ">=3.9"
-groups = ["main", "cpu-preset", "gpu-preset", "ml-preset"]
+groups = ["main"]
 files = [
     {file = "aiosignal-1.3.2-py2.py3-none-any.whl", hash = "sha256:45cde58e409a301715980c2b01d0c28bdde3770d8290b5eb2173759d9acb31a5"},
     {file = "aiosignal-1.3.2.tar.gz", hash = "sha256:a8c255c66fafb1e499c9351d0bf32ff2d8a0321595ebac3b93713656d2436f54"},
@@ -352,7 +352,7 @@ version = "25.3.0"
 description = "Classes Without Boilerplate"
 optional = false
 python-versions = ">=3.8"
-groups = ["main", "colab", "cpu-preset", "docker", "gpu-preset", "ml-preset"]
+groups = ["main", "colab", "docker", "ml-preset"]
 files = [
     {file = "attrs-25.3.0-py3-none-any.whl", hash = "sha256:427318ce031701fea540783410126f03899a97ffc6f61596ad581ac2e40e3bc3"},
     {file = "attrs-25.3.0.tar.gz", hash = "sha256:75d7cefc7fb576747b2c81b4442d4d4a1ce0900973527c011d1030fd3bf4af1b"},
@@ -1391,7 +1391,7 @@ version = "1.6.2"
 description = "A list-like structure which implements collections.abc.MutableSequence"
 optional = false
 python-versions = ">=3.9"
-groups = ["main", "cpu-preset", "gpu-preset", "ml-preset"]
+groups = ["main"]
 files = [
     {file = "frozenlist-1.6.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:92836b9903e52f787f4f4bfc6cf3b03cf19de4cbc09f5969e58806f876d8647f"},
     {file = "frozenlist-1.6.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:a3af419982432a13a997451e611ff7681a4fbf81dca04f70b08fc51106335ff0"},
@@ -1505,7 +1505,7 @@ version = "2024.6.1"
 description = "File-system specification"
 optional = false
 python-versions = ">=3.8"
-groups = ["main", "cpu-preset", "gpu-preset", "ml-preset"]
+groups = ["main", "cpu-preset", "gpu-preset"]
 files = [
     {file = "fsspec-2024.6.1-py3-none-any.whl", hash = "sha256:3cb443f8bcd2efb31295a5b9fdb02aee81d8452c80d28f97a6d0959e6cee101e"},
     {file = "fsspec-2024.6.1.tar.gz", hash = "sha256:fad7d7e209dd4c1208e3bbfda706620e0da5142bebbd9c384afb95b07e798e49"},
@@ -1970,7 +1970,7 @@ version = "1.5.1"
 description = "Lightweight pipelining with Python functions"
 optional = false
 python-versions = ">=3.9"
-groups = ["main"]
+groups = ["main", "cpu-preset", "gpu-preset", "ml-preset"]
 files = [
     {file = "joblib-1.5.1-py3-none-any.whl", hash = "sha256:4719a31f054c7d766948dcd83e9613686b27114f190f717cec7eaa2084f8a74a"},
     {file = "joblib-1.5.1.tar.gz", hash = "sha256:f4f86e351f39fe3d0d32a9f2c3d8af1ee4cec285aafcb27003dda5205576b444"},
@@ -2789,7 +2789,7 @@ version = "6.4.4"
 description = "multidict implementation"
 optional = false
 python-versions = ">=3.9"
-groups = ["main", "cpu-preset", "gpu-preset", "ml-preset"]
+groups = ["main"]
 files = [
     {file = "multidict-6.4.4-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:8adee3ac041145ffe4488ea73fa0a622b464cc25340d98be76924d0cda8545ff"},
     {file = "multidict-6.4.4-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:b61e98c3e2a861035aaccd207da585bdcacef65fe01d7a0d07478efac005e028"},
@@ -4123,7 +4123,7 @@ version = "0.3.1"
 description = "Accelerated property cache"
 optional = false
 python-versions = ">=3.9"
-groups = ["main", "cpu-preset", "gpu-preset", "ml-preset"]
+groups = ["main"]
 files = [
     {file = "propcache-0.3.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:f27785888d2fdd918bc36de8b8739f2d6c791399552333721b58193f68ea3e98"},
     {file = "propcache-0.3.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:d4e89cde74154c7b5957f87a355bb9c8ec929c167b59c83d90654ea36aeb6180"},
@@ -5228,7 +5228,7 @@ version = "1.7.0"
 description = "A set of python modules for machine learning and data mining"
 optional = false
 python-versions = ">=3.10"
-groups = ["main"]
+groups = ["main", "cpu-preset", "gpu-preset", "ml-preset"]
 files = [
     {file = "scikit_learn-1.7.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:9fe7f51435f49d97bd41d724bb3e11eeb939882af9c29c931a8002c357e8cdd5"},
     {file = "scikit_learn-1.7.0-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:d0c93294e1e1acbee2d029b1f2a064f26bd928b284938d51d412c22e0c977eb3"},
@@ -5278,7 +5278,7 @@ version = "1.15.3"
 description = "Fundamental algorithms for scientific computing in Python"
 optional = false
 python-versions = ">=3.10"
-groups = ["main"]
+groups = ["main", "cpu-preset", "gpu-preset", "ml-preset"]
 files = [
     {file = "scipy-1.15.3-cp310-cp310-macosx_10_13_x86_64.whl", hash = "sha256:a345928c86d535060c9c2b25e71e87c39ab2f22fc96e9636bd74d1dbf9de448c"},
     {file = "scipy-1.15.3-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:ad3432cb0f9ed87477a8d97f03b763fd1d57709f1bbde3c9369b1dff5503b253"},
@@ -6121,7 +6121,7 @@ version = "3.6.0"
 description = "threadpoolctl"
 optional = false
 python-versions = ">=3.9"
-groups = ["main"]
+groups = ["main", "cpu-preset", "gpu-preset", "ml-preset"]
 files = [
     {file = "threadpoolctl-3.6.0-py3-none-any.whl", hash = "sha256:43a0b8fd5a2928500110039e43a5eed8480b918967083ea48dc3ab9f13c4a7fb"},
     {file = "threadpoolctl-3.6.0.tar.gz", hash = "sha256:8ab8b4aa3491d812b623328249fab5302a68d2d71745c8a4c719a2fcaba9f44e"},
@@ -6410,31 +6410,31 @@ optree = ["optree (>=0.13.0)"]
 
 [[package]]
 name = "torch-geometric"
-version = "2.6.1"
+version = "2.4.0"
 description = "Graph Neural Network Library for PyTorch"
 optional = false
 python-versions = ">=3.8"
 groups = ["main", "cpu-preset", "gpu-preset", "ml-preset"]
 files = [
-    {file = "torch_geometric-2.6.1-py3-none-any.whl", hash = "sha256:8faeb353f9655f7dbec44c5e0b44c721773bdfb279994da96b9b8b12fd30f427"},
-    {file = "torch_geometric-2.6.1.tar.gz", hash = "sha256:1f18f9d0fc4d2239d526221e4f22606a4a3895b5d965a9856d27610a3df662c6"},
+    {file = "torch_geometric-2.4.0-py3-none-any.whl", hash = "sha256:9d8eb5eec44382f4072aa5e835450f144e9edb9d164627e532e311880b6bdad0"},
+    {file = "torch_geometric-2.4.0.tar.gz", hash = "sha256:343c6906d0678f16553c2d02b7267d0ec77eafb5b44324070ebcf7da8a934557"},
 ]
 
 [package.dependencies]
-aiohttp = "*"
-fsspec = "*"
 jinja2 = "*"
 numpy = "*"
 psutil = ">=5.8.0"
 pyparsing = "*"
 requests = "*"
+scikit-learn = "*"
+scipy = "*"
 tqdm = "*"
 
 [package.extras]
 benchmark = ["matplotlib", "networkx", "pandas", "protobuf (<4.21)", "wandb"]
-dev = ["ipython", "matplotlib-inline", "pre-commit", "torch_geometric[test]"]
-full = ["ase", "captum (<0.7.0)", "graphviz", "h5py", "matplotlib", "networkx", "numba (<0.60.0)", "opt_einsum", "pandas", "pgmpy", "pynndescent", "pytorch-memlab", "rdflib", "rdkit", "scikit-image", "scikit-learn", "scipy", "statsmodels", "sympy", "tabulate", "torch_geometric[graphgym,modelhub]", "torchmetrics", "trimesh"]
-graphgym = ["protobuf (<4.21)", "pytorch-lightning (<2.3.0)", "yacs"]
+dev = ["pre-commit", "torch_geometric[test]"]
+full = ["ase", "captum", "graphviz", "h5py", "matplotlib", "networkx", "numba", "opt_einsum", "pandas", "pgmpy", "pynndescent", "pytorch-memlab", "rdflib", "rdkit", "scikit-image", "statsmodels", "sympy", "tabulate", "torch_geometric[graphgym,modelhub]", "torchmetrics", "trimesh"]
+graphgym = ["hydra-core", "protobuf (<4.21)", "pytorch-lightning", "yacs"]
 modelhub = ["huggingface_hub"]
 test = ["onnx", "onnxruntime", "pytest", "pytest-cov"]
 
@@ -7258,7 +7258,7 @@ version = "1.20.0"
 description = "Yet another URL library"
 optional = false
 python-versions = ">=3.9"
-groups = ["main", "cpu-preset", "gpu-preset", "ml-preset"]
+groups = ["main"]
 files = [
     {file = "yarl-1.20.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:f1f6670b9ae3daedb325fa55fbe31c22c8228f6e0b513772c2e1c623caa6ab22"},
     {file = "yarl-1.20.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:85a231fa250dfa3308f3c7896cc007a47bc76e9e8e8595c20b7426cac4884c62"},
@@ -7381,4 +7381,4 @@ platform-tools = ["distlib", "packaging", "psutil"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "1ed1f8a0ec70f15a184d6953bf1c520676edd6ec6ea7638ab7170f5c426f06f8"
+content-hash = "c1cbe6bc6c20ea8e8bab730af8240b9c757c34f688cddd11a31e587937809a56"
