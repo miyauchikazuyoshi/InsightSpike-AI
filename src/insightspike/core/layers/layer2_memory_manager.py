@@ -18,6 +18,7 @@ import numpy as np
 from ...config import get_config
 from ...utils.embedder import get_model
 from ..interfaces import L2MemoryInterface
+from ..learning.knowledge_graph_memory import KnowledgeGraphMemory
 
 logger = logging.getLogger(__name__)
 
@@ -54,9 +55,15 @@ class L2MemoryManager(L2MemoryInterface):
     - Episodic memory with metadata support
     """
 
-    def __init__(self, dim: int = None, config=None):
+    def __init__(
+        self,
+        dim: int = None,
+        config=None,
+        knowledge_graph: Optional[KnowledgeGraphMemory] = None,
+    ):
         self.config = config or get_config()
         self.dim = dim or self.config.embedding.dimension
+        self.knowledge_graph = knowledge_graph
 
         # IVF-PQ parameters
         nlist = min(256, max(16, self.config.memory.nlist))
@@ -91,6 +98,12 @@ class L2MemoryManager(L2MemoryInterface):
 
             episode = Episode(vec, text, c_value, metadata)
             self.episodes.append(episode)
+
+            if self.knowledge_graph is not None:
+                try:
+                    self.knowledge_graph.add_episode_node(vec, len(self.episodes) - 1)
+                except Exception as e:
+                    logger.warning(f"KnowledgeGraph update failed: {e}")
 
             # Re-train index if we have enough episodes
             if len(self.episodes) >= 2 and not self.is_trained:
