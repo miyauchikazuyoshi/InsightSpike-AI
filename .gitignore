@@ -40,10 +40,25 @@ docs/guides/*COMPLETION*.md
 docs/guides/PROJECT_STRUCTURE_REORGANIZATION.md
 docs/guides/dependency-resolution-final-report.md
 docs/guides/project-reorganization-final-report.md
-documentation/
+documentation/reports/
 *_COMPLETION_REPORT.md
+*_COMPLETION.md
 *_REPORT.md
+*COMPLETION_REPORT.md
+*COMPLETION.md
 PROJECT_RESTRUCTURE*.md
+
+# 作業レポート・完了報告書（プッシュしない）
+docs/*COMPLETION*.md
+docs/*REPORT*.md
+docs/BIAS_CORRECTED_EXPERIMENT_REPORT.md
+docs/EXPERIMENT_DESIGN_COMPLETION_REPORT.md
+docs/EXPERIMENT_DESIGN_FINAL_COMPLETION.md
+docs/OSS_PREPARATION_COMPLETION_REPORT.md
+docs/PRODUCTION_EXCELLENCE_FINAL_REPORT.md
+docs/PUSH_PREPARATION_COMPLETION_REPORT.md
+docs/RAG_MEMORY_IMPROVEMENT_FINAL_REPORT.md
+docs/REUSABILITY_COMPLETION_REPORT.md
 
 # データ生成物（実験結果・モデル・インデックス）
 /data/index.faiss*

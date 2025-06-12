@@ -1,0 +1,341 @@
+{
+  "success_rates": {
+    "metric_name": "success_rates",
+    "sample_sizes": {
+      "baseline": 30,
+      "insightspike": 30
+    },
+    "descriptive": {
+      "baseline": {
+        "mean": 0.38902587050391496,
+        "std": 0.16328077577477787,
+        "median": 0.361125019541502,
+        "q25": 0.27332490964123735,
+        "q75": 0.4940826781642604,
+        "min": 0.1360938788360612,
+        "max": 0.7680577944720322,
+        "skewness": 0.5662279018677348,
+        "kurtosis": -0.37496679203484184
+      },
+      "insightspike": {
+        "mean": 0.5690980724519401,
+        "std": 0.22185420186675048,
+        "median": 0.5928522547290644,
+        "q25": 0.42219566707000655,
+        "q75": 0.6735662519018455,
+        "min": 0.181790905504643,
+        "max": 0.9466170087207889,
+        "skewness": -0.03732024328177201,
+        "kurtosis": -0.8932310699350516
+      }
+    },
+    "normality": {
+      "shapiro_wilk": {
+        "baseline": {
+          "statistic": 0.9569298033937309,
+          "p_value": 0.25803998228825076
+        },
+        "insightspike": {
+          "statistic": 0.9611067767212246,
+          "p_value": 0.33052288238373595
+        }
+      },
+      "kolmogorov_smirnov": {
+        "baseline": {
+          "statistic": 0.1313522297600337,
+          "p_value": 0.6314378840027068
+        },
+        "insightspike": {
+          "statistic": 0.09572041337941095,
+          "p_value": 0.9218483313804311
+        }
+      }
+    },
+    "comparative": {
+      "t_test_equal_var": {
+        "statistic": -3.5805020900927005,
+        "p_value": 0.0007016953533462367
+      },
+      "t_test_unequal_var": {
+        "statistic": -3.5805020900927005,
+        "p_value": 0.0007414118722479871
+      },
+      "mann_whitney_u": {
+        "statistic": 237.0,
+        "p_value": 0.0016797555161960338
+      },
+      "kolmogorov_smirnov": {
+        "statistic": 0.5,
+        "p_value": 0.0008995776840176799
+      },
+      "levene_variance": {
+        "statistic": 2.1478412053192977,
+        "p_value": 0.14817097272630306
+      }
+    },
+    "effect_size": {
+      "cohens_d": {
+        "value": 0.9244816643993251,
+        "interpretation": "large"
+      },
+      "glass_delta": {
+        "value": 1.1028377412685044,
+        "interpretation": "large"
+      },
+      "hedges_g": {
+        "value": 0.9124754090175157,
+        "interpretation": "large"
+      },
+      "common_language_effect_size": 0.7433497855553112
+    },
+    "confidence_intervals": {
+      "baseline_mean": {
+        "lower": 0.3280558268149896,
+        "upper": 0.4499959141928403
+      },
+      "insightspike_mean": {
+        "lower": 0.48625635200932515,
+        "upper": 0.6519397928945551
+      },
+      "difference": {
+        "value": 0.18007220194802515,
+        "lower": 0.07921114680003812,
+        "upper": 0.2809332570960122
+      }
+    },
+    "power_analysis": {
+      "effect_size": 0.9244816643993251,
+      "power": 0.9474416321644881,
+      "sample_size_baseline": 30,
+      "sample_size_insightspike": 30,
+      "alpha": 0.050000000000000044,
+      "adequate_power": "True"
+    }
+  },
+  "episode_rewards": {
+    "metric_name": "episode_rewards",
+    "sample_sizes": {
+      "baseline": 30,
+      "insightspike": 30
+    },
+    "descriptive": {
+      "baseline": {
+        "mean": 2.4253018823057166,
+        "std": 6.119592925557436,
+        "median": 2.413692774380059,
+        "q25": -1.7489130643226403,
+        "q75": 6.847393726849359,
+        "min": -10.469031582283305,
+        "max": 12.373071062068401,
+        "skewness": -0.24760712220438416,
+        "kurtosis": -0.5615059458567617
+      },
+      "insightspike": {
+        "mean": 23.47250809344015,
+        "std": 6.427565842586015,
+        "median": 24.748297644588416,
+        "q25": 19.519944255411524,
+        "q75": 27.401947614396825,
+        "min": 9.727032403423594,
+        "max": 34.462440195712674,
+        "skewness": -0.39074702761475166,
+        "kurtosis": -0.5066749820290739
+      }
+    },
+    "normality": {
+      "shapiro_wilk": {
+        "baseline": {
+          "statistic": 0.9751960724468977,
+          "p_value": 0.6885078304591556
+        },
+        "insightspike": {
+          "statistic": 0.9619498838540692,
+          "p_value": 0.34710287127710354
+        }
+      },
+      "kolmogorov_smirnov": {
+        "baseline": {
+          "statistic": 0.09009817661896896,
+          "p_value": 0.9497600160789115
+        },
+        "insightspike": {
+          "statistic": 0.1287150639925848,
+          "p_value": 0.6559482807497059
+        }
+      }
+    },
+    "comparative": {
+      "t_test_equal_var": {
+        "statistic": -12.989543925561,
+        "p_value": 8.124687496034634e-19
+      },
+      "t_test_unequal_var": {
+        "statistic": -12.989543925561001,
+        "p_value": 8.490524831218952e-19
+      },
+      "mann_whitney_u": {
+        "statistic": 6.0,
+        "p_value": 5.494052450965186e-11
+      },
+      "kolmogorov_smirnov": {
+        "statistic": 0.9333333333333333,
+        "p_value": 2.993288398909619e-14
+      },
+      "levene_variance": {
+        "statistic": 0.008959760947384163,
+        "p_value": 0.9249143184688154
+      }
+    },
+    "effect_size": {
+      "cohens_d": {
+        "value": 3.3538858199018318,
+        "interpretation": "large"
+      },
+      "glass_delta": {
+        "value": 3.4393147497171532,
+        "interpretation": "large"
+      },
+      "hedges_g": {
+        "value": 3.310328861201808,
+        "interpretation": "large"
+      },
+      "common_language_effect_size": 0.9911433046737317
+    },
+    "confidence_intervals": {
+      "baseline_mean": {
+        "lower": 0.14020832944111605,
+        "upper": 4.710395435170318
+      },
+      "insightspike_mean": {
+        "lower": 21.072415563401787,
+        "upper": 25.872600623478515
+      },
+      "difference": {
+        "value": 21.047206211134434,
+        "lower": 17.803618899508145,
+        "upper": 24.290793522760723
+      }
+    },
+    "power_analysis": {
+      "effect_size": 3.3538858199018318,
+      "power": 1.0,
+      "sample_size_baseline": 30,
+      "sample_size_insightspike": 30,
+      "alpha": 0.050000000000000044,
+      "adequate_power": "True"
+    }
+  },
+  "learning_efficiency": {
+    "metric_name": "learning_efficiency",
+    "sample_sizes": {
+      "baseline": 30,
+      "insightspike": 30
+    },
+    "descriptive": {
+      "baseline": {
+        "mean": 3.7543562986906385,
+        "std": 2.5203399444308316,
+        "median": 3.0960815145801077,
+        "q25": 1.8673937279497506,
+        "q75": 4.754805633758201,
+        "min": 0.05172097025090436,
+        "max": 9.69478055547846,
+        "skewness": 0.8768440415367446,
+        "kurtosis": 0.11635880710481494
+      },
+      "insightspike": {
+        "mean": 6.076273123847243,
+        "std": 2.7826816250281396,
+        "median": 5.567496751342595,
+        "q25": 4.150060664635194,
+        "q75": 8.704840645876274,
+        "min": 1.1664623019834712,
+        "max": 11.701271770201766,
+        "skewness": 0.08125369471861427,
+        "kurtosis": -1.05665190928521
+      }
+    },
+    "normality": {
+      "shapiro_wilk": {
+        "baseline": {
+          "statistic": 0.9243470532041871,
+          "p_value": 0.034823851076675905
+        },
+        "insightspike": {
+          "statistic": 0.9577651468371475,
+          "p_value": 0.271294475113587
+        }
+      },
+      "kolmogorov_smirnov": {
+        "baseline": {
+          "statistic": 0.15028621587746982,
+          "p_value": 0.4624791588031444
+        },
+        "insightspike": {
+          "statistic": 0.11502093955000658,
+          "p_value": 0.7804161883148657
+        }
+      }
+    },
+    "comparative": {
+      "t_test_equal_var": {
+        "statistic": -3.38741272166897,
+        "p_value": 0.0012728305287451466
+      },
+      "t_test_unequal_var": {
+        "statistic": -3.38741272166897,
+        "p_value": 0.0012793543140208815
+      },
+      "mann_whitney_u": {
+        "statistic": 239.0,
+        "p_value": 0.0018574800226340267
+      },
+      "kolmogorov_smirnov": {
+        "statistic": 0.43333333333333335,
+        "p_value": 0.006548396368058784
+      },
+      "levene_variance": {
+        "statistic": 1.201193648534734,
+        "p_value": 0.27761327293929267
+      }
+    },
+    "effect_size": {
+      "cohens_d": {
+        "value": 0.8746262038503374,
+        "interpretation": "large"
+      },
+      "glass_delta": {
+        "value": 0.9212712873465024,
+        "interpretation": "large"
+      },
+      "hedges_g": {
+        "value": 0.8632674219821512,
+        "interpretation": "large"
+      },
+      "common_language_effect_size": 0.7318619838045808
+    },
+    "confidence_intervals": {
+      "baseline_mean": {
+        "lower": 2.8132458967235974,
+        "upper": 4.695466700657679
+      },
+      "insightspike_mean": {
+        "lower": 5.037202728417734,
+        "upper": 7.1153435192767525
+      },
+      "difference": {
+        "value": 2.3219168251566047,
+        "lower": 0.9495462050151147,
+        "upper": 3.6942874452980945
+      }
+    },
+    "power_analysis": {
+      "effect_size": 0.8746262038503374,
+      "power": 0.9232747043620531,
+      "sample_size_baseline": 30,
+      "sample_size_insightspike": 30,
+      "alpha": 0.050000000000000044,
+      "adequate_power": "True"
+    }
+  }
+}

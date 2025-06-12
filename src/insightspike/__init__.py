@@ -68,6 +68,39 @@ try:
 except ImportError:
     L3GraphReasoner = None
 
+# Generic agent system exports
+try:
+    from .core.agents.generic_agent import GenericInsightSpikeAgent
+    from .core.agents.agent_factory import (
+        InsightSpikeAgentFactory, create_maze_agent, 
+        create_configured_maze_agent, AgentConfigBuilder
+    )
+    from .core.interfaces.generic_interfaces import (
+        TaskType, EnvironmentInterface, InsightMoment
+    )
+except ImportError:
+    # Fallback if generic agents are not available
+    GenericInsightSpikeAgent = None
+    InsightSpikeAgentFactory = None
+    create_maze_agent = None
+    create_configured_maze_agent = None
+    AgentConfigBuilder = None
+    TaskType = None
+    EnvironmentInterface = None
+    InsightMoment = None
+
+# Standalone reasoner export
+try:
+    from .core.reasoners.standalone_l3 import (
+        StandaloneL3GraphReasoner, create_standalone_reasoner,
+        analyze_documents_simple
+    )
+except ImportError:
+    # Fallback if standalone reasoner is not available
+    StandaloneL3GraphReasoner = None
+    create_standalone_reasoner = None
+    analyze_documents_simple = None
+
 # Import the unified config system
 from .config import get_config
 
@@ -100,11 +133,29 @@ __version__ = About.VERSION
 # Main exports
 __all__ = [
     "MainAgent",
-    "CycleResult",
+    "CycleResult", 
     "get_config",
     "About",
     "graph_metrics",
     "eureka_spike",
     "config",
     "utils",
+    # Layer exports
+    "ErrorMonitor",
+    "L2MemoryManager", 
+    "get_llm_provider",
+    "L3GraphReasoner",
+    # Generic agent system exports
+    "GenericInsightSpikeAgent",
+    "InsightSpikeAgentFactory",
+    "create_maze_agent",
+    "create_configured_maze_agent", 
+    "AgentConfigBuilder",
+    "TaskType",
+    "EnvironmentInterface",
+    "InsightMoment",
+    # Standalone reasoner exports
+    "StandaloneL3GraphReasoner",
+    "create_standalone_reasoner",
+    "analyze_documents_simple"
 ]

@@ -1,0 +1,1909 @@
+{
+  "summary_statistics": {
+    "simple": {
+      "Random": {
+        "name": "Random",
+        "mean_performance": 0.154,
+        "std_performance": 0.05203447133292076,
+        "median_performance": 0.16,
+        "q25": 0.12,
+        "q75": 0.18,
+        "confidence_interval_95": [
+          0.13457000908132397,
+          0.17342999091867603
+        ],
+        "sample_size": 30
+      },
+      "Vanilla Q-Learning": {
+        "name": "Vanilla Q-Learning",
+        "mean_performance": 0.7766666666666666,
+        "std_performance": 0.07373453471200182,
+        "median_performance": 0.77,
+        "q25": 0.725,
+        "q75": 0.835,
+        "confidence_interval_95": [
+          0.749133738914202,
+          0.8041995944191312
+        ],
+        "sample_size": 30
+      },
+      "Epsilon-Greedy QL": {
+        "name": "Epsilon-Greedy QL",
+        "mean_performance": 0.5619999999999999,
+        "std_performance": 0.1498827127663724,
+        "median_performance": 0.56,
+        "q25": 0.46,
+        "q75": 0.7,
+        "confidence_interval_95": [
+          0.5060328752590849,
+          0.617967124740915
+        ],
+        "sample_size": 30
+      },
+      "UCB Q-Learning": {
+        "name": "UCB Q-Learning",
+        "mean_performance": 0.5873333333333334,
+        "std_performance": 0.09790682880390304,
+        "median_performance": 0.6,
+        "q25": 0.53,
+        "q75": 0.635,
+        "confidence_interval_95": [
+          0.5507743226274313,
+          0.6238923440392354
+        ],
+        "sample_size": 30
+      },
+      "InsightSpike-AI": {
+        "name": "InsightSpike-AI",
+        "mean_performance": 0.786,
+        "std_performance": 0.060606133751262024,
+        "median_performance": 0.8,
+        "q25": 0.76,
+        "q75": 0.82,
+        "confidence_interval_95": [
+          0.7633692977320966,
+          0.8086307022679035
+        ],
+        "sample_size": 30
+      }
+    },
+    "noisy": {
+      "Random": {
+        "name": "Random",
+        "mean_performance": 0.15333333333333332,
+        "std_performance": 0.0541602560309064,
+        "median_performance": 0.16,
+        "q25": 0.12,
+        "q75": 0.18,
+        "confidence_interval_95": [
+          0.13310956136300298,
+          0.17355710530366367
+        ],
+        "sample_size": 30
+      },
+      "Vanilla Q-Learning": {
+        "name": "Vanilla Q-Learning",
+        "mean_performance": 0.8586666666666666,
+        "std_performance": 0.05679566115854962,
+        "median_performance": 0.86,
+        "q25": 0.82,
+        "q75": 0.895,
+        "confidence_interval_95": [
+          0.8374588182488305,
+          0.8798745150845027
+        ],
+        "sample_size": 30
+      },
+      "Epsilon-Greedy QL": {
+        "name": "Epsilon-Greedy QL",
+        "mean_performance": 0.8099999999999999,
+        "std_performance": 0.07961112381120342,
+        "median_performance": 0.82,
+        "q25": 0.76,
+        "q75": 0.855,
+        "confidence_interval_95": [
+          0.7802727178146877,
+          0.8397272821853122
+        ],
+        "sample_size": 30
+      },
+      "UCB Q-Learning": {
+        "name": "UCB Q-Learning",
+        "mean_performance": 0.8033333333333335,
+        "std_performance": 0.06748350160228607,
+        "median_performance": 0.8,
+        "q25": 0.78,
+        "q75": 0.82,
+        "confidence_interval_95": [
+          0.7781345797051148,
+          0.8285320869615521
+        ],
+        "sample_size": 30
+      },
+      "InsightSpike-AI": {
+        "name": "InsightSpike-AI",
+        "mean_performance": 0.8580000000000002,
+        "std_performance": 0.0718907216688563,
+        "median_performance": 0.88,
+        "q25": 0.8,
+        "q75": 0.92,
+        "confidence_interval_95": [
+          0.8311555633528808,
+          0.8848444366471196
+        ],
+        "sample_size": 30
+      }
+    },
+    "dynamic": {
+      "Random": {
+        "name": "Random",
+        "mean_performance": 0.13733333333333334,
+        "std_performance": 0.04600849496772745,
+        "median_performance": 0.14,
+        "q25": 0.1,
+        "q75": 0.16,
+        "confidence_interval_95": [
+          0.12015347896937975,
+          0.15451318769728692
+        ],
+        "sample_size": 30
+      },
+      "Vanilla Q-Learning": {
+        "name": "Vanilla Q-Learning",
+        "mean_performance": 0.920666666666667,
+        "std_performance": 0.044406688944217676,
+        "median_performance": 0.92,
+        "q25": 0.905,
+        "q75": 0.94,
+        "confidence_interval_95": [
+          0.904084936501788,
+          0.9372483968315459
+        ],
+        "sample_size": 30
+      },
+      "Epsilon-Greedy QL": {
+        "name": "Epsilon-Greedy QL",
+        "mean_performance": 0.8899999999999998,
+        "std_performance": 0.057953608081422955,
+        "median_performance": 0.9,
+        "q25": 0.865,
+        "q75": 0.92,
+        "confidence_interval_95": [
+          0.8683597670951226,
+          0.911640232904877
+        ],
+        "sample_size": 30
+      },
+      "UCB Q-Learning": {
+        "name": "UCB Q-Learning",
+        "mean_performance": 0.7493333333333333,
+        "std_performance": 0.08415639518524252,
+        "median_performance": 0.78,
+        "q25": 0.705,
+        "q75": 0.815,
+        "confidence_interval_95": [
+          0.7179088189237239,
+          0.7807578477429427
+        ],
+        "sample_size": 30
+      },
+      "InsightSpike-AI": {
+        "name": "InsightSpike-AI",
+        "mean_performance": 0.9006666666666666,
+        "std_performance": 0.04770117712227419,
+        "median_performance": 0.91,
+        "q25": 0.88,
+        "q75": 0.94,
+        "confidence_interval_95": [
+          0.8828547543986244,
+          0.9184785789347089
+        ],
+        "sample_size": 30
+      }
+    },
+    "complex": {
+      "Random": {
+        "name": "Random",
+        "mean_performance": 0.08133333333333334,
+        "std_performance": 0.044235524289821665,
+        "median_performance": 0.08,
+        "q25": 0.045,
+        "q75": 0.1,
+        "confidence_interval_95": [
+          0.06481551710080194,
+          0.09785114956586474
+        ],
+        "sample_size": 30
+      },
+      "Vanilla Q-Learning": {
+        "name": "Vanilla Q-Learning",
+        "mean_performance": 0.6579999999999999,
+        "std_performance": 0.045288348200818944,
+        "median_performance": 0.66,
+        "q25": 0.64,
+        "q75": 0.68,
+        "confidence_interval_95": [
+          0.6410890528581765,
+          0.6749109471418233
+        ],
+        "sample_size": 30
+      },
+      "Epsilon-Greedy QL": {
+        "name": "Epsilon-Greedy QL",
+        "mean_performance": 0.2886666666666667,
+        "std_performance": 0.15110474406239177,
+        "median_performance": 0.29000000000000004,
+        "q25": 0.19,
+        "q75": 0.375,
+        "confidence_interval_95": [
+          0.23224322794050753,
+          0.3450901053928258
+        ],
+        "sample_size": 30
+      },
+      "UCB Q-Learning": {
+        "name": "UCB Q-Learning",
+        "mean_performance": 0.43266666666666664,
+        "std_performance": 0.07763456985635721,
+        "median_performance": 0.44,
+        "q25": 0.365,
+        "q75": 0.48,
+        "confidence_interval_95": [
+          0.40367744185772747,
+          0.4616558914756058
+        ],
+        "sample_size": 30
+      },
+      "InsightSpike-AI": {
+        "name": "InsightSpike-AI",
+        "mean_performance": 0.6386666666666667,
+        "std_performance": 0.06579662151128164,
+        "median_performance": 0.62,
+        "q25": 0.6,
+        "q75": 0.695,
+        "confidence_interval_95": [
+          0.6140978044164042,
+          0.6632355289169293
+        ],
+        "sample_size": 30
+      }
+    }
+  },
+  "statistical_tests": {
+    "simple": {
+      "alpha": 0.05,
+      "corrected_alpha": 0.005,
+      "n_comparisons": 10,
+      "pairwise_tests": {
+        "Random vs Vanilla Q-Learning": {
+          "test": "Welch's t-test",
+          "statistic": -37.790927857013564,
+          "p_value": 1.4524145894661115e-39,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.6526666666666664,
+            -0.5886499999999999
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Random vs Epsilon-Greedy QL": {
+          "test": "Welch's t-test",
+          "statistic": -14.085048907963577,
+          "p_value": 3.4240746249578905e-16,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.46399999999999997,
+            -0.3526499999999999
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Random vs UCB Q-Learning": {
+          "test": "Welch's t-test",
+          "statistic": -21.40660996301049,
+          "p_value": 5.956401724140658e-25,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.4713333333333334,
+            -0.39533333333333354
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Random vs InsightSpike-AI": {
+          "test": "Welch's t-test",
+          "statistic": -43.3355082762578,
+          "p_value": 3.692548582160866e-45,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.6613333333333336,
+            -0.6046666666666666
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Vanilla Q-Learning vs Epsilon-Greedy QL": {
+          "test": "Welch's t-test",
+          "statistic": 7.0389943120746565,
+          "p_value": 1.2376360703228422e-08,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            0.15533333333333332,
+            0.27200000000000013
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Vanilla Q-Learning vs UCB Q-Learning": {
+          "test": "Welch's t-test",
+          "statistic": 8.460892684900475,
+          "p_value": 1.8201323374596828e-11,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            0.1499999999999999,
+            0.22999999999999976
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Vanilla Q-Learning vs InsightSpike-AI": {
+          "test": "Welch's t-test",
+          "statistic": -0.5356004772236348,
+          "p_value": 0.5943591828578891,
+          "significant_uncorrected": "False",
+          "significant_corrected": "False",
+          "difference_ci_95": [
+            -0.04133333333333322,
+            0.023350000000000287
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Epsilon-Greedy QL vs UCB Q-Learning": {
+          "test": "Welch's t-test",
+          "statistic": -0.7750595184941861,
+          "p_value": 0.44195929821800284,
+          "significant_uncorrected": "False",
+          "significant_corrected": "False",
+          "difference_ci_95": [
+            -0.09338333333333343,
+            0.036683333333333276
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Epsilon-Greedy QL vs InsightSpike-AI": {
+          "test": "Welch's t-test",
+          "statistic": -7.58879885580575,
+          "p_value": 3.830211022905851e-09,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.2786833333333335,
+            -0.16666666666666685
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "UCB Q-Learning vs InsightSpike-AI": {
+          "test": "Welch's t-test",
+          "statistic": -9.450019273858763,
+          "p_value": 1.4436009280678222e-12,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.23935000000000015,
+            -0.15800000000000025
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        }
+      },
+      "omnibus_test": {
+        "test": "Kruskal-Wallis",
+        "statistic": 116.17234571374973,
+        "p_value": 3.507369443507462e-24,
+        "significant": "True"
+      }
+    },
+    "noisy": {
+      "alpha": 0.05,
+      "corrected_alpha": 0.005,
+      "n_comparisons": 10,
+      "pairwise_tests": {
+        "Random vs Vanilla Q-Learning": {
+          "test": "Welch's t-test",
+          "statistic": -49.226289019244085,
+          "p_value": 6.260789155042656e-49,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.732,
+            -0.678
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Random vs Epsilon-Greedy QL": {
+          "test": "Welch's t-test",
+          "statistic": -37.353914146418724,
+          "p_value": 8.986763071417245e-39,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.6906666666666668,
+            -0.6213166666666669
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Random vs UCB Q-Learning": {
+          "test": "Welch's t-test",
+          "statistic": -41.14430523461513,
+          "p_value": 3.2196593776057904e-43,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.678666666666667,
+            -0.6193166666666667
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Random vs InsightSpike-AI": {
+          "test": "Mann-Whitney U",
+          "statistic": 0.0,
+          "p_value": 2.6672322904841003e-11,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.7346833333333332,
+            -0.6713166666666669
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "False"
+          }
+        },
+        "Vanilla Q-Learning vs Epsilon-Greedy QL": {
+          "test": "Welch's t-test",
+          "statistic": 2.7257106562874465,
+          "p_value": 0.008701795232722147,
+          "significant_uncorrected": "True",
+          "significant_corrected": "False",
+          "difference_ci_95": [
+            0.013999999999999898,
+            0.08266666666666667
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Vanilla Q-Learning vs UCB Q-Learning": {
+          "test": "Welch's t-test",
+          "statistic": 3.4360864238176037,
+          "p_value": 0.0011149374619446636,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            0.02333333333333342,
+            0.08468333333333332
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Vanilla Q-Learning vs InsightSpike-AI": {
+          "test": "Mann-Whitney U",
+          "statistic": 424.5,
+          "p_value": 0.7100752669814936,
+          "significant_uncorrected": "False",
+          "significant_corrected": "False",
+          "difference_ci_95": [
+            -0.03001666666666679,
+            0.03203333333333332
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "False"
+          }
+        },
+        "Epsilon-Greedy QL vs UCB Q-Learning": {
+          "test": "Welch's t-test",
+          "statistic": 0.34987786568299195,
+          "p_value": 0.7277315956583407,
+          "significant_uncorrected": "False",
+          "significant_corrected": "False",
+          "difference_ci_95": [
+            -0.02933333333333333,
+            0.043350000000000194
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Epsilon-Greedy QL vs InsightSpike-AI": {
+          "test": "Mann-Whitney U",
+          "statistic": 297.0,
+          "p_value": 0.023641346678891756,
+          "significant_uncorrected": "True",
+          "significant_corrected": "False",
+          "difference_ci_95": [
+            -0.08933333333333338,
+            -0.008000000000000118
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "False"
+          }
+        },
+        "UCB Q-Learning vs InsightSpike-AI": {
+          "test": "Mann-Whitney U",
+          "statistic": 251.5,
+          "p_value": 0.0032057908329768785,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.08866666666666645,
+            -0.019983333333333256
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "False"
+          }
+        }
+      },
+      "omnibus_test": {
+        "test": "Kruskal-Wallis",
+        "statistic": 81.76999226107557,
+        "p_value": 7.34395940443052e-17,
+        "significant": "True"
+      }
+    },
+    "dynamic": {
+      "alpha": 0.05,
+      "corrected_alpha": 0.005,
+      "n_comparisons": 10,
+      "pairwise_tests": {
+        "Random vs Vanilla Q-Learning": {
+          "test": "Mann-Whitney U",
+          "statistic": 0.0,
+          "p_value": 2.3951301881083876e-11,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.8046833333333335,
+            -0.7626666666666668
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "False"
+          }
+        },
+        "Random vs Epsilon-Greedy QL": {
+          "test": "Welch's t-test",
+          "statistic": -55.7128394565293,
+          "p_value": 3.5262822864058834e-50,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.7780166666666667,
+            -0.726
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Random vs UCB Q-Learning": {
+          "test": "Mann-Whitney U",
+          "statistic": 0.0,
+          "p_value": 2.684184386715497e-11,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.6420500000000001,
+            -0.5793333333333334
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "False"
+          }
+        },
+        "Random vs InsightSpike-AI": {
+          "test": "Mann-Whitney U",
+          "statistic": 0.0,
+          "p_value": 2.587214289768214e-11,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.7853500000000001,
+            -0.74
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "False"
+          }
+        },
+        "Vanilla Q-Learning vs Epsilon-Greedy QL": {
+          "test": "Mann-Whitney U",
+          "statistic": 627.5,
+          "p_value": 0.008056353791140775,
+          "significant_uncorrected": "True",
+          "significant_corrected": "False",
+          "difference_ci_95": [
+            0.006650000000000068,
+            0.05470000000000039
+          ],
+          "normality": {
+            "alg1": "False",
+            "alg2": "True"
+          }
+        },
+        "Vanilla Q-Learning vs UCB Q-Learning": {
+          "test": "Mann-Whitney U",
+          "statistic": 880.5,
+          "p_value": 1.6660454725484542e-10,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            0.13865000000000027,
+            0.20668333333333333
+          ],
+          "normality": {
+            "alg1": "False",
+            "alg2": "False"
+          }
+        },
+        "Vanilla Q-Learning vs InsightSpike-AI": {
+          "test": "Mann-Whitney U",
+          "statistic": 559.0,
+          "p_value": 0.10309755907875467,
+          "significant_uncorrected": "False",
+          "significant_corrected": "False",
+          "difference_ci_95": [
+            -0.004000000000000006,
+            0.04533333333333334
+          ],
+          "normality": {
+            "alg1": "False",
+            "alg2": "False"
+          }
+        },
+        "Epsilon-Greedy QL vs UCB Q-Learning": {
+          "test": "Mann-Whitney U",
+          "statistic": 851.0,
+          "p_value": 2.7857730667399234e-09,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            0.10733333333333339,
+            0.17933333333333323
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "False"
+          }
+        },
+        "Epsilon-Greedy QL vs InsightSpike-AI": {
+          "test": "Mann-Whitney U",
+          "statistic": 391.0,
+          "p_value": 0.3826069326566124,
+          "significant_uncorrected": "False",
+          "significant_corrected": "False",
+          "difference_ci_95": [
+            -0.03600000000000015,
+            0.014016666666666662
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "False"
+          }
+        },
+        "UCB Q-Learning vs InsightSpike-AI": {
+          "test": "Mann-Whitney U",
+          "statistic": 28.5,
+          "p_value": 4.232904986691976e-10,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.18668333333333328,
+            -0.11931666666666664
+          ],
+          "normality": {
+            "alg1": "False",
+            "alg2": "False"
+          }
+        }
+      },
+      "omnibus_test": {
+        "test": "Kruskal-Wallis",
+        "statistic": 111.82614499280675,
+        "p_value": 2.9680634476237085e-23,
+        "significant": "True"
+      }
+    },
+    "complex": {
+      "alpha": 0.05,
+      "corrected_alpha": 0.005,
+      "n_comparisons": 10,
+      "pairwise_tests": {
+        "Random vs Vanilla Q-Learning": {
+          "test": "Welch's t-test",
+          "statistic": -49.89207694129976,
+          "p_value": 2.548716022396668e-49,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.6,
+            -0.5553333333333333
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Random vs Epsilon-Greedy QL": {
+          "test": "Welch's t-test",
+          "statistic": -7.212677734852075,
+          "p_value": 2.433448918574073e-08,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.2653333333333333,
+            -0.15263333333333332
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Random vs UCB Q-Learning": {
+          "test": "Welch's t-test",
+          "statistic": -21.53635593881946,
+          "p_value": 1.1202763172126678e-25,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.38200000000000006,
+            -0.318
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Random vs InsightSpike-AI": {
+          "test": "Welch's t-test",
+          "statistic": -38.50252854690921,
+          "p_value": 3.0559489911908956e-39,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.5853333333333332,
+            -0.5299833333333331
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Vanilla Q-Learning vs Epsilon-Greedy QL": {
+          "test": "Welch's t-test",
+          "statistic": 12.823950860767944,
+          "p_value": 1.292027370808864e-14,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            0.3186666666666666,
+            0.4280499999999999
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Vanilla Q-Learning vs UCB Q-Learning": {
+          "test": "Welch's t-test",
+          "statistic": 13.731874274369108,
+          "p_value": 5.194327612630132e-18,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            0.19199999999999995,
+            0.2566666666666666
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Vanilla Q-Learning vs InsightSpike-AI": {
+          "test": "Welch's t-test",
+          "statistic": 1.3257120466528938,
+          "p_value": 0.19079238024632542,
+          "significant_uncorrected": "False",
+          "significant_corrected": "False",
+          "difference_ci_95": [
+            -0.0073499999999998445,
+            0.04801666666666669
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Epsilon-Greedy QL vs UCB Q-Learning": {
+          "test": "Welch's t-test",
+          "statistic": -4.642764828644917,
+          "p_value": 3.191245926487976e-05,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.2073833333333334,
+            -0.08598333333333337
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "Epsilon-Greedy QL vs InsightSpike-AI": {
+          "test": "Welch's t-test",
+          "statistic": -11.631857839430591,
+          "p_value": 2.3864522850897424e-14,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.4080333333333333,
+            -0.2926499999999998
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        },
+        "UCB Q-Learning vs InsightSpike-AI": {
+          "test": "Welch's t-test",
+          "statistic": -11.087281611851962,
+          "p_value": 8.465580360782804e-16,
+          "significant_uncorrected": "True",
+          "significant_corrected": "True",
+          "difference_ci_95": [
+            -0.24468333333333336,
+            -0.1680000000000001
+          ],
+          "normality": {
+            "alg1": "True",
+            "alg2": "True"
+          }
+        }
+      },
+      "omnibus_test": {
+        "test": "Kruskal-Wallis",
+        "statistic": 126.98558534661855,
+        "p_value": 1.7176777283331134e-26,
+        "significant": "True"
+      }
+    }
+  },
+  "effect_sizes": {
+    "simple": {
+      "Random vs Vanilla Q-Learning": {
+        "cohens_d": -9.757575615195966,
+        "cohens_d_ci_95": [
+          -11.871525702580534,
+          -8.485128625862785
+        ],
+        "hedges_g": -9.630853853959655,
+        "glass_delta": -8.44470869855933,
+        "cles": 0.0,
+        "interpretation": "large",
+        "mean_difference": -0.6226666666666666,
+        "percent_improvement": -80.17167381974248
+      },
+      "Random vs Epsilon-Greedy QL": {
+        "cohens_d": -3.6367439900706597,
+        "cohens_d_ci_95": [
+          -4.7040528438447415,
+          -2.9447457580028185
+        ],
+        "hedges_g": -3.5895135486411704,
+        "glass_delta": -2.7221284727876807,
+        "cles": 0.0,
+        "interpretation": "large",
+        "mean_difference": -0.4079999999999999,
+        "percent_improvement": -72.59786476868327
+      },
+      "Random vs UCB Q-Learning": {
+        "cohens_d": -5.527162925699826,
+        "cohens_d_ci_95": [
+          -7.393664940217619,
+          -4.525438978241627
+        ],
+        "hedges_g": -5.4553815890024255,
+        "glass_delta": -4.42597660068486,
+        "cles": 0.0,
+        "interpretation": "large",
+        "mean_difference": -0.43333333333333335,
+        "percent_improvement": -73.77979568671962
+      },
+      "Random vs InsightSpike-AI": {
+        "cohens_d": -11.189180123558677,
+        "cohens_d_ci_95": [
+          -14.730872156946226,
+          -9.393831314349983
+        ],
+        "hedges_g": -11.043866095979993,
+        "glass_delta": -10.427987414505543,
+        "cles": 0.0,
+        "interpretation": "large",
+        "mean_difference": -0.632,
+        "percent_improvement": -80.40712468193384
+      },
+      "Vanilla Q-Learning vs Epsilon-Greedy QL": {
+        "cohens_d": 1.8174605163142588,
+        "cohens_d_ci_95": [
+          1.3772119841731796,
+          2.4823565821101004
+        ],
+        "hedges_g": 1.7938571329855022,
+        "glass_delta": 1.432230993852342,
+        "cles": 0.905,
+        "interpretation": "large",
+        "mean_difference": 0.21466666666666667,
+        "percent_improvement": 38.196915776986955
+      },
+      "Vanilla Q-Learning vs UCB Q-Learning": {
+        "cohens_d": 2.1845930975111805,
+        "cohens_d_ci_95": [
+          1.7278896217279276,
+          2.8853489685353835
+        ],
+        "hedges_g": 2.156221758582464,
+        "glass_delta": 1.9338113147607687,
+        "cles": 0.9466666666666667,
+        "interpretation": "large",
+        "mean_difference": 0.18933333333333324,
+        "percent_improvement": 32.23609534619749
+      },
+      "Vanilla Q-Learning vs InsightSpike-AI": {
+        "cohens_d": -0.13829144856719214,
+        "cohens_d_ci_95": [
+          -0.6839861605420067,
+          0.38372797746727877
+        ],
+        "hedges_g": -0.13649545572865718,
+        "glass_delta": -0.15399981413826888,
+        "cles": 0.45055555555555554,
+        "interpretation": "negligible",
+        "mean_difference": -0.009333333333333416,
+        "percent_improvement": -1.187446988973717
+      },
+      "Epsilon-Greedy QL vs UCB Q-Learning": {
+        "cohens_d": -0.20011950716316815,
+        "cohens_d_ci_95": [
+          -0.7020480783424272,
+          0.28354641995978325
+        ],
+        "hedges_g": -0.19752055252468545,
+        "glass_delta": -0.2587494012708082,
+        "cles": 0.45944444444444443,
+        "interpretation": "small",
+        "mean_difference": -0.02533333333333343,
+        "percent_improvement": -4.313280363223625
+      },
+      "Epsilon-Greedy QL vs InsightSpike-AI": {
+        "cohens_d": -1.9594194390835715,
+        "cohens_d_ci_95": [
+          -2.630898505380927,
+          -1.4931942065198567
+        ],
+        "hedges_g": -1.9339724333811874,
+        "glass_delta": -3.695995539318422,
+        "cles": 0.06166666666666667,
+        "interpretation": "large",
+        "mean_difference": -0.2240000000000001,
+        "percent_improvement": -28.498727735368966
+      },
+      "UCB Q-Learning vs InsightSpike-AI": {
+        "cohens_d": -2.4399844845996066,
+        "cohens_d_ci_95": [
+          -3.346326242256795,
+          -1.930513460257711
+        ],
+        "hedges_g": -2.408296374410001,
+        "glass_delta": -3.2779960438002655,
+        "cles": 0.030555555555555555,
+        "interpretation": "large",
+        "mean_difference": -0.19866666666666666,
+        "percent_improvement": -25.275657336726038
+      }
+    },
+    "noisy": {
+      "Random vs Vanilla Q-Learning": {
+        "cohens_d": -12.71017317114169,
+        "cohens_d_ci_95": [
+          -15.339796409705745,
+          -11.07924955352452
+        ],
+        "hedges_g": -12.54510598710089,
+        "glass_delta": -12.418789022709657,
+        "cles": 0.0,
+        "interpretation": "large",
+        "mean_difference": -0.7053333333333333,
+        "percent_improvement": -82.14285714285714
+      },
+      "Random vs Epsilon-Greedy QL": {
+        "cohens_d": -9.64473916031609,
+        "cohens_d_ci_95": [
+          -12.094248557929419,
+          -8.242948486267494
+        ],
+        "hedges_g": -9.519482807584712,
+        "glass_delta": -8.248428551567011,
+        "cles": 0.0,
+        "interpretation": "large",
+        "mean_difference": -0.6566666666666666,
+        "percent_improvement": -81.06995884773663
+      },
+      "Random vs UCB Q-Learning": {
+        "cohens_d": -10.623413930995937,
+        "cohens_d_ci_95": [
+          -13.62890931928222,
+          -8.815666020718176
+        ],
+        "hedges_g": -10.485447516307678,
+        "glass_delta": -9.631983885939622,
+        "cles": 0.0,
+        "interpretation": "large",
+        "mean_difference": -0.6500000000000001,
+        "percent_improvement": -80.91286307053942
+      },
+      "Random vs InsightSpike-AI": {
+        "cohens_d": -11.071668682583848,
+        "cohens_d_ci_95": [
+          -14.197136855553579,
+          -9.384167410684592
+        ],
+        "hedges_g": -10.927880777615227,
+        "glass_delta": -9.801913936996057,
+        "cles": 0.0,
+        "interpretation": "large",
+        "mean_difference": -0.7046666666666669,
+        "percent_improvement": -82.12898212898213
+      },
+      "Vanilla Q-Learning vs Epsilon-Greedy QL": {
+        "cohens_d": 0.7037754652254246,
+        "cohens_d_ci_95": [
+          0.21458097713382743,
+          1.2147354434259068
+        ],
+        "hedges_g": 0.6946355241186009,
+        "glass_delta": 0.6113048571212096,
+        "cles": 0.6794444444444444,
+        "interpretation": "medium",
+        "mean_difference": 0.048666666666666636,
+        "percent_improvement": 6.008230452674894
+      },
+      "Vanilla Q-Learning vs UCB Q-Learning": {
+        "cohens_d": 0.8871936997049986,
+        "cohens_d_ci_95": [
+          0.3935212182167449,
+          1.504403174133732
+        ],
+        "hedges_g": 0.8756717036049337,
+        "glass_delta": 0.8199535000338313,
+        "cles": 0.7455555555555555,
+        "interpretation": "large",
+        "mean_difference": 0.05533333333333312,
+        "percent_improvement": 6.887966804979226
+      },
+      "Vanilla Q-Learning vs InsightSpike-AI": {
+        "cohens_d": 0.010290551764809936,
+        "cohens_d_ci_95": [
+          -0.5188856017115259,
+          0.5143841605847123
+        ],
+        "hedges_g": 0.01015690823539682,
+        "glass_delta": 0.009273333904438703,
+        "cles": 0.4716666666666667,
+        "interpretation": "negligible",
+        "mean_difference": 0.0006666666666663712,
+        "percent_improvement": 0.07770007770004324
+      },
+      "Epsilon-Greedy QL vs UCB Q-Learning": {
+        "cohens_d": 0.0903380764664549,
+        "cohens_d_ci_95": [
+          -0.4565122734613111,
+          0.6039479336684085
+        ],
+        "hedges_g": 0.08916485469416328,
+        "glass_delta": 0.09878957831732679,
+        "cles": 0.5538888888888889,
+        "interpretation": "negligible",
+        "mean_difference": 0.0066666666666664876,
+        "percent_improvement": 0.8298755186721768
+      },
+      "Epsilon-Greedy QL vs InsightSpike-AI": {
+        "cohens_d": -0.6328344975731277,
+        "cohens_d_ci_95": [
+          -1.203345078945507,
+          -0.1327062349811718
+        ],
+        "hedges_g": -0.6246158677345156,
+        "glass_delta": -0.6676800411198862,
+        "cles": 0.33,
+        "interpretation": "medium",
+        "mean_difference": -0.048000000000000265,
+        "percent_improvement": -5.594405594405624
+      },
+      "UCB Q-Learning vs InsightSpike-AI": {
+        "cohens_d": -0.7840668778107218,
+        "cohens_d_ci_95": [
+          -1.4367803078437777,
+          -0.25071121121228973
+        ],
+        "hedges_g": -0.7738841910859072,
+        "glass_delta": -0.7604133801643118,
+        "cles": 0.27944444444444444,
+        "interpretation": "medium",
+        "mean_difference": -0.05466666666666675,
+        "percent_improvement": -6.37140637140638
+      }
+    },
+    "dynamic": {
+      "Random vs Vanilla Q-Learning": {
+        "cohens_d": -17.324754528051802,
+        "cohens_d_ci_95": [
+          -22.63545884056012,
+          -14.201304333824735
+        ],
+        "hedges_g": -17.099757715999182,
+        "glass_delta": -17.639985145421065,
+        "cles": 0.0,
+        "interpretation": "large",
+        "mean_difference": -0.7833333333333337,
+        "percent_improvement": -85.08327299058654
+      },
+      "Random vs Epsilon-Greedy QL": {
+        "cohens_d": -14.384993292337699,
+        "cohens_d_ci_95": [
+          -18.756463027268715,
+          -12.093612878501647
+        ],
+        "hedges_g": -14.198175197632015,
+        "glass_delta": -12.987399604338595,
+        "cles": 0.0,
+        "interpretation": "large",
+        "mean_difference": -0.7526666666666665,
+        "percent_improvement": -84.5692883895131
+      },
+      "Random vs UCB Q-Learning": {
+        "cohens_d": -9.023898697399014,
+        "cohens_d_ci_95": [
+          -13.29767495249635,
+          -6.634841091963336
+        ],
+        "hedges_g": -8.906705207822403,
+        "glass_delta": -7.272174606016382,
+        "cles": 0.0,
+        "interpretation": "large",
+        "mean_difference": -0.612,
+        "percent_improvement": -81.67259786476868
+      },
+      "Random vs InsightSpike-AI": {
+        "cohens_d": -16.288795361275326,
+        "cohens_d_ci_95": [
+          -20.730528450602478,
+          -13.716689660014525
+        ],
+        "hedges_g": -16.077252564375648,
+        "glass_delta": -16.00240034699045,
+        "cles": 0.0,
+        "interpretation": "large",
+        "mean_difference": -0.7633333333333333,
+        "percent_improvement": -84.7520355292376
+      },
+      "Vanilla Q-Learning vs Epsilon-Greedy QL": {
+        "cohens_d": 0.5940110898464538,
+        "cohens_d_ci_95": [
+          0.08556469068525817,
+          1.1271537961170808
+        ],
+        "hedges_g": 0.5862966601081882,
+        "glass_delta": 0.5291588855620775,
+        "cles": 0.6972222222222222,
+        "interpretation": "medium",
+        "mean_difference": 0.030666666666667175,
+        "percent_improvement": 3.4456928838951892
+      },
+      "Vanilla Q-Learning vs UCB Q-Learning": {
+        "cohens_d": 2.5464230234701053,
+        "cohens_d_ci_95": [
+          1.9888766235709776,
+          3.742010551689928
+        ],
+        "hedges_g": 2.51335259459387,
+        "glass_delta": 2.0358920193313876,
+        "cles": 0.9783333333333334,
+        "interpretation": "large",
+        "mean_difference": 0.17133333333333367,
+        "percent_improvement": 22.864768683274068
+      },
+      "Vanilla Q-Learning vs InsightSpike-AI": {
+        "cohens_d": 0.4339959184621831,
+        "cohens_d_ci_95": [
+          -0.0543922473523594,
+          0.9485514999127422
+        ],
+        "hedges_g": 0.4283596078328041,
+        "glass_delta": 0.41927686498665667,
+        "cles": 0.6211111111111111,
+        "interpretation": "small",
+        "mean_difference": 0.02000000000000035,
+        "percent_improvement": 2.2205773501110677
+      },
+      "Epsilon-Greedy QL vs UCB Q-Learning": {
+        "cohens_d": 1.9468694019484525,
+        "cohens_d_ci_95": [
+          1.458659916021741,
+          2.698150910171386
+        ],
+        "hedges_g": 1.9215853837413297,
+        "glass_delta": 1.6714911131475543,
+        "cles": 0.9455555555555556,
+        "interpretation": "large",
+        "mean_difference": 0.1406666666666665,
+        "percent_improvement": 18.77224199288254
+      },
+      "Epsilon-Greedy QL vs InsightSpike-AI": {
+        "cohens_d": -0.20097147227804668,
+        "cohens_d_ci_95": [
+          -0.7179903507958882,
+          0.30399149698970274
+        ],
+        "hedges_g": -0.19836145315755258,
+        "glass_delta": -0.22361432799288294,
+        "cles": 0.43444444444444447,
+        "interpretation": "small",
+        "mean_difference": -0.010666666666666824,
+        "percent_improvement": -1.184307920059233
+      },
+      "UCB Q-Learning vs InsightSpike-AI": {
+        "cohens_d": -2.2124069308156042,
+        "cohens_d_ci_95": [
+          -3.1995850403657564,
+          -1.7476131547182492
+        ],
+        "hedges_g": -2.1836743732725443,
+        "glass_delta": -3.1725282783989797,
+        "cles": 0.03166666666666667,
+        "interpretation": "large",
+        "mean_difference": -0.15133333333333332,
+        "percent_improvement": -16.80236861584012
+      }
+    },
+    "complex": {
+      "Random vs Vanilla Q-Learning": {
+        "cohens_d": -12.882078873423536,
+        "cohens_d_ci_95": [
+          -16.221524229352678,
+          -11.03988013520774
+        ],
+        "hedges_g": -12.714779147794658,
+        "glass_delta": -12.73322365632754,
+        "cles": 0.0,
+        "interpretation": "large",
+        "mean_difference": -0.5766666666666665,
+        "percent_improvement": -87.63931104356637
+      },
+      "Random vs Epsilon-Greedy QL": {
+        "cohens_d": -1.8623053832428749,
+        "cohens_d_ci_95": [
+          -2.644472917173113,
+          -1.346763089783169
+        ],
+        "hedges_g": -1.8381195990449155,
+        "glass_delta": -1.372116637500968,
+        "cles": 0.11555555555555555,
+        "interpretation": "large",
+        "mean_difference": -0.20733333333333334,
+        "percent_improvement": -71.82448036951502
+      },
+      "Random vs UCB Q-Learning": {
+        "cohens_d": -5.560663192602865,
+        "cohens_d_ci_95": [
+          -7.04153115183227,
+          -4.751737363553119
+        ],
+        "hedges_g": -5.4884467875041265,
+        "glass_delta": -4.52547536469108,
+        "cles": 0.0,
+        "interpretation": "large",
+        "mean_difference": -0.3513333333333333,
+        "percent_improvement": -81.20184899845916
+      },
+      "Random vs InsightSpike-AI": {
+        "cohens_d": -9.941310123270336,
+        "cohens_d_ci_95": [
+          -12.318905110904662,
+          -8.694327918521548
+        ],
+        "hedges_g": -9.8122021995915,
+        "glass_delta": -8.470546367457054,
+        "cles": 0.0,
+        "interpretation": "large",
+        "mean_difference": -0.5573333333333333,
+        "percent_improvement": -87.26513569937369
+      },
+      "Vanilla Q-Learning vs Epsilon-Greedy QL": {
+        "cohens_d": 3.3111298744224342,
+        "cohens_d_ci_95": [
+          2.774164351819998,
+          4.278361862450169
+        ],
+        "hedges_g": 3.2681281877416235,
+        "glass_delta": 2.444220634004939,
+        "cles": 0.9994444444444445,
+        "interpretation": "large",
+        "mean_difference": 0.36933333333333324,
+        "percent_improvement": 127.94457274826784
+      },
+      "Vanilla Q-Learning vs UCB Q-Learning": {
+        "cohens_d": 3.5455546917897074,
+        "cohens_d_ci_95": [
+          2.9747947101961154,
+          4.445472235370226
+        ],
+        "hedges_g": 3.49950852696127,
+        "glass_delta": 2.902487046044753,
+        "cles": 0.9988888888888889,
+        "interpretation": "large",
+        "mean_difference": 0.22533333333333327,
+        "percent_improvement": 52.08012326656394
+      },
+      "Vanilla Q-Learning vs InsightSpike-AI": {
+        "cohens_d": 0.34229737857021386,
+        "cohens_d_ci_95": [
+          -0.13355447061084375,
+          0.8724686392006249
+        ],
+        "hedges_g": 0.337851958069302,
+        "glass_delta": 0.29383474241178575,
+        "cles": 0.6066666666666667,
+        "interpretation": "small",
+        "mean_difference": 0.019333333333333202,
+        "percent_improvement": 3.027139874739019
+      },
+      "Epsilon-Greedy QL vs UCB Q-Learning": {
+        "cohens_d": -1.1987567241132864,
+        "cohens_d_ci_95": [
+          -1.7860637010649467,
+          -0.7677176749332615
+        ],
+        "hedges_g": -1.183188454968958,
+        "glass_delta": -1.854843792738659,
+        "cles": 0.21222222222222223,
+        "interpretation": "large",
+        "mean_difference": -0.14399999999999996,
+        "percent_improvement": -33.28197226502311
+      },
+      "Epsilon-Greedy QL vs InsightSpike-AI": {
+        "cohens_d": -3.0033327798377916,
+        "cohens_d_ci_95": [
+          -3.8821148399569796,
+          -2.478913939467951
+        ],
+        "hedges_g": -2.964328458021716,
+        "glass_delta": -5.3194220609030545,
+        "cles": 0.0044444444444444444,
+        "interpretation": "large",
+        "mean_difference": -0.35000000000000003,
+        "percent_improvement": -54.801670146137795
+      },
+      "UCB Q-Learning vs InsightSpike-AI": {
+        "cohens_d": -2.8627238024942914,
+        "cohens_d_ci_95": [
+          -3.6424133808832173,
+          -2.3515880310871062
+        ],
+        "hedges_g": -2.8255455712930666,
+        "glass_delta": -3.1308598415600843,
+        "cles": 0.013333333333333334,
+        "interpretation": "large",
+        "mean_difference": -0.20600000000000007,
+        "percent_improvement": -32.25469728601254
+      }
+    }
+  },
+  "robustness_checks": {
+    "simple": {
+      "outlier_analysis": {
+        "Random": {
+          "n_outliers": 0,
+          "outlier_percentage": 0.0,
+          "outlier_values": [],
+          "bounds": {
+            "lower": 0.03,
+            "upper": 0.27
+          }
+        },
+        "Vanilla Q-Learning": {
+          "n_outliers": 0,
+          "outlier_percentage": 0.0,
+          "outlier_values": [],
+          "bounds": {
+            "lower": 0.56,
+            "upper": 1.0
+          }
+        },
+        "Epsilon-Greedy QL": {
+          "n_outliers": 0,
+          "outlier_percentage": 0.0,
+          "outlier_values": [],
+          "bounds": {
+            "lower": 0.10000000000000014,
+            "upper": 1.0599999999999998
+          }
+        },
+        "UCB Q-Learning": {
+          "n_outliers": 1,
+          "outlier_percentage": 3.3333333333333335,
+          "outlier_values": [
+            0.36
+          ],
+          "bounds": {
+            "lower": 0.37250000000000005,
+            "upper": 0.7925
+          }
+        },
+        "InsightSpike-AI": {
+          "n_outliers": 3,
+          "outlier_percentage": 10.0,
+          "outlier_values": [
+            0.92,
+            0.64,
+            0.62
+          ],
+          "bounds": {
+            "lower": 0.6700000000000002,
+            "upper": 0.9099999999999999
+          }
+        }
+      },
+      "sensitivity_analysis": {
+        "Random": {
+          "outlier_impact_percent": 0,
+          "robust_mean": 0.154
+        },
+        "Vanilla Q-Learning": {
+          "outlier_impact_percent": 0,
+          "robust_mean": 0.7766666666666666
+        },
+        "Epsilon-Greedy QL": {
+          "outlier_impact_percent": 0,
+          "robust_mean": 0.5619999999999999
+        },
+        "UCB Q-Learning": {
+          "outlier_impact_percent": 1.334690203139065,
+          "robust_mean": 0.5951724137931035
+        },
+        "InsightSpike-AI": {
+          "outlier_impact_percent": 0.8387522382433326,
+          "robust_mean": 0.7925925925925926
+        }
+      },
+      "assumption_checks": {
+        "Random": {
+          "normality_p_value": 0.342931814964217,
+          "is_normal": "True",
+          "skewness": -0.19022802183777893,
+          "kurtosis": -0.5319277754089993
+        },
+        "Vanilla Q-Learning": {
+          "normality_p_value": 0.3428923783050561,
+          "is_normal": "True",
+          "skewness": -0.03763948196158835,
+          "kurtosis": -0.897351706752366
+        },
+        "Epsilon-Greedy QL": {
+          "normality_p_value": 0.227706237058022,
+          "is_normal": "True",
+          "skewness": -0.2489586659564872,
+          "kurtosis": -1.0052692130000092
+        },
+        "UCB Q-Learning": {
+          "normality_p_value": 0.3783666424664569,
+          "is_normal": "True",
+          "skewness": -0.44453786462250877,
+          "kurtosis": -0.18306192916028863
+        },
+        "InsightSpike-AI": {
+          "normality_p_value": 0.05851353498771812,
+          "is_normal": "True",
+          "skewness": -0.73036899589098,
+          "kurtosis": 1.3878855299863853
+        }
+      }
+    },
+    "noisy": {
+      "outlier_analysis": {
+        "Random": {
+          "n_outliers": 0,
+          "outlier_percentage": 0.0,
+          "outlier_values": [],
+          "bounds": {
+            "lower": 0.03,
+            "upper": 0.27
+          }
+        },
+        "Vanilla Q-Learning": {
+          "n_outliers": 0,
+          "outlier_percentage": 0.0,
+          "outlier_values": [],
+          "bounds": {
+            "lower": 0.7074999999999998,
+            "upper": 1.0075
+          }
+        },
+        "Epsilon-Greedy QL": {
+          "n_outliers": 0,
+          "outlier_percentage": 0.0,
+          "outlier_values": [],
+          "bounds": {
+            "lower": 0.6175,
+            "upper": 0.9974999999999999
+          }
+        },
+        "UCB Q-Learning": {
+          "n_outliers": 7,
+          "outlier_percentage": 23.333333333333332,
+          "outlier_values": [
+            0.7,
+            0.72,
+            0.94,
+            0.9,
+            0.92,
+            0.92,
+            0.62
+          ],
+          "bounds": {
+            "lower": 0.7200000000000002,
+            "upper": 0.8799999999999999
+          }
+        },
+        "InsightSpike-AI": {
+          "n_outliers": 0,
+          "outlier_percentage": 0.0,
+          "outlier_values": [],
+          "bounds": {
+            "lower": 0.6200000000000001,
+            "upper": 1.1
+          }
+        }
+      },
+      "sensitivity_analysis": {
+        "Random": {
+          "outlier_impact_percent": 0,
+          "robust_mean": 0.15333333333333332
+        },
+        "Vanilla Q-Learning": {
+          "outlier_impact_percent": 0,
+          "robust_mean": 0.8586666666666666
+        },
+        "Epsilon-Greedy QL": {
+          "outlier_impact_percent": 0,
+          "robust_mean": 0.8099999999999999
+        },
+        "UCB Q-Learning": {
+          "outlier_impact_percent": 0.5231823922063871,
+          "robust_mean": 0.7991304347826088
+        },
+        "InsightSpike-AI": {
+          "outlier_impact_percent": 0,
+          "robust_mean": 0.8580000000000002
+        }
+      },
+      "assumption_checks": {
+        "Random": {
+          "normality_p_value": 0.6249827259598045,
+          "is_normal": "True",
+          "skewness": -0.0851645216508152,
+          "kurtosis": -0.5261151128624912
+        },
+        "Vanilla Q-Learning": {
+          "normality_p_value": 0.8136674867304581,
+          "is_normal": "True",
+          "skewness": 0.20641476117789073,
+          "kurtosis": -0.30807445825082747
+        },
+        "Epsilon-Greedy QL": {
+          "normality_p_value": 0.5143384857206383,
+          "is_normal": "True",
+          "skewness": -0.27692470168028177,
+          "kurtosis": -0.3941669103830283
+        },
+        "UCB Q-Learning": {
+          "normality_p_value": 0.2241610793587639,
+          "is_normal": "True",
+          "skewness": -0.15723527274966723,
+          "kurtosis": 0.7336282263532872
+        },
+        "InsightSpike-AI": {
+          "normality_p_value": 0.023888365459357342,
+          "is_normal": "False",
+          "skewness": -0.7918234770224859,
+          "kurtosis": 0.16775245656894722
+        }
+      }
+    },
+    "dynamic": {
+      "outlier_analysis": {
+        "Random": {
+          "n_outliers": 0,
+          "outlier_percentage": 0.0,
+          "outlier_values": [],
+          "bounds": {
+            "lower": 0.010000000000000009,
+            "upper": 0.25
+          }
+        },
+        "Vanilla Q-Learning": {
+          "n_outliers": 2,
+          "outlier_percentage": 6.666666666666667,
+          "outlier_values": [
+            0.82,
+            0.78
+          ],
+          "bounds": {
+            "lower": 0.8525000000000001,
+            "upper": 0.9924999999999998
+          }
+        },
+        "Epsilon-Greedy QL": {
+          "n_outliers": 2,
+          "outlier_percentage": 6.666666666666667,
+          "outlier_values": [
+            0.78,
+            0.72
+          ],
+          "bounds": {
+            "lower": 0.7825,
+            "upper": 1.0025000000000002
+          }
+        },
+        "UCB Q-Learning": {
+          "n_outliers": 1,
+          "outlier_percentage": 3.3333333333333335,
+          "outlier_values": [
+            0.44
+          ],
+          "bounds": {
+            "lower": 0.54,
+            "upper": 0.98
+          }
+        },
+        "InsightSpike-AI": {
+          "n_outliers": 1,
+          "outlier_percentage": 3.3333333333333335,
+          "outlier_values": [
+            0.76
+          ],
+          "bounds": {
+            "lower": 0.79,
+            "upper": 1.0299999999999998
+          }
+        }
+      },
+      "sensitivity_analysis": {
+        "Random": {
+          "outlier_impact_percent": 0,
+          "robust_mean": 0.13733333333333334
+        },
+        "Vanilla Q-Learning": {
+          "outlier_impact_percent": 0.9361746146684372,
+          "robust_mean": 0.9292857142857144
+        },
+        "Epsilon-Greedy QL": {
+          "outlier_impact_percent": 1.1235955056179787,
+          "robust_mean": 0.8999999999999998
+        },
+        "UCB Q-Learning": {
+          "outlier_impact_percent": 1.423487544483992,
+          "robust_mean": 0.76
+        },
+        "InsightSpike-AI": {
+          "outlier_impact_percent": 0.5385538170958853,
+          "robust_mean": 0.9055172413793102
+        }
+      },
+      "assumption_checks": {
+        "Random": {
+          "normality_p_value": 0.265978740054167,
+          "is_normal": "True",
+          "skewness": 0.3211071063409311,
+          "kurtosis": -0.4409009353102844
+        },
+        "Vanilla Q-Learning": {
+          "normality_p_value": 0.0016428418597627492,
+          "is_normal": "False",
+          "skewness": -1.2345393698818234,
+          "kurtosis": 2.215527029650354
+        },
+        "Epsilon-Greedy QL": {
+          "normality_p_value": 0.05499549110324557,
+          "is_normal": "True",
+          "skewness": -0.7784055770347267,
+          "kurtosis": 1.0274445648461539
+        },
+        "UCB Q-Learning": {
+          "normality_p_value": 0.0006619646013580802,
+          "is_normal": "False",
+          "skewness": -1.663591809779196,
+          "kurtosis": 4.100405921672941
+        },
+        "InsightSpike-AI": {
+          "normality_p_value": 0.02938334727975625,
+          "is_normal": "False",
+          "skewness": -0.939654264073022,
+          "kurtosis": 0.8057982082017325
+        }
+      }
+    },
+    "complex": {
+      "outlier_analysis": {
+        "Random": {
+          "n_outliers": 1,
+          "outlier_percentage": 3.3333333333333335,
+          "outlier_values": [
+            0.2
+          ],
+          "bounds": {
+            "lower": -0.03750000000000002,
+            "upper": 0.18250000000000002
+          }
+        },
+        "Vanilla Q-Learning": {
+          "n_outliers": 2,
+          "outlier_percentage": 6.666666666666667,
+          "outlier_values": [
+            0.56,
+            0.76
+          ],
+          "bounds": {
+            "lower": 0.58,
+            "upper": 0.7400000000000001
+          }
+        },
+        "Epsilon-Greedy QL": {
+          "n_outliers": 0,
+          "outlier_percentage": 0.0,
+          "outlier_values": [],
+          "bounds": {
+            "lower": -0.08749999999999997,
+            "upper": 0.6525
+          }
+        },
+        "UCB Q-Learning": {
+          "n_outliers": 0,
+          "outlier_percentage": 0.0,
+          "outlier_values": [],
+          "bounds": {
+            "lower": 0.1925,
+            "upper": 0.6525
+          }
+        },
+        "InsightSpike-AI": {
+          "n_outliers": 0,
+          "outlier_percentage": 0.0,
+          "outlier_values": [],
+          "bounds": {
+            "lower": 0.4575,
+            "upper": 0.8374999999999999
+          }
+        }
+      },
+      "sensitivity_analysis": {
+        "Random": {
+          "outlier_impact_percent": 5.0310910118711165,
+          "robust_mean": 0.07724137931034483
+        },
+        "Vanilla Q-Learning": {
+          "outlier_impact_percent": 0.021710811984346542,
+          "robust_mean": 0.6578571428571429
+        },
+        "Epsilon-Greedy QL": {
+          "outlier_impact_percent": 0,
+          "robust_mean": 0.2886666666666667
+        },
+        "UCB Q-Learning": {
+          "outlier_impact_percent": 0,
+          "robust_mean": 0.43266666666666664
+        },
+        "InsightSpike-AI": {
+          "outlier_impact_percent": 0,
+          "robust_mean": 0.6386666666666667
+        }
+      },
+      "assumption_checks": {
+        "Random": {
+          "normality_p_value": 0.3418316908714638,
+          "is_normal": "True",
+          "skewness": 0.42015027482940615,
+          "kurtosis": 0.3026457120244208
+        },
+        "Vanilla Q-Learning": {
+          "normality_p_value": 0.605046169088609,
+          "is_normal": "True",
+          "skewness": -0.07358197806147013,
+          "kurtosis": -0.07168787189039039
+        },
+        "Epsilon-Greedy QL": {
+          "normality_p_value": 0.4169580236704114,
+          "is_normal": "True",
+          "skewness": -0.10046925116025598,
+          "kurtosis": -0.8595848674617605
+        },
+        "UCB Q-Learning": {
+          "normality_p_value": 0.5822856236373157,
+          "is_normal": "True",
+          "skewness": -0.14562642262549866,
+          "kurtosis": -0.8720347856344599
+        },
+        "InsightSpike-AI": {
+          "normality_p_value": 0.4707746495366849,
+          "is_normal": "True",
+          "skewness": 0.07760166894570408,
+          "kurtosis": -0.6457845031757814
+        }
+      }
+    }
+  },
+  "visualizations_created": [
+    "experiments/outputs/improved_analysis/simple_boxplot_comparison.png",
+    "experiments/outputs/improved_analysis/simple_confidence_intervals.png",
+    "experiments/outputs/improved_analysis/noisy_boxplot_comparison.png",
+    "experiments/outputs/improved_analysis/noisy_confidence_intervals.png",
+    "experiments/outputs/improved_analysis/dynamic_boxplot_comparison.png",
+    "experiments/outputs/improved_analysis/dynamic_confidence_intervals.png",
+    "experiments/outputs/improved_analysis/complex_boxplot_comparison.png",
+    "experiments/outputs/improved_analysis/complex_confidence_intervals.png"
+  ]
+}
