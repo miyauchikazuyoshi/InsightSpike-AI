@@ -5,7 +5,7 @@
 > Implementing a cerebellum–LC–hippocampus–VTA loop to study *insight*.
 
 [![License: InsightSpike Community License](https://img.shields.io/badge/License-InsightSpike--Community--1.0-blue)](https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/LICENSE)  
-<a href="https://arxiv.org/abs/YYMM.NNNNN"><img src="https://img.shields.io/badge/arXiv-YYMM.NNNNN-b31b1b.svg" alt="arXiv"></a>  
+<a href="https://arxiv.org/abs/TBD"><img src="https://img.shields.io/badge/arXiv-TBD-b31b1b.svg" alt="arXiv"></a>  
 <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/releases"><img src="https://img.shields.io/github/v/release/miyauchikazuyoshi/InsightSpike-AI"></a>
 <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/issues"><img src="https://img.shields.io/github/issues/miyauchikazuyoshi/InsightSpike-AI"></a>
 <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/network/members"><img src="https://img.shields.io/github/forks/miyauchikazuyoshi/InsightSpike-AI"></a>
@@ -496,4 +496,33 @@ apply_preset_configuration('research_high_precision')
 
 ---
 
-## 🎮 CLI Commands
+## ⚠️ Performance Characteristics & Current Limitations
+
+### Current Performance Status (v0.8.0)
+InsightSpike-AI is currently in **research prototype stage** with the following characteristics:
+
+#### 🔬 Research Performance (Not Production-Optimized)
+- **Response Latency**: ~8.75x slower than target (research optimization pending)
+- **Throughput**: ~1/5000 of production target (acceptable for academic use)
+- **Memory Usage**: Optimized for research flexibility over efficiency
+- **Scalability**: Designed for single-user research scenarios
+
+#### 💻 Recommended System Requirements
+- **Minimum**: 8GB RAM, 4-core CPU, Python 3.11+
+- **Recommended**: 16GB+ RAM, 8-core CPU, GPU optional
+- **Storage**: 2-5GB for models and data cache
+- **Network**: Internet required for initial model downloads
+
+#### 🎯 Target Use Cases (v0.8.0)
+- ✅ **Academic Research**: Insight detection studies, algorithm validation
+- ✅ **Educational Demos**: Classroom demonstrations, concept exploration  
+- ✅ **Algorithm Development**: geDIG methodology experimentation
+- ⚠️ **Production Systems**: Requires optimization (planned for v1.0+)
+- ❌ **Real-time Applications**: Current latency too high
+
+#### 🚀 Optimization Roadmap
+- **v0.9.0**: FAISS indexing optimization, GNN computation improvements
+- **v1.0.0**: Production-ready performance, enterprise scalability
+- **v1.1.0**: Real-time inference capabilities
+
+For production deployments, please contact the development team for optimization consulting.

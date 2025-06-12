@@ -5,7 +5,7 @@ import os
 
 class About:
     NAME = "InsightSpike-AI"
-    VERSION = "0.7-Eureka"
+    VERSION = "0.8.0"
 
 
 # Export new main agent for easy access
@@ -102,13 +102,13 @@ except ImportError:
     analyze_documents_simple = None
 
 # Import the unified config system
-from .config import get_config
+from .core.config import get_config
 
 
 # Create a legacy config module object for backward compatibility
 class LegacyConfigModule:
     def __init__(self):
-        from .config import get_legacy_config
+        from .core.config import get_legacy_config
 
         legacy = get_legacy_config()
         for key, value in legacy.items():

@@ -1,9 +1,23 @@
 [tool.poetry]
 name = "insightspike-ai"
-version = "0.7.0"
-description = "InsightSpike prototype with PyG-based GNN layers"
-authors = ["YOUR NAME <you@example.com>"]
+version = "0.8.0"
+description = "Brain-Inspired Multi-Agent Architecture for Insight Detection and Knowledge Restructuring"
+authors = ["Kazuyoshi Miyauchi <k.miyauchi@insight-spike.ai>"]
 packages = [{ include = "insightspike", from = "src" }]
+readme = "README.md"
+homepage = "https://github.com/miyauchikazuyoshi/InsightSpike-AI"
+repository = "https://github.com/miyauchikazuyoshi/InsightSpike-AI"
+keywords = ["artificial-intelligence", "insight-detection", "knowledge-graphs", "reinforcement-learning", "neuroscience"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Other/Proprietary License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 
 [tool.poetry.dependencies]
 python = "^3.11"

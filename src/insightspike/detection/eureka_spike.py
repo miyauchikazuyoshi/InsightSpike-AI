@@ -10,13 +10,13 @@ import os
 from typing import Any, Dict, List, Tuple
 
 try:
-    # Import from the unified config system
-    from ..config import get_legacy_config
+    # Import from the modern config system directly
+    from ..core.config import get_config
 
-    legacy_config = get_legacy_config()
-    SPIKE_GED = legacy_config.get("SPIKE_GED", 0.5)
-    SPIKE_IG = legacy_config.get("SPIKE_IG", 0.2)
-    ETA_SPIKE = legacy_config.get("ETA_SPIKE", 0.2)
+    config = get_config()
+    SPIKE_GED = config.spike.spike_ged
+    SPIKE_IG = config.spike.spike_ig
+    ETA_SPIKE = config.spike.eta_spike
 except (ImportError, AttributeError):
     # Fallback for testing or if config is not available
     SPIKE_GED = 0.5
