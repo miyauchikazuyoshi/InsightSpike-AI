@@ -41,12 +41,8 @@ jobs:
     
     - name: Install dependencies
       run: |
-        # Install core dependencies
+        # Install core dependencies (CI group includes test dependencies)
         poetry install --with ci --no-root
-        # Install specific versions for CI compatibility
-        poetry run pip install faiss-cpu==1.11.0
-        poetry run pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cpu
-        poetry run pip install torch-geometric==2.4.0 || echo "⚠️ Torch-geometric optional"
         # Install project in development mode
         poetry run pip install -e . --no-deps
     
