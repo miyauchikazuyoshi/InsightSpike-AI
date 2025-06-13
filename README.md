@@ -18,6 +18,10 @@
 - [🎯 What is InsightSpike-AI?](#-what-is-insightspike-ai)
 - [✨ Key Features](#-key-features)
 - [🧠 Architecture Overview](#-architecture-overview)
+- [🎯 What is InsightSpike-AI?](#-what-is-insightspike-ai)
+- [✨ Key Features](#-key-features)
+- [🧠 Architecture Overview](#-architecture-overview)
+- [📁 Project Structure](#-project-structure)
 - [🚀 Quick Start](#-quick-start)
 - [📊 Basic Usage Examples](#-basic-usage-examples)
 - [📐 Input Data Formats](#-input-data-formats)
@@ -129,6 +133,20 @@ graph TD
 - 📚 Vector quantized episodic memory with IVF-PQ
 - 🕸️ Graph neural network reasoning with enhanced graph density
 - ⚡ Real-time insight spike detection
+
+---
+
+## 📁 Project Structure
+
+For new users and contributors, here's a quick overview of the project structure:
+
+- **`/src/`** - Main InsightSpike-AI source code
+- **`/notebooks/`** - Ready-to-use Jupyter notebooks (start here!)
+- **`/experiments/`** - Academic validation framework
+- **`/docs/`** - Technical documentation
+- **`/tests/`** - Comprehensive test suite
+
+📖 **New to the project?** See [`PROJECT_STRUCTURE.md`](PROJECT_STRUCTURE.md) for detailed guidance.
 
 ---
 

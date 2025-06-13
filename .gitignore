@@ -10,6 +10,15 @@ __pycache__/
 .coverage
 *.egg-info/
 
+# システム・エディタファイル
+.env
+.gitpod.yml
+.pre-commit-config.yaml
+.python-version
+.secrets.baseline
+Dockerfile.codex
+prepare_push.sh
+
 # 一時・バックアップファイル
 *.backup
 *.tmp
@@ -47,6 +56,27 @@ documentation/reports/
 *COMPLETION_REPORT.md
 *COMPLETION.md
 PROJECT_RESTRUCTURE*.md
+
+# 開発作業レポート（初見者混乱防止）
+CLEANUP_PLAN.md
+CODEX_SETUP.md
+COMMIT_MESSAGE.md
+COMPREHENSIVE_EXPERIMENTAL_VALIDATION_REPORT.md
+EXPERIMENT_ENHANCEMENT_ROADMAP.md
+EXPERIMENT_EXECUTION_SUMMARY.md
+GPT_O3_REVIEW_RESPONSE_SUMMARY.md
+OSS_PUBLICATION_READINESS_CHECKLIST.md
+REPOSITORY_ORGANIZATION_COMPLETION.md
+V0.8.0_RELEASE_COMPLETION_REPORT.md
+VERSION_EVALUATION_REPORT.md
+
+# アーカイブディレクトリ（開発履歴）
+archive/development_reports/
+archive/legacy_configs/
+
+# レガシー設定ファイル
+Makefile
+setup.py
 
 # 実験結果アーカイブ（プッシュしない）
 archive/experimental_results/
