@@ -1,4 +1,30 @@
 """
+⚠️ CRITICAL DATA LEAK WARNING - DEPRECATED ⚠️
+============================================
+
+❌ THIS FILE CONTAINS MAJOR DATA LEAKS IDENTIFIED BY GPT-o3 REVIEW ❌
+
+PROBLEMS:
+1. Hardcoded responses to specific test questions (Monty Hall, Zeno's paradox, etc.)
+2. Preferential treatment based on question content
+3. Artificial performance inflation for InsightSpike-AI
+4. Violates fair experimental comparison principles
+
+🚨 DO NOT USE FOR FAIR EXPERIMENTS 🚨
+
+USE INSTEAD: src/insightspike/core/layers/clean_llm_provider.py
+
+This file is kept for reference but should not be used in any experimental
+evaluation or production systems.
+
+Original GPT-o3 Review Quote:
+"データリーク問題特定: テスト質問に対するハードコード回答"
+"極端に弱いベースライン問題確認"
+
+REPLACEMENT: Use CleanLLMProvider which eliminates all data leaks.
+"""
+
+"""
 Lightweight LLM Provider for Testing
 ===================================
 

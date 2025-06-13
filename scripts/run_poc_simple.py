@@ -1,5 +1,43 @@
 #!/usr/bin/env python
 """
+⚠️ CRITICAL: DEPRECATED DUE TO DATA LEAKS ⚠️
+==========================================
+
+❌ THIS SCRIPT CONTAINS MAJOR EXPERIMENTAL FLAWS IDENTIFIED BY GPT-o3 ❌
+
+PROBLEMS IDENTIFIED IN GPT-o3 REVIEW:
+1. "データリーク問題": Hardcoded test responses
+2. "極端に弱いベースライン": Artificially weak comparisons  
+3. "6問小規模データ": Insufficient sample size
+4. "Claude生成データの人工性": Synthetic evaluation data
+5. "過学習問題": Overfitting to small test set
+
+🚨 DO NOT USE FOR EXPERIMENTAL VALIDATION 🚨
+
+USE INSTEAD: 
+- experiments/fair_real_data_experiments.py
+- experiments/real_rl_experiments.py  
+- experiments/real_qa_experiments.py
+- run_fair_validation.py
+
+These new scripts address all GPT-o3 concerns with:
+✅ No data leaks
+✅ Competitive baselines
+✅ Large-scale evaluation (1000+ samples)
+✅ Real datasets only
+✅ Statistical rigor
+
+Original GPT-o3 Review Translation:
+"This script contains mock implementations for proof-of-concept purposes"
+"The current 'abnormally good results' are due to simulated data and implementation bias"
+
+DEPRECATED - REPLACED BY FAIR EXPERIMENTS
+"""
+
+# Original problematic PoC script continues below...
+# Kept for reference but marked as deprecated
+
+"""
 Simplified PoC evaluation script for InsightSpike-AI
 ===================================================
 

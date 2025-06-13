@@ -48,6 +48,15 @@ documentation/reports/
 *COMPLETION.md
 PROJECT_RESTRUCTURE*.md
 
+# 実験結果アーカイブ（プッシュしない）
+archive/experimental_results/
+archive/old_results/
+*.pdf
+*.png
+experiments/results/
+experiments/outputs/
+experiments/large_scale_results/
+
 # 作業レポート・完了報告書（プッシュしない）
 docs/*COMPLETION*.md
 docs/*REPORT*.md
