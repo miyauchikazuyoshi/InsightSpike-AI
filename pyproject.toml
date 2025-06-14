@@ -23,13 +23,13 @@ classifiers = [
 python = "^3.11"
 
 # Core ML dependencies - CPU-only for compatibility
-torch = ">=2.0.0,<3.0.0"
-torchvision = ">=0.15.0"
-torchaudio = ">=2.0.0"
-faiss-cpu = ">=1.11.0"
+torch = "^2.2.2"
+torchvision = "^0.17.2"
+torchaudio = "^2.2.2"
+faiss-cpu = ">=1.7.0"  # Updated for NumPy 2.x compatibility
 
 # Cross-platform dependencies
-numpy = ">=1.24.0,<2.0.0"  # Unified NumPy 1.x for FAISS compatibility
+numpy = ">=1.24.0"  # Allow NumPy 2.x for 2025 compatibility
 sentence-transformers = "^2.5"
 scipy = "^1.12"
 transformers = "<4.40"
@@ -73,17 +73,19 @@ flake8 = "^6.0"
 
 [tool.poetry.group.ci.dependencies]
 pytest = "^8.0"
+pytest-cov = "^4.0"      # Coverage reporting for CI
 # CIでは faiss は手動インストール（LITE_MODE使用）
 
 [tool.poetry.group.colab.dependencies]
-# Colab環境では、以下はsetup_colab.shで先行インストール:
-# - torch>=2.4.0 (with CUDA 12.1)
-# - numpy==1.26.4 (FAISS + thinc compatible)
-# - faiss-gpu-cu12==1.11.0
-# - torch-geometric (optional)
-ipywidgets = "^8.0"  # Jupyter widget support for Colab
-jupyter = "^1.0"     # Jupyter notebook support
-notebook = "^7.0"    # Notebook interface
+# Colab環境専用依存関係
+# NOTE: torch, numpy, faiss は環境検出により事前インストール
+ipywidgets = "^8.0"     # Jupyter widget support for Colab
+jupyter = "^1.0"        # Jupyter notebook support
+notebook = "^7.0"       # Notebook interface
+pandas = "^2.0"         # Data analysis (commonly used in Colab)
+seaborn = "^0.12"       # Visualization (commonly used in Colab)
+plotly = "^5.0"         # Interactive plots for Colab
+tqdm = "^4.65"          # Progress bars for long operations
 
 [tool.poetry.group.docker.dependencies]
 # Docker環境専用依存関係 - torch/faissは事前にpip installするため除外

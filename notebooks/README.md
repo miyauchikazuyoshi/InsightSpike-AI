@@ -4,9 +4,9 @@ This directory contains Jupyter notebooks optimized for **large-scale experiment
 
 ## 📂 Notebook Contents
 
-### Large-Scale Production Notebooks
-- `Colab_Dependency_Investigation.ipynb` - **Large-scale dependency analysis** with performance monitoring for 100K+ documents
-- `InsightSpike_Bypass_Notebook.ipynb` - **Production-ready bypass methods** with batch processing and scalability features
+### Official Setup & Experiments (2025対応)
+- `InsightSpike_Colab_Setup_2025_fixed.ipynb` - **Official setup guide** with comprehensive dependency management
+- `InsightSpike_Colab_Experiments_2025_fixed.ipynb` - **Detailed experiment framework** with statistical analysis
 
 ## 🚀 Large-Scale Usage
 

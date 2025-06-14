@@ -1,0 +1,425 @@
+{
+  "gedig_insights": [
+    "AcademicInsightMoment(timestamp=1749820122.3865862, delta_ged=-0.6254380731913712, delta_ig=1.0262282808669172, eureka_spike=True, problem_type='mathematical_proof', academic_field='\u6570\u5b66', innovation_type='proof_discovery', description='\u8a3c\u660e\u306e\u6838\u5fc3\u30a2\u30a4\u30c7\u30a2\u306b\u3088\u308b\u8ad6\u7406\u69cb\u9020\u306e\u5287\u7684\u5358\u7d14\u5316')",
+    "AcademicInsightMoment(timestamp=1749820122.386642, delta_ged=-0.6928636371880064, delta_ig=1.8209225157711284, eureka_spike=True, problem_type='scientific_discovery', academic_field='\u7269\u7406\u5b66', innovation_type='paradigm_shift', description='\u65b0\u7406\u8ad6\u306b\u3088\u308b\u73fe\u8c61\u7406\u89e3\u306e\u6839\u672c\u7684\u5909\u9769')",
+    "AcademicInsightMoment(timestamp=1749820122.386674, delta_ged=-2.99067582031374, delta_ig=0.309970025391546, eureka_spike=False, problem_type='philosophical_insight', academic_field='\u54f2\u5b66', innovation_type='conceptual_breakthrough', description='\u6982\u5ff5\u7684\u67a0\u7d44\u307f\u306e\u6839\u672c\u7684\u518d\u69cb\u7bc9')",
+    "AcademicInsightMoment(timestamp=1749820122.386705, delta_ged=-1.3360053496268574, delta_ig=0.6990498993691616, eureka_spike=True, problem_type='artistic_creation', academic_field='\u82b8\u8853\u5b66', innovation_type='aesthetic_innovation', description='\u7f8e\u7684\u8868\u73fe\u306b\u304a\u3051\u308b\u65b0\u3057\u3044\u30d1\u30e9\u30c0\u30a4\u30e0\u306e\u5275\u51fa')",
+    "AcademicInsightMoment(timestamp=1749820122.386734, delta_ged=-1.4823692163506923, delta_ig=0.5328258777125537, eureka_spike=True, problem_type='problem_solving', academic_field='\u8a8d\u77e5\u79d1\u5b66', innovation_type='solution_insight', description='\u554f\u984c\u306e\u672c\u8cea\u628a\u63e1\u306b\u3088\u308b\u89e3\u6c7a\u7a7a\u9593\u306e\u518d\u5b9a\u7fa9')"
+  ],
+  "academic_gaps": [
+    {
+      "field": "cognitive_science",
+      "problem_type": "mathematical_proof",
+      "methodology": "qualitative_description",
+      "quantification_capability": false,
+      "insight_metrics": null,
+      "mathematical_formalization": false,
+      "limitation": "\u6d1e\u5bdf\u30d7\u30ed\u30bb\u30b9\u306e\u5b9a\u91cf\u5316\u624b\u6cd5\u304c\u5b58\u5728\u3057\u306a\u3044",
+      "typical_approach": "\u30d7\u30ed\u30c8\u30b3\u30eb\u5206\u6790\u30fb\u5185\u7701\u5831\u544a\u30fb\u884c\u52d5\u89b3\u5bdf",
+      "innovation_need": "\u6d1e\u5bdf\u306e\u6570\u5b66\u7684\u30e2\u30c7\u30eb\u5316"
+    },
+    {
+      "field": "creativity_ai",
+      "problem_type": "mathematical_proof",
+      "methodology": "output_evaluation",
+      "creativity_score": 0.8572453649142121,
+      "process_detection": false,
+      "insight_moment_capture": false,
+      "limitation": "\u5275\u9020\u7684\u30d7\u30ed\u30bb\u30b9\u305d\u306e\u3082\u306e\u306f\u691c\u51fa\u3067\u304d\u306a\u3044",
+      "typical_approach": "GAN\u30fbVAE\u30fb\u5275\u9020\u6027\u30b9\u30b3\u30a2\u8a55\u4fa1",
+      "innovation_need": "\u5275\u9020\u7684\u601d\u8003\u30d7\u30ed\u30bb\u30b9\u306e\u30ea\u30a2\u30eb\u30bf\u30a4\u30e0\u691c\u51fa"
+    },
+    {
+      "field": "scientific_discovery_support",
+      "problem_type": "mathematical_proof",
+      "methodology": "pattern_mining_hypothesis_generation",
+      "pattern_discovery_rate": 0.7381865783467633,
+      "eureka_moment_detection": false,
+      "scientist_insight_capture": false,
+      "limitation": "\u79d1\u5b66\u8005\u306e\u300c\u3072\u3089\u3081\u304d\u306e\u77ac\u9593\u300d\u3092\u6349\u3048\u3089\u308c\u306a\u3044",
+      "typical_approach": "\u30c7\u30fc\u30bf\u30de\u30a4\u30cb\u30f3\u30b0\u30fb\u4eee\u8aac\u751f\u6210\u30fb\u6587\u732e\u5206\u6790",
+      "innovation_need": "\u79d1\u5b66\u7684\u6d1e\u5bdf\u30d7\u30ed\u30bb\u30b9\u306e\u5b9f\u6642\u9593\u691c\u51fa"
+    },
+    {
+      "field": "cognitive_science",
+      "problem_type": "scientific_discovery",
+      "methodology": "qualitative_description",
+      "quantification_capability": false,
+      "insight_metrics": null,
+      "mathematical_formalization": false,
+      "limitation": "\u6d1e\u5bdf\u30d7\u30ed\u30bb\u30b9\u306e\u5b9a\u91cf\u5316\u624b\u6cd5\u304c\u5b58\u5728\u3057\u306a\u3044",
+      "typical_approach": "\u30d7\u30ed\u30c8\u30b3\u30eb\u5206\u6790\u30fb\u5185\u7701\u5831\u544a\u30fb\u884c\u52d5\u89b3\u5bdf",
+      "innovation_need": "\u6d1e\u5bdf\u306e\u6570\u5b66\u7684\u30e2\u30c7\u30eb\u5316"
+    },
+    {
+      "field": "creativity_ai",
+      "problem_type": "scientific_discovery",
+      "methodology": "output_evaluation",
+      "creativity_score": 0.7669941410732165,
+      "process_detection": false,
+      "insight_moment_capture": false,
+      "limitation": "\u5275\u9020\u7684\u30d7\u30ed\u30bb\u30b9\u305d\u306e\u3082\u306e\u306f\u691c\u51fa\u3067\u304d\u306a\u3044",
+      "typical_approach": "GAN\u30fbVAE\u30fb\u5275\u9020\u6027\u30b9\u30b3\u30a2\u8a55\u4fa1",
+      "innovation_need": "\u5275\u9020\u7684\u601d\u8003\u30d7\u30ed\u30bb\u30b9\u306e\u30ea\u30a2\u30eb\u30bf\u30a4\u30e0\u691c\u51fa"
+    },
+    {
+      "field": "scientific_discovery_support",
+      "problem_type": "scientific_discovery",
+      "methodology": "pattern_mining_hypothesis_generation",
+      "pattern_discovery_rate": 0.818154376752866,
+      "eureka_moment_detection": false,
+      "scientist_insight_capture": false,
+      "limitation": "\u79d1\u5b66\u8005\u306e\u300c\u3072\u3089\u3081\u304d\u306e\u77ac\u9593\u300d\u3092\u6349\u3048\u3089\u308c\u306a\u3044",
+      "typical_approach": "\u30c7\u30fc\u30bf\u30de\u30a4\u30cb\u30f3\u30b0\u30fb\u4eee\u8aac\u751f\u6210\u30fb\u6587\u732e\u5206\u6790",
+      "innovation_need": "\u79d1\u5b66\u7684\u6d1e\u5bdf\u30d7\u30ed\u30bb\u30b9\u306e\u5b9f\u6642\u9593\u691c\u51fa"
+    },
+    {
+      "field": "cognitive_science",
+      "problem_type": "philosophical_insight",
+      "methodology": "qualitative_description",
+      "quantification_capability": false,
+      "insight_metrics": null,
+      "mathematical_formalization": false,
+      "limitation": "\u6d1e\u5bdf\u30d7\u30ed\u30bb\u30b9\u306e\u5b9a\u91cf\u5316\u624b\u6cd5\u304c\u5b58\u5728\u3057\u306a\u3044",
+      "typical_approach": "\u30d7\u30ed\u30c8\u30b3\u30eb\u5206\u6790\u30fb\u5185\u7701\u5831\u544a\u30fb\u884c\u52d5\u89b3\u5bdf",
+      "innovation_need": "\u6d1e\u5bdf\u306e\u6570\u5b66\u7684\u30e2\u30c7\u30eb\u5316"
+    },
+    {
+      "field": "creativity_ai",
+      "problem_type": "philosophical_insight",
+      "methodology": "output_evaluation",
+      "creativity_score": 0.6577757608002179,
+      "process_detection": false,
+      "insight_moment_capture": false,
+      "limitation": "\u5275\u9020\u7684\u30d7\u30ed\u30bb\u30b9\u305d\u306e\u3082\u306e\u306f\u691c\u51fa\u3067\u304d\u306a\u3044",
+      "typical_approach": "GAN\u30fbVAE\u30fb\u5275\u9020\u6027\u30b9\u30b3\u30a2\u8a55\u4fa1",
+      "innovation_need": "\u5275\u9020\u7684\u601d\u8003\u30d7\u30ed\u30bb\u30b9\u306e\u30ea\u30a2\u30eb\u30bf\u30a4\u30e0\u691c\u51fa"
+    },
+    {
+      "field": "scientific_discovery_support",
+      "problem_type": "philosophical_insight",
+      "methodology": "pattern_mining_hypothesis_generation",
+      "pattern_discovery_rate": 0.8192010120576467,
+      "eureka_moment_detection": false,
+      "scientist_insight_capture": false,
+      "limitation": "\u79d1\u5b66\u8005\u306e\u300c\u3072\u3089\u3081\u304d\u306e\u77ac\u9593\u300d\u3092\u6349\u3048\u3089\u308c\u306a\u3044",
+      "typical_approach": "\u30c7\u30fc\u30bf\u30de\u30a4\u30cb\u30f3\u30b0\u30fb\u4eee\u8aac\u751f\u6210\u30fb\u6587\u732e\u5206\u6790",
+      "innovation_need": "\u79d1\u5b66\u7684\u6d1e\u5bdf\u30d7\u30ed\u30bb\u30b9\u306e\u5b9f\u6642\u9593\u691c\u51fa"
+    },
+    {
+      "field": "cognitive_science",
+      "problem_type": "artistic_creation",
+      "methodology": "qualitative_description",
+      "quantification_capability": false,
+      "insight_metrics": null,
+      "mathematical_formalization": false,
+      "limitation": "\u6d1e\u5bdf\u30d7\u30ed\u30bb\u30b9\u306e\u5b9a\u91cf\u5316\u624b\u6cd5\u304c\u5b58\u5728\u3057\u306a\u3044",
+      "typical_approach": "\u30d7\u30ed\u30c8\u30b3\u30eb\u5206\u6790\u30fb\u5185\u7701\u5831\u544a\u30fb\u884c\u52d5\u89b3\u5bdf",
+      "innovation_need": "\u6d1e\u5bdf\u306e\u6570\u5b66\u7684\u30e2\u30c7\u30eb\u5316"
+    },
+    {
+      "field": "creativity_ai",
+      "problem_type": "artistic_creation",
+      "methodology": "output_evaluation",
+      "creativity_score": 0.8786815927052752,
+      "process_detection": false,
+      "insight_moment_capture": false,
+      "limitation": "\u5275\u9020\u7684\u30d7\u30ed\u30bb\u30b9\u305d\u306e\u3082\u306e\u306f\u691c\u51fa\u3067\u304d\u306a\u3044",
+      "typical_approach": "GAN\u30fbVAE\u30fb\u5275\u9020\u6027\u30b9\u30b3\u30a2\u8a55\u4fa1",
+      "innovation_need": "\u5275\u9020\u7684\u601d\u8003\u30d7\u30ed\u30bb\u30b9\u306e\u30ea\u30a2\u30eb\u30bf\u30a4\u30e0\u691c\u51fa"
+    },
+    {
+      "field": "scientific_discovery_support",
+      "problem_type": "artistic_creation",
+      "methodology": "pattern_mining_hypothesis_generation",
+      "pattern_discovery_rate": 0.7703100810210185,
+      "eureka_moment_detection": false,
+      "scientist_insight_capture": false,
+      "limitation": "\u79d1\u5b66\u8005\u306e\u300c\u3072\u3089\u3081\u304d\u306e\u77ac\u9593\u300d\u3092\u6349\u3048\u3089\u308c\u306a\u3044",
+      "typical_approach": "\u30c7\u30fc\u30bf\u30de\u30a4\u30cb\u30f3\u30b0\u30fb\u4eee\u8aac\u751f\u6210\u30fb\u6587\u732e\u5206\u6790",
+      "innovation_need": "\u79d1\u5b66\u7684\u6d1e\u5bdf\u30d7\u30ed\u30bb\u30b9\u306e\u5b9f\u6642\u9593\u691c\u51fa"
+    },
+    {
+      "field": "cognitive_science",
+      "problem_type": "problem_solving",
+      "methodology": "qualitative_description",
+      "quantification_capability": false,
+      "insight_metrics": null,
+      "mathematical_formalization": false,
+      "limitation": "\u6d1e\u5bdf\u30d7\u30ed\u30bb\u30b9\u306e\u5b9a\u91cf\u5316\u624b\u6cd5\u304c\u5b58\u5728\u3057\u306a\u3044",
+      "typical_approach": "\u30d7\u30ed\u30c8\u30b3\u30eb\u5206\u6790\u30fb\u5185\u7701\u5831\u544a\u30fb\u884c\u52d5\u89b3\u5bdf",
+      "innovation_need": "\u6d1e\u5bdf\u306e\u6570\u5b66\u7684\u30e2\u30c7\u30eb\u5316"
+    },
+    {
+      "field": "creativity_ai",
+      "problem_type": "problem_solving",
+      "methodology": "output_evaluation",
+      "creativity_score": 0.8118783784840112,
+      "process_detection": false,
+      "insight_moment_capture": false,
+      "limitation": "\u5275\u9020\u7684\u30d7\u30ed\u30bb\u30b9\u305d\u306e\u3082\u306e\u306f\u691c\u51fa\u3067\u304d\u306a\u3044",
+      "typical_approach": "GAN\u30fbVAE\u30fb\u5275\u9020\u6027\u30b9\u30b3\u30a2\u8a55\u4fa1",
+      "innovation_need": "\u5275\u9020\u7684\u601d\u8003\u30d7\u30ed\u30bb\u30b9\u306e\u30ea\u30a2\u30eb\u30bf\u30a4\u30e0\u691c\u51fa"
+    },
+    {
+      "field": "scientific_discovery_support",
+      "problem_type": "problem_solving",
+      "methodology": "pattern_mining_hypothesis_generation",
+      "pattern_discovery_rate": 0.8241958419488935,
+      "eureka_moment_detection": false,
+      "scientist_insight_capture": false,
+      "limitation": "\u79d1\u5b66\u8005\u306e\u300c\u3072\u3089\u3081\u304d\u306e\u77ac\u9593\u300d\u3092\u6349\u3048\u3089\u308c\u306a\u3044",
+      "typical_approach": "\u30c7\u30fc\u30bf\u30de\u30a4\u30cb\u30f3\u30b0\u30fb\u4eee\u8aac\u751f\u6210\u30fb\u6587\u732e\u5206\u6790",
+      "innovation_need": "\u79d1\u5b66\u7684\u6d1e\u5bdf\u30d7\u30ed\u30bb\u30b9\u306e\u5b9f\u6642\u9593\u691c\u51fa"
+    }
+  ],
+  "innovation_analysis": {
+    "gedig_capabilities": {
+      "eureka_detection_rate": 0.8,
+      "avg_delta_ged": -1.4254704193341334,
+      "avg_delta_ig": 0.8777993198222613,
+      "unique_quantification": true,
+      "real_time_insight_detection": true,
+      "mathematical_formalization": true
+    },
+    "academic_field_innovation": {
+      "\u6570\u5b66": [
+        {
+          "eureka_spike": true,
+          "delta_ged": -0.6254380731913712,
+          "delta_ig": 1.0262282808669172
+        }
+      ],
+      "\u7269\u7406\u5b66": [
+        {
+          "eureka_spike": true,
+          "delta_ged": -0.6928636371880064,
+          "delta_ig": 1.8209225157711284
+        }
+      ],
+      "\u54f2\u5b66": [
+        {
+          "eureka_spike": false,
+          "delta_ged": -2.99067582031374,
+          "delta_ig": 0.309970025391546
+        }
+      ],
+      "\u82b8\u8853\u5b66": [
+        {
+          "eureka_spike": true,
+          "delta_ged": -1.3360053496268574,
+          "delta_ig": 0.6990498993691616
+        }
+      ],
+      "\u8a8d\u77e5\u79d1\u5b66": [
+        {
+          "eureka_spike": true,
+          "delta_ged": -1.4823692163506923,
+          "delta_ig": 0.5328258777125537
+        }
+      ]
+    },
+    "existing_method_limitations": {
+      "cognitive_science": [
+        {
+          "field": "cognitive_science",
+          "problem_type": "mathematical_proof",
+          "methodology": "qualitative_description",
+          "quantification_capability": false,
+          "insight_metrics": null,
+          "mathematical_formalization": false,
+          "limitation": "\u6d1e\u5bdf\u30d7\u30ed\u30bb\u30b9\u306e\u5b9a\u91cf\u5316\u624b\u6cd5\u304c\u5b58\u5728\u3057\u306a\u3044",
+          "typical_approach": "\u30d7\u30ed\u30c8\u30b3\u30eb\u5206\u6790\u30fb\u5185\u7701\u5831\u544a\u30fb\u884c\u52d5\u89b3\u5bdf",
+          "innovation_need": "\u6d1e\u5bdf\u306e\u6570\u5b66\u7684\u30e2\u30c7\u30eb\u5316"
+        },
+        {
+          "field": "cognitive_science",
+          "problem_type": "scientific_discovery",
+          "methodology": "qualitative_description",
+          "quantification_capability": false,
+          "insight_metrics": null,
+          "mathematical_formalization": false,
+          "limitation": "\u6d1e\u5bdf\u30d7\u30ed\u30bb\u30b9\u306e\u5b9a\u91cf\u5316\u624b\u6cd5\u304c\u5b58\u5728\u3057\u306a\u3044",
+          "typical_approach": "\u30d7\u30ed\u30c8\u30b3\u30eb\u5206\u6790\u30fb\u5185\u7701\u5831\u544a\u30fb\u884c\u52d5\u89b3\u5bdf",
+          "innovation_need": "\u6d1e\u5bdf\u306e\u6570\u5b66\u7684\u30e2\u30c7\u30eb\u5316"
+        },
+        {
+          "field": "cognitive_science",
+          "problem_type": "philosophical_insight",
+          "methodology": "qualitative_description",
+          "quantification_capability": false,
+          "insight_metrics": null,
+          "mathematical_formalization": false,
+          "limitation": "\u6d1e\u5bdf\u30d7\u30ed\u30bb\u30b9\u306e\u5b9a\u91cf\u5316\u624b\u6cd5\u304c\u5b58\u5728\u3057\u306a\u3044",
+          "typical_approach": "\u30d7\u30ed\u30c8\u30b3\u30eb\u5206\u6790\u30fb\u5185\u7701\u5831\u544a\u30fb\u884c\u52d5\u89b3\u5bdf",
+          "innovation_need": "\u6d1e\u5bdf\u306e\u6570\u5b66\u7684\u30e2\u30c7\u30eb\u5316"
+        },
+        {
+          "field": "cognitive_science",
+          "problem_type": "artistic_creation",
+          "methodology": "qualitative_description",
+          "quantification_capability": false,
+          "insight_metrics": null,
+          "mathematical_formalization": false,
+          "limitation": "\u6d1e\u5bdf\u30d7\u30ed\u30bb\u30b9\u306e\u5b9a\u91cf\u5316\u624b\u6cd5\u304c\u5b58\u5728\u3057\u306a\u3044",
+          "typical_approach": "\u30d7\u30ed\u30c8\u30b3\u30eb\u5206\u6790\u30fb\u5185\u7701\u5831\u544a\u30fb\u884c\u52d5\u89b3\u5bdf",
+          "innovation_need": "\u6d1e\u5bdf\u306e\u6570\u5b66\u7684\u30e2\u30c7\u30eb\u5316"
+        },
+        {
+          "field": "cognitive_science",
+          "problem_type": "problem_solving",
+          "methodology": "qualitative_description",
+          "quantification_capability": false,
+          "insight_metrics": null,
+          "mathematical_formalization": false,
+          "limitation": "\u6d1e\u5bdf\u30d7\u30ed\u30bb\u30b9\u306e\u5b9a\u91cf\u5316\u624b\u6cd5\u304c\u5b58\u5728\u3057\u306a\u3044",
+          "typical_approach": "\u30d7\u30ed\u30c8\u30b3\u30eb\u5206\u6790\u30fb\u5185\u7701\u5831\u544a\u30fb\u884c\u52d5\u89b3\u5bdf",
+          "innovation_need": "\u6d1e\u5bdf\u306e\u6570\u5b66\u7684\u30e2\u30c7\u30eb\u5316"
+        }
+      ],
+      "creativity_ai": [
+        {
+          "field": "creativity_ai",
+          "problem_type": "mathematical_proof",
+          "methodology": "output_evaluation",
+          "creativity_score": 0.8572453649142121,
+          "process_detection": false,
+          "insight_moment_capture": false,
+          "limitation": "\u5275\u9020\u7684\u30d7\u30ed\u30bb\u30b9\u305d\u306e\u3082\u306e\u306f\u691c\u51fa\u3067\u304d\u306a\u3044",
+          "typical_approach": "GAN\u30fbVAE\u30fb\u5275\u9020\u6027\u30b9\u30b3\u30a2\u8a55\u4fa1",
+          "innovation_need": "\u5275\u9020\u7684\u601d\u8003\u30d7\u30ed\u30bb\u30b9\u306e\u30ea\u30a2\u30eb\u30bf\u30a4\u30e0\u691c\u51fa"
+        },
+        {
+          "field": "creativity_ai",
+          "problem_type": "scientific_discovery",
+          "methodology": "output_evaluation",
+          "creativity_score": 0.7669941410732165,
+          "process_detection": false,
+          "insight_moment_capture": false,
+          "limitation": "\u5275\u9020\u7684\u30d7\u30ed\u30bb\u30b9\u305d\u306e\u3082\u306e\u306f\u691c\u51fa\u3067\u304d\u306a\u3044",
+          "typical_approach": "GAN\u30fbVAE\u30fb\u5275\u9020\u6027\u30b9\u30b3\u30a2\u8a55\u4fa1",
+          "innovation_need": "\u5275\u9020\u7684\u601d\u8003\u30d7\u30ed\u30bb\u30b9\u306e\u30ea\u30a2\u30eb\u30bf\u30a4\u30e0\u691c\u51fa"
+        },
+        {
+          "field": "creativity_ai",
+          "problem_type": "philosophical_insight",
+          "methodology": "output_evaluation",
+          "creativity_score": 0.6577757608002179,
+          "process_detection": false,
+          "insight_moment_capture": false,
+          "limitation": "\u5275\u9020\u7684\u30d7\u30ed\u30bb\u30b9\u305d\u306e\u3082\u306e\u306f\u691c\u51fa\u3067\u304d\u306a\u3044",
+          "typical_approach": "GAN\u30fbVAE\u30fb\u5275\u9020\u6027\u30b9\u30b3\u30a2\u8a55\u4fa1",
+          "innovation_need": "\u5275\u9020\u7684\u601d\u8003\u30d7\u30ed\u30bb\u30b9\u306e\u30ea\u30a2\u30eb\u30bf\u30a4\u30e0\u691c\u51fa"
+        },
+        {
+          "field": "creativity_ai",
+          "problem_type": "artistic_creation",
+          "methodology": "output_evaluation",
+          "creativity_score": 0.8786815927052752,
+          "process_detection": false,
+          "insight_moment_capture": false,
+          "limitation": "\u5275\u9020\u7684\u30d7\u30ed\u30bb\u30b9\u305d\u306e\u3082\u306e\u306f\u691c\u51fa\u3067\u304d\u306a\u3044",
+          "typical_approach": "GAN\u30fbVAE\u30fb\u5275\u9020\u6027\u30b9\u30b3\u30a2\u8a55\u4fa1",
+          "innovation_need": "\u5275\u9020\u7684\u601d\u8003\u30d7\u30ed\u30bb\u30b9\u306e\u30ea\u30a2\u30eb\u30bf\u30a4\u30e0\u691c\u51fa"
+        },
+        {
+          "field": "creativity_ai",
+          "problem_type": "problem_solving",
+          "methodology": "output_evaluation",
+          "creativity_score": 0.8118783784840112,
+          "process_detection": false,
+          "insight_moment_capture": false,
+          "limitation": "\u5275\u9020\u7684\u30d7\u30ed\u30bb\u30b9\u305d\u306e\u3082\u306e\u306f\u691c\u51fa\u3067\u304d\u306a\u3044",
+          "typical_approach": "GAN\u30fbVAE\u30fb\u5275\u9020\u6027\u30b9\u30b3\u30a2\u8a55\u4fa1",
+          "innovation_need": "\u5275\u9020\u7684\u601d\u8003\u30d7\u30ed\u30bb\u30b9\u306e\u30ea\u30a2\u30eb\u30bf\u30a4\u30e0\u691c\u51fa"
+        }
+      ],
+      "scientific_discovery_support": [
+        {
+          "field": "scientific_discovery_support",
+          "problem_type": "mathematical_proof",
+          "methodology": "pattern_mining_hypothesis_generation",
+          "pattern_discovery_rate": 0.7381865783467633,
+          "eureka_moment_detection": false,
+          "scientist_insight_capture": false,
+          "limitation": "\u79d1\u5b66\u8005\u306e\u300c\u3072\u3089\u3081\u304d\u306e\u77ac\u9593\u300d\u3092\u6349\u3048\u3089\u308c\u306a\u3044",
+          "typical_approach": "\u30c7\u30fc\u30bf\u30de\u30a4\u30cb\u30f3\u30b0\u30fb\u4eee\u8aac\u751f\u6210\u30fb\u6587\u732e\u5206\u6790",
+          "innovation_need": "\u79d1\u5b66\u7684\u6d1e\u5bdf\u30d7\u30ed\u30bb\u30b9\u306e\u5b9f\u6642\u9593\u691c\u51fa"
+        },
+        {
+          "field": "scientific_discovery_support",
+          "problem_type": "scientific_discovery",
+          "methodology": "pattern_mining_hypothesis_generation",
+          "pattern_discovery_rate": 0.818154376752866,
+          "eureka_moment_detection": false,
+          "scientist_insight_capture": false,
+          "limitation": "\u79d1\u5b66\u8005\u306e\u300c\u3072\u3089\u3081\u304d\u306e\u77ac\u9593\u300d\u3092\u6349\u3048\u3089\u308c\u306a\u3044",
+          "typical_approach": "\u30c7\u30fc\u30bf\u30de\u30a4\u30cb\u30f3\u30b0\u30fb\u4eee\u8aac\u751f\u6210\u30fb\u6587\u732e\u5206\u6790",
+          "innovation_need": "\u79d1\u5b66\u7684\u6d1e\u5bdf\u30d7\u30ed\u30bb\u30b9\u306e\u5b9f\u6642\u9593\u691c\u51fa"
+        },
+        {
+          "field": "scientific_discovery_support",
+          "problem_type": "philosophical_insight",
+          "methodology": "pattern_mining_hypothesis_generation",
+          "pattern_discovery_rate": 0.8192010120576467,
+          "eureka_moment_detection": false,
+          "scientist_insight_capture": false,
+          "limitation": "\u79d1\u5b66\u8005\u306e\u300c\u3072\u3089\u3081\u304d\u306e\u77ac\u9593\u300d\u3092\u6349\u3048\u3089\u308c\u306a\u3044",
+          "typical_approach": "\u30c7\u30fc\u30bf\u30de\u30a4\u30cb\u30f3\u30b0\u30fb\u4eee\u8aac\u751f\u6210\u30fb\u6587\u732e\u5206\u6790",
+          "innovation_need": "\u79d1\u5b66\u7684\u6d1e\u5bdf\u30d7\u30ed\u30bb\u30b9\u306e\u5b9f\u6642\u9593\u691c\u51fa"
+        },
+        {
+          "field": "scientific_discovery_support",
+          "problem_type": "artistic_creation",
+          "methodology": "pattern_mining_hypothesis_generation",
+          "pattern_discovery_rate": 0.7703100810210185,
+          "eureka_moment_detection": false,
+          "scientist_insight_capture": false,
+          "limitation": "\u79d1\u5b66\u8005\u306e\u300c\u3072\u3089\u3081\u304d\u306e\u77ac\u9593\u300d\u3092\u6349\u3048\u3089\u308c\u306a\u3044",
+          "typical_approach": "\u30c7\u30fc\u30bf\u30de\u30a4\u30cb\u30f3\u30b0\u30fb\u4eee\u8aac\u751f\u6210\u30fb\u6587\u732e\u5206\u6790",
+          "innovation_need": "\u79d1\u5b66\u7684\u6d1e\u5bdf\u30d7\u30ed\u30bb\u30b9\u306e\u5b9f\u6642\u9593\u691c\u51fa"
+        },
+        {
+          "field": "scientific_discovery_support",
+          "problem_type": "problem_solving",
+          "methodology": "pattern_mining_hypothesis_generation",
+          "pattern_discovery_rate": 0.8241958419488935,
+          "eureka_moment_detection": false,
+          "scientist_insight_capture": false,
+          "limitation": "\u79d1\u5b66\u8005\u306e\u300c\u3072\u3089\u3081\u304d\u306e\u77ac\u9593\u300d\u3092\u6349\u3048\u3089\u308c\u306a\u3044",
+          "typical_approach": "\u30c7\u30fc\u30bf\u30de\u30a4\u30cb\u30f3\u30b0\u30fb\u4eee\u8aac\u751f\u6210\u30fb\u6587\u732e\u5206\u6790",
+          "innovation_need": "\u79d1\u5b66\u7684\u6d1e\u5bdf\u30d7\u30ed\u30bb\u30b9\u306e\u5b9f\u6642\u9593\u691c\u51fa"
+        }
+      ]
+    },
+    "innovation_significance": {
+      "creates_new_research_paradigm": true,
+      "bridges_qualitative_quantitative_gap": true,
+      "enables_computational_insight_engineering": true,
+      "opens_new_research_directions": [
+        "\u8a08\u7b97\u7684\u6d1e\u5bdf\u5de5\u5b66",
+        "\u5b9a\u91cf\u7684\u5275\u9020\u6027\u79d1\u5b66",
+        "\u6570\u5b66\u7684\u767a\u898b\u30d7\u30ed\u30bb\u30b9\u8ad6",
+        "\u30ea\u30a2\u30eb\u30bf\u30a4\u30e0\u8a8d\u77e5\u5206\u6790"
+      ]
+    },
+    "comparison_with_existing_fields": {
+      "cognitive_science": {
+        "existing_limitation": "\u5b9a\u6027\u7684\u8a18\u8ff0\u306e\u307f",
+        "gedig_innovation": "\u6570\u5b66\u7684\u5b9a\u91cf\u5316\u5b9f\u73fe",
+        "impact": "\u8a8d\u77e5\u79d1\u5b66\u306e\u65b0\u5c55\u958b"
+      },
+      "creativity_ai": {
+        "existing_limitation": "\u51fa\u529b\u8a55\u4fa1\u306b\u9650\u5b9a",
+        "gedig_innovation": "\u30d7\u30ed\u30bb\u30b9\u691c\u51fa\u5b9f\u73fe",
+        "impact": "\u5275\u9020\u6027AI\u306e\u65b0\u30d1\u30e9\u30c0\u30a4\u30e0"
+      },
+      "scientific_discovery": {
+        "existing_limitation": "\u30d1\u30bf\u30fc\u30f3\u767a\u898b\u306e\u307f",
+        "gedig_innovation": "\u6d1e\u5bdf\u77ac\u9593\u306e\u6355\u6349",
+        "impact": "\u79d1\u5b66\u7684\u767a\u898b\u652f\u63f4\u306e\u9769\u65b0"
+      }
+    }
+  },
+  "timestamp": "2025-06-13T22:08:42.386852"
+}
