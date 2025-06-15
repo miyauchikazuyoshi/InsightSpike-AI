@@ -8,10 +8,13 @@ class About:
     VERSION = "0.8.0"
 
 
-# Export new main agent for easy access
-# Check if we're in lite mode for CI testing
+# Check if we're in LITE_MODE to skip heavy dependencies
 LITE_MODE = os.environ.get("INSIGHTSPIKE_LITE_MODE", "0") == "1"
 
+# Legacy compatibility exports - import the config.py file specifically
+from .core.config import get_config
+
+# Export new main agent for easy access
 if not LITE_MODE:
     try:
         from .core.agents.main_agent import CycleResult, MainAgent
@@ -47,39 +50,55 @@ else:
         def __init__(self, **kwargs):
             pass
 
-
-# Legacy compatibility exports - import the config.py file specifically
-from .core.config import get_config
-
 # New unified layer exports (recommended for new code)
-try:
-    from .core.layers.layer1_error_monitor import ErrorMonitor
-    from .core.layers.layer2_memory_manager import L2MemoryManager
-    from .core.layers.layer4_llm_provider import get_llm_provider
-except ImportError:
-    # Fallback if core layers are not available
+if not LITE_MODE:
+    try:
+        from .core.layers.layer1_error_monitor import ErrorMonitor
+        from .core.layers.layer2_memory_manager import L2MemoryManager
+        from .core.layers.layer4_llm_provider import get_llm_provider
+    except ImportError:
+        # Fallback if core layers are not available
+        ErrorMonitor = None
+        L2MemoryManager = None
+        get_llm_provider = None
+else:
+    # In lite mode, skip heavy dependencies
     ErrorMonitor = None
     L2MemoryManager = None
     get_llm_provider = None
 
-# Optional Layer3 with PyTorch dependency
-try:
-    from .core.layers.layer3_graph_reasoner import L3GraphReasoner
-except ImportError:
+# Optional Layer3 with PyTorch dependency - skip in LITE_MODE
+if not LITE_MODE:
+    try:
+        from .core.layers.layer3_graph_reasoner import L3GraphReasoner
+    except ImportError:
+        L3GraphReasoner = None
+else:
     L3GraphReasoner = None
 
 # Generic agent system exports
-try:
-    from .core.agents.generic_agent import GenericInsightSpikeAgent
-    from .core.agents.agent_factory import (
-        InsightSpikeAgentFactory, create_maze_agent, 
-        create_configured_maze_agent, AgentConfigBuilder
-    )
-    from .core.interfaces.generic_interfaces import (
-        TaskType, EnvironmentInterface, InsightMoment
-    )
-except ImportError:
-    # Fallback if generic agents are not available
+if not LITE_MODE:
+    try:
+        from .core.agents.generic_agent import GenericInsightSpikeAgent
+        from .core.agents.agent_factory import (
+            InsightSpikeAgentFactory, create_maze_agent, 
+            create_configured_maze_agent, AgentConfigBuilder
+        )
+        from .core.interfaces.generic_interfaces import (
+            TaskType, EnvironmentInterface, InsightMoment
+        )
+    except ImportError:
+        # Fallback if generic agents are not available
+        GenericInsightSpikeAgent = None
+        InsightSpikeAgentFactory = None
+        create_maze_agent = None
+        create_configured_maze_agent = None
+        AgentConfigBuilder = None
+        TaskType = None
+        EnvironmentInterface = None
+        InsightMoment = None
+else:
+    # In lite mode, skip heavy dependencies
     GenericInsightSpikeAgent = None
     InsightSpikeAgentFactory = None
     create_maze_agent = None
@@ -89,15 +108,22 @@ except ImportError:
     EnvironmentInterface = None
     InsightMoment = None
 
-# Standalone reasoner export
-try:
-    from .core.reasoners.standalone_l3 import (
-        StandaloneL3GraphReasoner, create_standalone_reasoner,
-        analyze_documents_simple
-    )
-except ImportError:
-    # Fallback if standalone reasoner is not available
+# Standalone reasoner export - skip in LITE_MODE
+if not LITE_MODE:
+    try:
+        from .core.reasoners.standalone_l3 import (
+            StandaloneL3GraphReasoner, create_standalone_reasoner,
+            analyze_documents_simple
+        )
+    except ImportError:
+        # Fallback if standalone reasoner is not available
+        StandaloneL3GraphReasoner = None
+        create_standalone_reasoner = None
+        analyze_documents_simple = None
+else:
     StandaloneL3GraphReasoner = None
+    create_standalone_reasoner = None
+    analyze_documents_simple = None
     create_standalone_reasoner = None
     analyze_documents_simple = None
 

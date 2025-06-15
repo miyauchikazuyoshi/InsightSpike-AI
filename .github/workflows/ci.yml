@@ -38,11 +38,17 @@ jobs:
         poetry config installer.parallel true
         echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
         echo "INSIGHTSPIKE_LITE_MODE=1" >> $GITHUB_ENV
+        echo "CUDA_VISIBLE_DEVICES=" >> $GITHUB_ENV
+        echo "TORCH_DEVICE=cpu" >> $GITHUB_ENV
+        echo "FORCE_CUDA=0" >> $GITHUB_ENV
+        echo "USE_CUDA=0" >> $GITHUB_ENV
     
     - name: Install dependencies
       run: |
         # Install core dependencies (CI group includes test dependencies)
         poetry install --with ci --no-root
+        # Install CPU-only PyTorch for CI
+        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
         # Install project in development mode
         poetry run pip install -e . --no-deps
     

@@ -49,15 +49,28 @@ except ImportError as e:
     print(f"Warning: Generic agents not available: {e}")
     GENERIC_AGENTS_AVAILABLE = False
 
-# Import standalone reasoner
-try:
-    from .reasoners.standalone_l3 import (
-        StandaloneL3GraphReasoner, create_standalone_reasoner,
-        analyze_documents_simple
-    )
-    STANDALONE_REASONER_AVAILABLE = True
-except ImportError as e:
-    print(f"Warning: Standalone reasoner not available: {e}")
+# Import standalone reasoner - skip in LITE_MODE
+import os
+LITE_MODE = os.getenv('INSIGHTSPIKE_LITE_MODE', '0') == '1'
+
+if not LITE_MODE:
+    try:
+        from .reasoners.standalone_l3 import (
+            StandaloneL3GraphReasoner, create_standalone_reasoner,
+            analyze_documents_simple
+        )
+        STANDALONE_REASONER_AVAILABLE = True
+    except ImportError as e:
+        print(f"Warning: Standalone reasoner not available: {e}")
+        StandaloneL3GraphReasoner = None
+        create_standalone_reasoner = None
+        analyze_documents_simple = None
+        STANDALONE_REASONER_AVAILABLE = False
+else:
+    StandaloneL3GraphReasoner = None
+    create_standalone_reasoner = None
+    analyze_documents_simple = None
+    STANDALONE_REASONER_AVAILABLE = False
     STANDALONE_REASONER_AVAILABLE = False
 
 # Import interfaces
