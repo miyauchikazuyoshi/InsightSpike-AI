@@ -1,45 +1,86 @@
-# 📓 Experiments Notebooks
+# � InsightSpike-AI Notebooks
 
-このディレクトリには、InsightSpike-AIの最新実験とデモンストレーション用ノートブックが含まれています。
+**Google Colab & Jupyter Notebooks for InsightSpike-AI v0.8.0**
 
-## 📂 ノートブック一覧
+このディレクトリには、InsightSpike-AIを効率的に使用するためのnotebooksが含まれています。
 
-### 🚀 メインデモ（推奨）
-- **`InsightSpike_Colab_Demo.ipynb`** - **2025年最新対応のメインデモ**
-  - T4 GPU対応、モジュールインポート修正済み
-  - Poetry代替実行システム
-  - 包括的な機能デモンストレーション
+## 🚀 Getting Started
 
-### 🔧 特殊用途
-- **`InsightSpike_Bypass_Notebook.ipynb`** - **トラブルシューティング用バイパス版**
-  - 通常セットアップが困難な場合の代替手段
-  - 最小限の依存関係で動作
+### ⚡ Quick Start (推奨)
+**`InsightSpike_Quick_Start_v0.8.0.ipynb`**
+- 🔥 **3ステップ**でInsightSpike-AIを動作
+- 📦 **最軽量**セットアップ
+- 🧪 **基本実験**付き
+- ⏱️ **5分以内**で完了
 
-- **`geDIG_Hanoi15_demo_repository.ipynb`** - **geDIGアルゴリズム専用デモ**
-  - Hanoi Tower問題での洞察検出実演
-  - アルゴリズム研究用
+### 🔧 完全セットアップ & デモ
+**`InsightSpike_Colab_Demo.ipynb`**
+- 🛠️ **詳細な診断**・修復機能
+- 📊 **パフォーマンス分析**
+- 🔬 **高度な実験**例
+- 🚨 **トラブルシューティング**
 
-- **`Colab_Dependency_Investigation.ipynb`** - **依存関係調査用**
-  - Poetry中心のシンプルなセットアップ
-  - デバッグ・調査用途
+## 📂 Notebook Contents
 
-## 🎯 推奨利用順序
+### Official Setup & Experiments (2025対応)
+- `InsightSpike_Colab_Setup_2025_fixed.ipynb` - **Official setup guide** with comprehensive dependency management
+- `InsightSpike_Colab_Experiments_2025_fixed.ipynb` - **Detailed experiment framework** with statistical analysis
 
-### 初回ユーザー
-1. `/notebooks/InsightSpike_Colab_Setup_2025_fixed.ipynb` (公式セットアップ)
-2. `InsightSpike_Colab_Demo.ipynb` (メインデモ)
+## 🚀 Large-Scale Usage
 
-### 開発者・研究者
-1. `InsightSpike_Colab_Demo.ipynb` (最新機能)
-2. `/notebooks/InsightSpike_Colab_Experiments_2025_fixed.ipynb` (詳細実験)
+### For Large-Scale Google Colab Experiments
+1. **Recommended Runtime**: A100 GPU for maximum performance
+2. **Memory**: High-RAM runtime for 1M+ vectors
+3. **Fallback**: V100/T4 GPU for development and testing
+4. Open notebook in Google Colab
+5. Run cells sequentially - automatic resource monitoring included
+6. Follow notebook instructions for large-scale configuration
 
-### トラブルシューティング
-1. `InsightSpike_Bypass_Notebook.ipynb` (代替方法)
-2. `Colab_Dependency_Investigation.ipynb` (調査・デバッグ)
+### Performance Specifications
+- **Document Processing**: 100K+ documents with full analysis
+- **Vector Operations**: 1M+ embeddings with FAISS optimization
+- **Batch Processing**: Automatic batching with checkpointing
+- **Memory Management**: Intelligent cleanup and monitoring
+- **Fault Tolerance**: Automatic recovery from interruptions
 
-## 💡 特徴
+## 🔧 Requirements for Large-Scale Operations
 
-- **2025年Colab対応**: NumPy 2.x、PyTorch 2.x環境での動作確認済み
-- **GPU最適化**: T4 GPU環境での最適な性能
-- **エラー処理**: 包括的なトラブルシューティング
-- **モジュラー設計**: 用途別に分離された明確な役割
+- **Python**: 3.8+ with performance optimizations
+- **GPU**: A100 recommended, V100/T4 supported
+- **Memory**: High-RAM runtime (25GB+) for large datasets
+- **Runtime**: Multi-hour sessions with automatic checkpointing
+- **Network**: Stable connection for package management
+
+## 📊 Performance Targets
+
+| Workload | Small Scale | Large Scale | Performance |
+|----------|-------------|-------------|-------------|
+| Documents | 1K-10K | 100K-1M+ | 10x faster processing |
+| Vectors | 10K-100K | 1M+ | GPU-accelerated FAISS |
+| Processing Time | Minutes | Hours | Checkpointed |
+| Memory Usage | Standard | High-RAM | Optimized |
+
+## 💡 Large-Scale Features
+
+- **Batch Processing**: Configurable batch sizes (1K-10K items)
+- **Checkpointing**: Automatic saves every 10K processed items
+- **Resource Monitoring**: Real-time CPU, memory, and GPU tracking
+- **Error Recovery**: Resume from last checkpoint on interruption
+- **Memory Optimization**: Automatic cleanup and garbage collection
+- **Progress Tracking**: ETA and throughput monitoring
+
+## 📝 Production Notes
+
+- Notebooks are optimized for **production-scale workloads**
+- Automatic fallback methods ensure reliability at scale
+- Built-in monitoring prevents resource exhaustion
+- Checkpoint system enables multi-session processing
+- Safe mode allows testing without external dependencies
+- All notebooks support both development and production use cases
+
+## 🎯 Target Applications
+
+- **Research**: Large corpus analysis and insight extraction
+- **Production**: Scalable document processing pipelines
+- **Experimentation**: A/B testing with large datasets
+- **Prototyping**: Rapid development of production-ready solutions

@@ -769,3 +769,12 @@ def test_safe(
     except Exception as e:
         print(f"[red]Error: {e}[/red]")
         raise typer.Exit(code=1)
+
+
+def main():
+    """Main CLI entry point for Poetry scripts"""
+    app()
+
+
+if __name__ == "__main__":
+    main()
