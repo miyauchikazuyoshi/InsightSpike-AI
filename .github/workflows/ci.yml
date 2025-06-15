@@ -7,7 +7,7 @@ on:
     branches: [ main, develop ]
 
 env:
-  PYTHON_VERSION: "3.10"  # Match pyproject.toml
+  PYTHON_VERSION: "3.10"
   POETRY_VERSION: "1.8.3"
 
 jobs:
@@ -41,8 +41,8 @@ jobs:
     
     - name: Install dependencies
       run: |
-        # Install core dependencies only
-        poetry install --only main --only dev
+        # Install core dependencies (CI group includes test dependencies)
+        poetry install --with ci --no-root
         # Install project in development mode
         poetry run pip install -e . --no-deps
     
