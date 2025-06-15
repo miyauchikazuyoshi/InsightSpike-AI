@@ -1,5 +1,6 @@
 import importlib
 import sys, types
+
 sys.path.insert(0, 'src')  # Add src to path for imports
 
 cli = importlib.import_module('insightspike.cli')

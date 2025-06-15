@@ -86,10 +86,31 @@ dummy_networkx = types.SimpleNamespace(
     shortest_path_length=lambda g, s, t: 1
 )
 
-# Mock faiss
+# Mock faiss with more comprehensive implementation
+class MockFaissIndex:
+    def __init__(self, dim=384):
+        self.dim = dim
+        self.ntotal = 0
+        self.is_trained = True
+    
+    def add(self, vectors):
+        self.ntotal += len(vectors) 
+    
+    def search(self, queries, k):
+        # Return mock distances and indices
+        distances = np.random.random((len(queries), k))
+        indices = np.random.randint(0, max(1, self.ntotal), (len(queries), k))
+        return distances, indices
+    
+    def train(self, vectors):
+        self.is_trained = True
+
 dummy_faiss = types.SimpleNamespace(
-    IndexFlatIP=lambda dim: MagicMock(),
-    index_factory=lambda dim, desc: MagicMock(),
+    IndexFlatIP=lambda dim: MockFaissIndex(dim),
+    IndexIVFPQ=lambda quantizer, dim, nlist, m, nbits: MockFaissIndex(dim),
+    index_factory=lambda dim, desc: MockFaissIndex(dim),
+    read_index=lambda path: MockFaissIndex(),
+    write_index=lambda index, path: None,
     METRIC_INNER_PRODUCT=0
 )
 
