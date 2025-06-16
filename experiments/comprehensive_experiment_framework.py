@@ -19,16 +19,32 @@ from datetime import datetime
 import json
 
 # Import our experimental modules
-from baseline_comparison_framework import (
-    ExperimentConfig, BaselineAgent, InsightSpikeAgent, 
-    ExperimentRunner, StatisticalAnalyzer as BaselineStatAnalyzer
-)
-from intrinsic_motivation_framework import (
-    IntrinsicRewardConfig, IntrinsicMotivationFramework, EnhancedQLearningAgent
-)
-from adaptive_reward_scheduling import (
-    AdaptiveScheduleConfig, AdaptiveInsightSpikeAgent
-)
+try:
+    from baseline_comparison_framework import (
+        ExperimentConfig, BaselineAgent, InsightSpikeAgent, 
+        ExperimentRunner
+    )
+except ImportError as e:
+    print(f"Warning: Could not import from baseline_comparison_framework: {e}")
+    # Define minimal fallback classes if needed
+    class ExperimentConfig: pass
+    class BaselineAgent: pass
+    class InsightSpikeAgent: pass
+    class ExperimentRunner: pass
+
+try:
+    from intrinsic_motivation_framework import (
+        IntrinsicRewardConfig, IntrinsicMotivationFramework, EnhancedQLearningAgent
+    )
+except ImportError as e:
+    print(f"Warning: Could not import from intrinsic_motivation_framework: {e}")
+    
+try:
+    from adaptive_reward_scheduling import (
+        AdaptiveScheduleConfig, AdaptiveInsightSpikeAgent
+    )
+except ImportError as e:
+    print(f"Warning: Could not import from adaptive_reward_scheduling: {e}")
 from advanced_visualization_framework import AdvancedVisualizationFramework
 from research_report_generator import (
     ResearchReportGenerator, ResearchReportConfig, ExperimentResults

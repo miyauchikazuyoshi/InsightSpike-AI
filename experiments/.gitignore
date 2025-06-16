@@ -3,10 +3,25 @@ outputs/*.json
 outputs/*.png
 outputs/*.csv
 outputs/*.txt
+outputs/*/
 results/*.json
 results/*.png
 results/*.csv
+results/*/
 data/temp_*
+
+# 一時的な実験ファイル
+*_20*.json
+*_20*.png
+*_20*.pdf
+*_report_*.md
+*_data_*.json
+*_results_*.png
+*_export_*.json
+
+# macOS ファイル
+.DS_Store
+*/.DS_Store
 
 # 作業用Jupyter Notebook
 notebooks/*_Investigation.ipynb
@@ -18,6 +33,7 @@ notebooks/*_Debug_*.ipynb
 test_*.py
 debug_*.py
 *_test.py
+temp_*.py
 *_debug.py
 *_temp.py
 

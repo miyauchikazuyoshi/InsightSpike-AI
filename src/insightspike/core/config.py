@@ -24,9 +24,9 @@ class LLMConfig:
     """Configuration for language models"""
 
     provider: str = "local"
-    model_name: str = "TinyLlama/TinyLlama-1.1B-intermediate-step-1431k-3T"
+    model_name: str = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"  # Chat特化版でRAG評価に最適
     max_tokens: int = 256
-    temperature: float = 0.7
+    temperature: float = 0.3  # RAG評価用に低温度で安定した応答
     device: str = "cpu"
     use_gpu: bool = False
     safe_mode: bool = False  # Use mock provider to avoid model loading issues
@@ -74,6 +74,16 @@ class ReasoningConfig:
     weight_conflict: float = 0.5
     gnn_hidden_dim: int = 64
     graph_file: str = "data/graph_pyg.pt"
+    
+    # Episode management thresholds based on graph analysis
+    episode_merge_threshold: float = 0.8  # High similarity threshold for merging
+    episode_split_threshold: float = 0.3  # High conflict threshold for splitting  
+    episode_prune_threshold: float = 0.1  # Low C-value threshold for pruning
+    
+    # Episode integration thresholds for new episodes
+    episode_integration_similarity_threshold: float = 0.85  # Vector similarity threshold
+    episode_integration_content_threshold: float = 0.4     # Content overlap threshold (lowered)
+    episode_integration_c_threshold: float = 0.3           # C-value difference threshold
 
 
 @dataclass

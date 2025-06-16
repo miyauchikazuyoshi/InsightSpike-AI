@@ -98,6 +98,21 @@ class L2MemoryInterface(LayerInterface):
         """Get memory statistics"""
         pass
 
+    @abstractmethod
+    def prune(self, c_threshold: float, importance_threshold: int = 1) -> int:
+        """Prune episodes with low C-values"""
+        pass
+
+    @abstractmethod
+    def merge(self, episode_indices: List[int]) -> int:
+        """Merge multiple episodes into one"""
+        pass
+
+    @abstractmethod
+    def split(self, episode_index: int) -> List[int]:
+        """Split an episode into multiple episodes"""
+        pass
+
 
 class L3GraphReasonerInterface(LayerInterface):
     """Layer 3: Graph Reasoner (PFC analog)"""

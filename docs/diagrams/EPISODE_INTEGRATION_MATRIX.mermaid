@@ -1,0 +1,120 @@
+%% Episode Management Decision Matrix
+%% エピソード管理の判定マトリックス
+
+flowchart TD
+    %% New Episode Input
+    NewEpisode[📥 New Episode<br/>Vector + Text + C-value]
+    
+    %% Integration Check Process
+    subgraph "🔍 Integration Decision Process"
+        direction TB
+        
+        %% Similarity Calculation
+        VectorSim[📊 Vector Similarity<br/>Cosine Distance]
+        ContentOver[📝 Content Overlap<br/>Word-level Jaccard]
+        CValueComp[⚖️ C-Value Compatibility<br/>Importance Difference]
+        
+        %% Threshold Checks
+        subgraph "🎯 Threshold Checks"
+            SimThresh[Vector Similarity ≥ 0.85]
+            ContThresh[Content Overlap ≥ 0.4]
+            IntegThresh[Integration Score ≥ 0.65]
+        end
+        
+        %% Integration Score
+        IntegScore[🧮 Integration Score<br/>0.5×Sim + 0.3×Content + 0.2×C-Compat]
+    end
+    
+    %% Decision Matrix
+    subgraph "🎯 Decision Matrix"
+        direction LR
+        
+        subgraph "✅ INTEGRATE Conditions"
+            HighSim[High Similarity ≥ 0.85]
+            HighCont[High Content ≥ 0.4] 
+            HighInteg[High Integration ≥ 0.65]
+        end
+        
+        subgraph "➕ NEW NODE Conditions"
+            LowSim[Low Similarity < 0.85]
+            LowCont[Low Content < 0.4]
+            LowInteg[Low Integration < 0.65]
+        end
+    end
+    
+    %% Actions
+    subgraph "🔄 Actions"
+        direction TB
+        
+        subgraph "🔗 Integration Process"
+            MergeVec[Weighted Vector Average]
+            CombineText[Text Combination with |]
+            MaxCValue[Max C-Value Selection]
+            UpdateMeta[Integration History Update]
+        end
+        
+        subgraph "➕ New Node Process"
+            AddEpisode[Add as New Episode]
+            TrainIndex[Update FAISS Index]
+            IncrementCount[Increment Episode Count]
+        end
+    end
+    
+    %% Flow
+    NewEpisode --> VectorSim
+    NewEpisode --> ContentOver
+    NewEpisode --> CValueComp
+    
+    VectorSim --> IntegScore
+    ContentOver --> IntegScore
+    CValueComp --> IntegScore
+    
+    IntegScore --> SimThresh
+    IntegScore --> ContThresh
+    IntegScore --> IntegThresh
+    
+    SimThresh -->|AND| Decision{Integration Decision}
+    ContThresh -->|AND| Decision
+    IntegThresh -->|AND| Decision
+    
+    Decision -->|All Met| HighSim
+    Decision -->|Any Failed| LowSim
+    
+    HighSim --> MergeVec
+    HighCont --> CombineText
+    HighInteg --> MaxCValue
+    
+    LowSim --> AddEpisode
+    LowCont --> TrainIndex
+    LowInteg --> IncrementCount
+    
+    %% Example Cases
+    subgraph "📋 Example Cases"
+        direction TB
+        
+        subgraph "Case 1: Similar Content"
+            Ex1Input["'Machine learning algorithms learn'<br/>vs<br/>'Machine learning algorithms discover'"]
+            Ex1Result[✅ INTEGRATE<br/>Sim: 0.99, Content: 0.78]
+        end
+        
+        subgraph "Case 2: Different Topic"
+            Ex2Input["'Machine learning algorithms'<br/>vs<br/>'Quantum physics particles'"]
+            Ex2Result[➕ NEW NODE<br/>Sim: 0.23, Content: 0.05]
+        end
+        
+        subgraph "Case 3: High Sim, Low Content"
+            Ex3Input["High vector similarity<br/>but different meaning"]
+            Ex3Result[➕ NEW NODE<br/>Sim: 0.89, Content: 0.12]
+        end
+    end
+    
+    %% Styling
+    classDef integrationClass fill:#e8f5e8
+    classDef newNodeClass fill:#fff3e0
+    classDef processClass fill:#e1f5fe
+    classDef exampleClass fill:#f3e5f5
+    
+    class HighSim,HighCont,HighInteg,MergeVec,CombineText,MaxCValue,UpdateMeta,Ex1Result integrationClass
+    class LowSim,LowCont,LowInteg,AddEpisode,TrainIndex,IncrementCount,Ex2Result,Ex3Result newNodeClass
+    class VectorSim,ContentOver,CValueComp,IntegScore,SimThresh,ContThresh,IntegThresh processClass
+    class Ex1Input,Ex2Input,Ex3Input exampleClass

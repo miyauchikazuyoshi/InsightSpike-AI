@@ -1,0 +1,128 @@
+%% Intrinsic Motivation and Episode Management Flow
+%% 内発報酬とエピソード管理のフロー図
+
+flowchart TD
+    %% Input and Processing
+    Query[🤔 User Query] --> L1[L1: Error Monitor]
+    L1 --> L2[L2: Memory Manager]
+    L2 --> L3[L3: Graph Reasoner]
+    L3 --> L4[L4: LLM Interface]
+    
+    %% Memory Search and Episode Check
+    subgraph "🧠 Memory Management"
+        direction TB
+        Search[📚 Episode Search]
+        NewEpisode[➕ New Episode]
+        
+        subgraph "Integration Decision"
+            Check[🔍 Integration Check]
+            SimThresh[Vector Similarity ≥ 0.85]
+            ContentThresh[Content Overlap ≥ 0.4]
+            IntegScore[Integration Score ≥ 0.65]
+        end
+        
+        Check --> SimThresh
+        Check --> ContentThresh
+        Check --> IntegScore
+        
+        NewEpisode --> Check
+        Check -->|All Met| Integrate[🔄 Integrate with Existing]
+        Check -->|Not Met| AddNew[➕ Add as New Node]
+    end
+    
+    %% Graph Analysis and Intrinsic Reward
+    subgraph "📊 Graph Analysis"
+        direction TB
+        GraphBuild[🕸️ Graph Construction]
+        MetricsCalc[📈 ΔGED/ΔIG Calculation]
+        
+        subgraph "Intrinsic Reward Components"
+            BaseReward[Base: ΔIG - 0.5×ΔGED]
+            NoveltyReward[Novelty: ΔIG - 0.5×Conflict]
+            StructureReward[Structure: Graph Quality]
+        end
+        
+        MetricsCalc --> BaseReward
+        MetricsCalc --> NoveltyReward
+        MetricsCalc --> StructureReward
+        
+        TotalReward[🎯 Total Intrinsic Reward]
+        BaseReward --> TotalReward
+        NoveltyReward --> TotalReward
+        StructureReward --> TotalReward
+    end
+    
+    %% Spike Detection and Memory Updates
+    subgraph "⚡ Spike Detection"
+        direction TB
+        SpikeCheck[🔍 Eureka Spike Check]
+        
+        subgraph "Spike Conditions"
+            HighReward[High Intrinsic Reward > 0.5]
+            LowGED[Low ΔGED < 0.2]
+            HighIG[High ΔIG > 0.2]
+        end
+        
+        SpikeCheck --> HighReward
+        SpikeCheck --> LowGED
+        SpikeCheck --> HighIG
+        
+        SpikeDetected[⚡ Spike Detected!]
+        HighReward -->|AND| SpikeDetected
+        LowGED -->|AND| SpikeDetected
+        HighIG -->|AND| SpikeDetected
+    end
+    
+    %% Episode Management Triggers
+    subgraph "🔄 Episode Management"
+        direction TB
+        UpdateCValues[📈 C-Value Updates]
+        
+        subgraph "Management Triggers"
+            direction LR
+            MergeTrigger[🔗 Merge Trigger<br/>Low ΔGED + High Similarity]
+            SplitTrigger[✂️ Split Trigger<br/>High Conflict + Complexity]
+            PruneTrigger[🗑️ Prune Trigger<br/>Low C-Values]
+        end
+        
+        UpdateCValues --> MergeTrigger
+        UpdateCValues --> SplitTrigger
+        UpdateCValues --> PruneTrigger
+        
+        subgraph "Actions"
+            MergeEpisodes[🔗 Merge Similar Episodes]
+            SplitEpisodes[✂️ Split Complex Episodes]
+            PruneEpisodes[🗑️ Remove Low-Value Episodes]
+        end
+        
+        MergeTrigger -->|Similarity > 0.8| MergeEpisodes
+        SplitTrigger -->|Conflict > 0.7| SplitEpisodes
+        PruneTrigger -->|C-Value < 0.1| PruneEpisodes
+    end
+    
+    %% Flow Connections
+    L2 --> Search
+    Search --> GraphBuild
+    GraphBuild --> MetricsCalc
+    TotalReward --> SpikeCheck
+    SpikeDetected --> UpdateCValues
+    
+    MergeEpisodes --> IndexRetrain[🔄 Index Retrain]
+    SplitEpisodes --> IndexRetrain
+    PruneEpisodes --> IndexRetrain
+    IndexRetrain --> OptimizedMemory[🧠 Optimized Memory]
+    
+    %% Output
+    L4 --> Response[📝 Enhanced Response]
+    OptimizedMemory --> FutureQueries[🔮 Future Queries]
+    
+    %% Styling
+    classDef memoryClass fill:#e1f5fe
+    classDef graphClass fill:#f3e5f5
+    classDef spikeClass fill:#fff3e0
+    classDef managementClass fill:#e8f5e8
+    
+    class Search,NewEpisode,Check,Integrate,AddNew memoryClass
+    class GraphBuild,MetricsCalc,BaseReward,NoveltyReward,StructureReward,TotalReward graphClass
+    class SpikeCheck,HighReward,LowGED,HighIG,SpikeDetected spikeClass
+    class UpdateCValues,MergeTrigger,SplitTrigger,PruneTrigger,MergeEpisodes,SplitEpisodes,PruneEpisodes managementClass

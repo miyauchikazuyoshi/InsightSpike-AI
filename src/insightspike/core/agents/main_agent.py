@@ -359,6 +359,7 @@ class MainAgent:
 
             if total_reward > 0:
                 # Increase C-values for retrieved documents
+                episode_indices = []
                 for doc in documents:
                     if "index" in doc:
                         current_c = doc.get("c_value", 0.5)
@@ -366,11 +367,62 @@ class MainAgent:
                         new_c = current_c + boost
 
                         self.l2_memory.update_c_value(doc["index"], new_c)
+                        episode_indices.append(doc["index"])
+
+                # Check for automatic episode management based on graph metrics
+                self._check_episode_management_triggers(graph_analysis, episode_indices)
 
                 logger.debug(f"Updated memory rewards with boost: {total_reward:.3f}")
 
         except Exception as e:
             logger.error(f"Memory reward update failed: {e}")
+
+    def _check_episode_management_triggers(self, graph_analysis: Dict, episode_indices: List[int]):
+        """Check if graph metrics trigger episode merge/split/prune operations"""
+        try:
+            metrics = graph_analysis.get("metrics", {})
+            conflicts = graph_analysis.get("conflicts", {})
+            
+            # Get threshold values from config
+            merge_threshold = getattr(self.config.reasoning, 'episode_merge_threshold', 0.8)
+            split_threshold = getattr(self.config.reasoning, 'episode_split_threshold', 0.3)
+            prune_threshold = getattr(self.config.reasoning, 'episode_prune_threshold', 0.1)
+            
+            # High similarity + low conflict might trigger merge
+            delta_ged = metrics.get("delta_ged", 0.0)
+            total_conflicts = conflicts.get("total", 0.0)
+            
+            if delta_ged < 0.2 and total_conflicts < 0.3 and len(episode_indices) >= 2:
+                # Similarity is high, conflict is low - consider merging
+                if hasattr(self.l2_memory, 'get_episode_similarity'):
+                    similarities = self.l2_memory.get_episode_similarity(episode_indices)
+                    if max(similarities) > merge_threshold:
+                        logger.info(f"Graph analysis suggests merging episodes {episode_indices[:2]}")
+                        merged_idx = self.l2_memory.merge(episode_indices[:2])
+                        if merged_idx >= 0:
+                            logger.info(f"Auto-merged episodes to index {merged_idx}")
+            
+            # High conflict or low quality might trigger split
+            elif total_conflicts > 0.7 or delta_ged > split_threshold:
+                for idx in episode_indices:
+                    episode = self.l2_memory.episodes[idx] if idx < len(self.l2_memory.episodes) else None
+                    if episode and len(episode.text.split('.')) > 2:  # Has multiple sentences
+                        logger.info(f"Graph analysis suggests splitting episode {idx}")
+                        split_indices = self.l2_memory.split(idx)
+                        if split_indices:
+                            logger.info(f"Auto-split episode {idx} into {split_indices}")
+                        break
+            
+            # Very low C-values might trigger pruning
+            memory_stats = self.l2_memory.get_memory_stats()
+            if memory_stats.get("c_value_min", 1.0) < prune_threshold:
+                logger.info("Graph analysis suggests pruning low-value episodes")
+                pruned_count = self.l2_memory.prune(prune_threshold * 2)  # Conservative pruning
+                if pruned_count > 0:
+                    logger.info(f"Auto-pruned {pruned_count} low-value episodes")
+                    
+        except Exception as e:
+            logger.error(f"Episode management trigger check failed: {e}")
 
     def _check_convergence(
         self, recent_results: List[CycleResult], question: str

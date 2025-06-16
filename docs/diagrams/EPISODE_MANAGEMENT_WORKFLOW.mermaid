@@ -1,0 +1,81 @@
+%% InsightSpike-AI Episode Management Workflow
+%% 新規エピソード統合判定とメモリ管理フロー
+
+flowchart TD
+    A[New Episode Input] --> B{Episode Integration Check}
+    
+    %% Integration Decision
+    B --> C[Calculate Similarity<br/>Vector Cosine ≥ 0.85?]
+    C --> D[Calculate Content Overlap<br/>Word Overlap ≥ 0.4?]
+    D --> E[Calculate Integration Score<br/>Weighted: 0.5×sim + 0.3×overlap + 0.2×c_compat]
+    E --> F{Integration Score ≥ 0.65?}
+    
+    %% Integration Path
+    F -->|Yes| G[INTEGRATE with Existing Episode]
+    G --> H[Update Vector<br/>Weighted Average]
+    H --> I[Combine Text<br/>Pipe Separator]
+    I --> J[Update C-value<br/>Take Maximum]
+    J --> K[Update Metadata<br/>Integration History]
+    K --> L[Retrain Index]
+    
+    %% New Node Path
+    F -->|No| M[CREATE New Episode Node]
+    M --> N[Add to Episodes List]
+    N --> O[Update FAISS Index]
+    
+    %% Graph Analysis and Intrinsic Reward
+    O --> P[Graph Analysis<br/>Layer 3 Processing]
+    L --> P
+    P --> Q[Calculate ΔGED/ΔIG<br/>Intrinsic Reward]
+    Q --> R{High Intrinsic Reward?<br/>Total > 0.5}
+    
+    %% Episode Management Triggers
+    R -->|Yes| S[Update C-values<br/>Reward-based Learning]
+    S --> T[Check Management Triggers]
+    T --> U{Low ΔGED + Low Conflict?<br/>≤ 0.2 + ≤ 0.3}
+    T --> V{High Conflict?<br/>≥ 0.7}
+    T --> W{Low C-values?<br/>< 0.1}
+    
+    %% Management Operations
+    U -->|Yes + High Similarity| X[MERGE Episodes<br/>Combine Similar]
+    V -->|Yes + High Complexity| Y[SPLIT Episodes<br/>Sentence Boundaries]
+    W -->|Yes| Z[PRUNE Episodes<br/>Remove Low-value]
+    
+    %% Final State
+    R -->|No| AA[Memory State Updated]
+    X --> AA
+    Y --> AA
+    Z --> AA
+    
+    %% Decision Matrix Box
+    subgraph "Integration Decision Matrix"
+        direction TB
+        DM1["🔄 High Sim + High Overlap → INTEGRATE"]
+        DM2["🆕 High Sim + Low Overlap → NEW NODE"]
+        DM3["🆕 Low Sim + High Overlap → NEW NODE"]
+        DM4["🆕 Low Sim + Low Overlap → NEW NODE"]
+    end
+    
+    %% Thresholds Box
+    subgraph "Configuration Thresholds"
+        direction TB
+        TH1["Vector Similarity: ≥ 0.85"]
+        TH2["Content Overlap: ≥ 0.4"]
+        TH3["Integration Score: ≥ 0.65"]
+        TH4["Episode Merge: ≥ 0.8 similarity"]
+        TH5["Episode Split: ≥ 0.3 conflict"]
+        TH6["Episode Prune: < 0.1 C-value"]
+    end
+    
+    %% Styling
+    classDef decision fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef process fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef integrate fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef manage fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    classDef config fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    
+    class B,F,R,U,V,W decision
+    class C,D,E,P,Q,S,T process
+    class G,H,I,J,K,M,N,O,L integrate
+    class X,Y,Z manage
+    class DM1,DM2,DM3,DM4,TH1,TH2,TH3,TH4,TH5,TH6 config
