@@ -14,7 +14,7 @@ from typing import Optional
 class EmbeddingConfig:
     """Configuration for embedding models"""
 
-    model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
+    model_name: str = "paraphrase-MiniLM-L6-v2"  # More stable on older CPUs
     dimension: int = 384
     device: str = "cpu"
 

@@ -54,20 +54,24 @@ class EmbeddingManager:
             return self._fallback_model()
 
         try:
-            # Try sentence-transformers first
+            # Try sentence-transformers first with safe initialization
+            import torch
             from sentence_transformers import SentenceTransformer
 
+            # Optimize environment for CPU-only stable execution
+            os.environ['PYTORCH_MPS_HIGH_WATERMARK_RATIO'] = '0.0'
+            os.environ['TOKENIZERS_PARALLELISM'] = 'false'
+            torch.set_num_threads(1)
+
             logger.info(f"Loading embedding model: {self.model_name}")
-            # Try to create model, handle device parameter issues gracefully
-            try:
-                # Explicitly use CPU to avoid GPU segfaults
-                model = SentenceTransformer(self.model_name, device="cpu")
-            except (TypeError, ValueError) as device_error:
-                # If device parameter is not supported, try without it
-                logger.warning(
-                    f"Device parameter not supported: {device_error}. Trying without device parameter."
-                )
-                model = SentenceTransformer(self.model_name)
+            
+            # Safe initialization with explicit parameters
+            model = SentenceTransformer(
+                self.model_name,
+                device="cpu",
+                cache_folder=None,  # Avoid cache conflicts
+                trust_remote_code=False
+            )
 
             _model_cache[self.model_name] = model
             self._model = model
