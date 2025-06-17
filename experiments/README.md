@@ -57,7 +57,7 @@ experiments/
 │
 ├── 📔 Interactive Notebooks
 │   └── notebooks/
-│       └── InsightSpike_Unified_Colab_Setup.ipynb # Unified Colab setup
+│       └── InsightSpike_Colab_Setup.ipynb # Clean Colab setup (NEW!)
 │
 ├── ✅ Validation & Testing
 │   └── validation/                              # Validation scripts
@@ -76,14 +76,16 @@ experiments/
 
 ## 🚀 Key Experiments
 
-### **1. Unified Colab Setup** ✨
-**File**: `notebooks/InsightSpike_Unified_Colab_Setup.ipynb`  
+### **1. Clean Colab Setup** ✨ **(NEW!)**
+**File**: `notebooks/InsightSpike_Colab_Setup.ipynb`  
 **Purpose**: Streamlined Google Colab environment  
 **Features**:
-- **2-cell setup** (75% reduction from 8-12 cells)
+- **3-step setup** with clear instructions
+- **Secure private repo access** with GitHub token
 - **Automatic GPU acceleration** (5-100x speedup)
 - **CPU fallback support** (full functionality)
 - **Unified dependency management** (same pyproject.toml)
+- **Built-in troubleshooting** and diagnostics
 
 ### **2. Comprehensive Experiment Framework**
 **File**: `comprehensive_experiment_framework.py`  
