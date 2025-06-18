@@ -16,6 +16,7 @@ import faiss
 import numpy as np
 
 from ...config import get_config
+from ..config import get_config as get_core_config
 from ...utils.embedder import get_model
 from ..interfaces import L2MemoryInterface
 from ..learning.knowledge_graph_memory import KnowledgeGraphMemory
@@ -195,67 +196,101 @@ class L2MemoryManager(L2MemoryInterface):
             "dimension": self.dim,
         }
 
-    def save(self, path: Optional[Path] = None) -> Path:
-        """Save memory index and episodes to disk."""
-        if path is None:
-            path = Path(self.config.memory.index_file)
+    def save(self, path: Optional[Path] = None) -> bool:
+        """Save memory state (episodes and index) to disk."""
+        try:
+            if path is None:
+                # Use config to determine save path
+                config = get_core_config()
+                index_path = Path(config.memory.index_file)
+                episodes_path = index_path.parent / "episodes.json"
+            else:
+                index_path = Path(path)
+                episodes_path = index_path.parent / "episodes.json"
 
-        # Save Faiss index
-        if self.is_trained:
-            faiss.write_index(self.index, str(path))
+            # Save Faiss index
+            if self.is_trained and len(self.episodes) > 0:
+                index_path.parent.mkdir(parents=True, exist_ok=True)
+                faiss.write_index(self.index, str(index_path))
+                logger.info(f"Saved Faiss index to {index_path}")
 
-        # Save episodes metadata
-        meta_path = path.with_suffix(".json")
-        meta = [
-            {"c": ep.c, "text": ep.text, "metadata": ep.metadata}
-            for ep in self.episodes
-        ]
+                # Save episode metadata
+                episodes_data = []
+                for i, episode in enumerate(self.episodes):
+                    episodes_data.append(
+                        {
+                            "id": i,
+                            "text": episode.text,
+                            "c": episode.c,
+                            "metadata": episode.metadata,
+                            "vec": episode.vec.tolist(),  # Convert numpy to list for JSON
+                        }
+                    )
 
-        meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2))
-        logger.info(f"Saved memory to {path} ({len(self.episodes)} episodes)")
-        return path
+                with open(episodes_path, "w", encoding="utf-8") as f:
+                    json.dump(episodes_data, f, ensure_ascii=False, indent=2)
+
+                logger.info(f"Saved {len(episodes_data)} episodes to {episodes_path}")
+                return True
+            else:
+                logger.warning("No trained index or episodes to save")
+                return False
+
+        except Exception as e:
+            logger.error(f"Failed to save memory: {e}")
+            return False
 
     def load(self, path: Optional[Path] = None) -> bool:
-        """Load memory index and episodes from disk."""
-        if path is None:
-            path = Path(self.config.memory.index_file)
-
+        """Load memory state (episodes and index) from disk."""
         try:
+            if path is None:
+                # Use config to determine load path
+                config = get_core_config()
+                index_path = Path(config.memory.index_file)
+                episodes_path = index_path.parent / "episodes.json"
+            else:
+                index_path = Path(path)
+                episodes_path = index_path.parent / "episodes.json"
+
             # Load episodes metadata
-            meta_path = path.with_suffix(".json")
-            if meta_path.exists():
-                meta = json.loads(meta_path.read_text())
+            if episodes_path.exists():
+                with open(episodes_path, "r", encoding="utf-8") as f:
+                    episodes_data = json.load(f)
 
                 # Reconstruct episodes
-                model = get_model()
-                texts = [item["text"] for item in meta]
-                vecs = model.encode(
-                    texts, convert_to_numpy=True, normalize_embeddings=True
-                )
-
                 self.episodes = []
-                for vec, item in zip(vecs, meta):
+                for ep_data in episodes_data:
+                    vec = np.array(ep_data["vec"], dtype=np.float32)
                     episode = Episode(
-                        vec, item["text"], item["c"], item.get("metadata", {})
+                        vec=vec,
+                        text=ep_data["text"],
+                        c=ep_data["c"],
+                        metadata=ep_data.get("metadata", {}),
                     )
                     self.episodes.append(episode)
 
-                # Load or rebuild index
-                if path.exists() and len(self.episodes) >= 2:
-                    self.index = faiss.read_index(str(path))
-                    self.is_trained = True
-                else:
-                    self._train_index()
+                logger.info(f"Loaded {len(self.episodes)} episodes from {episodes_path}")
+            else:
+                logger.warning(f"Episodes file not found: {episodes_path}")
+                return False
 
-                logger.info(
-                    f"Loaded memory from {path} ({len(self.episodes)} episodes)"
-                )
+            # Load Faiss index
+            if index_path.exists() and len(self.episodes) > 0:
+                self.index = faiss.read_index(str(index_path))
+                self.is_trained = True
+                logger.info(f"Loaded Faiss index from {index_path}")
                 return True
+            else:
+                logger.warning(f"Index file not found: {index_path}")
+                # Retrain index with loaded episodes
+                if len(self.episodes) >= 2:
+                    self._train_index()
+                    return True
+                return False
 
         except Exception as e:
             logger.error(f"Failed to load memory: {e}")
-
-        return False
+            return False
 
     def _train_index(self):
         """Train the Faiss index with current episodes."""
@@ -378,7 +413,7 @@ class L2MemoryManager(L2MemoryInterface):
         try:
             # Check if this should be integrated with existing episodes or added as new node
             integration_result = self._check_episode_integration(vector, text, c_value)
-            
+
             if integration_result["should_integrate"]:
                 # Integrate with existing episode
                 target_idx = integration_result["target_index"]
@@ -419,12 +454,12 @@ class L2MemoryManager(L2MemoryInterface):
     def update_c(self, episode_ids: List[int], reward: float, eta: float = 0.1) -> bool:
         """
         Update C-values with reward - legacy interface for compatibility.
-        
+
         Args:
             episode_ids: List of episode indices to update
             reward: Reward value to apply
             eta: Learning rate
-            
+
         Returns:
             True if update was successful
         """
@@ -439,7 +474,7 @@ class L2MemoryManager(L2MemoryInterface):
                     logger.warning(f"Invalid episode index: {episode_id}")
                     return False
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to update C-values: {e}")
             return False
@@ -447,7 +482,7 @@ class L2MemoryManager(L2MemoryInterface):
     def train_index(self) -> bool:
         """
         Train the FAISS index - public interface for compatibility.
-        
+
         Returns:
             True if training was successful
         """
@@ -461,17 +496,17 @@ class L2MemoryManager(L2MemoryInterface):
     def prune(self, c_threshold: float, importance_threshold: int = 1) -> int:
         """
         Prune episodes with low C-values and low importance.
-        
+
         Args:
             c_threshold: Minimum C-value threshold
             importance_threshold: Minimum importance threshold (not used currently)
-            
+
         Returns:
             Number of episodes pruned
         """
         try:
             original_count = len(self.episodes)
-            
+
             # Filter episodes based on C-value threshold
             pruned_episodes = []
             for i, episode in enumerate(self.episodes):
@@ -479,10 +514,10 @@ class L2MemoryManager(L2MemoryInterface):
                     pruned_episodes.append(episode)
                 else:
                     logger.debug(f"Pruning episode {i} with C-value {episode.c:.3f}")
-            
+
             self.episodes = pruned_episodes
             pruned_count = original_count - len(self.episodes)
-            
+
             # Retrain index if we pruned episodes
             if pruned_count > 0 and len(self.episodes) >= 2:
                 self._train_index()
@@ -490,9 +525,9 @@ class L2MemoryManager(L2MemoryInterface):
             elif pruned_count > 0:
                 self.is_trained = False
                 logger.info(f"Pruned {pruned_count} episodes, index invalidated")
-                
+
             return pruned_count
-            
+
         except Exception as e:
             logger.error(f"Failed to prune episodes: {e}")
             return 0
@@ -500,10 +535,10 @@ class L2MemoryManager(L2MemoryInterface):
     def merge(self, episode_indices: List[int]) -> int:
         """
         Merge multiple episodes into a single episode.
-        
+
         Args:
             episode_indices: List of episode indices to merge
-            
+
         Returns:
             Index of the new merged episode, or -1 if failed
         """
@@ -511,56 +546,56 @@ class L2MemoryManager(L2MemoryInterface):
             if len(episode_indices) < 2:
                 logger.warning("Need at least 2 episodes to merge")
                 return -1
-                
+
             # Validate indices
             valid_indices = [i for i in episode_indices if 0 <= i < len(self.episodes)]
             if len(valid_indices) != len(episode_indices):
                 logger.warning(f"Some episode indices are invalid: {episode_indices}")
-                
+
             if len(valid_indices) < 2:
                 return -1
-                
+
             # Get episodes to merge
             episodes_to_merge = [self.episodes[i] for i in valid_indices]
-            
+
             # Create merged episode
             # Average the vectors
             merged_vec = np.mean([ep.vec for ep in episodes_to_merge], axis=0)
-            
+
             # Combine text content
             merged_text = " | ".join([ep.text for ep in episodes_to_merge])
-            
+
             # Take maximum C-value (most important)
             merged_c = max([ep.c for ep in episodes_to_merge])
-            
+
             # Combine metadata
             merged_metadata = {}
             for ep in episodes_to_merge:
                 if ep.metadata:
                     merged_metadata.update(ep.metadata)
-            merged_metadata['merged_from'] = valid_indices
-            merged_metadata['merged_count'] = len(valid_indices)
-            
+            merged_metadata["merged_from"] = valid_indices
+            merged_metadata["merged_count"] = len(valid_indices)
+
             # Create new episode
             merged_episode = Episode(merged_vec, merged_text, merged_c, merged_metadata)
-            
+
             # Remove old episodes (in reverse order to maintain indices)
             for i in sorted(valid_indices, reverse=True):
                 del self.episodes[i]
-                
+
             # Add merged episode
             self.episodes.append(merged_episode)
             merged_index = len(self.episodes) - 1
-            
+
             # Retrain index
             if len(self.episodes) >= 2:
                 self._train_index()
                 logger.info(f"Merged {len(valid_indices)} episodes into episode {merged_index}")
             else:
                 self.is_trained = False
-                
+
             return merged_index
-            
+
         except Exception as e:
             logger.error(f"Failed to merge episodes: {e}")
             return -1
@@ -568,10 +603,10 @@ class L2MemoryManager(L2MemoryInterface):
     def split(self, episode_index: int) -> List[int]:
         """
         Split an episode into multiple episodes based on content.
-        
+
         Args:
             episode_index: Index of episode to split
-            
+
         Returns:
             List of indices of new episodes created from the split, empty if failed
         """
@@ -579,42 +614,42 @@ class L2MemoryManager(L2MemoryInterface):
             if not (0 <= episode_index < len(self.episodes)):
                 logger.warning(f"Invalid episode index for split: {episode_index}")
                 return []
-                
+
             episode = self.episodes[episode_index]
-            
+
             # Simple split based on sentence boundaries
-            sentences = [s.strip() for s in episode.text.split('.') if s.strip()]
-            
+            sentences = [s.strip() for s in episode.text.split(".") if s.strip()]
+
             if len(sentences) < 2:
                 logger.info(f"Episode {episode_index} cannot be split (too few sentences)")
                 return []
-                
+
             # Create new episodes from sentences
             new_indices = []
             base_c = episode.c * 0.8  # Slightly reduce C-value for split episodes
-            
+
             for i, sentence in enumerate(sentences):
                 if not sentence:
                     continue
-                    
+
                 # Create slightly varied vector (add small noise)
                 noise = np.random.normal(0, 0.01, episode.vec.shape)
                 new_vec = episode.vec + noise.astype(np.float32)
-                
+
                 # Create metadata
                 new_metadata = episode.metadata.copy() if episode.metadata else {}
-                new_metadata['split_from'] = episode_index
-                new_metadata['split_part'] = i + 1
-                new_metadata['split_total'] = len(sentences)
-                
+                new_metadata["split_from"] = episode_index
+                new_metadata["split_part"] = i + 1
+                new_metadata["split_total"] = len(sentences)
+
                 # Create new episode
                 new_episode = Episode(new_vec, sentence, base_c, new_metadata)
                 self.episodes.append(new_episode)
                 new_indices.append(len(self.episodes) - 1)
-                
+
             # Remove original episode
             del self.episodes[episode_index]
-            
+
             # Adjust indices for episodes that were added after the removed one
             adjusted_indices = []
             for idx in new_indices:
@@ -622,16 +657,16 @@ class L2MemoryManager(L2MemoryInterface):
                     adjusted_indices.append(idx - 1)
                 else:
                     adjusted_indices.append(idx)
-                    
+
             # Retrain index
             if len(self.episodes) >= 2:
                 self._train_index()
                 logger.info(f"Split episode {episode_index} into {len(adjusted_indices)} episodes")
             else:
                 self.is_trained = False
-                
+
             return adjusted_indices
-            
+
         except Exception as e:
             logger.error(f"Failed to split episode: {e}")
             return []
@@ -696,24 +731,24 @@ class L2MemoryManager(L2MemoryInterface):
     def get_episode_similarity(self, episode_indices: List[int]) -> List[float]:
         """
         Calculate pairwise similarities between episodes.
-        
+
         Args:
             episode_indices: List of episode indices to compare
-            
+
         Returns:
             List of similarity scores between episode pairs
         """
         try:
             similarities = []
-            
+
             for i in range(len(episode_indices)):
                 for j in range(i + 1, len(episode_indices)):
                     idx1, idx2 = episode_indices[i], episode_indices[j]
-                    
+
                     if 0 <= idx1 < len(self.episodes) and 0 <= idx2 < len(self.episodes):
                         ep1 = self.episodes[idx1]
                         ep2 = self.episodes[idx2]
-                        
+
                         # Calculate cosine similarity between vectors
                         sim = np.dot(ep1.vec, ep2.vec) / (
                             np.linalg.norm(ep1.vec) * np.linalg.norm(ep2.vec)
@@ -721,9 +756,9 @@ class L2MemoryManager(L2MemoryInterface):
                         similarities.append(float(sim))
                     else:
                         similarities.append(0.0)
-                        
+
             return similarities
-            
+
         except Exception as e:
             logger.error(f"Failed to calculate episode similarities: {e}")
             return []
@@ -731,32 +766,32 @@ class L2MemoryManager(L2MemoryInterface):
     def get_episode_content_complexity(self, episode_index: int) -> float:
         """
         Calculate content complexity of an episode (used for split decisions).
-        
+
         Args:
             episode_index: Index of episode to analyze
-            
+
         Returns:
             Complexity score (0.0 to 1.0)
         """
         try:
             if not (0 <= episode_index < len(self.episodes)):
                 return 0.0
-                
+
             episode = self.episodes[episode_index]
             text = episode.text
-            
+
             # Simple complexity metrics
-            sentence_count = len([s for s in text.split('.') if s.strip()])
+            sentence_count = len([s for s in text.split(".") if s.strip()])
             word_count = len(text.split())
             unique_word_ratio = len(set(text.lower().split())) / max(1, word_count)
-            
+
             # Normalize and combine metrics
             sentence_complexity = min(1.0, sentence_count / 5.0)  # Max 5 sentences = 1.0
-            length_complexity = min(1.0, word_count / 100.0)     # Max 100 words = 1.0
-            
+            length_complexity = min(1.0, word_count / 100.0)  # Max 100 words = 1.0
+
             complexity = (sentence_complexity + length_complexity + unique_word_ratio) / 3.0
             return float(complexity)
-            
+
         except Exception as e:
             logger.error(f"Failed to calculate episode complexity: {e}")
             return 0.0
@@ -764,87 +799,92 @@ class L2MemoryManager(L2MemoryInterface):
     def _check_episode_integration(self, vector: np.ndarray, text: str, c_value: float) -> Dict[str, Any]:
         """
         Check if new episode should be integrated with existing episodes or added as new node.
-        
+
         Args:
             vector: New episode vector
             text: New episode text
             c_value: New episode C-value
-            
+
         Returns:
             Dictionary with integration decision and target information
         """
         try:
             if len(self.episodes) == 0:
                 return {"should_integrate": False, "target_index": -1, "reason": "no_existing_episodes"}
-            
+
             # Configuration thresholds
-            similarity_threshold = getattr(self.config.reasoning, 'episode_integration_similarity_threshold', 0.85)
-            content_overlap_threshold = getattr(self.config.reasoning, 'episode_integration_content_threshold', 0.7)
-            c_value_diff_threshold = getattr(self.config.reasoning, 'episode_integration_c_threshold', 0.3)
-            
+            similarity_threshold = getattr(self.config.reasoning, "episode_integration_similarity_threshold", 0.85)
+            content_overlap_threshold = getattr(self.config.reasoning, "episode_integration_content_threshold", 0.7)
+            c_value_diff_threshold = getattr(self.config.reasoning, "episode_integration_c_threshold", 0.3)
+
             best_candidate = {
                 "index": -1,
                 "similarity": 0.0,
                 "content_overlap": 0.0,
                 "c_value_compatibility": 0.0,
-                "integration_score": 0.0
+                "integration_score": 0.0,
             }
-            
+
             # Check similarity with all existing episodes
             for i, episode in enumerate(self.episodes):
                 # 1. Vector similarity
                 vec_similarity = np.dot(vector, episode.vec) / (
                     np.linalg.norm(vector) * np.linalg.norm(episode.vec)
                 )
-                
+
                 # 2. Content overlap (improved word-based with cleaning)
                 import re
+
                 # Clean and normalize text
-                new_text_clean = re.sub(r'[^\w\s]', '', text.lower())
-                existing_text_clean = re.sub(r'[^\w\s]', '', episode.text.lower())
-                
+                new_text_clean = re.sub(r"[^\w\s]", "", text.lower())
+                existing_text_clean = re.sub(r"[^\w\s]", "", episode.text.lower())
+
                 new_words = set(new_text_clean.split())
                 existing_words = set(existing_text_clean.split())
-                
+
                 if len(new_words) == 0 or len(existing_words) == 0:
                     content_overlap = 0.0
                 else:
-                    content_overlap = len(new_words.intersection(existing_words)) / len(new_words.union(existing_words))
-                
+                    content_overlap = len(new_words.intersection(existing_words)) / len(
+                        new_words.union(existing_words)
+                    )
+
                 # 3. C-value compatibility (similar importance levels)
                 c_value_diff = abs(c_value - episode.c)
                 c_value_compatibility = 1.0 - min(1.0, c_value_diff / c_value_diff_threshold)
-                
+
                 # Combined integration score
                 integration_score = (
-                    0.5 * vec_similarity +           # 50% vector similarity
-                    0.3 * content_overlap +          # 30% content overlap  
-                    0.2 * c_value_compatibility      # 20% C-value compatibility
+                    0.5 * vec_similarity  # 50% vector similarity
+                    + 0.3 * content_overlap  # 30% content overlap
+                    + 0.2 * c_value_compatibility  # 20% C-value compatibility
                 )
-                
+
                 if integration_score > best_candidate["integration_score"]:
-                    best_candidate.update({
-                        "index": i,
-                        "similarity": vec_similarity,
-                        "content_overlap": content_overlap,
-                        "c_value_compatibility": c_value_compatibility,
-                        "integration_score": integration_score
-                    })
-            
+                    best_candidate.update(
+                        {
+                            "index": i,
+                            "similarity": vec_similarity,
+                            "content_overlap": content_overlap,
+                            "c_value_compatibility": c_value_compatibility,
+                            "integration_score": integration_score,
+                        }
+                    )
+
             # Decision logic
             should_integrate = (
-                best_candidate["similarity"] >= similarity_threshold and
-                best_candidate["content_overlap"] >= content_overlap_threshold and
-                best_candidate["integration_score"] >= 0.65  # Lowered overall threshold
+                best_candidate["similarity"] >= similarity_threshold
+                and best_candidate["content_overlap"] >= content_overlap_threshold
+                and best_candidate["integration_score"] >= 0.65  # Lowered overall threshold
             )
-            
+
             return {
                 "should_integrate": should_integrate,
                 "target_index": best_candidate["index"] if should_integrate else -1,
                 "best_candidate": best_candidate,
-                "reason": "high_similarity" if should_integrate else "below_threshold"
+                "reason": "high_similarity" if should_integrate else "below_threshold",
             }
-            
+
         except Exception as e:
             logger.error(f"Episode integration check failed: {e}")
             return {"should_integrate": False, "target_index": -1, "reason": "error"}
@@ -852,13 +892,13 @@ class L2MemoryManager(L2MemoryInterface):
     def _integrate_with_existing(self, target_index: int, new_vector: np.ndarray, new_text: str, new_c_value: float) -> int:
         """
         Integrate new episode content with existing episode.
-        
+
         Args:
             target_index: Index of existing episode to integrate with
             new_vector: Vector of new episode
             new_text: Text of new episode
             new_c_value: C-value of new episode
-            
+
         Returns:
             Index of updated episode
         """
@@ -866,50 +906,51 @@ class L2MemoryManager(L2MemoryInterface):
             if not (0 <= target_index < len(self.episodes)):
                 logger.error(f"Invalid target index for integration: {target_index}")
                 return -1
-                
+
             existing_episode = self.episodes[target_index]
-            
+
             # Update vector (weighted average based on C-values)
             total_weight = existing_episode.c + new_c_value
             if total_weight > 0:
                 weight_existing = existing_episode.c / total_weight
                 weight_new = new_c_value / total_weight
-                
+
                 integrated_vector = (
-                    weight_existing * existing_episode.vec + 
-                    weight_new * new_vector
+                    weight_existing * existing_episode.vec + weight_new * new_vector
                 )
             else:
                 integrated_vector = (existing_episode.vec + new_vector) / 2.0
-            
+
             # Update text (combine with separator)
             integrated_text = f"{existing_episode.text} | {new_text}"
-            
+
             # Update C-value (take maximum as it represents highest importance)
             integrated_c = max(existing_episode.c, new_c_value)
-            
+
             # Update metadata
             integrated_metadata = existing_episode.metadata.copy() if existing_episode.metadata else {}
-            integrated_metadata.setdefault('integration_history', [])
-            integrated_metadata['integration_history'].append({
-                'integrated_text': new_text,
-                'integrated_c': new_c_value,
-                'integration_timestamp': len(integrated_metadata['integration_history'])
-            })
-            integrated_metadata['integration_count'] = len(integrated_metadata['integration_history'])
-            
+            integrated_metadata.setdefault("integration_history", [])
+            integrated_metadata["integration_history"].append(
+                {
+                    "integrated_text": new_text,
+                    "integrated_c": new_c_value,
+                    "integration_timestamp": len(integrated_metadata["integration_history"]),
+                }
+            )
+            integrated_metadata["integration_count"] = len(integrated_metadata["integration_history"])
+
             # Update the existing episode
             self.episodes[target_index] = Episode(
                 integrated_vector, integrated_text, integrated_c, integrated_metadata
             )
-            
+
             # Update index if needed
             if self.is_trained:
                 self._retrain_index_single(target_index)
-            
+
             logger.info(f"Integrated new content with episode {target_index}, C-value: {integrated_c:.3f}")
             return target_index
-            
+
         except Exception as e:
             logger.error(f"Episode integration failed: {e}")
             return -1

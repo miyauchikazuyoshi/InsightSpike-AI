@@ -37,14 +37,26 @@ class GraphMetricsCalculator:
             return self._fallback_ged(graph1, graph2)
 
         try:
-            if graph1 is None or graph2 is None:
+            if graph1 is None and graph2 is None:
                 return 0.0
+            if graph1 is None:
+                return self._graph_complexity(graph2)
+            if graph2 is None:
+                return self._graph_complexity(graph1)
 
-            # Simple approximation: difference in structural properties
-            ged1 = self._graph_complexity(graph1)
-            ged2 = self._graph_complexity(graph2)
-
-            return abs(ged2 - ged1)
+            # Calculate both structural and embedding-based differences
+            structural_diff = self._structural_difference(graph1, graph2)
+            embedding_diff = self._embedding_difference(graph1, graph2)
+            
+            # Combine structural and embedding differences
+            # Weight structural more heavily, but include embedding differences
+            delta = 0.7 * structural_diff + 0.3 * embedding_diff
+            
+            # Ensure finite result
+            if not np.isfinite(delta):
+                return 0.0
+                
+            return float(delta)
 
         except Exception as e:
             logging.getLogger(__name__).error(f"ΔGED calculation failed: {e}")
@@ -56,14 +68,24 @@ class GraphMetricsCalculator:
             return self._fallback_ig(graph1, graph2)
 
         try:
-            if graph1 is None or graph2 is None:
+            if graph1 is None and graph2 is None:
                 return 0.0
+            if graph1 is None:
+                return max(0.0, self._information_content(graph2))
+            if graph2 is None:
+                return 0.0  # No gain when losing information
 
             # Information content approximation
             ig1 = self._information_content(graph1)
             ig2 = self._information_content(graph2)
 
-            return max(0.0, ig2 - ig1)  # Only positive information gain
+            delta = max(0.0, ig2 - ig1)  # Only positive information gain
+            
+            # Ensure finite result
+            if not np.isfinite(delta):
+                return 0.0
+                
+            return float(delta)
 
         except Exception as e:
             logging.getLogger(__name__).error(f"ΔIG calculation failed: {e}")
@@ -71,33 +93,113 @@ class GraphMetricsCalculator:
 
     def _graph_complexity(self, graph: Any) -> float:
         """Calculate graph structural complexity."""
-        if not hasattr(graph, "num_nodes") or graph.num_nodes == 0:
+        try:
+            if graph is None:
+                return 0.0
+            
+            # Handle different graph types
+            if hasattr(graph, 'num_nodes') and hasattr(graph, 'edge_index'):
+                # PyTorch Geometric Data object
+                num_nodes = graph.num_nodes if graph.num_nodes > 0 else graph.x.size(0) if hasattr(graph, 'x') else 0
+                num_edges = graph.edge_index.size(1) if hasattr(graph, 'edge_index') else 0
+            elif hasattr(graph, 'x') and hasattr(graph, 'edge_index'):
+                # Basic PyTorch data
+                num_nodes = graph.x.size(0) if graph.x is not None else 0
+                num_edges = graph.edge_index.size(1) if graph.edge_index is not None else 0
+            else:
+                return 0.0
+
+            if num_nodes == 0:
+                return 0.0
+
+            # Complexity based on nodes, edges, and density
+            max_possible_edges = num_nodes * (num_nodes - 1) / 2
+            density = num_edges / max(1, max_possible_edges) if max_possible_edges > 0 else 0
+            complexity = np.log(max(1, num_nodes)) + np.log(max(1, num_edges)) + density
+
+            return float(complexity)
+        except Exception as e:
+            logging.getLogger(__name__).error(f"Graph complexity calculation failed: {e}")
             return 0.0
 
-        num_nodes = graph.num_nodes
-        num_edges = graph.edge_index.size(1) // 2 if hasattr(graph, "edge_index") else 0
+    def _structural_difference(self, graph1: Any, graph2: Any) -> float:
+        """Calculate structural difference between two graphs."""
+        try:
+            # Calculate complexity for both graphs
+            complexity1 = self._graph_complexity(graph1)
+            complexity2 = self._graph_complexity(graph2)
+            
+            return abs(complexity2 - complexity1)
+        except Exception as e:
+            logging.getLogger(__name__).error(f"Structural difference calculation failed: {e}")
+            return 0.0
 
-        # Complexity based on nodes, edges, and density
-        density = num_edges / max(1, num_nodes * (num_nodes - 1) / 2)
-        complexity = np.log(max(1, num_nodes)) + np.log(max(1, num_edges)) + density
-
-        return float(complexity)
+    def _embedding_difference(self, graph1: Any, graph2: Any) -> float:
+        """Calculate embedding-based difference between two graphs."""
+        try:
+            if not hasattr(graph1, 'x') or not hasattr(graph2, 'x'):
+                return 0.0
+            if graph1.x is None or graph2.x is None:
+                return 0.0
+                
+            # Get embeddings
+            emb1 = graph1.x.cpu().numpy() if hasattr(graph1.x, 'cpu') else graph1.x.numpy()
+            emb2 = graph2.x.cpu().numpy() if hasattr(graph2.x, 'cpu') else graph2.x.numpy()
+            
+            # Handle different sizes by padding or averaging
+            if emb1.shape[0] != emb2.shape[0]:
+                # Different number of nodes - use mean embeddings
+                mean1 = np.mean(emb1, axis=0)
+                mean2 = np.mean(emb2, axis=0)
+                
+                # Calculate cosine distance
+                from sklearn.metrics.pairwise import cosine_similarity
+                sim = cosine_similarity([mean1], [mean2])[0, 0]
+                return 1.0 - sim  # Convert similarity to distance
+            else:
+                # Same number of nodes - compare pairwise
+                total_distance = 0.0
+                for i in range(emb1.shape[0]):
+                    from sklearn.metrics.pairwise import cosine_similarity
+                    sim = cosine_similarity([emb1[i]], [emb2[i]])[0, 0]
+                    total_distance += (1.0 - sim)
+                
+                return total_distance / emb1.shape[0]  # Average distance
+                
+        except Exception as e:
+            logging.getLogger(__name__).error(f"Embedding difference calculation failed: {e}")
+            return 0.0
 
     def _information_content(self, graph: Any) -> float:
         """Calculate information content of graph."""
-        if not hasattr(graph, "x") or graph.x.size(0) == 0:
-            return 0.0
-
         try:
+            if graph is None:
+                return 0.0
+                
+            # Check if graph has features
+            if not hasattr(graph, "x") or graph.x is None or graph.x.size(0) == 0:
+                # Fallback: use structural information
+                if hasattr(graph, 'num_nodes') or hasattr(graph, 'edge_index'):
+                    num_nodes = getattr(graph, 'num_nodes', 0)
+                    if num_nodes == 0 and hasattr(graph, 'x'):
+                        num_nodes = graph.x.size(0)
+                    num_edges = graph.edge_index.size(1) if hasattr(graph, 'edge_index') else 0
+                    return float(np.log(max(1, num_nodes)) + np.log(max(1, num_edges)))
+                return 0.0
+
             # Use feature entropy as information measure
-            features = graph.x.cpu().numpy()
+            features = graph.x.cpu().numpy() if hasattr(graph.x, 'cpu') else graph.x.numpy()
 
             # Calculate entropy of feature distributions
             total_entropy = 0.0
             for i in range(features.shape[1]):
                 feature_col = features[:, i]
+                # Handle constant features
+                if np.var(feature_col) == 0:
+                    continue
+                    
                 # Discretize continuous features
-                hist, _ = np.histogram(feature_col, bins=10)
+                hist, _ = np.histogram(feature_col, bins=min(10, len(feature_col)))
                 probs = hist / np.sum(hist + 1e-10)
                 probs = probs[probs > 0]  # Remove zero probabilities
 

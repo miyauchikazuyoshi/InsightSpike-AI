@@ -467,10 +467,10 @@ def get_llm_provider(config=None, safe_mode=False) -> L4LLMProvider:
     )
 
     if use_safe_mode:
-        from .mock_llm_provider import MockLLMProvider
+        from .clean_llm_provider import CleanLLMProvider
 
-        logger.info("Using mock LLM provider for safe operation")
-        return MockLLMProvider(config)
+        logger.info("Using clean LLM provider for safe operation (no data leaks)")
+        return CleanLLMProvider(config)
 
     provider_type = config.llm.provider.lower()
 

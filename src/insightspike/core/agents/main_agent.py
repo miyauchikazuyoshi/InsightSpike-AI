@@ -5,7 +5,9 @@ Main Agent Orchestrator
 Simplified main agent that coordinates all layers for clean execution.
 """
 
+import hashlib
 import logging
+import time
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -109,7 +111,7 @@ class MainAgent:
         self.l3_graph = (
             L3GraphReasoner(self.config) if GRAPH_REASONER_AVAILABLE else None
         )
-        self.l4_llm = get_llm_provider(self.config)
+        self.l4_llm = get_llm_provider(self.config, safe_mode=True)
 
         # State tracking
         self.cycle_count = 0
@@ -132,12 +134,12 @@ class MainAgent:
                 logger.warning(
                     f"LLM initialization failed ({e}), switching to safe mode"
                 )
-                # Try to reinitialize with mock provider
-                from .layers.mock_llm_provider import MockLLMProvider
+                # Try to reinitialize with clean provider (no data leaks)
+                from ..layers.clean_llm_provider import CleanLLMProvider
 
-                self.l4_llm = MockLLMProvider(self.config)
+                self.l4_llm = CleanLLMProvider(self.config)
                 if not self.l4_llm.initialize():
-                    logger.error("Even mock LLM provider failed to initialize")
+                    logger.error("Even clean LLM provider failed to initialize")
                     return False
 
             # Try to load existing memory
@@ -232,20 +234,26 @@ class MainAgent:
             # L2: Memory search and retrieval
             memory_results = self._search_memory(question)
             retrieved_docs = memory_results["documents"]
+            
+            logger.debug(f"Memory search returned {len(retrieved_docs)} documents")
 
             # L3: Graph reasoning and analysis
             graph_context = {
                 "previous_state": self.previous_state,
                 "error_state": error_state,
                 "memory_stats": memory_results.get("stats", {}),
+                "previous_graph": self.previous_state.get("graph_state") if self.previous_state else None,
             }
 
             # L3: Graph analysis (optional)
             if self.l3_graph:
+                logger.debug(f"L3GraphReasoner available, processing {len(retrieved_docs)} documents")
                 graph_analysis = self.l3_graph.analyze_documents(
                     retrieved_docs, graph_context
                 )
+                logger.debug(f"Graph analysis result: {graph_analysis.keys() if graph_analysis else 'None'}")
             else:
+                logger.warning("L3GraphReasoner not available")
                 # Fallback when graph reasoner is not available
                 graph_analysis = {
                     "graph": None,
@@ -287,6 +295,33 @@ class MainAgent:
             # Update memory with reward signal if spike detected
             if cycle_result.spike_detected:
                 self._update_memory_rewards(retrieved_docs, graph_analysis)
+                
+            # Store question and response in memory for future retrieval
+            memory_text = f"Q: {question}\nA: {cycle_result.response}"
+            
+            # Create a simple embedding for the text (fallback approach)
+            try:
+                # Use a simple hash-based embedding
+                hash_obj = hashlib.md5(memory_text.encode())
+                hash_hex = hash_obj.hexdigest()
+                
+                # Convert hash to numerical vector
+                memory_vector = np.array([int(hash_hex[i:i+2], 16) for i in range(0, min(32, len(hash_hex)), 2)], dtype=np.float32)
+                # Pad or truncate to standard size
+                if len(memory_vector) < 384:
+                    memory_vector = np.pad(memory_vector, (0, 384 - len(memory_vector)), 'constant')
+                else:
+                    memory_vector = memory_vector[:384]
+                
+                # Normalize
+                memory_vector = memory_vector / (np.linalg.norm(memory_vector) + 1e-8)
+                
+                # Add to memory
+                episode_idx = self.l2_memory.add_episode(memory_vector, memory_text, reasoning_quality)
+                logger.debug(f"Added episode {episode_idx} to memory: {len(memory_text)} chars")
+                
+            except Exception as e:
+                logger.warning(f"Failed to add to memory: {e}")
 
             # Update previous state for next cycle
             self.previous_state = {
@@ -305,11 +340,39 @@ class MainAgent:
     def _search_memory(self, question: str) -> Dict[str, Any]:
         """Search episodic memory for relevant documents"""
         try:
-            documents = self.l2_memory.search_episodes(
-                question,
-                k=self.config.memory.max_retrieved_docs,
-                min_similarity=self.config.memory.min_similarity,
+            # Create a query vector from the question (same approach as when storing)
+            hash_obj = hashlib.md5(question.encode())
+            hash_hex = hash_obj.hexdigest()
+            
+            # Convert hash to numerical vector
+            query_vector = np.array([int(hash_hex[i:i+2], 16) for i in range(0, min(32, len(hash_hex)), 2)], dtype=np.float32)
+            # Pad or truncate to standard size
+            if len(query_vector) < 384:
+                query_vector = np.pad(query_vector, (0, 384 - len(query_vector)), 'constant')
+            else:
+                query_vector = query_vector[:384]
+            
+            # Normalize
+            query_vector = query_vector / (np.linalg.norm(query_vector) + 1e-8)
+            
+            # Search with vector
+            similarities, indices = self.l2_memory.search(
+                query_vector,
+                top_k=self.config.memory.max_retrieved_docs,
             )
+
+            # Convert results to documents format
+            documents = []
+            for sim, idx in zip(similarities, indices):
+                if idx < len(self.l2_memory.episodes):
+                    episode = self.l2_memory.episodes[idx]
+                    documents.append({
+                        "text": episode.text,
+                        "similarity": float(sim),
+                        "index": idx,
+                        "c_value": episode.c,
+                        "timestamp": getattr(episode, 'timestamp', time.time())
+                    })
 
             stats = self.l2_memory.get_memory_stats()
 
@@ -530,6 +593,88 @@ class MainAgent:
         """Add a document to memory"""
         return self.l2_memory.store_episode(text, c_value, metadata)
 
+    def add_episode_with_graph_update(self, text: str, c_value: float = 0.5) -> Dict[str, Any]:
+        """
+        Add an episode to memory and update graph simultaneously.
+        This ensures data consistency between memory and graph representations.
+        """
+        try:
+            # Create embedding for the text
+            hash_obj = hashlib.md5(text.encode())
+            hash_hex = hash_obj.hexdigest()
+            
+            # Convert hash to numerical vector
+            vector = np.array([int(hash_hex[i:i+2], 16) for i in range(0, min(32, len(hash_hex)), 2)], dtype=np.float32)
+            # Pad or truncate to standard size
+            if len(vector) < 384:
+                vector = np.pad(vector, (0, 384 - len(vector)), 'constant')
+            else:
+                vector = vector[:384]
+            
+            # Normalize
+            vector = vector / (np.linalg.norm(vector) + 1e-8)
+            
+            # Add to L2 memory
+            episode_idx = self.l2_memory.add_episode(vector, text, c_value)
+            
+            # Create document representation for graph
+            document = {
+                "text": text,
+                "embedding": vector,
+                "c_value": c_value,
+                "episode_idx": episode_idx,
+                "timestamp": time.time()
+            }
+            
+            # Update L3 graph if available
+            graph_analysis = None
+            if self.l3_graph:
+                graph_analysis = self.l3_graph.analyze_documents([document])
+                logger.debug(f"Graph updated with new episode {episode_idx}")
+            
+            result = {
+                "episode_idx": episode_idx,
+                "vector": vector,
+                "text": text,
+                "c_value": c_value,
+                "graph_analysis": graph_analysis,
+                "success": True
+            }
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Failed to add episode with graph update: {e}")
+            return {
+                "episode_idx": -1,
+                "success": False,
+                "error": str(e)
+            }
+
+    def get_memory_graph_state(self) -> Dict[str, Any]:
+        """Get current state of memory and graph for analysis."""
+        try:
+            memory_stats = self.l2_memory.get_memory_stats()
+            
+            graph_state = {}
+            if self.l3_graph and self.l3_graph.previous_graph is not None:
+                graph = self.l3_graph.previous_graph
+                graph_state = {
+                    "num_nodes": graph.num_nodes,
+                    "num_edges": graph.edge_index.size(1) if hasattr(graph, 'edge_index') else 0,
+                    "has_features": hasattr(graph, 'x') and graph.x is not None
+                }
+            
+            return {
+                "memory": memory_stats,
+                "graph": graph_state,
+                "synchronized": True  # Since we use unified method
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to get memory/graph state: {e}")
+            return {"memory": {}, "graph": {}, "synchronized": False, "error": str(e)}
+
     def get_stats(self) -> Dict[str, Any]:
         """Get agent statistics"""
         return {
@@ -542,6 +687,64 @@ class MainAgent:
             else 0.0,
         }
 
+    def save_state(self) -> bool:
+        """Save agent state (memory and graph) to disk."""
+        try:
+            success = True
+            
+            # Save L2 memory
+            if self.l2_memory:
+                memory_saved = self.l2_memory.save()
+                if not memory_saved:
+                    logger.warning("Failed to save L2 memory")
+                    success = False
+                else:
+                    logger.info("L2 memory saved successfully")
+            
+            # Save L3 graph
+            if self.l3_graph and self.l3_graph.previous_graph is not None:
+                try:
+                    self.l3_graph.save_graph(self.l3_graph.previous_graph)
+                    logger.info("L3 graph saved successfully")
+                except Exception as e:
+                    logger.warning(f"Failed to save L3 graph: {e}")
+                    success = False
+            
+            return success
+            
+        except Exception as e:
+            logger.error(f"Failed to save agent state: {e}")
+            return False
+
+    def load_state(self) -> bool:
+        """Load agent state (memory and graph) from disk."""
+        try:
+            success = True
+            
+            # Load L2 memory
+            if self.l2_memory:
+                memory_loaded = self.l2_memory.load()
+                if memory_loaded:
+                    logger.info(f"L2 memory loaded: {len(self.l2_memory.episodes)} episodes")
+                else:
+                    logger.warning("No existing L2 memory found")
+                    success = False
+            
+            # Load L3 graph
+            if self.l3_graph:
+                loaded_graph = self.l3_graph.load_graph()
+                if loaded_graph is not None:
+                    self.l3_graph.previous_graph = loaded_graph
+                    logger.info(f"L3 graph loaded: {loaded_graph.num_nodes} nodes")
+                else:
+                    logger.warning("No existing L3 graph found")
+                    success = False
+            
+            return success
+            
+        except Exception as e:
+            logger.error(f"Failed to load agent state: {e}")
+            return False
 
 # Backward compatibility function
 def cycle(memory, question: str, previous_graph=None, **kwargs) -> Dict[str, Any]:

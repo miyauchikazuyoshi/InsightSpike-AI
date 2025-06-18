@@ -82,21 +82,37 @@ class ConflictScore:
 
         try:
             # Compare node feature distributions
-            old_features = graph_old.x.cpu().numpy()
-            new_features = graph_new.x.cpu().numpy()
+            old_features = graph_old.x.cpu().numpy() if hasattr(graph_old.x, 'cpu') else graph_old.x.numpy()
+            new_features = graph_new.x.cpu().numpy() if hasattr(graph_new.x, 'cpu') else graph_new.x.numpy()
+
+            # Handle empty features
+            if old_features.size == 0 or new_features.size == 0:
+                return 0.0
 
             # Use cosine similarity for feature comparison
             if old_features.shape[1] == new_features.shape[1]:
                 old_mean = np.mean(old_features, axis=0, keepdims=True)
                 new_mean = np.mean(new_features, axis=0, keepdims=True)
 
+                # Check for non-zero vectors
+                old_norm = np.linalg.norm(old_mean)
+                new_norm = np.linalg.norm(new_mean)
+                
+                if old_norm == 0 or new_norm == 0:
+                    return 0.0
+                
                 similarity = cosine_similarity(old_mean, new_mean)[0, 0]
-                return 1.0 - similarity  # Convert similarity to conflict
+                
+                # Handle NaN results
+                if not np.isfinite(similarity):
+                    return 0.0
+                    
+                return float(1.0 - similarity)  # Convert similarity to conflict
 
         except Exception as e:
             logger.warning(f"Semantic conflict calculation failed: {e}")
 
-        return 0.5  # Default moderate conflict
+        return 0.0  # Default to no conflict on error
 
     def _temporal_conflict(self, context: Dict[str, Any]) -> float:
         """Calculate temporal inconsistencies."""
@@ -128,20 +144,33 @@ class GraphBuilder:
             if embeddings is None:
                 embeddings = self._get_embeddings(documents)
 
-            # Build similarity matrix
-            sim_matrix = cosine_similarity(embeddings)
+            # For very small graphs, create simple structures
+            if len(documents) < 3:
+                # Create simple chain for small graphs
+                edge_list = []
+                if len(documents) == 2:
+                    edge_list = [[0, 1], [1, 0]]
+                elif len(documents) == 1:
+                    edge_list = [[0, 0]]  # Self-loop for single node
+            else:
+                # Build similarity matrix for larger graphs
+                sim_matrix = cosine_similarity(embeddings)
 
-            # Create edges based on similarity threshold
-            edge_list = []
-            for i in range(len(documents)):
-                for j in range(i + 1, len(documents)):
-                    if sim_matrix[i, j] > self.similarity_threshold:
-                        edge_list.extend([[i, j], [j, i]])  # Undirected edges
+                # Create edges based on similarity threshold
+                edge_list = []
+                for i in range(len(documents)):
+                    for j in range(i + 1, len(documents)):
+                        if sim_matrix[i, j] > self.similarity_threshold:
+                            edge_list.extend([[i, j], [j, i]])  # Undirected edges
 
-            if not edge_list:
-                # Create a simple chain if no similarities found
-                edge_list = [[i, i + 1] for i in range(len(documents) - 1)]
-                edge_list.extend([[i + 1, i] for i in range(len(documents) - 1)])
+                if not edge_list:
+                    # Create a simple chain if no similarities found
+                    edge_list = [[i, i + 1] for i in range(len(documents) - 1)]
+                    edge_list.extend([[i + 1, i] for i in range(len(documents) - 1)])
+
+            # Ensure we have at least some edges
+            if not edge_list and len(documents) > 0:
+                edge_list = [[0, 0]]  # Self-loop fallback
 
             # Convert to PyG format
             edge_index = torch.tensor(edge_list, dtype=torch.long).t().contiguous()
@@ -252,15 +281,29 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         context = context or {}
 
         try:
-            # Build current graph
-            current_graph = self.graph_builder.build_graph(documents)
+            # Handle empty documents case - create a minimal synthetic graph
+            if not documents:
+                # Create a minimal single-node graph for empty document case
+                synthetic_embedding = np.random.normal(0, 0.1, (1, 384))  # Small variance
+                current_graph = Data(
+                    x=torch.tensor(synthetic_embedding, dtype=torch.float),
+                    edge_index=torch.tensor([[0], [0]], dtype=torch.long),  # Self-loop
+                    num_nodes=1
+                )
+                logger.debug("Created synthetic graph for empty documents")
+            else:
+                # Build current graph from documents
+                current_graph = self.graph_builder.build_graph(documents)
+
+            # Get previous graph from context or instance variable
+            previous_graph = context.get("previous_graph", self.previous_graph)
 
             # Calculate metrics if we have a previous graph
-            metrics = self._calculate_metrics(current_graph, self.previous_graph)
+            metrics = self._calculate_metrics(current_graph, previous_graph)
 
             # Detect conflicts
             conflicts = self.conflict_scorer.calculate_conflict(
-                self.previous_graph, current_graph, context
+                previous_graph, current_graph, context
             )
 
             # Calculate reward signal
