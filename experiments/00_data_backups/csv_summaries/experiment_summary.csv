@@ -1,0 +1,2 @@
+experiment_id,total_episodes,total_insights_detected,avg_delta_ged,avg_delta_ig,processing_speed_eps_per_sec,memory_usage_mb,embedding_model,graph_metrics_used,experiment_date,status
+EXP_1000_20250618,1000,5,2.0872,15.4007,43.43,1.5,paraphrase-MiniLM-L6-v2,"ΔGED, ΔIG",2025-06-18,Completed Successfully

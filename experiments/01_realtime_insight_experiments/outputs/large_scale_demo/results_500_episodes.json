@@ -1,0 +1,15 @@
+{
+  "episodes": 500,
+  "execution_time": 3.893296957015991,
+  "episodes_per_second": 128.42585744685243,
+  "memory_stats": {
+    "total_episodes": 600,
+    "index_trained": true,
+    "c_value_mean": 0.2,
+    "c_value_std": 0.0,
+    "c_value_min": 0.2,
+    "c_value_max": 0.2,
+    "dimension": 384
+  },
+  "timestamp": "2025-06-18T00:01:13.876841"
+}

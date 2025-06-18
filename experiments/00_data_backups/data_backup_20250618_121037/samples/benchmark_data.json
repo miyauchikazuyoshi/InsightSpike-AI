@@ -1,0 +1,48 @@
+{
+  "benchmark_questions": [
+    {
+      "id": "monty_hall_basic",
+      "question": "In the Monty Hall problem, should you switch doors?",
+      "category": "probability_theory",
+      "expected_keywords": ["switch", "probability", "2/3", "1/3"],
+      "difficulty": "medium",
+      "cross_domain": false
+    },
+    {
+      "id": "zeno_paradox",
+      "question": "How is Zeno's paradox resolved using calculus?",
+      "category": "mathematics",
+      "expected_keywords": ["infinite", "series", "convergence", "limit"],
+      "difficulty": "hard",
+      "cross_domain": false
+    },
+    {
+      "id": "ship_theseus",
+      "question": "What is the Ship of Theseus paradox about identity?",
+      "category": "philosophy",
+      "expected_keywords": ["identity", "continuity", "parts", "replacement"],
+      "difficulty": "medium",
+      "cross_domain": false
+    },
+    {
+      "id": "cross_domain_probability_info",
+      "question": "How does information theory relate to probability in decision making?",
+      "category": "cross_domain",
+      "domains": ["probability_theory", "information_theory", "cognitive_science"],
+      "expected_keywords": ["entropy", "uncertainty", "bits", "probability"],
+      "difficulty": "hard",
+      "cross_domain": true
+    }
+  ],
+  "benchmark_metrics": {
+    "response_time_target": 1.0,
+    "confidence_threshold": 0.6,
+    "reasoning_quality_threshold": 0.5,
+    "cross_domain_bonus_threshold": 0.15
+  },
+  "test_parameters": {
+    "dged_threshold": -0.5,
+    "dig_threshold": 1.5,
+    "insight_detection_timeout": 5.0
+  }
+}

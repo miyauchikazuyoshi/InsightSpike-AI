@@ -1,0 +1,17 @@
+{
+  "experiment_metadata": {
+    "num_episodes": 1000,
+    "execution_time": 25.56986379623413,
+    "episodes_per_second": 39.10853839382897,
+    "insights_detected": 0,
+    "timestamp": "2025-06-18T03:12:59.133032"
+  },
+  "input_episodes_count": 1000,
+  "insight_events_count": 0,
+  "files_generated": {
+    "input_episodes": "experiments/outputs/comprehensive_experiment/input_episodes_detailed.csv",
+    "insight_events_detailed": "experiments/outputs/comprehensive_experiment/insight_events_comprehensive.json",
+    "insight_events_summary": "experiments/outputs/comprehensive_experiment/insight_events_summary.csv",
+    "experiment_summary": "experiments/outputs/comprehensive_experiment/experiment_summary.json"
+  }
+}

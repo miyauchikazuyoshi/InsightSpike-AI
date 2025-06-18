@@ -1,0 +1,31 @@
+{
+  "experiment_metadata": {
+    "experiment_name": "InsightSpike-AI 1000エピソード包括的解析",
+    "total_input_episodes": 1000,
+    "total_insight_events": 5,
+    "analysis_timestamp": "2025-06-18T03:17:31.283275",
+    "embedding_model": "paraphrase-MiniLM-L6-v2",
+    "vector_dimension": 384
+  },
+  "insight_summary": {
+    "total_insights": 5,
+    "insight_types": [
+      "知識精緻化",
+      "専門知識獲得",
+      "基礎概念学習",
+      "概念統合",
+      "構造的理解"
+    ],
+    "average_importance": 6.52504,
+    "total_reward": 254.00719999999998,
+    "vector_conversion_confidence": 0.03955837346613407
+  },
+  "files_generated": {
+    "input_episodes": "experiments/outputs/comprehensive_summary_v2/01_input_episodes_detailed.csv",
+    "insight_events_comprehensive": "experiments/outputs/comprehensive_summary_v2/02_insight_threshold_events_comprehensive.csv",
+    "insight_full_details": "experiments/outputs/comprehensive_summary_v2/03_insight_events_full_details.json",
+    "vector_conversions": "experiments/outputs/comprehensive_summary_v2/04_vector_to_language_conversions.csv",
+    "related_nodes": "experiments/outputs/comprehensive_summary_v2/05_related_nodes_mapping.csv",
+    "meta_summary": "experiments/outputs/comprehensive_summary_v2/06_experiment_meta_summary.json"
+  }
+}
