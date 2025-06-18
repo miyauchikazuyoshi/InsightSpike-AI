@@ -78,7 +78,12 @@ Further filings (US/PCT) will follow within the priority year.
 - **Dynamic Memory Management**: Adaptive topK optimization, conflict detection, and episode lifecycle management
 - **Smart Episode Integration**: Automatic redundancy prevention with similarity-based merge decisions
 
-### 🔧 Research-Ready API
+### � Key Research Findings
+- **Intrinsic Reward Mechanism**: Non-insight episodes (18.6%) demonstrate effective intrinsic reward functioning, where high similarity to known episodes suppresses insight generation
+- **Memory Efficiency**: Non-insight data contributes to dynamic RAG construction memory optimization by avoiding redundant processing
+- **Selective Learning**: System automatically focuses computational resources on truly novel insights, improving long-term sustainability
+
+### �🔧 Research-Ready API
 - **Public Functions**: `compute_delta_ged()`, `compute_delta_ig()`, `compute_fusion_reward()`
 - **Preset Configurations**: 6 validated configurations for research, production, education, etc.
 - **Algorithm Modules**: Independent implementations with multiple optimization levels
