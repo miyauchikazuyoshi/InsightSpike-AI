@@ -4,7 +4,7 @@
 > Quantized RAG ＋ GNN ＋ Internal Reward (ΔGED/ΔIG)  
 > Implementing a cerebellum–LC–hippocampus–VTA loop to study *insight*.
 
-[![License: InsightSpike Community License](https://img.shields.io/badge/License-InsightSpike--Community--1.0-blue)](https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/LICENSE)  
+[![License: InsightSpike Responsible AI](https://img.shields.io/badge/License-InsightSpike--Responsible--AI--1.0-blue)](https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/LICENSE)  
 <a href="https://arxiv.org/abs/TBD"><img src="https://img.shields.io/badge/arXiv-TBD-b31b1b.svg" alt="arXiv"></a>  
 <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/releases"><img src="https://img.shields.io/github/v/release/miyauchikazuyoshi/InsightSpike-AI"></a>
 <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/issues"><img src="https://img.shields.io/github/issues/miyauchikazuyoshi/InsightSpike-AI"></a>
@@ -592,3 +592,53 @@ InsightSpike-AI is currently in **research prototype stage** with the following 
 - **v1.1.0**: Real-time inference capabilities
 
 For production deployments, please contact the development team for optimization consulting.
+
+---
+
+## 📄 License & Patents
+
+### License
+This project is licensed under the **InsightSpike AI Responsible Use License Agreement v1.0**.
+
+**Responsible AI Principles:**
+- ✅ **Academic Research**: Freely permitted with attribution
+- ✅ **Educational Use**: Classroom demonstrations and learning
+- ✅ **Healthcare & Humanitarian**: Medical research and disaster response
+- ✅ **Environmental**: Sustainability and climate research
+- ❌ **Misinformation**: Fake news, propaganda generation prohibited
+- ❌ **Privacy Violations**: Unauthorized personal data analysis prohibited
+- ❌ **Discrimination**: Bias amplification and hate speech prohibited
+- ❌ **Illegal Surveillance**: Unauthorized monitoring prohibited
+- ❌ **Military Weapons**: Harmful military applications prohibited
+- ❌ **Political Manipulation**: Election interference prohibited
+- ❌ **Financial Crimes**: Market manipulation and fraud prohibited
+- ❌ **Harm to Minors**: Child exploitation prohibited
+
+**Technical Requirements:**
+- 🔍 **Human Oversight**: Required for all deployments
+- 📊 **Usage Logging**: Accountability tracking mandatory
+- ⚖️ **Bias Monitoring**: Algorithmic fairness required
+- 📢 **Transparency**: Public reporting for significant use
+
+**Commercial Licensing:**
+For commercial applications, contact: **miyauchikazuyoshi@gmail.com**
+
+### Patents & Innovation
+This project contains novel methodologies including:
+- **geDIG (Graph Edit Distance with Information Gain)** methodology
+- **Cross-domain insight synthesis** algorithms  
+- **Selective episodic memory** systems
+- **Analogical reasoning** mechanisms
+
+### Violation Reporting
+Report misuse to: **miyauchikazuyoshi@gmail.com**
+Subject: "InsightSpike License Violation Report"
+
+### Full License Text
+See [`LICENSE`](LICENSE) file for complete terms and conditions.
+
+**SPDX-License-Identifier**: InsightSpike-Responsible-AI-1.0
+
+---
+
+*InsightSpike-AI: Advancing the frontiers of machine insight and analogical reasoning*

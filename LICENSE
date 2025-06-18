@@ -1,41 +1,119 @@
-InsightSpike Community License Agreement v1.0 (Llama-style)
+InsightSpike AI Responsible Use License Agreement v1.0
 
 Copyright (c) 2025 InsightSpike Project Authors
 
-This license governs the use of the InsightSpike-AI software and associated models (the “Software”).
+This license governs the use of the InsightSpike-AI software and associated models (the "Software"), a revolutionary analogical reasoning and insight detection system.
 
-1. Grant of Rights
-Subject to your compliance with this license, you are granted a non-exclusive, worldwide, non-transferable, royalty-free, revocable license to use, reproduce, and modify the Software for research and non-commercial purposes only.
+PREAMBLE
+This technology represents a significant advancement in machine understanding and analogical reasoning, capable of generating insights across domains. With such power comes responsibility. This license is designed to promote beneficial uses while preventing harmful applications.
 
-2. Commercial Use
-Commercial use of the Software (including, but not limited to, using the Software or derivatives in products or services, or for any revenue-generating activity) is **not permitted** under this license.  
-If you wish to use the Software for commercial purposes, you must obtain a separate, written commercial license from the copyright holder.  
-For commercial inquiries, contact: miyauchikazuyoshi@gmail.com
+1. GRANT OF RIGHTS
+Subject to your compliance with this license, you are granted a non-exclusive, worldwide, non-transferable, royalty-free, revocable license to use, reproduce, modify, and distribute the Software for the permitted purposes outlined below.
 
-3. Redistribution
-You may redistribute the Software (including modifications and derivative works) for non-commercial purposes, provided that:
-- You include this license and copyright notice with any copy of the Software.
-- You clearly indicate any modifications made.
+2. PERMITTED USES
+✅ The following uses are explicitly permitted:
+- Academic research and scientific study
+- Educational purposes and classroom demonstrations  
+- Non-commercial personal projects and experimentation
+- Healthcare and medical research (non-harmful)
+- Environmental sustainability and climate research
+- Humanitarian aid and disaster response
+- Artistic and creative applications
+- Open source software development
+- Journalistic investigation (ethical)
+- Accessibility technology development
 
-4. No Trademark or Endorsement Rights
-Nothing in this license grants you rights to use the names, trademarks, logos, or branding of the InsightSpike Project Authors.
+3. PROHIBITED USES
+❌ The following uses are strictly prohibited:
+a) Misinformation and Disinformation: Creating, spreading, or amplifying false information, propaganda, or misleading content
+b) Privacy Violations: Unauthorized analysis of personal data, stalking, harassment, or invasive profiling
+c) Discrimination and Bias: Promoting prejudice, hate speech, or discriminatory practices against any group
+d) Illegal Surveillance: Unauthorized monitoring, tracking, or prediction of individuals' behavior
+e) Military and Weapons: Development of weapons, military applications, or dual-use technologies for harmful purposes
+f) Political Manipulation: Election interference, voter suppression, or manipulation of democratic processes
+g) Financial Crimes: Market manipulation, fraud schemes, or illegal financial activities
+h) Harm to Minors: Any application that could endanger, exploit, or negatively impact children
 
-5. Disclaimer of Warranty
-The Software is provided “AS IS” and without warranty of any kind. The authors disclaim all warranties, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, and non-infringement.
+4. TECHNICAL REQUIREMENTS
+Users must implement the following safeguards:
+a) Human Oversight: Maintain meaningful human supervision over the system's outputs
+b) Usage Logging: Record usage patterns, inputs, and outputs for accountability
+c) Bias Monitoring: Implement systems to detect and mitigate algorithmic bias
+d) Transparency Reporting: Publish regular reports on system usage and safeguards (for significant deployments)
+e) Misuse Detection: Deploy automated systems to detect potential misuse patterns
+f) Data Protection: Implement appropriate data security and privacy protection measures
 
-6. Limitation of Liability
-In no event shall the authors be liable for any damages arising from the use of the Software.
+5. ATTRIBUTION REQUIREMENTS
+Any use of the Software must include:
+- Appropriate credit to InsightSpike Project Authors
+- A link to this license
+- Clear indication of any modifications made
+- Disclosure of the AI system's involvement in generating insights
 
-7. Termination
-If you breach any term of this license, your rights under this license will terminate automatically.
+6. COMMERCIAL USE
+Commercial use requires a separate commercial license agreement. Commercial use includes:
+- Integration into commercial products or services
+- Use for revenue-generating activities
+- Enterprise deployments
+- Consulting services using the Software
+
+For commercial licensing, contact: miyauchikazuyoshi@gmail.com
+
+7. RESEARCH AND DEVELOPMENT EXEMPTION
+Bona fide research institutions may use the Software for research purposes that might otherwise fall under prohibited uses, provided:
+- The research has legitimate scientific merit
+- Appropriate ethical oversight is maintained
+- Results are published openly
+- No harmful applications are developed
+
+8. COMPLIANCE AND MONITORING
+a) Users must self-certify compliance with this license
+b) The authors reserve the right to investigate reported violations
+c) Users must cooperate with reasonable compliance inquiries
+d) Anonymous usage statistics may be collected for monitoring purposes
+
+9. TERMINATION
+Your license is automatically terminated if you:
+- Violate any provision of this license
+- Use the Software for prohibited purposes
+- Fail to implement required technical safeguards
+- Refuse to cooperate with compliance investigations
+
+Upon termination, you must immediately cease all use and destroy all copies of the Software.
+
+10. LIABILITY AND ENFORCEMENT
+a) Users are solely responsible for their use of the Software
+b) Violations may result in legal action, including injunctive relief
+c) Users agree to indemnify the authors against claims arising from misuse
+d) This license is governed by the laws of Japan
+
+11. REPORTING VIOLATIONS
+To report violations or concerns:
+- Email: miyauchikazuyoshi@gmail.com
+- Subject: "InsightSpike License Violation Report"
+- Include detailed information about the suspected violation
+
+12. UPDATES AND MODIFICATIONS
+This license may be updated to address new risks or technologies. Users will be notified of significant changes and must comply with updated terms.
+
+13. DISCLAIMER OF WARRANTY
+THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. THE AUTHORS DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+
+14. LIMITATION OF LIABILITY
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY DAMAGES ARISING FROM THE USE OF THE SOFTWARE, INCLUDING BUT NOT LIMITED TO DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES.
 
 ---
 
-**Summary:**  
-- **Research and non-commercial use only** is permitted by default.  
-- **Commercial use requires a separate license** (contact the author).  
-- Redistribution for non-commercial purposes is allowed with this license included.
+RESPONSIBLE AI COMMITMENT
+By using this software, you commit to:
+- Advancing human knowledge and wellbeing
+- Respecting human dignity and rights
+- Promoting fairness and reducing bias
+- Maintaining transparency and accountability
+- Contributing to beneficial AI development
 
-For commercial licensing, please contact: miyauchikazuyoshi@gmail.com
+This license reflects our commitment to ensuring that breakthrough AI technologies serve humanity's best interests while preventing harmful applications.
 
-SPDX-License-Identifier: InsightSpike-Community-1.0
+For questions about this license or to request clarification on specific use cases, please contact: miyauchikazuyoshi@gmail.com
+
+SPDX-License-Identifier: InsightSpike-Responsible-AI-1.0
