@@ -1,0 +1,458 @@
+{
+  "episodes_count": 50,
+  "seed": 42,
+  "build_time_seconds": 0.7699189186096191,
+  "timestamp": "2025-06-19T02:29:56.434294",
+  "episodes": [
+    {
+      "id": 1,
+      "text": "Initial research in Large Language Models achieves breakthrough performance on medical diagnosis, establishing foundational knowledge for future insights.",
+      "research_area": "Large Language Models",
+      "activity_type": "achieves breakthrough performance on",
+      "domain": "medical diagnosis",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:55.742915"
+    },
+    {
+      "id": 2,
+      "text": "Initial research in Computer Vision introduces novel architecture for autonomous systems, establishing foundational knowledge for future insights.",
+      "research_area": "Computer Vision",
+      "activity_type": "introduces novel architecture for",
+      "domain": "autonomous systems",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:55.759250"
+    },
+    {
+      "id": 3,
+      "text": "Initial research in Reinforcement Learning demonstrates significant improvements in natural language processing, establishing foundational knowledge for future insights.",
+      "research_area": "Reinforcement Learning",
+      "activity_type": "demonstrates significant improvements in",
+      "domain": "natural language processing",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:55.773753"
+    },
+    {
+      "id": 4,
+      "text": "Initial research in Graph Neural Networks reveals new insights about computer vision, establishing foundational knowledge for future insights.",
+      "research_area": "Graph Neural Networks",
+      "activity_type": "reveals new insights about",
+      "domain": "computer vision",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:55.788066"
+    },
+    {
+      "id": 5,
+      "text": "Initial research in Federated Learning establishes new benchmarks for robotics, establishing foundational knowledge for future insights.",
+      "research_area": "Federated Learning",
+      "activity_type": "establishes new benchmarks for",
+      "domain": "robotics",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:55.801955"
+    },
+    {
+      "id": 6,
+      "text": "Initial research in Explainable AI achieves breakthrough performance on cybersecurity, establishing foundational knowledge for future insights.",
+      "research_area": "Explainable AI",
+      "activity_type": "achieves breakthrough performance on",
+      "domain": "cybersecurity",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:55.817821"
+    },
+    {
+      "id": 7,
+      "text": "Initial research in Multimodal Learning introduces novel architecture for climate modeling, establishing foundational knowledge for future insights.",
+      "research_area": "Multimodal Learning",
+      "activity_type": "introduces novel architecture for",
+      "domain": "climate modeling",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:55.831901"
+    },
+    {
+      "id": 8,
+      "text": "Initial research in Few-shot Learning demonstrates significant improvements in drug discovery, establishing foundational knowledge for future insights.",
+      "research_area": "Few-shot Learning",
+      "activity_type": "demonstrates significant improvements in",
+      "domain": "drug discovery",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:55.846285"
+    },
+    {
+      "id": 9,
+      "text": "Initial research in Transfer Learning reveals new insights about financial prediction, establishing foundational knowledge for future insights.",
+      "research_area": "Transfer Learning",
+      "activity_type": "reveals new insights about",
+      "domain": "financial prediction",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:55.859993"
+    },
+    {
+      "id": 10,
+      "text": "Initial research in Adversarial Machine Learning establishes new benchmarks for educational technology, establishing foundational knowledge for future insights.",
+      "research_area": "Adversarial Machine Learning",
+      "activity_type": "establishes new benchmarks for",
+      "domain": "educational technology",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:55.875212"
+    },
+    {
+      "id": 11,
+      "text": "Initial research in Large Language Models achieves breakthrough performance on medical diagnosis, establishing foundational knowledge for future insights.",
+      "research_area": "Large Language Models",
+      "activity_type": "achieves breakthrough performance on",
+      "domain": "medical diagnosis",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:55.888974"
+    },
+    {
+      "id": 12,
+      "text": "Initial research in Computer Vision introduces novel architecture for autonomous systems, establishing foundational knowledge for future insights.",
+      "research_area": "Computer Vision",
+      "activity_type": "introduces novel architecture for",
+      "domain": "autonomous systems",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:55.902540"
+    },
+    {
+      "id": 13,
+      "text": "Initial research in Reinforcement Learning demonstrates significant improvements in natural language processing, establishing foundational knowledge for future insights.",
+      "research_area": "Reinforcement Learning",
+      "activity_type": "demonstrates significant improvements in",
+      "domain": "natural language processing",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:55.916443"
+    },
+    {
+      "id": 14,
+      "text": "Initial research in Graph Neural Networks reveals new insights about computer vision, establishing foundational knowledge for future insights.",
+      "research_area": "Graph Neural Networks",
+      "activity_type": "reveals new insights about",
+      "domain": "computer vision",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:55.930220"
+    },
+    {
+      "id": 15,
+      "text": "Initial research in Federated Learning establishes new benchmarks for robotics, establishing foundational knowledge for future insights.",
+      "research_area": "Federated Learning",
+      "activity_type": "establishes new benchmarks for",
+      "domain": "robotics",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:55.943975"
+    },
+    {
+      "id": 16,
+      "text": "Initial research in Explainable AI achieves breakthrough performance on cybersecurity, establishing foundational knowledge for future insights.",
+      "research_area": "Explainable AI",
+      "activity_type": "achieves breakthrough performance on",
+      "domain": "cybersecurity",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:55.958774"
+    },
+    {
+      "id": 17,
+      "text": "Initial research in Multimodal Learning introduces novel architecture for climate modeling, establishing foundational knowledge for future insights.",
+      "research_area": "Multimodal Learning",
+      "activity_type": "introduces novel architecture for",
+      "domain": "climate modeling",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:55.972537"
+    },
+    {
+      "id": 18,
+      "text": "Initial research in Few-shot Learning demonstrates significant improvements in drug discovery, establishing foundational knowledge for future insights.",
+      "research_area": "Few-shot Learning",
+      "activity_type": "demonstrates significant improvements in",
+      "domain": "drug discovery",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:55.986089"
+    },
+    {
+      "id": 19,
+      "text": "Initial research in Transfer Learning reveals new insights about financial prediction, establishing foundational knowledge for future insights.",
+      "research_area": "Transfer Learning",
+      "activity_type": "reveals new insights about",
+      "domain": "financial prediction",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:55.999628"
+    },
+    {
+      "id": 20,
+      "text": "Initial research in Adversarial Machine Learning establishes new benchmarks for educational technology, establishing foundational knowledge for future insights.",
+      "research_area": "Adversarial Machine Learning",
+      "activity_type": "establishes new benchmarks for",
+      "domain": "educational technology",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.014316"
+    },
+    {
+      "id": 21,
+      "text": "Initial research in Large Language Models achieves breakthrough performance on medical diagnosis, establishing foundational knowledge for future insights.",
+      "research_area": "Large Language Models",
+      "activity_type": "achieves breakthrough performance on",
+      "domain": "medical diagnosis",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.028066"
+    },
+    {
+      "id": 22,
+      "text": "Initial research in Computer Vision introduces novel architecture for autonomous systems, establishing foundational knowledge for future insights.",
+      "research_area": "Computer Vision",
+      "activity_type": "introduces novel architecture for",
+      "domain": "autonomous systems",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.041795"
+    },
+    {
+      "id": 23,
+      "text": "Initial research in Reinforcement Learning demonstrates significant improvements in natural language processing, establishing foundational knowledge for future insights.",
+      "research_area": "Reinforcement Learning",
+      "activity_type": "demonstrates significant improvements in",
+      "domain": "natural language processing",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.055574"
+    },
+    {
+      "id": 24,
+      "text": "Initial research in Graph Neural Networks reveals new insights about computer vision, establishing foundational knowledge for future insights.",
+      "research_area": "Graph Neural Networks",
+      "activity_type": "reveals new insights about",
+      "domain": "computer vision",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.069749"
+    },
+    {
+      "id": 25,
+      "text": "Initial research in Federated Learning establishes new benchmarks for robotics, establishing foundational knowledge for future insights.",
+      "research_area": "Federated Learning",
+      "activity_type": "establishes new benchmarks for",
+      "domain": "robotics",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.083440"
+    },
+    {
+      "id": 26,
+      "text": "Initial research in Explainable AI achieves breakthrough performance on cybersecurity, establishing foundational knowledge for future insights.",
+      "research_area": "Explainable AI",
+      "activity_type": "achieves breakthrough performance on",
+      "domain": "cybersecurity",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.098411"
+    },
+    {
+      "id": 27,
+      "text": "Initial research in Multimodal Learning introduces novel architecture for climate modeling, establishing foundational knowledge for future insights.",
+      "research_area": "Multimodal Learning",
+      "activity_type": "introduces novel architecture for",
+      "domain": "climate modeling",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.112480"
+    },
+    {
+      "id": 28,
+      "text": "Initial research in Few-shot Learning demonstrates significant improvements in drug discovery, establishing foundational knowledge for future insights.",
+      "research_area": "Few-shot Learning",
+      "activity_type": "demonstrates significant improvements in",
+      "domain": "drug discovery",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.126530"
+    },
+    {
+      "id": 29,
+      "text": "Initial research in Transfer Learning reveals new insights about financial prediction, establishing foundational knowledge for future insights.",
+      "research_area": "Transfer Learning",
+      "activity_type": "reveals new insights about",
+      "domain": "financial prediction",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.139993"
+    },
+    {
+      "id": 30,
+      "text": "Initial research in Adversarial Machine Learning establishes new benchmarks for educational technology, establishing foundational knowledge for future insights.",
+      "research_area": "Adversarial Machine Learning",
+      "activity_type": "establishes new benchmarks for",
+      "domain": "educational technology",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.154672"
+    },
+    {
+      "id": 31,
+      "text": "Initial research in Large Language Models achieves breakthrough performance on medical diagnosis, establishing foundational knowledge for future insights.",
+      "research_area": "Large Language Models",
+      "activity_type": "achieves breakthrough performance on",
+      "domain": "medical diagnosis",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.168106"
+    },
+    {
+      "id": 32,
+      "text": "Initial research in Computer Vision introduces novel architecture for autonomous systems, establishing foundational knowledge for future insights.",
+      "research_area": "Computer Vision",
+      "activity_type": "introduces novel architecture for",
+      "domain": "autonomous systems",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.181432"
+    },
+    {
+      "id": 33,
+      "text": "Initial research in Reinforcement Learning demonstrates significant improvements in natural language processing, establishing foundational knowledge for future insights.",
+      "research_area": "Reinforcement Learning",
+      "activity_type": "demonstrates significant improvements in",
+      "domain": "natural language processing",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.194907"
+    },
+    {
+      "id": 34,
+      "text": "Initial research in Graph Neural Networks reveals new insights about computer vision, establishing foundational knowledge for future insights.",
+      "research_area": "Graph Neural Networks",
+      "activity_type": "reveals new insights about",
+      "domain": "computer vision",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.208650"
+    },
+    {
+      "id": 35,
+      "text": "Initial research in Federated Learning establishes new benchmarks for robotics, establishing foundational knowledge for future insights.",
+      "research_area": "Federated Learning",
+      "activity_type": "establishes new benchmarks for",
+      "domain": "robotics",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.222812"
+    },
+    {
+      "id": 36,
+      "text": "Initial research in Explainable AI achieves breakthrough performance on cybersecurity, establishing foundational knowledge for future insights.",
+      "research_area": "Explainable AI",
+      "activity_type": "achieves breakthrough performance on",
+      "domain": "cybersecurity",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.238265"
+    },
+    {
+      "id": 37,
+      "text": "Initial research in Multimodal Learning introduces novel architecture for climate modeling, establishing foundational knowledge for future insights.",
+      "research_area": "Multimodal Learning",
+      "activity_type": "introduces novel architecture for",
+      "domain": "climate modeling",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.252246"
+    },
+    {
+      "id": 38,
+      "text": "Initial research in Few-shot Learning demonstrates significant improvements in drug discovery, establishing foundational knowledge for future insights.",
+      "research_area": "Few-shot Learning",
+      "activity_type": "demonstrates significant improvements in",
+      "domain": "drug discovery",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.265687"
+    },
+    {
+      "id": 39,
+      "text": "Initial research in Transfer Learning reveals new insights about financial prediction, establishing foundational knowledge for future insights.",
+      "research_area": "Transfer Learning",
+      "activity_type": "reveals new insights about",
+      "domain": "financial prediction",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.279304"
+    },
+    {
+      "id": 40,
+      "text": "Initial research in Adversarial Machine Learning establishes new benchmarks for educational technology, establishing foundational knowledge for future insights.",
+      "research_area": "Adversarial Machine Learning",
+      "activity_type": "establishes new benchmarks for",
+      "domain": "educational technology",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.293957"
+    },
+    {
+      "id": 41,
+      "text": "Initial research in Large Language Models achieves breakthrough performance on medical diagnosis, establishing foundational knowledge for future insights.",
+      "research_area": "Large Language Models",
+      "activity_type": "achieves breakthrough performance on",
+      "domain": "medical diagnosis",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.307873"
+    },
+    {
+      "id": 42,
+      "text": "Initial research in Computer Vision introduces novel architecture for autonomous systems, establishing foundational knowledge for future insights.",
+      "research_area": "Computer Vision",
+      "activity_type": "introduces novel architecture for",
+      "domain": "autonomous systems",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.321908"
+    },
+    {
+      "id": 43,
+      "text": "Initial research in Reinforcement Learning demonstrates significant improvements in natural language processing, establishing foundational knowledge for future insights.",
+      "research_area": "Reinforcement Learning",
+      "activity_type": "demonstrates significant improvements in",
+      "domain": "natural language processing",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.336309"
+    },
+    {
+      "id": 44,
+      "text": "Initial research in Graph Neural Networks reveals new insights about computer vision, establishing foundational knowledge for future insights.",
+      "research_area": "Graph Neural Networks",
+      "activity_type": "reveals new insights about",
+      "domain": "computer vision",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.350101"
+    },
+    {
+      "id": 45,
+      "text": "Initial research in Federated Learning establishes new benchmarks for robotics, establishing foundational knowledge for future insights.",
+      "research_area": "Federated Learning",
+      "activity_type": "establishes new benchmarks for",
+      "domain": "robotics",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.364060"
+    },
+    {
+      "id": 46,
+      "text": "Initial research in Explainable AI achieves breakthrough performance on cybersecurity, establishing foundational knowledge for future insights.",
+      "research_area": "Explainable AI",
+      "activity_type": "achieves breakthrough performance on",
+      "domain": "cybersecurity",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.378961"
+    },
+    {
+      "id": 47,
+      "text": "Initial research in Multimodal Learning introduces novel architecture for climate modeling, establishing foundational knowledge for future insights.",
+      "research_area": "Multimodal Learning",
+      "activity_type": "introduces novel architecture for",
+      "domain": "climate modeling",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.392739"
+    },
+    {
+      "id": 48,
+      "text": "Initial research in Few-shot Learning demonstrates significant improvements in drug discovery, establishing foundational knowledge for future insights.",
+      "research_area": "Few-shot Learning",
+      "activity_type": "demonstrates significant improvements in",
+      "domain": "drug discovery",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.406299"
+    },
+    {
+      "id": 49,
+      "text": "Initial research in Transfer Learning reveals new insights about financial prediction, establishing foundational knowledge for future insights.",
+      "research_area": "Transfer Learning",
+      "activity_type": "reveals new insights about",
+      "domain": "financial prediction",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.419671"
+    },
+    {
+      "id": 50,
+      "text": "Initial research in Adversarial Machine Learning establishes new benchmarks for educational technology, establishing foundational knowledge for future insights.",
+      "research_area": "Adversarial Machine Learning",
+      "activity_type": "establishes new benchmarks for",
+      "domain": "educational technology",
+      "type": "initial",
+      "timestamp": "2025-06-19T02:29:56.434275"
+    }
+  ]
+}

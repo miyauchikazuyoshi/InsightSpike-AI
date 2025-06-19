@@ -2,7 +2,7 @@
 
 ## Abstract
 
-This comprehensive literature review examines the historical development of cognitive architectures, multi-domain AI systems, and approaches toward artificial general intelligence (AGI), providing context for the revolutionary InsightSpike-AI geDIG implementation. We analyze the limitations of traditional fragmented approaches and identify the theoretical foundations that enable unified cognitive architectures to achieve unprecedented cross-domain intelligence.
+This comprehensive literature review examines the historical development of cognitive architectures, multi-domain AI systems, and approaches toward artificial general intelligence (AGI), providing context for the novel InsightSpike-AI geDIG implementation. We analyze the limitations of traditional fragmented approaches and identify the theoretical foundations that enable unified cognitive architectures to achieve significant cross-domain intelligence.
 
 ## 1. Introduction
 

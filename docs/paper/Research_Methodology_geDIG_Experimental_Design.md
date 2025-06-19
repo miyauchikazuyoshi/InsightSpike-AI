@@ -2,7 +2,7 @@
 
 ## 1. Experimental Framework Overview
 
-This document outlines the comprehensive methodology used to validate the revolutionary InsightSpike-AI unified cognitive architecture and establish the effectiveness of the Graph Edit Distance Information Gain (geDIG) algorithm across multiple AI domains.
+This document outlines the comprehensive methodology used to validate the novel InsightSpike-AI unified cognitive architecture and establish the effectiveness of the Graph Edit Distance Information Gain (geDIG) algorithm across multiple AI domains.
 
 ## 2. Research Questions
 

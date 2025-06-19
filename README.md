@@ -1,5 +1,13 @@
 # InsightSpike-AI
-**Brain-Inspired Multi-Agent Architecture for "Spike of Insight" (ΔGED × ΔIG)**
+**Brain-Inspired Multi-Ag### Core Technology: geDIG Methodology
+
+The sy### 🔍 Key Research Findings
+- **Intrinsic Reward Mechanism**: Non-insight episodes (18.6%) demonstrate effective intrinsic reward functioning, where high similarity to known episodes suppresses insight generation
+- **Memory Efficiency**: Non-insight data contributes to dynamic RAG construction memory optimization by avoiding redundant processing
+- **Selective Learning**: System focuses computational resources on novel insights, improving long-term sustainability's primary contribution lies in its **geDIG** (Graph Edit Distance + Information Gain) methodology: Architecture for "Spike of Insigh### 🔍 Key Research Findings
+- **Intrinsic Reward Mechanism**: Non-insight episodes (18.6% of 500 total episodes) demonstrate effective intrinsic reward functioning, where high similarity to known episodes suppresses insight generation (see `experiments/01_realtime_insight_experiments/outputs/`)
+- **Memory Efficiency**: Non-insight data contributes to dynamic RAG construction memory optimization by avoiding redundant processing (~18.6% computational savings)
+- **Selective Learning**: System automatically focuses computational resources on truly novel insights (81.6% insight detection rate), improving long-term sustainabilityΔGED × ΔIG)**
 
 > Quantized RAG ＋ GNN ＋ Internal Reward (ΔGED/ΔIG)  
 > Implementing a cerebellum–LC–hippocampus–VTA loop to study *insight*.
@@ -30,26 +38,30 @@
 - [🧪 Research & Validation](#-research--validation)
 - [🤝 Contributing](#-contributing)
 - [📄 License & Patents](#-license--patents)
+- [📚 Terminology & Definitions](#-terminology--definitions)
+- [📖 Academic Summary](docs/academic_summary.md)
 - [🔗 Related Resources](#-related-resources)
 
 ## 🎯 What is InsightSpike-AI?
 
-InsightSpike-AI is a novel AI architecture that detects and models human-like "insight moments" using neurobiologically-inspired mechanisms. Unlike traditional AI systems that provide incremental improvements, InsightSpike-AI identifies breakthrough moments when knowledge restructures dramatically - the computational equivalent of "Aha!" moments.
+InsightSpike-AI is a novel AI architecture that detects and models human-like "insight moments" using neurobiologically-inspired mechanisms. Unlike traditional AI systems that provide incremental improvements, InsightSpike-AI identifies significant moments when knowledge restructures - the computational equivalent of "Aha!" moments.
 
 ### Core Innovation: geDIG Technology
 
-The system's breakthrough lies in its **geDIG** (Graph Edit Distance + Information Gain) mechanism:
+The system's key contribution lies in its **geDIG** (Graph Edit Distance + Information Gain) mechanism:
 
 - **ΔGED**: Measures structural simplification in knowledge graphs
 - **ΔIG**: Quantifies information entropy changes during learning
 - **EurekaSpike**: Fires when ΔGED ≤ -0.5 AND ΔIG ≥ 0.2 simultaneously
 
-This creates an **intrinsic reward signal** that identifies genuine insight moments, not just correct answers.
+This creates an **intrinsic reward signal** that identifies insight moments beyond simple correct answers.
+
+**Comparison with Traditional Systems**: Unlike conventional adaptive RAG systems that only consider query difficulty, InsightSpike-AI uses insight degree (GED/IG) to optimize both reasoning and memory allocation.
 
 ### Real-World Applications
 
 - **Educational Systems**: Adaptive learning that recognizes when students truly "get it"
-- **Research Tools**: Accelerating scientific discovery by identifying conceptual breakthroughs
+- **Research Tools**: Supporting scientific discovery by identifying conceptual insights
 - **Problem Solving**: AI assistants that understand the difference between rote answers and insights
 - **Creative AI**: Systems that can experience and recognize creative leaps
 
@@ -90,17 +102,18 @@ Further filings (US/PCT) will follow within the priority year.
 - **External Integration**: Clean API for MATLAB, R, and other research environments
 
 ### 📊 Validation & Performance
-- **Comprehensive Experimental Framework**: RAG memory improvement, dynamic memory benchmarks, bias-corrected evaluation
-- **Scientific Rigor**: Statistical significance testing with multiple comparison correction and effect size calculation  
+- **Comprehensive Experimental Framework**: RAG memory improvement, dynamic memory benchmarks, bias-corrected evaluation with statistical significance testing
+- **Empirical Validation**: 81.6% insight detection rate at 22.0 episodes/second processing speed (detailed in `experiments/01_realtime_insight_experiments/`)
 - **Cross-Domain Validation**: Educational, research, and problem-solving scenarios with real educational system integration
 - **Reproducible Research**: Complete experimental environment with 8,990+ lines of validation code
 - **Production Ready**: Full CI/CD pipeline with Docker support and multi-environment compatibility
 
 ### 🧪 Research Framework
 - **16 Experimental Modules**: Complete validation suite covering all core functionalities
-- **Automated Report Generation**: Academic-grade experimental reports with statistical analysis
-- **Bias Correction**: Objective validation replacing inflated claims with measured improvements
+- **Automated Report Generation**: Academic-grade experimental reports with statistical analysis ([see detailed results](experiments/01_realtime_insight_experiments/outputs/))
+- **Bias Correction**: Objective validation replacing inflated claims with measured improvements  
 - **Long-term Benchmarks**: Dynamic memory system validation over extended periods
+- **Performance Metrics**: 81.6% insight detection rate, 22.0 eps/s processing ([detailed analysis](experiments/01_realtime_insight_experiments/outputs/detailed_logging_realtime/analysis_reports/))
 
 ## 🧠 Architecture Overview
 
@@ -643,6 +656,27 @@ Subject: "InsightSpike License Violation Report"
 See [`LICENSE`](LICENSE) file for complete terms and conditions.
 
 **SPDX-License-Identifier**: InsightSpike-Responsible-AI-1.0
+
+---
+
+## 📚 Terminology & Definitions
+
+### Core Concepts
+- **Insight Detection Rate**: Percentage of episodes where the system successfully identifies novel conceptual connections (baseline: 81.6% from 500-episode validation)
+- **Non-Insight Episodes**: Episodes with high similarity to existing knowledge, automatically filtered by intrinsic reward mechanism (typically 18.6% of total episodes)
+- **geDIG Score**: Combined metric of Graph Edit Distance (ΔGED) and Information Gain (ΔIG) used to quantify insight moments
+- **EurekaSpike**: Computational event triggered when ΔGED ≤ -0.5 AND ΔIG ≥ 0.2, indicating significant knowledge restructuring
+
+### Technical Terms  
+- **Dynamic RAG**: Retrieval-Augmented Generation system that adapts memory allocation based on content novelty
+- **Selective Learning**: AI learning paradigm that processes only information deemed valuable by intrinsic reward mechanisms
+- **Episodic Memory**: Structured storage system for experiences, allowing direct access and relationship mapping
+- **Cross-Domain Analogy**: System capability to identify structural similarities across different knowledge domains
+
+### Performance Metrics
+- **Processing Speed**: Episodes processed per second (benchmark: 22.0 eps/s)
+- **Memory Efficiency**: Computational resource optimization through selective processing
+- **Insight Quality**: Measured through statistical validation and cross-domain applicability
 
 ---
 
