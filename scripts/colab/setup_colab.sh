@@ -32,7 +32,7 @@ poetry config virtualenvs.create false
 echo "Installing GPU-accelerated libraries with pip..."
 
 # Install FAISS for CUDA 12.1. This will automatically pull a compatible numpy version.
-pip install faiss-gpu-cu121
+#pip install faiss-gpu-cu12
 
 # Install PyTorch Geometric and its optimized dependencies.
 # The URL must match the PyTorch and CUDA version of the Colab environment.
