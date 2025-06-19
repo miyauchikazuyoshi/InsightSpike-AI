@@ -1,55 +1,55 @@
 #!/bin/bash
 
 # ---
-# Colab-Optimized Setup Script for InsightSpike-AI
+# Colab-Optimized Setup Script for InsightSpike-AI (v2: Lockfile Regeneration)
 # ---
-# This script installs dependencies in the correct order for Colab's GPU environment,
-# bypassing the poetry dependency resolution issues with pre-compiled binaries like faiss-gpu.
+# This script forces regeneration of poetry.lock for the Colab environment
+# to avoid dependency conflicts from the local (e.g., macOS) lock file.
 #
 # Exit on any error
 set -e
 
 # ---
-# 1. Install Poetry
+# 1. Install and Configure Poetry
 # ---
-echo "Installing Poetry..."
-pip install poetry
-
-# ---
-# 2. Configure Poetry to use the system's Python environment
-# ---
-# This is crucial. We tell Poetry not to create its own virtual environment,
-# but to install packages directly into the Colab runtime.
-echo "Configuring Poetry to use system python..."
+echo "Installing and configuring Poetry..."
+pip install poetry > /dev/null
 poetry config virtualenvs.create false
 
 # ---
-# 3. Install the "Difficult" GPU Libraries with pip
+# 2. **CRITICAL STEP: Remove Existing Lock File**
 # ---
-# We handle the most problematic, pre-compiled libraries manually first.
-# This ensures they are compatible with Colab's CUDA and Python environment.
-# We target CUDA 12.1 which is common in modern Colab runtimes.
+# The poetry.lock file generated on a local machine (like macOS) is not
+# compatible with the Colab Linux GPU environment. We delete it to force
+# Poetry to resolve dependencies specifically for Colab.
+echo "Removing existing poetry.lock to ensure a fresh dependency resolution for Colab..."
+rm -f poetry.lock
+
+# ---
+# 3. Install Difficult GPU Libraries with pip FIRST
+# ---
+# We handle the most problematic, pre-compiled libraries manually.
+# This ensures compatibility with Colab's CUDA and Python environment.
 echo "Installing GPU-accelerated libraries with pip..."
+pip install faiss-gpu-cu12 > /dev/null
 
-# Install FAISS for CUDA 12.1. This will automatically pull a compatible numpy version.
-#pip install faiss-gpu-cu12
-
-# Install PyTorch Geometric and its optimized dependencies.
-# The URL must match the PyTorch and CUDA version of the Colab environment.
-# First, get the exact PyTorch version from Colab's environment to build the URL.
+# Install PyTorch Geometric and its optimized dependencies
 PYTORCH_VERSION=$(python -c "import torch; print(torch.__version__.split('+')[0])")
 CUDA_VERSION_SHORT=$(python -c "import torch; print(torch.version.cuda.replace('.',''))")
-echo "Detected PyTorch ${PYTORCH_VERSION} and CUDA ${CUDA_VERSION_SHORT}"
-
-pip install torch_geometric
-pip install pyg_lib torch_scatter torch_sparse -f https://data.pyg.org/whl/torch-${PYTORCH_VERSION}+cu${CUDA_VERSION_SHORT}.html
+echo "Detected PyTorch ${PYTORCH_VERSION} and CUDA ${CUDA_VERSION_SHORT}. Installing PyG..."
+pip install torch_geometric > /dev/null
+pip install pyg_lib torch_scatter torch_sparse -f https://data.pyg.org/whl/torch-${PYTORCH_VERSION}+cu${CUDA_VERSION_SHORT}.html > /dev/null
 
 # ---
-# 4. Install Remaining Dependencies with Poetry
+# 4. Resolve and Install All Other Dependencies with Poetry
 # ---
-# Now that the hard parts are done, we let Poetry install the rest of the pure-python
-# dependencies. It will see that torch, faiss, etc. are already installed and skip them.
-echo "Installing remaining application dependencies with Poetry..."
+# With no lock file, Poetry will now:
+# 1. Read pyproject.toml.
+# 2. See that torch, faiss-gpu, pyg are already installed and accept them.
+# 3. Resolve all other dependencies to be compatible with the Colab environment.
+# 4. Generate a BRAND NEW, Colab-specific poetry.lock file.
+# 5. Install the remaining packages.
+echo "Installing remaining dependencies with Poetry and generating a new lock file..."
 poetry install --no-root --without dev,ci --extras "full"
 
 # ---
@@ -64,4 +64,4 @@ print('✅ PyTorch version:', torch.__version__); \
 print('✅ CUDA available for PyTorch:', torch.cuda.is_available()); \
 print('✅ FAISS GPU enabled:', hasattr(faiss, 'GpuIndexIVFFlat')); \
 print('✅ PyG version:', torch_geometric.__version__); \
-print('\n🎉 Environment setup successful! You are ready to run InsightSpike-AI on Colab with GPU acceleration.')"
+print('\n🎉 Environment setup successful! A new, Colab-specific poetry.lock has been generated.')"
