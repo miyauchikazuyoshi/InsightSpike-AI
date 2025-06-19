@@ -2779,7 +2779,7 @@ files = [
 name = "pandas"
 version = "2.3.0"
 description = "Powerful data structures for data analysis, time series, and statistics"
-optional = true
+optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 markers = "extra == \"full\""
@@ -3358,7 +3358,7 @@ dev = ["backports.zoneinfo ; python_version < \"3.9\"", "black", "build", "freez
 name = "pytz"
 version = "2025.2"
 description = "World timezone definitions, modern and historical"
-optional = true
+optional = false
 python-versions = "*"
 groups = ["main"]
 markers = "extra == \"full\""
@@ -4045,7 +4045,7 @@ test = ["Cython", "array-api-strict (>=2.0,<2.1.1)", "asv", "gmpy2", "hypothesis
 name = "seaborn"
 version = "0.12.2"
 description = "Statistical data visualization"
-optional = true
+optional = false
 python-versions = ">=3.7"
 groups = ["main"]
 markers = "extra == \"full\""
@@ -4707,7 +4707,7 @@ markers = {ci = "python_version == \"3.10\"", dev = "python_version == \"3.10\""
 name = "tzdata"
 version = "2025.2"
 description = "Provider of IANA time zone data"
-optional = true
+optional = false
 python-versions = ">=2"
 groups = ["main"]
 markers = "extra == \"full\""
@@ -4948,4 +4948,4 @@ gpu = ["torch-geometric"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "4d89d209ad78cf053837083fcc30c60b847d057bef9ceee6f19ff5b165d57f73"
+content-hash = "7bc8f10faedde6cef2880630028cc6bea3764e67fa6c06ae47c777b780191074"
