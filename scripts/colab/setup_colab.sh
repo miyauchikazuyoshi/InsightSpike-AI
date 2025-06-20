@@ -9,6 +9,8 @@
 # Exit on any error
 set -e
 
+
+!pip uninstall -y thinc spacy
 # ---
 # 1. Install and Configure Poetry
 # ---
@@ -25,23 +27,9 @@ poetry config virtualenvs.create false
 echo "Removing existing poetry.lock to ensure a fresh dependency resolution for Colab..."
 rm -f poetry.lock
 
-# ---
-# 3. Install Difficult GPU Libraries with pip FIRST
-# ---
-# We handle the most problematic, pre-compiled libraries manually.
-# This ensures compatibility with Colab's CUDA and Python environment.
-echo "Installing GPU-accelerated libraries with pip..."
-pip install faiss-gpu-cu12 > /dev/null
-
-# Install PyTorch Geometric and its optimized dependencies
-PYTORCH_VERSION=$(python -c "import torch; print(torch.__version__.split('+')[0])")
-CUDA_VERSION_SHORT=$(python -c "import torch; print(torch.version.cuda.replace('.',''))")
-echo "Detected PyTorch ${PYTORCH_VERSION} and CUDA ${CUDA_VERSION_SHORT}. Installing PyG..."
-pip install torch_geometric > /dev/null
-pip install pyg_lib torch_scatter torch_sparse -f https://data.pyg.org/whl/torch-${PYTORCH_VERSION}+cu${CUDA_VERSION_SHORT}.html > /dev/null
 
 # ---
-# 4. Resolve and Install All Other Dependencies with Poetry
+# 3. Resolve and Install All Other Dependencies with Poetry
 # ---
 # With no lock file, Poetry will now:
 # 1. Read pyproject.toml.
@@ -51,6 +39,22 @@ pip install pyg_lib torch_scatter torch_sparse -f https://data.pyg.org/whl/torch
 # 5. Install the remaining packages.
 echo "Installing remaining dependencies with Poetry and generating a new lock file..."
 poetry install --no-root --without dev,ci --extras "full"
+
+# ---
+# 4. Install Difficult GPU Libraries with pip FIRST
+# ---
+# We handle the most problematic, pre-compiled libraries manually.
+# This ensures compatibility with Colab's CUDA and Python environment.
+#echo "Installing GPU-accelerated libraries with pip..."
+#pip install faiss-gpu-cu12 > /dev/null
+
+# Install PyTorch Geometric and its optimized dependencies
+PYTORCH_VERSION=$(python -c "import torch; print(torch.__version__.split('+')[0])")
+CUDA_VERSION_SHORT=$(python -c "import torch; print(torch.version.cuda.replace('.',''))")
+echo "Detected PyTorch ${PYTORCH_VERSION} and CUDA ${CUDA_VERSION_SHORT}. Installing PyG..."
+poetry run pip install torch_geometric > /dev/null
+poetry run pip install pyg_lib torch_scatter torch_sparse -f https://data.pyg.org/whl/torch-${PYTORCH_VERSION}+cu${CUDA_VERSION_SHORT}.html > /dev/null
+
 
 # ---
 # 5. Verification
