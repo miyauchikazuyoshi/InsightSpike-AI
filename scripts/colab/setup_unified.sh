@@ -31,6 +31,21 @@ fi
 echo "📦 Installing dependencies from pyproject.toml..."
 pip install -e .
 
+# Ensure Python can find the insightspike module
+echo "🔧 Setting up Python module paths..."
+CURRENT_DIR=$(pwd)
+SRC_PATH="$CURRENT_DIR/src"
+
+# Add src directory to Python path for current session
+export PYTHONPATH="$SRC_PATH:$PYTHONPATH"
+
+# Create a .pth file for persistent Python path (Colab-specific)
+if [ "$IN_COLAB" = true ]; then
+    SITE_PACKAGES=$(python -c "import site; print(site.getsitepackages()[0])")
+    echo "$SRC_PATH" > "$SITE_PACKAGES/insightspike-dev.pth"
+    echo "✅ Added $SRC_PATH to Python path permanently"
+fi
+
 # Additional Colab-specific optimizations
 if [ "$IN_COLAB" = true ]; then
     echo "⚡ Applying Colab optimizations..."
@@ -108,6 +123,34 @@ except ImportError:
 " 2>/dev/null || echo "❌ CLI Module: Import test failed"
 fi
 
+# Final Python import test to ensure everything works
+echo "🧪 Final import test..."
+python -c "
+import sys
+print(f'📍 Current working directory: {sys.path[0] if sys.path else \"Unknown\"}')
+
+try:
+    from insightspike.core.agents.main_agent import MainAgent
+    print('✅ MainAgent: Successfully imported')
+    
+    # Quick instantiation test
+    try:
+        agent = MainAgent()
+        print('✅ MainAgent: Successfully instantiated')
+    except Exception as e:
+        print(f'⚠️  MainAgent: Import OK, but instantiation failed - {e}')
+        
+except ImportError as e:
+    print(f'❌ MainAgent: Import failed - {e}')
+    print('💡 You may need to run: import sys; sys.path.insert(0, \"/content/InsightSpike-AI/src\")')
+
+try:
+    import insightspike.config as config
+    print('✅ Config: Successfully imported')
+except ImportError:
+    print('⚠️  Config: Import failed (may be optional)')
+"
+
 echo ""
 echo "🎉 Setup completed successfully!"
 echo "=================================="
@@ -117,6 +160,13 @@ else
     echo "💡 Ready to use InsightSpike-AI in local environment!"
 fi
 echo ""
-echo "Quick start:"
+echo "🚀 Quick start:"
 echo "  from insightspike.core.agents.main_agent import MainAgent"
 echo "  agent = MainAgent()  # Auto-optimized for your environment!"
+echo ""
+echo "🔧 Alternative CLI usage:"
+echo "  !insightspike --help  # If CLI is available"
+echo "  !python -m insightspike.cli.main --help  # Alternative method"
+echo ""
+echo "📝 Note: Python module paths have been automatically configured"
+echo "     No need to manually add sys.path modifications!"
