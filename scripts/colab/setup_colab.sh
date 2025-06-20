@@ -9,8 +9,6 @@
 # Exit on any error
 set -e
 
-
-!pip uninstall -y thinc spacy
 # ---
 # 1. Install and Configure Poetry
 # ---
@@ -37,8 +35,9 @@ rm -f poetry.lock
 # 3. Resolve all other dependencies to be compatible with the Colab environment.
 # 4. Generate a BRAND NEW, Colab-specific poetry.lock file.
 # 5. Install the remaining packages.
-echo "Installing remaining dependencies with Poetry and generating a new lock file..."
-poetry install --no-root --without dev,ci --extras "full"
+echo "Installing dependencies with Poetry and generating a new lock file..."
+# パッケージ本体も含めて全依存関係をインストール（--no-rootを削除）
+poetry install --without dev,ci --extras "full"
 
 # ---
 # 4. Install Difficult GPU Libraries with pip FIRST
@@ -68,4 +67,6 @@ print('✅ PyTorch version:', torch.__version__); \
 print('✅ CUDA available for PyTorch:', torch.cuda.is_available()); \
 print('✅ FAISS GPU enabled:', hasattr(faiss, 'GpuIndexIVFFlat')); \
 print('✅ PyG version:', torch_geometric.__version__); \
-print('\n🎉 Environment setup successful! A new, Colab-specific poetry.lock has been generated.')"
+print('\n🎉 Environment setup successful! A new, Colab-specific poetry.lock has been generated.'); \
+print('📦 InsightSpike-AI package and all dependencies installed.'); \
+print('🚀 CLI command \"insightspike\" is now available!')"
