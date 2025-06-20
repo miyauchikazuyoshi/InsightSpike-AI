@@ -38,12 +38,8 @@ cp pyproject_colab.toml pyproject.toml
 # 3. Generate a BRAND NEW, Colab-specific poetry.lock file
 # 4. Install packages optimized for Colab's hardware and software stack
 echo "Installing Colab-optimized dependencies and generating new lock file..."
-# Install all dependencies including faiss-gpu-cu12 via Poetry
+# Install all dependencies including faiss-cpu via Poetry
 poetry install
-
-# NumPy互換性問題を解決
-echo "Fixing NumPy compatibility..."
-poetry run pip install "numpy<2.0" --force-reinstall
 
 # ---
 # 4. Install Difficult GPU Libraries with pip FIRST
@@ -51,7 +47,7 @@ poetry run pip install "numpy<2.0" --force-reinstall
 # We handle the most problematic, pre-compiled libraries manually.
 # This ensures compatibility with Colab's CUDA and Python environment.
 #echo "Installing GPU-accelerated libraries with pip..."
-#pip install faiss-gpu-cu12 > /dev/null
+#pip install faiss-cpu > /dev/null
 
 # Install PyTorch Geometric and its optimized dependencies
 PYTORCH_VERSION=$(python -c "import torch; print(torch.__version__.split('+')[0])")
