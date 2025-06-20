@@ -70,12 +70,12 @@ import faiss; \
 import torch_geometric; \
 print('✅ PyTorch version:', torch.__version__); \
 print('✅ CUDA available for PyTorch:', torch.cuda.is_available()); \
-print('✅ FAISS GPU enabled:', hasattr(faiss, 'GpuIndexIVFFlat')); \
+print('✅ FAISS CPU version:', faiss.__version__); \
 print('✅ PyG version:', torch_geometric.__version__); \
 print('\n🎉 Colab environment setup successful!'); \
 print('📦 Using Colab-optimized dependency versions with NumPy 2.x'); \
 print('🚀 CLI command \"insightspike\" is now available!'); \
-print('⚡ GPU-optimized packages (faiss-gpu-cu12, PyTorch CUDA) ready'); \
+print('⚡ GPU-optimized packages (PyTorch CUDA) with faiss-cpu ready'); \
 print('🔬 NumPy 2.x compatibility enabled for latest ML features')"
 
 # ---
