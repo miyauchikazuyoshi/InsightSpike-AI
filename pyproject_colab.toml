@@ -49,6 +49,7 @@ packaging = "^24.0"  # Latest stable
 matplotlib = "^3.7.0"
 seaborn = "^0.12.0"
 pandas = "^2.0"  # Always include pandas in Colab
+plotly = "^5.14.0"  # Great for interactive plots in Colab
 
 # Vector search - GPU version for Colab
 faiss-gpu = "^1.7.4"  # GPU version for Colab's CUDA environment
@@ -56,22 +57,15 @@ faiss-gpu = "^1.7.4"  # GPU version for Colab's CUDA environment
 # Jupyter ecosystem - essential for Colab
 jupyter = "^1.0"
 ipykernel = "^6.20.0"
+ipywidgets = "^8.0.0"  # For interactive widgets in Colab
 
 [tool.poetry.group.colab-extras.dependencies]
-# Additional Colab-specific packages
-google-colab = { version = "*", markers = "sys_platform == 'linux'" }
-plotly = "^5.14.0"  # Great for interactive plots in Colab
-ipywidgets = "^8.0.0"  # For interactive widgets
+# Additional Colab-specific packages (optional extras)
+# Note: google-colab is pre-installed in Colab environment
 
 [tool.poetry.extras]
-# Simplified extras for Colab
-full = [
-    "faiss-gpu", 
-    "jupyter", 
-    "pandas", 
-    "plotly", 
-    "ipywidgets"
-]
+# Simplified extras for Colab - all essential packages are in main dependencies
+full = []  # Empty since all Colab essentials are now in main dependencies
 
 [tool.poetry.scripts]
 insightspike = "insightspike.cli.main:main"

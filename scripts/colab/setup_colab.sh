@@ -38,8 +38,8 @@ cp pyproject_colab.toml pyproject.toml
 # 3. Generate a BRAND NEW, Colab-specific poetry.lock file
 # 4. Install packages optimized for Colab's hardware and software stack
 echo "Installing Colab-optimized dependencies and generating new lock file..."
-# Install with Colab-specific extras, including package本体
-poetry install --extras "full"
+# Install with all essential packages in main dependencies (no extras needed)
+poetry install
 
 # NumPy互換性問題を解決
 echo "Fixing NumPy compatibility..."
