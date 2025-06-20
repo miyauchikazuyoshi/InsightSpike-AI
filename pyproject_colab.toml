@@ -51,8 +51,8 @@ seaborn = "^0.12.0"
 pandas = "^2.0"  # Always include pandas in Colab
 plotly = "^5.14.0"  # Great for interactive plots in Colab
 
-# Vector search - GPU version for Colab
-faiss-gpu = "^1.7.4"  # GPU version for Colab's CUDA environment
+# Vector search - GPU version for Colab (CUDA 12.x specific)
+faiss-gpu-cu12 = "^1.8.0"  # CUDA 12.x compatible version for Colab
 
 # Jupyter ecosystem - essential for Colab
 jupyter = "^1.0"

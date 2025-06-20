@@ -38,7 +38,7 @@ cp pyproject_colab.toml pyproject.toml
 # 3. Generate a BRAND NEW, Colab-specific poetry.lock file
 # 4. Install packages optimized for Colab's hardware and software stack
 echo "Installing Colab-optimized dependencies and generating new lock file..."
-# Install with all essential packages in main dependencies (no extras needed)
+# Install all dependencies including faiss-gpu-cu12 via Poetry
 poetry install
 
 # NumPy互換性問題を解決
@@ -60,7 +60,6 @@ echo "Detected PyTorch ${PYTORCH_VERSION} and CUDA ${CUDA_VERSION_SHORT}. Instal
 poetry run pip install torch_geometric > /dev/null
 poetry run pip install pyg_lib torch_scatter torch_sparse -f https://data.pyg.org/whl/torch-${PYTORCH_VERSION}+cu${CUDA_VERSION_SHORT}.html > /dev/null
 
-
 # ---
 # 5. Verification
 # ---
@@ -76,7 +75,7 @@ print('✅ PyG version:', torch_geometric.__version__); \
 print('\n🎉 Colab environment setup successful!'); \
 print('📦 Using Colab-optimized dependency versions with NumPy 2.x'); \
 print('🚀 CLI command \"insightspike\" is now available!'); \
-print('⚡ GPU-optimized packages (faiss-gpu, PyTorch CUDA) ready'); \
+print('⚡ GPU-optimized packages (faiss-gpu-cu12, PyTorch CUDA) ready'); \
 print('🔬 NumPy 2.x compatibility enabled for latest ML features')"
 
 # ---
