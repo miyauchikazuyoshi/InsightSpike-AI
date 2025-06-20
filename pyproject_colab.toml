@@ -1,0 +1,104 @@
+[tool.poetry]
+name = "insightspike-ai"
+version = "0.8.0"
+description = "Brain-Inspired Multi-Agent Architecture for Insight Detection and Knowledge Restructuring"
+authors = ["Kazuyoshi Miyauchi <k.miyauchi@insight-spike.ai>"]
+packages = [{ include = "insightspike", from = "src" }]
+readme = "README.md"
+homepage = "https://github.com/miyauchikazuyoshi/InsightSpike-AI"
+repository = "https://github.com/miyauchikazuyoshi/InsightSpike-AI"
+keywords = ["artificial-intelligence", "insight-detection", "knowledge-graphs", "reinforcement-learning", "neuroscience"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: InsightSpike AI Responsible Use License Agreement v1.0",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+# Colab-optimized ML dependencies - use versions that work with NumPy 2.x
+# GPU versions prioritized for Colab's T4/V100 GPUs
+torch = "^2.3.0"  # PyTorch 2.3+ has better NumPy 2.x compatibility
+torchvision = "^0.18.0"  # Compatible with PyTorch 2.3+
+torchaudio = "^2.3.0"
+torch-geometric = "^2.4.0"  # Newer version with NumPy 2.x support
+
+# NumPy - use 2.x to match Colab's pre-installed version
+numpy = "^2.0.0"  # Colab 2025 uses NumPy 2.x by default
+
+# Core dependencies optimized for NumPy 2.x compatibility in Colab
+sentence-transformers = "^2.5.0"  # Newer version with NumPy 2.x support
+transformers = "^4.40.0"  # Latest HuggingFace with NumPy 2.x compatibility
+scipy = "^1.13.0"  # NumPy 2.x compatible version
+networkx = "^3.2.0"  # Updated for NumPy 2.x
+scikit-learn = "^1.4.0"  # Latest stable with NumPy 2.x support
+
+# CLI and utilities - NumPy 2.x compatible versions
+typer = "^0.12.0"  # Latest version with NumPy 2.x compatibility
+rich = "^13.7.0"  # Updated version
+pyyaml = "^6.0.1"
+packaging = "^24.0"  # Latest stable
+
+# Visualization - essential for Colab notebooks
+matplotlib = "^3.7.0"
+seaborn = "^0.12.0"
+pandas = "^2.0"  # Always include pandas in Colab
+
+# Vector search - GPU version for Colab
+faiss-gpu = "^1.7.4"  # GPU version for Colab's CUDA environment
+
+# Jupyter ecosystem - essential for Colab
+jupyter = "^1.0"
+ipykernel = "^6.20.0"
+
+[tool.poetry.group.colab-extras.dependencies]
+# Additional Colab-specific packages
+google-colab = { version = "*", markers = "sys_platform == 'linux'" }
+plotly = "^5.14.0"  # Great for interactive plots in Colab
+ipywidgets = "^8.0.0"  # For interactive widgets
+
+[tool.poetry.extras]
+# Simplified extras for Colab
+full = [
+    "faiss-gpu", 
+    "jupyter", 
+    "pandas", 
+    "plotly", 
+    "ipywidgets"
+]
+
+[tool.poetry.scripts]
+insightspike = "insightspike.cli.main:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88

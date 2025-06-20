@@ -17,27 +17,33 @@ pip install poetry > /dev/null
 poetry config virtualenvs.create false
 
 # ---
-# 2. **CRITICAL STEP: Remove Existing Lock File**
+# 2. **CRITICAL STEP: Switch to Colab-optimized configuration**
 # ---
-# The poetry.lock file generated on a local machine (like macOS) is not
-# compatible with the Colab Linux GPU environment. We delete it to force
-# Poetry to resolve dependencies specifically for Colab.
-echo "Removing existing poetry.lock to ensure a fresh dependency resolution for Colab..."
+# Use pyproject_colab.toml which has Colab-specific dependency versions
+# and remove any existing lock file to force fresh resolution
+echo "Switching to Colab-optimized configuration..."
 rm -f poetry.lock
 
+# Backup original pyproject.toml and use Colab version
+echo "Backing up original pyproject.toml and switching to Colab configuration..."
+cp pyproject.toml pyproject_local_backup.toml
+cp pyproject_colab.toml pyproject.toml
 
 # ---
-# 3. Resolve and Install All Other Dependencies with Poetry
+# 3. Resolve and Install All Dependencies with Colab-optimized Poetry
 # ---
-# With no lock file, Poetry will now:
-# 1. Read pyproject.toml.
-# 2. See that torch, faiss-gpu, pyg are already installed and accept them.
-# 3. Resolve all other dependencies to be compatible with the Colab environment.
-# 4. Generate a BRAND NEW, Colab-specific poetry.lock file.
-# 5. Install the remaining packages.
-echo "Installing dependencies with Poetry and generating a new lock file..."
-# パッケージ本体も含めて全依存関係をインストール（--no-rootを削除）
-poetry install --without dev,ci --extras "full"
+# With Colab-specific pyproject.toml, Poetry will:
+# 1. Use Colab-optimized package versions (faiss-gpu, specific torch versions, etc.)
+# 2. Resolve all dependencies for the Colab Linux CUDA environment
+# 3. Generate a BRAND NEW, Colab-specific poetry.lock file
+# 4. Install packages optimized for Colab's hardware and software stack
+echo "Installing Colab-optimized dependencies and generating new lock file..."
+# Install with Colab-specific extras, including package本体
+poetry install --extras "full"
+
+# NumPy互換性問題を解決
+echo "Fixing NumPy compatibility..."
+poetry run pip install "numpy<2.0" --force-reinstall
 
 # ---
 # 4. Install Difficult GPU Libraries with pip FIRST
@@ -67,6 +73,23 @@ print('✅ PyTorch version:', torch.__version__); \
 print('✅ CUDA available for PyTorch:', torch.cuda.is_available()); \
 print('✅ FAISS GPU enabled:', hasattr(faiss, 'GpuIndexIVFFlat')); \
 print('✅ PyG version:', torch_geometric.__version__); \
-print('\n🎉 Environment setup successful! A new, Colab-specific poetry.lock has been generated.'); \
-print('📦 InsightSpike-AI package and all dependencies installed.'); \
-print('🚀 CLI command \"insightspike\" is now available!')"
+print('\n🎉 Colab environment setup successful!'); \
+print('📦 Using Colab-optimized dependency versions with NumPy 2.x'); \
+print('🚀 CLI command \"insightspike\" is now available!'); \
+print('⚡ GPU-optimized packages (faiss-gpu, PyTorch CUDA) ready'); \
+print('🔬 NumPy 2.x compatibility enabled for latest ML features')"
+
+# ---
+# Cleanup function for restoring original configuration
+# ---
+cleanup_colab_config() {
+    echo "Restoring original configuration..."
+    if [ -f "pyproject_local_backup.toml" ]; then
+        cp pyproject_local_backup.toml pyproject.toml
+        rm -f pyproject_local_backup.toml
+        echo "✅ Original pyproject.toml restored"
+    fi
+}
+
+# Set trap to cleanup on exit (optional)
+# trap cleanup_colab_config EXIT
