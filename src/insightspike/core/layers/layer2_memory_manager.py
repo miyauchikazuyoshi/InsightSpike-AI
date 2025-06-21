@@ -87,6 +87,10 @@ class L2MemoryManager(L2MemoryInterface):
         self.c_min = self.config.memory.c_value_min
         self.c_max = self.config.memory.c_value_max
 
+        # インスタンス属性として保持しておかないと後続処理で AttributeError となる
+        self.nlist = nlist  # IVF クラスタ数を保持
+        self.pq_segments = m  # PQ セグメント数を保持
+
     def store_episode(
         self, text: str, c_value: float = 0.5, metadata: Optional[Dict] = None
     ) -> bool:

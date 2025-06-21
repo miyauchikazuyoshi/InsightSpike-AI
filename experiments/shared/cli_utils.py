@@ -113,6 +113,10 @@ def add_phase_specific_args(parser: argparse.ArgumentParser, phase: str) -> argp
         
         parser.add_argument('--maze-count', type=int, default=10,
                            help='各サイズの迷路生成数（デフォルト: 10）')
+        
+        # GIF アニメーション出力オプション
+        parser.add_argument('--animate', action='store_true',
+                           help='A* と GEDIG の経路比較GIFを生成')
     
     elif phase == "phase4":
         parser.add_argument('--previous-results', nargs='+',
@@ -190,7 +194,8 @@ def merge_cli_config(args: argparse.Namespace, phase: str) -> Dict[str, Any]:
         config.update({
             'maze_sizes': getattr(args, 'maze_sizes', [10, 20, 50, 100]),
             'algorithms': getattr(args, 'algorithms', ['astar', 'dijkstra', 'genetic', 'reinforcement']),
-            'maze_count': getattr(args, 'maze_count', 10)
+            'maze_count': getattr(args, 'maze_count', 10),
+            'animate': getattr(args, 'animate', False)
         })
         
         if args.quick:

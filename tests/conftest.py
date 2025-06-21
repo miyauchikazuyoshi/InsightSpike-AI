@@ -152,6 +152,7 @@ dummy_sklearn = types.SimpleNamespace(
 class MockMainAgent:
     def __init__(self):
         self.initialized = False
+        self.l2_memory = MockMemory()
     
     def initialize(self):
         self.initialized = True
@@ -170,6 +171,32 @@ class MockMainAgent:
             'reasoning_quality': 0.8,
             'success': True
         }
+
+
+class MockMemory:
+    def __init__(self):
+        self.episodes = []
+    
+    def add_episode(self, vector, content, c_value=0.5):
+        self.episodes.append({
+            'vector': vector,
+            'content': content,
+            'c_value': c_value
+        })
+    
+    def search_episodes(self, query_vector, k=5):
+        """Mock search that returns existing episodes."""
+        import numpy as np
+        results = []
+        for i, episode in enumerate(self.episodes[:k]):
+            # Mock similarity score
+            similarity = np.random.random()
+            results.append({
+                'episode': episode,
+                'similarity': similarity,
+                'index': i
+            })
+        return results
 
 @pytest.fixture(scope="session", autouse=True)
 def mock_dependencies():

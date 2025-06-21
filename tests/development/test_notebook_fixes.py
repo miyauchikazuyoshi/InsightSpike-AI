@@ -68,10 +68,10 @@ def test_numpy_compatibility():
         return False
     except Exception as e:
         print(f"⚠️ NumPy compatibility test issue: {e}")
-        return False
+        assert False, f"NumPy compatibility test failed: {e}"
     
     print()
-    return True
+    assert True  # Test passed
 
 def test_mock_experiment_components():
     """Test basic components that would be used in the experiment."""
@@ -99,10 +99,10 @@ def test_mock_experiment_components():
         
     except Exception as e:
         print(f"❌ Mock experiment components test failed: {e}")
-        return False
+        assert False, f"Mock experiment components test failed: {e}"
     
     print()
-    return True
+    assert True  # Test passed
 
 def main():
     """Run all tests."""
@@ -129,10 +129,10 @@ def main():
     
     if numpy_ok and components_ok:
         print("🎉 All tests passed! The notebook fixes are working correctly.")
-        return True
+        assert True
     else:
         print("⚠️ Some tests failed. Check the output above for details.")
-        return False
+        assert False, "Some tests failed"
 
 if __name__ == "__main__":
     success = main()

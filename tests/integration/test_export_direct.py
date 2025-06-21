@@ -8,7 +8,7 @@ import os
 # Add the source directory to Python path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from insightspike.cli.deps_typer import export_requirements
+from insightspike.cli.deps_typer import export
 
 def test_export_function():
     """Test the export-requirements function directly."""
@@ -22,10 +22,9 @@ def test_export_function():
             output_file.unlink()
         
         # Call the function directly
-        export_requirements(
-            project_path=None,
-            output=output_file,
-            format="pip"
+        export(
+            format="requirements",
+            output=str(output_file)
         )
         
         print("=== FUNCTION CALL COMPLETED ===")

@@ -7,6 +7,21 @@ from .dependency_resolver import DependencyResolver, ResolvedDependency
 from .platform_utils import PlatformInfo
 
 
+class PoetryNotFoundError(Exception):
+    """Raised when Poetry is not found on the system"""
+    pass
+
+
+class PyprojectTomlError(Exception):
+    """Raised when there are issues with pyproject.toml"""
+    pass
+
+
+class DependencyInstallationError(Exception):
+    """Raised when dependency installation fails"""
+    pass
+
+
 class PoetryIntegration:
     """Integrates with Poetry for dependency management"""
 

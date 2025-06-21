@@ -7,7 +7,7 @@ from pathlib import Path
 # Add the source directory to Python path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from insightspike.cli.deps_typer import list_deps
+from insightspike.cli.deps_typer import list
 
 def test_list_function():
     """Test the list function directly."""
@@ -15,9 +15,8 @@ def test_list_function():
         print("=== CALLING list_deps DIRECTLY ===")
         
         # Call the function directly with default parameters
-        list_deps(
-            project_path=None,
-            group="main",
+        list(
+            platform=None,
             include_groups=False,
             platform_specific_only=False,
             json_output=False

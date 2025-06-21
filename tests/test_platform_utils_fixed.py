@@ -99,19 +99,17 @@ class TestPlatformDetector:
         """Test GPU detection when torch is not available."""
         detector = PlatformDetector()
         
-        with patch('subprocess.run', side_effect=FileNotFoundError), \
-             patch('platform.system', return_value="Linux"):  # Not Darwin to avoid torch import
+        with patch('importlib.import_module', side_effect=ImportError("No module named 'torch'")):
             gpu_available = detector._check_gpu_availability()
             assert gpu_available is False
 
     def test_check_gpu_availability_with_cuda(self):
-        """Test GPU detection when CUDA is available.""" 
+        """Test GPU detection when CUDA is available."""
         detector = PlatformDetector()
         
-        # Mock subprocess.run to return successful nvidia-smi result
-        mock_result = Mock()
-        mock_result.returncode = 0
+        mock_torch = Mock()
+        mock_torch.cuda.is_available.return_value = True
         
-        with patch('subprocess.run', return_value=mock_result):
+        with patch('importlib.import_module', return_value=mock_torch):
             gpu_available = detector._check_gpu_availability()
             assert gpu_available is True

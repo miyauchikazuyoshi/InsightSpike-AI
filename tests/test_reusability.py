@@ -48,11 +48,12 @@ def test_imports():
         )
         print("✅ Standalone reasoner imported successfully")
         
-        return True
+        assert True  # Test passed
         
     except Exception as e:
         print(f"❌ Import test failed: {e}")
         traceback.print_exc()
+        assert False, f"Import test failed: {e}"
         return False
 
 
@@ -83,12 +84,12 @@ def test_standalone_reasoner():
         summary = reasoner.get_analysis_summary()
         print(f"✅ Analysis summary: {summary['total_analyses']} analyses")
         
-        return True
+        assert True  # Test passed
         
     except Exception as e:
         print(f"❌ Standalone reasoner test failed: {e}")
         traceback.print_exc()
-        return False
+        assert False, f"Standalone reasoner test failed: {e}"
 
 
 def test_maze_agent_creation():
@@ -119,12 +120,12 @@ def test_maze_agent_creation():
         print(f"   Steps: {result['steps']}")
         print(f"   Insights: {result['insights']}")
         
-        return True
+        assert True  # Test passed
         
     except Exception as e:
         print(f"❌ Maze agent test failed: {e}")
         traceback.print_exc()
-        return False
+        assert False, f"Maze agent test failed: {e}"
 
 
 def test_environment_adapter():
@@ -155,12 +156,12 @@ def test_environment_adapter():
             if done:
                 break
         
-        return True
+        assert True  # Test passed
         
     except Exception as e:
         print(f"❌ Environment adapter test failed: {e}")
         traceback.print_exc()
-        return False
+        assert False, f"Environment adapter test failed: {e}"
 
 
 def test_insight_detection():
@@ -200,12 +201,12 @@ def test_insight_detection():
                 break
         
         print(f"✅ Insight detection test completed")
-        return True
+        assert True  # Test passed
         
     except Exception as e:
         print(f"❌ Insight detection test failed: {e}")
         traceback.print_exc()
-        return False
+        assert False, f"Insight detection test failed: {e}"
 
 
 def test_full_integration():
@@ -234,12 +235,12 @@ def test_full_integration():
         print(f"   Total insights: {total_insights}")
         print(f"   Average reward: {summary.get('avg_episode_reward', 0):.3f}")
         
-        return True
+        assert True  # Test passed
         
     except Exception as e:
         print(f"❌ Integration test failed: {e}")
         traceback.print_exc()
-        return False
+        assert False, f"Integration test failed: {e}"
 
 
 def run_all_tests():
@@ -274,10 +275,10 @@ def run_all_tests():
     
     if passed == total:
         print("🎉 All tests passed! Reusability implementation successful!")
-        return True
+        assert True
     else:
         print(f"⚠️  {total - passed} tests failed. Please check the implementation.")
-        return False
+        assert False, f"{total - passed} tests failed"
 
 
 if __name__ == "__main__":

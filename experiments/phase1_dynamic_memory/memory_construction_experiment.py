@@ -20,10 +20,11 @@ import numpy as np
 import pandas as pd
 import argparse
 import json
-from typing import Dict, List, Any, Tuple
+from typing import Dict, List, Any, Tuple, Optional
 from dataclasses import dataclass
 from pathlib import Path
 import logging
+import random
 
 # 共通ユーティリティインポート
 current_dir = Path(__file__).parent
@@ -75,6 +76,9 @@ class BaselineRAGSystem:
         self.memory_usage = []
         self.documents = []
         self.index = {}
+        # 乱数生成器を固定（再現性確保）
+        self.random_seed = self.config.get('random_seed', 42)
+        self.rng = np.random.default_rng(self.random_seed)
         
     def build_memory(self, documents: List[str]) -> MemoryMetrics:
         """標準的な記憶構築プロセス"""
@@ -84,7 +88,7 @@ class BaselineRAGSystem:
         # シンプルなベクトル化と格納
         for i, doc in enumerate(documents):
             # 基本的なテキスト処理
-            processed_doc = self._process_document(doc)
+            processed_doc = self._process_document(doc, rng=self.rng)
             self.documents.append(processed_doc)
             self.index[i] = processed_doc  # シンプルなインデックス
             
@@ -104,13 +108,13 @@ class BaselineRAGSystem:
             facts_extracted=len(documents) * 3  # 1文書あたり平均3ファクト
         )
     
-    def _process_document(self, doc: str) -> Dict:
+    def _process_document(self, doc: str, rng: Optional[np.random.Generator] = None) -> Dict:
         """基本的な文書処理"""
         return {
             'text': doc,
             'length': len(doc),
             'words': len(doc.split()),
-            'embedding': np.random.random(384)  # 模擬埋め込み
+            'embedding': (rng or np.random.default_rng()).random(384),  # 再現性ある埋め込み
         }
     
     def _get_memory_usage(self) -> float:
@@ -120,11 +124,11 @@ class BaselineRAGSystem:
     
     def _measure_accuracy(self) -> float:
         """検索精度の測定（模擬）"""
-        return np.random.uniform(0.6, 0.8)  # ベースライン精度
+        return self.rng.uniform(0.6, 0.8)  # ベースライン精度（再現性あり）
     
     def _measure_retention(self) -> float:
         """知識保持率の測定（模擬）"""
-        return np.random.uniform(0.7, 0.85)
+        return self.rng.uniform(0.7, 0.85)
 
 
 class InsightSpikeMemorySystem:
@@ -132,6 +136,12 @@ class InsightSpikeMemorySystem:
     
     def __init__(self, config: Dict = None):
         self.config = config or {}
+        self.memory_usage = []
+        self.documents = []
+        self.index = {}
+        # 乱数生成器を固定（再現性確保）
+        self.random_seed = self.config.get('random_seed', 42)
+        self.rng = np.random.default_rng(self.random_seed)
         try:
             self.agent = MainAgent()
             self.memory_manager = MemoryManager()
@@ -146,6 +156,9 @@ class InsightSpikeMemorySystem:
         start_time = time.time()
         start_memory = self._get_memory_usage()
         
+        # 乱数系列初期化（再現性確保）
+        rng = self.rng
+
         facts_extracted = 0
         
         for doc in documents:
@@ -155,14 +168,14 @@ class InsightSpikeMemorySystem:
                 facts_extracted += len(result.get('insights', []))
             else:
                 # モック処理
-                facts_extracted += self._mock_dynamic_processing(doc)
+                facts_extracted += self._mock_dynamic_processing(doc, rng)
         
         end_time = time.time()
         end_memory = self._get_memory_usage()
         
         # 動的記憶の利点を反映した精度測定
-        accuracy = self._measure_dynamic_accuracy()
-        retention = self._measure_dynamic_retention()
+        accuracy = self._measure_dynamic_accuracy(rng)
+        retention = self._measure_dynamic_retention(rng)
         
         return MemoryMetrics(
             construction_time=max(end_time - start_time, 0.05),  # 最小0.05秒（より高速）
@@ -173,7 +186,7 @@ class InsightSpikeMemorySystem:
             facts_extracted=facts_extracted
         )
     
-    def _mock_dynamic_processing(self, doc: str) -> int:
+    def _mock_dynamic_processing(self, doc: str, rng: Optional[np.random.Generator] = None) -> int:
         """動的処理のモック（高度な洞察抽出）"""
         # InsightSpikeの動的記憶構築をシミュレート
         time.sleep(0.001)  # わずかな処理時間
@@ -184,15 +197,15 @@ class InsightSpikeMemorySystem:
         process = psutil.Process()
         return process.memory_info().rss / 1024 / 1024
     
-    def _measure_dynamic_accuracy(self) -> float:
+    def _measure_dynamic_accuracy(self, rng: np.random.Generator) -> float:
         """動的記憶の検索精度（向上版）"""
         # 15%精度向上を反映
-        baseline_accuracy = np.random.uniform(0.6, 0.8)
+        baseline_accuracy = self.rng.uniform(0.6, 0.8)
         return min(1.0, baseline_accuracy * 1.15)
     
-    def _measure_dynamic_retention(self) -> float:
+    def _measure_dynamic_retention(self, rng: np.random.Generator) -> float:
         """動的記憶の知識保持率（向上版）"""
-        baseline_retention = np.random.uniform(0.7, 0.85)
+        baseline_retention = self.rng.uniform(0.7, 0.85)
         return min(1.0, baseline_retention * 1.1)
 
 
@@ -271,11 +284,11 @@ class MemoryConstructionExperiment:
             documents = self.generate_test_documents(size)
             
             # ベースラインRAGシステムテスト
-            baseline_system = BaselineRAGSystem()
+            baseline_system = BaselineRAGSystem({'random_seed': self.config.get('random_seed', 42)})
             baseline_metrics = baseline_system.build_memory(documents)
             
             # InsightSpike動的記憶システムテスト
-            insightspike_system = InsightSpikeMemorySystem()
+            insightspike_system = InsightSpikeMemorySystem({'random_seed': self.config.get('random_seed', 42)})
             insightspike_metrics = insightspike_system.build_memory(documents)
             
             # 結果記録
@@ -388,6 +401,9 @@ def create_cli_parser() -> argparse.ArgumentParser:
         # Phase 1固有の引数を追加
         parser = add_phase_specific_args(parser, "phase1")
         
+        # 再現性シード（Phase2 と統一）
+        parser.add_argument('--seed', type=int, default=42, help='乱数シード (default: 42)')
+        
         return parser
     except Exception:
         # フォールバック: 基本CLI作成
@@ -399,6 +415,7 @@ def create_cli_parser() -> argparse.ArgumentParser:
         parser.add_argument('--debug', action='store_true', help='デバッグモード')
         parser.add_argument('--sizes', type=int, nargs='+', default=[50, 100, 200, 500], help='文書サイズ')
         parser.add_argument('--runs', type=int, default=1, help='実行回数')
+        parser.add_argument('--seed', type=int, default=42, help='乱数シード (default: 42)')
         parser.add_argument('--output', type=str, default="experiments/phase1_dynamic_memory/results", help='出力ディレクトリ')
         parser.add_argument('--export', choices=['csv', 'json', 'excel'], default='csv', help='エクスポート形式')
         parser.add_argument('--no-backup', action='store_true', help='バックアップスキップ')
@@ -436,6 +453,7 @@ def merge_cli_config(args: argparse.Namespace, phase: str = "phase1") -> Dict[st
         'export_format': getattr(args, 'export', 'csv'),
         'output_dir': getattr(args, 'output', 'experiments/phase1_dynamic_memory/results'),
         'no_backup': getattr(args, 'no_backup', False),
+        'random_seed': getattr(args, 'seed', 42),
         'quick_mode': getattr(args, 'quick', False),
         'generate_report': True,
         'generate_plots': False,
@@ -446,6 +464,14 @@ def merge_cli_config(args: argparse.Namespace, phase: str = "phase1") -> Dict[st
     if config['quick_mode']:
         config['document_sizes'] = [50, 100]
         config['num_runs'] = 1
+    
+    # 乱数シードの固定
+    np.random.seed(config['random_seed'])
+    random.seed(config['random_seed'])
+    
+    # ディレクトリ名に空白 ("phase 1") が混入している場合を自動補正
+    if 'output_dir' in config and isinstance(config['output_dir'], str):
+        config['output_dir'] = config['output_dir'].replace('phase 1', 'phase1_dynamic_memory')
     
     return config
 

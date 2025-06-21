@@ -29,8 +29,9 @@ class DataStateManager:
     def __init__(self, workspace_dir: str = "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI"):
         self.workspace_dir = Path(workspace_dir)
         self.data_dir = self.workspace_dir / "data"
-        self.backup_dir = self.workspace_dir / "data_backups"
-        self.experiment_data_dir = self.workspace_dir / "experiment_data"
+        # 生成物を experiments/ 配下にまとめる
+        self.backup_dir = self.workspace_dir / "experiments" / "data_backups"
+        self.experiment_data_dir = self.workspace_dir / "experiments" / "experiment_data"
         
         # バックアップディレクトリ作成
         self.backup_dir.mkdir(exist_ok=True)

@@ -17,6 +17,9 @@ import sys
 import time
 import numpy as np
 import pandas as pd
+# matplotlib バックエンドを GUI 非依存の Agg に固定（GIF 生成用）
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import argparse
 import json
@@ -769,16 +772,10 @@ class GEDIGMazeExperiment:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.config = config or {}
-        
-        # ロギング設定
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler(self.output_dir / 'experiment.log'),
-                logging.StreamHandler()
-            ]
-        )
+        # 迷路を後から再利用できるよう保持（generate_maze_environments で上書き）
+        self.maze_envs: List[MazeEnvironment] = []
+        # GIF 生成を有効にするか
+        self.enable_animation: bool = self.config.get("animate", False)
         self.logger = logging.getLogger(__name__)
         
         # アルゴリズム初期化
@@ -842,6 +839,8 @@ class GEDIGMazeExperiment:
         )
         mazes.append(('MultiGoal_12x12', multigoal_maze))
         
+        # 生成した迷路をメンバに保存して後で再利用できるようにする
+        self.maze_envs = mazes
         return mazes
     
     def run_pathfinding_comparison(self, num_trials: int = 5) -> pd.DataFrame:
@@ -993,7 +992,7 @@ class GEDIGMazeExperiment:
         self.logger.info(f"Performance report generated: {report_path}")
     
     def visualize_results(self, df_results: pd.DataFrame) -> None:
-        """結果可視化"""
+        """結果の可視化（棒グラフ）"""
         # 図のサイズ設定
         plt.figure(figsize=(15, 10))
         
@@ -1073,6 +1072,88 @@ class GEDIGMazeExperiment:
         plt.close()
         
         self.logger.info(f"Visualization saved to {viz_path}")
+
+        # ----------------------------
+        # 追加機能: A* vs GEDIG 経路アニメーション
+        # ----------------------------
+        if self.enable_animation and self.maze_envs:
+            try:
+                self._generate_path_comparison_gifs(limit=3)  # 代表的な3迷路のみ
+            except Exception as e:
+                self.logger.warning(f"Path comparison GIF generation failed: {e}")
+
+    # ===============================================================
+    # GIF 生成ユーティリティ
+    # ===============================================================
+    def _draw_maze(self, maze: 'MazeEnvironment', path: List[Tuple[int, int]], color: str, title: str = "") -> 'np.ndarray':
+        """迷路グリッド＋部分経路を描画し numpy 配列で返す"""
+        import numpy as np
+        fig, ax = plt.subplots(figsize=(3, 3))
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_xlim(-0.5, maze.width - 0.5)
+        ax.set_ylim(-0.5, maze.height - 0.5)
+        ax.invert_yaxis()
+        # 障害物
+        if maze.obstacles:
+            xs = [o[0] for o in maze.obstacles]
+            ys = [o[1] for o in maze.obstacles]
+            ax.scatter(xs, ys, c='black', marker='s', s=100)
+        # スタート / ゴール
+        ax.scatter([maze.start[0]], [maze.start[1]], c='green', marker='o', s=100)
+        ax.scatter([maze.goal[0]], [maze.goal[1]], c='blue', marker='*', s=120)
+        # 経路
+        if path:
+            xs = [p[0] for p in path]
+            ys = [p[1] for p in path]
+            ax.plot(xs, ys, color=color, linewidth=2)
+            ax.scatter(xs, ys, color=color, s=25)
+        ax.set_title(title)
+        # バックエンド依存の canvas 取得を避け、Pillow へバイト転送 → imageio で読込
+        from io import BytesIO
+        import imageio.v2 as imageio_v2  # 明示import
+        buf = BytesIO()
+        fig.savefig(buf, format="png", dpi=150, bbox_inches="tight")
+        buf.seek(0)
+        img = imageio_v2.imread(buf)
+        plt.close(fig)
+        return img
+
+    def _create_comparison_gif(self, maze_name: str, maze_env: 'MazeEnvironment') -> None:
+        """A* と SlimeMold_GEDIG の経路を段階的に描いて GIF 出力"""
+        from pathlib import Path
+        import numpy as np
+        import imageio.v2 as imageio_v2  # 明示import
+
+        # --- 経路計算 ---
+        astar = AStarAlgorithm()
+        path_astar, _ = astar.find_path(maze_env)
+
+        gedig = SlimeMoldGEDIGAlgorithm()
+        path_gedig, _ = gedig.find_path(maze_env)
+
+        max_len = max(len(path_astar), len(path_gedig))
+        frames = []
+        for i in range(max_len):
+            partial_a = path_astar[: i + 1] if i < len(path_astar) else path_astar
+            partial_g = path_gedig[: i + 1] if i < len(path_gedig) else path_gedig
+            img_a = self._draw_maze(maze_env, partial_a, color='blue', title='A*')
+            img_g = self._draw_maze(maze_env, partial_g, color='red', title='SlimeMold_GEDIG')
+            combined = np.concatenate([img_a, img_g], axis=1)
+            frames.append(combined)
+
+        gif_path = self.output_dir / f'path_comparison_{maze_name}.gif'
+        imageio_v2.mimsave(gif_path, frames, format='GIF', duration=0.2)
+        self.logger.info(f"Path comparison GIF saved: {gif_path}")
+
+    def _generate_path_comparison_gifs(self, limit: int = 3):
+        """いくつかの迷路に対して比較 GIF を生成"""
+        count = 0
+        for maze_name, maze_env in self.maze_envs:
+            self._create_comparison_gif(maze_name, maze_env)
+            count += 1
+            if count >= limit:
+                break
 
 
 @with_data_safety(
@@ -1162,6 +1243,7 @@ def create_cli_parser() -> argparse.ArgumentParser:
     parser.add_argument('--export', choices=['csv', 'json', 'excel'], default='csv', help='エクスポート形式')
     parser.add_argument('--no-backup', action='store_true', help='バックアップスキップ')
     parser.add_argument('--quick', action='store_true', help='クイックテスト')
+    parser.add_argument('--animate', action='store_true', help='A*とGEDIGの経路比較GIFを生成')
     parser.add_argument('--config', type=str, help='設定ファイル')
     
     return parser
@@ -1197,6 +1279,7 @@ def merge_cli_config(args: argparse.Namespace, phase: str = "phase3") -> Dict[st
         'output_dir': getattr(args, 'output', 'experiments/phase3_gedig_maze/results'),
         'no_backup': getattr(args, 'no_backup', False),
         'quick_mode': getattr(args, 'quick', False),
+        'animate': getattr(args, 'animate', False),
         'generate_report': True,
         'generate_plots': True,  # Phase 3では可視化重要
         'selective_copy': ["processed", "models", "cache"]
@@ -1207,6 +1290,10 @@ def merge_cli_config(args: argparse.Namespace, phase: str = "phase3") -> Dict[st
         config['maze_sizes'] = [10, 20]
         config['maze_count'] = 3
         config['algorithms'] = ['astar', 'gedig']  # 基本アルゴリズムのみ
+    
+    # 出力ディレクトリの表記揺れ（"phase 3" → "phase3_gedig_maze"）を補正
+    if 'output_dir' in config and isinstance(config['output_dir'], str):
+        config['output_dir'] = config['output_dir'].replace('phase 3', 'phase3_gedig_maze')
     
     return config
 
@@ -1233,7 +1320,8 @@ def main():
             'selective_copy': ["processed", "models", "cache"],
             'generate_report': True,
             'generate_plots': True,
-            'quick_mode': False
+            'quick_mode': False,
+            'animate': False
         }
     
     # 実験ヘッダー表示

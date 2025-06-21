@@ -24,11 +24,11 @@ python = "^3.10"
 
 # Core ML dependencies - optimized for Colab and local compatibility
 # CUDA auto-detection: PyTorch will automatically use GPU when available
-torch = "^2.1.0"  # Supports both CPU and CUDA environments, required for TinyLlama
-torchvision = "^0.16.0"
-torchaudio = "^2.1.0"
-torch-geometric = "^2.3.0"  # GPU acceleration when available
-numpy = ">=1.24.0,<2.6.0"  # Keep NumPy 1.x for compatibility
+torch = "2.2.2"  # PyTorch 2.2.2 uses GCC OpenMP wheel -> Faissと互換
+torchvision = "0.17.2"
+torchaudio = "2.2.2"
+torch-geometric = "^2.4.0"  # Requires torch >=2.2,<2.5
+numpy = "<2.0,>=1.26.0"
 sentence-transformers = "^2.2.0"  # Auto GPU optimization
 scipy = "^1.10.0"
 transformers = "^4.30.0"
@@ -45,6 +45,9 @@ faiss-cpu = { version = "^1.7.4", optional = true }
 jupyter = { version = "^1.0", optional = true }
 pandas = { version = "^2.0", optional = true }
 seaborn = "^0.12.0"
+
+imageio = "^2.34.0"
+toml = "^0.10.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.0"

@@ -453,6 +453,10 @@ class RAGBenchmarkExperiment:
             'Haystack': HaystackRAGSystem(),
             'InsightSpike': InsightSpikeRAGSystem()
         }
+        
+        # 乱数生成器 (再現性確保)
+        self.random_seed = config.get('random_seed', 42) if config else 42
+        self.rng = np.random.default_rng(self.random_seed)
     
     def generate_ragbench_dataset(self, num_docs: int = 100, num_queries: int = 20) -> Tuple[List[str], List[str]]:
         """RAGBenchライクなデータセット生成"""
@@ -523,8 +527,11 @@ class RAGBenchmarkExperiment:
             'InsightSpike': 40  # より多くのメモリを使用（動的グラフ構築）
         }
         
-        estimated_memory = base_memory + system_overhead.get(system.name.split('_')[0], 15)
-        index_size = max(0.1, estimated_memory - start_memory) if abs(end_memory - start_memory) < 1 else end_memory - start_memory
+        memory_diff = end_memory - start_memory
+        index_size = abs(memory_diff)  # 絶対値で差分サイズを取得
+        # 極小値は 0.1MB とみなす（ノイズ防止）
+        if index_size < 0.1:
+            index_size = 0.1
         
         # クエリ実行
         response_times = []
@@ -536,7 +543,8 @@ class RAGBenchmarkExperiment:
             responses.append(response)
         
         # 性能指標計算
-        avg_response_time = np.mean(response_times)
+        # クエリ応答時間(秒) -> ミリ秒へ変換し平均を算出
+        avg_response_time_ms = np.mean(response_times) * 1000.0
         
         # 品質指標（模擬）
         fact_score = self._calculate_fact_score(responses)
@@ -545,9 +553,9 @@ class RAGBenchmarkExperiment:
         hallucination_rate = self._calculate_hallucination_rate(responses)
         
         return RAGMetrics(
-            response_speed_ms=avg_response_time,
-            retrieval_speed_ms=avg_response_time * 0.4,  # 検索は全体の40%
-            generation_speed_ms=avg_response_time * 0.6,  # 生成は全体の60%
+            response_speed_ms=avg_response_time_ms,
+            retrieval_speed_ms=avg_response_time_ms * 0.4,  # 検索は全体の40%
+            generation_speed_ms=avg_response_time_ms * 0.6,  # 生成は全体の60%
             memory_usage_mb=end_memory,
             index_size_mb=index_size,
             fact_score=fact_score,
@@ -581,12 +589,12 @@ class RAGBenchmarkExperiment:
         return min(1.0, base_scores[system_name] * quality_factor)
     
     def _calculate_bleu_score(self, responses: List[str]) -> float:
-        """BLEU スコア計算（模擬）"""
-        return np.random.uniform(0.3, 0.8)
+        """BLEU スコア計算（模擬, 再現性確保のため RNG を固定）"""
+        return float(self.rng.uniform(0.3, 0.8))
     
     def _calculate_rouge_score(self, responses: List[str]) -> float:
-        """ROUGE スコア計算（模擬）"""
-        return np.random.uniform(0.4, 0.7)
+        """ROUGE スコア計算（模擬, 再現性確保のため RNG を固定）"""
+        return float(self.rng.uniform(0.4, 0.7))
     
     def _calculate_hallucination_rate(self, responses: List[str]) -> float:
         """幻覚率計算（模擬）"""
@@ -597,10 +605,10 @@ class RAGBenchmarkExperiment:
             'Haystack': 0.08,
             'InsightSpike': 0.05  # 低い幻覚率
         }
-        return base_rates.get('InsightSpike', 0.10)
+        return float(base_rates.get('InsightSpike', 0.10))
     
-    def run_comprehensive_comparison(self, document_sizes: List[int] = [50, 100, 200]) -> pd.DataFrame:
-        """包括的RAG性能比較"""
+    def run_comprehensive_comparison(self, document_sizes: List[int] = [50, 100, 200], runs: int = 3) -> pd.DataFrame:
+        """包括的RAG性能比較 (複数試行し 95% CI を算出)"""
         results = []
         
         self.logger.info("Starting Phase 2: RAG Benchmark Comparison Experiment")
@@ -608,34 +616,51 @@ class RAGBenchmarkExperiment:
         for size in document_sizes:
             self.logger.info(f"Testing with {size} documents...")
             
-            # データセット生成
-            documents, queries = self.generate_ragbench_dataset(size, min(20, size//5))
-            
-            # 各システムを評価
-            for system_name, system in self.systems.items():
-                try:
-                    metrics = self.evaluate_rag_system(system, documents, queries)
-                    
-                    result = {
-                        'document_count': size,
-                        'system': system_name,
-                        **asdict(metrics)
-                    }
-                    results.append(result)
-                    
-                    self.logger.info(f"{system_name} - Response: {metrics.response_speed_ms:.1f}ms, "
-                                   f"FactScore: {metrics.fact_score:.3f}, "
-                                   f"Memory: {metrics.memory_usage_mb:.1f}MB")
-                    
-                except Exception as e:
-                    self.logger.error(f"Error evaluating {system_name}: {e}")
+            for run_idx in range(runs):
+                self.logger.info(f"  Run {run_idx+1}/{runs} (seed={self.random_seed + run_idx})")
+                # 乱数シードを更新
+                self.rng = np.random.default_rng(self.random_seed + run_idx)
+                
+                # データセット生成
+                documents, queries = self.generate_ragbench_dataset(size, min(20, size//5))
+                
+                # 各システムを評価
+                for system_name, system in self.systems.items():
+                    try:
+                        metrics = self.evaluate_rag_system(system, documents, queries)
+                        
+                        result = {
+                            'run': run_idx,
+                            'document_count': size,
+                            'system': system_name,
+                            **asdict(metrics)
+                        }
+                        results.append(result)
+                        
+                        self.logger.info(f"{system_name} - Response: {metrics.response_speed_ms:.1f}ms, "
+                                       f"FactScore: {metrics.fact_score:.3f}, "
+                                       f"Memory: {metrics.memory_usage_mb:.1f}MB")
+                        
+                    except Exception as e:
+                        self.logger.error(f"Error evaluating {system_name}: {e}")
         
-        # 結果DataFrame作成
         df_results = pd.DataFrame(results)
+        # 95% CI 集計
+        agg_funcs = {
+            'response_speed_ms': ['mean', 'std'],
+            'fact_score': ['mean', 'std'],
+            'memory_usage_mb': ['mean', 'std']
+        }
+        ci_df = df_results.groupby(['document_count', 'system']).agg(agg_funcs)
+        ci_df.columns = [f"{m}_{s}" for m, s in ci_df.columns]
+        ci_df = ci_df.reset_index()
         
-        # 結果保存
-        df_results.to_csv(self.output_dir / 'rag_benchmark_results.csv', index=False)
-        self.logger.info(f"Results saved to {self.output_dir / 'rag_benchmark_results.csv'}")
+        # 保存
+        df_results.to_csv(self.output_dir / 'rag_benchmark_results_runs.csv', index=False)
+        ci_df.to_csv(self.output_dir / 'rag_benchmark_results_ci.csv', index=False)
+        self.logger.info("Results saved to {} and {}".format(
+            self.output_dir / 'rag_benchmark_results_runs.csv',
+            self.output_dir / 'rag_benchmark_results_ci.csv'))
         
         return df_results
     
@@ -769,6 +794,9 @@ def create_cli_parser() -> argparse.ArgumentParser:
                 "RAG比較実験 - InsightSpike-AI vs 主要RAGシステム"
             )
             parser = add_phase_specific_args(parser, "phase2")
+            parser.add_argument("--quick", action="store_true", help="クイックテストモード (小規模データで高速実行)")
+            parser.add_argument("--seed", type=int, default=42, help="乱数シード (default: 42)")
+            parser.add_argument("--runs", type=int, default=3, help="各設定を繰り返す試行回数 (default: 3)")
             return parser
     except Exception:
         pass
@@ -786,7 +814,9 @@ def create_cli_parser() -> argparse.ArgumentParser:
     parser.add_argument('--output', type=str, default="experiments/phase2_rag_benchmark/results", help='出力ディレクトリ')
     parser.add_argument('--export', choices=['csv', 'json', 'excel'], default='csv', help='エクスポート形式')
     parser.add_argument('--no-backup', action='store_true', help='バックアップスキップ')
-    parser.add_argument('--quick', action='store_true', help='クイックテスト')
+    parser.add_argument('--quick', action='store_true', help='クイックテストモード (小規模データで高速実行)')
+    parser.add_argument('--seed', type=int, default=42, help='乱数シード (default: 42)')
+    parser.add_argument('--runs', type=int, default=3, help='各設定を繰り返す試行回数 (default: 3)')
     parser.add_argument('--config', type=str, help='設定ファイル')
     
     return parser
@@ -824,7 +854,9 @@ def merge_cli_config(args: argparse.Namespace, phase: str = "phase2") -> Dict[st
         'quick_mode': getattr(args, 'quick', False),
         'generate_report': True,
         'generate_plots': False,
-        'selective_copy': ["processed", "embedding", "models", "cache"]
+        'selective_copy': ["processed", "embedding", "models", "cache"],
+        'random_seed': getattr(args, 'seed', 42),
+        'runs': getattr(args, 'runs', 3)
     })
     
     # クイックモードの場合は設定を簡素化
@@ -858,7 +890,9 @@ def main():
             'selective_copy': ["processed", "embedding", "models", "cache"],
             'generate_report': True,
             'generate_plots': False,
-            'quick_mode': False
+            'quick_mode': False,
+            'random_seed': 42,
+            'runs': 3
         }
     
     # 実験ヘッダー表示
