@@ -1,7 +1,0 @@
-{
-  "session_id": "experiment_1_20250619_035750",
-  "total_episodes": 100,
-  "embedding_dim": 384,
-  "similarity_threshold": 0.3,
-  "graph_saved_timestamp": "2025-06-19T03:58:26.199064"
-}
