@@ -1,17 +1,15 @@
-# InsightSpike-AI アーキテクチャ進化ロードマップ (技術実装重視)
+# InsightSpike-AI Architecture Evolution Roadmap
 
-## 🏗️ 技術アーキテクチャ開発計画
+## 🚀 Future Architecture Development Plan
 
-*注: このドキュメントは技術実装に焦点を当てたロードマップです。実験・研究計画については [EXPERIMENTAL_RESEARCH_ROADMAP.md](EXPERIMENTAL_RESEARCH_ROADMAP.md) を参照してください。*
+### Current Status (Phase 1) ✅
+- **Three-environment strategy** implemented and validated
+- **CUDA 12.x compatibility** achieved with faiss-gpu-cu12
+- **26/26 unit tests** passing across all environments
+- **Google Colab optimization** with multiple setup strategies
+- **PyTorch Geometric integration** for basic graph neural networks
 
-### 現在のステータス (Phase 1) ✅
-- **3環境戦略** の実装・検証完了
-- **CUDA 12.x互換性** faiss-cpu対応で実現
-- **26/26ユニットテスト** 全環境で通過
-- **Google Colab最適化** 複数セットアップ戦略
-- **PyTorch Geometric統合** 基本GNN機能
-
-### Phase 2: システム最適化・安定化 (Q2 2025)
+### Phase 2: SSM/Mamba Multimodal Integration (Q2 2024)
 
 #### 🧠 L0 Layer Enhancement with State Space Models
 
