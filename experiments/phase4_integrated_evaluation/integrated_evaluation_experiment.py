@@ -10,6 +10,7 @@ Phase 4: 統合評価実験
 
 import sys
 import json
+import time
 import numpy as np
 import pandas as pd
 import argparse
@@ -43,9 +44,10 @@ logger = logging.getLogger(__name__)
 class IntegratedEvaluationExperiment:
     """統合評価実験メインクラス"""
     
-    def __init__(self, output_dir: str = "./phase4_integrated_evaluation_outputs"):
+    def __init__(self, output_dir: str = "./phase4_integrated_evaluation_outputs", config: Dict = None):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.config = config or {}
         
         # 実験コンポーネント初期化
         self.metrics_calculator = MetricsCalculator()

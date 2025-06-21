@@ -1,0 +1,55 @@
+{
+  "backups": [
+    {
+      "backup_id": "pre_phase3_gedig_maze_20250621_164746",
+      "backup_name": "pre_phase3_gedig_maze",
+      "description": "Pre-experiment backup for Phase 3: GEDIG Maze Optimization",
+      "timestamp": "20250621_164746",
+      "backup_path": "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/data_backups/pre_phase3_gedig_maze_20250621_164746.tar.gz",
+      "checksum": "8a02f00592edf671b80168af133cda05497a132d209192196dd0deafa365a11a",
+      "size_mb": 0.16985416412353516,
+      "file_count": 23
+    },
+    {
+      "backup_id": "pre_phase4_integrated_evaluation_20250621_162356",
+      "backup_name": "pre_phase4_integrated_evaluation",
+      "description": "Pre-experiment backup for Phase 4: Integrated Evaluation",
+      "timestamp": "20250621_162356",
+      "backup_path": "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/data_backups/pre_phase4_integrated_evaluation_20250621_162356.tar.gz",
+      "checksum": "8a02f00592edf671b80168af133cda05497a132d209192196dd0deafa365a11a",
+      "size_mb": 0.16986465454101562,
+      "file_count": 23
+    },
+    {
+      "backup_id": "pre_phase3_gedig_maze_20250621_162345",
+      "backup_name": "pre_phase3_gedig_maze",
+      "description": "Pre-experiment backup for Phase 3: GEDIG Maze Optimization",
+      "timestamp": "20250621_162345",
+      "backup_path": "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/data_backups/pre_phase3_gedig_maze_20250621_162345.tar.gz",
+      "checksum": "8a02f00592edf671b80168af133cda05497a132d209192196dd0deafa365a11a",
+      "size_mb": 0.16985416412353516,
+      "file_count": 23
+    },
+    {
+      "backup_id": "pre_phase2_rag_benchmark_20250621_162102",
+      "backup_name": "pre_phase2_rag_benchmark",
+      "description": "Pre-experiment backup for Phase 2: RAG Benchmark Comparison",
+      "timestamp": "20250621_162102",
+      "backup_path": "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/data_backups/pre_phase2_rag_benchmark_20250621_162102.tar.gz",
+      "checksum": "8a02f00592edf671b80168af133cda05497a132d209192196dd0deafa365a11a",
+      "size_mb": 0.16985702514648438,
+      "file_count": 23
+    },
+    {
+      "backup_id": "pre_phase1_memory_construction_20250621_162054",
+      "backup_name": "pre_phase1_memory_construction",
+      "description": "Pre-experiment backup for Phase 1: Dynamic Memory Construction",
+      "timestamp": "20250621_162054",
+      "backup_path": "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/data_backups/pre_phase1_memory_construction_20250621_162054.tar.gz",
+      "checksum": "8a02f00592edf671b80168af133cda05497a132d209192196dd0deafa365a11a",
+      "size_mb": 0.1698627471923828,
+      "file_count": 23
+    }
+  ],
+  "current_state": "pre_phase3_gedig_maze_20250621_164746"
+}

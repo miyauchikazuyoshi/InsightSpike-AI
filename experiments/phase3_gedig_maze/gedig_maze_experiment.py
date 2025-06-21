@@ -765,9 +765,10 @@ class SlimeMoldGEDIGAlgorithm(BasePathfindingAlgorithm):
 class GEDIGMazeExperiment:
     """GEDIG迷路実験メインクラス"""
     
-    def __init__(self, output_dir: str = "experiments/phase3_gedig_maze/results"):
+    def __init__(self, output_dir: str = "experiments/phase3_gedig_maze/results", config: Dict = None):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.config = config or {}
         
         # ロギング設定
         logging.basicConfig(
@@ -933,8 +934,9 @@ class GEDIGMazeExperiment:
             f.write("## 実験概要\n")
             f.write("粘菌アナロジーによるGEDIG評価法と従来の経路探索アルゴリズムの比較\n\n")
             
-            # アルゴリズム別平均性能
-            algo_avg = df_results.groupby('algorithm').mean()
+            # アルゴリズム別平均性能（数値列のみ）
+            numeric_columns = ['trials_count', 'convergence_time', 'success_rate', 'solution_quality', 'gedig_score']
+            algo_avg = df_results.groupby('algorithm')[numeric_columns].mean()
             
             f.write("## アルゴリズム別平均性能\n\n")
             f.write("| アルゴリズム | 試行回数 | 収束時間(s) | 成功率 | 解品質 | GEDIG |\n")
