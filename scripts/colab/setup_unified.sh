@@ -65,6 +65,21 @@ if [ "$IN_COLAB" = true ]; then
     echo "🔧 Setting up CLI environment..."
     export PATH="/root/.local/bin:$PATH"
     
+    # Add editable install to ensure CLI is accessible
+    echo "🔧 Installing InsightSpike-AI in editable mode..."
+    pip install -e .
+    
+    # Create a direct CLI symlink if needed
+    if [ ! -f "/usr/local/bin/insightspike" ]; then
+        echo "🔗 Creating CLI symlink..."
+        ln -sf "$(which python)" /usr/local/bin/insightspike-python
+        cat > /usr/local/bin/insightspike << 'EOF'
+#!/bin/bash
+python -m insightspike.cli.main "$@"
+EOF
+        chmod +x /usr/local/bin/insightspike
+    fi
+    
     echo "📁 Colab directories created"
 fi
 
@@ -94,6 +109,16 @@ try:
     print('✅ InsightSpike-AI: Core modules loaded successfully')
 except ImportError as e:
     print(f'❌ InsightSpike-AI: Import failed - {e}')
+
+# Test CLI command availability
+echo "🧪 Testing CLI commands..."
+if command -v insightspike >/dev/null 2>&1; then
+    echo "✅ CLI: 'insightspike' command available directly"
+    insightspike --version || echo "⚠️  CLI: Version check failed"
+else
+    echo "⚠️  CLI: 'insightspike' not in PATH, using 'python -m insightspike.cli.main'"
+    python -m insightspike.cli.main --version || echo "⚠️  CLI: Module execution failed"
+fi
 
 # Test configuration loading
 try:

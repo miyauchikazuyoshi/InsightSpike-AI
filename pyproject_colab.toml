@@ -65,13 +65,12 @@ accelerate = "^0.26.0"
 
 # Additional utilities for experiments
 tqdm = "^4.66.0"
-imageio = "^2.33.0"
+imageio = "^2.34.0"  # Latest version
 pillow = "^10.2.0"
 
 # Memory and performance monitoring
 psutil = "^5.9.0"
 pandas = "^2.0"  # Always include pandas in Colab
-plotly = "^5.14.0"  # Great for interactive plots in Colab
 
 # Vector search - CPU version for NumPy 2.x compatibility
 faiss-cpu = "^1.8.0"  # CPU version compatible with NumPy 2.x
@@ -80,9 +79,6 @@ faiss-cpu = "^1.8.0"  # CPU version compatible with NumPy 2.x
 jupyter = "^1.0"
 ipykernel = "^6.20.0"
 ipywidgets = "^8.0.0"  # For interactive widgets in Colab
-
-imageio = "^2.34.0"
-psutil = "^5.9.0"
 
 [tool.poetry.group.colab-extras.dependencies]
 # Additional Colab-specific packages (optional extras)
