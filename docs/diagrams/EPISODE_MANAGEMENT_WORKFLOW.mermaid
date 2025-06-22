@@ -13,7 +13,7 @@ flowchart TD
     %% Integration Path
     F -->|Yes| G[INTEGRATE with Existing Episode]
     G --> H[Update Vector<br/>Weighted Average]
-    H --> I[Combine Text<br/>Pipe Separator]
+    H --> I[Combine Text<br/>Using Pipe Character]
     I --> J[Update C-value<br/>Take Maximum]
     J --> K[Update Metadata<br/>Integration History]
     K --> L[Retrain Index]

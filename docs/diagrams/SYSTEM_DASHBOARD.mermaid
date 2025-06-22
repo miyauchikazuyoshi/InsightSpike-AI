@@ -1,0 +1,102 @@
+%% InsightSpike-AI System Dashboard
+%% リアルタイムシステムメトリクスとパフォーマンス監視
+
+flowchart TB
+    %% System Overview
+    subgraph "🎯 System Overview"
+        Status[System Status<br/>🟢 Active]
+        Uptime[Uptime<br/>99.9%]
+        Version[Version<br/>v0.8.0]
+    end
+    
+    %% Memory Metrics
+    subgraph "🧠 Memory Metrics"
+        direction TB
+        Episodes[Total Episodes<br/>1,234]
+        CValues[C-Value Distribution<br/>Min: 0.1<br/>Avg: 0.5<br/>Max: 0.9]
+        IndexStatus[FAISS Index<br/>Trained ✓]
+        MemoryUsage[Memory Usage<br/>256 MB]
+    end
+    
+    %% Graph Metrics
+    subgraph "📊 Graph Metrics"
+        direction TB
+        Nodes[Graph Nodes<br/>567]
+        Edges[Graph Edges<br/>1,890]
+        AvgGED[Avg ΔGED<br/>0.23]
+        AvgIG[Avg ΔIG<br/>0.45]
+    end
+    
+    %% Insight Metrics
+    subgraph "💡 Insight Metrics"
+        direction TB
+        TotalInsights[Total Insights<br/>342]
+        QualityDist[Quality Distribution<br/>High: 45%<br/>Med: 40%<br/>Low: 15%]
+        RecentSpikes[Recent Spikes<br/>12/day]
+        ValidationRate[Validation Rate<br/>78%]
+    end
+    
+    %% Performance Metrics
+    subgraph "⚡ Performance Metrics"
+        direction TB
+        ResponseTime[Avg Response Time<br/>450 ms]
+        Throughput[Throughput<br/>120 q/min]
+        CPUUsage[CPU Usage<br/>35%]
+        GPUUsage[GPU Usage<br/>60%]
+    end
+    
+    %% Episode Management Activity
+    subgraph "🔄 Episode Management"
+        direction TB
+        RecentMerges[Merges 24h<br/>23]
+        RecentSplits[Splits 24h<br/>8]
+        RecentPrunes[Prunes 24h<br/>15]
+        IntegrationRate[Integration Rate<br/>65%]
+    end
+    
+    %% Active Processes
+    subgraph "🔧 Active Processes"
+        direction TB
+        ActiveQueries[Active Queries<br/>3]
+        QueuedTasks[Queued Tasks<br/>7]
+        BackgroundJobs[Background Jobs<br/>2]
+    end
+    
+    %% Alerts and Warnings
+    subgraph "⚠️ Alerts"
+        direction TB
+        MemoryAlert[Memory Usage > 80%]
+        QualityAlert[Low Quality Insights > 30%]
+        PerformanceAlert[Response Time > 1s]
+    end
+    
+    %% Flow connections
+    Status --> Episodes
+    Episodes --> Nodes
+    Nodes --> TotalInsights
+    TotalInsights --> ResponseTime
+    ResponseTime --> ActiveQueries
+    
+    %% Alert triggers
+    MemoryUsage -.->|> 80%| MemoryAlert
+    QualityDist -.->|Low > 30%| QualityAlert
+    ResponseTime -.->|> 1000ms| PerformanceAlert
+    
+    %% Styling
+    classDef overview fill:#e3f2fd
+    classDef memory fill:#e8f5e8
+    classDef graph fill:#f3e5f5
+    classDef insight fill:#fff3e0
+    classDef performance fill:#e0f2f1
+    classDef management fill:#fce4ec
+    classDef process fill:#f1f8e9
+    classDef alert fill:#ffebee
+    
+    class Status,Uptime,Version overview
+    class Episodes,CValues,IndexStatus,MemoryUsage memory
+    class Nodes,Edges,AvgGED,AvgIG graph
+    class TotalInsights,QualityDist,RecentSpikes,ValidationRate insight
+    class ResponseTime,Throughput,CPUUsage,GPUUsage performance
+    class RecentMerges,RecentSplits,RecentPrunes,IntegrationRate management
+    class ActiveQueries,QueuedTasks,BackgroundJobs process
+    class MemoryAlert,QualityAlert,PerformanceAlert alert

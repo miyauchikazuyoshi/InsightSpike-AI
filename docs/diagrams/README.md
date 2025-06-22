@@ -7,14 +7,15 @@ This directory contains Mermaid diagrams illustrating the InsightSpike-AI archit
 ### Core System Architecture
 - **TECHNICAL_ARCHITECTURE.mermaid** - Overall system architecture with 4-layer design
 - **WORKFLOW_TREE.mermaid** - Processing workflow and decision trees
+- **SYSTEM_DASHBOARD.mermaid** - 🆕 Real-time system metrics and performance monitoring
 
 ### Memory Management
 - **INTRINSIC_MOTIVATION_FLOW.mermaid** - 🆕 Intrinsic reward → episode management flow
 - **EPISODE_INTEGRATION_MATRIX.mermaid** - 🆕 Smart episode integration vs new node decision matrix
+- **EPISODE_MANAGEMENT_WORKFLOW.mermaid** - Complete episode management workflow with thresholds
 
 ### Insight Processing
 - **INSIGHT_LIFECYCLE.mermaid** - Insight discovery and quality assessment lifecycle
-- **INSIGHT_VALIDATION.mermaid** - Validation and verification processes
 
 ## 🆕 New Diagrams (Latest Update)
 
