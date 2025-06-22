@@ -185,6 +185,7 @@ archive*/
 *_archive/
 legacy*/
 deprecated*/
+experiments_backup*/
 
 # IDE and environment files
 .env

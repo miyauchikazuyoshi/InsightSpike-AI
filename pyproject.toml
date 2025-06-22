@@ -2,7 +2,7 @@
 name = "insightspike-ai"
 version = "0.8.0"
 description = "Brain-Inspired Multi-Agent Architecture for Insight Detection and Knowledge Restructuring"
-authors = ["Kazuyoshi Miyauchi <k.miyauchi@insight-spike.ai>"]
+authors = ["Kazuyoshi Miyauchi <contact@insightspike-ai.org>"]
 packages = [{ include = "insightspike", from = "src" }]
 readme = "README.md"
 homepage = "https://github.com/miyauchikazuyoshi/InsightSpike-AI"
