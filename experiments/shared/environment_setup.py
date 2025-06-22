@@ -6,7 +6,12 @@
 
 import os
 import sys
-import psutil
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
+    psutil = None
 import time
 import logging
 import subprocess

@@ -1,55 +1,55 @@
 {
   "backups": [
     {
-      "backup_id": "pre_phase2_rag_benchmark_20250621_193629",
-      "backup_name": "pre_phase2_rag_benchmark",
-      "description": "Pre-experiment backup for Phase 2: RAG Benchmark Comparison",
-      "timestamp": "20250621_193629",
-      "backup_path": "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/data_backups/pre_phase2_rag_benchmark_20250621_193629.tar.gz",
-      "checksum": "8a02f00592edf671b80168af133cda05497a132d209192196dd0deafa365a11a",
-      "size_mb": 0.16985702514648438,
-      "file_count": 23
-    },
-    {
-      "backup_id": "pre_phase3_gedig_maze_20250621_164746",
+      "backup_id": "pre_phase3_gedig_maze_20250622_133751",
       "backup_name": "pre_phase3_gedig_maze",
       "description": "Pre-experiment backup for Phase 3: GEDIG Maze Optimization",
-      "timestamp": "20250621_164746",
-      "backup_path": "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/data_backups/pre_phase3_gedig_maze_20250621_164746.tar.gz",
-      "checksum": "8a02f00592edf671b80168af133cda05497a132d209192196dd0deafa365a11a",
-      "size_mb": 0.16985416412353516,
-      "file_count": 23
+      "timestamp": "20250622_133751",
+      "backup_path": "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/data_backups/pre_phase3_gedig_maze_20250622_133751.tar.gz",
+      "checksum": "a3aef5b6ae0f809f51df0df8fb161d5cef07907243092fecbe32846036e091ba",
+      "size_mb": 0.17165374755859375,
+      "file_count": 25
     },
     {
-      "backup_id": "pre_phase4_integrated_evaluation_20250621_162356",
-      "backup_name": "pre_phase4_integrated_evaluation",
-      "description": "Pre-experiment backup for Phase 4: Integrated Evaluation",
-      "timestamp": "20250621_162356",
-      "backup_path": "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/data_backups/pre_phase4_integrated_evaluation_20250621_162356.tar.gz",
-      "checksum": "8a02f00592edf671b80168af133cda05497a132d209192196dd0deafa365a11a",
-      "size_mb": 0.16986465454101562,
-      "file_count": 23
-    },
-    {
-      "backup_id": "pre_phase3_gedig_maze_20250621_162345",
+      "backup_id": "pre_phase3_gedig_maze_20250622_133709",
       "backup_name": "pre_phase3_gedig_maze",
       "description": "Pre-experiment backup for Phase 3: GEDIG Maze Optimization",
-      "timestamp": "20250621_162345",
-      "backup_path": "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/data_backups/pre_phase3_gedig_maze_20250621_162345.tar.gz",
-      "checksum": "8a02f00592edf671b80168af133cda05497a132d209192196dd0deafa365a11a",
-      "size_mb": 0.16985416412353516,
-      "file_count": 23
+      "timestamp": "20250622_133709",
+      "backup_path": "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/data_backups/pre_phase3_gedig_maze_20250622_133709.tar.gz",
+      "checksum": "a3aef5b6ae0f809f51df0df8fb161d5cef07907243092fecbe32846036e091ba",
+      "size_mb": 0.17165374755859375,
+      "file_count": 25
     },
     {
-      "backup_id": "pre_phase2_rag_benchmark_20250621_162102",
-      "backup_name": "pre_phase2_rag_benchmark",
-      "description": "Pre-experiment backup for Phase 2: RAG Benchmark Comparison",
-      "timestamp": "20250621_162102",
-      "backup_path": "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/data_backups/pre_phase2_rag_benchmark_20250621_162102.tar.gz",
-      "checksum": "8a02f00592edf671b80168af133cda05497a132d209192196dd0deafa365a11a",
-      "size_mb": 0.16985702514648438,
-      "file_count": 23
+      "backup_id": "pre_phase3_gedig_maze_20250622_133245",
+      "backup_name": "pre_phase3_gedig_maze",
+      "description": "Pre-experiment backup for Phase 3: GEDIG Maze Optimization",
+      "timestamp": "20250622_133245",
+      "backup_path": "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/data_backups/pre_phase3_gedig_maze_20250622_133245.tar.gz",
+      "checksum": "a3aef5b6ae0f809f51df0df8fb161d5cef07907243092fecbe32846036e091ba",
+      "size_mb": 0.17165374755859375,
+      "file_count": 25
+    },
+    {
+      "backup_id": "pre_phase3_gedig_maze_20250622_132745",
+      "backup_name": "pre_phase3_gedig_maze",
+      "description": "Pre-experiment backup for Phase 3: GEDIG Maze Optimization",
+      "timestamp": "20250622_132745",
+      "backup_path": "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/data_backups/pre_phase3_gedig_maze_20250622_132745.tar.gz",
+      "checksum": "a3aef5b6ae0f809f51df0df8fb161d5cef07907243092fecbe32846036e091ba",
+      "size_mb": 0.17165374755859375,
+      "file_count": 25
+    },
+    {
+      "backup_id": "pre_phase3_gedig_maze_20250622_131746",
+      "backup_name": "pre_phase3_gedig_maze",
+      "description": "Pre-experiment backup for Phase 3: GEDIG Maze Optimization",
+      "timestamp": "20250622_131746",
+      "backup_path": "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/data_backups/pre_phase3_gedig_maze_20250622_131746.tar.gz",
+      "checksum": "a3aef5b6ae0f809f51df0df8fb161d5cef07907243092fecbe32846036e091ba",
+      "size_mb": 0.17165374755859375,
+      "file_count": 25
     }
   ],
-  "current_state": "pre_phase2_rag_benchmark_20250621_193629"
+  "current_state": "pre_phase3_gedig_maze_20250622_133751"
 }

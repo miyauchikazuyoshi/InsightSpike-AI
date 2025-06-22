@@ -14,7 +14,12 @@ from sklearn.metrics import (
 )
 from scipy.stats import pearsonr, spearmanr
 import time
-import psutil
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
+    psutil = None
 import logging
 
 logger = logging.getLogger(__name__)

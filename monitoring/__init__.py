@@ -6,8 +6,7 @@ Comprehensive monitoring and alerting system for large-scale deployments.
 from .production_monitor import (
     ProductionMonitor,
     PerformanceMetrics,
-    SystemAlert,
-    MonitoringConfig
+    SystemAlert
 )
 
 __version__ = "1.0.0"
