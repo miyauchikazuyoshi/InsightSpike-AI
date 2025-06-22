@@ -51,19 +51,19 @@ except ImportError:
 
 @dataclass
 class MazeEnvironment:
-    """迷路環境定義"""
+    """迷路環境定義（壁ベース表現）"""
     width: int
     height: int
     start: Tuple[int, int]
     goal: Tuple[int, int]
-    obstacles: Set[Tuple[int, int]]
+    walls: Set[Tuple[int, int]]  # 壁の座標
     
     def is_valid_position(self, pos: Tuple[int, int]) -> bool:
-        """有効な位置かチェック"""
+        """有効な位置かチェック（通路セル）"""
         x, y = pos
         return (0 <= x < self.width and 
                 0 <= y < self.height and 
-                pos not in self.obstacles)
+                pos not in self.walls)
     
     def get_neighbors(self, pos: Tuple[int, int]) -> List[Tuple[int, int]]:
         """隣接する有効な位置を取得"""
@@ -74,6 +74,15 @@ class MazeEnvironment:
             if self.is_valid_position(new_pos):
                 neighbors.append(new_pos)
         return neighbors
+    
+    def get_all_valid_positions(self) -> List[Tuple[int, int]]:
+        """全ての有効な位置（通路セル）を取得"""
+        valid_positions = []
+        for x in range(self.width):
+            for y in range(self.height):
+                if self.is_valid_position((x, y)):
+                    valid_positions.append((x, y))
+        return valid_positions
 
 
 @dataclass
@@ -505,264 +514,411 @@ class GeneticAlgorithm(BasePathfindingAlgorithm):
         return individual[:mutation_point]
 
 
-class SlimeMoldGEDIGAlgorithm(BasePathfindingAlgorithm):
-    """粘菌インスパイアGEDIG（Graph Edit Distance + Information Gain）アルゴリズム"""
+class ImprovedSlimeMoldGEDIGAlgorithm(BasePathfindingAlgorithm):
+    """
+    改良版粘菌GEDIG アルゴリズム
+    
+    理論的基盤:
+    1. 共通グラフ定義: ノードV=迷路セル、エッジE=隣接セル間、重みw_e(t)=チューブ太さ（流量）
+    2. エッジ分布エントロピー: H(t) = -∑p_e(t)log(p_e(t)), p_e(t) = w_e(t)/∑w_e'(t)
+    3. GED（グラフ編集距離）: GED_t = 1 - cosine(w(t), w(t-1))
+    4. IG（情報利得）: IG_t = H(t-1) - H(t)
+    5. 洞察スパイク: GED_t > τ_g かつ IG_t > τ_i
+    """
     
     def __init__(self):
         super().__init__("SlimeMold_GEDIG")
-        self.virtual_tubes = {}  # 仮想管のネットワーク
-        self.conductivity = {}   # 管の導電性
-        self.flow_rates = {}     # 流量
-        self.decay_rate = 0.95   # 減衰率
-    
+        # 粘菌パラメータ
+        self.flow_decay = 0.05         # 流量減衰率（より保持）
+        self.conductivity_factor = 1.5  # 導電性係数（より活発）
+        self.exploration_bonus = 0.1    # 探索ボーナス（より探索的）
+        
+        # 洞察スパイク検出のしきい値
+        self.tau_g = 0.01  # GED閾値（更に敏感に）
+        self.tau_i = 0.01  # IG閾値（より敏感に）
+        
+        # 状態管理
+        self.edge_weights = {}          # エッジ重み w_e(t)
+        self.weight_history = []        # 重みベクトル履歴
+        self.entropy_history = []       # エントロピー履歴
+        self.ged_history = []          # GED履歴
+        self.ig_history = []           # IG履歴
+        self.insight_spikes = []       # 洞察スパイク発生時刻
+        
     def find_path(self, maze: MazeEnvironment) -> Tuple[List[Tuple[int, int]], PathfindingMetrics]:
-        """GEDIGアルゴリズムによる経路探索"""
+        """粘菌アナロジーによる経路探索"""
         start_time = time.time()
         self.trials = 0
+        self._initialize_network(maze)
         
-        # 初期化
-        self._initialize_virtual_network(maze)
-        
-        max_iterations = 200
-        convergence_threshold = 0.001
-        previous_gedig = 0.0
+        best_path = []
+        max_iterations = 1000
+        convergence_threshold = 0.01
         
         for iteration in range(max_iterations):
             self.trials += 1
             
-            # GEDIG評価
-            current_gedig = self._evaluate_gedig(maze)
+            # 1. 粘菌フローシミュレーション
+            self._simulate_slime_flow(maze, iteration)
             
-            # 収束判定
-            if abs(current_gedig - previous_gedig) < convergence_threshold:
-                break
+            # 2. 現在の重みベクトルを記録
+            current_weights = self._get_current_weight_vector()
+            self.weight_history.append(current_weights.copy())
+            
+            # 3. エントロピー計算
+            entropy = self._calculate_edge_entropy()
+            self.entropy_history.append(entropy)
+            
+            # 4. GED・IG計算（2回目以降）
+            if len(self.weight_history) >= 2:
+                ged_score = self._calculate_ged()
+                ig_score = self._calculate_information_gain()
                 
-            # 仮想管の更新
-            self._update_virtual_tubes(maze)
+                self.ged_history.append(ged_score)
+                self.ig_history.append(ig_score)
+                
+                # 5. 洞察スパイク検出
+                if ged_score > self.tau_g and ig_score > self.tau_i:
+                    self.insight_spikes.append(iteration)
+                    # 洞察時の経路を抽出
+                    current_path = self._extract_optimal_path(maze)
+                    if current_path and current_path[-1] == maze.goal:
+                        best_path = current_path
+                        break
             
-            # 減衰処理
-            self._apply_decay()
-            
-            previous_gedig = current_gedig
+            # 6. 収束判定
+            if len(self.weight_history) >= 2:
+                weight_change = self._calculate_weight_change()
+                if weight_change < convergence_threshold:
+                    break
         
-        # 最適経路抽出
-        best_path = self._extract_optimal_path(maze)
+        # 最終経路抽出
+        if not best_path:
+            best_path = self._extract_optimal_path(maze)
         
         end_time = time.time()
         success_rate = 1.0 if best_path and best_path[-1] == maze.goal else 0.0
+        
+        # GEDIG統合スコア
+        gedig_score = len(self.insight_spikes) * (
+            np.mean(self.ged_history) if self.ged_history else 0.0
+        )
         
         return best_path, PathfindingMetrics(
             algorithm_name=self.name,
             trials_count=self.trials,
             convergence_time=end_time - start_time,
-            path_length=len(best_path),
-            solution_quality=0.95 if success_rate > 0 else 0.0,  # 高品質解
+            path_length=len(best_path) if best_path else 0,
+            solution_quality=success_rate,
             success_rate=success_rate,
-            exploration_efficiency=len(best_path) / max(self.trials, 1),
-            memory_usage_mb=len(self.virtual_tubes) * 0.01,
-            gedig_score=current_gedig
+            exploration_efficiency=len(self.explored_nodes) / max(self.trials, 1),
+            memory_usage_mb=self._estimate_memory_usage(),
+            gedig_score=gedig_score
         )
     
-    def _initialize_virtual_network(self, maze: MazeEnvironment):
-        """仮想管ネットワーク初期化"""
-        self.virtual_tubes = {}
-        self.conductivity = {}
-        self.flow_rates = {}
+    def _initialize_network(self, maze: MazeEnvironment):
+        """粘菌管ネットワーク初期化"""
+        self.edge_weights = {}
+        self.explored_nodes = set()
         
-        # 全有効位置間に仮想管を設置
-        valid_positions = []
-        for x in range(maze.width):
-            for y in range(maze.height):
-                if maze.is_valid_position((x, y)):
-                    valid_positions.append((x, y))
-        
-        # 隣接位置間の管を初期化
-        for pos in valid_positions:
-            neighbors = maze.get_neighbors(pos)
-            for neighbor in neighbors:
-                edge = (pos, neighbor)
-                self.virtual_tubes[edge] = 1.0  # 初期強度
-                self.conductivity[edge] = 1.0   # 初期導電性
-                self.flow_rates[edge] = 0.0     # 初期流量
-    
-    def _evaluate_gedig(self, maze: MazeEnvironment) -> float:
-        """GEDIG (Graph Edit Distance + Information Gain) 評価"""
-        ged_score = self._calculate_graph_edit_distance()
-        ig_score = self._calculate_information_gain(maze)
-        
-        # 重み付き統合
-        alpha, beta = 0.6, 0.4
-        gedig_score = alpha * ged_score + beta * ig_score
-        
-        return gedig_score
-    
-    def _calculate_graph_edit_distance(self) -> float:
-        """グラフ編集距離計算"""
-        # 前回の状態との比較（簡易版）
-        total_change = 0.0
-        for edge, strength in self.virtual_tubes.items():
-            # 強度変化をコストとして計算
-            prev_strength = getattr(self, '_prev_tubes', {}).get(edge, 1.0)
-            change = abs(strength - prev_strength)
-            total_change += change
-        
-        # 正規化
-        ged_score = total_change / max(len(self.virtual_tubes), 1)
-        
-        # 状態保存
-        self._prev_tubes = self.virtual_tubes.copy()
-        
-        return ged_score
-    
-    def _calculate_information_gain(self, maze: MazeEnvironment) -> float:
-        """情報獲得量計算"""
-        # エントロピーベースの情報獲得
-        total_entropy = 0.0
-        
-        # 各位置の不確実性を計算
+        # 全ての有効なエッジを初期化
         for x in range(maze.width):
             for y in range(maze.height):
                 pos = (x, y)
                 if not maze.is_valid_position(pos):
                     continue
-                
-                # その位置を通る管の強度分布
-                incoming_strengths = []
-                for edge, strength in self.virtual_tubes.items():
-                    if edge[1] == pos:  # この位置への流入
-                        incoming_strengths.append(strength)
-                
-                if incoming_strengths:
-                    # 確率分布に正規化
-                    total_strength = sum(incoming_strengths)
-                    if total_strength > 0:
-                        probabilities = [s / total_strength for s in incoming_strengths]
-                        # エントロピー計算
-                        entropy = -sum(p * log2(p + 1e-10) for p in probabilities)
-                        total_entropy += entropy
-        
-        # 情報獲得 = 最大エントロピー - 現在のエントロピー
-        max_entropy = log2(len(self.virtual_tubes) + 1)
-        information_gain = max_entropy - (total_entropy / max(maze.width * maze.height, 1))
-        
-        return max(0.0, information_gain)
+                    
+                neighbors = maze.get_neighbors(pos)
+                for neighbor in neighbors:
+                    # 双方向エッジを作成（正規化用）
+                    edge = tuple(sorted([pos, neighbor]))
+                    if edge not in self.edge_weights:
+                        self.edge_weights[edge] = 1.0  # 初期重み
     
-    def _update_virtual_tubes(self, maze: MazeEnvironment):
-        """仮想管の更新（粘菌の適応的強化）"""
-        # ゴールからの距離に基づく重要度計算
-        goal_distances = self._calculate_goal_distances(maze)
+    def _simulate_slime_flow(self, maze: MazeEnvironment, iteration: int):
+        """粘菌の流体力学シミュレーション"""
+        # ゴールからの距離場計算（魅力場）
+        goal_distances = self._calculate_distance_field(maze)
         
-        # 流量シミュレーション
-        self._simulate_flow(maze, goal_distances)
-        
-        # 管強度の更新
-        for edge in self.virtual_tubes:
+        # 各エッジの流量を更新
+        for edge in self.edge_weights:
             pos1, pos2 = edge
             
-            # 距離ベースの重要度
+            # 距離ベースの魅力度
             dist1 = goal_distances.get(pos1, float('inf'))
             dist2 = goal_distances.get(pos2, float('inf'))
-            importance = 1.0 / (1.0 + min(dist1, dist2))
             
-            # 流量ベースの強化
-            flow = self.flow_rates.get(edge, 0.0)
-            flow_factor = 1.0 + flow * 0.1
+            # ゴールに近いほど高い魅力度
+            attractiveness = 1.0 / (1.0 + min(dist1, dist2))
             
-            # 新しい強度計算
-            new_strength = self.virtual_tubes[edge] * importance * flow_factor
-            self.virtual_tubes[edge] = min(2.0, max(0.1, new_strength))
+            # スタートからの距離も考慮（探索促進）
+            start_dist1 = self.manhattan_distance(pos1, maze.start)
+            start_dist2 = self.manhattan_distance(pos2, maze.start)
+            exploration_factor = 1.0 + self.exploration_bonus / (1.0 + min(start_dist1, start_dist2))
+            
+            # 時間減衰（使われない管は細くなる）
+            decay_factor = 1.0 - self.flow_decay * iteration / 100.0
+            decay_factor = max(0.1, decay_factor)
+            
+            # 新しい重み計算
+            new_weight = self.edge_weights[edge] * attractiveness * exploration_factor * decay_factor
+            self.edge_weights[edge] = max(0.1, min(5.0, new_weight))
     
-    def _calculate_goal_distances(self, maze: MazeEnvironment) -> Dict[Tuple[int, int], int]:
-        """ゴールからの最短距離計算（BFS）"""
+    def _calculate_distance_field(self, maze: MazeEnvironment) -> Dict[Tuple[int, int], int]:
+        """ゴールからの最短距離場をBFSで計算"""
         distances = {}
         queue = deque([(maze.goal, 0)])
-        visited = {maze.goal}
+        distances[maze.goal] = 0
         
         while queue:
             pos, dist = queue.popleft()
-            distances[pos] = dist
+            neighbors = maze.get_neighbors(pos)
             
-            for neighbor in maze.get_neighbors(pos):
-                if neighbor not in visited:
-                    visited.add(neighbor)
+            for neighbor in neighbors:
+                if neighbor not in distances:
+                    distances[neighbor] = dist + 1
                     queue.append((neighbor, dist + 1))
         
         return distances
     
-    def _simulate_flow(self, maze: MazeEnvironment, goal_distances: Dict[Tuple[int, int], int]):
-        """流量シミュレーション"""
-        # スタートからゴールへの仮想的な流れを計算
-        start_distance = goal_distances.get(maze.start, float('inf'))
-        
-        for edge in self.virtual_tubes:
-            pos1, pos2 = edge
-            
-            # 流れの方向性を計算
-            dist1 = goal_distances.get(pos1, float('inf'))
-            dist2 = goal_distances.get(pos2, float('inf'))
-            
-            if dist1 < dist2:  # pos1がゴールに近い
-                direction_factor = 1.0
-            elif dist2 < dist1:  # pos2がゴールに近い
-                direction_factor = 0.5
-            else:
-                direction_factor = 0.1
-            
-            # 流量計算
-            conductivity = self.conductivity.get(edge, 1.0)
-            tube_strength = self.virtual_tubes[edge]
-            flow = direction_factor * conductivity * tube_strength
-            
-            self.flow_rates[edge] = flow
+    def _get_current_weight_vector(self) -> Dict[Tuple[Tuple[int, int], Tuple[int, int]], float]:
+        """現在の重みベクトルを取得"""
+        return self.edge_weights.copy()
     
-    def _apply_decay(self):
-        """減衰処理（使われない管の弱化）"""
-        for edge in self.virtual_tubes:
-            current_strength = self.virtual_tubes[edge]
-            flow = self.flow_rates.get(edge, 0.0)
-            
-            # 流量が少ない管は減衰
-            if flow < 0.1:
-                self.virtual_tubes[edge] = current_strength * self.decay_rate
-            
-            # 最小値制限
-            self.virtual_tubes[edge] = max(0.01, self.virtual_tubes[edge])
+    def _calculate_edge_entropy(self) -> float:
+        """エッジ分布のエントロピー H(t) = -∑p_e(t)log(p_e(t))"""
+        if not self.edge_weights:
+            return 0.0
+        
+        # 重みを確率分布に正規化
+        total_weight = sum(self.edge_weights.values())
+        if total_weight == 0:
+            return 0.0
+        
+        entropy = 0.0
+        for weight in self.edge_weights.values():
+            p = weight / total_weight
+            if p > 0:
+                entropy += -p * log2(p)
+        
+        return entropy
+    
+    def _calculate_ged(self) -> float:
+        """GED_t = 1 - cosine(w(t), w(t-1))"""
+        if len(self.weight_history) < 2:
+            return 0.0
+        
+        current_weights = self.weight_history[-1]
+        previous_weights = self.weight_history[-2]
+        
+        # 共通エッジの重みベクトルを作成
+        common_edges = set(current_weights.keys()) & set(previous_weights.keys())
+        if not common_edges:
+            return 1.0
+        
+        # ベクトル化
+        vec_current = np.array([current_weights.get(edge, 0.0) for edge in common_edges])
+        vec_previous = np.array([previous_weights.get(edge, 0.0) for edge in common_edges])
+        
+        # コサイン類似度計算
+        norm_current = np.linalg.norm(vec_current)
+        norm_previous = np.linalg.norm(vec_previous)
+        
+        if norm_current == 0 or norm_previous == 0:
+            return 1.0
+        
+        cosine_sim = np.dot(vec_current, vec_previous) / (norm_current * norm_previous)
+        return 1.0 - cosine_sim
+    
+    def _calculate_information_gain(self) -> float:
+        """IG_t = H(t-1) - H(t)"""
+        if len(self.entropy_history) < 2:
+            return 0.0
+        
+        return self.entropy_history[-2] - self.entropy_history[-1]
+    
+    def _calculate_weight_change(self) -> float:
+        """重みベクトルの変化量計算（収束判定用）"""
+        if len(self.weight_history) < 2:
+            return float('inf')
+        
+        current = self.weight_history[-1]
+        previous = self.weight_history[-2]
+        
+        total_change = 0.0
+        all_edges = set(current.keys()) | set(previous.keys())
+        
+        for edge in all_edges:
+            curr_weight = current.get(edge, 0.0)
+            prev_weight = previous.get(edge, 0.0)
+            total_change += abs(curr_weight - prev_weight)
+        
+        return total_change / max(len(all_edges), 1)
     
     def _extract_optimal_path(self, maze: MazeEnvironment) -> List[Tuple[int, int]]:
-        """最適経路抽出"""
-        path = [maze.start]
-        current = maze.start
-        visited = set()
+        """現在の管ネットワークから最適経路を抽出"""
+        if not self.edge_weights:
+            return []
         
-        while current != maze.goal and len(path) < 1000:  # 無限ループ防止
-            if current in visited:
+        # 重み付きグラフでDijkstra法を実行
+        distances = {maze.start: 0.0}
+        previous = {}
+        unvisited = set(maze.get_all_valid_positions())
+        
+        while unvisited:
+            # 最小距離のノードを選択
+            current = min(unvisited, key=lambda pos: distances.get(pos, float('inf')))
+            
+            if current == maze.goal:
                 break
-            visited.add(current)
+                
+            if current not in distances:
+                break
+                
+            unvisited.remove(current)
+            current_dist = distances[current]
             
-            # 最強の管を選択
-            best_neighbor = None
-            max_strength = 0.0
-            
+            # 隣接ノードの距離を更新
             neighbors = maze.get_neighbors(current)
             for neighbor in neighbors:
-                edge = (current, neighbor)
-                strength = self.virtual_tubes.get(edge, 0.0)
+                if neighbor not in unvisited:
+                    continue
                 
-                # ゴールへの距離も考慮
-                goal_dist = self.manhattan_distance(neighbor, maze.goal)
-                adjusted_strength = strength / (1.0 + goal_dist * 0.1)
+                # エッジ重みを使って距離計算（重いエッジ = 短い距離）
+                edge = tuple(sorted([current, neighbor]))
+                edge_weight = self.edge_weights.get(edge, 0.1)
+                edge_cost = 1.0 / edge_weight  # 重い管ほど通りやすい
                 
-                if adjusted_strength > max_strength:
-                    max_strength = adjusted_strength
-                    best_neighbor = neighbor
-            
-            if best_neighbor is None:
-                break
+                new_dist = current_dist + edge_cost
                 
-            path.append(best_neighbor)
-            current = best_neighbor
+                if new_dist < distances.get(neighbor, float('inf')):
+                    distances[neighbor] = new_dist
+                    previous[neighbor] = current
         
-        return path
+        # 経路復元
+        if maze.goal not in previous and maze.goal != maze.start:
+            return []
+        
+        path = []
+        current = maze.goal
+        while current is not None:
+            path.append(current)
+            current = previous.get(current)
+        
+        path.reverse()
+        return path if path[0] == maze.start else []
+    
+    def _estimate_memory_usage(self) -> float:
+        """メモリ使用量推定（MB）"""
+        # エッジ数 × データサイズの概算
+        return len(self.edge_weights) * 0.001  # 概算値
+
+
+class MazeGenerator:
+    """適切な迷路生成アルゴリズム（Recursive Backtracking）"""
+    
+    def __init__(self, width: int, height: int, seed: Optional[int] = None):
+        self.width = width
+        self.height = height
+        if seed is not None:
+            random.seed(seed)
+        
+    def generate_maze(self) -> Set[Tuple[int, int]]:
+        """Recursive Backtrackingで迷路を生成（壁の座標を返す）"""
+        # 奇数サイズに調整（迷路生成の標準）
+        maze_width = self.width if self.width % 2 == 1 else self.width - 1
+        maze_height = self.height if self.height % 2 == 1 else self.height - 1
+        
+        # 全て壁で初期化
+        walls = set()
+        for x in range(maze_width):
+            for y in range(maze_height):
+                walls.add((x, y))
+        
+        # 通路を作る（奇数座標のみを通路候補とする）
+        visited = set()
+        stack = []
+        
+        # スタート地点（必ず奇数座標）
+        start_x, start_y = 1, 1
+        current = (start_x, start_y)
+        visited.add(current)
+        walls.discard(current)  # 通路として開放
+        
+        while True:
+            # 隣接する未訪問セル（2マス先の奇数座標）を探す
+            neighbors = []
+            x, y = current
+            
+            for dx, dy in [(0, 2), (2, 0), (0, -2), (-2, 0)]:
+                nx, ny = x + dx, y + dy
+                if (0 < nx < maze_width - 1 and 
+                    0 < ny < maze_height - 1 and 
+                    (nx, ny) not in visited):
+                    neighbors.append((nx, ny))
+            
+            if neighbors:
+                # ランダムに隣接セルを選択
+                next_cell = random.choice(neighbors)
+                stack.append(current)
+                
+                # 現在のセルと次のセルの間の壁を除去
+                wall_x = (current[0] + next_cell[0]) // 2
+                wall_y = (current[1] + next_cell[1]) // 2
+                walls.discard((wall_x, wall_y))
+                
+                # 次のセルを通路として開放
+                walls.discard(next_cell)
+                visited.add(next_cell)
+                current = next_cell
+            elif stack:
+                # バックトラック
+                current = stack.pop()
+            else:
+                break
+        
+        return walls
+    
+    def generate_simple_maze(self) -> Set[Tuple[int, int]]:
+        """シンプルな迷路パターン（テスト用）"""
+        walls = set()
+        
+        # 外壁
+        for x in range(self.width):
+            walls.add((x, 0))
+            walls.add((x, self.height - 1))
+        for y in range(self.height):
+            walls.add((0, y))
+            walls.add((self.width - 1, y))
+        
+        # 内部の壁パターン
+        # 水平壁
+        for x in range(2, self.width - 2, 4):
+            for y in range(2, self.height - 2, 4):
+                walls.add((x, y))
+                walls.add((x + 1, y))
+        
+        # 垂直壁
+        for x in range(4, self.width - 2, 4):
+            for y in range(1, self.height - 1, 2):
+                walls.add((x, y))
+        
+        return walls
+    
+    def ensure_path_accessibility(self, walls: Set[Tuple[int, int]], start: Tuple[int, int], goal: Tuple[int, int], width: int, height: int) -> Set[Tuple[int, int]]:
+        """スタートとゴール周辺の通路を確保"""
+        # スタート・ゴール地点とその隣接セルを通路として確保
+        for pos in [start, goal]:
+            x, y = pos
+            # 中心
+            walls.discard((x, y))
+            # 隣接4方向
+            for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < width and 0 <= ny < height:
+                    walls.discard((nx, ny))
+        
+        return walls
 
 
 class GEDIGMazeExperiment:
@@ -784,60 +940,56 @@ class GEDIGMazeExperiment:
             'Dijkstra': DijkstraAlgorithm(),
             'Reinforcement_Learning': ReinforcementLearningAlgorithm(),
             'Genetic_Algorithm': GeneticAlgorithm(),
-            'SlimeMold_GEDIG': SlimeMoldGEDIGAlgorithm()
+            'SlimeMold_GEDIG': ImprovedSlimeMoldGEDIGAlgorithm()
         }
     
     def generate_maze_environments(self) -> List[MazeEnvironment]:
-        """様々な迷路環境を生成"""
+        """様々な迷路環境を生成（適切な迷路アルゴリズムを使用）"""
         mazes = []
         
-        # 1. 単純迷路 (10x10)
+        # 1. 小さな迷路 (11x11) - Recursive Backtracking
+        generator_small = MazeGenerator(11, 11, seed=42)
+        small_walls = generator_small.generate_maze()
+        small_walls = generator_small.ensure_path_accessibility(small_walls, (1, 1), (9, 9), 11, 11)
+        small_maze = MazeEnvironment(
+            width=11, height=11,
+            start=(1, 1), goal=(9, 9),
+            walls=small_walls
+        )
+        mazes.append(('RecursiveMaze_11x11', small_maze))
+        
+        # 2. 中型迷路 (21x21) - Recursive Backtracking  
+        generator_medium = MazeGenerator(21, 21, seed=123)
+        medium_walls = generator_medium.generate_maze()
+        medium_walls = generator_medium.ensure_path_accessibility(medium_walls, (1, 1), (19, 19), 21, 21)
+        medium_maze = MazeEnvironment(
+            width=21, height=21,
+            start=(1, 1), goal=(19, 19),
+            walls=medium_walls
+        )
+        mazes.append(('RecursiveMaze_21x21', medium_maze))
+        
+        # 3. シンプルパターン迷路 (15x15)
+        generator_simple = MazeGenerator(15, 15, seed=456)
+        simple_walls = generator_simple.generate_simple_maze()
+        simple_walls = generator_simple.ensure_path_accessibility(simple_walls, (1, 1), (13, 13), 15, 15)
         simple_maze = MazeEnvironment(
-            width=10, height=10,
-            start=(0, 0), goal=(9, 9),
-            obstacles={(3, 3), (3, 4), (4, 3), (6, 6), (6, 7), (7, 6)}
-        )
-        mazes.append(('Simple_10x10', simple_maze))
-        
-        # 2. 複雑迷路 (20x20)
-        complex_obstacles = set()
-        # 壁を配置
-        for i in range(5, 15):
-            complex_obstacles.add((i, 5))
-            complex_obstacles.add((5, i))
-            complex_obstacles.add((i, 15))
-            complex_obstacles.add((15, i))
-        
-        complex_maze = MazeEnvironment(
-            width=20, height=20,
-            start=(0, 0), goal=(19, 19),
-            obstacles=complex_obstacles
-        )
-        mazes.append(('Complex_20x20', complex_maze))
-        
-        # 3. 動的迷路 (障害物をランダム配置)
-        dynamic_obstacles = set()
-        random.seed(42)  # 再現可能性のため
-        for _ in range(30):
-            x, y = random.randint(2, 12), random.randint(2, 12)
-            if (x, y) not in [(0, 0), (14, 14)]:  # スタート・ゴール以外
-                dynamic_obstacles.add((x, y))
-        
-        dynamic_maze = MazeEnvironment(
             width=15, height=15,
-            start=(0, 0), goal=(14, 14),
-            obstacles=dynamic_obstacles
+            start=(1, 1), goal=(13, 13),
+            walls=simple_walls
         )
-        mazes.append(('Dynamic_15x15', dynamic_maze))
+        mazes.append(('SimpleMaze_15x15', simple_maze))
         
-        # 4. マルチゴール迷路（複数経路）
-        multigoal_obstacles = {(5, 2), (5, 3), (5, 4), (2, 5), (3, 5), (4, 5)}
-        multigoal_maze = MazeEnvironment(
-            width=12, height=12,
-            start=(0, 0), goal=(11, 11),
-            obstacles=multigoal_obstacles
+        # 4. 複雑迷路 (31x31) - より大きな迷路
+        generator_complex = MazeGenerator(31, 31, seed=789)
+        complex_walls = generator_complex.generate_maze()
+        complex_walls = generator_complex.ensure_path_accessibility(complex_walls, (1, 1), (29, 29), 31, 31)
+        complex_maze = MazeEnvironment(
+            width=31, height=31,
+            start=(1, 1), goal=(29, 29),
+            walls=complex_walls
         )
-        mazes.append(('MultiGoal_12x12', multigoal_maze))
+        mazes.append(('ComplexMaze_31x31', complex_maze))
         
         # 生成した迷路をメンバに保存して後で再利用できるようにする
         self.maze_envs = mazes
@@ -1076,44 +1228,76 @@ class GEDIGMazeExperiment:
         # ----------------------------
         # 追加機能: A* vs GEDIG 経路アニメーション
         # ----------------------------
+        self.logger.info(f"Animation enabled: {self.enable_animation}, Maze count: {len(self.maze_envs)}")
         if self.enable_animation and self.maze_envs:
             try:
+                self.logger.info("Starting GIF generation...")
                 self._generate_path_comparison_gifs(limit=3)  # 代表的な3迷路のみ
             except Exception as e:
                 self.logger.warning(f"Path comparison GIF generation failed: {e}")
+        else:
+            if not self.enable_animation:
+                self.logger.info("Animation disabled - skipping GIF generation")
+            if not self.maze_envs:
+                self.logger.warning("No mazes available for GIF generation")
 
     # ===============================================================
     # GIF 生成ユーティリティ
     # ===============================================================
     def _draw_maze(self, maze: 'MazeEnvironment', path: List[Tuple[int, int]], color: str, title: str = "") -> 'np.ndarray':
-        """迷路グリッド＋部分経路を描画し numpy 配列で返す"""
+        """迷路グリッド＋部分経路を描画し numpy 配列で返す（改良版）"""
         import numpy as np
-        fig, ax = plt.subplots(figsize=(3, 3))
+        fig, ax = plt.subplots(figsize=(4, 4))
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_xlim(-0.5, maze.width - 0.5)
         ax.set_ylim(-0.5, maze.height - 0.5)
         ax.invert_yaxis()
-        # 障害物
-        if maze.obstacles:
-            xs = [o[0] for o in maze.obstacles]
-            ys = [o[1] for o in maze.obstacles]
-            ax.scatter(xs, ys, c='black', marker='s', s=100)
-        # スタート / ゴール
-        ax.scatter([maze.start[0]], [maze.start[1]], c='green', marker='o', s=100)
-        ax.scatter([maze.goal[0]], [maze.goal[1]], c='blue', marker='*', s=120)
-        # 経路
-        if path:
+        ax.set_aspect('equal')
+        
+        # 背景を白に設定
+        ax.set_facecolor('white')
+        
+        # 壁を描画（線ベース）
+        if maze.walls:
+            for wall_x, wall_y in maze.walls:
+                # 各壁セルを小さな四角として描画
+                from matplotlib.patches import Rectangle
+                rect = Rectangle((wall_x - 0.5, wall_y - 0.5), 1, 1, 
+                               linewidth=0, facecolor='black', alpha=0.8)
+                ax.add_patch(rect)
+        
+        # グリッド線を描画（薄いグレー）
+        for x in range(maze.width + 1):
+            ax.axvline(x - 0.5, color='lightgray', linewidth=0.5, alpha=0.3)
+        for y in range(maze.height + 1):
+            ax.axhline(y - 0.5, color='lightgray', linewidth=0.5, alpha=0.3)
+        
+        # スタート地点（緑の円）
+        ax.scatter([maze.start[0]], [maze.start[1]], c='green', marker='o', s=150, 
+                  edgecolor='darkgreen', linewidth=2, zorder=5)
+        
+        # ゴール地点（青い星）
+        ax.scatter([maze.goal[0]], [maze.goal[1]], c='blue', marker='*', s=200,
+                  edgecolor='darkblue', linewidth=2, zorder=5)
+        
+        # 経路を描画
+        if path and len(path) > 1:
             xs = [p[0] for p in path]
             ys = [p[1] for p in path]
-            ax.plot(xs, ys, color=color, linewidth=2)
-            ax.scatter(xs, ys, color=color, s=25)
-        ax.set_title(title)
-        # バックエンド依存の canvas 取得を避け、Pillow へバイト転送 → imageio で読込
+            # 経路線
+            ax.plot(xs, ys, color=color, linewidth=3, alpha=0.8, zorder=3)
+            # 経路点
+            ax.scatter(xs[1:-1], ys[1:-1], color=color, s=30, alpha=0.7, zorder=4)
+        
+        ax.set_title(title, fontsize=12, fontweight='bold')
+        
+        # 画像として出力
         from io import BytesIO
-        import imageio.v2 as imageio_v2  # 明示import
+        import imageio.v2 as imageio_v2
         buf = BytesIO()
-        fig.savefig(buf, format="png", dpi=150, bbox_inches="tight")
+        fig.savefig(buf, format="png", dpi=150, bbox_inches="tight", 
+                   facecolor='white', edgecolor='none')
         buf.seek(0)
         img = imageio_v2.imread(buf)
         plt.close(fig)
@@ -1121,6 +1305,7 @@ class GEDIGMazeExperiment:
 
     def _create_comparison_gif(self, maze_name: str, maze_env: 'MazeEnvironment') -> None:
         """A* と SlimeMold_GEDIG の経路を段階的に描いて GIF 出力"""
+        self.logger.info(f"Creating comparison GIF for {maze_name}")
         from pathlib import Path
         import numpy as np
         import imageio.v2 as imageio_v2  # 明示import
@@ -1129,7 +1314,7 @@ class GEDIGMazeExperiment:
         astar = AStarAlgorithm()
         path_astar, _ = astar.find_path(maze_env)
 
-        gedig = SlimeMoldGEDIGAlgorithm()
+        gedig = ImprovedSlimeMoldGEDIGAlgorithm()
         path_gedig, _ = gedig.find_path(maze_env)
 
         max_len = max(len(path_astar), len(path_gedig))
@@ -1148,8 +1333,10 @@ class GEDIGMazeExperiment:
 
     def _generate_path_comparison_gifs(self, limit: int = 3):
         """いくつかの迷路に対して比較 GIF を生成"""
+        self.logger.info(f"Generating path comparison GIFs for up to {limit} mazes")
         count = 0
         for maze_name, maze_env in self.maze_envs:
+            self.logger.info(f"Creating GIF for maze: {maze_name}")
             self._create_comparison_gif(maze_name, maze_env)
             count += 1
             if count >= limit:
