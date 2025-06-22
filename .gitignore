@@ -198,4 +198,6 @@ Thumbs.db
 
 # Work reports and documentation (exclude from repository)
 docs/reports/
+# 実験用バックアップファイル（除外）
+experiments/data_backups/
 docs/archive/experiments/data_backups/*.tar.gz
