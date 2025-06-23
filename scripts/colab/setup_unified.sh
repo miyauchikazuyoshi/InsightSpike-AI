@@ -31,18 +31,27 @@ fi
 echo "📦 Installing dependencies from pyproject.toml..."
 pip install -e .
 
-# Install FAISS separately with GPU/CPU detection
+# Install FAISS separately with enhanced GPU/CPU detection
 echo "🔧 Installing FAISS with optimal backend..."
 if command -v nvidia-smi &> /dev/null && nvidia-smi > /dev/null 2>&1; then
-    echo "🎮 GPU detected - installing faiss-gpu..."
-    pip install faiss-gpu --upgrade --quiet || {
-        echo "⚠️ faiss-gpu failed, falling back to faiss-cpu..."
+    echo "🎮 GPU detected - trying faiss-gpu installation..."
+    pip install faiss-gpu --upgrade --quiet --no-deps || {
+        echo "⚠️ faiss-gpu failed, installing faiss-cpu..."
         pip install faiss-cpu --upgrade --quiet
     }
 else
     echo "💻 CPU environment - installing faiss-cpu..."
     pip install faiss-cpu --upgrade --quiet
 fi
+
+# Verify FAISS installation
+python -c "
+try:
+    import faiss
+    print('✅ FAISS successfully installed: version ' + getattr(faiss, '__version__', 'unknown'))
+except ImportError as e:
+    print('⚠️ FAISS import failed: ' + str(e))
+" 2>/dev/null || echo "⚠️ FAISS verification failed"
 
 # Ensure Python can find the insightspike module
 echo "🔧 Setting up Python module paths..."
@@ -123,14 +132,14 @@ try:
 except ImportError as e:
     print(f'❌ InsightSpike-AI: Import failed - {e}')
 
-# Test CLI command availability
-echo "🧪 Testing CLI commands..."
+# Test CLI command availability (fixed)
+echo "Testing CLI commands..."
 if command -v insightspike >/dev/null 2>&1; then
-    echo "✅ CLI: 'insightspike' command available directly"
-    insightspike --version || echo "⚠️  CLI: Version check failed"
+    echo "CLI: 'insightspike' command available directly"
+    insightspike --version || echo "CLI: Version check failed"
 else
-    echo "⚠️  CLI: 'insightspike' not in PATH, using 'python -m insightspike.cli.main'"
-    python -m insightspike.cli.main --version || echo "⚠️  CLI: Module execution failed"
+    echo "CLI: 'insightspike' not in PATH, using 'python -m insightspike.cli.main'"
+    python -m insightspike.cli.main --version || echo "CLI: Module execution failed"
 fi
 
 # Test configuration loading
