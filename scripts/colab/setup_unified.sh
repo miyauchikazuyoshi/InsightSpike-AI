@@ -44,14 +44,56 @@ else
     pip install faiss-cpu --upgrade --quiet
 fi
 
-# Verify FAISS installation
+# Install PyTorch Geometric for graph operations (Phase 2 support)
+echo "🔧 Installing PyTorch Geometric for graph neural networks..."
+if command -v nvidia-smi &> /dev/null && nvidia-smi > /dev/null 2>&1; then
+    echo "🎮 Installing PyTorch Geometric with CUDA support..."
+    # Get PyTorch CUDA version
+    CUDA_VERSION=$(python -c "import torch; print(torch.version.cuda)" 2>/dev/null || echo "118")
+    TORCH_VERSION=$(python -c "import torch; print(torch.__version__.split('+')[0])" 2>/dev/null || echo "2.2.0")
+    
+    # Install PyTorch Geometric with matching CUDA version
+    pip install torch-geometric torch-scatter torch-sparse --quiet \
+        --extra-index-url https://data.pyg.org/whl/torch-${TORCH_VERSION}+cu${CUDA_VERSION} || {
+        echo "⚠️ CUDA-specific installation failed, trying CPU version..."
+        pip install torch-geometric torch-scatter torch-sparse --quiet
+    }
+else
+    echo "💻 Installing PyTorch Geometric (CPU version)..."
+    pip install torch-geometric torch-scatter torch-sparse --quiet
+fi
+
+# Verify installations
+echo "🔍 Verifying core library installations..."
 python -c "
+# FAISS verification
 try:
     import faiss
-    print('✅ FAISS successfully installed: version ' + getattr(faiss, '__version__', 'unknown'))
+    print('✅ FAISS: version ' + getattr(faiss, '__version__', 'unknown'))
 except ImportError as e:
-    print('⚠️ FAISS import failed: ' + str(e))
-" 2>/dev/null || echo "⚠️ FAISS verification failed"
+    print('❌ FAISS: Import failed - ' + str(e))
+
+# PyTorch Geometric verification
+try:
+    import torch_geometric
+    print('✅ PyTorch Geometric: version ' + torch_geometric.__version__)
+    
+    # Test basic functionality
+    import torch_geometric.data
+    print('✅ PyTorch Geometric: Core functionality available')
+    
+except ImportError as e:
+    print('❌ PyTorch Geometric: Import failed - ' + str(e))
+    print('⚠️  Graph neural network features will be unavailable')
+
+# PyTorch Scatter/Sparse verification  
+try:
+    import torch_scatter
+    import torch_sparse
+    print('✅ PyTorch extensions: torch-scatter and torch-sparse available')
+except ImportError as e:
+    print('⚠️ PyTorch extensions: Some graph operations may be limited - ' + str(e))
+" 2>/dev/null || echo "⚠️ Library verification encountered errors"
 
 # Ensure Python can find the insightspike module
 echo "🔧 Setting up Python module paths..."
@@ -105,7 +147,7 @@ EOF
     echo "📁 Colab directories created"
 fi
 
-# Verify installation
+# Verify installation with comprehensive status reporting
 echo "🔍 Verifying installation..."
 python -c "
 import torch
@@ -114,32 +156,63 @@ print(f'✅ PyTorch: {torch.__version__}')
 print(f'✅ CUDA available: {torch.cuda.is_available()}')
 print(f'✅ NumPy: {np.__version__}')
 
+# FAISS status
 try:
     import faiss
-    print(f'✅ FAISS: {faiss.__version__}')
+    print(f'✅ FAISS: {getattr(faiss, \"__version__\", \"unknown\")} - Ready for similarity search')
 except ImportError:
-    print('⚠️  FAISS: Not available (optional)')
+    print('❌ FAISS: Not available - Memory systems will use baseline implementation')
 
+# PyTorch Geometric status with detailed reporting
 try:
     import torch_geometric
-    print(f'✅ PyTorch Geometric: {torch_geometric.__version__}')
+    print(f'✅ PyTorch Geometric: {torch_geometric.__version__} - Graph operations enabled')
+    
+    # Test core components
+    try:
+        import torch_geometric.nn
+        import torch_geometric.data
+        print('✅ PyTorch Geometric: Neural network layers available')
+    except ImportError:
+        print('⚠️ PyTorch Geometric: Some components missing')
+        
+    try:
+        import torch_scatter
+        import torch_sparse
+        print('✅ PyTorch extensions: Scatter and sparse operations available')
+    except ImportError:
+        print('⚠️ PyTorch extensions: Limited graph operations')
+        
 except ImportError:
-    print('⚠️  PyTorch Geometric: Not available (optional)')
+    print('❌ PyTorch Geometric: Not available')
+    print('   Phase 2 graph neural networks will be disabled')
+    print('   Phase 1 experiments will work normally')
 
+# InsightSpike status
 try:
     from insightspike.core.agents.main_agent import MainAgent
     print('✅ InsightSpike-AI: Core modules loaded successfully')
+    
+    # Test instantiation
+    try:
+        agent = MainAgent()
+        print('✅ InsightSpike-AI: MainAgent instantiation successful')
+        del agent  # Clean up
+    except Exception as e:
+        print(f'⚠️ InsightSpike-AI: MainAgent instantiation failed - {e}')
+        
 except ImportError as e:
-    print(f'❌ InsightSpike-AI: Import failed - {e}')
+    print(f'❌ InsightSpike-AI: Core import failed - {e}')
+    print('   Standalone implementations will be used')
 
 # Test CLI command availability (fixed)
-echo "Testing CLI commands..."
+echo \"Testing CLI commands...\"
 if command -v insightspike >/dev/null 2>&1; then
-    echo "CLI: 'insightspike' command available directly"
-    insightspike --version || echo "CLI: Version check failed"
+    echo \"CLI: 'insightspike' command available directly\"
+    insightspike --version || echo \"CLI: Version check failed\"
 else
-    echo "CLI: 'insightspike' not in PATH, using 'python -m insightspike.cli.main'"
-    python -m insightspike.cli.main --version || echo "CLI: Module execution failed"
+    echo \"CLI: 'insightspike' not in PATH, using 'python -m insightspike.cli.main'\"
+    python -m insightspike.cli.main --version || echo \"CLI: Module execution failed\"
 fi
 
 # Test configuration loading
@@ -201,19 +274,82 @@ except ImportError:
 echo ""
 echo "🎉 Setup completed successfully!"
 echo "=================================="
+
+# Generate setup summary
+echo "📋 Setup Summary:"
+python -c "
+# Check available components and generate status report
+components = {
+    'CUDA/GPU': False,
+    'FAISS': False, 
+    'PyTorch Geometric': False,
+    'InsightSpike Core': False
+}
+
+try:
+    import torch
+    components['CUDA/GPU'] = torch.cuda.is_available()
+except:
+    pass
+
+try:
+    import faiss
+    components['FAISS'] = True
+except:
+    pass
+
+try:
+    import torch_geometric
+    components['PyTorch Geometric'] = True
+except:
+    pass
+
+try:
+    from insightspike.core.agents.main_agent import MainAgent
+    components['InsightSpike Core'] = True
+except:
+    pass
+
+print('✅ Available Components:')
+for comp, available in components.items():
+    status = '✅' if available else '❌'
+    print(f'   {status} {comp}')
+
+print('')
+print('🔬 Experiment Capabilities:')
+print('   ✅ Phase 1: Dynamic Memory Construction (Always available)')
+if components['FAISS']:
+    print('   ✅ Enhanced similarity search with FAISS')
+else:
+    print('   ⚠️  Baseline similarity search (FAISS unavailable)')
+    
+if components['PyTorch Geometric']:
+    print('   ✅ Phase 2: Graph neural networks ready')
+else:
+    print('   ⚠️  Phase 2: Graph operations limited (PyTorch Geometric unavailable)')
+    
+if components['CUDA/GPU']:
+    print('   ✅ GPU acceleration enabled')
+else:
+    print('   💻 CPU-only mode (No GPU detected)')
+"
+
 if [ "$IN_COLAB" = true ]; then
-    echo "💡 Ready to use InsightSpike-AI in Google Colab with GPU acceleration!"
+    echo ""
+    echo "💡 Ready to use InsightSpike-AI in Google Colab!"
+    echo "🔬 Phase 1 experiments are fully supported"
+    echo "📊 Run the Phase 1 notebook to start your experiments"
 else
+    echo ""
     echo "💡 Ready to use InsightSpike-AI in local environment!"
 fi
+
 echo ""
-echo "🚀 Quick start:"
-echo "  from insightspike.core.agents.main_agent import MainAgent"
-echo "  agent = MainAgent()  # Auto-optimized for your environment!"
+echo "🚀 Next Steps:"
+echo "  1. Run Phase 1 notebook cells sequentially"
+echo "  2. Start with device setup (Cell 8)"
+echo "  3. Load data (Cell 11) and run experiments"
 echo ""
 echo "🔧 Alternative CLI usage:"
 echo "  !insightspike --help  # If CLI is available"
 echo "  !python -m insightspike.cli.main --help  # Alternative method"
-echo ""
-echo "📝 Note: Python module paths have been automatically configured"
-echo "     No need to manually add sys.path modifications!"
