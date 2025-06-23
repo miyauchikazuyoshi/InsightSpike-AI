@@ -31,6 +31,19 @@ fi
 echo "📦 Installing dependencies from pyproject.toml..."
 pip install -e .
 
+# Install FAISS separately with GPU/CPU detection
+echo "🔧 Installing FAISS with optimal backend..."
+if command -v nvidia-smi &> /dev/null && nvidia-smi > /dev/null 2>&1; then
+    echo "🎮 GPU detected - installing faiss-gpu..."
+    pip install faiss-gpu --upgrade --quiet || {
+        echo "⚠️ faiss-gpu failed, falling back to faiss-cpu..."
+        pip install faiss-cpu --upgrade --quiet
+    }
+else
+    echo "💻 CPU environment - installing faiss-cpu..."
+    pip install faiss-cpu --upgrade --quiet
+fi
+
 # Ensure Python can find the insightspike module
 echo "🔧 Setting up Python module paths..."
 CURRENT_DIR=$(pwd)
