@@ -46,21 +46,31 @@ fi
 
 # Install PyTorch Geometric for graph operations (Phase 2 support)
 echo "🔧 Installing PyTorch Geometric for graph neural networks..."
+
+# First install the main package
+pip install torch_geometric --quiet
+
+# Then install optional dependencies for enhanced functionality
 if command -v nvidia-smi &> /dev/null && nvidia-smi > /dev/null 2>&1; then
-    echo "🎮 Installing PyTorch Geometric with CUDA support..."
-    # Get PyTorch CUDA version
+    echo "🎮 Installing PyTorch Geometric extensions with CUDA support..."
+    # Get PyTorch CUDA version for proper wheel selection
     CUDA_VERSION=$(python -c "import torch; print(torch.version.cuda)" 2>/dev/null || echo "118")
     TORCH_VERSION=$(python -c "import torch; print(torch.__version__.split('+')[0])" 2>/dev/null || echo "2.2.0")
     
-    # Install PyTorch Geometric with matching CUDA version
-    pip install torch-geometric torch-scatter torch-sparse --quiet \
-        --extra-index-url https://data.pyg.org/whl/torch-${TORCH_VERSION}+cu${CUDA_VERSION} || {
-        echo "⚠️ CUDA-specific installation failed, trying CPU version..."
-        pip install torch-geometric torch-scatter torch-sparse --quiet
+    echo "🔍 Detected PyTorch ${TORCH_VERSION} with CUDA ${CUDA_VERSION}"
+    
+    # Install extensions from official PyG wheel repository
+    pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv \
+        -f https://data.pyg.org/whl/torch-${TORCH_VERSION}+cu${CUDA_VERSION}.html --quiet || {
+        echo "⚠️ CUDA-specific extensions failed, trying CPU versions..."
+        pip install torch_scatter torch_sparse torch_cluster torch_spline_conv \
+            -f https://data.pyg.org/whl/torch-${TORCH_VERSION}+cpu.html --quiet
     }
 else
-    echo "💻 Installing PyTorch Geometric (CPU version)..."
-    pip install torch-geometric torch-scatter torch-sparse --quiet
+    echo "💻 Installing PyTorch Geometric extensions (CPU version)..."
+    TORCH_VERSION=$(python -c "import torch; print(torch.__version__.split('+')[0])" 2>/dev/null || echo "2.2.0")
+    pip install torch_scatter torch_sparse torch_cluster torch_spline_conv \
+        -f https://data.pyg.org/whl/torch-${TORCH_VERSION}+cpu.html --quiet
 fi
 
 # Verify installations
