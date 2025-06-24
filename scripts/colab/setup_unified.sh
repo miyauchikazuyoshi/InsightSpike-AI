@@ -352,12 +352,88 @@ else
     echo "💡 Ready to use InsightSpike-AI in local environment!"
 fi
 
+# =============================================================================
+# CLI Setup for Phase 2 Compatibility
+# =============================================================================
 echo ""
-echo "🚀 Next Steps:"
+echo "� Setting up CLI for Phase 2 compatibility..."
+
+# Environment variables for CLI
+export PYTHONPATH="$(pwd)/src:$(pwd):$PYTHONPATH"
+export TOKENIZERS_PARALLELISM=false
+export INSIGHTSPIKE_ENV="colab"
+
+if [ "$IN_COLAB" = true ]; then
+    echo "📱 Configuring CLI for Colab environment..."
+    
+    # Create CLI wrapper script
+    cat > /usr/local/bin/insightspike << 'EOF'
+#!/bin/bash
+# InsightSpike CLI Wrapper for Colab
+export PYTHONPATH="/content/InsightSpike-AI/src:/content/InsightSpike-AI:$PYTHONPATH"
+export INSIGHTSPIKE_ENV="colab"
+export TOKENIZERS_PARALLELISM="false"
+
+cd /content/InsightSpike-AI
+
+# Try poetry first, fallback to direct python
+if command -v poetry >/dev/null 2>&1; then
+    poetry run python -m insightspike.cli.main "$@"
+else
+    python -m insightspike.cli.main "$@"
+fi
+EOF
+    
+    # Make executable
+    chmod +x /usr/local/bin/insightspike
+    
+    # Test CLI installation
+    echo "🧪 Testing CLI installation..."
+    if /usr/local/bin/insightspike --help >/dev/null 2>&1; then
+        echo "✅ CLI wrapper installed successfully!"
+        CLI_AVAILABLE=true
+    else
+        echo "⚠️  CLI wrapper has issues, using alternative methods"
+        CLI_AVAILABLE=false
+    fi
+    
+    # Install Poetry if possible for full CLI support
+    echo "📦 Installing Poetry for full CLI support..."
+    if ! command -v poetry &> /dev/null; then
+        pip install poetry --quiet --user || {
+            echo "⚠️  Poetry installation failed - using pip-based workflow"
+        }
+    fi
+    
+else
+    echo "💻 Local environment - verifying Poetry CLI..."
+    if command -v poetry &> /dev/null; then
+        echo "✅ Poetry CLI available"
+        CLI_AVAILABLE=true
+    else
+        echo "⚠️  Poetry not found - please install Poetry for full CLI functionality"
+        CLI_AVAILABLE=false
+    fi
+fi
+
+echo ""
+echo "�🚀 Next Steps:"
 echo "  1. Run Phase 1 notebook cells sequentially"
 echo "  2. Start with device setup (Cell 8)"
 echo "  3. Load data (Cell 11) and run experiments"
 echo ""
-echo "🔧 Alternative CLI usage:"
-echo "  !insightspike --help  # If CLI is available"
-echo "  !python -m insightspike.cli.main --help  # Alternative method"
+
+if [ "$CLI_AVAILABLE" = true ]; then
+    echo "🎯 CLI Ready for Phase 2:"
+    echo "  • Command line: insightspike --help"
+    echo "  • Dependency management: insightspike deps --help"
+    echo "  • Experiment control: insightspike ask --help"
+else
+    echo "🔧 Alternative CLI methods:"
+    echo "  • Notebook cells: !python -m insightspike.cli.main --help"
+    echo "  • Python API: from insightspike.cli.main import app"
+    echo "  • Direct execution: python -m insightspike.cli.main <command>"
+fi
+
+echo ""
+echo "✅ Setup complete - ready for Phase 1 & 2 experiments!"
