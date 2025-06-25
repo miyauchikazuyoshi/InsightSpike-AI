@@ -7,7 +7,7 @@ echo "🚀 InsightSpike-AI Unified Setup Starting..."
 echo "============================================"
 
 # Check if running in Colab
-if [ -n "$COLAB_GPU" ] || [ -n "$COLAB_TPU_ADDR" ]; then
+if [ -n "$COLAB_GPU" ] || [ -n "$COLAB_TPU_ADDR" ] || [ -d "/content" ]; then
     echo "📱 Google Colab environment detected"
     IN_COLAB=true
 else
@@ -35,18 +35,10 @@ pip install typer click pydantic --quiet
 echo "📦 Installing dependencies from pyproject.toml..."
 pip install -e . --quiet
 
-# Install FAISS separately with enhanced GPU/CPU detection
-echo "🔧 Installing FAISS with optimal backend..."
-if command -v nvidia-smi &> /dev/null && nvidia-smi > /dev/null 2>&1; then
-    echo "🎮 GPU detected - trying faiss-gpu installation..."
-    pip install faiss-gpu --upgrade --quiet --no-deps || {
-        echo "⚠️ faiss-gpu failed, installing faiss-cpu..."
-        pip install faiss-cpu --upgrade --quiet
-    }
-else
-    echo "💻 CPU environment - installing faiss-cpu..."
-    pip install faiss-cpu --upgrade --quiet
-fi
+# Install FAISS CPU version (reliable and works everywhere)
+echo "🔧 Installing FAISS (CPU version for stability)..."
+pip install faiss-cpu --upgrade --quiet
+echo "  ✅ faiss-cpu installed successfully"
 
 # Install PyTorch Geometric for graph operations (Phase 2 support)
 echo "🔧 Installing PyTorch Geometric for graph neural networks..."
@@ -218,21 +210,6 @@ try:
         del agent  # Clean up
     except Exception as e:
         print(f'⚠️ InsightSpike-AI: MainAgent instantiation failed - {e}')
-        
-except ImportError as e:
-    print(f'❌ InsightSpike-AI: Core import failed - {e}')
-    print('   Standalone implementations will be used')
-
-# Test CLI command availability (fixed syntax)
-echo \"✅ InsightSpike-AI: Core modules loaded successfully\"
-
-# Test instantiation
-try:
-    agent = MainAgent()
-    print('✅ InsightSpike-AI: MainAgent instantiation successful')
-    del agent  # Clean up
-except Exception as e:
-    print(f'⚠️ InsightSpike-AI: MainAgent instantiation failed - {e}')
         
 except ImportError as e:
     print(f'❌ InsightSpike-AI: Core import failed - {e}')

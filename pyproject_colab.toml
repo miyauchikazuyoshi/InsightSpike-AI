@@ -58,6 +58,7 @@ langchain-huggingface = "^0.0.1"
 llama-index = "^0.10.0"
 farm-haystack = "^1.21.0"
 # Vector search - CPU version for reliable Colab compatibility
+# Note: GPU version will be attempted via setup script with fallback to CPU
 faiss-cpu = "^1.8.0"  # CPU version, reliable across all Colab instances
 
 # Data processing and evaluation

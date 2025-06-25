@@ -9,12 +9,32 @@
 ## 🚀 Quick Start
 
 ### Google Colab (Recommended)
+
+**⚡ One-Step Setup:**
 ```python
-# Open in Google Colab and run:
+# Run this single cell to set up everything
 !git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
 %cd InsightSpike-AI
-!pip install -e .
+!bash scripts/colab/setup_unified.sh
 ```
+
+**🧪 Quick Test:**
+```python
+# Verify installation works
+!insightspike --help
+```
+
+**🔬 Start Experiments:**
+```python
+# Run Phase 1 experiment
+%run experiments_colab/phase1_dynamic_memory/dynamic_memory_colab.ipynb
+```
+
+> **⚠️ Troubleshooting:** If setup fails, try the fallback method:
+> ```python
+> !pip install torch torchvision torchaudio faiss-cpu typer click pydantic
+> !pip install -e .
+> ```
 
 ### Local Installation
 ```bash
