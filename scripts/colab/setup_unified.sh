@@ -27,9 +27,13 @@ if [ "$IN_COLAB" = true ]; then
     fi
 fi
 
+# Install core dependencies first for CLI functionality  
+echo "📦 Installing core dependencies for CLI..."
+pip install typer click pydantic --quiet
+
 # Install dependencies using pyproject.toml
 echo "📦 Installing dependencies from pyproject.toml..."
-pip install -e .
+pip install -e . --quiet
 
 # Install FAISS separately with enhanced GPU/CPU detection
 echo "🔧 Installing FAISS with optimal backend..."
