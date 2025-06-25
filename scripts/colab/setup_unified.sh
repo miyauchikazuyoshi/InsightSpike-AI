@@ -110,14 +110,18 @@ echo "🔧 Setting up Python module paths..."
 CURRENT_DIR=$(pwd)
 SRC_PATH="$CURRENT_DIR/src"
 
-# Add src directory to Python path for current session
-export PYTHONPATH="$SRC_PATH:$PYTHONPATH"
+# Add both src and project root to Python path
+export PYTHONPATH="$SRC_PATH:$CURRENT_DIR:$PYTHONPATH"
 
 # Create a .pth file for persistent Python path (Colab-specific)
 if [ "$IN_COLAB" = true ]; then
-    SITE_PACKAGES=$(python -c "import site; print(site.getsitepackages()[0])")
+    SITE_PACKAGES=$(python -c "import site; print(site.getsitepackages()[0])" 2>/dev/null || echo "/usr/local/lib/python3.10/dist-packages")
     echo "$SRC_PATH" > "$SITE_PACKAGES/insightspike-dev.pth"
-    echo "✅ Added $SRC_PATH to Python path permanently"
+    echo "$CURRENT_DIR" >> "$SITE_PACKAGES/insightspike-dev.pth"
+    echo "✅ Added Python paths to $SITE_PACKAGES/insightspike-dev.pth"
+    
+    # Also set in bashrc for persistent sessions
+    echo "export PYTHONPATH=\"$SRC_PATH:$CURRENT_DIR:\$PYTHONPATH\"" >> ~/.bashrc
 fi
 
 # Additional Colab-specific optimizations
@@ -356,60 +360,171 @@ fi
 # CLI Setup for Phase 2 Compatibility
 # =============================================================================
 echo ""
-echo "� Setting up CLI for Phase 2 compatibility..."
+echo "🔧 Setting up CLI for Phase 2 compatibility..."
 
 # Environment variables for CLI
-export PYTHONPATH="$(pwd)/src:$(pwd):$PYTHONPATH"
+PROJECT_ROOT="$(pwd)"
+SRC_PATH="$PROJECT_ROOT/src"
+export PYTHONPATH="$SRC_PATH:$PROJECT_ROOT:$PYTHONPATH"
 export TOKENIZERS_PARALLELISM=false
 export INSIGHTSPIKE_ENV="colab"
 
 if [ "$IN_COLAB" = true ]; then
     echo "📱 Configuring CLI for Colab environment..."
     
-    # Create CLI wrapper script
+    # Create CLI wrapper script with proper paths
     cat > /usr/local/bin/insightspike << 'EOF'
 #!/bin/bash
-# InsightSpike CLI Wrapper for Colab
+# InsightSpike CLI Wrapper for Colab - Multiple fallback methods
 export PYTHONPATH="/content/InsightSpike-AI/src:/content/InsightSpike-AI:$PYTHONPATH"
 export INSIGHTSPIKE_ENV="colab"
 export TOKENIZERS_PARALLELISM="false"
 
 cd /content/InsightSpike-AI
 
-# Try poetry first, fallback to direct python
+# Method 1: Try poetry (if available and configured)
 if command -v poetry >/dev/null 2>&1; then
-    poetry run python -m insightspike.cli.main "$@"
-else
-    python -m insightspike.cli.main "$@"
+    if poetry run python -c "from insightspike.cli.main import main" >/dev/null 2>&1; then
+        exec poetry run python -m insightspike.cli.main "$@"
+    fi
 fi
+
+# Method 2: Try direct Python with proper paths
+if python -c "import sys; sys.path.insert(0, 'src'); from insightspike.cli.main import main" >/dev/null 2>&1; then
+    exec python -c "
+import sys
+sys.path.insert(0, 'src')
+from insightspike.cli.main import main
+main()
+" "$@"
+fi
+
+# Method 3: Try system python with module path
+export PYTHONPATH="/content/InsightSpike-AI/src:$PYTHONPATH"
+if python -m insightspike.cli.main --help >/dev/null 2>&1; then
+    exec python -m insightspike.cli.main "$@"
+fi
+
+# Method 4: Last resort - direct execution
+echo "❌ All CLI methods failed. Available alternatives:"
+echo "  • python -c \"import sys; sys.path.insert(0, 'src'); from insightspike.cli.main import main; main()\""
+echo "  • python -m insightspike.cli.main (after setting PYTHONPATH)"
+exit 1
 EOF
     
     # Make executable
     chmod +x /usr/local/bin/insightspike
     
-    # Test CLI installation
+    # Test CLI installation with comprehensive diagnostics
     echo "🧪 Testing CLI installation..."
-    if /usr/local/bin/insightspike --help >/dev/null 2>&1; then
-        echo "✅ CLI wrapper installed successfully!"
-        CLI_AVAILABLE=true
+    
+    CLI_STATUS="failed"
+    
+    # Test 1: Direct Python module access
+    echo "  📋 Test 1: Direct Python import"
+    if cd /content/InsightSpike-AI && python -c "import sys; sys.path.insert(0, 'src'); from insightspike.cli.main import main" >/dev/null 2>&1; then
+        echo "    ✅ CLI module import: Working"
+        CLI_STATUS="import_ok"
     else
-        echo "⚠️  CLI wrapper has issues, using alternative methods"
-        CLI_AVAILABLE=false
+        echo "    ❌ CLI module import: Failed"
     fi
     
-    # Install Poetry if possible for full CLI support
+    # Test 2: Poetry execution (if available)
+    echo "  📋 Test 2: Poetry CLI execution"
+    if command -v poetry >/dev/null 2>&1; then
+        if cd /content/InsightSpike-AI && poetry run python -c "from insightspike.cli.main import main" >/dev/null 2>&1; then
+            echo "    ✅ Poetry CLI: Working"
+            CLI_STATUS="poetry_ok"
+            
+            # Test actual command
+            if poetry run insightspike --help >/dev/null 2>&1; then
+                echo "    ✅ Poetry command execution: Working"
+                CLI_STATUS="full"
+            else
+                echo "    ⚠️  Poetry import OK, but command execution failed"
+            fi
+        else
+            echo "    ❌ Poetry CLI: Module import failed"
+        fi
+    else
+        echo "    ⚠️  Poetry: Not available"
+    fi
+    
+    # Test 3: Wrapper script
+    echo "  📋 Test 3: CLI wrapper script"
+    if /usr/local/bin/insightspike --help >/dev/null 2>&1; then
+        echo "    ✅ CLI wrapper: Working"
+        if [ "$CLI_STATUS" != "full" ]; then
+            CLI_STATUS="wrapper_ok"
+        fi
+    else
+        echo "    ⚠️  CLI wrapper: Has issues"
+    fi
+    
+    # Set CLI availability based on tests
+    case "$CLI_STATUS" in
+        "full")
+            CLI_AVAILABLE=true
+            echo "✅ CLI Status: Fully functional"
+            ;;
+        "poetry_ok"|"wrapper_ok")
+            CLI_AVAILABLE="partial"
+            echo "⚠️  CLI Status: Partially functional"
+            ;;
+        "import_ok")
+            CLI_AVAILABLE="import_only"
+            echo "⚠️  CLI Status: Import only (manual execution required)"
+            ;;
+        *)
+            CLI_AVAILABLE=false
+            echo "❌ CLI Status: Not functional"
+            ;;
+    esac
+    
+    # Install Poetry with proper configuration for Colab
     echo "📦 Installing Poetry for full CLI support..."
     if ! command -v poetry &> /dev/null; then
-        pip install poetry --quiet --user || {
-            echo "⚠️  Poetry installation failed - using pip-based workflow"
+        echo "🔧 Installing Poetry with Colab-optimized settings..."
+        
+        # Install poetry in user space
+        pip install poetry --quiet --user
+        
+        # Add poetry to PATH if not already there
+        export PATH="$HOME/.local/bin:$PATH"
+        echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+        
+        # Configure poetry to use system environment (not create venv in Colab)
+        ~/.local/bin/poetry config virtualenvs.create false --local || {
+            echo "⚠️  Poetry config failed, continuing..."
         }
+        
+        # Test poetry installation
+        if ~/.local/bin/poetry --version >/dev/null 2>&1; then
+            echo "✅ Poetry installed successfully"
+            # Create symlink for easier access
+            sudo ln -sf ~/.local/bin/poetry /usr/local/bin/poetry 2>/dev/null || true
+        else
+            echo "⚠️  Poetry installation had issues - using alternative CLI methods"
+        fi
+    else
+        echo "✅ Poetry already installed"
+        # Still configure it for Colab
+        poetry config virtualenvs.create false --local 2>/dev/null || true
     fi
     
 else
     echo "💻 Local environment - verifying Poetry CLI..."
     if command -v poetry &> /dev/null; then
         echo "✅ Poetry CLI available"
-        CLI_AVAILABLE=true
+        
+        # Test direct CLI access
+        if poetry run python -c "from insightspike.cli.main import main" >/dev/null 2>&1; then
+            echo "✅ CLI module accessible via Poetry"
+            CLI_AVAILABLE=true
+        else
+            echo "⚠️  CLI module has import issues"
+            CLI_AVAILABLE="partial"
+        fi
     else
         echo "⚠️  Poetry not found - please install Poetry for full CLI functionality"
         CLI_AVAILABLE=false
@@ -417,7 +532,7 @@ else
 fi
 
 echo ""
-echo "�🚀 Next Steps:"
+echo "🚀 Next Steps:"
 echo "  1. Run Phase 1 notebook cells sequentially"
 echo "  2. Start with device setup (Cell 8)"
 echo "  3. Load data (Cell 11) and run experiments"
@@ -425,15 +540,35 @@ echo ""
 
 if [ "$CLI_AVAILABLE" = true ]; then
     echo "🎯 CLI Ready for Phase 2:"
-    echo "  • Command line: insightspike --help"
+    echo "  • Full command line: insightspike --help"
     echo "  • Dependency management: insightspike deps --help"
     echo "  • Experiment control: insightspike ask --help"
+    echo "  • All Poetry features available"
+elif [ "$CLI_AVAILABLE" = "partial" ]; then
+    echo "🔧 CLI Partially Available:"
+    echo "  • Limited CLI: /usr/local/bin/insightspike --help"
+    echo "  • Python module: python -m insightspike.cli.main --help"
+    echo "  • Direct import: python -c 'from insightspike.cli.main import main; main()'"
+    echo "  • Some commands may require manual execution"
+elif [ "$CLI_AVAILABLE" = "import_only" ]; then
+    echo "🐍 CLI Import Only:"
+    echo "  • Manual execution: python -c 'import sys; sys.path.insert(0, \"src\"); from insightspike.cli.main import main; main()'"
+    echo "  • Notebook API: from insightspike.cli.main import app"
+    echo "  • Poetry setup may need completion"
 else
     echo "🔧 Alternative CLI methods:"
-    echo "  • Notebook cells: !python -m insightspike.cli.main --help"
-    echo "  • Python API: from insightspike.cli.main import app"
-    echo "  • Direct execution: python -m insightspike.cli.main <command>"
+    echo "  • Check Python paths: import sys; print(sys.path)"
+    echo "  • Manual setup: sys.path.insert(0, '/content/InsightSpike-AI/src')"
+    echo "  • Direct execution from notebook cells"
+    echo "  • Consider using Python API instead of CLI"
 fi
+
+echo ""
+echo "🔍 Debug Information:"
+echo "  • Python executable: $(which python)"
+echo "  • Poetry location: $(which poetry 2>/dev/null || echo 'Not found')"
+echo "  • Current PYTHONPATH: $PYTHONPATH"
+echo "  • InsightSpike-AI location: $(pwd)"
 
 echo ""
 echo "✅ Setup complete - ready for Phase 1 & 2 experiments!"
