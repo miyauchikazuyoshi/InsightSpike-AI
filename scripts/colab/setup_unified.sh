@@ -27,12 +27,20 @@ if [ "$IN_COLAB" = true ]; then
     fi
 fi
 
+# Upgrade pip first to avoid dependency resolution issues
+echo "📦 Upgrading pip and setuptools..."
+pip install --upgrade pip setuptools wheel --quiet
+
 # Install core dependencies first for CLI functionality  
 echo "📦 Installing core dependencies for CLI..."
 pip install typer click pydantic --quiet
 
-# Install dependencies using pyproject.toml
-echo "📦 Installing dependencies from pyproject.toml..."
+# Install project in editable mode with minimal dependencies first
+echo "📦 Installing InsightSpike-AI in editable mode..."
+pip install -e . --no-deps --quiet
+
+# Then install all dependencies
+echo "📦 Installing project dependencies..."
 pip install -e . --quiet
 
 # Install FAISS CPU version (reliable and works everywhere)
