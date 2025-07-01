@@ -52,8 +52,11 @@
 git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
 cd InsightSpike-AI
 
-# Install with Poetry
+# Install with Poetry (recommended)
 poetry install
+
+# OR install with pip (alternative)
+pip install -e .
 
 # Validate installation and data integrity
 python scripts/pre_push_validation.py
@@ -63,6 +66,58 @@ python scripts/validation/complete_system_validation.py
 
 # Test core components
 python scripts/testing/safe_component_test.py
+```
+
+### 🔧 Environment Troubleshooting
+
+**Common Issues & Solutions:**
+
+**1. "InsightSpike-AI not available" CLI warning:**
+```bash
+# Check if package is properly installed
+pip list | grep -i insight
+poetry show | grep -i insight
+
+# Reinstall in development mode
+pip install -e .
+# OR with Poetry
+poetry install
+
+# Verify Python environment
+which python
+which pip
+```
+
+**2. Import errors in local development:**
+```bash
+# Add to PYTHONPATH
+export PYTHONPATH="${PYTHONPATH}:/path/to/InsightSpike-AI"
+
+# Check sys.path in Python
+python -c "import sys; print('\n'.join(sys.path))"
+```
+
+**3. Version conflicts (especially NumPy/PyTorch):**
+```bash
+# Check conflicting versions
+pip check
+
+# Clean reinstall
+pip uninstall numpy torch sentence-transformers
+pip install numpy==1.26.4 torch==2.2.2 sentence-transformers==2.7.0
+```
+
+**4. Package installation fails:**
+```bash
+# Update pip and poetry
+pip install --upgrade pip poetry poetry-core
+
+# Clean Poetry cache
+poetry cache clear --all pypi
+
+# Alternative installation
+pip install torch torchvision torchaudio faiss-cpu typer click pydantic
+pip install -e .
 ```
 
 ### 🔧 Development Setup

@@ -2,6 +2,239 @@
 
 This directory contains two comprehensive experiments designed to validate InsightSpike-AI's core capabilities in Google Colab environments.
 
+## � Local Development to Colab Transition Guide
+
+### 📊 Environment Comparison
+
+| Aspect | Local (Intel Mac) | Colab (GPU Cloud) |
+|--------|-------------------|-------------------|
+| **Package Management** | Poetry (pyproject.toml) | Poetry + Colab-specific deps |
+| **Python Version** | 3.11+ (flexible) | 3.10.x (Colab default) |
+| **PyTorch** | CPU/MPS optimized | CPU version (T4 GPU available) |
+| **NumPy** | Latest stable | 1.26.4 (compatibility) |
+| **Install Method** | `poetry install` | Poetry in Colab environment |
+| **Import Method** | Direct package import | PYTHONPATH + fallback |
+
+### 🔧 Development Workflow
+
+#### Local Development Setup
+
+```bash
+# Initial setup (one-time)
+curl -sSL https://install.python-poetry.org | python3 -
+cd /path/to/InsightSpike-AI
+poetry install
+poetry shell
+
+# Daily development
+poetry run jupyter lab
+# or
+poetry shell && jupyter lab
+```
+
+#### Colab Deployment
+
+```python
+# 1. Install dependencies (triggers restart)
+!pip install torch==2.2.2 numpy==1.26.4 sentence-transformers==2.7.0
+
+# 2. Clone and install package (after restart)
+!git clone https://token@github.com/user/InsightSpike-AI.git
+!cd InsightSpike-AI && poetry install --no-dev
+
+# 3. Verify installation
+import insightspike
+print(f"InsightSpike-AI v{insightspike.__version__}")
+```
+
+### ⚠️ Common Issues & Solutions
+
+#### "pip install -e ." Not Working
+
+**Problem**: Editable installs fail in Poetry projects  
+**Solution**: Use Poetry for development installs
+
+```bash
+# ❌ Don't use:
+pip install -e .
+
+# ✅ Use instead:
+poetry install          # Full development install
+poetry install --no-dev # Production install
+```
+
+#### Package Import Failures
+
+**Problem**: InsightSpike-AI not found after install  
+**Solutions**:
+
+1. **Check installation**: `poetry show insightspike-ai`
+2. **Verify environment**: `poetry env info`
+3. **Manual path**: `sys.path.append('src')`
+4. **Reinstall**: `poetry install --force`
+
+#### Version Conflicts
+
+**Problem**: Dependency version mismatches  
+**Solutions**:
+
+1. **Use lockfile**: `poetry install` (respects poetry.lock)
+2. **Update deps**: `poetry update`
+3. **Colab mode**: Use `pyproject_colab.toml`
+
+## �🛠️ Environment Setup & Troubleshooting
+
+### 🚨 Critical: Runtime Restart Required
+
+Both experiment notebooks will automatically:
+Both experiment notebooks will automatically:
+
+1. **Install Dependencies**: PyTorch 2.2.2, NumPy 1.26.4, sentence-transformers
+2. **Trigger Restart Warning**: Colab will show "セッションを再起動する" popup
+3. **Require Manual Restart**: You MUST click the restart button before continuing
+
+**Why Restart is Necessary:**
+
+- **NumPy Downgrade**: 2.x → 1.26.4 (ML library compatibility)
+- **PyTorch Version Change**: 2.6.1 → 2.2.2 (meta tensor issue fix)
+- **Poetry Installation**: Fresh session for package management
+- **Memory Reset**: Clean environment for stable imports
+
+### 📋 Step-by-Step Setup Process
+
+1. **Run Package Installation Cell**:
+
+   ```python
+   # First cell installs packages and shows restart instructions
+   ```
+
+2. **Wait for Restart Popup**:
+   - Look for "セッションを再起動する" warning
+   - Click the restart button immediately
+   - Do NOT continue without restarting
+
+3. **Run Environment Verification Cell**:
+
+   ```python
+   # Second cell verifies packages and clones repository
+   ```
+
+4. **Continue with Experiment**:
+   - All remaining cells can be run sequentially
+   - Environment is now stable and ready
+
+### 🔧 Common Issues & Solutions
+
+#### "Package Installation Failed"
+
+```bash
+# Fallback manual installation:
+!pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2
+!pip install sentence-transformers==2.7.0 numpy==1.26.4
+!pip install scikit-learn pandas matplotlib seaborn plotly
+```
+
+#### "GitHub Token Not Found"
+
+1. Click key icon (🔑) in left sidebar
+2. Add secret: `GITHUB_TOKEN` = your_token
+3. Get token from: <https://github.com/settings/tokens>
+4. Required scope: `repo` (private repository access)
+
+#### "Import Errors After Restart"
+
+```python
+# Verify environment
+import torch, numpy as np
+print(f"PyTorch: {torch.__version__}")
+print(f"NumPy: {np.__version__}")
+
+# Re-run repository setup cell if needed
+```
+
+#### "Meta Tensor Errors"
+
+- Indicates PyTorch version mismatch
+- Ensure runtime was restarted after package installation
+- Re-run package installation if error persists
+
+#### "CUDA Out of Memory"
+```python
+# Force CPU mode in experiments
+device = "cpu"  # Override any GPU settings
+torch.cuda.empty_cache()  # Clear GPU memory if used
+```
+
+### 🎯 Best Practices for Local → Colab Workflow
+
+#### Development Environment Synchronization
+
+**Local Development (Intel Mac):**
+```bash
+# Use Poetry for dependency management
+poetry install
+poetry export --format requirements.txt > requirements.txt
+
+# Test locally before Colab
+python experiments/colab_experiments/foundational_experiment/intrinsic_motivation_experiment.py
+```
+
+**Colab Execution:**
+1. Push changes to GitHub main branch
+2. Colab notebooks automatically pull latest code
+3. Dependencies installed via pinned versions
+4. Results saved to experiment directories
+
+#### Version Consistency
+
+**Critical Library Versions:**
+- PyTorch: `2.2.2` (Colab compatibility)
+- NumPy: `1.26.4` (ML library compatibility)  
+- sentence-transformers: `2.7.0` (PyTorch 2.2.2 compatible)
+- transformers: `4.30.0` (stability tested)
+
+**Environment Tracking:**
+```python
+# Automatically saved in experiment results
+environment_info = {
+    "torch_version": torch.__version__,
+    "numpy_version": np.__version__,
+    "device": torch.cuda.get_device_name() if torch.cuda.is_available() else "CPU",
+    "python_version": sys.version
+}
+```
+
+### 🔍 Verification Commands
+
+**Pre-Experiment Checklist:**
+```python
+# Run in Colab after setup
+import torch, numpy as np, sentence_transformers
+print(f"✅ PyTorch: {torch.__version__}")
+print(f"✅ NumPy: {np.__version__}")
+print(f"✅ CUDA Available: {torch.cuda.is_available()}")
+print(f"✅ SentenceTransformers: {sentence_transformers.__version__}")
+
+# Test InsightSpike import
+sys.path.append('/content/InsightSpike-AI')
+from src.insightspike.core.system import InsightSpikeSystem
+print("✅ InsightSpike-AI modules available")
+```
+
+**Post-Experiment Validation:**
+```python
+# Check experiment outputs
+import os
+results_dirs = [
+    "/content/InsightSpike-AI/experiments/colab_experiments/foundational_experiment/foundational_experiment_results",
+    "/content/InsightSpike-AI/experiments/colab_experiments/dynamic_rag_comparison/rag_comparison_results"
+]
+for dir_path in results_dirs:
+    if os.path.exists(dir_path):
+        files = os.listdir(dir_path)
+        print(f"✅ {dir_path}: {len(files)} result files")
+```
+
 ## 🔐 Prerequisites: GitHub Token Setup
 
 Since InsightSpike-AI is a private repository, you need to set up a GitHub token in Colab secrets:
