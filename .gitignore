@@ -202,3 +202,12 @@ docs/reports/
 # 実験用バックアップファイル（除外）
 experiments/data_backups/
 docs/archive/experiments/data_backups/*.tar.gz
+
+# 実験結果ファイル（大きすぎるJSONは除外）
+experiments/*/results/*_large.json
+experiments/*/results/*_detailed.json
+experiments_colab/*/results/*_large.json
+experiments_colab/*/*.json
+# ただし、重要な結果サマリーは保持
+!experiments/*/RESULTS_SUMMARY.json
+!experiments_colab/*/RESULTS_SUMMARY.json

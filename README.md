@@ -26,8 +26,11 @@
 
 **🔬 Start Experiments:**
 ```python
-# Run Phase 1 experiment
+# Run Phase 1 experiment (Dynamic Memory)
 %run experiments_colab/phase1_dynamic_memory/dynamic_memory_colab.ipynb
+
+# Run Phase 2 experiment (RAG Benchmark & Embedding Comparison)
+%run experiments_colab/phase2_rag_benchmark/insightspike_embedding_comparison.ipynb
 ```
 
 > **⚠️ Troubleshooting:** If setup fails, try the fallback method:
