@@ -1,6 +1,0 @@
-{
-  "experiment_type": "integrated_evaluation",
-  "evaluation_scope": "comprehensive",
-  "min_memory_gb": 8,
-  "min_disk_gb": 20
-}

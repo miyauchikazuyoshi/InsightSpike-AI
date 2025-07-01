@@ -4,6 +4,7 @@ Pre-Push Validation Test: Large-Scale Objective Experiment
 =======================================================
 
 Simplified version for quick validation before pushing to repository.
+Includes data state validation and clean backup restoration.
 """
 
 import numpy as np
@@ -13,9 +14,115 @@ from pathlib import Path
 from datetime import datetime
 import sys
 import os
+import subprocess
+import shutil
 
 # Add src to path for InsightSpike imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
+
+def check_data_consistency():
+    """Check if current data is in clean state"""
+    print("📊 Checking data consistency...")
+    
+    data_dir = Path("data")
+    backup_dir = data_dir / "clean_backup"
+    
+    if not backup_dir.exists():
+        print("⚠️ Clean backup directory not found")
+        return False
+    
+    files_to_check = {
+        "episodes.json": "episodes_clean.json",
+        "graph_pyg.pt": "graph_pyg_clean.pt",
+        "index.faiss": "index_clean.faiss",
+        "insight_facts.db": "insight_facts_clean.db",
+        "unknown_learning.db": "unknown_learning_clean.db"
+    }
+    
+    inconsistent_files = []
+    
+    for current_file, backup_file in files_to_check.items():
+        current_path = data_dir / current_file
+        backup_path = backup_dir / backup_file
+        
+        if not current_path.exists():
+            print(f"❌ Missing: {current_file}")
+            inconsistent_files.append(current_file)
+            continue
+            
+        if not backup_path.exists():
+            print(f"❌ Missing backup: {backup_file}")
+            inconsistent_files.append(current_file)
+            continue
+        
+        # Check file sizes as quick consistency check
+        current_size = current_path.stat().st_size
+        backup_size = backup_path.stat().st_size
+        
+        if current_size != backup_size:
+            print(f"⚠️ Size mismatch: {current_file} ({current_size} bytes) vs backup ({backup_size} bytes)")
+            inconsistent_files.append(current_file)
+        else:
+            print(f"✅ {current_file}: Consistent with backup")
+    
+    is_consistent = len(inconsistent_files) == 0
+    
+    if is_consistent:
+        print("✅ All data files are consistent with clean backup")
+    else:
+        print(f"⚠️ Found {len(inconsistent_files)} inconsistent files: {inconsistent_files}")
+    
+    return is_consistent
+
+def restore_clean_data():
+    """Restore data to clean state using existing utility"""
+    print("🔄 Restoring data to clean state...")
+    
+    try:
+        # Use the existing restore utility
+        result = subprocess.run([
+            sys.executable, 
+            "scripts/utilities/restore_clean_data.py", 
+            "--restore", 
+            "--force"
+        ], capture_output=True, text=True, cwd=".")
+        
+        if result.returncode == 0:
+            print("✅ Data successfully restored to clean state")
+            return True
+        else:
+            print(f"❌ Failed to restore clean data: {result.stderr}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Error during data restoration: {e}")
+        return False
+
+def validate_data_state():
+    """Validate data state before running tests"""
+    print("🔍 Pre-push Data State Validation")
+    print("=" * 40)
+    
+    # Check if data is consistent
+    is_consistent = check_data_consistency()
+    
+    if not is_consistent:
+        print("\n❓ Data is not in clean state. Restore clean backup? (y/N): ", end="")
+        response = input().lower().strip()
+        
+        if response == 'y':
+            if restore_clean_data():
+                print("✅ Data restoration completed")
+                return True
+            else:
+                print("❌ Data restoration failed")
+                return False
+        else:
+            print("⚠️ Proceeding with potentially modified data")
+            return True
+    else:
+        print("✅ Data is already in clean state")
+        return True
 
 class QuickValidationConfig:
     """Simplified config for pre-push validation"""
@@ -175,16 +282,26 @@ def analyze_results(results):
     return validation_passed, all_comparisons
 
 def main():
-    """Run pre-push validation test"""
+    """Run pre-push validation test with data state management"""
     start_time = time.time()
+    
+    print("🚀 Pre-Push Validation Pipeline")
+    print("=" * 50)
+    
+    # Step 1: Validate and restore clean data state
+    if not validate_data_state():
+        print("❌ Data validation failed. Resolve data issues before proceeding.")
+        return False
     
     config = QuickValidationConfig()
     config.output_dir.mkdir(parents=True, exist_ok=True)
     
-    # Run experiments
+    print(f"\n🧪 Running validation experiments...")
+    
+    # Step 2: Run experiments
     results = run_agent_comparison(config)
     
-    # Analyze results
+    # Step 3: Analyze results
     validation_passed, comparisons = analyze_results(results)
     
     # Save results

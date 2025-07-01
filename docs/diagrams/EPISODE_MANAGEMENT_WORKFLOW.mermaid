@@ -6,7 +6,7 @@ flowchart TD
     
     %% Integration Decision
     B --> C[Calculate Similarity<br/>Vector Cosine ≥ 0.85?]
-    C --> D[Calculate Content Overlap<br/>Word Overlap ≥ 0.4?]
+    C --> D[Calculate Content Overlap<br/>Word Overlap ≥ 0.7?]
     D --> E[Calculate Integration Score<br/>Weighted: 0.5×sim + 0.3×overlap + 0.2×c_compat]
     E --> F{Integration Score ≥ 0.65?}
     
@@ -60,7 +60,7 @@ flowchart TD
     subgraph "Configuration Thresholds"
         direction TB
         TH1["Vector Similarity: ≥ 0.85"]
-        TH2["Content Overlap: ≥ 0.4"]
+        TH2["Content Overlap: ≥ 0.7"]
         TH3["Integration Score: ≥ 0.65"]
         TH4["Episode Merge: ≥ 0.8 similarity"]
         TH5["Episode Split: ≥ 0.3 conflict"]

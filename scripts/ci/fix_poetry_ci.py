@@ -2,12 +2,27 @@
 """
 Fix Poetry CI configuration in GitHub Actions workflow
 """
+import os
 import re
 
 def fix_poetry_config():
     """Fix Poetry installation configuration in CI workflow"""
     
     workflow_file = ".github/workflows/enhanced-ci.yml"
+    
+    # Check if GitHub workflows directory exists
+    if not os.path.exists(".github/workflows"):
+        print("⚠️ GitHub workflows directory not found")
+        print("This script is intended for repositories with GitHub Actions CI")
+        return
+    
+    if not os.path.exists(workflow_file):
+        print(f"⚠️ Workflow file not found: {workflow_file}")
+        print("Available workflow files:")
+        for file in os.listdir(".github/workflows"):
+            if file.endswith(('.yml', '.yaml')):
+                print(f"  - {file}")
+        return
     
     with open(workflow_file, 'r') as f:
         content = f.read()

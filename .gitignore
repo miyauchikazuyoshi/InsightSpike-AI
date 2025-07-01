@@ -118,6 +118,9 @@ docs/REUSABILITY_COMPLETION_REPORT.md
 /data/cache/*
 !/data/cache/.gitkeep
 
+# クリーンバックアップ（Git管理対象 - 復元・テスト用の基準データ）
+# data/clean_backup/ は意図的にGit管理します（復元可能性を保証）
+
 # データベースファイル（実験用は除外、本番用は保持）
 /data/*_experimental.db
 /data/*_test.db

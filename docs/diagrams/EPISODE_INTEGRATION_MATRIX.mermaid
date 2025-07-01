@@ -17,7 +17,7 @@ flowchart TD
         %% Threshold Checks
         subgraph "🎯 Threshold Checks"
             SimThresh[Vector Similarity ≥ 0.85]
-            ContThresh[Content Overlap ≥ 0.4]
+            ContThresh[Content Overlap ≥ 0.7]
             IntegThresh[Integration Score ≥ 0.65]
         end
         
@@ -31,13 +31,13 @@ flowchart TD
         
         subgraph "✅ INTEGRATE Conditions"
             HighSim[High Similarity ≥ 0.85]
-            HighCont[High Content ≥ 0.4] 
+            HighCont[High Content ≥ 0.7] 
             HighInteg[High Integration ≥ 0.65]
         end
         
         subgraph "➕ NEW NODE Conditions"
             LowSim[Low Similarity < 0.85]
-            LowCont[Low Content < 0.4]
+            LowCont[Low Content < 0.7]
             LowInteg[Low Integration < 0.65]
         end
     end

@@ -1,0 +1,77 @@
+{
+  "benchmark_metadata": {
+    "timestamp": "2025-07-01T21:10:51.513362",
+    "test_environment": {
+      "python_version": "3.11.12 (main, May  8 2025, 15:16:26) [Clang 17.0.0 (clang-1700.0.13.3)]",
+      "platform": "darwin",
+      "graph_sizes_tested": [
+        10,
+        20
+      ]
+    },
+    "performance_targets": {
+      "response_time_target": "< 1.0 seconds",
+      "scalability_requirement": "O(n\u00b3) or better",
+      "memory_efficiency": "Linear scaling preferred"
+    }
+  },
+  "algorithm_benchmarks": {
+    "graph_edit_distance": {
+      "algorithm": "graph_edit_distance",
+      "complexity_analysis": {
+        "10": {
+          "avg_execution_time": 6.258254870772362e-07,
+          "std_execution_time": 7.615902828249132e-07,
+          "iterations": 5,
+          "theoretical_complexity": "O(n\u00b3)",
+          "measured_scaling": 1.0
+        },
+        "20": {
+          "avg_execution_time": 5.171867087483406e-07,
+          "std_execution_time": 3.8732272983197874e-07,
+          "iterations": 5,
+          "theoretical_complexity": "O(n\u00b3)",
+          "measured_scaling": 0.4132036162059601
+        }
+      },
+      "performance_metrics": {},
+      "timestamp": "2025-07-01T21:10:51.506128"
+    },
+    "information_gain": {
+      "algorithm": "information_gain",
+      "complexity_analysis": {
+        "10": {
+          "avg_execution_time": 1.0744901373982429e-06,
+          "std_execution_time": 1.3497914160280016e-06,
+          "iterations": 10,
+          "theoretical_complexity": "O(n log n)",
+          "measured_scaling": 1.0
+        },
+        "20": {
+          "avg_execution_time": 2.501881681382656e-07,
+          "std_execution_time": 1.3333802407877222e-07,
+          "iterations": 10,
+          "theoretical_complexity": "O(n log n)",
+          "measured_scaling": 0.11642180762313377
+        }
+      },
+      "performance_metrics": {},
+      "timestamp": "2025-07-01T21:10:51.512243"
+    },
+    "integration_workflow": {
+      "algorithm": "integration_workflow",
+      "workflow_metrics": {},
+      "scalability_analysis": {},
+      "timestamp": "2025-07-01T21:10:51.513252"
+    }
+  },
+  "summary_analysis": {
+    "performance_status": "PASS",
+    "bottlenecks_identified": [],
+    "optimization_recommendations": [],
+    "scalability_assessment": {
+      "ged_max_time": 6.258254870772362e-07,
+      "ged_scaling": "Acceptable"
+    }
+  }
+}
