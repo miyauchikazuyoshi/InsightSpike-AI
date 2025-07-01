@@ -74,30 +74,44 @@ python scripts/testing/safe_component_test.py
 
 **1. "InsightSpike-AI not available" CLI warning:**
 ```bash
-# Check if package is properly installed
+# ❌ Don't use pip install -e . in Poetry projects
+# ✅ Use Poetry for development installs instead:
+poetry install          # Full development install
+poetry install --no-dev # Production install
+
+# Verify installation
+poetry show insightspike-ai
+poetry run python -c "import insightspike; print(insightspike.__version__)"
+
+# Alternative: Check if package is installed
 pip list | grep -i insight
-poetry show | grep -i insight
-
-# Reinstall in development mode
-pip install -e .
-# OR with Poetry
-poetry install
-
-# Verify Python environment
-which python
-which pip
 ```
 
 **2. Import errors in local development:**
 ```bash
-# Add to PYTHONPATH
-export PYTHONPATH="${PYTHONPATH}:/path/to/InsightSpike-AI"
+# Activate Poetry environment first
+poetry shell
+# OR run commands within Poetry environment
+poetry run python your_script.py
+poetry run jupyter lab
 
-# Check sys.path in Python
-python -c "import sys; print('\n'.join(sys.path))"
+# Manual PYTHONPATH (fallback only)
+export PYTHONPATH="${PYTHONPATH}:/path/to/InsightSpike-AI/src"
 ```
 
-**3. Version conflicts (especially NumPy/PyTorch):**
+**3. Editable install issues:**
+```bash
+# Modern approach (Poetry)
+poetry install --editable  # Development mode
+
+# Legacy approach (only if Poetry unavailable)
+pip install -e .
+
+# Verify editable install
+python -c "import insightspike; print(insightspike.__file__)"
+```
+
+**4. Version conflicts (especially NumPy/PyTorch):**
 ```bash
 # Check conflicting versions
 pip check
