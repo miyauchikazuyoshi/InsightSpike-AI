@@ -226,6 +226,19 @@ except ImportError:
     print("Using fallback implementation")
 ```
 
+#### "Sentence Transformers Not Available"
+
+**NumPy Compatibility Issue:**
+
+```python
+# Problem: NumPy downgrade breaks sentence-transformers
+# Solution: Reinstall after environment setup
+!pip install --force-reinstall sentence-transformers==2.7.0
+
+# Alternative: Use TF-IDF fallback (automatic in notebooks)
+from sklearn.feature_extraction.text import TfidfVectorizer
+```
+
 #### "CUDA Out of Memory"
 ```python
 # Force CPU mode in experiments
