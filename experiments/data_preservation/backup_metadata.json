@@ -1,0 +1,121 @@
+{
+  "backup_strategy": "critical_data_preservation",
+  "backup_date": "2025-07-02",
+  "backup_size": "132KB",
+  "original_data_size": "3.0MB",
+  "compression_ratio": "95.6%",
+  
+  "backup_contents": {
+    "core_models": {
+      "graph_pyg.pt": {
+        "size": "8KB",
+        "description": "PyTorch Geometric graph for geDIG embedding",
+        "critical": true,
+        "regeneration": "requires InsightSpike-AI graph construction"
+      },
+      "insight_facts.db": {
+        "size": "40KB", 
+        "description": "Knowledge facts database",
+        "critical": true,
+        "regeneration": "complex, requires historical learning data"
+      },
+      "unknown_learning.db": {
+        "size": "28KB",
+        "description": "Unknown concepts learning database", 
+        "critical": true,
+        "regeneration": "complex, requires learning episode history"
+      },
+      "index.faiss": {
+        "size": "8KB",
+        "description": "Vector similarity search index",
+        "critical": false,
+        "regeneration": "can be rebuilt from embeddings"
+      }
+    },
+    
+    "experiment_data": {
+      "episodes.json": {
+        "size": "24KB",
+        "description": "Reinforcement learning episode data",
+        "critical": true,
+        "regeneration": "impossible, contains unique experiment results"
+      },
+      "processed/": {
+        "size": "24KB",
+        "description": "Processed experiment results and metadata",
+        "critical": true,
+        "contents": [
+          "experiment_results.json",
+          "comprehensive_rag_analysis.json", 
+          "graph_visualization_results.json",
+          "simple_metadata.json",
+          "test_questions.json"
+        ],
+        "regeneration": "impossible, contains unique experimental outcomes"
+      }
+    }
+  },
+  
+  "excluded_data": {
+    "huggingface_datasets": {
+      "size": "2.5MB",
+      "reason": "can be re-downloaded from HuggingFace Hub",
+      "regeneration_time": "5-10 minutes",
+      "regeneration_script": "download_datasets_step_by_step.py"
+    },
+    "raw": {
+      "size": "104KB", 
+      "reason": "source text data, can be regenerated",
+      "regeneration_time": "1-2 minutes",
+      "regeneration_method": "text processing pipeline"
+    },
+    "clean_backup": {
+      "size": "112KB",
+      "reason": "redundant backup, superseded by this backup",
+      "action": "can be safely removed"
+    },
+    "integrated_rag_memory_experiments": {
+      "size": "192KB",
+      "reason": "old experiment data, not critical for current experiments",
+      "status": "archived separately if needed"
+    }
+  },
+  
+  "restoration_priority": {
+    "level_1_critical": [
+      "insight_facts.db",
+      "unknown_learning.db", 
+      "episodes.json",
+      "processed/"
+    ],
+    "level_2_important": [
+      "graph_pyg.pt"
+    ],
+    "level_3_regenerable": [
+      "index.faiss"
+    ]
+  },
+  
+  "restoration_instructions": {
+    "quick_restore": "Copy all files from critical_backup/ to data/ directory",
+    "full_environment_restore": "Run restoration_script.py to rebuild complete environment",
+    "dataset_restoration": "Execute download scripts to rebuild HuggingFace datasets",
+    "index_rebuild": "Use FAISS rebuild script if vector index is corrupted",
+    "verification": "Run test suite to verify environment integrity"
+  },
+  
+  "backup_validation": {
+    "files_backed_up": 8,
+    "total_critical_size": "132KB",
+    "backup_integrity": "verified",
+    "missing_dependencies": "none",
+    "restoration_tested": false
+  },
+  
+  "maintenance": {
+    "update_frequency": "after major experiments",
+    "next_backup_due": "after next significant data changes",
+    "monitoring": "track data/ directory changes",
+    "cleanup": "remove outdated backups periodically"
+  }
+}

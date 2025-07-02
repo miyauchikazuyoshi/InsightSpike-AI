@@ -82,7 +82,16 @@ setup.py
 archive/experimental_results/
 archive/old_results/
 *.pdf
-*.png
+# 重要な実験データはプッシュする
+!experiments/*/results/*.png
+!experiments/*/results/*.json
+!experiments/*/data/**
+# ただし、大きなファイルは除外
+experiments/*/data/**/*.arrow
+experiments/*/data/**/*GB*
+experiments/*/data/**/*_large*
+# 重要な実験結果JSONファイルはプッシュする
+!experiments/*/results/*.json
 experiments/results/
 experiments/outputs/
 experiments/large_scale_results/
@@ -118,6 +127,14 @@ docs/REUSABILITY_COMPLETION_REPORT.md
 /data/cache/*
 !/data/cache/.gitkeep
 
+# データ保存戦略 - クリティカルデータバックアップ
+!experiments/data_preservation/critical_backup/    # クリティカルデータは保持
+!experiments/data_preservation/*.py               # 復元スクリプトも保持
+!experiments/data_preservation/*.json             # メタデータも保持
+!experiments/data_preservation/*.md               # ドキュメントも保持
+experiments/data_preservation/optional_full_backup/  # 大きなバックアップは除外
+experiments/data_preservation/temp/               # 一時ファイルは除外
+
 # クリーンバックアップ（Git管理対象 - 復元・テスト用の基準データ）
 # data/clean_backup/ は意図的にGit管理します（復元可能性を保証）
 
@@ -128,12 +145,21 @@ docs/REUSABILITY_COMPLETION_REPORT.md
 # 本番データベースは保持
 !data/insight_facts.db
 !data/unknown_learning.db
+# 実験データディレクトリ内のデータベースは保持
+!experiments/*/data/**/*.db
 
 # グラフファイル（本番使用は保持、実験用は除外）
 /data/graph_experimental_*.pt
 /data/graph_test_*.pt
 /data/graph_debug_*.pt
 !data/graph_pyg.pt  # 本番使用グラフファイルは保持
+
+# 実験用グラフファイル（選択的保存）
+!experiments/*/graphs/                   # グラフディレクトリは含める
+!experiments/*/graphs/*.pt              # 重要なグラフファイルは保持
+!experiments/*/graphs/*.json            # グラフメタデータも保持
+experiments/*/full_graphs/              # 大きなグラフコレクションは除外
+experiments/*/temp_graphs/              # 一時的なグラフは除外
 
 # 実験結果ファイル（重要でない生成物）
 /data/processed/*_experimental*.json
@@ -173,6 +199,10 @@ docs/REUSABILITY_COMPLETION_REPORT.md
 *_test*.json
 *_debug*.json
 *_REPORT.json
+# 重要な実験結果データは保持
+!experiments/*/results/*_experimental*.json
+!experiments/*/results/corrected_*.json
+!experiments/*/results/fixed_*.json
 # 重要な設定ファイルは保持
 !package.json
 !package-lock.json
@@ -210,7 +240,9 @@ docs/archive/experiments/data_backups/*.tar.gz
 experiments/*/results/*_large.json
 experiments/*/results/*_detailed.json
 experiments_colab/*/results/*_large.json
-experiments_colab/*/*.json
-# ただし、重要な結果サマリーは保持
+# 重要な実験データはプッシュする（コラブも含む）
+!experiments_colab/*/*.json
+!experiments_colab/*/*.png
+# 重要な結果サマリーは保持
 !experiments/*/RESULTS_SUMMARY.json
 !experiments_colab/*/RESULTS_SUMMARY.json
