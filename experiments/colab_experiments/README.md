@@ -141,6 +141,32 @@ Both experiment notebooks will automatically:
 3. Get token from: <https://github.com/settings/tokens>
 4. Required scope: `repo` (private repository access)
 
+#### "Poetry Command Errors"
+
+**Poetry 2.1+ Syntax Changes:**
+
+```bash
+# ❌ Old syntax (Poetry < 2.1):
+poetry install --no-dev
+
+# ✅ New syntax (Poetry 2.1+):
+poetry install --without dev
+poetry install --without dev,test
+```
+
+#### "Repository Already Exists"
+
+**Re-running Setup Cells:**
+
+```python
+# Automatic handling in updated notebooks
+if os.path.exists('/content/InsightSpike-AI'):
+    os.chdir('/content/InsightSpike-AI')
+    !git pull origin main  # Update existing repo
+else:
+    !git clone $clone_url  # Fresh clone
+```
+
 #### "Import Errors After Restart"
 
 ```python
@@ -157,6 +183,48 @@ print(f"NumPy: {np.__version__}")
 - Indicates PyTorch version mismatch
 - Ensure runtime was restarted after package installation
 - Re-run package installation if error persists
+
+#### "Poetry --no-dev Option Error"
+
+**Poetry Version Compatibility:**
+
+```bash
+# ❌ Old syntax (Poetry < 2.0):
+poetry install --no-dev
+
+# ✅ New syntax (Poetry 2.1+):
+poetry install --without dev
+poetry install --without dev,test
+```
+
+#### "Repository Already Exists"
+
+**Re-running Setup Cells:**
+
+```python
+# Automatic handling in updated notebooks
+if os.path.exists('/content/InsightSpike-AI'):
+    os.chdir('/content/InsightSpike-AI')
+    !git pull origin main  # Update existing repo
+else:
+    !git clone $clone_url  # Fresh clone
+```
+
+#### "Module Import Errors"
+
+**Common Import Issues:**
+
+```python
+# ❌ May fail due to module structure changes:
+from insightspike.core import RAGSystem
+
+# ✅ Use graceful fallback strategy:
+try:
+    from insightspike.core.rag import RAGSystem
+except ImportError:
+    from insightspike.core.system import InsightSpikeSystem
+    print("Using fallback implementation")
+```
 
 #### "CUDA Out of Memory"
 ```python
