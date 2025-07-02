@@ -96,8 +96,8 @@ Both experiment notebooks will automatically:
 **Why Restart is Necessary:**
 
 - **NumPy Downgrade**: 2.x → 1.26.4 (ML library compatibility)
-- **PyTorch Version Change**: 2.6.1 → 2.2.2 (meta tensor issue fix)
-- **Poetry Installation**: Fresh session for package management
+- **PyTorch Installation**: CUDA-enabled version for GPU acceleration
+- **Dependency Order**: NumPy → PyTorch → transformers → sentence-transformers
 - **Memory Reset**: Clean environment for stable imports
 
 ### 📋 Step-by-Step Setup Process
@@ -105,7 +105,12 @@ Both experiment notebooks will automatically:
 1. **Run Package Installation Cell**:
 
    ```python
-   # First cell installs packages and shows restart instructions
+   # First cell installs packages in optimal order:
+   # 1. NumPy 1.26.4 (downgrade from 2.x for compatibility)
+   # 2. PyTorch 2.2.2 with GPU support (CUDA 12.1) or CPU-only
+   # 3. transformers 4.30.0
+   # 4. sentence-transformers 2.7.0
+   # 5. Additional ML and visualization packages
    ```
 
 2. **Wait for Restart Popup**:
@@ -116,12 +121,37 @@ Both experiment notebooks will automatically:
 3. **Run Environment Verification Cell**:
 
    ```python
-   # Second cell verifies packages and clones repository
+   # Second cell verifies:
+   # - GPU availability and CUDA version
+   # - Package versions and compatibility  
+   # - InsightSpike-AI import status
+   # - Provides troubleshooting if needed
    ```
 
 4. **Continue with Experiment**:
    - All remaining cells can be run sequentially
-   - Environment is now stable and ready
+   - Environment is now stable and ready for GPU-accelerated experiments
+
+### 🎮 GPU Support & Performance
+
+The notebooks automatically detect and configure GPU acceleration:
+
+**GPU Detection:**
+- Automatically detects available GPUs using `nvidia-smi`
+- Installs CUDA-enabled PyTorch 2.2.2 with CUDA 12.1 support
+- Falls back to CPU-only PyTorch if no GPU is available
+
+**Performance Benefits:**
+- **Embeddings**: Faster sentence-transformers processing
+- **Vector Search**: Accelerated FAISS operations
+- **Model Training**: GPU-accelerated learning algorithms
+- **Batch Processing**: Improved throughput for large datasets
+
+**Enabling GPU in Colab:**
+1. Runtime → Change runtime type
+2. Hardware accelerator → GPU (T4, V100, or A100)
+3. Save and restart runtime
+4. Run the setup cells to install GPU-enabled packages
 
 ### 🔧 Common Issues & Solutions
 
@@ -245,6 +275,49 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 device = "cpu"  # Override any GPU settings
 torch.cuda.empty_cache()  # Clear GPU memory if used
 ```
+
+#### "HuggingFace Dataset Download Failures"
+
+**Dataset Access Issues:**
+
+```python
+# Problem: Datasets library not available or download fails
+# Solution 1: Automatic installation with retry
+def check_datasets_library():
+    try:
+        import datasets
+        return True
+    except ImportError:
+        !pip install datasets
+        import datasets
+        return True
+
+# Solution 2: Graceful fallback to synthetic data
+try:
+    from datasets import load_dataset
+    nq_dataset = load_dataset("natural_questions", split="validation[:100]")
+    print("✅ Using real HuggingFace dataset")
+except Exception as e:
+    print(f"⚠️  Using synthetic fallback: {e}")
+    nq_dataset = None  # Triggers synthetic data creation
+
+# Solution 3: Cache configuration for better downloads
+import os
+os.environ['HF_HUB_CACHE'] = '/tmp/huggingface_cache'
+os.environ['HF_DATASETS_CACHE'] = '/tmp/datasets'
+```
+
+**Supported Datasets in Dynamic RAG Experiment:**
+- **Natural Questions**: Factual QA dataset (validation[:100] samples)
+- **HotpotQA**: Multi-hop reasoning dataset (validation[:50] samples)
+- **Synthetic Fallback**: High-quality synthetic QA pairs for offline testing
+
+**Dataset Download Process:**
+1. **Check Access**: Verify HuggingFace API availability
+2. **Download Real Data**: Attempt to download requested datasets
+3. **Fallback Strategy**: Use synthetic data if downloads fail
+4. **Verification**: Validate dataset structure before processing
+5. **Processing**: Extract questions, answers, and context safely
 
 ### 🎯 Best Practices for Local → Colab Workflow
 
