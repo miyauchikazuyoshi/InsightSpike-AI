@@ -1,0 +1,134 @@
+[
+  {
+    "text": "The capital of Japan is Tokyo, which is the world's most populous metropolitan area.",
+    "type": "general"
+  },
+  {
+    "text": "Machine learning is a subset of artificial intelligence that enables systems to learn from data.",
+    "type": "general"
+  },
+  {
+    "text": "Python was created by Guido van Rossum and first released in 1991.",
+    "type": "general"
+  },
+  {
+    "text": "The speed of light in vacuum is approximately 299,792,458 meters per second.",
+    "type": "general"
+  },
+  {
+    "text": "DNA stands for deoxyribonucleic acid and contains genetic instructions.",
+    "type": "general"
+  },
+  {
+    "text": "The Great Wall of China is over 13,000 miles long and took centuries to build.",
+    "type": "general"
+  },
+  {
+    "text": "Photosynthesis is the process by which plants convert light energy into chemical energy.",
+    "type": "general"
+  },
+  {
+    "text": "The human brain contains approximately 86 billion neurons.",
+    "type": "general"
+  },
+  {
+    "text": "Climate change is primarily caused by greenhouse gas emissions from human activities.",
+    "type": "general"
+  },
+  {
+    "text": "Quantum computing uses quantum bits or qubits that can exist in multiple states.",
+    "type": "general"
+  },
+  {
+    "text": "REST API stands for Representational State Transfer Application Programming Interface.",
+    "type": "technical"
+  },
+  {
+    "text": "Git is a distributed version control system created by Linus Torvalds.",
+    "type": "technical"
+  },
+  {
+    "text": "Docker containers package applications with their dependencies for consistent deployment.",
+    "type": "technical"
+  },
+  {
+    "text": "Neural networks are composed of layers of interconnected nodes inspired by biological neurons.",
+    "type": "technical"
+  },
+  {
+    "text": "SQL is a domain-specific language used for managing relational databases.",
+    "type": "technical"
+  },
+  {
+    "text": "Kubernetes is an open-source container orchestration platform originally developed by Google.",
+    "type": "technical"
+  },
+  {
+    "text": "TCP/IP is the fundamental communication protocol of the Internet.",
+    "type": "technical"
+  },
+  {
+    "text": "Blockchain is a distributed ledger technology that ensures data immutability.",
+    "type": "technical"
+  },
+  {
+    "text": "OAuth 2.0 is an authorization framework that enables third-party access to resources.",
+    "type": "technical"
+  },
+  {
+    "text": "GraphQL is a query language for APIs developed by Facebook.",
+    "type": "technical"
+  },
+  {
+    "text": "Question: What is the purpose of RAG systems? Answer: RAG (Retrieval-Augmented Generation) systems combine retrieval mechanisms with language generation to provide accurate, contextual responses.",
+    "type": "qa"
+  },
+  {
+    "text": "Question: How does compression work in InsightSpike? Answer: InsightSpike uses graph-based compression and episodic memory to reduce storage requirements while maintaining information accessibility.",
+    "type": "qa"
+  },
+  {
+    "text": "Question: What are embeddings? Answer: Embeddings are dense vector representations of text that capture semantic meaning in a high-dimensional space.",
+    "type": "qa"
+  },
+  {
+    "text": "Question: Why is FAISS used for vector search? Answer: FAISS provides efficient similarity search in high-dimensional spaces using optimized indexing structures.",
+    "type": "qa"
+  },
+  {
+    "text": "Question: What is the advantage of episodic memory? Answer: Episodic memory allows systems to learn from experiences and adapt their behavior based on past interactions.",
+    "type": "qa"
+  },
+  {
+    "text": "In the context of natural language processing, transformers have revolutionized the field by enabling parallel processing and capturing long-range dependencies.",
+    "type": "contextual"
+  },
+  {
+    "text": "When discussing database performance, indexing is crucial as it significantly speeds up data retrieval operations at the cost of additional storage space.",
+    "type": "contextual"
+  },
+  {
+    "text": "Regarding cybersecurity, zero-trust architecture assumes no implicit trust and continuously verifies every transaction.",
+    "type": "contextual"
+  },
+  {
+    "text": "In software development, agile methodologies emphasize iterative development, collaboration, and adaptability to changing requirements.",
+    "type": "contextual"
+  },
+  {
+    "text": "For distributed systems, the CAP theorem states that it's impossible to simultaneously guarantee consistency, availability, and partition tolerance.",
+    "type": "contextual"
+  },
+  {
+    "text": "Artificial General Intelligence (AGI) represents a theoretical form of AI that would match or exceed human cognitive abilities across all domains. Unlike narrow AI, which excels at specific tasks, AGI would demonstrate human-like reasoning, learning, and problem-solving capabilities. The development of AGI remains one of the most significant challenges in computer science.",
+    "type": "complex"
+  },
+  {
+    "text": "The transformer architecture, introduced in the 'Attention is All You Need' paper, revolutionized NLP by replacing recurrent layers with self-attention mechanisms. This allows for parallel processing of sequences and better capture of long-range dependencies. Models like BERT, GPT, and T5 are all based on transformer architecture.",
+    "type": "complex"
+  },
+  {
+    "text": "Graph neural networks (GNNs) extend deep learning to graph-structured data. They work by aggregating information from neighboring nodes through message passing. Applications include molecular property prediction, social network analysis, and knowledge graph reasoning. InsightSpike uses graph structures for efficient information storage.",
+    "type": "complex"
+  }
+]

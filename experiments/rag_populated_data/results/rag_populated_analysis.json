@@ -1,0 +1,37 @@
+{
+  "summary": {
+    "total_queries": 50,
+    "avg_retrieved_docs": 15.0,
+    "avg_relevant_docs": 8.66,
+    "response_relevance_rate": 0.04,
+    "avg_quality_score": 0.779923811678113,
+    "avg_response_time": 0.4771961975097656
+  },
+  "memory_efficiency": {
+    "episode_count": 65,
+    "total_text_size": 33417,
+    "total_embedding_size": 99840,
+    "episodes_file_size": 348132,
+    "index_file_size": 99885,
+    "graph_file_size": 41188,
+    "total_storage": 489205,
+    "text_compression_ratio": 0.09598917655034139,
+    "storage_per_episode": 7526.2307692307695,
+    "memory_stats": {
+      "total_episodes": 65,
+      "index_trained": true,
+      "c_value_mean": 0.684022238609762,
+      "c_value_std": 0.14271074536468323,
+      "c_value_min": 0.5,
+      "c_value_max": 0.9,
+      "dimension": 384
+    }
+  },
+  "baseline_comparison": {
+    "baseline_avg_quality": 0.7761917066184847,
+    "rag_avg_quality": 0.758298464712801,
+    "quality_improvement": -2.3052606402658418,
+    "baseline_avg_time": 0.2795636415481567,
+    "rag_avg_time": 0.9069151878356934
+  }
+}

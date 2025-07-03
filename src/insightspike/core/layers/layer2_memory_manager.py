@@ -94,30 +94,42 @@ class L2MemoryManager(L2MemoryInterface):
     def store_episode(
         self, text: str, c_value: float = 0.5, metadata: Optional[Dict] = None
     ) -> bool:
-        """Store a new episode in memory."""
+        """Store a new episode in memory with deduplication."""
         try:
             model = get_model()
             vec = model.encode(
                 [text], convert_to_numpy=True, normalize_embeddings=True
             )[0]
 
-            episode = Episode(vec, text, c_value, metadata)
-            self.episodes.append(episode)
+            # Check if this should be integrated with existing episodes
+            integration_result = self._check_episode_integration(vec, text, c_value)
+            
+            if integration_result["should_integrate"]:
+                # Integrate with existing episode
+                target_idx = integration_result["target_index"]
+                similarity = integration_result.get('similarity', integration_result.get('integration_score', 0))
+                logger.info(f"Integrating with existing episode {target_idx} (similarity: {similarity:.3f})")
+                episode_idx = self._integrate_with_existing(target_idx, vec, text, c_value)
+                return episode_idx >= 0
+            else:
+                # Add as new episode
+                episode = Episode(vec, text, c_value, metadata)
+                self.episodes.append(episode)
 
-            if self.knowledge_graph is not None:
-                try:
-                    self.knowledge_graph.add_episode_node(vec, len(self.episodes) - 1)
-                except Exception as e:
-                    logger.warning(f"KnowledgeGraph update failed: {e}")
+                if self.knowledge_graph is not None:
+                    try:
+                        self.knowledge_graph.add_episode_node(vec, len(self.episodes) - 1)
+                    except Exception as e:
+                        logger.warning(f"KnowledgeGraph update failed: {e}")
 
-            # Re-train index if we have enough episodes
-            if len(self.episodes) >= 2 and not self.is_trained:
-                self._train_index()
-            elif self.is_trained:
-                self._add_to_index(episode)
+                # Re-train index if we have enough episodes
+                if len(self.episodes) >= 2 and not self.is_trained:
+                    self._train_index()
+                elif self.is_trained:
+                    self._add_to_index(episode)
 
-            logger.debug(f"Stored episode with C={c_value:.3f}: {text[:100]}...")
-            return True
+                logger.debug(f"Stored new episode with C={c_value:.3f}: {text[:100]}...")
+                return True
 
         except Exception as e:
             logger.error(f"Failed to store episode: {e}")
@@ -231,6 +243,23 @@ class L2MemoryManager(L2MemoryInterface):
                         }
                     )
 
+                # Custom JSON encoder for numpy types
+                def convert_numpy_types(obj):
+                    if isinstance(obj, np.integer):
+                        return int(obj)
+                    elif isinstance(obj, np.floating):
+                        return float(obj)
+                    elif isinstance(obj, np.ndarray):
+                        return obj.tolist()
+                    elif isinstance(obj, dict):
+                        return {k: convert_numpy_types(v) for k, v in obj.items()}
+                    elif isinstance(obj, list):
+                        return [convert_numpy_types(v) for v in obj]
+                    return obj
+                
+                # Convert all data before saving
+                episodes_data = [convert_numpy_types(ep) for ep in episodes_data]
+                
                 with open(episodes_path, "w", encoding="utf-8") as f:
                     json.dump(episodes_data, f, ensure_ascii=False, indent=2)
 

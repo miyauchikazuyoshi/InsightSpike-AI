@@ -1,0 +1,1938 @@
+{
+  "questions": [
+    {
+      "question": "When was company_0 founded?",
+      "answer": "year_1",
+      "context": "The answer to 'When was company_0 founded?' is year_1. This is a well-known fact about company_0.",
+      "type": "factual",
+      "doc_id": 0,
+      "relevant_doc_ids": [
+        0
+      ]
+    },
+    {
+      "question": "When was organization_1 founded?",
+      "answer": "year_2",
+      "context": "The answer to 'When was organization_1 founded?' is year_2. This is a well-known fact about organization_1.",
+      "type": "factual",
+      "doc_id": 1,
+      "relevant_doc_ids": [
+        1
+      ]
+    },
+    {
+      "question": "When was country_2 founded?",
+      "answer": "year_3",
+      "context": "The answer to 'When was country_2 founded?' is year_3. This is a well-known fact about country_2.",
+      "type": "factual",
+      "doc_id": 2,
+      "relevant_doc_ids": [
+        2
+      ]
+    },
+    {
+      "question": "When was company_3 founded?",
+      "answer": "year_4",
+      "context": "The answer to 'When was company_3 founded?' is year_4. This is a well-known fact about company_3.",
+      "type": "factual",
+      "doc_id": 3,
+      "relevant_doc_ids": [
+        3
+      ]
+    },
+    {
+      "question": "When was organization_4 founded?",
+      "answer": "year_5",
+      "context": "The answer to 'When was organization_4 founded?' is year_5. This is a well-known fact about organization_4.",
+      "type": "factual",
+      "doc_id": 4,
+      "relevant_doc_ids": [
+        4
+      ]
+    },
+    {
+      "question": "When was country_5 founded?",
+      "answer": "year_6",
+      "context": "The answer to 'When was country_5 founded?' is year_6. This is a well-known fact about country_5.",
+      "type": "factual",
+      "doc_id": 5,
+      "relevant_doc_ids": [
+        5
+      ]
+    },
+    {
+      "question": "When was company_6 founded?",
+      "answer": "year_7",
+      "context": "The answer to 'When was company_6 founded?' is year_7. This is a well-known fact about company_6.",
+      "type": "factual",
+      "doc_id": 6,
+      "relevant_doc_ids": [
+        6
+      ]
+    },
+    {
+      "question": "When was organization_7 founded?",
+      "answer": "year_8",
+      "context": "The answer to 'When was organization_7 founded?' is year_8. This is a well-known fact about organization_7.",
+      "type": "factual",
+      "doc_id": 7,
+      "relevant_doc_ids": [
+        7
+      ]
+    },
+    {
+      "question": "When was country_8 founded?",
+      "answer": "year_9",
+      "context": "The answer to 'When was country_8 founded?' is year_9. This is a well-known fact about country_8.",
+      "type": "factual",
+      "doc_id": 8,
+      "relevant_doc_ids": [
+        8
+      ]
+    },
+    {
+      "question": "Who invented technology_0?",
+      "answer": "person_10",
+      "context": "The answer to 'Who invented technology_0?' is person_10. This is a well-known fact about technology_0.",
+      "type": "factual",
+      "doc_id": 9,
+      "relevant_doc_ids": [
+        9
+      ]
+    },
+    {
+      "question": "Who invented device_1?",
+      "answer": "person_11",
+      "context": "The answer to 'Who invented device_1?' is person_11. This is a well-known fact about device_1.",
+      "type": "factual",
+      "doc_id": 10,
+      "relevant_doc_ids": [
+        10
+      ]
+    },
+    {
+      "question": "Who invented method_2?",
+      "answer": "person_12",
+      "context": "The answer to 'Who invented method_2?' is person_12. This is a well-known fact about method_2.",
+      "type": "factual",
+      "doc_id": 11,
+      "relevant_doc_ids": [
+        11
+      ]
+    },
+    {
+      "question": "Who invented technology_3?",
+      "answer": "person_13",
+      "context": "The answer to 'Who invented technology_3?' is person_13. This is a well-known fact about technology_3.",
+      "type": "factual",
+      "doc_id": 12,
+      "relevant_doc_ids": [
+        12
+      ]
+    },
+    {
+      "question": "Who invented device_4?",
+      "answer": "person_14",
+      "context": "The answer to 'Who invented device_4?' is person_14. This is a well-known fact about device_4.",
+      "type": "factual",
+      "doc_id": 13,
+      "relevant_doc_ids": [
+        13
+      ]
+    },
+    {
+      "question": "Who invented method_5?",
+      "answer": "person_15",
+      "context": "The answer to 'Who invented method_5?' is person_15. This is a well-known fact about method_5.",
+      "type": "factual",
+      "doc_id": 14,
+      "relevant_doc_ids": [
+        14
+      ]
+    },
+    {
+      "question": "Who invented technology_6?",
+      "answer": "person_16",
+      "context": "The answer to 'Who invented technology_6?' is person_16. This is a well-known fact about technology_6.",
+      "type": "factual",
+      "doc_id": 15,
+      "relevant_doc_ids": [
+        15
+      ]
+    },
+    {
+      "question": "Who invented device_7?",
+      "answer": "person_17",
+      "context": "The answer to 'Who invented device_7?' is person_17. This is a well-known fact about device_7.",
+      "type": "factual",
+      "doc_id": 16,
+      "relevant_doc_ids": [
+        16
+      ]
+    },
+    {
+      "question": "Who invented method_8?",
+      "answer": "person_18",
+      "context": "The answer to 'Who invented method_8?' is person_18. This is a well-known fact about method_8.",
+      "type": "factual",
+      "doc_id": 17,
+      "relevant_doc_ids": [
+        17
+      ]
+    },
+    {
+      "question": "What is the capital of country_0?",
+      "answer": "city_19",
+      "context": "The answer to 'What is the capital of country_0?' is city_19. This is a well-known fact about country_0.",
+      "type": "factual",
+      "doc_id": 18,
+      "relevant_doc_ids": [
+        18
+      ]
+    },
+    {
+      "question": "What is the capital of state_1?",
+      "answer": "city_20",
+      "context": "The answer to 'What is the capital of state_1?' is city_20. This is a well-known fact about state_1.",
+      "type": "factual",
+      "doc_id": 19,
+      "relevant_doc_ids": [
+        19
+      ]
+    },
+    {
+      "question": "What is the capital of province_2?",
+      "answer": "city_21",
+      "context": "The answer to 'What is the capital of province_2?' is city_21. This is a well-known fact about province_2.",
+      "type": "factual",
+      "doc_id": 20,
+      "relevant_doc_ids": [
+        20
+      ]
+    },
+    {
+      "question": "What is the capital of country_3?",
+      "answer": "city_22",
+      "context": "The answer to 'What is the capital of country_3?' is city_22. This is a well-known fact about country_3.",
+      "type": "factual",
+      "doc_id": 21,
+      "relevant_doc_ids": [
+        21
+      ]
+    },
+    {
+      "question": "What is the capital of state_4?",
+      "answer": "city_23",
+      "context": "The answer to 'What is the capital of state_4?' is city_23. This is a well-known fact about state_4.",
+      "type": "factual",
+      "doc_id": 22,
+      "relevant_doc_ids": [
+        22
+      ]
+    },
+    {
+      "question": "What is the capital of province_5?",
+      "answer": "city_24",
+      "context": "The answer to 'What is the capital of province_5?' is city_24. This is a well-known fact about province_5.",
+      "type": "factual",
+      "doc_id": 23,
+      "relevant_doc_ids": [
+        23
+      ]
+    },
+    {
+      "question": "What is the capital of country_6?",
+      "answer": "city_25",
+      "context": "The answer to 'What is the capital of country_6?' is city_25. This is a well-known fact about country_6.",
+      "type": "factual",
+      "doc_id": 24,
+      "relevant_doc_ids": [
+        24
+      ]
+    },
+    {
+      "question": "What is the capital of state_7?",
+      "answer": "city_26",
+      "context": "The answer to 'What is the capital of state_7?' is city_26. This is a well-known fact about state_7.",
+      "type": "factual",
+      "doc_id": 25,
+      "relevant_doc_ids": [
+        25
+      ]
+    },
+    {
+      "question": "What is the capital of province_8?",
+      "answer": "city_27",
+      "context": "The answer to 'What is the capital of province_8?' is city_27. This is a well-known fact about province_8.",
+      "type": "factual",
+      "doc_id": 26,
+      "relevant_doc_ids": [
+        26
+      ]
+    },
+    {
+      "question": "How many items_0 are there?",
+      "answer": "number_28",
+      "context": "The answer to 'How many items_0 are there?' is number_28. This is a well-known fact about items_0.",
+      "type": "factual",
+      "doc_id": 27,
+      "relevant_doc_ids": [
+        27
+      ]
+    },
+    {
+      "question": "How many people_1 are there?",
+      "answer": "number_29",
+      "context": "The answer to 'How many people_1 are there?' is number_29. This is a well-known fact about people_1.",
+      "type": "factual",
+      "doc_id": 28,
+      "relevant_doc_ids": [
+        28
+      ]
+    },
+    {
+      "question": "How many places_2 are there?",
+      "answer": "number_30",
+      "context": "The answer to 'How many places_2 are there?' is number_30. This is a well-known fact about places_2.",
+      "type": "factual",
+      "doc_id": 29,
+      "relevant_doc_ids": [
+        29
+      ]
+    },
+    {
+      "question": "How many items_3 are there?",
+      "answer": "number_31",
+      "context": "The answer to 'How many items_3 are there?' is number_31. This is a well-known fact about items_3.",
+      "type": "factual",
+      "doc_id": 30,
+      "relevant_doc_ids": [
+        30
+      ]
+    },
+    {
+      "question": "How many people_4 are there?",
+      "answer": "number_32",
+      "context": "The answer to 'How many people_4 are there?' is number_32. This is a well-known fact about people_4.",
+      "type": "factual",
+      "doc_id": 31,
+      "relevant_doc_ids": [
+        31
+      ]
+    },
+    {
+      "question": "How many places_5 are there?",
+      "answer": "number_33",
+      "context": "The answer to 'How many places_5 are there?' is number_33. This is a well-known fact about places_5.",
+      "type": "factual",
+      "doc_id": 32,
+      "relevant_doc_ids": [
+        32
+      ]
+    },
+    {
+      "question": "How many items_6 are there?",
+      "answer": "number_34",
+      "context": "The answer to 'How many items_6 are there?' is number_34. This is a well-known fact about items_6.",
+      "type": "factual",
+      "doc_id": 33,
+      "relevant_doc_ids": [
+        33
+      ]
+    },
+    {
+      "question": "How many people_7 are there?",
+      "answer": "number_35",
+      "context": "The answer to 'How many people_7 are there?' is number_35. This is a well-known fact about people_7.",
+      "type": "factual",
+      "doc_id": 34,
+      "relevant_doc_ids": [
+        34
+      ]
+    },
+    {
+      "question": "How many places_8 are there?",
+      "answer": "number_36",
+      "context": "The answer to 'How many places_8 are there?' is number_36. This is a well-known fact about places_8.",
+      "type": "factual",
+      "doc_id": 35,
+      "relevant_doc_ids": [
+        35
+      ]
+    },
+    {
+      "question": "Where is landmark_0 located?",
+      "answer": "location_37",
+      "context": "The answer to 'Where is landmark_0 located?' is location_37. This is a well-known fact about landmark_0.",
+      "type": "factual",
+      "doc_id": 36,
+      "relevant_doc_ids": [
+        36
+      ]
+    },
+    {
+      "question": "Where is building_1 located?",
+      "answer": "location_38",
+      "context": "The answer to 'Where is building_1 located?' is location_38. This is a well-known fact about building_1.",
+      "type": "factual",
+      "doc_id": 37,
+      "relevant_doc_ids": [
+        37
+      ]
+    },
+    {
+      "question": "Where is natural feature_2 located?",
+      "answer": "location_39",
+      "context": "The answer to 'Where is natural feature_2 located?' is location_39. This is a well-known fact about natural feature_2.",
+      "type": "factual",
+      "doc_id": 38,
+      "relevant_doc_ids": [
+        38
+      ]
+    },
+    {
+      "question": "Where is landmark_3 located?",
+      "answer": "location_40",
+      "context": "The answer to 'Where is landmark_3 located?' is location_40. This is a well-known fact about landmark_3.",
+      "type": "factual",
+      "doc_id": 39,
+      "relevant_doc_ids": [
+        39
+      ]
+    },
+    {
+      "question": "Where is building_4 located?",
+      "answer": "location_41",
+      "context": "The answer to 'Where is building_4 located?' is location_41. This is a well-known fact about building_4.",
+      "type": "factual",
+      "doc_id": 40,
+      "relevant_doc_ids": [
+        40
+      ]
+    },
+    {
+      "question": "Where is natural feature_5 located?",
+      "answer": "location_42",
+      "context": "The answer to 'Where is natural feature_5 located?' is location_42. This is a well-known fact about natural feature_5.",
+      "type": "factual",
+      "doc_id": 41,
+      "relevant_doc_ids": [
+        41
+      ]
+    },
+    {
+      "question": "Where is landmark_6 located?",
+      "answer": "location_43",
+      "context": "The answer to 'Where is landmark_6 located?' is location_43. This is a well-known fact about landmark_6.",
+      "type": "factual",
+      "doc_id": 42,
+      "relevant_doc_ids": [
+        42
+      ]
+    },
+    {
+      "question": "Where is building_7 located?",
+      "answer": "location_44",
+      "context": "The answer to 'Where is building_7 located?' is location_44. This is a well-known fact about building_7.",
+      "type": "factual",
+      "doc_id": 43,
+      "relevant_doc_ids": [
+        43
+      ]
+    },
+    {
+      "question": "Where is natural feature_8 located?",
+      "answer": "location_45",
+      "context": "The answer to 'Where is natural feature_8 located?' is location_45. This is a well-known fact about natural feature_8.",
+      "type": "factual",
+      "doc_id": 44,
+      "relevant_doc_ids": [
+        44
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_0 have?",
+      "answer": "Value_0",
+      "context": "Entity_0 is related to Property_0. Property_0 has characteristic Value_0.",
+      "type": "multi-hop",
+      "doc_id": 46,
+      "relevant_doc_ids": [
+        45,
+        46
+      ],
+      "supporting_facts": [
+        "Entity_0 is related to Property_0",
+        "Property_0 has characteristic Value_0"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_1 have?",
+      "answer": "Value_1",
+      "context": "Entity_1 is related to Property_1. Property_1 has characteristic Value_1.",
+      "type": "multi-hop",
+      "doc_id": 48,
+      "relevant_doc_ids": [
+        47,
+        48
+      ],
+      "supporting_facts": [
+        "Entity_1 is related to Property_1",
+        "Property_1 has characteristic Value_1"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_2 have?",
+      "answer": "Value_2",
+      "context": "Entity_2 is related to Property_2. Property_2 has characteristic Value_2.",
+      "type": "multi-hop",
+      "doc_id": 50,
+      "relevant_doc_ids": [
+        49,
+        50
+      ],
+      "supporting_facts": [
+        "Entity_2 is related to Property_2",
+        "Property_2 has characteristic Value_2"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_3 have?",
+      "answer": "Value_3",
+      "context": "Entity_3 is related to Property_3. Property_3 has characteristic Value_3.",
+      "type": "multi-hop",
+      "doc_id": 52,
+      "relevant_doc_ids": [
+        51,
+        52
+      ],
+      "supporting_facts": [
+        "Entity_3 is related to Property_3",
+        "Property_3 has characteristic Value_3"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_4 have?",
+      "answer": "Value_4",
+      "context": "Entity_4 is related to Property_4. Property_4 has characteristic Value_4.",
+      "type": "multi-hop",
+      "doc_id": 54,
+      "relevant_doc_ids": [
+        53,
+        54
+      ],
+      "supporting_facts": [
+        "Entity_4 is related to Property_4",
+        "Property_4 has characteristic Value_4"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_5 have?",
+      "answer": "Value_5",
+      "context": "Entity_5 is related to Property_5. Property_5 has characteristic Value_5.",
+      "type": "multi-hop",
+      "doc_id": 56,
+      "relevant_doc_ids": [
+        55,
+        56
+      ],
+      "supporting_facts": [
+        "Entity_5 is related to Property_5",
+        "Property_5 has characteristic Value_5"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_6 have?",
+      "answer": "Value_6",
+      "context": "Entity_6 is related to Property_6. Property_6 has characteristic Value_6.",
+      "type": "multi-hop",
+      "doc_id": 58,
+      "relevant_doc_ids": [
+        57,
+        58
+      ],
+      "supporting_facts": [
+        "Entity_6 is related to Property_6",
+        "Property_6 has characteristic Value_6"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_7 have?",
+      "answer": "Value_7",
+      "context": "Entity_7 is related to Property_7. Property_7 has characteristic Value_7.",
+      "type": "multi-hop",
+      "doc_id": 60,
+      "relevant_doc_ids": [
+        59,
+        60
+      ],
+      "supporting_facts": [
+        "Entity_7 is related to Property_7",
+        "Property_7 has characteristic Value_7"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_8 have?",
+      "answer": "Value_8",
+      "context": "Entity_8 is related to Property_8. Property_8 has characteristic Value_8.",
+      "type": "multi-hop",
+      "doc_id": 62,
+      "relevant_doc_ids": [
+        61,
+        62
+      ],
+      "supporting_facts": [
+        "Entity_8 is related to Property_8",
+        "Property_8 has characteristic Value_8"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_9 have?",
+      "answer": "Value_9",
+      "context": "Entity_9 is related to Property_9. Property_9 has characteristic Value_9.",
+      "type": "multi-hop",
+      "doc_id": 64,
+      "relevant_doc_ids": [
+        63,
+        64
+      ],
+      "supporting_facts": [
+        "Entity_9 is related to Property_9",
+        "Property_9 has characteristic Value_9"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_10 have?",
+      "answer": "Value_10",
+      "context": "Entity_10 is related to Property_10. Property_10 has characteristic Value_10.",
+      "type": "multi-hop",
+      "doc_id": 66,
+      "relevant_doc_ids": [
+        65,
+        66
+      ],
+      "supporting_facts": [
+        "Entity_10 is related to Property_10",
+        "Property_10 has characteristic Value_10"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_11 have?",
+      "answer": "Value_11",
+      "context": "Entity_11 is related to Property_11. Property_11 has characteristic Value_11.",
+      "type": "multi-hop",
+      "doc_id": 68,
+      "relevant_doc_ids": [
+        67,
+        68
+      ],
+      "supporting_facts": [
+        "Entity_11 is related to Property_11",
+        "Property_11 has characteristic Value_11"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_12 have?",
+      "answer": "Value_12",
+      "context": "Entity_12 is related to Property_12. Property_12 has characteristic Value_12.",
+      "type": "multi-hop",
+      "doc_id": 70,
+      "relevant_doc_ids": [
+        69,
+        70
+      ],
+      "supporting_facts": [
+        "Entity_12 is related to Property_12",
+        "Property_12 has characteristic Value_12"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_13 have?",
+      "answer": "Value_13",
+      "context": "Entity_13 is related to Property_13. Property_13 has characteristic Value_13.",
+      "type": "multi-hop",
+      "doc_id": 72,
+      "relevant_doc_ids": [
+        71,
+        72
+      ],
+      "supporting_facts": [
+        "Entity_13 is related to Property_13",
+        "Property_13 has characteristic Value_13"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_14 have?",
+      "answer": "Value_14",
+      "context": "Entity_14 is related to Property_14. Property_14 has characteristic Value_14.",
+      "type": "multi-hop",
+      "doc_id": 74,
+      "relevant_doc_ids": [
+        73,
+        74
+      ],
+      "supporting_facts": [
+        "Entity_14 is related to Property_14",
+        "Property_14 has characteristic Value_14"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_15 have?",
+      "answer": "Value_15",
+      "context": "Entity_15 is related to Property_15. Property_15 has characteristic Value_15.",
+      "type": "multi-hop",
+      "doc_id": 76,
+      "relevant_doc_ids": [
+        75,
+        76
+      ],
+      "supporting_facts": [
+        "Entity_15 is related to Property_15",
+        "Property_15 has characteristic Value_15"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_16 have?",
+      "answer": "Value_16",
+      "context": "Entity_16 is related to Property_16. Property_16 has characteristic Value_16.",
+      "type": "multi-hop",
+      "doc_id": 78,
+      "relevant_doc_ids": [
+        77,
+        78
+      ],
+      "supporting_facts": [
+        "Entity_16 is related to Property_16",
+        "Property_16 has characteristic Value_16"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_17 have?",
+      "answer": "Value_17",
+      "context": "Entity_17 is related to Property_17. Property_17 has characteristic Value_17.",
+      "type": "multi-hop",
+      "doc_id": 80,
+      "relevant_doc_ids": [
+        79,
+        80
+      ],
+      "supporting_facts": [
+        "Entity_17 is related to Property_17",
+        "Property_17 has characteristic Value_17"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_18 have?",
+      "answer": "Value_18",
+      "context": "Entity_18 is related to Property_18. Property_18 has characteristic Value_18.",
+      "type": "multi-hop",
+      "doc_id": 82,
+      "relevant_doc_ids": [
+        81,
+        82
+      ],
+      "supporting_facts": [
+        "Entity_18 is related to Property_18",
+        "Property_18 has characteristic Value_18"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_19 have?",
+      "answer": "Value_19",
+      "context": "Entity_19 is related to Property_19. Property_19 has characteristic Value_19.",
+      "type": "multi-hop",
+      "doc_id": 84,
+      "relevant_doc_ids": [
+        83,
+        84
+      ],
+      "supporting_facts": [
+        "Entity_19 is related to Property_19",
+        "Property_19 has characteristic Value_19"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_20 have?",
+      "answer": "Value_20",
+      "context": "Entity_20 is related to Property_20. Property_20 has characteristic Value_20.",
+      "type": "multi-hop",
+      "doc_id": 86,
+      "relevant_doc_ids": [
+        85,
+        86
+      ],
+      "supporting_facts": [
+        "Entity_20 is related to Property_20",
+        "Property_20 has characteristic Value_20"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_21 have?",
+      "answer": "Value_21",
+      "context": "Entity_21 is related to Property_21. Property_21 has characteristic Value_21.",
+      "type": "multi-hop",
+      "doc_id": 88,
+      "relevant_doc_ids": [
+        87,
+        88
+      ],
+      "supporting_facts": [
+        "Entity_21 is related to Property_21",
+        "Property_21 has characteristic Value_21"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_22 have?",
+      "answer": "Value_22",
+      "context": "Entity_22 is related to Property_22. Property_22 has characteristic Value_22.",
+      "type": "multi-hop",
+      "doc_id": 90,
+      "relevant_doc_ids": [
+        89,
+        90
+      ],
+      "supporting_facts": [
+        "Entity_22 is related to Property_22",
+        "Property_22 has characteristic Value_22"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_23 have?",
+      "answer": "Value_23",
+      "context": "Entity_23 is related to Property_23. Property_23 has characteristic Value_23.",
+      "type": "multi-hop",
+      "doc_id": 92,
+      "relevant_doc_ids": [
+        91,
+        92
+      ],
+      "supporting_facts": [
+        "Entity_23 is related to Property_23",
+        "Property_23 has characteristic Value_23"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_24 have?",
+      "answer": "Value_24",
+      "context": "Entity_24 is related to Property_24. Property_24 has characteristic Value_24.",
+      "type": "multi-hop",
+      "doc_id": 94,
+      "relevant_doc_ids": [
+        93,
+        94
+      ],
+      "supporting_facts": [
+        "Entity_24 is related to Property_24",
+        "Property_24 has characteristic Value_24"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_25 have?",
+      "answer": "Value_25",
+      "context": "Entity_25 is related to Property_25. Property_25 has characteristic Value_25.",
+      "type": "multi-hop",
+      "doc_id": 96,
+      "relevant_doc_ids": [
+        95,
+        96
+      ],
+      "supporting_facts": [
+        "Entity_25 is related to Property_25",
+        "Property_25 has characteristic Value_25"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_26 have?",
+      "answer": "Value_26",
+      "context": "Entity_26 is related to Property_26. Property_26 has characteristic Value_26.",
+      "type": "multi-hop",
+      "doc_id": 98,
+      "relevant_doc_ids": [
+        97,
+        98
+      ],
+      "supporting_facts": [
+        "Entity_26 is related to Property_26",
+        "Property_26 has characteristic Value_26"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_27 have?",
+      "answer": "Value_27",
+      "context": "Entity_27 is related to Property_27. Property_27 has characteristic Value_27.",
+      "type": "multi-hop",
+      "doc_id": 100,
+      "relevant_doc_ids": [
+        99,
+        100
+      ],
+      "supporting_facts": [
+        "Entity_27 is related to Property_27",
+        "Property_27 has characteristic Value_27"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_28 have?",
+      "answer": "Value_28",
+      "context": "Entity_28 is related to Property_28. Property_28 has characteristic Value_28.",
+      "type": "multi-hop",
+      "doc_id": 102,
+      "relevant_doc_ids": [
+        101,
+        102
+      ],
+      "supporting_facts": [
+        "Entity_28 is related to Property_28",
+        "Property_28 has characteristic Value_28"
+      ]
+    },
+    {
+      "question": "What characteristic does the property of Entity_29 have?",
+      "answer": "Value_29",
+      "context": "Entity_29 is related to Property_29. Property_29 has characteristic Value_29.",
+      "type": "multi-hop",
+      "doc_id": 104,
+      "relevant_doc_ids": [
+        103,
+        104
+      ],
+      "supporting_facts": [
+        "Entity_29 is related to Property_29",
+        "Property_29 has characteristic Value_29"
+      ]
+    },
+    {
+      "question": "Why does phenomenon_0 happen?",
+      "answer": "explanation_106",
+      "context": "The explanation for 'Why does phenomenon_0 happen?' is as follows: explanation_106. This involves complex interactions in phenomenon_0.",
+      "type": "reasoning",
+      "doc_id": 105,
+      "relevant_doc_ids": [
+        105
+      ]
+    },
+    {
+      "question": "Why does event_1 happen?",
+      "answer": "explanation_107",
+      "context": "The explanation for 'Why does event_1 happen?' is as follows: explanation_107. This involves complex interactions in event_1.",
+      "type": "reasoning",
+      "doc_id": 106,
+      "relevant_doc_ids": [
+        106
+      ]
+    },
+    {
+      "question": "Why does process_2 happen?",
+      "answer": "explanation_108",
+      "context": "The explanation for 'Why does process_2 happen?' is as follows: explanation_108. This involves complex interactions in process_2.",
+      "type": "reasoning",
+      "doc_id": 107,
+      "relevant_doc_ids": [
+        107
+      ]
+    },
+    {
+      "question": "Why does phenomenon_3 happen?",
+      "answer": "explanation_109",
+      "context": "The explanation for 'Why does phenomenon_3 happen?' is as follows: explanation_109. This involves complex interactions in phenomenon_3.",
+      "type": "reasoning",
+      "doc_id": 108,
+      "relevant_doc_ids": [
+        108
+      ]
+    },
+    {
+      "question": "Why does event_4 happen?",
+      "answer": "explanation_110",
+      "context": "The explanation for 'Why does event_4 happen?' is as follows: explanation_110. This involves complex interactions in event_4.",
+      "type": "reasoning",
+      "doc_id": 109,
+      "relevant_doc_ids": [
+        109
+      ]
+    },
+    {
+      "question": "Why does process_5 happen?",
+      "answer": "explanation_111",
+      "context": "The explanation for 'Why does process_5 happen?' is as follows: explanation_111. This involves complex interactions in process_5.",
+      "type": "reasoning",
+      "doc_id": 110,
+      "relevant_doc_ids": [
+        110
+      ]
+    },
+    {
+      "question": "Why does phenomenon_6 happen?",
+      "answer": "explanation_112",
+      "context": "The explanation for 'Why does phenomenon_6 happen?' is as follows: explanation_112. This involves complex interactions in phenomenon_6.",
+      "type": "reasoning",
+      "doc_id": 111,
+      "relevant_doc_ids": [
+        111
+      ]
+    },
+    {
+      "question": "Why does event_7 happen?",
+      "answer": "explanation_113",
+      "context": "The explanation for 'Why does event_7 happen?' is as follows: explanation_113. This involves complex interactions in event_7.",
+      "type": "reasoning",
+      "doc_id": 112,
+      "relevant_doc_ids": [
+        112
+      ]
+    },
+    {
+      "question": "Why does process_8 happen?",
+      "answer": "explanation_114",
+      "context": "The explanation for 'Why does process_8 happen?' is as follows: explanation_114. This involves complex interactions in process_8.",
+      "type": "reasoning",
+      "doc_id": 113,
+      "relevant_doc_ids": [
+        113
+      ]
+    },
+    {
+      "question": "How does system_0 work?",
+      "answer": "description_115",
+      "context": "The description for 'How does system_0 work?' is as follows: description_115. This involves complex interactions in system_0.",
+      "type": "reasoning",
+      "doc_id": 114,
+      "relevant_doc_ids": [
+        114
+      ]
+    },
+    {
+      "question": "How does mechanism_1 work?",
+      "answer": "description_116",
+      "context": "The description for 'How does mechanism_1 work?' is as follows: description_116. This involves complex interactions in mechanism_1.",
+      "type": "reasoning",
+      "doc_id": 115,
+      "relevant_doc_ids": [
+        115
+      ]
+    },
+    {
+      "question": "How does technology_2 work?",
+      "answer": "description_117",
+      "context": "The description for 'How does technology_2 work?' is as follows: description_117. This involves complex interactions in technology_2.",
+      "type": "reasoning",
+      "doc_id": 116,
+      "relevant_doc_ids": [
+        116
+      ]
+    },
+    {
+      "question": "How does system_3 work?",
+      "answer": "description_118",
+      "context": "The description for 'How does system_3 work?' is as follows: description_118. This involves complex interactions in system_3.",
+      "type": "reasoning",
+      "doc_id": 117,
+      "relevant_doc_ids": [
+        117
+      ]
+    },
+    {
+      "question": "How does mechanism_4 work?",
+      "answer": "description_119",
+      "context": "The description for 'How does mechanism_4 work?' is as follows: description_119. This involves complex interactions in mechanism_4.",
+      "type": "reasoning",
+      "doc_id": 118,
+      "relevant_doc_ids": [
+        118
+      ]
+    },
+    {
+      "question": "How does technology_5 work?",
+      "answer": "description_120",
+      "context": "The description for 'How does technology_5 work?' is as follows: description_120. This involves complex interactions in technology_5.",
+      "type": "reasoning",
+      "doc_id": 119,
+      "relevant_doc_ids": [
+        119
+      ]
+    },
+    {
+      "question": "How does system_6 work?",
+      "answer": "description_121",
+      "context": "The description for 'How does system_6 work?' is as follows: description_121. This involves complex interactions in system_6.",
+      "type": "reasoning",
+      "doc_id": 120,
+      "relevant_doc_ids": [
+        120
+      ]
+    },
+    {
+      "question": "How does mechanism_7 work?",
+      "answer": "description_122",
+      "context": "The description for 'How does mechanism_7 work?' is as follows: description_122. This involves complex interactions in mechanism_7.",
+      "type": "reasoning",
+      "doc_id": 121,
+      "relevant_doc_ids": [
+        121
+      ]
+    },
+    {
+      "question": "How does technology_8 work?",
+      "answer": "description_123",
+      "context": "The description for 'How does technology_8 work?' is as follows: description_123. This involves complex interactions in technology_8.",
+      "type": "reasoning",
+      "doc_id": 122,
+      "relevant_doc_ids": [
+        122
+      ]
+    },
+    {
+      "question": "What causes effect_0?",
+      "answer": "cause_124",
+      "context": "The cause for 'What causes effect_0?' is as follows: cause_124. This involves complex interactions in effect_0.",
+      "type": "reasoning",
+      "doc_id": 123,
+      "relevant_doc_ids": [
+        123
+      ]
+    },
+    {
+      "question": "What causes result_1?",
+      "answer": "cause_125",
+      "context": "The cause for 'What causes result_1?' is as follows: cause_125. This involves complex interactions in result_1.",
+      "type": "reasoning",
+      "doc_id": 124,
+      "relevant_doc_ids": [
+        124
+      ]
+    },
+    {
+      "question": "What causes outcome_2?",
+      "answer": "cause_126",
+      "context": "The cause for 'What causes outcome_2?' is as follows: cause_126. This involves complex interactions in outcome_2.",
+      "type": "reasoning",
+      "doc_id": 125,
+      "relevant_doc_ids": [
+        125
+      ]
+    },
+    {
+      "question": "What causes effect_3?",
+      "answer": "cause_127",
+      "context": "The cause for 'What causes effect_3?' is as follows: cause_127. This involves complex interactions in effect_3.",
+      "type": "reasoning",
+      "doc_id": 126,
+      "relevant_doc_ids": [
+        126
+      ]
+    },
+    {
+      "question": "What causes result_4?",
+      "answer": "cause_128",
+      "context": "The cause for 'What causes result_4?' is as follows: cause_128. This involves complex interactions in result_4.",
+      "type": "reasoning",
+      "doc_id": 127,
+      "relevant_doc_ids": [
+        127
+      ]
+    },
+    {
+      "question": "What causes outcome_5?",
+      "answer": "cause_129",
+      "context": "The cause for 'What causes outcome_5?' is as follows: cause_129. This involves complex interactions in outcome_5.",
+      "type": "reasoning",
+      "doc_id": 128,
+      "relevant_doc_ids": [
+        128
+      ]
+    },
+    {
+      "question": "What causes effect_6?",
+      "answer": "cause_130",
+      "context": "The cause for 'What causes effect_6?' is as follows: cause_130. This involves complex interactions in effect_6.",
+      "type": "reasoning",
+      "doc_id": 129,
+      "relevant_doc_ids": [
+        129
+      ]
+    },
+    {
+      "question": "What causes result_7?",
+      "answer": "cause_131",
+      "context": "The cause for 'What causes result_7?' is as follows: cause_131. This involves complex interactions in result_7.",
+      "type": "reasoning",
+      "doc_id": 130,
+      "relevant_doc_ids": [
+        130
+      ]
+    },
+    {
+      "question": "What causes outcome_8?",
+      "answer": "cause_132",
+      "context": "The cause for 'What causes outcome_8?' is as follows: cause_132. This involves complex interactions in outcome_8.",
+      "type": "reasoning",
+      "doc_id": 131,
+      "relevant_doc_ids": [
+        131
+      ]
+    }
+  ],
+  "documents": [
+    {
+      "id": 0,
+      "text": "The answer to 'When was company_0 founded?' is year_1. This is a well-known fact about company_0.",
+      "type": "factual"
+    },
+    {
+      "id": 1,
+      "text": "The answer to 'When was organization_1 founded?' is year_2. This is a well-known fact about organization_1.",
+      "type": "factual"
+    },
+    {
+      "id": 2,
+      "text": "The answer to 'When was country_2 founded?' is year_3. This is a well-known fact about country_2.",
+      "type": "factual"
+    },
+    {
+      "id": 3,
+      "text": "The answer to 'When was company_3 founded?' is year_4. This is a well-known fact about company_3.",
+      "type": "factual"
+    },
+    {
+      "id": 4,
+      "text": "The answer to 'When was organization_4 founded?' is year_5. This is a well-known fact about organization_4.",
+      "type": "factual"
+    },
+    {
+      "id": 5,
+      "text": "The answer to 'When was country_5 founded?' is year_6. This is a well-known fact about country_5.",
+      "type": "factual"
+    },
+    {
+      "id": 6,
+      "text": "The answer to 'When was company_6 founded?' is year_7. This is a well-known fact about company_6.",
+      "type": "factual"
+    },
+    {
+      "id": 7,
+      "text": "The answer to 'When was organization_7 founded?' is year_8. This is a well-known fact about organization_7.",
+      "type": "factual"
+    },
+    {
+      "id": 8,
+      "text": "The answer to 'When was country_8 founded?' is year_9. This is a well-known fact about country_8.",
+      "type": "factual"
+    },
+    {
+      "id": 9,
+      "text": "The answer to 'Who invented technology_0?' is person_10. This is a well-known fact about technology_0.",
+      "type": "factual"
+    },
+    {
+      "id": 10,
+      "text": "The answer to 'Who invented device_1?' is person_11. This is a well-known fact about device_1.",
+      "type": "factual"
+    },
+    {
+      "id": 11,
+      "text": "The answer to 'Who invented method_2?' is person_12. This is a well-known fact about method_2.",
+      "type": "factual"
+    },
+    {
+      "id": 12,
+      "text": "The answer to 'Who invented technology_3?' is person_13. This is a well-known fact about technology_3.",
+      "type": "factual"
+    },
+    {
+      "id": 13,
+      "text": "The answer to 'Who invented device_4?' is person_14. This is a well-known fact about device_4.",
+      "type": "factual"
+    },
+    {
+      "id": 14,
+      "text": "The answer to 'Who invented method_5?' is person_15. This is a well-known fact about method_5.",
+      "type": "factual"
+    },
+    {
+      "id": 15,
+      "text": "The answer to 'Who invented technology_6?' is person_16. This is a well-known fact about technology_6.",
+      "type": "factual"
+    },
+    {
+      "id": 16,
+      "text": "The answer to 'Who invented device_7?' is person_17. This is a well-known fact about device_7.",
+      "type": "factual"
+    },
+    {
+      "id": 17,
+      "text": "The answer to 'Who invented method_8?' is person_18. This is a well-known fact about method_8.",
+      "type": "factual"
+    },
+    {
+      "id": 18,
+      "text": "The answer to 'What is the capital of country_0?' is city_19. This is a well-known fact about country_0.",
+      "type": "factual"
+    },
+    {
+      "id": 19,
+      "text": "The answer to 'What is the capital of state_1?' is city_20. This is a well-known fact about state_1.",
+      "type": "factual"
+    },
+    {
+      "id": 20,
+      "text": "The answer to 'What is the capital of province_2?' is city_21. This is a well-known fact about province_2.",
+      "type": "factual"
+    },
+    {
+      "id": 21,
+      "text": "The answer to 'What is the capital of country_3?' is city_22. This is a well-known fact about country_3.",
+      "type": "factual"
+    },
+    {
+      "id": 22,
+      "text": "The answer to 'What is the capital of state_4?' is city_23. This is a well-known fact about state_4.",
+      "type": "factual"
+    },
+    {
+      "id": 23,
+      "text": "The answer to 'What is the capital of province_5?' is city_24. This is a well-known fact about province_5.",
+      "type": "factual"
+    },
+    {
+      "id": 24,
+      "text": "The answer to 'What is the capital of country_6?' is city_25. This is a well-known fact about country_6.",
+      "type": "factual"
+    },
+    {
+      "id": 25,
+      "text": "The answer to 'What is the capital of state_7?' is city_26. This is a well-known fact about state_7.",
+      "type": "factual"
+    },
+    {
+      "id": 26,
+      "text": "The answer to 'What is the capital of province_8?' is city_27. This is a well-known fact about province_8.",
+      "type": "factual"
+    },
+    {
+      "id": 27,
+      "text": "The answer to 'How many items_0 are there?' is number_28. This is a well-known fact about items_0.",
+      "type": "factual"
+    },
+    {
+      "id": 28,
+      "text": "The answer to 'How many people_1 are there?' is number_29. This is a well-known fact about people_1.",
+      "type": "factual"
+    },
+    {
+      "id": 29,
+      "text": "The answer to 'How many places_2 are there?' is number_30. This is a well-known fact about places_2.",
+      "type": "factual"
+    },
+    {
+      "id": 30,
+      "text": "The answer to 'How many items_3 are there?' is number_31. This is a well-known fact about items_3.",
+      "type": "factual"
+    },
+    {
+      "id": 31,
+      "text": "The answer to 'How many people_4 are there?' is number_32. This is a well-known fact about people_4.",
+      "type": "factual"
+    },
+    {
+      "id": 32,
+      "text": "The answer to 'How many places_5 are there?' is number_33. This is a well-known fact about places_5.",
+      "type": "factual"
+    },
+    {
+      "id": 33,
+      "text": "The answer to 'How many items_6 are there?' is number_34. This is a well-known fact about items_6.",
+      "type": "factual"
+    },
+    {
+      "id": 34,
+      "text": "The answer to 'How many people_7 are there?' is number_35. This is a well-known fact about people_7.",
+      "type": "factual"
+    },
+    {
+      "id": 35,
+      "text": "The answer to 'How many places_8 are there?' is number_36. This is a well-known fact about places_8.",
+      "type": "factual"
+    },
+    {
+      "id": 36,
+      "text": "The answer to 'Where is landmark_0 located?' is location_37. This is a well-known fact about landmark_0.",
+      "type": "factual"
+    },
+    {
+      "id": 37,
+      "text": "The answer to 'Where is building_1 located?' is location_38. This is a well-known fact about building_1.",
+      "type": "factual"
+    },
+    {
+      "id": 38,
+      "text": "The answer to 'Where is natural feature_2 located?' is location_39. This is a well-known fact about natural feature_2.",
+      "type": "factual"
+    },
+    {
+      "id": 39,
+      "text": "The answer to 'Where is landmark_3 located?' is location_40. This is a well-known fact about landmark_3.",
+      "type": "factual"
+    },
+    {
+      "id": 40,
+      "text": "The answer to 'Where is building_4 located?' is location_41. This is a well-known fact about building_4.",
+      "type": "factual"
+    },
+    {
+      "id": 41,
+      "text": "The answer to 'Where is natural feature_5 located?' is location_42. This is a well-known fact about natural feature_5.",
+      "type": "factual"
+    },
+    {
+      "id": 42,
+      "text": "The answer to 'Where is landmark_6 located?' is location_43. This is a well-known fact about landmark_6.",
+      "type": "factual"
+    },
+    {
+      "id": 43,
+      "text": "The answer to 'Where is building_7 located?' is location_44. This is a well-known fact about building_7.",
+      "type": "factual"
+    },
+    {
+      "id": 44,
+      "text": "The answer to 'Where is natural feature_8 located?' is location_45. This is a well-known fact about natural feature_8.",
+      "type": "factual"
+    },
+    {
+      "id": 45,
+      "text": "Entity_0 is related to Property_0",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 46,
+      "text": "Property_0 has characteristic Value_0",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 47,
+      "text": "Entity_1 is related to Property_1",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 48,
+      "text": "Property_1 has characteristic Value_1",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 49,
+      "text": "Entity_2 is related to Property_2",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 50,
+      "text": "Property_2 has characteristic Value_2",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 51,
+      "text": "Entity_3 is related to Property_3",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 52,
+      "text": "Property_3 has characteristic Value_3",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 53,
+      "text": "Entity_4 is related to Property_4",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 54,
+      "text": "Property_4 has characteristic Value_4",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 55,
+      "text": "Entity_5 is related to Property_5",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 56,
+      "text": "Property_5 has characteristic Value_5",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 57,
+      "text": "Entity_6 is related to Property_6",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 58,
+      "text": "Property_6 has characteristic Value_6",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 59,
+      "text": "Entity_7 is related to Property_7",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 60,
+      "text": "Property_7 has characteristic Value_7",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 61,
+      "text": "Entity_8 is related to Property_8",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 62,
+      "text": "Property_8 has characteristic Value_8",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 63,
+      "text": "Entity_9 is related to Property_9",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 64,
+      "text": "Property_9 has characteristic Value_9",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 65,
+      "text": "Entity_10 is related to Property_10",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 66,
+      "text": "Property_10 has characteristic Value_10",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 67,
+      "text": "Entity_11 is related to Property_11",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 68,
+      "text": "Property_11 has characteristic Value_11",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 69,
+      "text": "Entity_12 is related to Property_12",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 70,
+      "text": "Property_12 has characteristic Value_12",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 71,
+      "text": "Entity_13 is related to Property_13",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 72,
+      "text": "Property_13 has characteristic Value_13",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 73,
+      "text": "Entity_14 is related to Property_14",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 74,
+      "text": "Property_14 has characteristic Value_14",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 75,
+      "text": "Entity_15 is related to Property_15",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 76,
+      "text": "Property_15 has characteristic Value_15",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 77,
+      "text": "Entity_16 is related to Property_16",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 78,
+      "text": "Property_16 has characteristic Value_16",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 79,
+      "text": "Entity_17 is related to Property_17",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 80,
+      "text": "Property_17 has characteristic Value_17",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 81,
+      "text": "Entity_18 is related to Property_18",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 82,
+      "text": "Property_18 has characteristic Value_18",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 83,
+      "text": "Entity_19 is related to Property_19",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 84,
+      "text": "Property_19 has characteristic Value_19",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 85,
+      "text": "Entity_20 is related to Property_20",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 86,
+      "text": "Property_20 has characteristic Value_20",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 87,
+      "text": "Entity_21 is related to Property_21",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 88,
+      "text": "Property_21 has characteristic Value_21",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 89,
+      "text": "Entity_22 is related to Property_22",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 90,
+      "text": "Property_22 has characteristic Value_22",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 91,
+      "text": "Entity_23 is related to Property_23",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 92,
+      "text": "Property_23 has characteristic Value_23",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 93,
+      "text": "Entity_24 is related to Property_24",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 94,
+      "text": "Property_24 has characteristic Value_24",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 95,
+      "text": "Entity_25 is related to Property_25",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 96,
+      "text": "Property_25 has characteristic Value_25",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 97,
+      "text": "Entity_26 is related to Property_26",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 98,
+      "text": "Property_26 has characteristic Value_26",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 99,
+      "text": "Entity_27 is related to Property_27",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 100,
+      "text": "Property_27 has characteristic Value_27",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 101,
+      "text": "Entity_28 is related to Property_28",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 102,
+      "text": "Property_28 has characteristic Value_28",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 103,
+      "text": "Entity_29 is related to Property_29",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 104,
+      "text": "Property_29 has characteristic Value_29",
+      "type": "multi-hop-support"
+    },
+    {
+      "id": 105,
+      "text": "The explanation for 'Why does phenomenon_0 happen?' is as follows: explanation_106. This involves complex interactions in phenomenon_0.",
+      "type": "reasoning"
+    },
+    {
+      "id": 106,
+      "text": "The explanation for 'Why does event_1 happen?' is as follows: explanation_107. This involves complex interactions in event_1.",
+      "type": "reasoning"
+    },
+    {
+      "id": 107,
+      "text": "The explanation for 'Why does process_2 happen?' is as follows: explanation_108. This involves complex interactions in process_2.",
+      "type": "reasoning"
+    },
+    {
+      "id": 108,
+      "text": "The explanation for 'Why does phenomenon_3 happen?' is as follows: explanation_109. This involves complex interactions in phenomenon_3.",
+      "type": "reasoning"
+    },
+    {
+      "id": 109,
+      "text": "The explanation for 'Why does event_4 happen?' is as follows: explanation_110. This involves complex interactions in event_4.",
+      "type": "reasoning"
+    },
+    {
+      "id": 110,
+      "text": "The explanation for 'Why does process_5 happen?' is as follows: explanation_111. This involves complex interactions in process_5.",
+      "type": "reasoning"
+    },
+    {
+      "id": 111,
+      "text": "The explanation for 'Why does phenomenon_6 happen?' is as follows: explanation_112. This involves complex interactions in phenomenon_6.",
+      "type": "reasoning"
+    },
+    {
+      "id": 112,
+      "text": "The explanation for 'Why does event_7 happen?' is as follows: explanation_113. This involves complex interactions in event_7.",
+      "type": "reasoning"
+    },
+    {
+      "id": 113,
+      "text": "The explanation for 'Why does process_8 happen?' is as follows: explanation_114. This involves complex interactions in process_8.",
+      "type": "reasoning"
+    },
+    {
+      "id": 114,
+      "text": "The description for 'How does system_0 work?' is as follows: description_115. This involves complex interactions in system_0.",
+      "type": "reasoning"
+    },
+    {
+      "id": 115,
+      "text": "The description for 'How does mechanism_1 work?' is as follows: description_116. This involves complex interactions in mechanism_1.",
+      "type": "reasoning"
+    },
+    {
+      "id": 116,
+      "text": "The description for 'How does technology_2 work?' is as follows: description_117. This involves complex interactions in technology_2.",
+      "type": "reasoning"
+    },
+    {
+      "id": 117,
+      "text": "The description for 'How does system_3 work?' is as follows: description_118. This involves complex interactions in system_3.",
+      "type": "reasoning"
+    },
+    {
+      "id": 118,
+      "text": "The description for 'How does mechanism_4 work?' is as follows: description_119. This involves complex interactions in mechanism_4.",
+      "type": "reasoning"
+    },
+    {
+      "id": 119,
+      "text": "The description for 'How does technology_5 work?' is as follows: description_120. This involves complex interactions in technology_5.",
+      "type": "reasoning"
+    },
+    {
+      "id": 120,
+      "text": "The description for 'How does system_6 work?' is as follows: description_121. This involves complex interactions in system_6.",
+      "type": "reasoning"
+    },
+    {
+      "id": 121,
+      "text": "The description for 'How does mechanism_7 work?' is as follows: description_122. This involves complex interactions in mechanism_7.",
+      "type": "reasoning"
+    },
+    {
+      "id": 122,
+      "text": "The description for 'How does technology_8 work?' is as follows: description_123. This involves complex interactions in technology_8.",
+      "type": "reasoning"
+    },
+    {
+      "id": 123,
+      "text": "The cause for 'What causes effect_0?' is as follows: cause_124. This involves complex interactions in effect_0.",
+      "type": "reasoning"
+    },
+    {
+      "id": 124,
+      "text": "The cause for 'What causes result_1?' is as follows: cause_125. This involves complex interactions in result_1.",
+      "type": "reasoning"
+    },
+    {
+      "id": 125,
+      "text": "The cause for 'What causes outcome_2?' is as follows: cause_126. This involves complex interactions in outcome_2.",
+      "type": "reasoning"
+    },
+    {
+      "id": 126,
+      "text": "The cause for 'What causes effect_3?' is as follows: cause_127. This involves complex interactions in effect_3.",
+      "type": "reasoning"
+    },
+    {
+      "id": 127,
+      "text": "The cause for 'What causes result_4?' is as follows: cause_128. This involves complex interactions in result_4.",
+      "type": "reasoning"
+    },
+    {
+      "id": 128,
+      "text": "The cause for 'What causes outcome_5?' is as follows: cause_129. This involves complex interactions in outcome_5.",
+      "type": "reasoning"
+    },
+    {
+      "id": 129,
+      "text": "The cause for 'What causes effect_6?' is as follows: cause_130. This involves complex interactions in effect_6.",
+      "type": "reasoning"
+    },
+    {
+      "id": 130,
+      "text": "The cause for 'What causes result_7?' is as follows: cause_131. This involves complex interactions in result_7.",
+      "type": "reasoning"
+    },
+    {
+      "id": 131,
+      "text": "The cause for 'What causes outcome_8?' is as follows: cause_132. This involves complex interactions in outcome_8.",
+      "type": "reasoning"
+    },
+    {
+      "id": 132,
+      "text": "This is an irrelevant document about topic_0. It contains random information that should not match any queries.",
+      "type": "noise"
+    },
+    {
+      "id": 133,
+      "text": "This is an irrelevant document about topic_1. It contains random information that should not match any queries.",
+      "type": "noise"
+    },
+    {
+      "id": 134,
+      "text": "This is an irrelevant document about topic_2. It contains random information that should not match any queries.",
+      "type": "noise"
+    },
+    {
+      "id": 135,
+      "text": "This is an irrelevant document about topic_3. It contains random information that should not match any queries.",
+      "type": "noise"
+    },
+    {
+      "id": 136,
+      "text": "This is an irrelevant document about topic_4. It contains random information that should not match any queries.",
+      "type": "noise"
+    },
+    {
+      "id": 137,
+      "text": "This is an irrelevant document about topic_5. It contains random information that should not match any queries.",
+      "type": "noise"
+    },
+    {
+      "id": 138,
+      "text": "This is an irrelevant document about topic_6. It contains random information that should not match any queries.",
+      "type": "noise"
+    },
+    {
+      "id": 139,
+      "text": "This is an irrelevant document about topic_7. It contains random information that should not match any queries.",
+      "type": "noise"
+    },
+    {
+      "id": 140,
+      "text": "This is an irrelevant document about topic_8. It contains random information that should not match any queries.",
+      "type": "noise"
+    },
+    {
+      "id": 141,
+      "text": "This is an irrelevant document about topic_9. It contains random information that should not match any queries.",
+      "type": "noise"
+    },
+    {
+      "id": 142,
+      "text": "This is an irrelevant document about topic_10. It contains random information that should not match any queries.",
+      "type": "noise"
+    },
+    {
+      "id": 143,
+      "text": "This is an irrelevant document about topic_11. It contains random information that should not match any queries.",
+      "type": "noise"
+    },
+    {
+      "id": 144,
+      "text": "This is an irrelevant document about topic_12. It contains random information that should not match any queries.",
+      "type": "noise"
+    },
+    {
+      "id": 145,
+      "text": "This is an irrelevant document about topic_13. It contains random information that should not match any queries.",
+      "type": "noise"
+    },
+    {
+      "id": 146,
+      "text": "This is an irrelevant document about topic_14. It contains random information that should not match any queries.",
+      "type": "noise"
+    },
+    {
+      "id": 147,
+      "text": "This is an irrelevant document about topic_15. It contains random information that should not match any queries.",
+      "type": "noise"
+    },
+    {
+      "id": 148,
+      "text": "This is an irrelevant document about topic_16. It contains random information that should not match any queries.",
+      "type": "noise"
+    },
+    {
+      "id": 149,
+      "text": "This is an irrelevant document about topic_17. It contains random information that should not match any queries.",
+      "type": "noise"
+    },
+    {
+      "id": 150,
+      "text": "This is an irrelevant document about topic_18. It contains random information that should not match any queries.",
+      "type": "noise"
+    },
+    {
+      "id": 151,
+      "text": "This is an irrelevant document about topic_19. It contains random information that should not match any queries.",
+      "type": "noise"
+    }
+  ],
+  "random_seed": 42,
+  "timestamp": "2025-07-02T22:37:29.053907"
+}

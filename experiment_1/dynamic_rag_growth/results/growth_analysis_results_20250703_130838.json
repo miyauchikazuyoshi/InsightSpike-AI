@@ -1,0 +1,153 @@
+{
+  "timestamp": "20250703_130838",
+  "existing_data_analysis": {
+    "episodes": {
+      "size_bytes": 23113,
+      "count": 5,
+      "size_per_episode": 4622.6
+    },
+    "graph": {
+      "size_bytes": 5284,
+      "num_nodes": 1,
+      "size_per_node": 5284.0
+    },
+    "datasets": {}
+  },
+  "datasets_analyzed": 14,
+  "total_samples": 1160,
+  "growth_simulation": [
+    {
+      "dataset": "ms_marco_20",
+      "cumulative_samples": 20,
+      "raw_size_bytes": 86944,
+      "estimated_insightspike_size": 4481.649484536083,
+      "compression_ratio": 19.4,
+      "size_per_sample_raw": 4347.2,
+      "size_per_sample_compressed": 224.08247422680415
+    },
+    {
+      "dataset": "drop_20",
+      "cumulative_samples": 40,
+      "raw_size_bytes": 111112,
+      "estimated_insightspike_size": 5727.422680412372,
+      "compression_ratio": 19.4,
+      "size_per_sample_raw": 2777.8,
+      "size_per_sample_compressed": 143.18556701030928
+    },
+    {
+      "dataset": "commonsense_qa_20",
+      "cumulative_samples": 60,
+      "raw_size_bytes": 117128,
+      "estimated_insightspike_size": 6037.525773195876,
+      "compression_ratio": 19.4,
+      "size_per_sample_raw": 1952.1333333333334,
+      "size_per_sample_compressed": 100.62542955326461
+    },
+    {
+      "dataset": "squad_30",
+      "cumulative_samples": 90,
+      "raw_size_bytes": 147344,
+      "estimated_insightspike_size": 7595.051546391753,
+      "compression_ratio": 19.4,
+      "size_per_sample_raw": 1637.1555555555556,
+      "size_per_sample_compressed": 84.38946162657503
+    },
+    {
+      "dataset": "coqa_30",
+      "cumulative_samples": 120,
+      "raw_size_bytes": 220416,
+      "estimated_insightspike_size": 11361.649484536083,
+      "compression_ratio": 19.4,
+      "size_per_sample_raw": 1836.8,
+      "size_per_sample_compressed": 94.68041237113403
+    },
+    {
+      "dataset": "ms_marco_50",
+      "cumulative_samples": 170,
+      "raw_size_bytes": 437128,
+      "estimated_insightspike_size": 22532.37113402062,
+      "compression_ratio": 19.4,
+      "size_per_sample_raw": 2571.3411764705884,
+      "size_per_sample_compressed": 132.54335961188602
+    },
+    {
+      "dataset": "boolq_50",
+      "cumulative_samples": 220,
+      "raw_size_bytes": 469128,
+      "estimated_insightspike_size": 24181.855670103094,
+      "compression_ratio": 19.4,
+      "size_per_sample_raw": 2132.4,
+      "size_per_sample_compressed": 109.91752577319588
+    },
+    {
+      "dataset": "drop_50",
+      "cumulative_samples": 270,
+      "raw_size_bytes": 548416,
+      "estimated_insightspike_size": 28268.865979381444,
+      "compression_ratio": 19.4,
+      "size_per_sample_raw": 2031.1703703703704,
+      "size_per_sample_compressed": 104.69950362733869
+    },
+    {
+      "dataset": "hotpot_qa_60",
+      "cumulative_samples": 330,
+      "raw_size_bytes": 962840,
+      "estimated_insightspike_size": 49630.92783505155,
+      "compression_ratio": 19.4,
+      "size_per_sample_raw": 2917.6969696969695,
+      "size_per_sample_compressed": 150.39675101530773
+    },
+    {
+      "dataset": "coqa_80",
+      "cumulative_samples": 410,
+      "raw_size_bytes": 1157352,
+      "estimated_insightspike_size": 59657.319587628874,
+      "compression_ratio": 19.4,
+      "size_per_sample_raw": 2822.809756097561,
+      "size_per_sample_compressed": 145.50565753080213
+    },
+    {
+      "dataset": "squad_100",
+      "cumulative_samples": 510,
+      "raw_size_bytes": 1232016,
+      "estimated_insightspike_size": 63505.97938144331,
+      "compression_ratio": 19.4,
+      "size_per_sample_raw": 2415.7176470588233,
+      "size_per_sample_compressed": 124.52152819890844
+    },
+    {
+      "dataset": "ms_marco_150",
+      "cumulative_samples": 660,
+      "raw_size_bytes": 1873888,
+      "estimated_insightspike_size": 96592.16494845362,
+      "compression_ratio": 19.4,
+      "size_per_sample_raw": 2839.224242424242,
+      "size_per_sample_compressed": 146.35176507341458
+    },
+    {
+      "dataset": "squad_200",
+      "cumulative_samples": 860,
+      "raw_size_bytes": 2092360,
+      "estimated_insightspike_size": 107853.60824742269,
+      "compression_ratio": 19.4,
+      "size_per_sample_raw": 2432.9767441860463,
+      "size_per_sample_compressed": 125.41117238072405
+    },
+    {
+      "dataset": "squad_300",
+      "cumulative_samples": 1160,
+      "raw_size_bytes": 2369376,
+      "estimated_insightspike_size": 122132.78350515464,
+      "compression_ratio": 19.4,
+      "size_per_sample_raw": 2042.5655172413792,
+      "size_per_sample_compressed": 105.28688233202986
+    }
+  ],
+  "key_findings": {
+    "final_sample_count": 1160,
+    "final_raw_size_mb": 2.259613037109375,
+    "final_compressed_size_mb": 0.11647489882007088,
+    "average_compression_ratio": 19.400000000000002,
+    "storage_saved_percent": 94.84536082474226
+  }
+}

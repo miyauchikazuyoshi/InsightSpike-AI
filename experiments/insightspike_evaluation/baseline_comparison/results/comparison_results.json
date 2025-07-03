@@ -1,0 +1,53 @@
+{
+  "InsightSpike-AI": {
+    "recall@1": 0.235,
+    "recall@5": 0.64,
+    "recall@10": 0.875,
+    "mrr": 0.4142896825396825,
+    "avg_latency_ms": 5.658596754074097,
+    "memory_stats": {
+      "episodic_size": 500.0,
+      "compressed_size": 144.0,
+      "kg_size": 22.1875,
+      "total_size": 666.1875,
+      "raw_size": 976.5625,
+      "compression_ratio": 1.465897363730181
+    }
+  },
+  "TF-IDF": {
+    "recall@1": 0.815,
+    "recall@5": 0.815,
+    "recall@10": 0.815,
+    "mrr": 0.815,
+    "avg_latency_ms": 1.7736995220184326,
+    "memory_stats": {
+      "total_size": 593.75,
+      "raw_size": 3600,
+      "compression_ratio": 6.063157894736842
+    }
+  },
+  "Sentence-BERT": {
+    "recall@1": 0.815,
+    "recall@5": 0.815,
+    "recall@10": 0.815,
+    "mrr": 0.815,
+    "avg_latency_ms": 36.86199903488159,
+    "memory_stats": {
+      "total_size": 5400.0,
+      "raw_size": 3600,
+      "compression_ratio": 0.6666666666666666
+    }
+  },
+  "DPR": {
+    "recall@1": 0.815,
+    "recall@5": 0.815,
+    "recall@10": 0.815,
+    "mrr": 0.815,
+    "avg_latency_ms": 29.569171667099,
+    "memory_stats": {
+      "total_size": 5400.0,
+      "raw_size": 3600,
+      "compression_ratio": 0.6666666666666666
+    }
+  }
+}

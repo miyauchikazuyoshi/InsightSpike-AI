@@ -1,0 +1,74 @@
+{
+  "ms_marco_150": {
+    "path": "data/mega_huggingface_datasets/ms_marco_150",
+    "samples": 150,
+    "download_time": 9.030766248703003,
+    "status": "success"
+  },
+  "squad_300": {
+    "path": "data/mega_huggingface_datasets/squad_300",
+    "samples": 300,
+    "download_time": 9.053377151489258,
+    "status": "success"
+  },
+  "squad_200": {
+    "path": "data/mega_huggingface_datasets/squad_200",
+    "samples": 200,
+    "download_time": 9.063475131988525,
+    "status": "success"
+  },
+  "coqa_80": {
+    "path": "data/mega_huggingface_datasets/coqa_80",
+    "samples": 80,
+    "download_time": 6.77754282951355,
+    "status": "success"
+  },
+  "drop_50": {
+    "path": "data/mega_huggingface_datasets/drop_50",
+    "samples": 50,
+    "download_time": 7.531497955322266,
+    "status": "success"
+  },
+  "xnli_failed": {
+    "status": "failed",
+    "error": "Config name is missing.\nPlease pick one among the available configs: ['all_languages', 'ar', 'bg', 'de', 'el', 'en', 'es', 'fr', 'hi', 'ru', 'sw', 'th', 'tr', 'ur', 'vi', 'zh']\nExample of usage:\n\t`load_dataset('xnli', 'all_languages')`"
+  },
+  "piqa_failed": {
+    "status": "failed",
+    "error": "The repository for piqa contains custom code which must be executed to correctly load the dataset. You can inspect the repository content at https://hf.co/datasets/piqa.\nPlease pass the argument `trust_remote_code=True` to allow custom code to be run."
+  },
+  "winogrande_failed": {
+    "status": "failed",
+    "error": "The repository for winogrande contains custom code which must be executed to correctly load the dataset. You can inspect the repository content at https://hf.co/datasets/winogrande.\nPlease pass the argument `trust_remote_code=True` to allow custom code to be run."
+  },
+  "boolq_50": {
+    "path": "data/mega_huggingface_datasets/boolq_50",
+    "samples": 50,
+    "download_time": 15.100759029388428,
+    "status": "success"
+  },
+  "hellaswag_failed": {
+    "status": "failed",
+    "error": "The repository for hellaswag contains custom code which must be executed to correctly load the dataset. You can inspect the repository content at https://hf.co/datasets/hellaswag.\nPlease pass the argument `trust_remote_code=True` to allow custom code to be run."
+  },
+  "arc_failed": {
+    "status": "failed",
+    "error": "Dataset 'arc' doesn't exist on the Hub or cannot be accessed."
+  },
+  "commonsense_qa_20": {
+    "path": "data/mega_huggingface_datasets/commonsense_qa_20",
+    "samples": 20,
+    "download_time": 11.164827108383179,
+    "status": "success"
+  },
+  "natural_questions_failed": {
+    "status": "failed",
+    "error": "An error occurred while generating the dataset"
+  },
+  "hotpot_qa_60": {
+    "path": "data/mega_huggingface_datasets/hotpot_qa_60",
+    "samples": 60,
+    "download_time": 239.51966381072998,
+    "status": "success"
+  }
+}

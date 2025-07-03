@@ -1,0 +1,21 @@
+{
+  "processing": {
+    "total_documents": 100,
+    "total_insights": 0,
+    "insight_ratio": 0.0,
+    "avg_processing_time": 0.3140527057647705,
+    "total_processing_time": 31.40527057647705
+  },
+  "retrieval": {
+    "total_queries": 20,
+    "successful_retrievals": 0,
+    "retrieval_accuracy": 0.0,
+    "avg_retrieval_time": 0.35924195051193236,
+    "avg_quality_score": 0.0
+  },
+  "insights": {
+    "count": 0,
+    "avg_quality": 0,
+    "indices": []
+  }
+}

@@ -1,0 +1,165 @@
+{
+  "timestamp": "2025-07-03T13:43:49.310370",
+  "initial_metrics": {
+    "episodes": {
+      "count": 8,
+      "size": 55815,
+      "size_per_item": 6976.875
+    },
+    "graph": {
+      "size": 5284
+    },
+    "index": {
+      "size": 58413
+    },
+    "total_size": 119512
+  },
+  "final_metrics": {
+    "episodes": {
+      "count": 30,
+      "size": 327905,
+      "size_per_item": 10930.166666666666
+    },
+    "graph": {
+      "size": 5284
+    },
+    "index": {
+      "size": 46125
+    },
+    "total_size": 379314
+  },
+  "growth_data": [
+    {
+      "step": 0,
+      "added": 0,
+      "metrics": {
+        "episodes": {
+          "count": 8,
+          "size": 55815,
+          "size_per_item": 6976.875
+        },
+        "graph": {
+          "size": 5284
+        },
+        "index": {
+          "size": 58413
+        },
+        "total_size": 119512
+      }
+    },
+    {
+      "step": 1,
+      "added": 5,
+      "metrics": {
+        "episodes": {
+          "count": 5,
+          "size": 54481,
+          "size_per_item": 10896.2
+        },
+        "graph": {
+          "size": 5284
+        },
+        "index": {
+          "size": 7725
+        },
+        "total_size": 67490
+      }
+    },
+    {
+      "step": 2,
+      "added": 10,
+      "metrics": {
+        "episodes": {
+          "count": 10,
+          "size": 108998,
+          "size_per_item": 10899.8
+        },
+        "graph": {
+          "size": 5284
+        },
+        "index": {
+          "size": 15405
+        },
+        "total_size": 129687
+      }
+    },
+    {
+      "step": 3,
+      "added": 15,
+      "metrics": {
+        "episodes": {
+          "count": 15,
+          "size": 163572,
+          "size_per_item": 10904.8
+        },
+        "graph": {
+          "size": 5284
+        },
+        "index": {
+          "size": 23085
+        },
+        "total_size": 191941
+      }
+    },
+    {
+      "step": 4,
+      "added": 20,
+      "metrics": {
+        "episodes": {
+          "count": 20,
+          "size": 218026,
+          "size_per_item": 10901.3
+        },
+        "graph": {
+          "size": 5284
+        },
+        "index": {
+          "size": 30765
+        },
+        "total_size": 254075
+      }
+    },
+    {
+      "step": 5,
+      "added": 25,
+      "metrics": {
+        "episodes": {
+          "count": 25,
+          "size": 273054,
+          "size_per_item": 10922.16
+        },
+        "graph": {
+          "size": 5284
+        },
+        "index": {
+          "size": 38445
+        },
+        "total_size": 316783
+      }
+    },
+    {
+      "step": 6,
+      "added": 30,
+      "metrics": {
+        "episodes": {
+          "count": 30,
+          "size": 327905,
+          "size_per_item": 10930.166666666666
+        },
+        "graph": {
+          "size": 5284
+        },
+        "index": {
+          "size": 46125
+        },
+        "total_size": 379314
+      }
+    }
+  ],
+  "summary": {
+    "total_added": 30,
+    "episode_growth": 22,
+    "size_growth": 259802,
+    "compression_ratio": 0.008922435803676132
+  }
+}

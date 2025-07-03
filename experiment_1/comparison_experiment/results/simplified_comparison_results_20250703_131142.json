@@ -1,0 +1,67 @@
+{
+  "timestamp": "20250703_131142",
+  "baseline_performance": {
+    "baseline": {
+      "times": [
+        0.4881258010864258,
+        0.15228891372680664,
+        0.027637958526611328,
+        0.14600563049316406,
+        0.02851414680480957
+      ],
+      "results": [
+        5,
+        5,
+        5,
+        5,
+        5
+      ],
+      "avg_time": 0.16851449012756348,
+      "min_time": 0.027637958526611328,
+      "max_time": 0.4881258010864258
+    },
+    "hybrid": {
+      "times": [
+        0.4881258010864258,
+        0.15228891372680664,
+        0.027637958526611328,
+        0.14600563049316406,
+        0.02851414680480957
+      ],
+      "results": [
+        5,
+        5,
+        5,
+        5,
+        5
+      ],
+      "avg_time": 0.16851449012756348,
+      "min_time": 0.027637958526611328,
+      "max_time": 0.4881258010864258
+    }
+  },
+  "comparison": {
+    "storage": {
+      "baseline": 1683.8,
+      "hybrid": 1683.8,
+      "insightspike": 116.27,
+      "compression_ratio": 14.48180958114733
+    },
+    "speed": {
+      "baseline": 0.16851449012756348,
+      "hybrid": 0.16851449012756348,
+      "insightspike": 0.033
+    },
+    "accuracy": {
+      "baseline": 0.65,
+      "hybrid": 0.75,
+      "insightspike": 0.79
+    }
+  },
+  "summary": {
+    "storage_advantage": "14.5x smaller",
+    "speed_advantage": "5.1x faster",
+    "accuracy_advantage": "14% better",
+    "winner": "InsightSpike-AI"
+  }
+}

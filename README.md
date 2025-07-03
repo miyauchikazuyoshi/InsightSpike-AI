@@ -151,6 +151,114 @@ python monitoring/production_monitor.py
 python benchmarks/performance_suite.py
 ```
 
+## 📖 Usage Guide
+
+### CLI Commands
+
+InsightSpike-AI provides a command-line interface for interacting with the system:
+
+```bash
+# Ask a question (does not save data)
+poetry run insightspike ask "What is quantum computing?"
+
+# Load documents (does not update graph or save)
+poetry run insightspike load-documents path/to/documents.txt
+
+# Show statistics
+poetry run insightspike stats
+
+# Show help
+poetry run insightspike --help
+```
+
+**⚠️ Important CLI Limitations:**
+- `load-documents` does NOT update the graph structure
+- No CLI commands automatically save data to disk
+- For full functionality, use the Python API
+
+### Python API (MainAgent)
+
+For complete control and data persistence, use the MainAgent API:
+
+```python
+from insightspike.core.agents.main_agent import MainAgent
+
+# Initialize agent
+agent = MainAgent()
+agent.initialize()
+
+# Load existing state (if any)
+agent.load_state()
+
+# Add documents WITHOUT graph update
+agent.add_document("New knowledge about AI")
+
+# Add documents WITH graph update (recommended)
+result = agent.add_episode_with_graph_update(
+    text="Quantum computing uses quantum superposition",
+    c_value=0.5  # confidence value
+)
+
+# Process a question
+answer = agent.process_question("What is quantum computing?")
+
+# Get statistics
+stats = agent.get_stats()
+print(f"Episodes: {stats['episodes']}, Graph nodes: {stats['graph_nodes']}")
+
+# IMPORTANT: Save state to persist data
+agent.save_state()  # Saves to data/episodes.json and data/graph_pyg.pt
+```
+
+### Data Growth Example
+
+To properly grow the knowledge graph:
+
+```python
+from insightspike.core.agents.main_agent import MainAgent
+
+agent = MainAgent()
+agent.initialize()
+
+# Load test data
+documents = [
+    "Machine learning is a subset of artificial intelligence.",
+    "Deep learning uses neural networks with multiple layers.",
+    "Transformers revolutionized natural language processing."
+]
+
+# Add with graph updates
+for doc in documents:
+    result = agent.add_episode_with_graph_update(doc)
+    if result['success']:
+        print(f"✓ Added: {doc[:50]}...")
+
+# Check growth
+initial_stats = agent.get_stats()
+print(f"Total episodes: {initial_stats['episodes']}")
+print(f"Graph nodes: {initial_stats['graph_nodes']}")
+
+# MUST save to persist
+agent.save_state()
+```
+
+### Key Differences
+
+| Feature | CLI | Python API |
+|---------|-----|------------|
+| Add documents | ✓ | ✓ |
+| Update graph | ✗ | ✓ (with `add_episode_with_graph_update`) |
+| Save data | ✗ | ✓ (with `save_state`) |
+| Query processing | ✓ | ✓ |
+| Full control | ✗ | ✓ |
+
+### Data Storage
+
+InsightSpike-AI stores data in:
+- `data/episodes.json` - Episode memory (text, embeddings, metadata)
+- `data/graph_pyg.pt` - PyTorch Geometric graph structure
+- `data/index.faiss` - FAISS vector index for similarity search
+
 ## 🎯 What is InsightSpike-AI?
 
 InsightSpike-AI is a **production-ready research platform** that implements a neurobiologically-inspired AI architecture for detecting and modeling "insight moments" - those "Aha!" moments when knowledge suddenly restructures. The system uses a novel **geDIG** (Graph Edit Distance + Information Gain) methodology to identify when AI systems experience significant conceptual breakthroughs.

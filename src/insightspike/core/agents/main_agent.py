@@ -5,7 +5,6 @@ Main Agent Orchestrator
 Simplified main agent that coordinates all layers for clean execution.
 """
 
-import hashlib
 import logging
 import time
 from dataclasses import dataclass
@@ -299,26 +298,13 @@ class MainAgent:
             # Store question and response in memory for future retrieval
             memory_text = f"Q: {question}\nA: {cycle_result.response}"
             
-            # Create a simple embedding for the text (fallback approach)
+            # Use L2MemoryManager's store_episode method which properly uses SentenceTransformer
             try:
-                # Use a simple hash-based embedding
-                hash_obj = hashlib.md5(memory_text.encode())
-                hash_hex = hash_obj.hexdigest()
-                
-                # Convert hash to numerical vector
-                memory_vector = np.array([int(hash_hex[i:i+2], 16) for i in range(0, min(32, len(hash_hex)), 2)], dtype=np.float32)
-                # Pad or truncate to standard size
-                if len(memory_vector) < 384:
-                    memory_vector = np.pad(memory_vector, (0, 384 - len(memory_vector)), 'constant')
+                success = self.l2_memory.store_episode(memory_text, c_value=reasoning_quality)
+                if success:
+                    logger.debug(f"Stored episode in memory: {len(memory_text)} chars with quality {reasoning_quality:.3f}")
                 else:
-                    memory_vector = memory_vector[:384]
-                
-                # Normalize
-                memory_vector = memory_vector / (np.linalg.norm(memory_vector) + 1e-8)
-                
-                # Add to memory
-                episode_idx = self.l2_memory.add_episode(memory_vector, memory_text, reasoning_quality)
-                logger.debug(f"Added episode {episode_idx} to memory: {len(memory_text)} chars")
+                    logger.warning("Failed to store episode in memory")
                 
             except Exception as e:
                 logger.warning(f"Failed to add to memory: {e}")
@@ -340,39 +326,22 @@ class MainAgent:
     def _search_memory(self, question: str) -> Dict[str, Any]:
         """Search episodic memory for relevant documents"""
         try:
-            # Create a query vector from the question (same approach as when storing)
-            hash_obj = hashlib.md5(question.encode())
-            hash_hex = hash_obj.hexdigest()
-            
-            # Convert hash to numerical vector
-            query_vector = np.array([int(hash_hex[i:i+2], 16) for i in range(0, min(32, len(hash_hex)), 2)], dtype=np.float32)
-            # Pad or truncate to standard size
-            if len(query_vector) < 384:
-                query_vector = np.pad(query_vector, (0, 384 - len(query_vector)), 'constant')
-            else:
-                query_vector = query_vector[:384]
-            
-            # Normalize
-            query_vector = query_vector / (np.linalg.norm(query_vector) + 1e-8)
-            
-            # Search with vector
-            similarities, indices = self.l2_memory.search(
-                query_vector,
-                top_k=self.config.memory.max_retrieved_docs,
+            # Use L2MemoryManager's search_episodes method which properly uses SentenceTransformer
+            results = self.l2_memory.search_episodes(
+                question,
+                k=self.config.memory.max_retrieved_docs,
             )
 
-            # Convert results to documents format
+            # Convert search_episodes results to documents format
             documents = []
-            for sim, idx in zip(similarities, indices):
-                if idx < len(self.l2_memory.episodes):
-                    episode = self.l2_memory.episodes[idx]
-                    documents.append({
-                        "text": episode.text,
-                        "similarity": float(sim),
-                        "index": idx,
-                        "c_value": episode.c,
-                        "timestamp": getattr(episode, 'timestamp', time.time())
-                    })
+            for result in results:
+                documents.append({
+                    "text": result["text"],
+                    "similarity": result["similarity"],
+                    "index": result["index"],
+                    "c_value": result["c_value"],
+                    "timestamp": result.get("timestamp", time.time())
+                })
 
             stats = self.l2_memory.get_memory_stats()
 
@@ -599,23 +568,15 @@ class MainAgent:
         This ensures data consistency between memory and graph representations.
         """
         try:
-            # Create embedding for the text
-            hash_obj = hashlib.md5(text.encode())
-            hash_hex = hash_obj.hexdigest()
+            # Use L2MemoryManager's store_episode to get proper embeddings
+            success = self.l2_memory.store_episode(text, c_value)
+            if not success:
+                raise Exception("Failed to store episode")
             
-            # Convert hash to numerical vector
-            vector = np.array([int(hash_hex[i:i+2], 16) for i in range(0, min(32, len(hash_hex)), 2)], dtype=np.float32)
-            # Pad or truncate to standard size
-            if len(vector) < 384:
-                vector = np.pad(vector, (0, 384 - len(vector)), 'constant')
-            else:
-                vector = vector[:384]
-            
-            # Normalize
-            vector = vector / (np.linalg.norm(vector) + 1e-8)
-            
-            # Add to L2 memory
-            episode_idx = self.l2_memory.add_episode(vector, text, c_value)
+            # Get the last added episode (the one we just stored)
+            episode_idx = len(self.l2_memory.episodes) - 1
+            episode = self.l2_memory.episodes[episode_idx]
+            vector = episode.vec
             
             # Create document representation for graph
             document = {

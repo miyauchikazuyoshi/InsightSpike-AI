@@ -1,0 +1,157 @@
+{
+  "timestamp": "2025-07-03T13:33:51.525951",
+  "initial_metrics": {
+    "episodes": {
+      "count": 5,
+      "size": 23113,
+      "size_per_item": 4622.6
+    },
+    "graph": {
+      "size": 5284
+    },
+    "index": {
+      "size": 53805
+    },
+    "total_size": 82202
+  },
+  "final_metrics": {
+    "episodes": {
+      "count": 5,
+      "size": 23113,
+      "size_per_item": 4622.6
+    },
+    "graph": {
+      "size": 5284
+    },
+    "index": {
+      "size": 53805
+    },
+    "total_size": 82202
+  },
+  "growth_data": [
+    {
+      "batch": 0,
+      "metrics": {
+        "episodes": {
+          "count": 5,
+          "size": 23113,
+          "size_per_item": 4622.6
+        },
+        "graph": {
+          "size": 5284
+        },
+        "index": {
+          "size": 53805
+        },
+        "total_size": 82202
+      }
+    },
+    {
+      "batch": 1,
+      "metrics": {
+        "episodes": {
+          "count": 5,
+          "size": 23113,
+          "size_per_item": 4622.6
+        },
+        "graph": {
+          "size": 5284
+        },
+        "index": {
+          "size": 53805
+        },
+        "total_size": 82202
+      }
+    },
+    {
+      "batch": 2,
+      "metrics": {
+        "episodes": {
+          "count": 5,
+          "size": 23113,
+          "size_per_item": 4622.6
+        },
+        "graph": {
+          "size": 5284
+        },
+        "index": {
+          "size": 53805
+        },
+        "total_size": 82202
+      }
+    },
+    {
+      "batch": 3,
+      "metrics": {
+        "episodes": {
+          "count": 5,
+          "size": 23113,
+          "size_per_item": 4622.6
+        },
+        "graph": {
+          "size": 5284
+        },
+        "index": {
+          "size": 53805
+        },
+        "total_size": 82202
+      }
+    },
+    {
+      "batch": 4,
+      "metrics": {
+        "episodes": {
+          "count": 5,
+          "size": 23113,
+          "size_per_item": 4622.6
+        },
+        "graph": {
+          "size": 5284
+        },
+        "index": {
+          "size": 53805
+        },
+        "total_size": 82202
+      }
+    },
+    {
+      "batch": 5,
+      "metrics": {
+        "episodes": {
+          "count": 5,
+          "size": 23113,
+          "size_per_item": 4622.6
+        },
+        "graph": {
+          "size": 5284
+        },
+        "index": {
+          "size": 53805
+        },
+        "total_size": 82202
+      }
+    },
+    {
+      "batch": 6,
+      "metrics": {
+        "episodes": {
+          "count": 5,
+          "size": 23113,
+          "size_per_item": 4622.6
+        },
+        "graph": {
+          "size": 5284
+        },
+        "index": {
+          "size": 53805
+        },
+        "total_size": 82202
+      }
+    }
+  ],
+  "summary": {
+    "episode_growth": 0,
+    "size_growth": 0,
+    "batches_loaded": 6
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "demo_type": "graph_evolution_visualization",
+  "timestamp": "2025-06-02T01:07:41.455754",
+  "knowledge_facts_count": 8,
+  "questions_processed": 3,
+  "results": [
+    {
+      "question": "In the Monty Hall problem, why should you switch doors?",
+      "type": "insight_synthesis",
+      "delta_ged": 9.0,
+      "delta_ig": -0.03369935909373664,
+      "insight_detected": false,
+      "visualization_path": "data/processed/graph_visualizations/graph_evolution_q1_insight_synthesis.png"
+    },
+    {
+      "question": "How can infinite series help resolve Zeno's paradox?",
+      "type": "cross_domain",
+      "delta_ged": 3.0,
+      "delta_ig": -0.2169003670178589,
+      "insight_detected": false,
+      "visualization_path": "data/processed/graph_visualizations/graph_evolution_q2_cross_domain.png"
+    },
+    {
+      "question": "What is probability?",
+      "type": "direct_retrieval",
+      "delta_ged": 3.0,
+      "delta_ig": -0.0036271611367771073,
+      "insight_detected": false,
+      "visualization_path": "data/processed/graph_visualizations/graph_evolution_q3_direct_retrieval.png"
+    }
+  ],
+  "summary": {
+    "insight_questions": 0,
+    "avg_delta_ged": 5.0,
+    "avg_delta_ig": -0.08474229574945753
+  }
+}

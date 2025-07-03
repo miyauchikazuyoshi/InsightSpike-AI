@@ -1,0 +1,97 @@
+{
+  "builder_name": "parquet",
+  "citation": "",
+  "config_name": "v1.1",
+  "dataset_name": "ms_marco",
+  "dataset_size": 434276555,
+  "description": "",
+  "download_checksums": {
+    "hf://datasets/ms_marco@a47ee7aae8d7d466ba15f9f0bfac3b3681087b3a/v1.1/validation-00000-of-00001.parquet": {
+      "num_bytes": 21391358,
+      "checksum": null
+    },
+    "hf://datasets/ms_marco@a47ee7aae8d7d466ba15f9f0bfac3b3681087b3a/v1.1/train-00000-of-00001.parquet": {
+      "num_bytes": 175452226,
+      "checksum": null
+    },
+    "hf://datasets/ms_marco@a47ee7aae8d7d466ba15f9f0bfac3b3681087b3a/v1.1/test-00000-of-00001.parquet": {
+      "num_bytes": 20484569,
+      "checksum": null
+    }
+  },
+  "download_size": 217328153,
+  "features": {
+    "answers": {
+      "feature": {
+        "dtype": "string",
+        "_type": "Value"
+      },
+      "_type": "Sequence"
+    },
+    "passages": {
+      "feature": {
+        "is_selected": {
+          "dtype": "int32",
+          "_type": "Value"
+        },
+        "passage_text": {
+          "dtype": "string",
+          "_type": "Value"
+        },
+        "url": {
+          "dtype": "string",
+          "_type": "Value"
+        }
+      },
+      "_type": "Sequence"
+    },
+    "query": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "query_id": {
+      "dtype": "int32",
+      "_type": "Value"
+    },
+    "query_type": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "wellFormedAnswers": {
+      "feature": {
+        "dtype": "string",
+        "_type": "Value"
+      },
+      "_type": "Sequence"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 651604708,
+  "splits": {
+    "validation": {
+      "name": "validation",
+      "num_bytes": 42676755,
+      "num_examples": 10047,
+      "dataset_name": "ms_marco"
+    },
+    "train": {
+      "name": "train",
+      "num_bytes": 350611112,
+      "num_examples": 82326,
+      "dataset_name": "ms_marco"
+    },
+    "test": {
+      "name": "test",
+      "num_bytes": 40988688,
+      "num_examples": 9650,
+      "dataset_name": "ms_marco"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}

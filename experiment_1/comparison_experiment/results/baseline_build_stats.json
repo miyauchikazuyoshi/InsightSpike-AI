@@ -1,0 +1,19 @@
+{
+  "timestamp": "2025-07-03T13:09:26.555831",
+  "num_documents": 100,
+  "standard_baseline": {
+    "num_documents": 100,
+    "encode_time": 1.3101468086242676,
+    "index_time": 0.0014591217041015625,
+    "total_time": 1.3116059303283691,
+    "index_size": 168380
+  },
+  "hybrid_baseline": {
+    "num_documents": 100,
+    "encode_time": 0.1297459602355957,
+    "index_time": 0.00017595291137695312,
+    "total_time": 0.13052105903625488,
+    "index_size": 168380,
+    "bm25_time": 0.0005991458892822266
+  }
+}

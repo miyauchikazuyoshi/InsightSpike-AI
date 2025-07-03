@@ -1,0 +1,97 @@
+{
+  "TF-IDF": {
+    "recall@1": 0.05,
+    "precision@1": 0.05,
+    "recall@5": 0.2,
+    "precision@5": 0.04,
+    "recall@10": 0.35,
+    "precision@10": 0.035,
+    "latency_ms": 0.9459590911865234
+  },
+  "Sentence-BERT": {
+    "recall@1": 0.04,
+    "precision@1": 0.04,
+    "recall@5": 0.2,
+    "precision@5": 0.04,
+    "recall@10": 0.4,
+    "precision@10": 0.04,
+    "latency_ms": 37.49436616897583
+  },
+  "geDIG-Linear": {
+    "recall@1": 0.02,
+    "precision@1": 0.02,
+    "recall@5": 0.19,
+    "precision@5": 0.038,
+    "recall@10": 0.33,
+    "precision@10": 0.033,
+    "latency_ms": 1.2169671058654785,
+    "avg_hits": 5.89,
+    "hit_rate": 0.011779999999999999
+  },
+  "geDIG-AND": {
+    "recall@1": 0.0,
+    "precision@1": 0.0,
+    "recall@5": 0.03,
+    "precision@5": 0.006000000000000001,
+    "recall@10": 0.08,
+    "precision@10": 0.008,
+    "latency_ms": 1.331338882446289,
+    "avg_hits": 1.39,
+    "hit_rate": 0.00278
+  },
+  "geDIG-OR": {
+    "recall@1": 0.0,
+    "precision@1": 0.0,
+    "recall@5": 0.04,
+    "precision@5": 0.008,
+    "recall@10": 0.14,
+    "precision@10": 0.013999999999999999,
+    "latency_ms": 1.152040958404541,
+    "avg_hits": 24.61,
+    "hit_rate": 0.04922
+  },
+  "geDIG-WeightedAND": {
+    "recall@1": 0.01,
+    "precision@1": 0.01,
+    "recall@5": 0.1,
+    "precision@5": 0.02,
+    "recall@10": 0.29,
+    "precision@10": 0.028999999999999998,
+    "latency_ms": 1.1178231239318848,
+    "avg_hits": 20.95,
+    "hit_rate": 0.0419
+  },
+  "geDIG-Multiplicative": {
+    "recall@1": 0.01,
+    "precision@1": 0.01,
+    "recall@5": 0.1,
+    "precision@5": 0.02,
+    "recall@10": 0.27,
+    "precision@10": 0.027000000000000003,
+    "latency_ms": 1.1247467994689941,
+    "avg_hits": 1.39,
+    "hit_rate": 0.00278
+  },
+  "geDIG-AND-Low": {
+    "recall@1": 0.01,
+    "precision@1": 0.01,
+    "recall@5": 0.06,
+    "precision@5": 0.012,
+    "recall@10": 0.11,
+    "precision@10": 0.011000000000000001,
+    "latency_ms": 1.0936737060546875,
+    "avg_hits": 21.75,
+    "hit_rate": 0.0435
+  },
+  "geDIG-AND-High": {
+    "recall@1": 0.0,
+    "precision@1": 0.0,
+    "recall@5": 0.01,
+    "precision@5": 0.002,
+    "recall@10": 0.02,
+    "precision@10": 0.002,
+    "latency_ms": 1.1172962188720703,
+    "avg_hits": 0.0,
+    "hit_rate": 0.0
+  }
+}
