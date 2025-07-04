@@ -330,7 +330,18 @@ class GraphCentricMemoryManager(L2MemoryManager):
         
         results = []
         for i, episode in enumerate(self.episodes):
-            similarity = np.dot(query_vec, episode.vec)
+            # Ensure both vectors have the same shape
+            if query_vec.shape != episode.vec.shape:
+                if query_vec.ndim == 2 and query_vec.shape[0] == 1:
+                    query_vec = query_vec.squeeze(0)
+                if episode.vec.ndim == 2 and episode.vec.shape[0] == 1:
+                    episode_vec = episode.vec.squeeze(0)
+                else:
+                    episode_vec = episode.vec
+            else:
+                episode_vec = episode.vec
+            
+            similarity = np.dot(query_vec, episode_vec)
             importance = self.get_importance(i)
             
             # 重要度で調整されたスコア
@@ -382,6 +393,10 @@ class GraphCentricMemoryManager(L2MemoryManager):
             return 0.0
         
         edge_index = graph.edge_index
+        
+        # Convert to tensor if needed
+        if isinstance(edge_index, np.ndarray):
+            edge_index = torch.from_numpy(edge_index)
         
         # エッジ存在チェック
         mask = ((edge_index[0] == idx1) & (edge_index[1] == idx2)) | \
