@@ -4,6 +4,7 @@ Tests for Graph-Centric Memory Manager (C-value free)
 
 import pytest
 import numpy as np
+import torch
 import time
 from unittest.mock import Mock, patch
 
@@ -61,7 +62,7 @@ class TestGraphCentricMemory:
         # Mock Layer3 graph
         mock_layer3 = Mock()
         mock_graph = Mock()
-        mock_graph.edge_index = np.array([[0], [1]])  # Connect 0 and 1
+        mock_graph.edge_index = torch.tensor([[0], [1]])  # Connect 0 and 1 as PyTorch tensor
         mock_graph.edge_attr = Mock()
         mock_graph.edge_attr.__getitem__ = Mock(return_value=0.8)  # Mock edge weight
         mock_layer3.previous_graph = mock_graph
@@ -124,10 +125,12 @@ class TestGraphCentricMemory:
         """Test search considers dynamic importance."""
         # Mock the embedder to return 10-dimensional vectors matching the episode vectors
         mock_model = Mock()
-        # Return a normalized 10-dimensional vector
-        query_vec = np.random.randn(10).astype(np.float32)
-        query_vec = query_vec / np.linalg.norm(query_vec)
-        mock_model.encode = Mock(return_value=query_vec)
+        # Return a normalized 10-dimensional vector without extra dimension
+        def mock_encode(text, **kwargs):
+            vec = np.random.randn(10).astype(np.float32)
+            vec = vec / np.linalg.norm(vec)
+            return vec
+        mock_model.encode = Mock(side_effect=mock_encode)
         mock_get_model.return_value = mock_model
         
         # Add episodes with different access patterns

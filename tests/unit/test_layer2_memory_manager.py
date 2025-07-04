@@ -5,6 +5,7 @@ Compatible with graph-centric implementation
 
 import pytest
 import numpy as np
+import torch
 from unittest.mock import patch, MagicMock, Mock
 
 from insightspike.core.layers.layer2_graph_centric import GraphCentricMemoryManager
@@ -61,9 +62,11 @@ class TestGraphCentricMemoryManager:
         """Test episode search functionality."""
         # Mock the embedder to return 8-dimensional vectors matching the episode vectors
         mock_model = Mock()
-        query_vec = np.random.randn(8).astype(np.float32)
-        query_vec = query_vec / np.linalg.norm(query_vec)
-        mock_model.encode = Mock(return_value=query_vec)
+        def mock_encode(text, **kwargs):
+            vec = np.random.randn(8).astype(np.float32)
+            vec = vec / np.linalg.norm(vec)
+            return vec
+        mock_model.encode = Mock(side_effect=mock_encode)
         mock_get_model.return_value = mock_model
         
         # Add test episodes
@@ -106,7 +109,7 @@ class TestGraphCentricMemoryManager:
         # Mock Layer3
         mock_layer3 = Mock()
         mock_graph = Mock()
-        mock_graph.edge_index = np.array([[0, 1], [1, 0]])
+        mock_graph.edge_index = torch.tensor([[0, 1], [1, 0]])  # PyTorch tensor
         mock_graph.edge_attr = Mock()
         mock_graph.edge_attr.__getitem__ = Mock(return_value=0.8)  # Mock edge weight
         mock_layer3.previous_graph = mock_graph
