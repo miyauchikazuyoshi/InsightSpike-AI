@@ -158,7 +158,7 @@ class MockMainAgent:
         self.initialized = True
         return True
     
-    def add_document(self, text, c_value=0.5):
+    def add_document(self, text):
         pass
     
     def process_question(self, question, max_cycles=3, verbose=False):
@@ -177,11 +177,10 @@ class MockMemory:
     def __init__(self):
         self.episodes = []
     
-    def add_episode(self, vector, content, c_value=0.5):
+    def add_episode(self, vector, content):
         self.episodes.append({
             'vector': vector,
-            'content': content,
-            'c_value': c_value
+            'content': content
         })
     
     def search_episodes(self, query_vector, k=5):

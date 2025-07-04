@@ -1,26 +1,118 @@
+"""
+Updated tests for Layer 2 Memory Manager
+Compatible with graph-centric implementation
+"""
+
+import pytest
 import numpy as np
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, Mock
 
-def test_memory_init():
-    """Test Memory class initialization with proper mocking."""
+from insightspike.core.layers.layer2_graph_centric import GraphCentricMemoryManager
+
+
+class TestGraphCentricMemoryManager:
+    """Test the graph-centric memory manager."""
     
-    class DummyIndex:
-        def __init__(self, dim):
-            self.d = dim
-            self.ntotal = 0
-        def add(self, vecs):
-            pass
-        def train(self, vecs):
-            pass
-
-    # Mock faiss.index_factory to return our dummy index
-    with patch('faiss.index_factory') as mock_factory:
-        mock_factory.return_value = DummyIndex(8)  # Use dimension compatible with PQ
+    @pytest.fixture
+    def memory(self):
+        """Create a memory manager instance."""
+        return GraphCentricMemoryManager(dim=8)
+    
+    def test_memory_init(self, memory):
+        """Test memory initialization."""
+        assert memory.dim == 8
+        assert hasattr(memory, 'episodes')
+        assert hasattr(memory, 'index')
+        assert len(memory.episodes) == 0
         
-        # Import the module after setting up mocks
-        from insightspike.core.layers.layer2_memory_manager import L2MemoryManager as Memory
+    def test_add_episode_without_c_value(self, memory):
+        """Test adding episodes without C-values."""
+        vec = np.random.rand(8).astype(np.float32)
+        text = "Test episode"
         
-        mem = Memory(8)  # Use compatible dimension
-        assert mem.dim == 8
-        assert hasattr(mem, 'episodes')
-        assert hasattr(mem, 'index')
+        idx = memory.add_episode(vec, text)
+        
+        assert idx == 0
+        assert len(memory.episodes) == 1
+        assert memory.episodes[0].text == text
+        assert not hasattr(memory.episodes[0], 'c')
+        
+    def test_episode_integration(self, memory):
+        """Test episode integration based on similarity."""
+        # Add first episode
+        vec1 = np.array([1, 0, 0, 0, 0, 0, 0, 0], dtype=np.float32)
+        memory.add_episode(vec1, "First episode")
+        
+        # Add very similar episode (should integrate)
+        vec2 = np.array([0.99, 0.01, 0, 0, 0, 0, 0, 0], dtype=np.float32)
+        vec2 = vec2 / np.linalg.norm(vec2)
+        
+        memory.integration_config.similarity_threshold = 0.9
+        idx = memory.add_episode(vec2, "Similar episode")
+        
+        # Should integrate into first episode
+        assert len(memory.episodes) == 1
+        assert "Similar episode" in memory.episodes[0].text
+        
+    def test_search_episodes(self, memory):
+        """Test episode search functionality."""
+        # Add test episodes
+        vecs = [
+            np.array([1, 0, 0, 0, 0, 0, 0, 0], dtype=np.float32),
+            np.array([0, 1, 0, 0, 0, 0, 0, 0], dtype=np.float32),
+            np.array([0, 0, 1, 0, 0, 0, 0, 0], dtype=np.float32),
+        ]
+        
+        for i, vec in enumerate(vecs):
+            memory.add_episode(vec, f"Episode {i}")
+        
+        # Search
+        results = memory.search_episodes("test query", k=2)
+        
+        assert len(results) <= 2
+        for result in results:
+            assert 'text' in result
+            assert 'score' in result
+            assert 'importance' in result
+            
+    def test_dynamic_importance_calculation(self, memory):
+        """Test that importance is calculated dynamically."""
+        vec = np.random.rand(8).astype(np.float32)
+        idx = memory.add_episode(vec, "Test")
+        
+        # Get initial importance
+        imp1 = memory.get_importance(idx)
+        
+        # Update access
+        memory._update_access(idx)
+        memory._update_access(idx)
+        
+        # Importance should increase
+        imp2 = memory.get_importance(idx)
+        assert imp2 > imp1
+        
+    def test_graph_informed_integration(self, memory):
+        """Test integration with graph information."""
+        # Mock Layer3
+        mock_layer3 = Mock()
+        mock_graph = Mock()
+        mock_graph.edge_index = np.array([[0, 1], [1, 0]])
+        mock_layer3.previous_graph = mock_graph
+        memory.set_layer3_graph(mock_layer3)
+        
+        # Add episodes
+        vec1 = np.array([1, 0, 0, 0, 0, 0, 0, 0], dtype=np.float32)
+        memory.add_episode(vec1, "Episode 1")
+        
+        # Similar but below normal threshold
+        vec2 = np.array([0.8, 0.2, 0, 0, 0, 0, 0, 0], dtype=np.float32)
+        vec2 = vec2 / np.linalg.norm(vec2)
+        
+        memory.integration_config.similarity_threshold = 0.9
+        memory.integration_config.graph_connection_bonus = 0.2
+        
+        idx = memory.add_episode(vec2, "Episode 2")
+        
+        # Should integrate due to graph connection
+        stats = memory.get_stats()
+        assert stats['graph_assist_rate'] > 0
