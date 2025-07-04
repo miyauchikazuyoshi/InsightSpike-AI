@@ -328,6 +328,10 @@ class GraphCentricMemoryManager(L2MemoryManager):
         model = get_model()
         query_vec = model.encode(query, normalize_embeddings=True, convert_to_numpy=True)
         
+        # Ensure 1D shape
+        if query_vec.ndim > 1:
+            query_vec = query_vec.squeeze()
+        
         results = []
         for i, episode in enumerate(self.episodes):
             similarity = np.dot(query_vec, episode.vec)

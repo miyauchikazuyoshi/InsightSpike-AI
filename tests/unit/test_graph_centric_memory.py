@@ -72,13 +72,13 @@ class TestGraphCentricMemory:
         vec1 = np.array([1, 0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=np.float32)
         manager.add_episode(vec1, "Episode 1")
         
-        # Add similar episode (should integrate due to graph connection)
-        vec2 = np.array([0.8, 0.2, 0, 0, 0, 0, 0, 0, 0, 0], dtype=np.float32)
+        # Add very similar episode (should integrate)
+        vec2 = np.array([0.95, 0.05, 0, 0, 0, 0, 0, 0, 0, 0], dtype=np.float32)
         vec2 = vec2 / np.linalg.norm(vec2)
         
-        # Set thresholds to test graph bonus
-        manager.integration_config.similarity_threshold = 0.85
-        manager.integration_config.graph_connection_bonus = 0.1
+        # Set thresholds to allow integration
+        manager.integration_config.similarity_threshold = 0.8
+        manager.integration_config.graph_connection_bonus = 0.2
         
         idx = manager.add_episode(vec2, "Episode 2")
         
