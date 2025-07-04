@@ -56,8 +56,14 @@ class TestGraphCentricMemoryManager:
         assert idx is not None
         assert len(memory.episodes) > 0
         
-    def test_search_episodes(self, memory):
+    @patch('insightspike.core.layers.layer2_graph_centric.get_model')
+    def test_search_episodes(self, mock_get_model, memory):
         """Test episode search functionality."""
+        # Mock the embedder to return 8-dimensional vectors
+        mock_model = Mock()
+        mock_model.encode = Mock(side_effect=lambda text, **kwargs: np.random.randn(8).astype(np.float32))
+        mock_get_model.return_value = mock_model
+        
         # Add test episodes
         vecs = [
             np.array([1, 0, 0, 0, 0, 0, 0, 0], dtype=np.float32),
@@ -99,6 +105,8 @@ class TestGraphCentricMemoryManager:
         mock_layer3 = Mock()
         mock_graph = Mock()
         mock_graph.edge_index = np.array([[0, 1], [1, 0]])
+        mock_graph.edge_attr = Mock()
+        mock_graph.edge_attr.__getitem__ = Mock(return_value=0.8)  # Mock edge weight
         mock_layer3.previous_graph = mock_graph
         memory.set_layer3_graph(mock_layer3)
         

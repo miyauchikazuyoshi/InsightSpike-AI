@@ -62,6 +62,8 @@ class TestGraphCentricMemory:
         mock_layer3 = Mock()
         mock_graph = Mock()
         mock_graph.edge_index = np.array([[0], [1]])  # Connect 0 and 1
+        mock_graph.edge_attr = Mock()
+        mock_graph.edge_attr.__getitem__ = Mock(return_value=0.8)  # Mock edge weight
         mock_layer3.previous_graph = mock_graph
         manager.set_layer3_graph(mock_layer3)
         
@@ -115,8 +117,14 @@ class TestGraphCentricMemory:
             assert not hasattr(episode, 'c')
             assert not hasattr(episode, 'c_value')
     
-    def test_search_with_importance(self, manager):
+    @patch('insightspike.core.layers.layer2_graph_centric.get_model')
+    def test_search_with_importance(self, mock_get_model, manager):
         """Test search considers dynamic importance."""
+        # Mock the embedder to return 10-dimensional vectors
+        mock_model = Mock()
+        mock_model.encode = Mock(side_effect=lambda text, **kwargs: np.random.randn(10).astype(np.float32))
+        mock_get_model.return_value = mock_model
+        
         # Add episodes with different access patterns
         vecs = []
         for i in range(5):
@@ -134,8 +142,6 @@ class TestGraphCentricMemory:
         # Episodes 3, 4 not accessed
         
         # Search
-        query = np.random.randn(10).astype(np.float32)
-        query = query / np.linalg.norm(query)
         results = manager.search_episodes("test query", k=5)
         
         # Results should include importance scores
