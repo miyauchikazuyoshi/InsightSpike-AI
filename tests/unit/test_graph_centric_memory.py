@@ -70,7 +70,7 @@ class TestGraphCentricMemory:
         
         # Add first episode
         vec1 = np.array([1, 0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=np.float32)
-        manager.add_episode(vec1, "Episode 1")
+        manager.add_episode(vec1, "Test episode about science")
         
         # Add very similar episode (should integrate)
         vec2 = np.array([0.95, 0.05, 0, 0, 0, 0, 0, 0, 0, 0], dtype=np.float32)
@@ -79,8 +79,9 @@ class TestGraphCentricMemory:
         # Set thresholds to allow integration
         manager.integration_config.similarity_threshold = 0.8
         manager.integration_config.graph_connection_bonus = 0.2
+        manager.integration_config.content_overlap_threshold = 0.3  # Lower threshold to allow 2/5 overlap
         
-        idx = manager.add_episode(vec2, "Episode 2")
+        idx = manager.add_episode(vec2, "Test episode about technology")
         
         # Should integrate due to graph connection lowering threshold
         stats = manager.get_stats()
@@ -120,16 +121,26 @@ class TestGraphCentricMemory:
             assert not hasattr(episode, 'c')
             assert not hasattr(episode, 'c_value')
     
-    @patch('insightspike.core.layers.layer2_graph_centric.get_model')
+    @patch('insightspike.utils.embedder.get_model')
     def test_search_with_importance(self, mock_get_model, manager):
         """Test search considers dynamic importance."""
         # Mock the embedder to return 10-dimensional vectors matching the episode vectors
         mock_model = Mock()
         # Return a normalized 10-dimensional vector without extra dimension
-        def mock_encode(text, **kwargs):
-            vec = np.random.randn(10).astype(np.float32)
-            vec = vec / np.linalg.norm(vec)
-            return vec
+        def mock_encode(texts, **kwargs):
+            # Handle both single string and list of strings
+            if isinstance(texts, str):
+                vec = np.random.randn(10).astype(np.float32)
+                vec = vec / np.linalg.norm(vec)
+                return vec
+            else:
+                # Return array for list input
+                vecs = []
+                for _ in texts:
+                    vec = np.random.randn(10).astype(np.float32)
+                    vec = vec / np.linalg.norm(vec)
+                    vecs.append(vec)
+                return np.array(vecs)
         mock_model.encode = Mock(side_effect=mock_encode)
         mock_get_model.return_value = mock_model
         

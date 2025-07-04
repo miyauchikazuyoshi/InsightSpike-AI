@@ -57,15 +57,25 @@ class TestGraphCentricMemoryManager:
         assert idx is not None
         assert len(memory.episodes) > 0
         
-    @patch('insightspike.core.layers.layer2_graph_centric.get_model')
+    @patch('insightspike.utils.embedder.get_model')
     def test_search_episodes(self, mock_get_model, memory):
         """Test episode search functionality."""
         # Mock the embedder to return 8-dimensional vectors matching the episode vectors
         mock_model = Mock()
-        def mock_encode(text, **kwargs):
-            vec = np.random.randn(8).astype(np.float32)
-            vec = vec / np.linalg.norm(vec)
-            return vec
+        def mock_encode(texts, **kwargs):
+            # Handle both single string and list of strings
+            if isinstance(texts, str):
+                vec = np.random.randn(8).astype(np.float32)
+                vec = vec / np.linalg.norm(vec)
+                return vec
+            else:
+                # Return array for list input
+                vecs = []
+                for _ in texts:
+                    vec = np.random.randn(8).astype(np.float32)
+                    vec = vec / np.linalg.norm(vec)
+                    vecs.append(vec)
+                return np.array(vecs)
         mock_model.encode = Mock(side_effect=mock_encode)
         mock_get_model.return_value = mock_model
         
@@ -117,7 +127,7 @@ class TestGraphCentricMemoryManager:
         
         # Add episodes
         vec1 = np.array([1, 0, 0, 0, 0, 0, 0, 0], dtype=np.float32)
-        memory.add_episode(vec1, "Episode 1")
+        memory.add_episode(vec1, "Test episode about science")
         
         # Similar but below normal threshold
         vec2 = np.array([0.8, 0.2, 0, 0, 0, 0, 0, 0], dtype=np.float32)
@@ -125,8 +135,9 @@ class TestGraphCentricMemoryManager:
         
         memory.integration_config.similarity_threshold = 0.9
         memory.integration_config.graph_connection_bonus = 0.2
+        memory.integration_config.content_overlap_threshold = 0.3  # Lower threshold to allow 2/5 overlap
         
-        idx = memory.add_episode(vec2, "Episode 2")
+        idx = memory.add_episode(vec2, "Test episode about technology")
         
         # Should integrate due to graph connection
         stats = memory.get_stats()
