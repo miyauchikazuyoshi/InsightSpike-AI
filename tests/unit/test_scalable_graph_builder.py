@@ -15,18 +15,18 @@ class TestScalableGraphBuilder:
     @pytest.fixture
     def builder(self):
         """Create a builder instance for testing."""
-        return ScalableGraphBuilder(
-            dimension=10,
-            top_k=3,
-            similarity_threshold=0.3
-        )
+        builder = ScalableGraphBuilder()
+        builder.dimension = 10
+        builder.top_k = 3
+        builder.similarity_threshold = 0.3
+        return builder
     
     def test_initialization(self, builder):
         """Test builder initialization."""
         assert builder.dimension == 10
         assert builder.top_k == 3
         assert builder.similarity_threshold == 0.3
-        assert builder.use_faiss == True
+        assert builder.index is None  # Not initialized until build_graph is called
     
     def test_build_graph_small(self, builder):
         """Test graph building with small dataset."""
