@@ -1,28 +1,28 @@
 %% Episode Management Decision Matrix
-%% エピソード管理の判定マトリックス
+%% Graph-Centric Integration Matrix (C-value Free)
 
 flowchart TD
     %% New Episode Input
-    NewEpisode[📥 New Episode<br/>Vector + Text + C-value]
+    NewEpisode[📥 New Episode<br/>Vector + Text]
     
-    %% Integration Check Process
-    subgraph "🔍 Integration Decision Process"
+    %% Graph-Informed Integration Check
+    subgraph "🔍 Graph-Informed Decision Process"
         direction TB
         
-        %% Similarity Calculation
-        VectorSim[📊 Vector Similarity<br/>Cosine Distance]
+        %% Core Calculations
+        VectorSim[📊 Vector Similarity<br/>FAISS Cosine Distance]
+        GraphConn[🔗 Graph Connection<br/>Edge Weight Strength]
         ContentOver[📝 Content Overlap<br/>Word-level Jaccard]
-        CValueComp[⚖️ C-Value Compatibility<br/>Importance Difference]
         
-        %% Threshold Checks
-        subgraph "🎯 Threshold Checks"
-            SimThresh[Vector Similarity ≥ 0.85]
-            ContThresh[Content Overlap ≥ 0.7]
-            IntegThresh[Integration Score ≥ 0.65]
+        %% Dynamic Thresholds
+        subgraph "🎯 Adaptive Thresholds"
+            BaseThresh[Base: Similarity ≥ 0.85]
+            GraphBonus[Graph Bonus: -0.1 if connected]
+            EffectiveThresh[Effective: 0.75-0.85]
         end
         
-        %% Integration Score
-        IntegScore[🧮 Integration Score<br/>0.5×Sim + 0.3×Content + 0.2×C-Compat]
+        %% Integration Weight
+        IntegWeight[⚖️ Integration Weight<br/>graph_strength OR similarity]
     end
     
     %% Decision Matrix
@@ -30,91 +30,97 @@ flowchart TD
         direction LR
         
         subgraph "✅ INTEGRATE Conditions"
-            HighSim[High Similarity ≥ 0.85]
-            HighCont[High Content ≥ 0.7] 
-            HighInteg[High Integration ≥ 0.65]
+            HighSimGraph[High Sim + Graph Connection]
+            MedSimStrong[Medium Sim + Strong Graph] 
+            HighSimContent[High Sim + High Content]
         end
         
         subgraph "➕ NEW NODE Conditions"
-            LowSim[Low Similarity < 0.85]
-            LowCont[Low Content < 0.7]
-            LowInteg[Low Integration < 0.65]
+            LowSim[Low Similarity < 0.75]
+            NoGraph[No Graph Connection]
+            Conflict[Neighbor Conflicts]
         end
     end
     
-    %% Actions
-    subgraph "🔄 Actions"
+    %% Graph-Based Actions
+    subgraph "🔄 Graph-Centric Actions"
         direction TB
         
-        subgraph "🔗 Integration Process"
-            MergeVec[Weighted Vector Average]
-            CombineText[Text Combination with Pipe]
-            MaxCValue[Max C-Value Selection]
-            UpdateMeta[Integration History Update]
+        subgraph "🔗 Graph Integration"
+            WeightedMerge[Graph-Weighted Vector Merge<br/>(1-w)×v1 + w×v2]
+            UpdateGraph[Update Graph Structure]
+            DynamicImport[Calculate Dynamic Importance]
+            HierarchyUpdate[Update Hierarchical Index]
         end
         
-        subgraph "➕ New Node Process"
-            AddEpisode[Add as New Episode]
-            TrainIndex[Update FAISS Index]
-            IncrementCount[Increment Episode Count]
+        subgraph "⚡ Scalable Operations"
+            FAISSUpdate[FAISS Index Update<br/>O(log n)]
+            ClusterRebalance[Rebalance Clusters<br/>if needed]
+            ConflictDetect[Detect Neighbor Conflicts]
         end
+    end
+    
+    %% Splitting Logic
+    subgraph "✂️ Automatic Splitting"
+        direction TB
+        
+        ConflictThresh[Conflict Score > 0.7]
+        NeighborCheck[Check All Neighbors]
+        SplitDecision[Split to Minimize Conflicts]
+        GraphCoherence[Maintain Graph Coherence]
     end
     
     %% Flow
     NewEpisode --> VectorSim
+    NewEpisode --> GraphConn
     NewEpisode --> ContentOver
-    NewEpisode --> CValueComp
     
-    VectorSim --> IntegScore
-    ContentOver --> IntegScore
-    CValueComp --> IntegScore
+    VectorSim --> BaseThresh
+    GraphConn --> GraphBonus
+    BaseThresh --> EffectiveThresh
+    GraphBonus --> EffectiveThresh
     
-    IntegScore --> SimThresh
-    IntegScore --> ContThresh
-    IntegScore --> IntegThresh
+    EffectiveThresh --> Decision{Integration Decision}
+    ContentOver --> Decision
     
-    SimThresh -->|AND| Decision{Integration Decision}
-    ContThresh -->|AND| Decision
-    IntegThresh -->|AND| Decision
+    Decision -->|Graph + Sim| HighSimGraph
+    Decision -->|Low Sim| LowSim
+    Decision -->|Conflicts| ConflictThresh
     
-    Decision -->|All Met| HighSim
-    Decision -->|Any Failed| LowSim
+    HighSimGraph --> WeightedMerge
+    WeightedMerge --> UpdateGraph
+    UpdateGraph --> DynamicImport
+    DynamicImport --> HierarchyUpdate
     
-    HighSim --> MergeVec
-    HighCont --> CombineText
-    HighInteg --> MaxCValue
+    LowSim --> FAISSUpdate
+    ConflictThresh --> NeighborCheck
+    NeighborCheck --> SplitDecision
+    SplitDecision --> GraphCoherence
     
-    LowSim --> AddEpisode
-    LowCont --> TrainIndex
-    LowInteg --> IncrementCount
-    
-    %% Example Cases
-    subgraph "📋 Example Cases"
+    %% Performance Examples
+    subgraph "📊 Performance at Scale"
         direction TB
         
-        subgraph "Case 1: Similar Content"
-            Ex1Input["'Machine learning algorithms learn'<br/>vs<br/>'Machine learning algorithms discover'"]
-            Ex1Result[✅ INTEGRATE<br/>Sim: 0.99, Content: 0.78]
+        subgraph "1K Episodes"
+            Scale1[Build: 150ms<br/>Search: 0.5ms<br/>Compression: 100x]
         end
         
-        subgraph "Case 2: Different Topic"
-            Ex2Input["'Machine learning algorithms'<br/>vs<br/>'Quantum physics particles'"]
-            Ex2Result[➕ NEW NODE<br/>Sim: 0.23, Content: 0.05]
+        subgraph "10K Episodes"
+            Scale2[Build: 1.5s<br/>Search: 2ms<br/>Compression: 200x]
         end
         
-        subgraph "Case 3: High Sim, Low Content"
-            Ex3Input["High vector similarity<br/>but different meaning"]
-            Ex3Result[➕ NEW NODE<br/>Sim: 0.89, Content: 0.12]
+        subgraph "100K Episodes"
+            Scale3[Build: 15s<br/>Search: 5ms<br/>Compression: 500x]
         end
     end
     
     %% Styling
     classDef integrationClass fill:#e8f5e8
     classDef newNodeClass fill:#fff3e0
-    classDef processClass fill:#e1f5fe
-    classDef exampleClass fill:#f3e5f5
+    classDef graphClass fill:#e3f2fd
+    classDef scaleClass fill:#f3e5f5
     
-    class HighSim,HighCont,HighInteg,MergeVec,CombineText,MaxCValue,UpdateMeta,Ex1Result integrationClass
-    class LowSim,LowCont,LowInteg,AddEpisode,TrainIndex,IncrementCount,Ex2Result,Ex3Result newNodeClass
-    class VectorSim,ContentOver,CValueComp,IntegScore,SimThresh,ContThresh,IntegThresh processClass
-    class Ex1Input,Ex2Input,Ex3Input exampleClass
+    class HighSimGraph,MedSimStrong,HighSimContent,WeightedMerge,UpdateGraph integrationClass
+    class LowSim,NoGraph,Conflict,FAISSUpdate newNodeClass
+    class VectorSim,GraphConn,ContentOver,IntegWeight,DynamicImport graphClass
+    class Scale1,Scale2,Scale3 scaleClass

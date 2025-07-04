@@ -883,7 +883,7 @@ tests = ["asttokens (>=2.1.0)", "coverage", "coverage-enable-subprocess", "ipyth
 name = "faiss-cpu"
 version = "1.11.0"
 description = "A library for efficient similarity search and clustering of dense vectors."
-optional = true
+optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 markers = "extra == \"cpu\" or extra == \"full\""
@@ -4942,4 +4942,4 @@ gpu = ["torch-geometric"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "8f9a15e66a8987cb011b6b353b59387a8f8fc920eb33ce142de910281877f405"
+content-hash = "eeed53273d2ba77bc060fc312a2eccf18bfcce148fe24c014bf7844c50bfba2d"

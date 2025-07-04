@@ -16,13 +16,22 @@ from sklearn.metrics.pairwise import cosine_similarity
 from torch_geometric.data import Data
 from torch_geometric.nn import GCNConv, global_mean_pool
 
-from ...utils.graph_metrics import delta_ged, delta_ig
+# Import both simple and advanced metrics
+from ...utils.graph_metrics import delta_ged as simple_delta_ged, delta_ig as simple_delta_ig
+try:
+    from ...utils.advanced_graph_metrics import delta_ged as advanced_delta_ged, delta_ig as advanced_delta_ig
+    ADVANCED_METRICS_AVAILABLE = True
+except ImportError:
+    ADVANCED_METRICS_AVAILABLE = False
+    advanced_delta_ged = simple_delta_ged
+    advanced_delta_ig = simple_delta_ig
 from ..config import get_config
 from ..interfaces import L3GraphReasonerInterface, LayerInput, LayerOutput
+from .scalable_graph_builder import ScalableGraphBuilder
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["L3GraphReasoner", "ConflictScore", "GraphBuilder"]
+__all__ = ["L3GraphReasoner", "ConflictScore", "GraphBuilder", "ScalableGraphBuilder"]
 
 
 class ConflictScore:
@@ -228,9 +237,21 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         # Set layer_id for LayerInterface
         super().__init__("layer3_graph_reasoner", config)
         self.config = config or get_config()
-        self.graph_builder = GraphBuilder(config)
+        # Use ScalableGraphBuilder for better performance
+        self.graph_builder = ScalableGraphBuilder(config)
         self.conflict_scorer = ConflictScore(config)
         self.previous_graph = None
+        
+        # Use advanced metrics if available
+        self.use_advanced_metrics = getattr(config, 'use_advanced_metrics', True) if config else True
+        if self.use_advanced_metrics and ADVANCED_METRICS_AVAILABLE:
+            self.delta_ged = advanced_delta_ged
+            self.delta_ig = advanced_delta_ig
+            logger.info("Using advanced GED/IG algorithms")
+        else:
+            self.delta_ged = simple_delta_ged
+            self.delta_ig = simple_delta_ig
+            logger.info("Using simple GED/IG algorithms")
 
         # Initialize simple GNN if needed
         self.gnn = None
@@ -299,7 +320,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
             previous_graph = context.get("previous_graph", self.previous_graph)
 
             # Calculate metrics if we have a previous graph
-            metrics = self._calculate_metrics(current_graph, previous_graph)
+            metrics = self._calculate_metrics(current_graph, previous_graph, context)
 
             # Detect conflicts
             conflicts = self.conflict_scorer.calculate_conflict(
@@ -333,18 +354,19 @@ class L3GraphReasoner(L3GraphReasonerInterface):
             return self._fallback_result()
 
     def _calculate_metrics(
-        self, current_graph: Data, previous_graph: Optional[Data]
+        self, current_graph: Data, previous_graph: Optional[Data], context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, float]:
         """Calculate ΔGED and ΔIG metrics."""
         if previous_graph is None:
             return {"delta_ged": 0.0, "delta_ig": 0.0}
 
         try:
-            # Calculate graph edit distance change
-            ged = delta_ged(previous_graph, current_graph)
+            # Calculate graph edit distance change using configured method
+            ged = self.delta_ged(previous_graph, current_graph)
 
-            # Calculate information gain change
-            ig = delta_ig(previous_graph, current_graph)
+            # Calculate information gain change with context
+            query = context.get("query", None) if context else None
+            ig = self.delta_ig(previous_graph, current_graph, query)
 
             return {
                 "delta_ged": float(ged),
