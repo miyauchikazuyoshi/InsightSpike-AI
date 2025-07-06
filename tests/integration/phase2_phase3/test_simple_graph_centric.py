@@ -17,7 +17,7 @@ def test_without_c_value():
     print("=== Testing Graph-Centric Memory (C値なし) ===\n")
     
     # マネージャー作成
-    manager = GraphCentricMemoryManager(dim=10)
+    manager = GraphCentricMemoryManager(dim=384)
     
     # 設定
     manager.integration_config.similarity_threshold = 0.7
