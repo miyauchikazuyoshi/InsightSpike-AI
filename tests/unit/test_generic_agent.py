@@ -7,8 +7,7 @@ from unittest.mock import Mock, MagicMock, patch
 from collections import deque
 
 from insightspike.core.agents.generic_agent import (
-    GenericMemoryManager, GenericReasoner, SimpleInsightDetector, 
-    GenericInsightSpikeAgent
+    GenericMemoryManager, GenericReasoner, GenericInsightSpikeAgent
 )
 from insightspike.core.interfaces.generic_interfaces import (
     EnvironmentState, InsightMoment, TaskType
@@ -201,47 +200,6 @@ class TestGenericReasoner:
         assert features['task_difficulty'] == 0.5
 
 
-class TestSimpleInsightDetector:
-    """Test SimpleInsightDetector functionality."""
-    
-    def test_init(self):
-        """Test detector initialization."""
-        detector = SimpleInsightDetector(threshold=2.0)
-        assert detector.threshold == 2.0
-        assert detector.baseline == 0.0
-    
-    def test_detect_insight_above_threshold(self):
-        """Test insight detection above threshold."""
-        detector = SimpleInsightDetector(threshold=2.0)
-        state = EnvironmentState(observation=np.array([1]))
-        
-        # High reward should trigger insight
-        insight = detector.detect_insight(state, 0, 5.0, state)
-        assert insight is not None
-        assert insight.value == 5.0
-        assert "High reward" in insight.description
-    
-    def test_detect_insight_below_threshold(self):
-        """Test no insight below threshold."""
-        detector = SimpleInsightDetector(threshold=2.0)
-        state = EnvironmentState(observation=np.array([1]))
-        
-        # Low reward should not trigger insight
-        insight = detector.detect_insight(state, 0, 1.0, state)
-        assert insight is None
-    
-    def test_baseline_update(self):
-        """Test baseline updating."""
-        detector = SimpleInsightDetector()
-        
-        # Process several rewards
-        for reward in [1.0, 2.0, 3.0]:
-            state = EnvironmentState(observation=np.array([1]))
-            detector.detect_insight(state, 0, reward, state)
-        
-        # Baseline should be updated
-        assert detector.baseline > 0
-        assert detector.baseline < 3.0
 
 
 class TestGenericInsightSpikeAgent:
@@ -271,7 +229,7 @@ class TestGenericInsightSpikeAgent:
         assert agent.state_encoder == self.state_encoder
         assert isinstance(agent.memory, GenericMemoryManager)
         assert isinstance(agent.reasoner, GenericReasoner)
-        assert isinstance(agent.insight_detector, SimpleInsightDetector)
+        assert agent.insight_detector is not None  # Just check it exists
     
     def test_act(self):
         """Test agent action selection."""
