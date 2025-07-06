@@ -56,14 +56,37 @@ def get_mock_model():
         _mock_model_instance = DummyModel()
     return _mock_model_instance
 
+def create_tensor_mock(shape=None, value=0):
+    """Create a mock tensor with proper methods."""
+    mock = MagicMock()
+    if shape:
+        mock.shape = shape
+        mock.size.return_value = shape[0] if shape else 0
+        mock.numel.return_value = np.prod(shape) if shape else 0
+    else:
+        mock.shape = (0,)
+        mock.size.return_value = 0
+        mock.numel.return_value = 0
+    return mock
+
 # Mock torch completely
 dummy_torch = types.SimpleNamespace(
     load=lambda *a, **k: None,
     save=lambda *a, **k: None,
     device=lambda x: "cpu",
     cuda=types.SimpleNamespace(is_available=lambda: False),
-    tensor=lambda x: MagicMock(),
+    backends=types.SimpleNamespace(
+        mps=types.SimpleNamespace(is_available=lambda: False),
+        cuda=types.SimpleNamespace(is_available=lambda: False)
+    ),
+    tensor=lambda x: create_tensor_mock(),
     Tensor=MagicMock,  # Add Tensor class for type annotations
+    relu=lambda x: create_tensor_mock(),  # Add relu as a direct function
+    zeros=lambda *args, dtype=None, **kwargs: create_tensor_mock(shape=args if args else (0,)),  # Add zeros function
+    empty=lambda shape, **kwargs: create_tensor_mock(shape=shape if isinstance(shape, tuple) else (shape,)),  # Add empty function
+    cat=lambda tensors, dim=0: create_tensor_mock(),  # Add cat function
+    long=MagicMock,  # Add long dtype
+    mean=lambda x, dim=None, keepdim=False, **kwargs: create_tensor_mock(shape=(1, x.shape[-1] if hasattr(x, 'shape') else 128)),  # Add mean function
     nn=types.SimpleNamespace(
         Module=object,
         Linear=lambda *a, **k: MagicMock(),
@@ -76,7 +99,8 @@ dummy_torch = types.SimpleNamespace(
             normalize=lambda x, p=2, dim=1: x,
         )
     ),
-    __version__="2.2.2"  # Add version attribute
+    __version__="2.2.2",  # Add version attribute
+    Size=lambda dims: tuple(dims) if isinstance(dims, list) else dims  # Add Size class
 )
 
 # Mock networkx
@@ -180,22 +204,60 @@ class MockMemory:
     def add_episode(self, vector, content):
         self.episodes.append({
             'vector': vector,
-            'content': content
+            'content': content,
+            'c': 0.5  # Default c-value
         })
     
+    def store_episode(self, text, c_value=0.5, metadata=None):
+        """New API for storing episodes."""
+        self.episodes.append({
+            'content': text,
+            'text': text,
+            'c': c_value,
+            'metadata': metadata or {}
+        })
+        return True
+    
+    def update_c_values(self, episode_ids, rewards):
+        """Update C-values for episodes."""
+        for episode_id, reward in zip(episode_ids, rewards):
+            if 0 <= episode_id < len(self.episodes):
+                current_c = self.episodes[episode_id].get('c', 0.5)
+                new_c = max(0.0, min(1.0, current_c + 0.1 * reward))
+                self.episodes[episode_id]['c'] = new_c
+    
+    def update_c(self, episode_ids, reward, eta=0.1):
+        """Legacy update_c method for compatibility."""
+        for episode_id in episode_ids:
+            if 0 <= episode_id < len(self.episodes):
+                current_c = self.episodes[episode_id].get('c', 0.5)
+                new_c = max(0.0, min(1.0, current_c + eta * reward))
+                self.episodes[episode_id]['c'] = new_c
+    
     def search_episodes(self, query_vector, k=5):
-        """Mock search that returns existing episodes."""
+        """Mock search that returns existing episodes in the same format as L2MemoryManager."""
         import numpy as np
         results = []
         for i, episode in enumerate(self.episodes[:k]):
             # Mock similarity score
             similarity = np.random.random()
+            # Match the format returned by L2MemoryManager.search_episodes
             results.append({
-                'episode': episode,
+                'text': episode.get('content', episode.get('text', '')),
                 'similarity': similarity,
+                'c_value': episode.get('c', 0.5),
+                'weighted_score': similarity * (episode.get('c', 0.5) ** 0.5),  # gamma=0.5
+                'metadata': episode.get('metadata', {}),
                 'index': i
             })
         return results
+    
+    def get_memory_stats(self):
+        """Get memory statistics."""
+        return {
+            'total_episodes': len(self.episodes),
+            'index_trained': True
+        }
 
 @pytest.fixture(scope="session", autouse=True)
 def mock_dependencies():
@@ -217,13 +279,24 @@ def mock_dependencies():
     sys.modules['sklearn.metrics.pairwise'] = dummy_sklearn.metrics.pairwise
     
     # Mock torch_geometric modules
+    def mock_gcn_conv(in_channels, out_channels):
+        mock = MagicMock()
+        mock.return_value = MagicMock()  # Ensure __call__ returns a MagicMock
+        return mock
+    
+    def mock_gat_conv(in_channels, out_channels, heads=1, concat=True):
+        mock = MagicMock()
+        mock.return_value = MagicMock()  # Ensure __call__ returns a MagicMock
+        return mock
+    
     sys.modules['torch_geometric'] = types.SimpleNamespace()
     sys.modules['torch_geometric.data'] = types.SimpleNamespace(
         Data=lambda **kwargs: types.SimpleNamespace(**kwargs)
     )
     sys.modules['torch_geometric.nn'] = types.SimpleNamespace(
-        GCNConv=lambda in_channels, out_channels: MagicMock(),
-        global_mean_pool=lambda x, batch: MagicMock()
+        GCNConv=mock_gcn_conv,
+        GATConv=mock_gat_conv,
+        global_mean_pool=lambda x, batch: MagicMock(shape=(1, 16))
     )
     
     # InsightSpike modules

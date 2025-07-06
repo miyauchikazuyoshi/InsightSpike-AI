@@ -76,7 +76,17 @@ def test_basic_functionality():
         
         # 各エピソードの詳細表示
         for i, episode in enumerate(agent.l2_memory.episodes):
-            print(f"   Episode {i+1}: C-value={episode.c:.3f}, length={len(episode.text)}")
+            # Handle both Episode objects and dict representations
+            if hasattr(episode, 'c'):
+                c_value = episode.c
+                text = episode.text
+            elif isinstance(episode, dict):
+                c_value = episode.get('c', 0.5)
+                text = episode.get('text', episode.get('content', ''))
+            else:
+                c_value = 0.5
+                text = str(episode)
+            print(f"   Episode {i+1}: C-value={c_value:.3f}, length={len(text)}")
         
         # 7. グラフ構築とメトリクス計算テスト
         print("\n📊 グラフメトリクス計算テスト...")

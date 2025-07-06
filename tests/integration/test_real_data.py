@@ -56,15 +56,33 @@ def test_with_real_data():
                 content = " | ".join(str(cell) for cell in row if cell is not None)
                 if len(content) > 10:  # 有効なコンテンツのみ
                     vector = np.random.random(384).astype(np.float32)
-                    agent.l2_memory.add_episode(vector, content[:200], c_value=0.5)  # 200文字に制限
+                    # Check if l2_memory has store_episode method (new API)
+                    if hasattr(agent.l2_memory, 'store_episode'):
+                        agent.l2_memory.store_episode(content[:200], c_value=0.5)
+                    else:
+                        # Fallback to old API without c_value
+                        agent.l2_memory.add_episode(vector, content[:200])
                     print(f"   ✅ エピソード{i+1}: {content[:50]}...")
             
             # メモリ状態確認
             print(f"\n📊 メモリ状態:")
             print(f"   追加されたエピソード: {len(agent.l2_memory.episodes)}")
-            if agent.l2_memory.episodes:
-                avg_c = sum(ep.c for ep in agent.l2_memory.episodes) / len(agent.l2_memory.episodes)
-                print(f"   平均C-value: {avg_c:.3f}")
+            if hasattr(agent.l2_memory, 'episodes') and agent.l2_memory.episodes:
+                # Handle both Episode objects and dict representations
+                c_values = []
+                for ep in agent.l2_memory.episodes:
+                    if hasattr(ep, 'c'):
+                        c_values.append(ep.c)
+                    elif isinstance(ep, dict) and 'c' in ep:
+                        c_values.append(ep['c'])
+                    else:
+                        c_values.append(0.5)  # Default value
+                
+                if c_values:
+                    avg_c = sum(c_values) / len(c_values)
+                    print(f"   平均C-value: {avg_c:.3f}")
+                else:
+                    print(f"   平均C-value: 0.500")
             else:
                 print(f"   平均C-value: 0.000")
             
