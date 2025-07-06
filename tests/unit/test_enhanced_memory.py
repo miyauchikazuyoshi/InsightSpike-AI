@@ -9,7 +9,7 @@ import json
 from unittest.mock import Mock, patch
 
 from insightspike.core.layers.layer2_enhanced_scalable import L2EnhancedScalableMemory
-from insightspike.core.utils.embedder import get_embedder
+from insightspike.utils.embedder import get_model
 
 
 class TestL2EnhancedScalableMemory:
@@ -18,8 +18,15 @@ class TestL2EnhancedScalableMemory:
     @pytest.fixture
     def memory(self):
         """Create memory instance for testing"""
-        embedder = get_embedder()
-        return L2EnhancedScalableMemory(embedder=embedder)
+        with patch('insightspike.utils.embedder.get_model') as mock_get_model:
+            mock_embedder = Mock()
+            mock_embedder.get_sentence_embedding_dimension.return_value = 384
+            mock_embedder.encode.return_value = np.random.randn(1, 384)
+            mock_get_model.return_value = mock_embedder
+            
+            with patch('insightspike.core.layers.layer2_enhanced_scalable.get_model', return_value=mock_embedder):
+                with patch('insightspike.core.layers.layer2_memory_manager.get_model', return_value=mock_embedder):
+                    return L2EnhancedScalableMemory()
     
     def test_initialization(self, memory):
         """Test memory initialization"""
@@ -108,7 +115,7 @@ class TestL2EnhancedScalableMemory:
             assert os.path.exists(os.path.join(tmpdir, "graph_pyg.pt"))
             
             # Create new memory and load
-            new_memory = L2EnhancedScalableMemory(embedder=get_embedder())
+            new_memory = L2EnhancedScalableMemory()
             new_memory.load_state(tmpdir)
             
             # Verify loaded state
@@ -200,7 +207,7 @@ class TestL2EnhancedScalableMemory:
         with tempfile.TemporaryDirectory() as tmpdir:
             memory.save_state(tmpdir)
             
-            new_memory = L2EnhancedScalableMemory(embedder=get_embedder())
+            new_memory = L2EnhancedScalableMemory()
             new_memory.load_state(tmpdir)
             
             # Check metadata still preserved
