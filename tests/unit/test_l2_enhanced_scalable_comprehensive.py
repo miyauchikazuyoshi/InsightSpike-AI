@@ -21,10 +21,16 @@ class TestL2EnhancedScalableMemory:
         config = MagicMock()
         config.memory.embedding_dim = 384
         config.memory.index_file = "data/test_index.faiss"
+        config.memory.nlist = 100  # Add missing nlist parameter
+        config.memory.pq_segments = 8
+        config.memory.c_value_gamma = 1.0
+        config.memory.c_value_min = 0.1
+        config.memory.c_value_max = 1.0
         config.memory.c_min = 0.1
         config.memory.c_max = 1.0
         config.memory.c_decay_rate = 0.01
         config.memory.storage_threshold = 0.5
+        config.embedding.dimension = 384
         config.reasoning.similarity_threshold = 0.3
         config.reasoning.graph_top_k = 50
         config.reasoning.conflict_threshold = 0.8
