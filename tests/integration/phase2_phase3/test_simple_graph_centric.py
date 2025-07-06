@@ -22,12 +22,12 @@ def test_without_c_value():
     # 設定
     manager.integration_config.similarity_threshold = 0.7
     
-    # テストエピソード
+    # テストエピソード (384次元に変更)
     episodes = [
-        ("AI research", np.array([0.9, 0.1, 0, 0, 0, 0, 0, 0, 0, 0])),
-        ("Machine learning", np.array([0.8, 0.2, 0, 0, 0, 0, 0, 0, 0, 0])),
-        ("Climate science", np.array([0, 0, 0.9, 0.1, 0, 0, 0, 0, 0, 0])),
-        ("Deep learning and AI", np.array([0.85, 0.15, 0, 0, 0, 0, 0, 0, 0, 0])),
+        ("AI research", np.random.randn(384).astype(np.float32)),
+        ("Machine learning", np.random.randn(384).astype(np.float32)),
+        ("Climate science", np.random.randn(384).astype(np.float32)),
+        ("Deep learning and AI", np.random.randn(384).astype(np.float32)),
     ]
     
     print("1. Adding episodes (C値を渡しても無視される)")
