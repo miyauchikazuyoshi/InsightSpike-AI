@@ -61,13 +61,40 @@ def create_tensor_mock(shape=None, value=0):
     mock = MagicMock()
     if shape:
         mock.shape = shape
-        mock.size.return_value = shape[0] if shape else 0
+        # size() should return the shape tuple when called without args
+        # size(dim) should return the size of that dimension
+        def size_method(dim=None):
+            if dim is None:
+                return shape
+            elif isinstance(dim, int) and 0 <= dim < len(shape):
+                return shape[dim]
+            else:
+                return 0
+        mock.size = size_method
         mock.numel.return_value = np.prod(shape) if shape else 0
     else:
         mock.shape = (0,)
-        mock.size.return_value = 0
+        mock.size = lambda dim=None: (0,) if dim is None else 0
         mock.numel.return_value = 0
     return mock
+
+# Create a mock dtype for torch.long
+class MockDtype:
+    def __init__(self, name):
+        self.name = name
+    def __repr__(self):
+        return f"torch.{self.name}"
+
+def mock_tensor_function(data, dtype=None, **kwargs):
+    """Mock tensor creation function that handles dtype."""
+    if isinstance(data, list) and len(data) > 0:
+        if isinstance(data[0], list):
+            shape = (len(data), len(data[0]))
+        else:
+            shape = (len(data),)
+    else:
+        shape = (0,)
+    return create_tensor_mock(shape=shape)
 
 # Mock torch completely
 dummy_torch = types.SimpleNamespace(
@@ -79,14 +106,15 @@ dummy_torch = types.SimpleNamespace(
         mps=types.SimpleNamespace(is_available=lambda: False),
         cuda=types.SimpleNamespace(is_available=lambda: False)
     ),
-    tensor=lambda x: create_tensor_mock(),
+    tensor=mock_tensor_function,
     Tensor=MagicMock,  # Add Tensor class for type annotations
     relu=lambda x: create_tensor_mock(),  # Add relu as a direct function
     zeros=lambda *args, dtype=None, **kwargs: create_tensor_mock(shape=args if args else (0,)),  # Add zeros function
     empty=lambda shape, **kwargs: create_tensor_mock(shape=shape if isinstance(shape, tuple) else (shape,)),  # Add empty function
     cat=lambda tensors, dim=0: create_tensor_mock(),  # Add cat function
-    long=MagicMock,  # Add long dtype
+    long=MockDtype('long'),  # Add long dtype as proper mock object
     mean=lambda x, dim=None, keepdim=False, **kwargs: create_tensor_mock(shape=(1, x.shape[-1] if hasattr(x, 'shape') else 128)),  # Add mean function
+    randn=lambda *shape: create_tensor_mock(shape=shape),  # Add randn function
     nn=types.SimpleNamespace(
         Module=object,
         Linear=lambda *a, **k: MagicMock(),
@@ -289,6 +317,13 @@ def mock_dependencies():
         mock.return_value = MagicMock()  # Ensure __call__ returns a MagicMock
         return mock
     
+    # Mock degree function for torch_geometric.utils
+    def mock_degree(edge_index, num_nodes=None):
+        """Mock degree function that returns a tensor-like object."""
+        mock = create_tensor_mock(shape=(4,))  # Default 4 nodes
+        mock.tolist = lambda: [1, 1, 1, 1]  # Each node has degree 1
+        return mock
+    
     sys.modules['torch_geometric'] = types.SimpleNamespace()
     sys.modules['torch_geometric.data'] = types.SimpleNamespace(
         Data=lambda **kwargs: types.SimpleNamespace(**kwargs)
@@ -297,6 +332,9 @@ def mock_dependencies():
         GCNConv=mock_gcn_conv,
         GATConv=mock_gat_conv,
         global_mean_pool=lambda x, batch: MagicMock(shape=(1, 16))
+    )
+    sys.modules['torch_geometric.utils'] = types.SimpleNamespace(
+        degree=mock_degree
     )
     
     # InsightSpike modules
