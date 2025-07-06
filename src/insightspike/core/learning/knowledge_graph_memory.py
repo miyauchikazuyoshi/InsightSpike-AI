@@ -36,7 +36,7 @@ except ImportError:
 class KnowledgeGraphMemory:
     """Persistent knowledge graph storing episode embeddings."""
 
-    def __init__(self, embedding_dim: int, similarity_threshold: float = 0.3):
+    def __init__(self, embedding_dim: int, similarity_threshold: float = 0.2):
         self.embedding_dim = embedding_dim
         self.similarity_threshold = similarity_threshold
         self.embeddings: List[np.ndarray] = []

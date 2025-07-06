@@ -32,7 +32,7 @@ def test_actual_insightspike_workflow():
     start_time = time.perf_counter()
     
     # 知識グラフメモリ初期化
-    memory = KnowledgeGraphMemory(embedding_dim=128, similarity_threshold=0.4)
+    memory = KnowledgeGraphMemory(embedding_dim=128, similarity_threshold=0.2)
     
     # 学習エピソードシミュレーション（異なるタスクドメインの経験）
     domains = ['navigation', 'object_manipulation', 'conversation', 'planning']
@@ -113,7 +113,7 @@ def test_actual_insightspike_workflow():
         if using_mock:
             # For mocked torch, skip complex operations
             global_knowledge = final_features
-            global_knowledge_shape = torch.Size([1, 128])
+            global_knowledge_shape = (1, 128)  # Use tuple instead of torch.Size for mock compatibility
         else:
             # Get the number of nodes
             num_nodes = memory.graph.x.size(0) if hasattr(memory.graph.x, 'size') else 0
@@ -131,7 +131,7 @@ def test_actual_insightspike_workflow():
             mock.shape = (1, 128)
             mock.size.return_value = 1
             global_knowledge = mock
-            global_knowledge_shape = torch.Size([1, 128])
+            global_knowledge_shape = (1, 128)  # Use tuple instead of torch.Size for mock compatibility
         else:
             # Fallback for when torch.mean is not properly mocked
             try:

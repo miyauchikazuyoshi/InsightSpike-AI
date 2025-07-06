@@ -36,7 +36,7 @@ class LLMConfig:
 class RetrievalConfig:
     """Configuration for retrieval layers"""
 
-    similarity_threshold: float = 0.35
+    similarity_threshold: float = 0.25
     top_k: int = 15
     layer1_top_k: int = 20
     layer2_top_k: int = 15
@@ -64,7 +64,7 @@ class GraphConfig:
 class ReasoningConfig:
     """Configuration for reasoning layer"""
 
-    similarity_threshold: float = 0.3
+    similarity_threshold: float = 0.2
     spike_ged_threshold: float = 0.5
     spike_ig_threshold: float = 0.2
     conflict_threshold: float = 0.6
@@ -144,7 +144,7 @@ class ScalableGraphConfig:
     faiss_index_type: str = "IndexFlatIP"  # FAISS index type
     top_k_neighbors: int = 50  # Maximum neighbors per node
     batch_size: int = 1000  # Batch size for processing
-    similarity_threshold: float = 0.3  # Minimum similarity for edge creation
+    similarity_threshold: float = 0.2  # Minimum similarity for edge creation
     conflict_threshold: float = 0.8  # Similarity threshold for conflict detection
     
     # Graph importance calculation
