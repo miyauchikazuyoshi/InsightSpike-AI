@@ -7,6 +7,7 @@ Supports dynamic graph growth, conflict-based splitting, and graph-based importa
 """
 
 import logging
+import time
 from typing import List, Dict, Any, Optional, Tuple
 import numpy as np
 import torch
@@ -54,11 +55,13 @@ class ScalableGraphManager:
         
     def _initialize_empty_graph(self):
         """Initialize an empty graph."""
-        self.graph = Data(
+        graph = Data(
             x=torch.empty((0, self.embedding_dim)),
             edge_index=torch.empty((2, 0), dtype=torch.long)
         )
-        self.graph.num_nodes = 0
+        graph.num_nodes = 0
+        self.graph = graph
+        return graph
         
     def add_episode_node(
         self,
