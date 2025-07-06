@@ -84,6 +84,13 @@ class ReasoningConfig:
     episode_integration_similarity_threshold: float = 0.85  # Vector similarity threshold
     episode_integration_content_threshold: float = 0.4     # Content overlap threshold (lowered)
     episode_integration_c_threshold: float = 0.3           # C-value difference threshold
+    
+    # Scalable graph configuration
+    use_scalable_graph: bool = True  # Enable FAISS-based scalable graph
+    graph_top_k: int = 50  # Maximum neighbors per node
+    graph_batch_size: int = 1000  # Batch size for graph operations
+    conflict_split_threshold: int = 2  # Number of conflicts to trigger split
+    use_advanced_metrics: bool = True  # Use advanced GED/IG algorithms
 
 
 @dataclass
@@ -130,6 +137,34 @@ class PathConfig:
 
 
 @dataclass
+class ScalableGraphConfig:
+    """Configuration for scalable graph operations"""
+    
+    enabled: bool = True  # Enable scalable graph features
+    faiss_index_type: str = "IndexFlatIP"  # FAISS index type
+    top_k_neighbors: int = 50  # Maximum neighbors per node
+    batch_size: int = 1000  # Batch size for processing
+    similarity_threshold: float = 0.3  # Minimum similarity for edge creation
+    conflict_threshold: float = 0.8  # Similarity threshold for conflict detection
+    
+    # Graph importance calculation
+    use_graph_importance: bool = True  # Use graph-based importance instead of C-values
+    importance_decay_factor: float = 0.1  # Time decay for access-based importance
+    pagerank_alpha: float = 0.85  # PageRank damping factor
+    importance_cache_validity: int = 300  # Cache validity in seconds
+    
+    # Conflict-based splitting
+    enable_conflict_split: bool = True  # Enable automatic conflict-based splitting
+    min_conflicts_for_split: int = 2  # Minimum conflicts to trigger split
+    split_text_min_length: int = 50  # Minimum text length for meaningful split
+    
+    # Performance optimization
+    faiss_nprobe: int = 10  # Number of clusters to search (for IVF indices)
+    faiss_nlist: int = 100  # Number of clusters (for IVF indices)
+    incremental_update: bool = True  # Use incremental graph updates
+
+
+@dataclass
 class UnknownLearnerConfig:
     """Configuration for unknown information learning system"""
 
@@ -153,6 +188,7 @@ class Config:
     reasoning: ReasoningConfig = None
     memory: MemoryConfig = None
     paths: PathConfig = None
+    scalable_graph: ScalableGraphConfig = None
     unknown_learner: UnknownLearnerConfig = None
 
     def __post_init__(self):
@@ -172,6 +208,8 @@ class Config:
             self.memory = MemoryConfig()
         if self.paths is None:
             self.paths = PathConfig()
+        if self.scalable_graph is None:
+            self.scalable_graph = ScalableGraphConfig()
         if self.unknown_learner is None:
             self.unknown_learner = UnknownLearnerConfig()
 

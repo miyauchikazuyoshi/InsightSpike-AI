@@ -1,0 +1,11 @@
+{
+  "datasets": {},
+  "metrics": {
+    "episodes": [],
+    "nodes": [],
+    "edges": [],
+    "processing_times": [],
+    "integration_rates": [],
+    "documents_processed": []
+  }
+}

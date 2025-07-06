@@ -11,6 +11,7 @@ from torch_geometric.data import Data
 import faiss
 
 from insightspike.config import get_config
+from insightspike.monitoring import GraphOperationMonitor, MonitoredOperation
 
 logger = logging.getLogger(__name__)
 
@@ -26,19 +27,22 @@ class ScalableGraphBuilder:
     - Incremental graph updates
     """
     
-    def __init__(self, config=None):
+    def __init__(self, config=None, monitor: Optional[GraphOperationMonitor] = None):
         self.config = config or get_config()
         self.similarity_threshold = self.config.reasoning.similarity_threshold
-        self.top_k = 50  # Maximum neighbors per node
-        self.batch_size = 1000  # Process embeddings in batches
+        self.top_k = self.config.scalable_graph.top_k_neighbors if hasattr(self.config, 'scalable_graph') else 50
+        self.batch_size = self.config.scalable_graph.batch_size if hasattr(self.config, 'scalable_graph') else 1000
         
         # FAISS index for efficient similarity search
         self.index = None
-        self.dimension = 384  # Default embedding dimension
+        self.dimension = self.config.embedding.dimension if hasattr(self.config, 'embedding') else 384
         
         # Track document metadata
         self.documents = []
         self.embeddings = None
+        
+        # Monitoring
+        self.monitor = monitor
         
     def build_graph(
         self, 
@@ -59,7 +63,33 @@ class ScalableGraphBuilder:
         """
         if not documents:
             return self._empty_graph()
-            
+        
+        # Get current graph state for monitoring
+        def get_graph_state():
+            return {
+                "nodes": len(self.documents) if self.documents else 0,
+                "edges": self.embeddings.shape[0] * self.top_k if self.embeddings is not None else 0
+            }
+        
+        # Use monitoring if available
+        if self.monitor:
+            with MonitoredOperation(
+                self.monitor, 
+                "build_graph", 
+                get_graph_state,
+                {"incremental": incremental, "num_docs": len(documents)}
+            ):
+                return self._build_graph_internal(documents, embeddings, incremental)
+        else:
+            return self._build_graph_internal(documents, embeddings, incremental)
+    
+    def _build_graph_internal(
+        self,
+        documents: List[Dict[str, Any]],
+        embeddings: Optional[np.ndarray],
+        incremental: bool
+    ) -> Data:
+        """Internal graph building logic."""
         try:
             # Extract embeddings if not provided
             if embeddings is None:
@@ -217,7 +247,24 @@ class ScalableGraphBuilder:
         """
         if self.index is None or self.embeddings is None:
             return np.array([]), np.array([])
+        
+        # Monitor search operation
+        if self.monitor:
+            def get_graph_state():
+                return {"nodes": len(self.documents), "edges": 0}
             
+            with MonitoredOperation(
+                self.monitor,
+                "search",
+                get_graph_state,
+                {"node_idx": node_idx, "k": k or self.top_k}
+            ):
+                return self._get_neighbors_internal(node_idx, k)
+        else:
+            return self._get_neighbors_internal(node_idx, k)
+    
+    def _get_neighbors_internal(self, node_idx: int, k: int = None) -> Tuple[np.ndarray, np.ndarray]:
+        """Internal neighbor search logic."""
         k = k or self.top_k
         query_embedding = self.embeddings[node_idx:node_idx+1]
         

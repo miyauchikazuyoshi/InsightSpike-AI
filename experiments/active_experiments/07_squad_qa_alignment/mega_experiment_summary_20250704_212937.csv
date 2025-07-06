@@ -1,0 +1,10 @@
+Checkpoint,Dataset,Total_Documents,Total_Episodes,New_Documents,New_Episodes,Integration_Rate
+1,squad_200,200,115,100,55,45.0%
+2,squad_200,300,172,100,57,43.0%
+3,squad_200,400,228,100,56,44.0%
+4,squad_300,500,269,100,41,59.0%
+5,squad_300,600,305,100,36,64.0%
+6,squad_300,700,349,100,44,56.0%
+7,squad_300,800,394,100,45,55.0%
+8,squad_300,900,438,100,44,56.0%
+9,squad_300,1000,489,100,51,49.0%

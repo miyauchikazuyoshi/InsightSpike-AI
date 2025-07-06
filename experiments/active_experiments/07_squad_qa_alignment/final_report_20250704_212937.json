@@ -1,0 +1,26 @@
+{
+  "experiment": "Mega Dataset Experiment",
+  "completed": "2025-07-04T21:29:37.346857",
+  "summary": {
+    "total_documents": 1000,
+    "total_episodes": 489,
+    "integration_rate": 0.511,
+    "datasets_processed": [
+      "squad_200",
+      "squad_300",
+      "ms_marco_150",
+      "coqa_80"
+    ],
+    "checkpoints": 11
+  },
+  "estimated_graph": {
+    "nodes": 1000,
+    "edges": 45861,
+    "density": 0.09181381381381382
+  },
+  "performance": {
+    "docs_per_episode": 2.044989775051125,
+    "squad_200_integration": 0.43,
+    "squad_300_integration": 0.65
+  }
+}

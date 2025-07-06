@@ -39,3 +39,10 @@ except ImportError as e:
         ]
     else:
         __all__ = ["clean_text", "iter_text"]
+
+# Export graph importance utilities
+try:
+    from .graph_importance import GraphImportanceCalculator, DynamicImportanceTracker
+    __all__.extend(["GraphImportanceCalculator", "DynamicImportanceTracker"])
+except ImportError:
+    pass

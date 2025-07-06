@@ -360,8 +360,8 @@ class L2MemoryManager(L2MemoryInterface):
 
         except Exception as e:
             logger.warning(f"IVF-PQ training failed ({e}), falling back to flat index")
-            # Fallback to flat index
-            self.index = faiss.IndexFlatL2(self.dim)
+            # Fallback to flat index with inner product (cosine similarity for normalized vectors)
+            self.index = faiss.IndexFlatIP(self.dim)
             self.index.add(vecs)
             self.is_trained = True
 

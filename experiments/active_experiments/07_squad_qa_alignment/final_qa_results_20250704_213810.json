@@ -1,0 +1,45 @@
+{
+  "timestamp": "2025-07-04T21:38:10.099928",
+  "summary": {
+    "accuracy": 0.0,
+    "correct": 0,
+    "total": 4,
+    "avg_response_time": 1.2042869329452515,
+    "episodes": 5,
+    "compression_rate": 0.511
+  },
+  "results": [
+    {
+      "question": "To whom did the Virgin Mary allegedly appear in 1858 in Lourdes France?",
+      "ground_truth": "Saint Bernadette Soubirous",
+      "response": "The topic requires examining multiple perspectives and considering how different elements interact within the broader context.",
+      "correct": false,
+      "response_time": 4.423627853393555,
+      "retrieved_count": 5
+    },
+    {
+      "question": "What is in front of the Notre Dame Main Building?",
+      "ground_truth": "a copper statue of Christ",
+      "response": "This involves understanding the fundamental principles and how they apply in various scenarios.",
+      "correct": false,
+      "response_time": 0.12620186805725098,
+      "retrieved_count": 7
+    },
+    {
+      "question": "What sits on top of the Main Building at Notre Dame?",
+      "ground_truth": "a golden statue of the Virgin Mary",
+      "response": "This question involves analyzing the relationships between different concepts and principles. A systematic approach helps in understanding the key factors involved.",
+      "correct": false,
+      "response_time": 0.12710809707641602,
+      "retrieved_count": 7
+    },
+    {
+      "question": "What is the Grotto at Notre Dame?",
+      "ground_truth": "a Marian place of prayer and reflection",
+      "response": "This question involves analyzing the relationships between different concepts and principles. A systematic approach helps in understanding the key factors involved.",
+      "correct": false,
+      "response_time": 0.14020991325378418,
+      "retrieved_count": 8
+    }
+  ]
+}

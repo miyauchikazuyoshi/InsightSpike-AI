@@ -1,0 +1,40 @@
+# Experiment-specific .gitignore
+
+# Backup directories
+*/data_backup*/
+*/data_final/
+*/data_experiment/
+*/data_after_experiment/
+
+# Large data files
+*.faiss
+*.pt
+*.db
+*.pkl
+*.npy
+*.h5
+
+# Large JSON files (>1MB)
+episodes.json
+qa_pairs.json
+*_episodes.json
+scalable_index.faiss
+
+# Log files
+*.log
+experiment_log_*.txt
+
+# Temporary files
+*.tmp
+*.cache
+.DS_Store
+
+# Results that are too large
+*/results/*.png
+*/results/*.jpg
+*/results/figures/
+
+# Keep important results
+!*/results/*_summary.json
+!*/results/*_metrics.json
+!*/results/README.md

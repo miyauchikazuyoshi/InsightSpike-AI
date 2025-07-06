@@ -54,9 +54,14 @@ cd InsightSpike-AI
 
 # Install with Poetry (recommended)
 poetry install
+poetry run python scripts/setup_models.py  # Download required models
 
 # OR install with pip (alternative)
 pip install -e .
+python scripts/setup_models.py  # Download required models
+
+# OR use Make for quick setup
+make quickstart  # Installs package and downloads models automatically
 
 # Validate installation and data integrity
 python scripts/pre_push_validation.py
@@ -210,6 +215,39 @@ print(f"Episodes: {stats['episodes']}, Graph nodes: {stats['graph_nodes']}")
 agent.save_state()  # Saves to data/episodes.json and data/graph_pyg.pt
 ```
 
+### Standard Data Management for Experiments
+
+When running experiments, follow this standardized workflow:
+
+```python
+import shutil
+from datetime import datetime
+
+# 1. Backup existing data before experiment
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+shutil.copytree("data", f"data_backup_{timestamp}")
+
+# 2. Initialize fresh agent for clean experiment
+agent = MainAgent()
+agent.initialize()
+
+# 3. Run your experiment
+# ... experiment code ...
+
+# 4. Save experiment results
+experiment_results = {
+    "timestamp": timestamp,
+    "metrics": agent.get_stats(),
+    # ... other results ...
+}
+
+# 5. Optionally restore original data
+# shutil.rmtree("data")
+# shutil.copytree(f"data_backup_{timestamp}", "data")
+```
+
+For detailed data management guidelines, see [Data Management Guide](data/README.md).
+
 ### Data Growth Example
 
 To properly grow the knowledge graph:
@@ -254,10 +292,14 @@ agent.save_state()
 
 ### Data Storage
 
-InsightSpike-AI stores data in:
+InsightSpike-AI uses a structured data directory system:
 - `data/episodes.json` - Episode memory (text, embeddings, metadata)
 - `data/graph_pyg.pt` - PyTorch Geometric graph structure
 - `data/index.faiss` - FAISS vector index for similarity search
+- `data/insight_facts.db` - SQLite database for discovered insights
+- `data/learning/` - Auto-learning system data
+
+See [Data Management Guide](data/README.md) for detailed directory structure and usage guidelines.
 
 ## 🎯 What is InsightSpike-AI?
 
@@ -566,7 +608,7 @@ InsightSpike-AI/
 ### 🚀 Quick Start Guides
 
 - **[Production Setup](scripts/README.md)** - Enterprise deployment & validation tools
-- **[Data Management](data/clean_backup/README.md)** - Backup/restore system & data integrity
+- **[Data Management](data/README.md)** - Data directory structure & usage guidelines
 - **[System Monitoring](monitoring/production_monitor.py)** - Health metrics & performance tracking
 - **[Pre-push Validation](scripts/pre_push_validation.py)** - Automated quality assurance
 

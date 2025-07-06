@@ -6,6 +6,8 @@ This directory contains Mermaid diagrams illustrating the InsightSpike-AI archit
 
 ### Core System Architecture
 - **TECHNICAL_ARCHITECTURE.mermaid** - Overall system architecture with scalable graph implementation
+- **TECHNICAL_ARCHITECTURE_v2.mermaid** - ⚡ **NEW** Updated architecture with L2EnhancedScalableMemory integration
+- **DATA_FLOW_ARCHITECTURE.mermaid** - ⚡ **NEW** Data flow and directory structure (data/, experiments/)
 - **WORKFLOW_TREE.mermaid** - Processing workflow and decision trees
 - **SYSTEM_DASHBOARD.mermaid** - Real-time system metrics with hierarchical graph performance
 
@@ -17,7 +19,21 @@ This directory contains Mermaid diagrams illustrating the InsightSpike-AI archit
 ### Insight Processing
 - **INSIGHT_LIFECYCLE.mermaid** - Insight discovery and quality assessment lifecycle
 
-## 🚀 Latest Updates (Phase 2 & 3 Implementation)
+## 🚀 Latest Updates (2025-07-06)
+
+### New Diagrams Added
+1. **TECHNICAL_ARCHITECTURE_v2.mermaid**
+   - Shows MainAgent using L2EnhancedScalableMemory
+   - Highlights ScalableGraphManager with O(n log n) performance
+   - Updated data storage paths (data/core/, data/db/, etc.)
+
+2. **DATA_FLOW_ARCHITECTURE.mermaid**
+   - Complete data directory structure
+   - Experiment data management workflow
+   - Backup and restore procedures
+   - Data access patterns
+
+### Phase 2 & 3 Implementation Updates
 
 ### Scalable Graph Architecture
 The diagrams now reflect the **NP-hard GED optimization** solutions:

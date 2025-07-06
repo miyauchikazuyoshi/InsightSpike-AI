@@ -1,0 +1,3 @@
+Dataset,Documents,Episodes,Integration Rate,Avg Time (s),Graph Nodes,Graph Edges,Conflicts
+squad_30,60,22,63.3%,0.112,60,1709,0
+ms_marco_20,181,184,-1.7%,0.050,241,2599,2

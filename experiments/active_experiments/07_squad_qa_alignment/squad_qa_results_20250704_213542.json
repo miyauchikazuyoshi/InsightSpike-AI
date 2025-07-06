@@ -1,0 +1,177 @@
+{
+  "timestamp": "2025-07-04T21:35:42.334914",
+  "results": [
+    {
+      "question": "To whom did the Virgin Mary allegedly appear in 1858 in Lourdes France?",
+      "episode_idx": 1,
+      "response": "This involves understanding the fundamental principles and how they apply in various scenarios.",
+      "response_time": 4.156306982040405,
+      "retrieved_count": 5,
+      "close_episodes": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "success": true
+    },
+    {
+      "question": "What is in front of the Notre Dame Main Building?",
+      "episode_idx": 2,
+      "response": "This question involves analyzing the relationships between different concepts and principles. A systematic approach helps in understanding the key factors involved.",
+      "response_time": 0.2582731246948242,
+      "retrieved_count": 6,
+      "close_episodes": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "success": true
+    },
+    {
+      "question": "The Basilica of the Sacred heart at Notre Dame is beside to which structure? | In which architectural style is the Basilica of the Sacred Heart at Notre Dame made?",
+      "episode_idx": 3,
+      "response": "This requires a comprehensive approach that considers multiple dimensions of the problem. The analysis involves examining both theoretical foundations and practical implications.",
+      "response_time": 0.1101539134979248,
+      "retrieved_count": 7,
+      "close_episodes": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "success": true
+    },
+    {
+      "question": "What is the Grotto at Notre Dame?",
+      "episode_idx": 4,
+      "response": "This question involves analyzing the relationships between different concepts and principles. A systematic approach helps in understanding the key factors involved.",
+      "response_time": 0.06403183937072754,
+      "retrieved_count": 8,
+      "close_episodes": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "success": true
+    },
+    {
+      "question": "What sits on top of the Main Building at Notre Dame?",
+      "episode_idx": 5,
+      "response": "This involves understanding the fundamental principles and how they apply in various scenarios.",
+      "response_time": 0.07164788246154785,
+      "retrieved_count": 9,
+      "close_episodes": [],
+      "success": true
+    },
+    {
+      "question": "When did the Scholastic Magazine of Notre dame begin publishing?",
+      "episode_idx": 7,
+      "response": "This involves understanding the fundamental principles and how they apply in various scenarios.",
+      "response_time": 0.07264208793640137,
+      "retrieved_count": 10,
+      "close_episodes": [],
+      "success": true
+    },
+    {
+      "question": "How often is Notre Dame's the Juggler published?",
+      "episode_idx": 8,
+      "response": "This question involves analyzing the relationships between different concepts and principles. A systematic approach helps in understanding the key factors involved.",
+      "response_time": 0.08129477500915527,
+      "retrieved_count": 11,
+      "close_episodes": [],
+      "success": true
+    },
+    {
+      "question": "What is the daily student paper at Notre Dame called?",
+      "episode_idx": 9,
+      "response": "This question involves analyzing the relationships between different concepts and principles. A systematic approach helps in understanding the key factors involved.",
+      "response_time": 0.08243703842163086,
+      "retrieved_count": 12,
+      "close_episodes": [],
+      "success": true
+    },
+    {
+      "question": "How many student news papers are found at Notre Dame?",
+      "episode_idx": 10,
+      "response": "This involves understanding the fundamental principles and how they apply in various scenarios.",
+      "response_time": 0.08476734161376953,
+      "retrieved_count": 13,
+      "close_episodes": [],
+      "success": true
+    },
+    {
+      "question": "In what year did the student paper Common Sense begin publication at Notre Dame?",
+      "episode_idx": 11,
+      "response": "The topic requires examining multiple perspectives and considering how different elements interact within the broader context.",
+      "response_time": 0.09234094619750977,
+      "retrieved_count": 14,
+      "close_episodes": [],
+      "success": true
+    },
+    {
+      "question": "Where is the headquarters of the Congregation of the Holy Cross?",
+      "episode_idx": 13,
+      "response": "This involves understanding the fundamental principles and how they apply in various scenarios.",
+      "response_time": 0.09116101264953613,
+      "retrieved_count": 15,
+      "close_episodes": [],
+      "success": true
+    },
+    {
+      "question": "What is the primary seminary of the Congregation of the Holy Cross?",
+      "episode_idx": 14,
+      "response": "The topic requires examining multiple perspectives and considering how different elements interact within the broader context.",
+      "response_time": 0.09404420852661133,
+      "retrieved_count": 15,
+      "close_episodes": [],
+      "success": true
+    },
+    {
+      "question": "What is the oldest structure at Notre Dame?",
+      "episode_idx": 15,
+      "response": "The topic requires examining multiple perspectives and considering how different elements interact within the broader context.",
+      "response_time": 0.09006094932556152,
+      "retrieved_count": 15,
+      "close_episodes": [],
+      "success": true
+    },
+    {
+      "question": "What individuals live at Fatima House at Notre Dame?",
+      "episode_idx": 16,
+      "response": "This question involves analyzing the relationships between different concepts and principles. A systematic approach helps in understanding the key factors involved.",
+      "response_time": 0.09123086929321289,
+      "retrieved_count": 15,
+      "close_episodes": [],
+      "success": true
+    },
+    {
+      "question": "Which prize did Frederick Buechner create?",
+      "episode_idx": 17,
+      "response": "This question involves analyzing the relationships between different concepts and principles. A systematic approach helps in understanding the key factors involved.",
+      "response_time": 0.10031485557556152,
+      "retrieved_count": 15,
+      "close_episodes": [],
+      "success": true
+    }
+  ],
+  "summary": {
+    "total_questions": 15,
+    "successful": 15,
+    "found_related": 4,
+    "avg_response_time": 0.369380521774292,
+    "avg_retrieved_docs": 11.333333333333334
+  }
+}

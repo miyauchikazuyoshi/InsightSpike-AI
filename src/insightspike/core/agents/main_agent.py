@@ -18,8 +18,8 @@ from ...config import get_config
 from ..config import Config
 from ..config import get_config as get_new_config
 from ..layers.layer1_error_monitor import ErrorMonitor
-from ..layers.layer2_memory_manager import (
-    L2MemoryManager as Memory,  # Use new unified implementation
+from ..layers.layer2_enhanced_scalable import (
+    L2EnhancedScalableMemory as Memory,  # Use scalable implementation with O(n log n)
 )
 from ..layers.layer4_llm_provider import get_llm_provider
 
@@ -110,7 +110,7 @@ class MainAgent:
         self.l3_graph = (
             L3GraphReasoner(self.config) if GRAPH_REASONER_AVAILABLE else None
         )
-        self.l4_llm = get_llm_provider(self.config, safe_mode=True)
+        self.l4_llm = get_llm_provider(self.config, safe_mode=False)
 
         # State tracking
         self.cycle_count = 0
@@ -564,34 +564,53 @@ class MainAgent:
 
     def add_episode_with_graph_update(self, text: str, c_value: float = 0.5) -> Dict[str, Any]:
         """
-        Add an episode to memory and update graph simultaneously.
-        This ensures data consistency between memory and graph representations.
+        Add an episode to memory and update graph efficiently using Layer2's ScalableGraphManager.
         """
         try:
-            # Use L2MemoryManager's store_episode to get proper embeddings
+            # Use L2MemoryManager's store_episode (which already handles graph updates)
             success = self.l2_memory.store_episode(text, c_value)
             if not success:
                 raise Exception("Failed to store episode")
             
-            # Get the last added episode (the one we just stored)
+            # Get the last added episode
             episode_idx = len(self.l2_memory.episodes) - 1
             episode = self.l2_memory.episodes[episode_idx]
             vector = episode.vec
             
-            # Create document representation for graph
-            document = {
-                "text": text,
-                "embedding": vector,
-                "c_value": c_value,
-                "episode_idx": episode_idx,
-                "timestamp": time.time()
-            }
-            
-            # Update L3 graph if available
+            # Get graph state from Layer2's ScalableGraphManager
+            graph_nodes = 0
             graph_analysis = None
-            if self.l3_graph:
-                graph_analysis = self.l3_graph.analyze_documents([document])
-                logger.debug(f"Graph updated with new episode {episode_idx}")
+            
+            # Check if Layer2 is using ScalableGraphManager
+            if hasattr(self.l2_memory, 'scalable_graph') and self.l2_memory.scalable_graph:
+                # Get current graph from Layer2
+                current_graph = self.l2_memory.scalable_graph.get_current_graph()
+                graph_nodes = current_graph.num_nodes if current_graph else 0
+                
+                # Only use Layer3 for analysis, not rebuilding
+                if self.l3_graph and current_graph and graph_nodes > 0:
+                    # Analyze the existing graph (no rebuilding)
+                    graph_analysis = self.l3_graph.analyze_documents(
+                        [],  # Empty documents - just analyze existing graph
+                        context={"graph": current_graph}
+                    )
+                    logger.debug(f"Graph analysis on {graph_nodes} nodes")
+            else:
+                # Fallback to old behavior if not using ScalableGraphManager
+                logger.warning("Layer2 not using ScalableGraphManager, falling back to full rebuild")
+                if self.l3_graph:
+                    # This is the inefficient path we want to avoid
+                    all_documents = []
+                    for i, ep in enumerate(self.l2_memory.episodes):
+                        all_documents.append({
+                            "text": ep.text,
+                            "embedding": ep.vec,
+                            "c_value": getattr(ep, 'c_value', 0.5),
+                            "episode_idx": i,
+                            "timestamp": getattr(ep, 'timestamp', time.time())
+                        })
+                    graph_analysis = self.l3_graph.analyze_documents(all_documents)
+                    graph_nodes = graph_analysis['metrics'].get('graph_size_current', 0) if graph_analysis and 'metrics' in graph_analysis else 0
             
             result = {
                 "episode_idx": episode_idx,
@@ -599,6 +618,8 @@ class MainAgent:
                 "text": text,
                 "c_value": c_value,
                 "graph_analysis": graph_analysis,
+                "total_episodes": len(self.l2_memory.episodes),
+                "graph_nodes": graph_nodes,
                 "success": True
             }
             

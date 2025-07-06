@@ -1,0 +1,17 @@
+{
+  "Experiment Summary": {
+    "Total Documents": 1100,
+    "Final Episodes": 986,
+    "Final Graph Nodes": 1100,
+    "Final Graph Edges": 48827,
+    "Integration Rate": "10.4%",
+    "Graph Density": "4.04%",
+    "Avg Edges per Node": "44.4"
+  },
+  "Performance Metrics": {
+    "Avg Processing Time": "0.064s",
+    "Min Processing Time": "0.014s",
+    "Max Processing Time": "0.179s",
+    "Total Experiment Time": "1.0s"
+  }
+}

@@ -302,9 +302,12 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         context = context or {}
 
         try:
-            # Handle empty documents case - create a minimal synthetic graph
-            if not documents:
-                # Create a minimal single-node graph for empty document case
+            # Check if a pre-built graph is provided in context
+            if context.get("graph") is not None:
+                current_graph = context["graph"]
+                logger.debug(f"Using pre-built graph with {current_graph.num_nodes} nodes")
+            elif not documents:
+                # Handle empty documents case - create a minimal synthetic graph
                 synthetic_embedding = np.random.normal(0, 0.1, (1, 384))  # Small variance
                 current_graph = Data(
                     x=torch.tensor(synthetic_embedding, dtype=torch.float),
@@ -335,6 +338,9 @@ class L3GraphReasoner(L3GraphReasonerInterface):
 
             # Store current graph for next iteration
             self.previous_graph = current_graph
+            
+            # Save graph to disk
+            self.save_graph(current_graph)
 
             result = {
                 "graph": current_graph,
@@ -358,7 +364,12 @@ class L3GraphReasoner(L3GraphReasonerInterface):
     ) -> Dict[str, float]:
         """Calculate ΔGED and ΔIG metrics."""
         if previous_graph is None:
-            return {"delta_ged": 0.0, "delta_ig": 0.0}
+            return {
+                "delta_ged": 0.0, 
+                "delta_ig": 0.0,
+                "graph_size_current": current_graph.num_nodes if current_graph else 0,
+                "graph_size_previous": 0
+            }
 
         try:
             # Calculate graph edit distance change using configured method

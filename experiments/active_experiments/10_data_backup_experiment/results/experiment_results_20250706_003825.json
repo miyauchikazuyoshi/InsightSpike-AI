@@ -1,0 +1,66 @@
+{
+  "experiment": "Dynamic Growth RAG",
+  "timestamp": "2025-07-06T00:38:25.069585",
+  "growth_results": [
+    {
+      "checkpoint": 10,
+      "episodes": 8,
+      "integration_rate": 0.6,
+      "growth_time": 5.376290798187256,
+      "test_accuracy": 0.6,
+      "docs_added": 20
+    },
+    {
+      "checkpoint": 50,
+      "episodes": 18,
+      "integration_rate": 0.8200000000000001,
+      "growth_time": 3.8832221031188965,
+      "test_accuracy": 0.9,
+      "docs_added": 92
+    },
+    {
+      "checkpoint": 100,
+      "episodes": 45,
+      "integration_rate": 0.775,
+      "growth_time": 7.19996190071106,
+      "test_accuracy": 0.8666666666666667,
+      "docs_added": 182
+    },
+    {
+      "checkpoint": 250,
+      "episodes": 204,
+      "integration_rate": 0.5920000000000001,
+      "growth_time": 28.92700481414795,
+      "test_accuracy": 0.7333333333333333,
+      "docs_added": 456
+    },
+    {
+      "checkpoint": 500,
+      "episodes": 341,
+      "integration_rate": 0.659,
+      "growth_time": 140.37573313713074,
+      "test_accuracy": 0.36666666666666664,
+      "docs_added": 796
+    },
+    {
+      "checkpoint": 630,
+      "episodes": 445,
+      "integration_rate": 0.6468253968253967,
+      "growth_time": 451.94817900657654,
+      "test_accuracy": 0.4,
+      "docs_added": 920
+    }
+  ],
+  "comparison": {
+    "standard_rag": {
+      "accuracy": 1.0,
+      "tested": 50
+    }
+  },
+  "summary": {
+    "total_qa_pairs": 630,
+    "final_episodes": 445,
+    "final_accuracy": 0.4,
+    "final_integration_rate": 0.6468253968253967
+  }
+}

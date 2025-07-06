@@ -1,0 +1,59 @@
+# Experiment Configuration Template
+# Copy and modify this for your experiment
+
+experiment:
+  name: "template_example"
+  version: "1.0"
+  description: "Template showing experiment configuration"
+  
+parameters:
+  # Data parameters
+  data:
+    num_episodes: 100
+    batch_size: 32
+    data_source: "squad"  # squad, custom, synthetic
+    
+  # Model parameters
+  model:
+    embedding_dim: 384
+    similarity_threshold: 0.85
+    c_value_default: 0.5
+    
+  # Graph parameters
+  graph:
+    use_scalable: true
+    top_k_neighbors: 50
+    conflict_threshold: 0.8
+    
+  # Evaluation parameters
+  evaluation:
+    metrics:
+      - precision
+      - recall
+      - f1_score
+      - graph_density
+      - compression_ratio
+    k_values: [1, 3, 5, 10]
+    
+  # Experiment control
+  control:
+    random_seed: 42
+    max_iterations: 1000
+    checkpoint_interval: 100
+    verbose: true
+    
+# Paths (relative to experiment directory)
+paths:
+  input_data: "data/input/"
+  output_data: "data/output/"
+  checkpoints: "results/checkpoints/"
+  plots: "results/plots/"
+  
+# Baseline comparisons
+baselines:
+  - name: "standard_rag"
+    enabled: true
+  - name: "no_graph"
+    enabled: true
+  - name: "random"
+    enabled: false
