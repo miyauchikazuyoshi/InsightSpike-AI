@@ -14,6 +14,8 @@ from typing import List, Dict
 
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
+from insightspike.core.layers.hierarchical_graph_builder import HierarchicalGraphBuilder
+
 
 class SimpleRAG:
     """シンプルなRAGシステム"""
