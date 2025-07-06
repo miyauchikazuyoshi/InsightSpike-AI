@@ -4,9 +4,35 @@ Unit tests for graph edge generation improvements
 import numpy as np
 import pytest
 from unittest.mock import Mock, patch
+from dataclasses import dataclass
 
 from insightspike.core.layers.scalable_graph_builder import ScalableGraphBuilder
 from insightspike.core.learning.knowledge_graph_memory import KnowledgeGraphMemory
+
+
+@dataclass
+class MockReasoningConfig:
+    similarity_threshold: float = 0.2
+
+@dataclass
+class MockScalableGraphConfig:
+    top_k_neighbors: int = 50
+    batch_size: int = 1000
+
+@dataclass
+class MockEmbeddingConfig:
+    dimension: int = 384
+
+@dataclass
+class MockConfig:
+    reasoning: MockReasoningConfig
+    scalable_graph: MockScalableGraphConfig
+    embedding: MockEmbeddingConfig
+    
+    def __init__(self, similarity_threshold=0.2, dimension=384, top_k=50):
+        self.reasoning = MockReasoningConfig(similarity_threshold=similarity_threshold)
+        self.scalable_graph = MockScalableGraphConfig(top_k_neighbors=top_k)
+        self.embedding = MockEmbeddingConfig(dimension=dimension)
 
 
 class TestGraphEdgeGeneration:
@@ -14,11 +40,8 @@ class TestGraphEdgeGeneration:
     
     def test_scalable_graph_builder_with_lower_threshold(self):
         """Test that ScalableGraphBuilder generates edges with lower threshold."""
-        builder = ScalableGraphBuilder(
-            embedding_dim=10,
-            similarity_threshold=0.2,  # Lower threshold
-            top_k=5
-        )
+        config = MockConfig(similarity_threshold=0.2, dimension=10, top_k=5)
+        builder = ScalableGraphBuilder(config=config)
         
         # Create similar embeddings
         embeddings = []
@@ -61,11 +84,8 @@ class TestGraphEdgeGeneration:
     
     def test_edge_generation_with_diverse_embeddings(self):
         """Test edge generation with more diverse embeddings."""
-        builder = ScalableGraphBuilder(
-            embedding_dim=10,
-            similarity_threshold=0.2,
-            top_k=3
-        )
+        config = MockConfig(similarity_threshold=0.2, dimension=10, top_k=3)
+        builder = ScalableGraphBuilder(config=config)
         
         # Create diverse embeddings
         embeddings = []
@@ -101,11 +121,8 @@ class TestGraphEdgeGeneration:
         # Test with different thresholds
         edges_by_threshold = {}
         for threshold in [0.1, 0.2, 0.3, 0.4]:
-            builder = ScalableGraphBuilder(
-                embedding_dim=10,
-                similarity_threshold=threshold,
-                top_k=10
-            )
+            config = MockConfig(similarity_threshold=threshold, dimension=10, top_k=10)
+            builder = ScalableGraphBuilder(config=config)
             graph = builder.build_graph(documents, embeddings=embeddings)
             edges_by_threshold[threshold] = graph.edge_index.shape[1]
         
@@ -119,7 +136,8 @@ class TestGraphEdgeGeneration:
     
     def test_empty_graph_handling(self):
         """Test handling of empty graphs."""
-        builder = ScalableGraphBuilder(embedding_dim=10)
+        config = MockConfig(dimension=10)
+        builder = ScalableGraphBuilder(config=config)
         
         # Build with empty documents
         graph = builder.build_graph([])
@@ -129,7 +147,8 @@ class TestGraphEdgeGeneration:
     
     def test_single_node_graph(self):
         """Test graph with single node."""
-        builder = ScalableGraphBuilder(embedding_dim=10)
+        config = MockConfig(dimension=10)
+        builder = ScalableGraphBuilder(config=config)
         
         # Single document
         vec = np.random.randn(10).astype(np.float32)
