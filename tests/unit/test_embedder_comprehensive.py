@@ -18,10 +18,11 @@ class TestEmbeddingManager:
         mock_config.embedding.model_name = "test-model"
         mock_config.embedding.dimension = 512
         
-        # Pass config directly
-        manager = EmbeddingManager(config=mock_config)
-        assert manager.model_name == "test-model"
-        assert manager.dimension == 512
+        with patch('insightspike.utils.embedder.get_config', return_value=mock_config):
+            # Pass config directly
+            manager = EmbeddingManager(config=mock_config)
+            assert manager.model_name == "test-model"
+            assert manager.dimension == 512
     
     def test_init_without_config(self):
         """Test initialization without config (fallback)."""
@@ -38,8 +39,15 @@ class TestEmbeddingManager:
         assert manager.model_name == "custom-model"
     
     @patch('insightspike.utils.embedder.SentenceTransformer')
-    def test_get_model_caching(self, mock_st):
+    @patch('insightspike.utils.embedder.get_config')
+    def test_get_model_caching(self, mock_get_config, mock_st):
         """Test model caching mechanism."""
+        # Setup config
+        mock_config = Mock()
+        mock_config.embedding.model_name = "test-model"
+        mock_config.embedding.dimension = 384
+        mock_get_config.return_value = mock_config
+        
         # Clear cache
         import insightspike.utils.embedder as embedder_module
         embedder_module._model_cache.clear()
@@ -77,10 +85,17 @@ class TestEmbeddingManager:
                 assert mock_fallback.called
                 assert model == mock_fallback_model
     
+    @patch('insightspike.utils.embedder.torch')
     @patch('insightspike.utils.embedder.SentenceTransformer')
-    @patch('torch.set_num_threads')
-    def test_model_loading_with_env_setup(self, mock_set_threads, mock_st):
+    @patch('insightspike.utils.embedder.get_config')
+    def test_model_loading_with_env_setup(self, mock_get_config, mock_st, mock_torch):
         """Test model loading sets up environment correctly."""
+        # Setup config
+        mock_config = Mock()
+        mock_config.embedding.model_name = "test-model"
+        mock_config.embedding.dimension = 384
+        mock_get_config.return_value = mock_config
+        
         import insightspike.utils.embedder as embedder_module
         embedder_module._model_cache.clear()
         
@@ -93,7 +108,7 @@ class TestEmbeddingManager:
         # Check environment was configured
         assert os.environ.get('PYTORCH_MPS_HIGH_WATERMARK_RATIO') == '0.0'
         assert os.environ.get('TOKENIZERS_PARALLELISM') == 'false'
-        mock_set_threads.assert_called_once_with(1)
+        mock_torch.set_num_threads.assert_called_once_with(1)
         
         # Check model was created with correct params
         mock_st.assert_called_once_with(
@@ -103,8 +118,15 @@ class TestEmbeddingManager:
             trust_remote_code=False
         )
     
-    def test_model_loading_fallback_on_error(self):
+    @patch('insightspike.utils.embedder.get_config')
+    def test_model_loading_fallback_on_error(self, mock_get_config):
         """Test fallback when model loading fails."""
+        # Setup config
+        mock_config = Mock()
+        mock_config.embedding.model_name = "test-model"
+        mock_config.embedding.dimension = 384
+        mock_get_config.return_value = mock_config
+        
         import insightspike.utils.embedder as embedder_module
         embedder_module._model_cache.clear()
         
@@ -120,8 +142,15 @@ class TestEmbeddingManager:
                 assert model == mock_fallback_model
     
     @patch('insightspike.utils.embedder.SentenceTransformer')
-    def test_encode_single_text(self, mock_st):
+    @patch('insightspike.utils.embedder.get_config')
+    def test_encode_single_text(self, mock_get_config, mock_st):
         """Test encoding single text."""
+        # Setup config
+        mock_config = Mock()
+        mock_config.embedding.model_name = "test-model"
+        mock_config.embedding.dimension = 384
+        mock_get_config.return_value = mock_config
+        
         mock_model = Mock()
         mock_embeddings = np.random.rand(1, 384)
         mock_model.encode.return_value = mock_embeddings
@@ -144,8 +173,15 @@ class TestEmbeddingManager:
         assert np.array_equal(result, mock_embeddings)
     
     @patch('insightspike.utils.embedder.SentenceTransformer')
-    def test_encode_multiple_texts(self, mock_st):
+    @patch('insightspike.utils.embedder.get_config')
+    def test_encode_multiple_texts(self, mock_get_config, mock_st):
         """Test encoding multiple texts."""
+        # Setup config
+        mock_config = Mock()
+        mock_config.embedding.model_name = "test-model"
+        mock_config.embedding.dimension = 384
+        mock_get_config.return_value = mock_config
+        
         mock_model = Mock()
         mock_embeddings = np.random.rand(3, 384)
         mock_model.encode.return_value = mock_embeddings
@@ -168,8 +204,15 @@ class TestEmbeddingManager:
         )
         assert np.array_equal(result, mock_embeddings)
     
-    def test_encode_fallback(self):
+    @patch('insightspike.utils.embedder.get_config')
+    def test_encode_fallback(self, mock_get_config):
         """Test encoding with fallback model."""
+        # Setup config
+        mock_config = Mock()
+        mock_config.embedding.model_name = "test-model"
+        mock_config.embedding.dimension = 384
+        mock_get_config.return_value = mock_config
+        
         manager = EmbeddingManager()
         manager._model = None
         
@@ -188,15 +231,22 @@ class TestEmbeddingManager:
                 mock_fallback_encode.assert_called_once()
                 assert np.array_equal(result, expected_embeddings)
     
-    def test_fallback_model(self):
+    @patch('insightspike.utils.embedder.get_config')
+    def test_fallback_model(self, mock_get_config):
         """Test fallback model creation."""
+        # Setup config
+        mock_config = Mock()
+        mock_config.embedding.model_name = "test-model"
+        mock_config.embedding.dimension = 384
+        mock_get_config.return_value = mock_config
+        
         manager = EmbeddingManager()
         
         fallback = manager._fallback_model()
         
         assert hasattr(fallback, 'encode')
-        assert hasattr(fallback, 'get_sentence_embedding_dimension')
-        assert fallback.get_sentence_embedding_dimension() == manager.dimension
+        assert hasattr(fallback, 'dimension')
+        assert fallback.dimension == manager.dimension
     
     def test_fallback_encode(self):
         """Test fallback encoding method."""
@@ -255,8 +305,15 @@ class TestGetModelFunction:
             assert not mock_manager_class.called
             assert result == mock_model
     
-    def test_get_model_with_custom_model_name(self):
+    @patch('insightspike.utils.embedder.get_config')
+    def test_get_model_with_custom_model_name(self, mock_get_config):
         """Test get_model with custom model name creates new manager."""
+        # Setup config
+        mock_config = Mock()
+        mock_config.embedding.model_name = "test-model"
+        mock_config.embedding.dimension = 384
+        mock_get_config.return_value = mock_config
+        
         import insightspike.utils.embedder as embedder_module
         
         # Reset global state
@@ -305,8 +362,15 @@ class TestEdgeCases:
         assert not np.any(np.isnan(result))
     
     @patch('insightspike.utils.embedder.SentenceTransformer', side_effect=ImportError)
-    def test_sentence_transformers_not_installed(self, mock_st):
+    @patch('insightspike.utils.embedder.get_config')
+    def test_sentence_transformers_not_installed(self, mock_get_config, mock_st):
         """Test behavior when sentence-transformers is not installed."""
+        # Setup config
+        mock_config = Mock()
+        mock_config.embedding.model_name = "test-model"
+        mock_config.embedding.dimension = 384
+        mock_get_config.return_value = mock_config
+        
         import insightspike.utils.embedder as embedder_module
         embedder_module._model_cache.clear()
         

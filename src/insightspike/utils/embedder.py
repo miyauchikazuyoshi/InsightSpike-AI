@@ -25,12 +25,12 @@ class EmbeddingManager:
 
     def __init__(self, model_name: str = None, config=None):
         try:
-            from ...config import get_config
+            from ..core.config import get_config
 
             self.config = config or get_config()
             self.model_name = model_name or self.config.embedding.model_name
             self.dimension = self.config.embedding.dimension
-        except ImportError:
+        except (ImportError, AttributeError):
             # Fallback configuration
             self.config = None
             self.model_name = model_name or "sentence-transformers/all-MiniLM-L6-v2"
@@ -148,6 +148,10 @@ class FallbackEmbedder:
 
     def __init__(self, dimension: int = 384):
         self.dimension = dimension
+    
+    def get_sentence_embedding_dimension(self):
+        """Return the dimension of the embeddings."""
+        return self.dimension
 
     def encode(self, texts: Union[str, List[str]], **kwargs) -> np.ndarray:
         """Generate simple hash-based embeddings."""
