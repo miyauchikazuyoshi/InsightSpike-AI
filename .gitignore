@@ -25,6 +25,9 @@ prepare_push.sh
 *.log
 backup/
 
+# 実験データディレクトリ
+data_experiment/
+
 # テスト・デバッグファイル（実験用）
 tests/debug/
 debug_*.py
