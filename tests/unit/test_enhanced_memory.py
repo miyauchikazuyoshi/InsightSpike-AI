@@ -257,12 +257,15 @@ class TestL2EnhancedScalableMemory:
             "tags": ["test", "unit"]
         }
         
-        # First, ensure embedder returns a proper embedding
-        with patch.object(memory, '_encode_text') as mock_encode:
+        # First, mock the embedder to return a proper embedding
+        with patch('insightspike.utils.embedder.get_model') as mock_get_model:
+            # Create mock embedder
+            mock_embedder = Mock()
             # Return a valid normalized embedding
             embedding = np.random.randn(384).astype(np.float32)
             embedding = embedding / np.linalg.norm(embedding)
-            mock_encode.return_value = embedding
+            mock_embedder.encode.return_value = np.array([embedding])
+            mock_get_model.return_value = mock_embedder
             
             result = memory.store_episode("Test content", metadata=metadata)
             assert result  # Should succeed
