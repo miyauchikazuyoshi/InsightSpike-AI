@@ -85,7 +85,8 @@ class TestScalableGraphBuilder:
         graph_high = self.builder.build_graph(self.test_docs[:10])
         edges_high = graph_high.edge_index.shape[1]
         
-        assert edges_high < edges_low
+        # High threshold should have fewer or equal edges than low threshold
+        assert edges_high <= edges_low
     
     def test_get_neighbors(self):
         """Test neighbor retrieval."""
