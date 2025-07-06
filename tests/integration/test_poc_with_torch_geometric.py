@@ -69,7 +69,7 @@ def test_torch_geometric_integration():
     # Test basic torch-geometric operations
     from torch_geometric.utils import degree
     degrees = degree(data.edge_index[0])
-    print(f"✓ Node degrees: {degrees}")
+    print(f"✓ Node degrees: {degrees.tolist()}")  # Convert to list to avoid SymBool issues
     
     return True
 

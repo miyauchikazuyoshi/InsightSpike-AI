@@ -56,13 +56,17 @@ def test_with_real_data():
                 content = " | ".join(str(cell) for cell in row if cell is not None)
                 if len(content) > 10:  # 有効なコンテンツのみ
                     vector = np.random.random(384).astype(np.float32)
-                    agent.l2_memory.add_episode(vector, content[:200])  # 200文字に制限
+                    agent.l2_memory.add_episode(vector, content[:200], c_value=0.5)  # 200文字に制限
                     print(f"   ✅ エピソード{i+1}: {content[:50]}...")
             
             # メモリ状態確認
             print(f"\n📊 メモリ状態:")
             print(f"   追加されたエピソード: {len(agent.l2_memory.episodes)}")
-            print(f"   平均C-value: {sum(ep.c for ep in agent.l2_memory.episodes) / max(len(agent.l2_memory.episodes), 1):.3f}")
+            if agent.l2_memory.episodes:
+                avg_c = sum(ep.c for ep in agent.l2_memory.episodes) / len(agent.l2_memory.episodes)
+                print(f"   平均C-value: {avg_c:.3f}")
+            else:
+                print(f"   平均C-value: 0.000")
             
             conn.close()
             print("\n✅ 実データベーステスト完了")

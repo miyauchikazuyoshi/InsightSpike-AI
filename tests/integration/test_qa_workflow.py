@@ -62,11 +62,11 @@ def test_qa_workflow():
         
         if results:
             print("💡 関連する知識:")
-            for j, (episode, score) in enumerate(results[:2]):
-                print(f"   {j+1}. [{score:.3f}] {episode.text[:100]}...")
+            for j, result in enumerate(results[:2]):
+                print(f"   {j+1}. [{result['weighted_score']:.3f}] {result['text'][:100]}...")
                 
             # 学習フィードバック：良い質問には報酬
-            episode_ids = [agent.l2_memory.episodes.index(ep) for ep, _ in results[:1]]
+            episode_ids = [result['index'] for result in results[:1]]
             agent.l2_memory.update_c_values(episode_ids, [0.1])  # 小さな報酬
             print(f"   ✅ エピソード{episode_ids}にフィードバック報酬を付与")
         else:
@@ -76,11 +76,15 @@ def test_qa_workflow():
     print(f"\n📊 最終メモリ状態:")
     stats = agent.l2_memory.get_memory_stats()
     print(f"   総エピソード: {stats['total_episodes']}")
-    print(f"   平均C-value: {sum(ep.c for ep in agent.l2_memory.episodes) / len(agent.l2_memory.episodes):.3f}")
-    
-    # C-value分布
-    c_values = [ep.c for ep in agent.l2_memory.episodes]
-    print(f"   C-value範囲: {min(c_values):.3f} - {max(c_values):.3f}")
+    if agent.l2_memory.episodes:
+        avg_c = sum(ep.c for ep in agent.l2_memory.episodes) / len(agent.l2_memory.episodes)
+        print(f"   平均C-value: {avg_c:.3f}")
+        
+        # C-value分布
+        c_values = [ep.c for ep in agent.l2_memory.episodes]
+        print(f"   C-value範囲: {min(c_values):.3f} - {max(c_values):.3f}")
+    else:
+        print("   エピソードなし")
     
     print("\n🎉 質問応答テスト完了！")
     return True
