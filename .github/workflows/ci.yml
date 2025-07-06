@@ -61,12 +61,31 @@ jobs:
         mkdir -p data/raw logs
         echo "Test data for integration tests" > data/raw/test_sentences.txt
     
-    - name: Run tests
+    - name: Run unit tests
       run: |
-        echo "🧪 Running tests..."
-        poetry run pytest --version
+        echo "🧪 Running unit tests..."
         poetry run pytest tests/unit/ -v --tb=short -k "not test_add_nodes"
-        echo "✅ All tests completed"
+        echo "✅ Unit tests completed"
+    
+    - name: Run integration tests
+      run: |
+        echo "🧪 Running integration tests..."
+        poetry run pytest tests/integration/ -v --tb=short --maxfail=3
+        echo "✅ Integration tests completed"
+    
+    - name: Run tests with coverage
+      run: |
+        echo "📊 Running tests with coverage..."
+        poetry run pytest tests/unit/ tests/integration/ --cov=src --cov-report=xml --cov-report=term-missing --cov-fail-under=60
+        echo "✅ Coverage analysis completed"
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
 
   # Quick experiment tests
   experiments:
@@ -127,10 +146,10 @@ jobs:
         poetry run python tests/integration/phase2_phase3/test_phase3_simple.py || echo "⚠️ RAG test completed with display output"
         echo "✅ All scalability tests completed"
 
-  # Code quality check - simplified for current setup
+  # Code quality check - enhanced with formatting and type checks
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     
     steps:
     - uses: actions/checkout@v4
@@ -140,14 +159,35 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
     
-    - name: Install tools
-      run: |
-        pip install flake8 mypy
+    - name: Install Poetry and dependencies
+      uses: snok/install-poetry@v1.4.1
+      with:
+        version: ${{ env.POETRY_VERSION }}
+        virtualenvs-create: true
+        virtualenvs-in-project: true
     
-    - name: Run quality checks
+    - name: Install quality tools
       run: |
-        echo "🔧 Running basic code quality checks..."
-        # Run flake8 with relaxed rules for now - focus on critical errors only
-        flake8 src/ --max-line-length=120 --ignore=E203,W503,F401,W291,W293,E501,E128,E131,E129,F541,F841,F403,F405,E722,E402,E302,E305,E226 --count --select=E9,F63,F7,F82 || echo "⚠️ Critical errors found but continuing"
-        # Skip mypy for now to focus on functionality
-        echo "✅ Quality checks completed (relaxed mode for stability)"
+        poetry install --only dev
+        poetry run pip install black isort flake8 mypy
+    
+    - name: Check code formatting with Black
+      run: |
+        echo "🎨 Checking code formatting..."
+        poetry run black --check src tests || echo "⚠️ Code formatting issues found"
+    
+    - name: Check import sorting with isort
+      run: |
+        echo "📦 Checking import sorting..."
+        poetry run isort --check-only src tests || echo "⚠️ Import sorting issues found"
+    
+    - name: Run flake8 linting
+      run: |
+        echo "🔍 Running linting checks..."
+        poetry run flake8 src/ --max-line-length=100 --extend-ignore=E203,W503,E501 --count --statistics || echo "⚠️ Linting issues found"
+    
+    - name: Run type checking with mypy
+      run: |
+        echo "🔎 Running type checks..."
+        poetry run mypy src --ignore-missing-imports --no-strict-optional --warn-return-any || echo "⚠️ Type checking issues found"
+        echo "✅ Quality checks completed"
