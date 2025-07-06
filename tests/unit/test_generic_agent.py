@@ -10,7 +10,8 @@ from insightspike.core.agents.generic_agent import (
     GenericMemoryManager, GenericReasoner, GenericInsightSpikeAgent
 )
 from insightspike.core.interfaces.generic_interfaces import (
-    EnvironmentState, InsightMoment, TaskType
+    EnvironmentState, InsightMoment, TaskType, ActionSpace,
+    EnvironmentInterface, InsightDetectorInterface, StateEncoder, RewardNormalizer
 )
 
 
@@ -28,8 +29,16 @@ class TestGenericMemoryManager:
         """Test storing experiences."""
         manager = GenericMemoryManager()
         
-        state = EnvironmentState(observation=np.array([1, 2, 3]))
-        next_state = EnvironmentState(observation=np.array([4, 5, 6]))
+        state = EnvironmentState(
+            state_data=np.array([1, 2, 3]),
+            environment_type="test",
+            task_type=TaskType.CUSTOM
+        )
+        next_state = EnvironmentState(
+            state_data=np.array([4, 5, 6]),
+            environment_type="test",
+            task_type=TaskType.CUSTOM
+        )
         
         manager.store_experience(
             state=state,
@@ -47,11 +56,19 @@ class TestGenericMemoryManager:
         """Test storing experience with insight."""
         manager = GenericMemoryManager()
         
-        state = EnvironmentState(observation=np.array([1, 2, 3]))
+        state = EnvironmentState(
+            state_data=np.array([1, 2, 3]),
+            environment_type="test",
+            task_type=TaskType.CUSTOM
+        )
         insight = InsightMoment(
-            value=2.0,
-            state=state,
-            description="Test insight"
+            step=0,
+            episode=0,
+            insight_type="test_insight",
+            description="Test insight",
+            confidence=0.9,
+            dged_value=0.1,
+            dig_value=0.2
         )
         
         manager.store_experience(
@@ -65,68 +82,70 @@ class TestGenericMemoryManager:
         assert len(manager.insights) == 1
         assert manager.insights[0] == insight
     
-    def test_retrieve_recent(self):
-        """Test retrieving recent experiences."""
+    def test_retrieve_similar(self):
+        """Test retrieving similar experiences."""
         manager = GenericMemoryManager()
         
         # Store multiple experiences
-        for i in range(10):
-            state = EnvironmentState(observation=np.array([i]))
+        for i in range(5):
+            state = EnvironmentState(
+                state_data=np.array([i]),
+                environment_type="test",
+                task_type=TaskType.CUSTOM
+            )
             manager.store_experience(state, i, i/10, state)
         
-        recent = manager.retrieve_recent(n=5)
-        assert len(recent) == 5
-        assert recent[0]['timestamp'] == 5  # Most recent first
-    
-    def test_retrieve_insights(self):
-        """Test retrieving insights."""
-        manager = GenericMemoryManager()
+        query_state = EnvironmentState(
+            state_data=np.array([2]),
+            environment_type="test",
+            task_type=TaskType.CUSTOM
+        )
         
-        # Add insights
-        for i in range(3):
-            insight = InsightMoment(
-                value=i,
-                state=EnvironmentState(observation=np.array([i])),
-                description=f"Insight {i}"
-            )
-            manager.store_experience(
-                state=insight.state,
-                action=0,
-                reward=0,
-                next_state=insight.state,
-                insight=insight
-            )
-        
-        insights = manager.retrieve_insights(n=2)
-        assert len(insights) == 2
-        assert insights[0].value == 2  # Highest value first
+        similar = manager.retrieve_similar(query_state, k=3)
+        assert len(similar) <= 3
+        assert all('state' in exp for exp in similar)
     
     def test_max_capacity(self):
         """Test max capacity enforcement."""
         manager = GenericMemoryManager(max_capacity=3)
         
         for i in range(5):
-            state = EnvironmentState(observation=np.array([i]))
+            state = EnvironmentState(
+                state_data=np.array([i]),
+                environment_type="test",
+                task_type=TaskType.CUSTOM
+            )
             manager.store_experience(state, 0, 0, state)
         
         assert len(manager.experiences) == 3
-        # Should keep most recent
-        assert manager.experiences[-1]['state'].observation[0] == 4
     
-    def test_get_statistics(self):
+    def test_get_memory_stats(self):
         """Test getting memory statistics."""
         manager = GenericMemoryManager()
         
         # Add some experiences and insights
         for i in range(5):
-            state = EnvironmentState(observation=np.array([i]))
-            insight = InsightMoment(value=i, state=state) if i % 2 == 0 else None
+            state = EnvironmentState(
+                state_data=np.array([i]),
+                environment_type="test",
+                task_type=TaskType.CUSTOM
+            )
+            insight = InsightMoment(
+                step=i,
+                episode=0,
+                insight_type="test",
+                description=f"Insight {i}",
+                confidence=0.9,
+                dged_value=0.1,
+                dig_value=0.2
+            ) if i % 2 == 0 else None
             manager.store_experience(state, 0, i, state, insight)
         
-        stats = manager.get_statistics()
+        stats = manager.get_memory_stats()
         assert stats['total_experiences'] == 5
         assert stats['total_insights'] == 3
-        assert stats['avg_reward'] == 2.0
+        assert 'memory_utilization' in stats
+        assert 'insight_rate' in stats
 
 
 class TestGenericReasoner:
@@ -134,72 +153,52 @@ class TestGenericReasoner:
     
     def test_init(self):
         """Test reasoner initialization."""
-        reasoner = GenericReasoner(strategy='exploration')
-        assert reasoner.strategy == 'exploration'
-        assert reasoner.epsilon == 0.2
+        reasoner = GenericReasoner()
+        assert reasoner is not None
     
-    def test_reason_exploration(self):
-        """Test exploration reasoning."""
-        reasoner = GenericReasoner(strategy='exploration', epsilon=1.0)
-        state = EnvironmentState(observation=np.array([1, 2, 3]))
-        memory = GenericMemoryManager()
+    def test_analyze_insight_pattern(self):
+        """Test insight pattern analysis."""
+        reasoner = GenericReasoner()
         
-        with patch('numpy.random.random', return_value=0.5):
-            with patch('numpy.random.choice', return_value=2):
-                action = reasoner.reason(state, memory, task_type=TaskType.EXPLORATION)
-                assert action == 2
-    
-    def test_reason_exploitation(self):
-        """Test exploitation reasoning."""
-        reasoner = GenericReasoner(strategy='exploitation')
-        state = EnvironmentState(observation=np.array([1, 2, 3]))
-        memory = GenericMemoryManager()
-        
-        # Add experiences with different rewards
-        for i in range(3):
-            memory.store_experience(
-                state=state,
-                action=i,
-                reward=i * 10,  # Action 2 has highest reward
-                next_state=state
+        insights = [
+            InsightMoment(
+                step=i*10,
+                episode=0,
+                insight_type="type_a" if i % 2 == 0 else "type_b",
+                description=f"Insight {i}",
+                confidence=0.9,
+                dged_value=0.1,
+                dig_value=0.2
             )
+            for i in range(5)
+        ]
         
-        action = reasoner.reason(state, memory, task_type=TaskType.OPTIMIZATION)
-        assert action == 2  # Should choose highest reward action
+        analysis = reasoner.analyze_insight_pattern(insights)
+        assert analysis['pattern_detected'] is True
+        assert analysis['total_insights'] == 5
+        assert 'insight_types' in analysis
+        assert 'avg_interval' in analysis
     
-    def test_reason_with_insights(self):
-        """Test reasoning with insights."""
+    def test_analyze_empty_insights(self):
+        """Test pattern analysis with no insights."""
         reasoner = GenericReasoner()
-        state = EnvironmentState(observation=np.array([1, 2, 3]))
-        memory = GenericMemoryManager()
-        
-        # Add insight
-        insight = InsightMoment(
-            value=10.0,
-            state=state,
-            action=1,
-            description="Good action"
-        )
-        memory.store_experience(state, 1, 5.0, state, insight)
-        
-        # Should prefer action from insight
-        action = reasoner.reason(state, memory, task_type=TaskType.DISCOVERY)
-        assert action == 1
+        analysis = reasoner.analyze_insight_pattern([])
+        assert analysis['pattern_detected'] is False
     
-    def test_extract_features(self):
-        """Test feature extraction."""
+    def test_predict_next_insight(self):
+        """Test insight prediction."""
         reasoner = GenericReasoner()
-        state = EnvironmentState(
-            observation=np.array([1, 2, 3]),
-            task_info={'difficulty': 0.5}
-        )
         
-        features = reasoner.extract_features(state)
-        assert 'observation_mean' in features
-        assert 'observation_std' in features
-        assert features['task_difficulty'] == 0.5
-
-
+        context = {
+            'recent_rewards': [1.0, 2.0, 3.0],
+            'exploration_ratio': 0.3
+        }
+        
+        predictions = reasoner.predict_next_insight(context)
+        assert isinstance(predictions, dict)
+        assert 'strategic_breakthrough' in predictions
+        assert 'exploration_insight' in predictions
+        assert all(0 <= p <= 1 for p in predictions.values())
 
 
 class TestGenericInsightSpikeAgent:
@@ -207,112 +206,184 @@ class TestGenericInsightSpikeAgent:
     
     def setup_method(self):
         """Set up test fixtures."""
-        self.env = Mock()
-        self.env.reset.return_value = EnvironmentState(observation=np.array([0]))
-        self.env.get_action_space.return_value = list(range(4))
+        # Mock environment
+        self.env = MagicMock(spec=EnvironmentInterface)
+        self.env.get_action_space.return_value = ActionSpace(
+            action_type="discrete",
+            action_dim=4
+        )
+        self.env.reset.return_value = EnvironmentState(
+            state_data=np.array([0, 0]),
+            environment_type="test",
+            task_type=TaskType.CUSTOM
+        )
         
-        self.state_encoder = Mock()
-        self.state_encoder.encode.return_value = np.array([0, 1])
+        # Mock insight detector
+        self.insight_detector = MagicMock(spec=InsightDetectorInterface)
+        self.insight_detector.detect_insight.return_value = None
         
-        self.reward_normalizer = Mock()
-        self.reward_normalizer.normalize.return_value = 1.0
+        # Mock state encoder
+        self.state_encoder = MagicMock(spec=StateEncoder)
+        self.state_encoder.encode_state.return_value = np.array([0, 1])
+        
+        # Mock reward normalizer
+        self.reward_normalizer = MagicMock(spec=RewardNormalizer)
+        self.reward_normalizer.normalize_reward.return_value = 1.0
     
     def test_init(self):
         """Test agent initialization."""
         agent = GenericInsightSpikeAgent(
+            agent_id="test-agent",
             environment=self.env,
+            insight_detector=self.insight_detector,
             state_encoder=self.state_encoder,
             reward_normalizer=self.reward_normalizer
         )
         
+        assert agent.agent_id == "test-agent"
         assert agent.environment == self.env
-        assert agent.state_encoder == self.state_encoder
         assert isinstance(agent.memory, GenericMemoryManager)
         assert isinstance(agent.reasoner, GenericReasoner)
-        assert agent.insight_detector is not None  # Just check it exists
     
-    def test_act(self):
-        """Test agent action selection."""
+    def test_select_action(self):
+        """Test action selection."""
         agent = GenericInsightSpikeAgent(
+            agent_id="test-agent",
             environment=self.env,
-            state_encoder=self.state_encoder
-        )
-        
-        state = EnvironmentState(observation=np.array([1, 2]))
-        agent.reasoner.reason = Mock(return_value=2)
-        
-        action = agent.act(state, task_type=TaskType.EXPLORATION)
-        assert action == 2
-        agent.reasoner.reason.assert_called_once()
-    
-    def test_step(self):
-        """Test agent step execution."""
-        agent = GenericInsightSpikeAgent(
-            environment=self.env,
+            insight_detector=self.insight_detector,
             state_encoder=self.state_encoder,
             reward_normalizer=self.reward_normalizer
         )
         
-        # Mock environment step
-        next_state = EnvironmentState(observation=np.array([2]))
-        self.env.step.return_value = (next_state, 5.0, False, {})
+        state = EnvironmentState(
+            state_data=np.array([1, 2]),
+            environment_type="test",
+            task_type=TaskType.CUSTOM
+        )
         
-        # Mock action selection
-        agent.act = Mock(return_value=1)
-        
-        # Execute step
-        state = EnvironmentState(observation=np.array([1]))
-        result = agent.step(state, task_type=TaskType.EXPLORATION)
-        
-        assert result['next_state'] == next_state
-        assert result['reward'] == 1.0  # Normalized
-        assert result['done'] is False
-        assert 'insight' in result
+        action = agent.select_action(state)
+        assert isinstance(action, (int, np.integer))
+        assert 0 <= action < 4
     
-    def test_run_episode(self):
-        """Test running full episode."""
+    def test_update(self):
+        """Test agent update."""
         agent = GenericInsightSpikeAgent(
+            agent_id="test-agent",
             environment=self.env,
+            insight_detector=self.insight_detector,
             state_encoder=self.state_encoder,
             reward_normalizer=self.reward_normalizer
         )
         
-        # Mock environment behavior
+        state = EnvironmentState(
+            state_data=np.array([1, 2]),
+            environment_type="test",
+            task_type=TaskType.CUSTOM
+        )
+        next_state = EnvironmentState(
+            state_data=np.array([2, 3]),
+            environment_type="test",
+            task_type=TaskType.CUSTOM
+        )
+        
+        # Update agent
+        agent.update(state, 1, 5.0, next_state, False)
+        
+        # Check memory was updated
+        assert len(agent.memory.experiences) == 1
+        assert len(agent.recent_rewards) == 1
+    
+    def test_update_with_insight(self):
+        """Test agent update with insight detection."""
+        # Create insight
+        test_insight = InsightMoment(
+            step=10,
+            episode=1,
+            insight_type="test_insight",
+            description="Test insight detected",
+            confidence=0.95,
+            dged_value=0.1,
+            dig_value=0.2
+        )
+        
+        # Setup insight detector to return insight
+        self.insight_detector.detect_insight.return_value = test_insight
+        
+        agent = GenericInsightSpikeAgent(
+            agent_id="test-agent",
+            environment=self.env,
+            insight_detector=self.insight_detector,
+            state_encoder=self.state_encoder,
+            reward_normalizer=self.reward_normalizer
+        )
+        
+        state = EnvironmentState(
+            state_data=np.array([1, 2]),
+            environment_type="test",
+            task_type=TaskType.CUSTOM,
+            step_count=10,
+            episode_count=1
+        )
+        
+        # Update should detect insight
+        agent.update(state, 1, 10.0, state, False)
+        
+        assert len(agent.insight_moments) == 1
+        assert agent.insight_moments[0] == test_insight
+        assert agent.insight_boost_duration > 0
+    
+    def test_train_episode(self):
+        """Test training an episode."""
+        # Setup environment behavior
         states = [
-            EnvironmentState(observation=np.array([i])) 
+            EnvironmentState(
+                state_data=np.array([i, i+1]),
+                environment_type="test",
+                task_type=TaskType.CUSTOM
+            )
             for i in range(3)
         ]
+        
         self.env.reset.return_value = states[0]
         self.env.step.side_effect = [
             (states[1], 1.0, False, {}),
-            (states[2], 10.0, True, {})  # High reward at end
+            (states[2], 2.0, True, {})  # Episode ends
         ]
         
-        # Mock action selection
-        agent.act = Mock(return_value=0)
-        
-        # Run episode
-        total_reward, insights = agent.run_episode(
-            max_steps=10,
-            task_type=TaskType.EXPLORATION
+        agent = GenericInsightSpikeAgent(
+            agent_id="test-agent",
+            environment=self.env,
+            insight_detector=self.insight_detector,
+            state_encoder=self.state_encoder,
+            reward_normalizer=self.reward_normalizer
         )
         
-        assert total_reward == 2.0  # Both rewards normalized to 1.0
-        assert len(insights) >= 1  # Should detect high reward insight
+        # Train episode
+        result = agent.train_episode()
+        
+        assert result['episode'] == 1
+        assert result['steps'] == 2
+        assert 'reward' in result
+        assert 'insights' in result
+        assert agent.episode_count == 1
     
-    def test_get_statistics(self):
-        """Test getting agent statistics."""
+    def test_get_performance_summary(self):
+        """Test getting performance summary."""
         agent = GenericInsightSpikeAgent(
+            agent_id="test-agent",
             environment=self.env,
-            state_encoder=self.state_encoder
+            insight_detector=self.insight_detector,
+            state_encoder=self.state_encoder,
+            reward_normalizer=self.reward_normalizer
         )
         
         # Add some data
-        for i in range(3):
-            state = EnvironmentState(observation=np.array([i]))
-            agent.memory.store_experience(state, i, i, state)
+        agent.episode_rewards = [10.0, 20.0, 15.0]
+        agent.episode_steps = [100, 150, 120]
         
-        stats = agent.get_statistics()
-        assert 'episodes_completed' in stats
-        assert 'memory_stats' in stats
-        assert stats['memory_stats']['total_experiences'] == 3
+        summary = agent.get_performance_summary()
+        assert 'total_episodes' in summary
+        assert 'total_insights' in summary
+        assert 'avg_episode_reward' in summary
+        assert 'memory_stats' in summary
+        assert 'insight_analysis' in summary

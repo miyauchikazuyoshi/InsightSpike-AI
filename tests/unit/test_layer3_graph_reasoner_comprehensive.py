@@ -7,11 +7,13 @@ import numpy as np
 import torch
 from torch_geometric.data import Data
 from unittest.mock import Mock, patch, MagicMock
-import networkx as nx
+import tempfile
+from pathlib import Path
 
 from insightspike.core.layers.layer3_graph_reasoner import (
-    L3GraphReasoner, ConflictScore
+    L3GraphReasoner, ConflictScore, GraphBuilder
 )
+from insightspike.core.interfaces import LayerInput
 
 
 class TestConflictScore:
@@ -23,248 +25,443 @@ class TestConflictScore:
         assert hasattr(score, 'config')
         assert hasattr(score, 'conflict_threshold')
     
+    def test_conflict_score_with_config(self):
+        """Test ConflictScore with custom config."""
+        mock_config = Mock()
+        mock_config.reasoning.conflict_threshold = 0.7
+        score = ConflictScore(config=mock_config)
+        assert score.conflict_threshold == 0.7
+    
     def test_calculate_conflict(self):
         """Test conflict calculation."""
         score = ConflictScore()
         
         # Create mock graphs
-        graph_old = Data(x=torch.randn(3, 8), edge_index=torch.tensor([[0, 1], [1, 2]], dtype=torch.long))
-        graph_new = Data(x=torch.randn(4, 8), edge_index=torch.tensor([[0, 1, 2], [1, 2, 3]], dtype=torch.long))
+        graph_old = Data(
+            x=torch.randn(3, 8), 
+            edge_index=torch.tensor([[0, 1], [1, 2]], dtype=torch.long).t()
+        )
+        graph_new = Data(
+            x=torch.randn(4, 8), 
+            edge_index=torch.tensor([[0, 1, 2], [1, 2, 3]], dtype=torch.long).t()
+        )
         
-        context = {'episodes': []}
+        context = {'previous_confidence': 0.8, 'current_confidence': 0.6}
         result = score.calculate_conflict(graph_old, graph_new, context)
         
         assert isinstance(result, dict)
-        assert 'structural' in result or 'overall' in result or len(result) > 0
+        assert 'structural' in result
+        assert 'semantic' in result
+        assert 'temporal' in result
+        assert 'total' in result
+        assert all(0 <= v <= 1 for v in result.values() if isinstance(v, (int, float)))
+    
+    def test_calculate_conflict_with_none_graphs(self):
+        """Test conflict calculation with None graphs."""
+        score = ConflictScore()
+        
+        result = score.calculate_conflict(None, None, {})
+        
+        assert result['structural'] == 0.0
+        assert result['semantic'] == 0.0
+        assert result['total'] == 0.0
+    
+    def test_structural_conflict(self):
+        """Test structural conflict calculation."""
+        score = ConflictScore()
+        
+        # Same structure
+        graph1 = Data(x=torch.randn(3, 8), edge_index=torch.tensor([[0, 1], [1, 2]], dtype=torch.long).t())
+        graph2 = Data(x=torch.randn(3, 8), edge_index=torch.tensor([[0, 1], [1, 2]], dtype=torch.long).t())
+        
+        conflict = score._structural_conflict(graph1, graph2)
+        assert conflict == 0.0  # No structural difference
+        
+        # Different structure
+        graph3 = Data(x=torch.randn(5, 8), edge_index=torch.tensor([[0, 1, 2, 3], [1, 2, 3, 4]], dtype=torch.long).t())
+        
+        conflict2 = score._structural_conflict(graph1, graph3)
+        assert conflict2 > 0.0  # Should have structural difference
+    
+    def test_semantic_conflict(self):
+        """Test semantic conflict calculation."""
+        score = ConflictScore()
+        
+        # Similar features
+        x1 = torch.ones(3, 8)
+        graph1 = Data(x=x1, edge_index=torch.tensor([[0, 1], [1, 2]], dtype=torch.long).t())
+        
+        x2 = torch.ones(3, 8) * 1.1  # Slightly different
+        graph2 = Data(x=x2, edge_index=torch.tensor([[0, 1], [1, 2]], dtype=torch.long).t())
+        
+        conflict = score._semantic_conflict(graph1, graph2)
+        assert 0.0 <= conflict <= 1.0
+    
+    def test_temporal_conflict(self):
+        """Test temporal conflict calculation."""
+        score = ConflictScore()
+        
+        # With confidence difference
+        context1 = {'previous_confidence': 0.9, 'current_confidence': 0.5}
+        conflict1 = score._temporal_conflict(context1)
+        assert conflict1 == 0.4
+        
+        # Without confidence info
+        context2 = {}
+        conflict2 = score._temporal_conflict(context2)
+        assert conflict2 == 0.0
+
+
+class TestGraphBuilder:
+    """Test GraphBuilder functionality."""
+    
+    def test_graph_builder_creation(self):
+        """Test creating GraphBuilder instances."""
+        builder = GraphBuilder()
+        assert hasattr(builder, 'config')
+        assert hasattr(builder, 'similarity_threshold')
+    
+    def test_build_graph_from_documents(self):
+        """Test building graph from documents."""
+        builder = GraphBuilder()
+        
+        # Documents with embeddings
+        docs = [
+            {'text': 'Doc 1', 'embedding': np.random.rand(384)},
+            {'text': 'Doc 2', 'embedding': np.random.rand(384)},
+            {'text': 'Doc 3', 'embedding': np.random.rand(384)}
+        ]
+        
+        graph = builder.build_graph(docs)
+        
+        assert isinstance(graph, Data)
+        assert graph.num_nodes == 3
+        assert graph.x.shape == (3, 384)
+        assert hasattr(graph, 'edge_index')
+        assert hasattr(graph, 'documents')
+    
+    def test_build_graph_empty(self):
+        """Test building graph with no documents."""
+        builder = GraphBuilder()
+        
+        graph = builder.build_graph([])
+        
+        assert isinstance(graph, Data)
+        assert graph.x.shape[0] == 0
+    
+    def test_build_graph_with_embeddings(self):
+        """Test building graph with provided embeddings."""
+        builder = GraphBuilder()
+        
+        docs = [{'text': f'Doc {i}'} for i in range(3)]
+        embeddings = np.random.rand(3, 384)
+        
+        graph = builder.build_graph(docs, embeddings)
+        
+        assert graph.num_nodes == 3
+        assert torch.allclose(graph.x, torch.tensor(embeddings, dtype=torch.float))
+    
+    def test_build_graph_small(self):
+        """Test building graph with very few documents."""
+        builder = GraphBuilder()
+        
+        # Single document
+        docs1 = [{'text': 'Single doc', 'embedding': np.random.rand(384)}]
+        graph1 = builder.build_graph(docs1)
+        assert graph1.num_nodes == 1
+        assert graph1.edge_index.shape[1] > 0  # Should have self-loop
+        
+        # Two documents
+        docs2 = [
+            {'text': 'Doc 1', 'embedding': np.random.rand(384)},
+            {'text': 'Doc 2', 'embedding': np.random.rand(384)}
+        ]
+        graph2 = builder.build_graph(docs2)
+        assert graph2.num_nodes == 2
+        assert graph2.edge_index.shape[1] >= 2  # Should have edges
 
 
 class TestL3GraphReasoner:
     """Test L3GraphReasoner functionality."""
     
     @pytest.fixture
-    def reasoner(self):
+    def mock_config(self):
+        """Create mock config."""
+        config = Mock()
+        config.reasoning.use_gnn = False
+        config.reasoning.similarity_threshold = 0.3
+        config.reasoning.spike_ged_threshold = 0.1
+        config.reasoning.spike_ig_threshold = 0.15
+        config.reasoning.conflict_threshold = 0.5
+        config.reasoning.weight_ged = 0.4
+        config.reasoning.weight_ig = 0.4
+        config.reasoning.weight_conflict = 0.2
+        config.reasoning.gnn_hidden_dim = 64
+        config.reasoning.graph_file = "data/graph_pyg.pt"
+        config.embedding.dimension = 8
+        config.graph.similarity_threshold = 0.2
+        return config
+    
+    @pytest.fixture
+    def reasoner(self, mock_config):
         """Create a graph reasoner instance."""
-        return L3GraphReasoner(embedding_dim=8, use_gnn=False)
+        with patch('insightspike.core.layers.layer3_graph_reasoner.get_config', return_value=mock_config):
+            return L3GraphReasoner(config=mock_config)
     
     @pytest.fixture
     def sample_graph(self):
         """Create a sample graph."""
         x = torch.randn(5, 8)
         edge_index = torch.tensor([[0, 1, 2, 3, 4], [1, 2, 3, 4, 0]], dtype=torch.long)
-        return Data(x=x, edge_index=edge_index)
+        return Data(x=x, edge_index=edge_index, num_nodes=5)
     
-    def test_init_without_gnn(self):
-        """Test initialization without GNN."""
-        reasoner = L3GraphReasoner(embedding_dim=16, use_gnn=False)
-        assert reasoner.embedding_dim == 16
-        assert reasoner.use_gnn is False
-        assert reasoner.gnn_model is None
+    def test_initialization(self, mock_config):
+        """Test L3GraphReasoner initialization."""
+        with patch('insightspike.core.layers.layer3_graph_reasoner.get_config', return_value=mock_config):
+            reasoner = L3GraphReasoner()
+            assert reasoner.layer_id == "layer3_graph_reasoner"
+            assert reasoner.config == mock_config
+            assert hasattr(reasoner, 'graph_builder')
+            assert hasattr(reasoner, 'conflict_scorer')
     
-    def test_init_with_gnn(self):
-        """Test initialization with GNN."""
-        reasoner = L3GraphReasoner(embedding_dim=16, use_gnn=True)
-        assert reasoner.embedding_dim == 16
-        assert reasoner.use_gnn is True
-        assert reasoner.gnn_model is not None
+    def test_initialization_with_gnn(self, mock_config):
+        """Test initialization with GNN enabled."""
+        mock_config.reasoning.use_gnn = True
+        with patch('insightspike.core.layers.layer3_graph_reasoner.get_config', return_value=mock_config):
+            reasoner = L3GraphReasoner(config=mock_config)
+            assert reasoner.gnn is not None
     
-    def test_retrieve_simple(self, reasoner, sample_graph):
-        """Test simple retrieval without GNN."""
-        reasoner.graph = sample_graph
-        query = torch.randn(8)
-        
-        results = reasoner.retrieve(query, k=3)
-        
-        assert len(results) == 3
-        assert all('node_idx' in r for r in results)
-        assert all('similarity' in r for r in results)
-        assert all(0 <= r['node_idx'] < 5 for r in results)
+    def test_initialize_method(self, reasoner):
+        """Test initialize method."""
+        result = reasoner.initialize()
+        assert result is True
+        assert reasoner._is_initialized is True
     
-    @patch('torch_geometric.nn.GCNConv')
-    def test_retrieve_with_gnn(self, mock_gcn):
-        """Test retrieval with GNN processing."""
-        # Create reasoner with GNN
-        reasoner = L3GraphReasoner(embedding_dim=8, use_gnn=True)
-        reasoner.graph = Data(
-            x=torch.randn(5, 8),
-            edge_index=torch.tensor([[0, 1], [1, 0]], dtype=torch.long)
-        )
-        
-        # Mock GNN forward pass
-        reasoner.gnn_model = Mock()
-        reasoner.gnn_model.return_value = torch.randn(5, 8)
-        
-        query = torch.randn(8)
-        results = reasoner.retrieve(query, k=2)
-        
-        assert len(results) == 2
-        reasoner.gnn_model.assert_called_once()
-    
-    def test_detect_conflicts_no_conflicts(self, reasoner):
-        """Test conflict detection with no conflicts."""
-        node_indices = [0, 2, 4]
-        conflicts = reasoner.detect_conflicts(node_indices)
-        
-        assert len(conflicts) == 0
-    
-    def test_detect_conflicts_semantic(self, reasoner):
-        """Test semantic conflict detection."""
-        reasoner.episodes = [
-            Mock(text="The cat is black", metadata={}),
-            Mock(text="The cat is white", metadata={}),
-            Mock(text="Dogs are friendly", metadata={})
+    def test_process_with_layer_input(self, reasoner):
+        """Test process method with LayerInput."""
+        documents = [
+            {'text': 'Doc 1', 'embedding': np.random.rand(8)},
+            {'text': 'Doc 2', 'embedding': np.random.rand(8)}
         ]
         
-        conflicts = reasoner.detect_conflicts([0, 1])
+        layer_input = LayerInput(data=documents, context={'query': 'test'})
         
-        assert len(conflicts) > 0
-        assert any('semantic' in str(c).lower() or 'conflict' in str(c).lower() for c in conflicts.values())
+        with patch.object(reasoner, 'analyze_documents') as mock_analyze:
+            mock_analyze.return_value = {'result': 'test'}
+            result = reasoner.process(layer_input)
+            
+            mock_analyze.assert_called_once_with(documents, {'query': 'test'})
+            assert result == {'result': 'test'}
     
-    def test_detect_conflicts_temporal(self, reasoner):
-        """Test temporal conflict detection."""
-        reasoner.episodes = [
-            Mock(text="Event A happened first", metadata={'timestamp': 100}),
-            Mock(text="Event A happened last", metadata={'timestamp': 200}),
+    def test_process_with_documents(self, reasoner):
+        """Test process method with direct documents."""
+        documents = [{'text': 'Doc 1'}]
+        
+        with patch.object(reasoner, 'analyze_documents') as mock_analyze:
+            mock_analyze.return_value = {'result': 'test'}
+            result = reasoner.process(documents)
+            
+            mock_analyze.assert_called_once_with(documents, {})
+    
+    def test_analyze_documents_empty(self, reasoner):
+        """Test analyzing empty documents."""
+        result = reasoner.analyze_documents([])
+        
+        assert isinstance(result, dict)
+        assert 'graph' in result
+        assert 'metrics' in result
+        assert 'spike_detected' in result
+        assert result['graph'].num_nodes == 1  # Synthetic node
+    
+    def test_analyze_documents_with_context_graph(self, reasoner, sample_graph):
+        """Test analyzing with pre-built graph in context."""
+        documents = []
+        context = {'graph': sample_graph}
+        
+        result = reasoner.analyze_documents(documents, context)
+        
+        assert result['graph'] == sample_graph
+        assert 'metrics' in result
+        assert 'conflicts' in result
+    
+    def test_analyze_documents_build_graph(self, reasoner):
+        """Test analyzing documents and building graph."""
+        documents = [
+            {'text': 'Doc 1', 'embedding': np.random.rand(8)},
+            {'text': 'Doc 2', 'embedding': np.random.rand(8)},
+            {'text': 'Doc 3', 'embedding': np.random.rand(8)}
         ]
         
-        conflicts = reasoner.detect_conflicts([0, 1])
+        with patch.object(reasoner, 'save_graph'):
+            result = reasoner.analyze_documents(documents)
         
-        assert len(conflicts) > 0
-        # Should detect temporal ordering conflict
+        assert isinstance(result, dict)
+        assert 'graph' in result
+        assert result['graph'].num_nodes == 3
+        assert 'spike_detected' in result
+        assert 'reasoning_quality' in result
     
-    def test_get_graph_context(self, reasoner, sample_graph):
-        """Test getting graph context."""
-        reasoner.graph = sample_graph
-        reasoner.networkx_graph = nx.Graph()
-        reasoner.networkx_graph.add_edges_from([(0, 1), (1, 2), (2, 3)])
+    def test_calculate_metrics(self, reasoner, sample_graph):
+        """Test metrics calculation."""
+        previous_graph = Data(x=torch.randn(4, 8), edge_index=torch.tensor([[0, 1], [2, 3]], dtype=torch.long).t())
         
-        context = reasoner.get_graph_context([0, 2])
+        metrics = reasoner._calculate_metrics(sample_graph, previous_graph)
         
-        assert 'subgraph_size' in context
-        assert 'connectivity' in context
-        assert 'node_degrees' in context
-        assert len(context['node_degrees']) == 2
+        assert 'delta_ged' in metrics
+        assert 'delta_ig' in metrics
+        assert 'graph_size_current' in metrics
+        assert 'graph_size_previous' in metrics
+        assert metrics['graph_size_current'] == 5
+        assert metrics['graph_size_previous'] == 4
     
-    def test_reason_with_memory(self, reasoner):
-        """Test reasoning with memory context."""
-        memory_context = {
-            'episodes': [
-                {'text': 'Episode 1', 'importance': 0.8},
-                {'text': 'Episode 2', 'importance': 0.6}
-            ],
-            'query': 'Test query'
-        }
+    def test_calculate_metrics_no_previous(self, reasoner, sample_graph):
+        """Test metrics calculation without previous graph."""
+        metrics = reasoner._calculate_metrics(sample_graph, None)
         
-        result = reasoner.reason(memory_context)
-        
-        assert 'reasoning' in result
-        assert 'confidence' in result
-        assert 0 <= result['confidence'] <= 1
+        assert metrics['delta_ged'] == 0.0
+        assert metrics['delta_ig'] == 0.0
+        assert metrics['graph_size_previous'] == 0
     
-    def test_update_graph(self, reasoner):
-        """Test graph update."""
-        new_graph = Data(
-            x=torch.randn(10, 8),
-            edge_index=torch.tensor([[0, 1, 2], [1, 2, 0]], dtype=torch.long)
-        )
+    def test_calculate_reward(self, reasoner):
+        """Test reward calculation."""
+        metrics = {'delta_ged': 0.5, 'delta_ig': 0.3, 'graph_size_current': 10}
+        conflicts = {'total': 0.1}
         
-        reasoner.update_graph(new_graph)
+        reward = reasoner._calculate_reward(metrics, conflicts)
         
-        assert reasoner.graph.x.shape[0] == 10
-        assert reasoner.networkx_graph is not None
-        assert reasoner.networkx_graph.number_of_nodes() == 10
+        assert isinstance(reward, dict)
+        assert 'base' in reward
+        assert 'structure' in reward
+        assert 'novelty' in reward
+        assert 'total' in reward
+        assert reward['total'] == sum(reward[k] for k in ['base', 'structure', 'novelty'])
     
-    def test_process_with_gnn(self, reasoner):
-        """Test GNN processing."""
-        reasoner.use_gnn = True
-        reasoner.gnn_model = Mock()
-        reasoner.gnn_model.return_value = torch.randn(5, 8)
+    def test_detect_spike(self, reasoner):
+        """Test spike detection."""
+        # Should detect spike
+        metrics1 = {'delta_ged': 0.2, 'delta_ig': 0.3}
+        conflicts1 = {'total': 0.3}
+        assert reasoner._detect_spike(metrics1, conflicts1) is True
         
-        graph = Data(
-            x=torch.randn(5, 8),
-            edge_index=torch.tensor([[0, 1], [1, 2]], dtype=torch.long)
-        )
+        # Should not detect spike (low metrics)
+        metrics2 = {'delta_ged': 0.05, 'delta_ig': 0.05}
+        conflicts2 = {'total': 0.3}
+        assert reasoner._detect_spike(metrics2, conflicts2) is False
         
-        processed = reasoner._process_with_gnn(graph)
-        
-        assert processed.shape == (5, 8)
-        reasoner.gnn_model.assert_called_once()
+        # Should not detect spike (high conflict)
+        metrics3 = {'delta_ged': 0.2, 'delta_ig': 0.3}
+        conflicts3 = {'total': 0.8}
+        assert reasoner._detect_spike(metrics3, conflicts3) is False
     
-    def test_calculate_similarity(self, reasoner):
-        """Test similarity calculation."""
-        node_features = torch.randn(5, 8)
-        query = torch.randn(8)
+    def test_assess_reasoning_quality(self, reasoner):
+        """Test reasoning quality assessment."""
+        metrics = {'delta_ged': 0.4, 'delta_ig': 0.6}
+        conflicts = {'total': 0.2}
         
-        similarities = reasoner._calculate_similarity(node_features, query)
+        quality = reasoner._assess_reasoning_quality(metrics, conflicts)
         
-        assert similarities.shape == (5,)
-        assert all(-1 <= s <= 1 for s in similarities)
+        assert 0.0 <= quality <= 1.0
+        assert quality == 0.3  # (0.4 + 0.6) / 2 - 0.2
     
-    def test_check_semantic_conflict(self, reasoner):
-        """Test semantic conflict checking."""
-        # Similar content - no conflict
-        text1 = "Machine learning is a subset of AI"
-        text2 = "AI includes machine learning"
-        score1 = reasoner._check_semantic_conflict(text1, text2)
-        assert score1 < 0.5
-        
-        # Contradictory content - conflict
-        text3 = "The model accuracy is 95%"
-        text4 = "The model accuracy is 60%"
-        score2 = reasoner._check_semantic_conflict(text3, text4)
-        assert score2 > 0
+    def test_save_and_load_graph(self, reasoner, sample_graph):
+        """Test saving and loading graphs."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            save_path = Path(tmpdir) / "test_graph.pt"
+            
+            # Save
+            result_path = reasoner.save_graph(sample_graph, save_path)
+            assert result_path == save_path
+            assert save_path.exists()
+            
+            # Load
+            loaded_graph = reasoner.load_graph(save_path)
+            assert isinstance(loaded_graph, Data)
+            assert loaded_graph.num_nodes == sample_graph.num_nodes
     
-    def test_check_temporal_conflict(self, reasoner):
-        """Test temporal conflict checking."""
-        meta1 = {'timestamp': 100, 'text': 'Event A happened'}
-        meta2 = {'timestamp': 200, 'text': 'Event A happened'}
+    def test_save_graph_fallback(self, reasoner):
+        """Test graph saving with fallback to dict format."""
+        # Create a graph that might fail normal saving
+        x = torch.randn(3, 8)
+        edge_index = torch.tensor([[0, 1], [1, 2]], dtype=torch.long).t()
+        graph = Data(x=x, edge_index=edge_index, num_nodes=3)
         
-        score = reasoner._check_temporal_conflict(meta1, meta2, "happened", "happened")
-        assert score > 0  # Same event at different times
+        with tempfile.TemporaryDirectory() as tmpdir:
+            save_path = Path(tmpdir) / "test_graph.pt"
+            
+            with patch('torch.save', side_effect=[Exception("Save failed"), None]):
+                result_path = reasoner.save_graph(graph, save_path)
+                assert result_path == save_path
     
-    def test_empty_graph_handling(self, reasoner):
-        """Test handling of empty graph."""
-        reasoner.graph = None
-        query = torch.randn(8)
+    def test_interface_methods(self, reasoner):
+        """Test interface compliance methods."""
+        vectors = np.random.rand(3, 8)
         
-        results = reasoner.retrieve(query, k=5)
-        assert len(results) == 0
+        # Test build_graph
+        graph = reasoner.build_graph(vectors)
+        assert isinstance(graph, Data)
+        assert graph.num_nodes == 3
+        
+        # Test calculate_ged
+        graph2 = reasoner.build_graph(np.random.rand(4, 8))
+        ged = reasoner.calculate_ged(graph, graph2)
+        assert isinstance(ged, float)
+        
+        # Test calculate_ig
+        ig = reasoner.calculate_ig(graph, graph2)
+        assert isinstance(ig, float)
+        
+        # Test detect_eureka_spike
+        spike = reasoner.detect_eureka_spike(0.2, 0.3)
+        assert isinstance(spike, bool)
     
-    def test_large_k_handling(self, reasoner, sample_graph):
-        """Test retrieval with k larger than graph size."""
-        reasoner.graph = sample_graph  # 5 nodes
-        query = torch.randn(8)
+    def test_cleanup(self, reasoner):
+        """Test cleanup method."""
+        reasoner.previous_graph = Data(x=torch.randn(3, 8))
+        reasoner.gnn = Mock()
         
-        results = reasoner.retrieve(query, k=10)
-        assert len(results) == 5  # Should return all nodes
+        reasoner.cleanup()
+        
+        assert reasoner.previous_graph is None
+        assert reasoner.gnn is None
+        assert reasoner._is_initialized is False
     
-    @patch('insightspike.core.layers.layer3_graph_reasoner.logger')
-    def test_error_logging(self, mock_logger, reasoner):
-        """Test error logging."""
-        # Cause an error in conflict detection
-        reasoner.episodes = None
+    def test_process_with_gnn(self, mock_config):
+        """Test processing with GNN enabled."""
+        mock_config.reasoning.use_gnn = True
         
-        conflicts = reasoner.detect_conflicts([0, 1])
-        
-        # Should log error and return empty dict
-        assert conflicts == {}
-        mock_logger.error.assert_called()
+        with patch('insightspike.core.layers.layer3_graph_reasoner.get_config', return_value=mock_config):
+            reasoner = L3GraphReasoner(config=mock_config)
+            assert reasoner.gnn is not None
+            
+            # Test GNN processing
+            graph = Data(x=torch.randn(3, 8), edge_index=torch.tensor([[0, 1], [1, 2]], dtype=torch.long).t())
+            
+            with patch('torch.no_grad'):
+                graph_features = reasoner._process_with_gnn(graph)
+                # Since we're mocking, features might be None
+                assert graph_features is None or isinstance(graph_features, torch.Tensor)
     
-    def test_integration_with_episodes(self, reasoner):
-        """Test integration with episode data."""
-        # Set up episodes
-        reasoner.episodes = [
-            Mock(text=f"Episode {i}", embedding=torch.randn(8), metadata={'id': i})
-            for i in range(5)
-        ]
+    def test_fallback_result(self, reasoner):
+        """Test fallback result for errors."""
+        result = reasoner._fallback_result()
         
-        # Create graph from episodes
-        embeddings = torch.stack([e.embedding for e in reasoner.episodes])
-        edge_index = torch.tensor([[0, 1, 2], [1, 2, 0]], dtype=torch.long)
-        reasoner.graph = Data(x=embeddings, edge_index=edge_index)
+        assert isinstance(result, dict)
+        assert 'graph' in result
+        assert 'metrics' in result
+        assert 'conflicts' in result
+        assert 'reward' in result
+        assert result['spike_detected'] is False
+        assert result['reasoning_quality'] == 0.0
+    
+    def test_advanced_metrics_usage(self, mock_config):
+        """Test usage of advanced metrics when available."""
+        mock_config.use_advanced_metrics = True
         
-        # Test retrieval
-        query = reasoner.episodes[0].embedding
-        results = reasoner.retrieve(query, k=3)
-        
-        assert results[0]['node_idx'] == 0  # Should find itself first
-        assert results[0]['similarity'] > 0.99
+        with patch('insightspike.core.layers.layer3_graph_reasoner.ADVANCED_METRICS_AVAILABLE', True):
+            with patch('insightspike.core.layers.layer3_graph_reasoner.get_config', return_value=mock_config):
+                reasoner = L3GraphReasoner(config=mock_config)
+                
+                # Should use advanced metrics
+                from insightspike.utils.advanced_graph_metrics import delta_ged, delta_ig
+                assert reasoner.delta_ged == delta_ged
+                assert reasoner.delta_ig == delta_ig

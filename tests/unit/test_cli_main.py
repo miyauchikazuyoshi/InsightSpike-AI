@@ -27,6 +27,7 @@ class TestAskCommand:
             'response': 'Test answer',
             'reasoning_quality': 0.85,
             'total_cycles': 3,
+            'spike_detected': False,
             'success': True
         }
         mock_agent_class.return_value = mock_agent
@@ -67,20 +68,20 @@ class TestAskCommand:
         assert "Error" in result.stdout
 
 
-class TestLearnCommand:
-    """Test the learn command."""
+class TestLoadDocumentsCommand:
+    """Test the load_documents command."""
     
     @patch('insightspike.cli.main.MainAgent')
     @patch('insightspike.cli.main.load_corpus')
-    def test_learn_from_file(self, mock_load_corpus, mock_agent_class):
-        """Test learning from file."""
+    def test_load_documents_from_file(self, mock_load_corpus, mock_agent_class):
+        """Test loading documents from file."""
         # Mock corpus loading
         mock_load_corpus.return_value = ["Doc 1", "Doc 2", "Doc 3"]
         
         # Mock agent
         mock_agent = Mock()
         mock_agent.initialize.return_value = True
-        mock_agent.add_document = Mock()
+        mock_agent.add_document.side_effect = [True, True, False]  # Last one fails
         mock_agent_class.return_value = mock_agent
         
         # Create temp file
@@ -89,271 +90,324 @@ class TestLearnCommand:
             temp_path = f.name
         
         try:
-            result = runner.invoke(app, ["learn", temp_path])
+            result = runner.invoke(app, ["load_documents", temp_path])
             
             assert result.exit_code == 0
             assert "Loading documents from" in result.stdout
-            assert "Loaded 3 documents" in result.stdout
+            assert "Successfully loaded 2/3 documents" in result.stdout
             assert mock_agent.add_document.call_count == 3
         finally:
             Path(temp_path).unlink()
     
     @patch('insightspike.cli.main.MainAgent')
-    def test_learn_from_text(self, mock_agent_class):
-        """Test learning from direct text."""
-        mock_agent = Mock()
-        mock_agent.initialize.return_value = True
-        mock_agent.add_document = Mock()
-        mock_agent_class.return_value = mock_agent
+    @patch('insightspike.cli.main.load_corpus')
+    def test_load_documents_from_directory(self, mock_load_corpus, mock_agent_class):
+        """Test loading documents from directory."""
+        # Mock corpus loading
+        mock_load_corpus.return_value = ["Doc content"]
         
-        result = runner.invoke(app, ["learn", "--text", "Learn this text"])
-        
-        assert result.exit_code == 0
-        assert "Learning from provided text" in result.stdout
-        mock_agent.add_document.assert_called_once_with("Learn this text")
-    
-    def test_learn_no_input(self):
-        """Test learn command with no input."""
-        result = runner.invoke(app, ["learn"])
-        
-        assert result.exit_code != 0
-        assert "provide either a file path or text" in result.stdout
-
-
-class TestTrainCommand:
-    """Test the train command."""
-    
-    @patch('insightspike.cli.main.ExperimentFramework')
-    def test_train_default(self, mock_framework_class):
-        """Test train command with defaults."""
-        mock_framework = Mock()
-        mock_framework.run_experiment.return_value = {
-            'agent': 'test_agent',
-            'avg_reward': 10.5,
-            'total_insights': 5
-        }
-        mock_framework_class.return_value = mock_framework
-        
-        result = runner.invoke(app, ["train"])
-        
-        assert result.exit_code == 0
-        assert "Starting training" in result.stdout
-        mock_framework.run_experiment.assert_called_once()
-    
-    @patch('insightspike.cli.main.ExperimentFramework')
-    def test_train_with_parameters(self, mock_framework_class):
-        """Test train command with custom parameters."""
-        mock_framework = Mock()
-        mock_framework.run_experiment.return_value = {
-            'agent': 'test_agent',
-            'avg_reward': 15.0,
-            'total_insights': 10
-        }
-        mock_framework_class.return_value = mock_framework
-        
-        result = runner.invoke(app, [
-            "train",
-            "--episodes", "50",
-            "--domain", "custom_domain"
-        ])
-        
-        assert result.exit_code == 0
-        config_call = mock_framework_class.call_args[1]['config']
-        assert config_call['num_episodes'] == 50
-        assert config_call['domain'] == 'custom_domain'
-
-
-class TestValidateCommand:
-    """Test the validate command."""
-    
-    @patch('insightspike.cli.main.MainAgent')
-    def test_validate_success(self, mock_agent_class):
-        """Test successful validation."""
-        mock_agent = Mock()
-        mock_agent.initialize.return_value = True
-        mock_agent.get_memory_stats.return_value = {
-            'total_episodes': 100,
-            'index_trained': True
-        }
-        mock_agent_class.return_value = mock_agent
-        
-        result = runner.invoke(app, ["validate"])
-        
-        assert result.exit_code == 0
-        assert "System validation passed" in result.stdout
-        assert "Memory: 100 episodes" in result.stdout
-    
-    @patch('insightspike.cli.main.MainAgent')
-    def test_validate_no_episodes(self, mock_agent_class):
-        """Test validation with no episodes."""
-        mock_agent = Mock()
-        mock_agent.initialize.return_value = True
-        mock_agent.get_memory_stats.return_value = {
-            'total_episodes': 0,
-            'index_trained': False
-        }
-        mock_agent_class.return_value = mock_agent
-        
-        result = runner.invoke(app, ["validate"])
-        
-        assert result.exit_code == 0
-        assert "Warning: No episodes in memory" in result.stdout
-
-
-class TestExportCommand:
-    """Test the export command."""
-    
-    @patch('insightspike.cli.main.MainAgent')
-    def test_export_success(self, mock_agent_class):
-        """Test successful export."""
-        mock_agent = Mock()
-        mock_agent.initialize.return_value = True
-        mock_agent.export_memory.return_value = {
-            'episodes': [{'text': 'Episode 1'}],
-            'metadata': {'version': '1.0'}
-        }
-        mock_agent_class.return_value = mock_agent
-        
-        with tempfile.TemporaryDirectory() as tmpdir:
-            output_path = Path(tmpdir) / "export.json"
-            result = runner.invoke(app, ["export", str(output_path)])
-            
-            assert result.exit_code == 0
-            assert output_path.exists()
-            
-            # Check exported content
-            with open(output_path) as f:
-                data = json.load(f)
-                assert 'episodes' in data
-                assert len(data['episodes']) == 1
-
-
-class TestStatusCommand:
-    """Test the status command."""
-    
-    @patch('insightspike.cli.main.MainAgent')
-    @patch('insightspike.cli.main.InsightFactRegistry')
-    def test_status(self, mock_registry_class, mock_agent_class):
-        """Test status command."""
         # Mock agent
         mock_agent = Mock()
         mock_agent.initialize.return_value = True
-        mock_agent.get_memory_stats.return_value = {
-            'total_episodes': 50,
-            'index_trained': True
+        mock_agent.add_document.return_value = True
+        mock_agent_class.return_value = mock_agent
+        
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create test files
+            tmpdir_path = Path(tmpdir)
+            (tmpdir_path / "file1.txt").write_text("Content 1")
+            (tmpdir_path / "file2.txt").write_text("Content 2")
+            
+            result = runner.invoke(app, ["load_documents", tmpdir])
+            
+            assert result.exit_code == 0
+            assert "Successfully loaded" in result.stdout
+            assert mock_load_corpus.call_count == 2  # Called for each txt file
+    
+    def test_load_documents_nonexistent_path(self):
+        """Test load_documents with nonexistent path."""
+        result = runner.invoke(app, ["load_documents", "/nonexistent/path"])
+        
+        assert result.exit_code == 1
+        assert "Path not found" in result.stdout
+
+
+class TestStatsCommand:
+    """Test the stats command."""
+    
+    @patch('insightspike.cli.main.MainAgent')
+    def test_stats_success(self, mock_agent_class):
+        """Test successful stats command."""
+        mock_agent = Mock()
+        mock_agent.initialize.return_value = True
+        mock_agent.get_stats.return_value = {
+            'initialized': True,
+            'total_cycles': 100,
+            'reasoning_history_length': 50,
+            'average_quality': 0.75,
+            'memory_stats': {
+                'total_episodes': 200,
+                'total_documents': 10,
+                'index_type': 'FAISS'
+            }
         }
         mock_agent_class.return_value = mock_agent
         
-        # Mock registry
+        result = runner.invoke(app, ["stats"])
+        
+        assert result.exit_code == 0
+        assert "Agent Statistics" in result.stdout
+        assert "Initialized: True" in result.stdout
+        assert "Total cycles: 100" in result.stdout
+        assert "Total episodes: 200" in result.stdout
+    
+    @patch('insightspike.cli.main.MainAgent')
+    def test_stats_with_error(self, mock_agent_class):
+        """Test stats command with error."""
+        mock_agent = Mock()
+        mock_agent.initialize.return_value = True
+        mock_agent.get_stats.side_effect = Exception("Stats error")
+        mock_agent_class.return_value = mock_agent
+        
+        result = runner.invoke(app, ["stats"])
+        
+        assert result.exit_code == 1
+        assert "Error getting stats" in result.stdout
+
+
+class TestConfigInfoCommand:
+    """Test the config_info command."""
+    
+    @patch('insightspike.cli.main.get_config')
+    def test_config_info(self, mock_get_config):
+        """Test config info command."""
+        mock_config = Mock()
+        mock_config.environment = "test"
+        mock_config.llm.provider = "openai"
+        mock_config.llm.model_name = "gpt-3.5-turbo"
+        mock_config.memory.max_retrieved_docs = 5
+        mock_config.graph.spike_ged_threshold = 0.1
+        mock_config.graph.spike_ig_threshold = 0.15
+        mock_get_config.return_value = mock_config
+        
+        result = runner.invoke(app, ["config_info"])
+        
+        assert result.exit_code == 0
+        assert "Current Configuration" in result.stdout
+        assert "Environment: test" in result.stdout
+        assert "LLM Provider: openai" in result.stdout
+    
+    @patch('insightspike.cli.main.get_config')
+    def test_config_info_with_error(self, mock_get_config):
+        """Test config info command with error."""
+        mock_get_config.side_effect = Exception("Config error")
+        
+        result = runner.invoke(app, ["config_info"])
+        
+        assert result.exit_code == 1
+        assert "Error getting config" in result.stdout
+
+
+class TestInsightsCommand:
+    """Test the insights command."""
+    
+    @patch('insightspike.cli.main.InsightFactRegistry')
+    def test_insights(self, mock_registry_class):
+        """Test insights command."""
         mock_registry = Mock()
-        mock_registry.status.return_value = "Registry: 10 insights detected"
+        mock_registry.get_optimization_stats.return_value = {
+            'avg_quality': 0.8,
+            'avg_ged': 0.2,
+            'avg_ig': 0.3
+        }
+        mock_insight = Mock()
+        mock_insight.relationship_type = "causal"
+        mock_insight.text = "Test insight text"
+        mock_insight.quality_score = 0.9
+        mock_insight.ged_optimization = 0.25
+        mock_insight.ig_improvement = 0.35
+        mock_insight.source_concepts = ["concept1"]
+        mock_insight.target_concepts = ["concept2"]
+        mock_insight.generated_at = "2023-01-01"
+        
+        mock_registry.insights = {"insight1": mock_insight}
         mock_registry_class.return_value = mock_registry
         
-        result = runner.invoke(app, ["status"])
+        result = runner.invoke(app, ["insights"])
         
         assert result.exit_code == 0
-        assert "Episodes: 50" in result.stdout
-        assert "Index: ✓ Trained" in result.stdout
-        assert "Registry: 10 insights detected" in result.stdout
+        assert "Insight Facts Registry" in result.stdout
+        assert "Total Insights: 1" in result.stdout
+        assert "Average Quality: 0.800" in result.stdout
+        assert "Test insight text" in result.stdout
+    
+    @patch('insightspike.cli.main.InsightFactRegistry')
+    def test_insights_empty(self, mock_registry_class):
+        """Test insights command with no insights."""
+        mock_registry = Mock()
+        mock_registry.get_optimization_stats.return_value = {
+            'avg_quality': 0,
+            'avg_ged': 0,
+            'avg_ig': 0
+        }
+        mock_registry.insights = {}
+        mock_registry_class.return_value = mock_registry
+        
+        result = runner.invoke(app, ["insights"])
+        
+        assert result.exit_code == 0
+        assert "No insights registered yet" in result.stdout
 
 
-class TestClearCommand:
-    """Test the clear command."""
+class TestInsightsSearchCommand:
+    """Test the insights_search command."""
+    
+    @patch('insightspike.cli.main.InsightFactRegistry')
+    def test_insights_search_found(self, mock_registry_class):
+        """Test insights search with results."""
+        mock_registry = Mock()
+        
+        mock_insight = Mock()
+        mock_insight.relationship_type = "causal"
+        mock_insight.text = "AI relates to intelligence"
+        mock_insight.quality_score = 0.85
+        mock_insight.ged_optimization = 0.2
+        mock_insight.source_concepts = ["ai"]
+        mock_insight.target_concepts = ["intelligence"]
+        
+        mock_registry.find_relevant_insights.return_value = [mock_insight]
+        mock_registry_class.return_value = mock_registry
+        
+        result = runner.invoke(app, ["insights_search", "ai"])
+        
+        assert result.exit_code == 0
+        assert "Insights Related to 'ai'" in result.stdout
+        assert "AI relates to intelligence" in result.stdout
+        assert "Quality: 0.850" in result.stdout
+    
+    @patch('insightspike.cli.main.InsightFactRegistry')
+    def test_insights_search_not_found(self, mock_registry_class):
+        """Test insights search with no results."""
+        mock_registry = Mock()
+        mock_registry.find_relevant_insights.return_value = []
+        mock_registry_class.return_value = mock_registry
+        
+        result = runner.invoke(app, ["insights_search", "nonexistent"])
+        
+        assert result.exit_code == 0
+        assert "No insights found" in result.stdout
+
+
+class TestDemoCommand:
+    """Test the demo command."""
     
     @patch('insightspike.cli.main.MainAgent')
-    def test_clear_confirmed(self, mock_agent_class):
-        """Test clear command with confirmation."""
+    def test_demo(self, mock_agent_class):
+        """Test demo command."""
         mock_agent = Mock()
         mock_agent.initialize.return_value = True
-        mock_agent.clear_memory.return_value = True
+        mock_agent.process_question.return_value = {
+            'response': 'Demo response',
+            'reasoning_quality': 0.9,
+            'spike_detected': True
+        }
         mock_agent_class.return_value = mock_agent
         
-        result = runner.invoke(app, ["clear"], input="y\n")
+        result = runner.invoke(app, ["demo"])
         
         assert result.exit_code == 0
-        assert "Memory cleared successfully" in result.stdout
-        mock_agent.clear_memory.assert_called_once()
+        assert "InsightSpike Insight Demo" in result.stdout
+        assert "Demo response" in result.stdout
+        assert "INSIGHT SPIKE DETECTED" in result.stdout
     
     @patch('insightspike.cli.main.MainAgent')
-    def test_clear_cancelled(self, mock_agent_class):
-        """Test clear command cancelled."""
+    def test_demo_with_error(self, mock_agent_class):
+        """Test demo command with error."""
         mock_agent = Mock()
+        mock_agent.initialize.return_value = False
         mock_agent_class.return_value = mock_agent
         
-        result = runner.invoke(app, ["clear"], input="n\n")
+        result = runner.invoke(app, ["demo"])
+        
+        assert result.exit_code == 1
+        assert "Failed to initialize agent" in result.stdout
+
+
+class TestTestSafeCommand:
+    """Test the test_safe command."""
+    
+    @patch('insightspike.cli.main.get_config')
+    @patch('insightspike.cli.main.MockLLMProvider')
+    def test_test_safe(self, mock_provider_class, mock_get_config):
+        """Test test_safe command."""
+        mock_config = Mock()
+        mock_get_config.return_value = mock_config
+        
+        mock_provider = Mock()
+        mock_provider.initialize.return_value = True
+        mock_provider.generate_response.return_value = {
+            'response': 'Mock response',
+            'reasoning_quality': 0.8,
+            'confidence': 0.9,
+            'model_used': 'mock-model',
+            'success': True
+        }
+        mock_provider_class.return_value = mock_provider
+        
+        result = runner.invoke(app, ["test_safe"])
         
         assert result.exit_code == 0
-        assert "Clear cancelled" in result.stdout
-        mock_agent.clear_memory.assert_not_called()
-
-
-class TestListCommand:
-    """Test the list command."""
+        assert "Mock response" in result.stdout
+        assert "Quality: 0.800" in result.stdout
+        assert "Safe mode test successful" in result.stdout
     
-    @patch('insightspike.cli.main.MainAgent')
-    def test_list_episodes(self, mock_agent_class):
-        """Test listing episodes."""
-        mock_agent = Mock()
-        mock_agent.initialize.return_value = True
-        mock_agent.list_episodes.return_value = [
-            {'id': 0, 'text': 'Episode 1', 'c_value': 0.5},
-            {'id': 1, 'text': 'Episode 2', 'c_value': 0.8}
-        ]
-        mock_agent_class.return_value = mock_agent
+    @patch('insightspike.cli.main.get_config')
+    @patch('insightspike.cli.main.MockLLMProvider')
+    def test_test_safe_with_custom_question(self, mock_provider_class, mock_get_config):
+        """Test test_safe command with custom question."""
+        mock_config = Mock()
+        mock_get_config.return_value = mock_config
         
-        result = runner.invoke(app, ["list", "--limit", "2"])
+        mock_provider = Mock()
+        mock_provider.initialize.return_value = True
+        mock_provider.generate_response.return_value = {
+            'response': 'Custom response',
+            'reasoning_quality': 0.7,
+            'confidence': 0.8,
+            'model_used': 'mock-model',
+            'success': True
+        }
+        mock_provider_class.return_value = mock_provider
+        
+        result = runner.invoke(app, ["test_safe", "Custom question?"])
         
         assert result.exit_code == 0
-        assert "Episode 1" in result.stdout
-        assert "Episode 2" in result.stdout
-        assert "C=0.500" in result.stdout
-        assert "C=0.800" in result.stdout
+        assert "Custom response" in result.stdout
+        mock_provider.generate_response.assert_called_with({}, "Custom question?")
 
 
-class TestSearchCommand:
-    """Test the search command."""
+# Legacy command tests
+class TestLegacyCommands:
+    """Test legacy compatibility commands."""
     
-    @patch('insightspike.cli.main.MainAgent')
-    def test_search(self, mock_agent_class):
-        """Test search command."""
-        mock_agent = Mock()
-        mock_agent.initialize.return_value = True
-        mock_agent.search_episodes.return_value = [
-            {'text': 'Found episode 1', 'score': 0.9},
-            {'text': 'Found episode 2', 'score': 0.7}
-        ]
-        mock_agent_class.return_value = mock_agent
+    @patch('insightspike.cli.main.load_documents')
+    def test_embed_redirects_to_load_documents(self, mock_load_documents):
+        """Test embed command redirects properly."""
+        with tempfile.NamedTemporaryFile(suffix='.txt', delete=False) as f:
+            temp_path = Path(f.name)
         
-        result = runner.invoke(app, ["search", "test query", "--top-k", "2"])
-        
-        assert result.exit_code == 0
-        assert "Found episode 1" in result.stdout
-        assert "Score: 0.900" in result.stdout
-        mock_agent.search_episodes.assert_called_once_with("test query", k=2)
-
-
-class TestVersionCommand:
-    """Test the version command."""
+        try:
+            result = runner.invoke(app, ["embed", "--path", str(temp_path)])
+            
+            assert "'embed' command is deprecated" in result.stdout
+            mock_load_documents.assert_called_once()
+        finally:
+            temp_path.unlink()
     
-    def test_version(self):
-        """Test version command."""
-        result = runner.invoke(app, ["version"])
+    @patch('insightspike.cli.main.ask')
+    def test_query_redirects_to_ask(self, mock_ask):
+        """Test query command redirects properly."""
+        result = runner.invoke(app, ["query", "Test question"])
         
-        assert result.exit_code == 0
-        assert "InsightSpike-AI" in result.stdout
-        assert "Version:" in result.stdout
-
-
-class TestDepsCommands:
-    """Test dependency management commands."""
-    
-    @patch('subprocess.run')
-    def test_deps_install(self, mock_run):
-        """Test deps install command."""
-        mock_run.return_value = Mock(returncode=0)
-        
-        result = runner.invoke(app, ["deps", "install"])
-        
-        # Note: This might fail if deps commands are not properly integrated
-        # Just check it doesn't crash
-        assert result.exit_code in [0, 2]  # 2 is for missing subcommand
+        assert "'query' command is deprecated" in result.stdout
+        mock_ask.assert_called_once_with("Test question")

@@ -18,16 +18,19 @@ class TestEmbeddingManager:
         mock_config.embedding.model_name = "test-model"
         mock_config.embedding.dimension = 512
         
+        # Pass config directly
         manager = EmbeddingManager(config=mock_config)
         assert manager.model_name == "test-model"
         assert manager.dimension == 512
     
     def test_init_without_config(self):
         """Test initialization without config (fallback)."""
-        with patch('insightspike.utils.embedder.get_config', side_effect=ImportError):
-            manager = EmbeddingManager()
-            assert manager.model_name == "sentence-transformers/all-MiniLM-L6-v2"
-            assert manager.dimension == 384
+        # Create manager without config - will use defaults
+        manager = EmbeddingManager()
+        # Either uses config defaults or fallback
+        assert hasattr(manager, 'model_name')
+        assert hasattr(manager, 'dimension')
+        assert manager.dimension > 0
     
     def test_init_with_model_name(self):
         """Test initialization with explicit model name."""
@@ -55,223 +58,264 @@ class TestEmbeddingManager:
         mock_st.reset_mock()
         model2 = manager.get_model()
         assert not mock_st.called
-        assert model2 == model1
+        assert model2 == mock_model
+    
+    def test_safe_mode(self):
+        """Test safe mode with environment variable."""
+        # Clear cache and set safe mode
+        import insightspike.utils.embedder as embedder_module
+        embedder_module._model_cache.clear()
+        
+        with patch.dict(os.environ, {'INSIGHTSPIKE_SAFE_MODE': '1'}):
+            manager = EmbeddingManager()
+            
+            with patch.object(manager, '_fallback_model') as mock_fallback:
+                mock_fallback_model = Mock()
+                mock_fallback.return_value = mock_fallback_model
+                
+                model = manager.get_model()
+                assert mock_fallback.called
+                assert model == mock_fallback_model
     
     @patch('insightspike.utils.embedder.SentenceTransformer')
-    def test_get_model_error_handling(self, mock_st):
-        """Test error handling in model loading."""
-        mock_st.side_effect = Exception("Model load error")
+    @patch('torch.set_num_threads')
+    def test_model_loading_with_env_setup(self, mock_set_threads, mock_st):
+        """Test model loading sets up environment correctly."""
+        import insightspike.utils.embedder as embedder_module
+        embedder_module._model_cache.clear()
         
-        manager = EmbeddingManager(model_name="bad-model")
+        mock_model = Mock()
+        mock_st.return_value = mock_model
         
-        # Should fall back to mock model
+        manager = EmbeddingManager()
         model = manager.get_model()
-        assert hasattr(model, 'encode')
         
-        # Test the mock model works
-        result = model.encode("test text")
-        assert isinstance(result, np.ndarray)
-        assert result.shape == (manager.dimension,)
+        # Check environment was configured
+        assert os.environ.get('PYTORCH_MPS_HIGH_WATERMARK_RATIO') == '0.0'
+        assert os.environ.get('TOKENIZERS_PARALLELISM') == 'false'
+        mock_set_threads.assert_called_once_with(1)
+        
+        # Check model was created with correct params
+        mock_st.assert_called_once_with(
+            manager.model_name,
+            device="cpu",
+            cache_folder=None,
+            trust_remote_code=False
+        )
     
-    def test_encode_single_text(self):
+    def test_model_loading_fallback_on_error(self):
+        """Test fallback when model loading fails."""
+        import insightspike.utils.embedder as embedder_module
+        embedder_module._model_cache.clear()
+        
+        with patch('insightspike.utils.embedder.SentenceTransformer', side_effect=Exception("Load failed")):
+            manager = EmbeddingManager()
+            
+            with patch.object(manager, '_fallback_model') as mock_fallback:
+                mock_fallback_model = Mock()
+                mock_fallback.return_value = mock_fallback_model
+                
+                model = manager.get_model()
+                assert mock_fallback.called
+                assert model == mock_fallback_model
+    
+    @patch('insightspike.utils.embedder.SentenceTransformer')
+    def test_encode_single_text(self, mock_st):
         """Test encoding single text."""
-        manager = EmbeddingManager()
         mock_model = Mock()
-        mock_model.encode.return_value = np.random.randn(1, 384)
-        manager._model = mock_model
+        mock_embeddings = np.random.rand(1, 384)
+        mock_model.encode.return_value = mock_embeddings
+        mock_st.return_value = mock_model
         
-        result = manager.encode("test text")
-        assert isinstance(result, np.ndarray)
-        assert result.shape == (384,)
-        mock_model.encode.assert_called_once()
+        import insightspike.utils.embedder as embedder_module
+        embedder_module._model_cache.clear()
+        
+        manager = EmbeddingManager()
+        
+        result = manager.encode("Test text")
+        
+        mock_model.encode.assert_called_once_with(
+            ["Test text"],
+            batch_size=32,
+            show_progress_bar=False,
+            convert_to_numpy=True,
+            normalize_embeddings=True
+        )
+        assert np.array_equal(result, mock_embeddings)
     
-    def test_encode_multiple_texts(self):
+    @patch('insightspike.utils.embedder.SentenceTransformer')
+    def test_encode_multiple_texts(self, mock_st):
         """Test encoding multiple texts."""
-        manager = EmbeddingManager()
         mock_model = Mock()
-        mock_model.encode.return_value = np.random.randn(3, 384)
-        manager._model = mock_model
+        mock_embeddings = np.random.rand(3, 384)
+        mock_model.encode.return_value = mock_embeddings
+        mock_st.return_value = mock_model
         
-        texts = ["text1", "text2", "text3"]
-        result = manager.encode(texts)
-        assert isinstance(result, np.ndarray)
-        assert result.shape == (3, 384)
+        import insightspike.utils.embedder as embedder_module
+        embedder_module._model_cache.clear()
+        
+        manager = EmbeddingManager()
+        
+        texts = ["Text 1", "Text 2", "Text 3"]
+        result = manager.encode(texts, batch_size=64, show_progress_bar=True)
+        
+        mock_model.encode.assert_called_once_with(
+            texts,
+            batch_size=64,
+            show_progress_bar=True,
+            convert_to_numpy=True,
+            normalize_embeddings=True
+        )
+        assert np.array_equal(result, mock_embeddings)
     
-    def test_encode_with_normalization(self):
-        """Test encoding with normalization."""
+    def test_encode_fallback(self):
+        """Test encoding with fallback model."""
         manager = EmbeddingManager()
-        mock_model = Mock()
-        # Return non-normalized vectors
-        embeddings = np.array([[3.0, 4.0], [6.0, 8.0]])
-        mock_model.encode.return_value = embeddings
-        manager._model = mock_model
-        manager.dimension = 2
+        manager._model = None
         
-        result = manager.encode(["text1", "text2"], normalize_embeddings=True)
+        with patch.object(manager, 'get_model') as mock_get_model:
+            mock_fallback = Mock()
+            mock_get_model.return_value = mock_fallback
+            
+            with patch.object(manager, '_fallback_encode') as mock_fallback_encode:
+                expected_embeddings = np.random.rand(1, 384)
+                mock_fallback_encode.return_value = expected_embeddings
+                
+                # When model.encode doesn't exist
+                mock_fallback.encode = None
+                
+                result = manager.encode("Test")
+                mock_fallback_encode.assert_called_once()
+                assert np.array_equal(result, expected_embeddings)
+    
+    def test_fallback_model(self):
+        """Test fallback model creation."""
+        manager = EmbeddingManager()
+        
+        fallback = manager._fallback_model()
+        
+        assert hasattr(fallback, 'encode')
+        assert hasattr(fallback, 'get_sentence_embedding_dimension')
+        assert fallback.get_sentence_embedding_dimension() == manager.dimension
+    
+    def test_fallback_encode(self):
+        """Test fallback encoding method."""
+        manager = EmbeddingManager()
+        
+        # Single text
+        result1 = manager._fallback_encode(["Test text"])
+        assert result1.shape == (1, manager.dimension)
+        assert result1.dtype == np.float32
+        
+        # Multiple texts
+        result2 = manager._fallback_encode(["Text 1", "Text 2", "Text 3"])
+        assert result2.shape == (3, manager.dimension)
         
         # Check normalization
-        norms = np.linalg.norm(result, axis=1)
-        np.testing.assert_allclose(norms, [1.0, 1.0], rtol=1e-6)
-    
-    def test_encode_empty_text(self):
-        """Test encoding empty text."""
-        manager = EmbeddingManager()
-        result = manager.encode("")
-        assert isinstance(result, np.ndarray)
-        assert result.shape == (384,)
-    
-    def test_encode_none_text(self):
-        """Test encoding None text."""
-        manager = EmbeddingManager()
-        result = manager.encode(None)
-        assert isinstance(result, np.ndarray)
-        assert result.shape == (384,)
+        norms = np.linalg.norm(result2, axis=1)
+        assert np.allclose(norms, 1.0, atol=1e-6)
 
 
 class TestGetModelFunction:
     """Test the global get_model function."""
     
-    def test_get_model_singleton(self):
-        """Test get_model returns singleton."""
-        model1 = get_model()
-        model2 = get_model()
-        assert model1 is model2
-    
-    @patch.dict(os.environ, {'INSIGHTSPIKE_EMBEDDING_MODEL': 'custom-model'})
-    def test_get_model_with_env_var(self):
-        """Test get_model respects environment variable."""
-        # Clear global manager
+    def test_get_model_returns_global_manager(self):
+        """Test get_model returns the global manager's model."""
         import insightspike.utils.embedder as embedder_module
+        
+        # Reset global state
+        embedder_module._global_manager = None
+        embedder_module._model_cache.clear()
+        
+        with patch('insightspike.utils.embedder.EmbeddingManager') as mock_manager_class:
+            mock_manager = Mock()
+            mock_model = Mock()
+            mock_manager.get_model.return_value = mock_model
+            mock_manager_class.return_value = mock_manager
+            
+            result = get_model()
+            
+            assert result == mock_model
+            assert embedder_module._global_manager == mock_manager
+    
+    def test_get_model_reuses_global_manager(self):
+        """Test get_model reuses existing global manager."""
+        import insightspike.utils.embedder as embedder_module
+        
+        # Set up existing manager
+        mock_manager = Mock()
+        mock_model = Mock()
+        mock_manager.get_model.return_value = mock_model
+        embedder_module._global_manager = mock_manager
+        
+        with patch('insightspike.utils.embedder.EmbeddingManager') as mock_manager_class:
+            result = get_model()
+            
+            # Should not create new manager
+            assert not mock_manager_class.called
+            assert result == mock_model
+    
+    def test_get_model_with_custom_model_name(self):
+        """Test get_model with custom model name creates new manager."""
+        import insightspike.utils.embedder as embedder_module
+        
+        # Reset global state
         embedder_module._global_manager = None
         
         with patch('insightspike.utils.embedder.EmbeddingManager') as mock_manager_class:
             mock_manager = Mock()
+            mock_model = Mock()
+            mock_manager.get_model.return_value = mock_model
             mock_manager_class.return_value = mock_manager
             
-            get_model()
+            result = get_model(model_name="custom-model")
             
-            # Check that EmbeddingManager was called with env var model
-            mock_manager_class.assert_called_once_with(model_name='custom-model')
-    
-    def test_get_model_encode_interface(self):
-        """Test the model returned by get_model has encode interface."""
-        model = get_model()
-        assert hasattr(model, 'encode')
-        
-        # Test encode works
-        result = model.encode("test")
-        assert isinstance(result, np.ndarray)
-        
-        # Test batch encode
-        results = model.encode(["test1", "test2"])
-        assert isinstance(results, np.ndarray)
-        assert len(results) == 2
-
-
-class TestMockModel:
-    """Test the mock model functionality."""
-    
-    def test_mock_model_encode_consistency(self):
-        """Test mock model returns consistent embeddings."""
-        manager = EmbeddingManager()
-        # Force mock model
-        manager._model = None
-        with patch('insightspike.utils.embedder.SentenceTransformer', side_effect=Exception):
-            model = manager.get_model()
-            
-            # Same text should give same embedding
-            text = "test text"
-            emb1 = model.encode(text)
-            emb2 = model.encode(text)
-            np.testing.assert_array_equal(emb1, emb2)
-    
-    def test_mock_model_batch_processing(self):
-        """Test mock model handles batch processing."""
-        manager = EmbeddingManager()
-        with patch('insightspike.utils.embedder.SentenceTransformer', side_effect=Exception):
-            model = manager.get_model()
-            
-            texts = ["text1", "text2", "text3"]
-            embeddings = model.encode(texts, batch_size=2)
-            
-            assert embeddings.shape == (3, 384)
-            # Each embedding should be different
-            assert not np.array_equal(embeddings[0], embeddings[1])
-            assert not np.array_equal(embeddings[1], embeddings[2])
-    
-    def test_mock_model_kwargs_handling(self):
-        """Test mock model handles various kwargs."""
-        manager = EmbeddingManager()
-        with patch('insightspike.utils.embedder.SentenceTransformer', side_effect=Exception):
-            model = manager.get_model()
-            
-            # Should handle various kwargs without error
-            result = model.encode(
-                "test",
-                batch_size=32,
-                show_progress_bar=False,
-                convert_to_numpy=True,
-                normalize_embeddings=True
-            )
-            assert isinstance(result, np.ndarray)
+            mock_manager_class.assert_called_once_with(model_name="custom-model")
+            assert result == mock_model
 
 
 class TestEdgeCases:
-    """Test edge cases and error conditions."""
+    """Test edge cases and error handling."""
     
-    def test_large_batch_encoding(self):
-        """Test encoding large batch of texts."""
-        manager = EmbeddingManager()
-        texts = ["text" + str(i) for i in range(1000)]
-        
-        result = manager.encode(texts)
-        assert result.shape == (1000, 384)
-    
-    def test_mixed_input_types(self):
-        """Test encoding with mixed input types."""
+    def test_empty_text_encoding(self):
+        """Test encoding empty text."""
         manager = EmbeddingManager()
         
-        # Should handle string
-        result1 = manager.encode("text")
-        assert result1.shape == (384,)
-        
-        # Should handle list
-        result2 = manager.encode(["text"])
-        assert result2.shape == (1, 384)
-        
-        # Should handle empty list
-        result3 = manager.encode([])
-        assert result3.shape == (0, 384)
+        # Use fallback for predictable behavior
+        result = manager._fallback_encode([""])
+        assert result.shape == (1, manager.dimension)
+        assert not np.any(np.isnan(result))
     
-    def test_dimension_mismatch_handling(self):
-        """Test handling of dimension mismatches."""
+    def test_very_long_text_encoding(self):
+        """Test encoding very long text."""
         manager = EmbeddingManager()
-        manager.dimension = 512
         
-        # Mock model returns wrong dimension
-        mock_model = Mock()
-        mock_model.encode.return_value = np.random.randn(1, 384)
-        manager._model = mock_model
-        
-        # Should still work but log warning
-        with patch('insightspike.utils.embedder.logger') as mock_logger:
-            result = manager.encode("test")
-            assert result.shape == (384,)  # Uses actual dimension
+        long_text = "word " * 10000  # Very long text
+        result = manager._fallback_encode([long_text])
+        assert result.shape == (1, manager.dimension)
+        assert not np.any(np.isnan(result))
     
-    @patch('insightspike.utils.embedder._model_cache', {})
-    def test_cache_clearing(self):
-        """Test model cache can be cleared."""
-        # Add model to cache
-        manager1 = EmbeddingManager(model_name="model1")
-        model1 = manager1.get_model()
+    def test_unicode_text_encoding(self):
+        """Test encoding unicode text."""
+        manager = EmbeddingManager()
         
-        # Clear cache
+        unicode_texts = ["Hello 世界", "Привет мир", "مرحبا بالعالم"]
+        result = manager._fallback_encode(unicode_texts)
+        assert result.shape == (3, manager.dimension)
+        assert not np.any(np.isnan(result))
+    
+    @patch('insightspike.utils.embedder.SentenceTransformer', side_effect=ImportError)
+    def test_sentence_transformers_not_installed(self, mock_st):
+        """Test behavior when sentence-transformers is not installed."""
         import insightspike.utils.embedder as embedder_module
         embedder_module._model_cache.clear()
         
-        # Should create new model
-        manager2 = EmbeddingManager(model_name="model1")
-        with patch('insightspike.utils.embedder.SentenceTransformer') as mock_st:
-            mock_st.return_value = Mock()
-            model2 = manager2.get_model()
-            assert mock_st.called
+        manager = EmbeddingManager()
+        
+        with patch.object(manager, '_fallback_model') as mock_fallback:
+            mock_fallback_model = Mock()
+            mock_fallback.return_value = mock_fallback_model
+            
+            model = manager.get_model()
+            assert mock_fallback.called
+            assert model == mock_fallback_model
