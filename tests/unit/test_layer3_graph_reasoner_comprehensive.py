@@ -462,13 +462,12 @@ class TestL3GraphReasoner:
                 # Test GNN processing
                 graph = Data(x=torch.randn(3, 8), edge_index=torch.tensor([[0, 1], [1, 2]], dtype=torch.long).t())
                 
-                with patch('torch.no_grad'):
-                    if reasoner.gnn is not None:
-                        graph_features = reasoner._process_with_gnn(graph)
-                        assert graph_features is None or isinstance(graph_features, torch.Tensor)
-                    else:
-                        # GNN failed to initialize in test env
-                        assert reasoner.config.reasoning.use_gnn is True
+                if reasoner.gnn is not None:
+                    graph_features = reasoner._process_with_gnn(graph)
+                    assert graph_features is None or isinstance(graph_features, torch.Tensor)
+                else:
+                    # GNN failed to initialize in test env
+                    assert reasoner.config.reasoning.use_gnn is True
     
     def test_fallback_result(self, reasoner):
         """Test fallback result for errors."""
