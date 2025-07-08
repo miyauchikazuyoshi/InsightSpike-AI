@@ -1,19 +1,4 @@
-"""Generic helpers"""
-import re
-from pathlib import Path
-from typing import Iterable
-
-__all__ = ["iter_text", "clean_text", "create_mock_components"]
-
-
-def iter_text(root: Path, suffix: str = ".txt") -> Iterable[Path]:
-    """Yield all text files under *root*."""
-    yield from root.rglob(f"*{suffix}")
-
-
-def clean_text(text: str) -> str:
-    """Collapse whitespace and trim."""
-    return re.sub(r"\s+", " ", text).strip()
+"""Factory for creating mock components for testing and CI."""
 
 
 def create_mock_components():

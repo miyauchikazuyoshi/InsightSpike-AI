@@ -25,7 +25,7 @@ try:
     if os.getenv('INSIGHTSPIKE_LITE_MODE'):
         # Minimal imports for CI/LITE mode
         print("🚀 Running in LITE mode - using minimal benchmarks")
-        from insightspike.utils import create_mock_components
+        from insightspike.utils.mock_factory import create_mock_components
         GraphEditDistance, InformationGain, InsightDetector = create_mock_components()
     else:
         from insightspike.algorithms.graph_edit_distance import GraphEditDistance

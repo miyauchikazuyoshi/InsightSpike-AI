@@ -4,6 +4,12 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from typing import Optional
+from datetime import datetime
+
+
+def timestamp() -> str:
+    """Generate timestamp in a standardized format."""
+    return datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 
 
 @dataclass

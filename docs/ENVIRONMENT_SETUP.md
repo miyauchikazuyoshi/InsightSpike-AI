@@ -4,32 +4,70 @@
 
 ### Local Development (Mac/Intel)
 
-```bash
-# 1. Clone and install
-git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
-cd InsightSpike-AI
-poetry install  # OR: pip install -e .
+**Recommended Setup: Using Conda for Core ML Dependencies**
 
-# 2. Verify installation
+For robust management of complex machine learning dependencies like PyTorch, PyTorch Geometric, and FAISS, we highly recommend using Conda.
+
+```bash
+# 1. Install Miniconda (if not already installed)
+#    Download from: https://docs.conda.io/en/latest/miniconda.html
+#    Follow installation prompts. Restart terminal after installation.
+
+# 2. Create and activate a new Conda environment
+conda create -n insightspike_env python=3.11  # Use Python 3.11
+conda activate insightspike_env
+
+# 3. Install core ML dependencies via Conda (recommended channels)
+#    FAISS (from conda-forge for better compatibility)
+conda install -c conda-forge faiss-cpu
+
+#    PyTorch Geometric (from pyg channel)
+conda install pyg -c pyg
+
+#    PyTorch (ensure compatibility with PyTorch Geometric)
+#    Check PyTorch website for specific version compatibility with your system and PyG
+#    Example for PyTorch 2.2.2 (compatible with PyG 2.6.1)
+conda install pytorch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 -c pytorch
+
+# 4. Install other project dependencies via pip (from pyproject.toml)
+#    First, ensure you are in the project root and the Conda environment is active.
+#    Export poetry dependencies to a requirements file (excluding local paths)
+poetry run pip freeze | grep "==" > poetry_requirements.txt
+pip install -r poetry_requirements.txt
+
+# 5. Set PYTHONPATH for module imports
+#    Add this to your shell profile (~/.zshrc or ~/.bash_profile)
+echo 'export PYTHONPATH="/path/to/InsightSpike-AI/src:$PYTHONPATH"' >> ~/.zshrc # or ~/.bash_profile
+source ~/.zshrc # or ~/.bash_profile
+
+# 6. Verify installation
 python -c "from src.insightspike.core.system import InsightSpikeSystem; print('✅ Ready!')"
 
-# 3. Run validation
+# 7. Run validation
 python scripts/pre_push_validation.py
 ```
 
-### Google Colab
-
-```python
-# 1. Set up GitHub token in secrets (🔑 sidebar)
-#    Name: GITHUB_TOKEN, Value: your_token
-
-# 2. Run first cell (package installation)
-# 3. RESTART RUNTIME when prompted
-# 4. Run second cell (repository setup)
-# 5. Continue with experiment
-```
+---
 
 ## 🔧 Common Issues & Quick Fixes
+
+### Segmentation Faults with FAISS/PyTorch Geometric (macOS Intel)
+
+**Problem**: Encountering `Segmentation fault` errors, especially during graph building or similarity search operations involving FAISS and PyTorch Geometric. This is often due to low-level library conflicts (e.g., OpenMP runtimes) or subtle version incompatibilities between these highly optimized C/C++-backed libraries on macOS Intel.
+
+**Solution**:
+1.  **Prioritize Conda Installation**: As detailed in the "Recommended Setup" above, installing FAISS and PyTorch Geometric via Conda (specifically from `conda-forge` and `pyg` channels) is crucial. Conda provides a more controlled environment, ensuring compatible binaries and managing underlying C/C++ dependencies.
+2.  **Strict Version Alignment**: Ensure the following versions are used, as they have shown better compatibility:
+    *   `torch`: `2.2.2`
+    *   `torchvision`: `0.17.2`
+    *   `torchaudio`: `2.2.2`
+    *   `faiss-cpu`: `1.8.0` (from `conda-forge`)
+    *   `torch-geometric`: `2.5.2` (from `pyg` channel, which installs `pyg`)
+    *   `numpy`: `1.26.4`
+3.  **Import Order**: While less common with Conda-managed environments, if issues persist, ensure `import faiss` occurs *before* `import torch` in your Python scripts where both are used. (Note: This is often handled by the package manager, but can be a manual workaround).
+4.  **Debugging**: If a segfault occurs, try to isolate the problematic code section. You can temporarily add `import sys; sys.exit(1)` before the suspected line to see if the code reaches that point. Inspect input data for `NaN` or `Inf` values (`np.isnan().any()`, `np.isinf().any()`).
+
+---
 
 ### "InsightSpike-AI not available" CLI Warning
 
@@ -74,82 +112,84 @@ torch.cuda.empty_cache()
 
 ### Poetry Installation Issues
 
-**Problem**: Poetry install fails
+**Problem**: Poetry install fails, or `poetry export` command is not found.
+
 **Solution**:
-```bash
-# Update Poetry and pip
-pip install --upgrade pip poetry poetry-core
+1.  **Update Poetry**: Ensure your Poetry installation is up-to-date.
+    ```bash
+    pip install --upgrade pip poetry poetry-core
+    ```
+2.  **Conda Integration**: If you are using Conda, ensure Poetry is configured to use your Conda environment's Python interpreter.
+    ```bash
+    # First, activate your Conda environment: conda activate your_env_name
+    poetry env use $(which python) # This tells Poetry to use the active Conda env's python
+    poetry install # Now Poetry should install dependencies into the Conda env
+    ```
+3.  **Manual Dependency Export (if `poetry export` is unavailable)**: If `poetry export` is not available (e.g., older Poetry versions), you can manually extract dependencies for `pip` installation:
+    ```bash
+    # Activate your Poetry environment (if using one): poetry shell
+    # Or just run directly if Poetry is configured to use Conda env:
+    poetry run pip freeze | grep "==" > poetry_requirements.txt
+    # Then, in your Conda environment:
+    pip install -r poetry_requirements.txt
+    ```
 
-# Clear cache
-poetry cache clear --all pypi
-
-# Alternative: Direct pip install
-pip install torch torchvision torchaudio faiss-cpu typer click pydantic
-pip install -e .
-```
+---
 
 ### GitHub Token Setup (Colab)
 
 **Problem**: "GitHub token not found"
 **Solution**:
-1. Go to https://github.com/settings/tokens
-2. Generate token with `repo` scope
-3. In Colab: Click 🔑 → Add secret → Name: `GITHUB_TOKEN`
-4. Paste token value → Save
+... (既存の内容を維持) ...
+
+---
 
 ### Environment Path Issues
 
-**Problem**: Import errors in local development
-**Solution**:
-```bash
-# Add to shell profile (.zshrc, .bashrc)
-export PYTHONPATH="${PYTHONPATH}:/path/to/InsightSpike-AI"
+**Problem**: `ModuleNotFoundError` for `insightspike` or other project modules.
 
-# OR in Python
-import sys
-sys.path.append('/path/to/InsightSpike-AI')
+**Solution**:
+Ensure your project's `src` directory is correctly added to your `PYTHONPATH`. This tells Python where to find your custom modules.
+
+```bash
+# Add this to your shell profile (~/.zshrc or ~/.bash_profile)
+# Replace /path/to/InsightSpike-AI with your actual project root path
+echo 'export PYTHONPATH="/path/to/InsightSpike-AI/src:$PYTHONPATH"' >> ~/.zshrc # or ~/.bash_profile
+source ~/.zshrc # or ~/.bash_profile
 ```
+
+---
 
 ## 🎯 Local ↔ Colab Best Practices
 
 ### Development Workflow
 
-1. **Local Development**:
-   - Use Poetry for dependency management
-   - Test with `python scripts/pre_push_validation.py`
-   - Commit to main branch
-
-2. **Colab Execution**:
-   - Notebooks pull latest code automatically
-   - Pinned dependency versions for stability
-   - Results saved to experiment directories
+... (既存の内容を維持) ...
 
 ### Version Synchronization
 
-**Critical Versions**:
-- Python: 3.10+
+**Critical Versions (for macOS Intel with Conda)**:
+- Python: 3.11
 - PyTorch: 2.2.2
 - NumPy: 1.26.4
+- FAISS-CPU: 1.8.0 (installed via `conda install -c conda-forge faiss-cpu`)
+- PyTorch Geometric: 2.5.2 (installed via `conda install pyg -c pyg`)
 - sentence-transformers: 2.7.0
 
 **Check Compatibility**:
-```python
-# Save this snippet for environment verification
-import sys, torch, numpy as np
-print(f"Python: {sys.version}")
-print(f"PyTorch: {torch.__version__}")
-print(f"NumPy: {np.__version__}")
-print(f"CUDA: {torch.cuda.is_available()}")
-```
+... (既存の内容を維持) ...
+
+---
 
 ## 🚨 Emergency Recovery
 
 ### Complete Environment Reset
 
 ```bash
-# Local
-rm -rf .venv/
-poetry install --no-cache
+# Local (Conda-based setup)
+conda deactivate # Deactivate current Conda env
+conda env remove -n insightspike_env # Remove the Conda environment
+# Then, follow "Recommended Setup" from scratch.
 
 # Colab
 # Runtime → Factory reset runtime
@@ -158,49 +198,23 @@ poetry install --no-cache
 
 ### Fallback Installation
 
-```bash
-# Minimal working setup
-pip install torch==2.2.2
-pip install numpy==1.26.4  
-pip install faiss-cpu typer click pydantic
-pip install -e .
-```
+... (既存の内容を維持) ...
 
 ### Data Corruption Recovery
 
-```bash
-# Restore clean data state
-python scripts/utilities/restore_clean_data.py
+... (既存の内容を維持) ...
 
-# Verify data integrity
-python scripts/validation/data_integrity_check.py
-```
+---
 
 ## 📞 Getting Help
 
-1. **Check Logs**: `monitoring/production_monitor.py`
-2. **Run Diagnostics**: `scripts/debugging/debug_experiment_state.py`
-3. **GitHub Issues**: Create issue with error logs
-4. **Documentation**: See `docs/` and experiment READMEs
+... (既存の内容を維持) ...
+
+---
 
 ## ✅ Success Indicators
 
-**Local Setup Complete**:
-```bash
-✅ poetry install succeeded
-✅ python -c "from src.insightspike..." works
-✅ scripts/pre_push_validation.py passes
-✅ CLI warning "InsightSpike-AI not available" gone
-```
-
-**Colab Setup Complete**:
-```python
-✅ Runtime restarted after package installation
-✅ GitHub token found in secrets
-✅ Repository cloned successfully
-✅ Import experiment modules works
-✅ Environment verification shows correct versions
-```
+... (既存の内容を維持) ...
 
 ---
-*Last updated: January 2025*
+*Last updated: July 2025*

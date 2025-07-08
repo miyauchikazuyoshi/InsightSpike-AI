@@ -112,7 +112,7 @@ def test_core_functionality():
     try:
         # Test configuration system
         print("1. Testing configuration system...")
-        from insightspike.config import get_config
+        from insightspike.core.config import get_config
         config = get_config()
         # Use safe config access
         embedding_model = getattr(config, 'embedding_model', 'paraphrase-MiniLM-L6-v2')
@@ -191,7 +191,7 @@ def test_environment_compatibility():
     
     try:
         # Test environment detection
-        from insightspike.config import get_config
+        from insightspike.core.config import get_config
         config = get_config()
         print(f"✅ Environment detected: {config.environment}")
         
@@ -264,7 +264,7 @@ def test_production_readiness():
         
         # Test configuration validation
         print("3. Testing configuration validation...")
-        from insightspike.config import get_config
+        from insightspike.core.config import get_config
         config = get_config()
         
         # Check critical configuration attributes

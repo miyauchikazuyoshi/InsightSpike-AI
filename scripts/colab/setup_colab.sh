@@ -38,40 +38,50 @@ cp pyproject_colab.toml pyproject.toml
 # 3. Generate a BRAND NEW, Colab-specific poetry.lock file
 # 4. Install packages optimized for Colab's hardware and software stack
 echo "Installing Colab-optimized dependencies and generating new lock file..."
-# Install all dependencies including faiss-cpu via Poetry
-poetry install
+poetry install --no-root # Install dependencies without installing the project itself first
+# Note: If poetry install fails due to dependency resolution, try:
+# poetry lock --no-cache --no-update && poetry install --no-root
 
 # ---
 # 4. Install Difficult GPU Libraries with pip FIRST
 # ---
 # We handle the most problematic, pre-compiled libraries manually.
 # This ensures compatibility with Colab's CUDA and Python environment.
-#echo "Installing GPU-accelerated libraries with pip..."
-#pip install faiss-cpu > /dev/null
+# Note: faiss-gpu is now handled by poetry install via pyproject_colab.toml
+# If faiss-gpu installation fails via poetry, consider uncommenting the following:
+# echo "Installing FAISS-GPU manually via pip..."
+# pip install faiss-gpu > /dev/null # Ensure this matches the version in pyproject_colab.toml
 
 # Install PyTorch Geometric and its optimized dependencies
 PYTORCH_VERSION=$(python -c "import torch; print(torch.__version__.split('+')[0])")
-CUDA_VERSION_SHORT=$(python -c "import torch; print(torch.version.cuda.replace('.',''))")
+CUDA_VERSION_SHORT=$(python -c "import torch; print(torch.version.cuda.replace('.', ''))")
 echo "Detected PyTorch ${PYTORCH_VERSION} and CUDA ${CUDA_VERSION_SHORT}. Installing PyG..."
 poetry run pip install torch_geometric > /dev/null
 poetry run pip install pyg_lib torch_scatter torch_sparse -f https://data.pyg.org/whl/torch-${PYTORCH_VERSION}+cu${CUDA_VERSION_SHORT}.html > /dev/null
 
 # ---
-# 5. Verification
+# 5. Set PYTHONPATH for module imports
+# ---
+echo "Setting PYTHONPATH..."
+export PYTHONPATH="$(pwd)/src:$PYTHONPATH"
+
+# ---
+# 6. Verification
 # ---
 echo "Installation complete. Verifying libraries..."
-python -c " \
-import torch; \
-import faiss; \
-import torch_geometric; \
-print('✅ PyTorch version:', torch.__version__); \
-print('✅ CUDA available for PyTorch:', torch.cuda.is_available()); \
-print('✅ FAISS CPU version:', faiss.__version__); \
-print('✅ PyG version:', torch_geometric.__version__); \
-print('\n🎉 Colab environment setup successful!'); \
-print('📦 Using Colab-optimized dependency versions with NumPy 2.x'); \
-print('🚀 CLI command \"insightspike\" is now available!'); \
-print('⚡ GPU-optimized packages (PyTorch CUDA) with faiss-cpu ready'); \
+python -c " 
+import torch; 
+import faiss; 
+import torch_geometric; 
+print('✅ PyTorch version:', torch.__version__); 
+print('✅ CUDA available for PyTorch:', torch.cuda.is_available()); 
+print('✅ FAISS version:', faiss.__version__); 
+print('✅ PyG version:', torch_geometric.__version__); 
+print('
+🎉 Colab environment setup successful!'); 
+print('📦 Using Colab-optimized dependency versions with NumPy 2.x'); 
+print('🚀 CLI command \"insightspike\" is now available!'); 
+print('⚡ GPU-optimized packages (PyTorch CUDA) with faiss-gpu ready'); 
 print('🔬 NumPy 2.x compatibility enabled for latest ML features')"
 
 # ---

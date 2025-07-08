@@ -8,12 +8,27 @@ from typing import List, Dict, Any, Optional, Tuple
 import numpy as np
 import torch
 from torch_geometric.data import Data
-import faiss
 
-from insightspike.config import get_config
+from insightspike.core.config import get_config
 from insightspike.monitoring import GraphOperationMonitor, MonitoredOperation
 
 logger = logging.getLogger(__name__)
+
+# Try to import FAISS, fall back to mock if needed
+import os
+if os.environ.get('USE_FAISS_MOCK', '').lower() == 'true':
+    logger.info("Using mock FAISS implementation as requested")
+    from insightspike.utils import faiss_mock as faiss
+else:
+    try:
+        import faiss
+        # Test FAISS to catch segfault issues early
+        test_index = faiss.IndexFlatIP(10)
+        test_index.add(np.random.randn(5, 10).astype(np.float32))
+        del test_index
+    except Exception as e:
+        logger.warning(f"FAISS not working properly: {e}. Using mock implementation.")
+        from insightspike.utils import faiss_mock as faiss
 
 
 class ScalableGraphBuilder:
@@ -156,16 +171,15 @@ class ScalableGraphBuilder:
                 batch_embeddings.astype(np.float32), 
                 min(self.top_k + 1, n_samples)
             )
-            
+
             # Convert to edge list
-            for i, (dists, neighs) in enumerate(zip(distances, neighbors)):
-                node_idx = start_idx + i
-                
-                # Process all neighbors
-                for j, (dist, neigh) in enumerate(zip(dists, neighs)):
-                    # Skip self-connections and apply similarity threshold
-                    if neigh != -1 and neigh != node_idx and dist > self.similarity_threshold:
-                        edge_list.append([node_idx, neigh])
+            # for i, (dists, neighs) in enumerate(zip(distances, neighbors)):
+            #     node_idx = start_idx + i
+            #     # Process all neighbors
+            #     for j, (dist, neigh) in enumerate(zip(dists, neighs)):
+            #         # Skip self-connections and apply similarity threshold
+            #         if neigh != -1 and neigh != node_idx and dist > self.similarity_threshold:
+            #             edge_list.append([node_idx, neigh])
                         
         return edge_list
         

@@ -27,7 +27,7 @@ python = "^3.10"
 torch = "^2.3.0"  # PyTorch 2.3+ has better NumPy 2.x compatibility
 torchvision = "^0.18.0"  # Compatible with PyTorch 2.3+
 torchaudio = "^2.3.0"
-torch-geometric = "^2.4.0"  # Newer version with NumPy 2.x support
+pyg = "^2.5.2" # Use 'pyg' for PyTorch Geometric, compatible with PyTorch 2.3+
 
 # NumPy - use 2.x to match Colab's pre-installed version
 numpy = "^2.0.0"  # Colab 2025 uses NumPy 2.x by default

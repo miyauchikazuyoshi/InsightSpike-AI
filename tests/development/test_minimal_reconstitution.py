@@ -14,7 +14,7 @@ def main():
     try:
         # Test 1: Import config
         print("Step 1: Testing config import...")
-        from insightspike.config import get_config
+        from insightspike.core.config import get_config
         config = get_config()
         print(f"✓ Config loaded: {type(config).__name__}")
         

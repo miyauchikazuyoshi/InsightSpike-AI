@@ -11,7 +11,7 @@ try:
     print("Testing imports...")
     
     # Test config
-    from insightspike.config import get_config
+    from insightspike.core.config import get_config
     print("✓ Config import successful")
     
     # Test memory manager
