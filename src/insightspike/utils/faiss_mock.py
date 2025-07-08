@@ -35,12 +35,12 @@ class MockFaissIndex:
     def search(self, queries: np.ndarray, k: int) -> Tuple[np.ndarray, np.ndarray]:
         """Search k nearest neighbors."""
         if self.vectors is None or self.ntotal == 0:
-            # Return empty results
+            # Return empty results (distances, indices)
             if queries.ndim == 1:
-                return np.array([[-1] * k]), np.array([[0.0] * k])
+                return np.array([[0.0] * k]), np.array([[-1] * k])
             else:
                 n_queries = queries.shape[0]
-                return np.array([[-1] * k] * n_queries), np.array([[0.0] * k] * n_queries)
+                return np.array([[0.0] * k] * n_queries), np.array([[-1] * k] * n_queries)
         
         if queries.ndim == 1:
             queries = queries.reshape(1, -1)
