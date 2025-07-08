@@ -173,13 +173,13 @@ class ScalableGraphBuilder:
             )
 
             # Convert to edge list
-            # for i, (dists, neighs) in enumerate(zip(distances, neighbors)):
-            #     node_idx = start_idx + i
-            #     # Process all neighbors
-            #     for j, (dist, neigh) in enumerate(zip(dists, neighs)):
-            #         # Skip self-connections and apply similarity threshold
-            #         if neigh != -1 and neigh != node_idx and dist > self.similarity_threshold:
-            #             edge_list.append([node_idx, neigh])
+            for i, (dists, neighs) in enumerate(zip(distances, neighbors)):
+                node_idx = start_idx + i
+                # Process all neighbors
+                for j, (dist, neigh) in enumerate(zip(dists, neighs)):
+                    # Skip self-connections and apply similarity threshold
+                    if neigh != -1 and neigh != node_idx and dist > self.similarity_threshold:
+                        edge_list.append([node_idx, neigh])
                         
         return edge_list
         
