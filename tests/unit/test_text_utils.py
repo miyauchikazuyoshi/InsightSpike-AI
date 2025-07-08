@@ -23,19 +23,24 @@ def test_clean_text():
 
 def test_iter_text():
     """Test text iteration function."""
-    # Test file path
-    result = list(iter_text("test.txt"))
-    assert result == ["test.txt"]
+    # Test with Path object
+    from pathlib import Path
+    import tempfile
     
-    # Test list of texts
-    texts = ["Hello", "World"]
-    result = list(iter_text(texts))
-    assert result == texts
-    
-    # Test single string
-    result = list(iter_text("Hello"))
-    assert result == ["Hello"]
-    
-    # Test empty list
-    result = list(iter_text([]))
-    assert result == []
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmppath = Path(tmpdir)
+        
+        # Create test files
+        (tmppath / "test1.txt").write_text("content1")
+        (tmppath / "test2.txt").write_text("content2")
+        (tmppath / "test.md").write_text("markdown")
+        
+        # Test finding .txt files
+        result = list(iter_text(tmppath))
+        assert len(result) == 2
+        assert all(str(p).endswith('.txt') for p in result)
+        
+        # Test with different suffix
+        result = list(iter_text(tmppath, suffix=".md"))
+        assert len(result) == 1
+        assert str(result[0]).endswith('.md')

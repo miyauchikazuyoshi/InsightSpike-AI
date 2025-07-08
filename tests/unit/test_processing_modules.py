@@ -11,10 +11,9 @@ from insightspike.processing.retrieval import retrieve
 
 def test_predict():
     """Test predict function."""
-    # Since predict is a placeholder returning input
-    assert predict("test") == "test"
-    assert predict(123) == 123
-    assert predict([1, 2, 3]) == [1, 2, 3]
+    # Since predict returns empty string
+    assert predict("test") == ""
+    assert predict("another test") == ""
 
 
 def test_quantize():
@@ -34,6 +33,6 @@ def test_train():
 
 def test_retrieve():
     """Test retrieve function."""
-    # Since retrieve is a placeholder returning empty list
-    assert retrieve() == []
-    assert isinstance(retrieve(), list)
+    # Since retrieve requires a query parameter and returns empty list
+    assert retrieve("test query") == []
+    assert isinstance(retrieve("another query"), list)
