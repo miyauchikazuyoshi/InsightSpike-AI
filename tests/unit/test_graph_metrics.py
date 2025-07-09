@@ -54,10 +54,32 @@ import pytest
 import numpy as np
 from insightspike import graph_metrics
 
+
+@pytest.fixture
+def sample_graph():
+    """Create a sample graph for testing."""
+    g = nx.Graph()
+    g.add_edge(1, 2)
+    g.add_edge(2, 3)
+    g.add_edge(3, 4)
+    return g
+
+
+@pytest.fixture
+def sample_vectors():
+    """Create sample vectors for testing."""
+    return np.random.randn(5, 10)
+
+
 def test_delta_ged(sample_graph):
     """Test ΔGED calculation between two graphs"""
     # Create a second graph that's slightly different
-    g2 = sample_graph  # Using same graph for simplicity in mocked environment
+    g2 = nx.Graph()
+    g2.add_edge(1, 2)
+    g2.add_edge(2, 3)
+    g2.add_edge(3, 4)
+    g2.add_edge(4, 5)  # One extra edge
+    
     result = graph_metrics.delta_ged(sample_graph, g2)
     assert isinstance(result, float)
     assert result >= 0

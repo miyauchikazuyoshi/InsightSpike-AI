@@ -149,3 +149,8 @@ def is_macos() -> bool:
 def is_linux() -> bool:
     """Check if current platform is Linux."""
     return platform.system().lower() == "linux"
+
+
+def is_windows() -> bool:
+    """Check if current platform is Windows."""
+    return platform.system().lower() == "windows"

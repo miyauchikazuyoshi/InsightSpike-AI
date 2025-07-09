@@ -2,7 +2,36 @@
 Test agent_loop module functionality
 """
 import pytest
+import numpy as np
 from insightspike import agent_loop
+
+
+@pytest.fixture
+def mock_memory():
+    """Mock memory for testing."""
+    class MockMemory:
+        def __init__(self):
+            self.episodes = []
+            
+        def search(self, vec, k):
+            return [], []
+            
+        def update_c(self, idxs, r, eta=0.1):
+            pass
+            
+        def train_index(self):
+            pass
+            
+        def prune(self, c, i):
+            pass
+            
+        def merge(self, idxs):
+            pass
+            
+        def split(self, idx):
+            pass
+    
+    return MockMemory()
 
 def test_cycle(mock_memory):
     """Test basic cycle function"""

@@ -128,7 +128,7 @@ else:
     analyze_documents_simple = None
 
 # Import the unified config system
-from .core.config import get_config
+from .core.config import get_config, Config
 
 
 # Create a legacy config module object for backward compatibility
@@ -169,7 +169,9 @@ __all__ = [
     "MainAgent",
     "CycleResult", 
     "get_config",
+    "Config",
     "About",
+    "about",
     "graph_metrics",
     "eureka_spike",
     "config",

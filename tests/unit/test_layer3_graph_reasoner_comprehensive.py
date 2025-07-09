@@ -403,9 +403,28 @@ class TestL3GraphReasoner:
         with tempfile.TemporaryDirectory() as tmpdir:
             save_path = Path(tmpdir) / "test_graph.pt"
             
-            with patch('torch.save', side_effect=[Exception("Save failed"), None]):
+            # Mock torch.save directly on the reasoner module
+            import insightspike.core.layers.layer3_graph_reasoner as l3_module
+            original_torch = l3_module.torch
+            
+            # Add save method to mock torch
+            save_count = 0
+            def mock_save(data, path):
+                nonlocal save_count
+                save_count += 1
+                if save_count == 1:
+                    raise Exception("Save failed")
+                # Second call succeeds
+            
+            original_torch.save = mock_save
+            
+            try:
                 result_path = reasoner.save_graph(graph, save_path)
                 assert result_path == save_path
+            finally:
+                # Clean up
+                if hasattr(original_torch, 'save'):
+                    delattr(original_torch, 'save')
     
     def test_interface_methods(self, reasoner):
         """Test interface compliance methods."""
