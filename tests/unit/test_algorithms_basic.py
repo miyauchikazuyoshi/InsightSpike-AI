@@ -3,21 +3,21 @@ import pytest
 import numpy as np
 from unittest.mock import Mock, patch
 
-from insightspike.algorithms import CalculateDeltaGED, CalculateDeltaIG
+from insightspike.algorithms import GraphEditDistance, InformationGain
 
 
-def test_calculate_delta_ged_init():
-    """Test CalculateDeltaGED initialization."""
-    calc = CalculateDeltaGED()
+def test_graph_edit_distance_init():
+    """Test GraphEditDistance initialization."""
+    calc = GraphEditDistance()
     assert calc is not None
-    assert hasattr(calc, 'calculate')
+    assert hasattr(calc, 'compute')
 
 
-def test_calculate_delta_ig_init():
-    """Test CalculateDeltaIG initialization."""
-    calc = CalculateDeltaIG()
+def test_information_gain_init():
+    """Test InformationGain initialization."""
+    calc = InformationGain()
     assert calc is not None
-    assert hasattr(calc, 'calculate')
+    assert hasattr(calc, 'compute')
 
 
 def test_algorithms_module_imports():
@@ -25,9 +25,9 @@ def test_algorithms_module_imports():
     import insightspike.algorithms as alg
     
     # Test convenience functions exist
-    assert hasattr(alg, 'calculate_delta_ged')
-    assert hasattr(alg, 'calculate_delta_ig')
+    assert hasattr(alg, 'compute_delta_ged')
+    assert hasattr(alg, 'compute_delta_ig')
     
     # Test they are callable
-    assert callable(alg.calculate_delta_ged)
-    assert callable(alg.calculate_delta_ig)
+    assert callable(alg.compute_delta_ged)
+    assert callable(alg.compute_delta_ig)

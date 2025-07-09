@@ -1,37 +1,31 @@
 """Tests for config module coverage"""
 import pytest
-from insightspike.config import ConfigKeys
+from insightspike.config import Config, get_config
 
 
 def test_config_keys():
-    """Test ConfigKeys class."""
-    # Test that ConfigKeys has expected attributes
-    assert hasattr(ConfigKeys, 'REASONING')
-    assert hasattr(ConfigKeys, 'EMBEDDING')
-    assert hasattr(ConfigKeys, 'GNN')
-    assert hasattr(ConfigKeys, 'MEMORY')
-    assert hasattr(ConfigKeys, 'LLM')
+    """Test Config class and get_config function."""
+    # Test get_config returns a Config instance
+    config = get_config()
+    assert config is not None
+    assert isinstance(config, Config)
     
-    # Test specific key values
-    assert ConfigKeys.REASONING == 'reasoning'
-    assert ConfigKeys.EMBEDDING == 'embedding'
-    assert ConfigKeys.GNN == 'gnn'
-    assert ConfigKeys.MEMORY == 'memory'
-    assert ConfigKeys.LLM == 'llm'
+    # Test config has expected attributes
+    assert hasattr(config, 'reasoning')
+    assert hasattr(config, 'embedding')
+    assert hasattr(config, 'gnn')
+    assert hasattr(config, 'memory')
+    assert hasattr(config, 'llm')
 
 
 def test_config_keys_usage():
-    """Test that ConfigKeys can be used properly."""
-    # Should be able to access all keys
-    keys = [
-        ConfigKeys.REASONING,
-        ConfigKeys.EMBEDDING,
-        ConfigKeys.GNN,
-        ConfigKeys.MEMORY,
-        ConfigKeys.LLM
-    ]
+    """Test that config can be used properly."""
+    config = get_config()
     
-    # All keys should be strings
-    for key in keys:
-        assert isinstance(key, str)
-        assert len(key) > 0
+    # Test reasoning config
+    assert hasattr(config.reasoning, 'similarity_threshold')
+    assert isinstance(config.reasoning.similarity_threshold, (int, float))
+    
+    # Test embedding config
+    assert hasattr(config.embedding, 'dimension')
+    assert isinstance(config.embedding.dimension, int)
