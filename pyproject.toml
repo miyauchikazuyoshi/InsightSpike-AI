@@ -106,6 +106,17 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 
+[tool.coverage.run]
+source = ["src/insightspike"]
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+]
+
+[tool.coverage.report]
+fail_under = 50
+
 [tool.black]
 line-length = 88
 target-version = ['py310']
