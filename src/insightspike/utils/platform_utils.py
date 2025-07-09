@@ -144,3 +144,8 @@ def get_optimal_dependency_config(platform_info: PlatformInfo) -> dict:
 def is_macos() -> bool:
     """Check if current platform is macOS."""
     return platform.system().lower() == "darwin"
+
+
+def is_linux() -> bool:
+    """Check if current platform is Linux."""
+    return platform.system().lower() == "linux"

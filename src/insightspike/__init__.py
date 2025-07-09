@@ -157,7 +157,12 @@ from .metrics import graph_metrics
 __version__ = About.VERSION
 
 # Export About as a module attribute for backward compatibility
-about = About
+def about():
+    """Return package information as a dictionary."""
+    return {
+        "name": About.NAME,
+        "version": About.VERSION
+    }
 
 # Main exports
 __all__ = [

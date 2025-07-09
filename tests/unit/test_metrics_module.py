@@ -2,6 +2,7 @@
 import pytest
 from unittest.mock import Mock, MagicMock
 import numpy as np
+import networkx as nx
 
 from insightspike.metrics import delta_ged, delta_ig
 
@@ -11,16 +12,14 @@ def test_delta_ged_function():
     # Test function exists and is callable
     assert callable(delta_ged)
     
-    # Create mock graphs that behave like NetworkX graphs
-    g1 = Mock()
-    g1.nodes = Mock(return_value=[1, 2, 3, 4, 5])
-    g1.edges = Mock(return_value=[(1, 2), (2, 3)])
-    g1.__iter__ = Mock(return_value=iter([1, 2, 3, 4, 5]))
+    # Create actual NetworkX graphs
+    g1 = nx.Graph()
+    g1.add_nodes_from([1, 2, 3, 4, 5])
+    g1.add_edges_from([(1, 2), (2, 3)])
     
-    g2 = Mock()
-    g2.nodes = Mock(return_value=[1, 2, 3, 4, 5, 6])
-    g2.edges = Mock(return_value=[(1, 2), (2, 3), (3, 4)])
-    g2.__iter__ = Mock(return_value=iter([1, 2, 3, 4, 5, 6]))
+    g2 = nx.Graph()
+    g2.add_nodes_from([1, 2, 3, 4, 5, 6])
+    g2.add_edges_from([(1, 2), (2, 3), (3, 4)])
     
     # Call function
     result = delta_ged(g1, g2)
