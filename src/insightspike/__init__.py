@@ -156,6 +156,9 @@ from .metrics import graph_metrics
 # Version info
 __version__ = About.VERSION
 
+# Export About as a module attribute for backward compatibility
+about = About
+
 # Main exports
 __all__ = [
     "MainAgent",

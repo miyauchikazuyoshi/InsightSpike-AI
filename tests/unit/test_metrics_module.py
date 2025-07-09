@@ -11,16 +11,16 @@ def test_delta_ged_function():
     # Test function exists and is callable
     assert callable(delta_ged)
     
-    # Create mock graphs
+    # Create mock graphs that behave like NetworkX graphs
     g1 = Mock()
-    g1.num_nodes = 5
-    g1.edge_index = Mock()
-    g1.edge_index.size = Mock(return_value=(2, 10))
+    g1.nodes = Mock(return_value=[1, 2, 3, 4, 5])
+    g1.edges = Mock(return_value=[(1, 2), (2, 3)])
+    g1.__iter__ = Mock(return_value=iter([1, 2, 3, 4, 5]))
     
     g2 = Mock()
-    g2.num_nodes = 6
-    g2.edge_index = Mock()
-    g2.edge_index.size = Mock(return_value=(2, 12))
+    g2.nodes = Mock(return_value=[1, 2, 3, 4, 5, 6])
+    g2.edges = Mock(return_value=[(1, 2), (2, 3), (3, 4)])
+    g2.__iter__ = Mock(return_value=iter([1, 2, 3, 4, 5, 6]))
     
     # Call function
     result = delta_ged(g1, g2)
@@ -32,15 +32,12 @@ def test_delta_ig_function():
     # Test function exists and is callable
     assert callable(delta_ig)
     
-    # Create mock graphs with embeddings
-    g1 = Mock()
-    g1.x = np.random.randn(5, 10)
-    
-    g2 = Mock()
-    g2.x = np.random.randn(6, 10)
+    # Create numpy arrays directly as delta_ig expects
+    vecs_old = np.random.randn(5, 10)
+    vecs_new = np.random.randn(6, 10)
     
     # Call function
-    result = delta_ig(g1, g2)
+    result = delta_ig(vecs_old, vecs_new)
     assert isinstance(result, (int, float))
 
 

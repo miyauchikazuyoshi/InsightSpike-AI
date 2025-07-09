@@ -412,6 +412,20 @@ class InformationGain:
             "k_clusters": self.k_clusters,
             "min_samples": self.min_samples
         }
+    
+    def compute(self, data_before: Any, data_after: Any) -> float:
+        """
+        Compute Information Gain between two data states.
+        Alias for calculate() method to maintain API consistency.
+        
+        Args:
+            data_before: Initial data state
+            data_after: Final data state
+            
+        Returns:
+            float: Information gain value
+        """
+        return self.calculate(data_before, data_after).ig_value
 
 
 # Convenience functions for external API

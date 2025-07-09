@@ -139,3 +139,8 @@ def get_optimal_dependency_config(platform_info: PlatformInfo) -> dict:
         # macOS uses default PyPI for torch with Metal support
 
     return config
+
+
+def is_macos() -> bool:
+    """Check if current platform is macOS."""
+    return platform.system().lower() == "darwin"

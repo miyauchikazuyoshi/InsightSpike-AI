@@ -212,6 +212,11 @@ class Config:
             self.scalable_graph = ScalableGraphConfig()
         if self.unknown_learner is None:
             self.unknown_learner = UnknownLearnerConfig()
+    
+    @property
+    def gnn(self):
+        """Property for backward compatibility - GNN config is in reasoning"""
+        return self.reasoning
 
 
 def get_config() -> Config:

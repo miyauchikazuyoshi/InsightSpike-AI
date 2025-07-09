@@ -46,3 +46,16 @@ try:
     __all__.extend(["GraphImportanceCalculator", "DynamicImportanceTracker"])
 except ImportError:
     pass
+
+# Model availability utilities
+def get_available_models():
+    """Get list of available embedding models."""
+    # Default models that are commonly available
+    return [
+        "paraphrase-MiniLM-L6-v2",
+        "all-MiniLM-L6-v2", 
+        "all-mpnet-base-v2",
+        "multi-qa-MiniLM-L6-cos-v1"
+    ]
+
+__all__.append("get_available_models")

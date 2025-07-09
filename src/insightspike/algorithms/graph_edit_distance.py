@@ -356,6 +356,20 @@ class GraphEditDistance:
             "node_cost": self.node_cost,
             "edge_cost": self.edge_cost
         }
+    
+    def compute(self, graph1: Any, graph2: Any) -> float:
+        """
+        Compute Graph Edit Distance between two graphs.
+        Alias for calculate() method to maintain API consistency.
+        
+        Args:
+            graph1: First graph
+            graph2: Second graph
+            
+        Returns:
+            float: Graph edit distance value
+        """
+        return self.calculate(graph1, graph2).ged_value
 
 
 # Convenience functions for external API
