@@ -4,7 +4,7 @@
 flowchart LR
     %% User Interaction Layer
     subgraph "👤 User Layer"
-        U1[Terminal/CLI]
+        U1[Terminal/CLI<br/>spike commands]
         U2[Python API]
         U3[Jupyter Notebook]
     end
@@ -12,9 +12,10 @@ flowchart LR
     %% Application Layer
     subgraph "🖥️ Application Layer"
         direction TB
-        CLI_App[CLI Application<br/>typer + rich]
+        CLI_App[CLI Application<br/>spike query/embed<br/>typer + rich]
         Agent_Loop[Agent Loop<br/>agent_loop.py]
         Main_Agent[MainAgent<br/>main_agent.py<br/>⚡ O(n log n)]
+        Simple_Config[SimpleConfig<br/>Presets System]
     end
     
     %% Core Processing Layers
@@ -43,8 +44,8 @@ flowchart LR
         end
         
         subgraph "Layer 4: Generation"
-            L4_LLM[LLM Processing<br/>(TinyLlama/GPT)]
-            L4_Local[LocalProvider<br/>safe_mode=False]
+            L4_LLM[UnifiedLLMProvider<br/>(TinyLlama/GPT)]
+            L4_Local[LocalProvider<br/>MockProvider<br/>safe_mode support]
             L4_Response[Response Generation]
         end
     end
@@ -90,6 +91,7 @@ flowchart LR
     
     CLI_App --> Main_Agent
     Agent_Loop --> Main_Agent
+    Simple_Config --> Main_Agent
     Main_Agent --> L1_Input
     
     %% Layer Flow with ScalableGraphManager

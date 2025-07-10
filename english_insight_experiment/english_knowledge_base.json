@@ -1,0 +1,260 @@
+{
+  "metadata": {
+    "created": "2025-07-11",
+    "language": "english",
+    "total_episodes": 50,
+    "description": "English version of integrated knowledge dataset for InsightSpike experiments"
+  },
+  "episodes": [
+    {
+      "id": 1,
+      "text": "Energy is the capacity to do work.",
+      "phase": 1
+    },
+    {
+      "id": 2,
+      "text": "Energy can change forms but cannot be created or destroyed.",
+      "phase": 1
+    },
+    {
+      "id": 3,
+      "text": "Entropy is a measure of energy degradation.",
+      "phase": 1
+    },
+    {
+      "id": 4,
+      "text": "Information and entropy have a deep mathematical relationship.",
+      "phase": 1
+    },
+    {
+      "id": 5,
+      "text": "Information is defined as the reduction of uncertainty.",
+      "phase": 1
+    },
+    {
+      "id": 6,
+      "text": "Describing a system's state requires information.",
+      "phase": 1
+    },
+    {
+      "id": 7,
+      "text": "Observation is the process of extracting information from a system.",
+      "phase": 1
+    },
+    {
+      "id": 8,
+      "text": "Observation always involves energy exchange.",
+      "phase": 1
+    },
+    {
+      "id": 9,
+      "text": "In quantum systems, observation changes the system's state.",
+      "phase": 1
+    },
+    {
+      "id": 10,
+      "text": "Measurement precision has fundamental limits.",
+      "phase": 1
+    },
+    {
+      "id": 11,
+      "text": "The second law of thermodynamics and Shannon's information theory share the same mathematical structure.",
+      "phase": 2
+    },
+    {
+      "id": 12,
+      "text": "Maxwell's demon is a thought experiment showing the relationship between information and energy.",
+      "phase": 2
+    },
+    {
+      "id": 13,
+      "text": "Erasing information requires minimum energy (Landauer's principle).",
+      "phase": 2
+    },
+    {
+      "id": 14,
+      "text": "Black hole entropy represents its information capacity.",
+      "phase": 2
+    },
+    {
+      "id": 15,
+      "text": "In the holographic principle, information is encoded on boundary surfaces.",
+      "phase": 2
+    },
+    {
+      "id": 16,
+      "text": "Quantum entanglement is a correlation that cannot be explained by classical information theory.",
+      "phase": 2
+    },
+    {
+      "id": 17,
+      "text": "Quantum information has fundamentally different properties from classical information.",
+      "phase": 2
+    },
+    {
+      "id": 18,
+      "text": "Decoherence is the process of quantum information leaking into the environment.",
+      "phase": 2
+    },
+    {
+      "id": 19,
+      "text": "Life is a system that maintains order within the flow of entropy.",
+      "phase": 2
+    },
+    {
+      "id": 20,
+      "text": "DNA is chemically encoded digital information.",
+      "phase": 2
+    },
+    {
+      "id": 31,
+      "text": "Energy, information, and entropy form the fundamental trinity of the universe.",
+      "phase": 3
+    },
+    {
+      "id": 32,
+      "text": "The measurement problem can be reformulated in information-theoretic terms.",
+      "phase": 3
+    },
+    {
+      "id": 33,
+      "text": "Wave function collapse can be understood as an information update process.",
+      "phase": 3
+    },
+    {
+      "id": 34,
+      "text": "Quantum entanglement is a state where information is non-locally correlated.",
+      "phase": 3
+    },
+    {
+      "id": 35,
+      "text": "The black hole information paradox shows the contradiction between quantum mechanics and general relativity.",
+      "phase": 3
+    },
+    {
+      "id": 36,
+      "text": "Through Hawking radiation, black hole information is gradually released.",
+      "phase": 3
+    },
+    {
+      "id": 37,
+      "text": "The entropy of the entire universe is constantly increasing.",
+      "phase": 3
+    },
+    {
+      "id": 38,
+      "text": "Heat death of the universe is the state of maximum entropy.",
+      "phase": 3
+    },
+    {
+      "id": 39,
+      "text": "Life is a dissipative structure that locally decreases entropy.",
+      "phase": 3
+    },
+    {
+      "id": 40,
+      "text": "Consciousness might be quantified by Integrated Information Theory (IIT).",
+      "phase": 3
+    },
+    {
+      "id": 61,
+      "text": "If information is a physical entity, how is its mass calculated?",
+      "phase": 4
+    },
+    {
+      "id": 62,
+      "text": "Can the hard problem of consciousness be solved from an information integration perspective?",
+      "phase": 4
+    },
+    {
+      "id": 63,
+      "text": "Do quantum entanglement and non-locality of consciousness share a common principle?",
+      "phase": 4
+    },
+    {
+      "id": 64,
+      "text": "Can we view the entire universe as a quantum computer?",
+      "phase": 4
+    },
+    {
+      "id": 65,
+      "text": "Can the origin of life be explained as self-organization of information?",
+      "phase": 4
+    },
+    {
+      "id": 66,
+      "text": "Is evolution a process for the universe to recognize itself?",
+      "phase": 4
+    },
+    {
+      "id": 67,
+      "text": "Does artificial consciousness emerge from sufficient information integration?",
+      "phase": 4
+    },
+    {
+      "id": 68,
+      "text": "Can quantum gravity theory be built with information as the fundamental element?",
+      "phase": 4
+    },
+    {
+      "id": 69,
+      "text": "Is the interior of a black hole the ultimate compression state of information?",
+      "phase": 4
+    },
+    {
+      "id": 70,
+      "text": "Can the many-worlds interpretation be understood as branching of information?",
+      "phase": 4
+    },
+    {
+      "id": 111,
+      "text": "Energy, information, and consciousness are different aspects of the same reality.",
+      "phase": 5
+    },
+    {
+      "id": 112,
+      "text": "The evolution of the universe can be understood as increasing information processing capacity.",
+      "phase": 5
+    },
+    {
+      "id": 113,
+      "text": "Life and consciousness are inevitable consequences of the universe recognizing itself.",
+      "phase": 5
+    },
+    {
+      "id": 114,
+      "text": "The unification of quantum mechanics and general relativity will be achieved based on information.",
+      "phase": 5
+    },
+    {
+      "id": 115,
+      "text": "All physical laws reduce to laws of information conservation and transformation.",
+      "phase": 5
+    },
+    {
+      "id": 116,
+      "text": "Consciousness is the most sophisticated form of information processing in the universe.",
+      "phase": 5
+    },
+    {
+      "id": 117,
+      "text": "Artificial intelligence represents a new stage of the universe's information processing capacity.",
+      "phase": 5
+    },
+    {
+      "id": 118,
+      "text": "Quantum computers directly utilize the computational principles of the universe.",
+      "phase": 5
+    },
+    {
+      "id": 119,
+      "text": "Blockchain ensures information reliability in a distributed manner.",
+      "phase": 5
+    },
+    {
+      "id": 120,
+      "text": "The Internet functions as a planetary nervous system.",
+      "phase": 5
+    }
+  ]
+}

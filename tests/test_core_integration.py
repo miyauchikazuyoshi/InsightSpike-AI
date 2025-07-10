@@ -11,12 +11,12 @@ from unittest.mock import Mock, patch
 import numpy as np
 
 # Import the modules we're testing
-from src.insightspike.core.experiment_framework import (
+from insightspike.core.experiment_framework import (
     BaseExperiment, ExperimentConfig, ExperimentResult, 
     PerformanceMetrics, ExperimentSuite,
     create_simple_experiment_config, create_performance_metrics
 )
-from src.insightspike.utils.visualization import (
+from insightspike.utils.visualization import (
     InsightSpikeVisualizer, quick_performance_chart, 
     quick_comparison, quick_progress_chart
 )

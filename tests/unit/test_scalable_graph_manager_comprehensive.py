@@ -10,7 +10,7 @@ from unittest.mock import patch, MagicMock
 import tempfile
 import os
 
-from src.insightspike.core.learning.scalable_graph_manager import ScalableGraphManager
+from insightspike.core.learning.scalable_graph_manager import ScalableGraphManager
 
 
 class TestScalableGraphManager:

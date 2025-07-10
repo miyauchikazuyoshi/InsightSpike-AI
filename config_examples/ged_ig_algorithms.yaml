@@ -1,0 +1,47 @@
+# GED/IG Algorithm Configuration Examples
+# =======================================
+
+# Example 1: Simple algorithms (fastest, least accurate)
+simple_config:
+  ged_algorithm: "simple"
+  ig_algorithm: "simple"
+  spike_ged_threshold: 0.3
+  spike_ig_threshold: 0.2
+
+# Example 2: Advanced algorithms (balanced)
+advanced_config:
+  ged_algorithm: "advanced"
+  ig_algorithm: "advanced"
+  spike_ged_threshold: 0.5
+  spike_ig_threshold: 0.3
+
+# Example 3: NetworkX GED with entropy IG (most accurate)
+networkx_config:
+  ged_algorithm: "networkx"
+  ig_algorithm: "entropy"
+  spike_ged_threshold: 0.7
+  spike_ig_threshold: 0.4
+
+# Example 4: Mixed configuration
+mixed_config:
+  ged_algorithm: "networkx"
+  ig_algorithm: "simple"
+  spike_ged_threshold: 0.6
+  spike_ig_threshold: 0.25
+
+# Algorithm Details:
+# 
+# GED Algorithms:
+# - simple: Fast approximation based on graph complexity (O(n))
+# - advanced: PyG-aware calculation with structural+embedding distance (O(n²))
+# - networkx: Exact/approximate GED using NetworkX library (O(n³) to O(n!))
+#
+# IG Algorithms:
+# - simple: Basic information content comparison
+# - advanced: Combined structural and embedding-based IG
+# - entropy: Shannon entropy-based information gain calculation
+#
+# Threshold Guidelines:
+# - Lower thresholds = more sensitive spike detection
+# - Higher thresholds = fewer false positives
+# - Adjust based on your dataset and use case

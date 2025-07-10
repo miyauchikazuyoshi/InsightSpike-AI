@@ -8,8 +8,8 @@ from unittest.mock import patch, MagicMock, PropertyMock
 import tempfile
 from pathlib import Path
 
-from src.insightspike.core.layers.layer2_enhanced_scalable import L2EnhancedScalableMemory
-from src.insightspike.core.layers.layer2_memory_manager import Episode
+from insightspike.core.layers.layer2_enhanced_scalable import L2EnhancedScalableMemory
+from insightspike.core.layers.layer2_memory_manager import Episode
 
 
 class TestL2EnhancedScalableMemory:

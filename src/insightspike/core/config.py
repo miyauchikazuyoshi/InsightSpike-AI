@@ -58,6 +58,8 @@ class GraphConfig:
 
     spike_ged_threshold: float = 0.5
     spike_ig_threshold: float = 0.2
+    ged_algorithm: str = "advanced"  # Options: simple, advanced, networkx
+    ig_algorithm: str = "advanced"   # Options: simple, advanced, entropy
 
 
 @dataclass
@@ -91,6 +93,10 @@ class ReasoningConfig:
     graph_batch_size: int = 1000  # Batch size for graph operations
     conflict_split_threshold: int = 2  # Number of conflicts to trigger split
     use_advanced_metrics: bool = True  # Use advanced GED/IG algorithms
+    
+    # GED/IG Algorithm Selection (also available in GraphConfig)
+    ged_algorithm: str = "advanced"  # Options: simple, advanced, networkx
+    ig_algorithm: str = "advanced"   # Options: simple, advanced, entropy
 
 
 @dataclass

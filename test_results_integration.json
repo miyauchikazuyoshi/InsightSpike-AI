@@ -1,0 +1,142 @@
+{
+  "timestamp": "2025-07-10 18:07:24",
+  "scenarios": [
+    {
+      "scenario": "basic_spike_detection",
+      "passed": 6,
+      "total": 6,
+      "success_rate": 1.0,
+      "details": [
+        {
+          "condition": true,
+          "message": "Agent initialization successful",
+          "passed": true
+        },
+        {
+          "condition": true,
+          "message": "Episode 1: graph_analysis present",
+          "passed": true
+        },
+        {
+          "condition": true,
+          "message": "Episode 2: graph_analysis present",
+          "passed": true
+        },
+        {
+          "condition": true,
+          "message": "Episode 3: graph_analysis present",
+          "passed": true
+        },
+        {
+          "condition": true,
+          "message": "Episode 4: graph_analysis present",
+          "passed": true
+        },
+        {
+          "condition": true,
+          "message": "Graph size matches episode count",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "scenario": "memory_retrieval",
+      "passed": 6,
+      "total": 6,
+      "success_rate": 1.0,
+      "details": [
+        {
+          "condition": true,
+          "message": "Question returns dict result",
+          "passed": true
+        },
+        {
+          "condition": true,
+          "message": "Response contains 'response' field",
+          "passed": true
+        },
+        {
+          "condition": true,
+          "message": "Response is not empty",
+          "passed": true
+        },
+        {
+          "condition": true,
+          "message": "Question returns dict result",
+          "passed": true
+        },
+        {
+          "condition": true,
+          "message": "Response contains 'response' field",
+          "passed": true
+        },
+        {
+          "condition": true,
+          "message": "Response is not empty",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "scenario": "error_recovery",
+      "passed": 4,
+      "total": 4,
+      "success_rate": 1.0,
+      "details": [
+        {
+          "condition": true,
+          "message": "Normal episode succeeds",
+          "passed": true
+        },
+        {
+          "condition": true,
+          "message": "Empty episode handled",
+          "passed": true
+        },
+        {
+          "condition": true,
+          "message": "Long episode processed",
+          "passed": true
+        },
+        {
+          "condition": true,
+          "message": "Special characters handled",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "scenario": "performance",
+      "passed": 4,
+      "total": 4,
+      "success_rate": 1.0,
+      "details": [
+        {
+          "condition": true,
+          "message": "Initialization completes in < 5s (actual: 0.00s)",
+          "passed": true
+        },
+        {
+          "condition": true,
+          "message": "Average episode time < 1s (actual: 0.028s)",
+          "passed": true
+        },
+        {
+          "condition": true,
+          "message": "Question processing < 2s (actual: 0.73s)",
+          "passed": true
+        },
+        {
+          "condition": true,
+          "message": "Memory usage < 1GB (actual: 512MB)",
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_passed": 20,
+    "total_tests": 20,
+    "success_rate": 1.0
+  }
+}

@@ -2,7 +2,9 @@
 
 ## 📋 概要
 
-In## 🔧 保守・管理スクリプト
+InsightSpike-AIプロジェクトの各種スクリプト・ツール・ユーティリティを整理したディレクトリ
+
+## 🔧 保守・管理スクリプト
 
 ### **プッシュ前バリデーション**
 
@@ -37,11 +39,6 @@ In## 🔧 保守・管理スクリプト
   chmod +x .git/hooks/pre-push
   ```
 
-### **その他**
-
-- `publication_validation.py` - 公開品質検証  
-- `POETRY_DEPS_COMPLETION_REPORT.py` - 依存関係管理Spike-AIプロジェクトの各種スクリプト・ツール・ユーティリティを整理したディレクトリ
-
 ## 📁 ディレクトリ構成
 
 | ディレクトリ | 説明 | 主要スクリプト |
@@ -69,15 +66,24 @@ python scripts/testing/safe_component_test.py
 python scripts/validation/validate_mermaid.py
 ```
 
-## �� 保守・管理スクリプト
+## 🔧 その他のスクリプト
 
-- `pre_push_validation.py` - プッシュ前検証
-- `publication_validation.py` - 公開品質検証  
-- `POETRY_DEPS_COMPLETION_REPORT.py` - 依存関係管理
+### **セットアップ**
+- `setup_models.py` - 必要なモデルのダウンロード
+- `setup_tinyllama.py` - TinyLlamaモデルのセットアップ
+- `post_install.py` - インストール後の初期設定
+
+### **ユーティリティ**
+- `utilities/persistent_load_documents.py` - ドキュメントの永続的な読み込み
 
 ## 📊 整理完了実績
 
-**2025年07月01日 完了**:
+**2025年01月10日 更新**:
+- ✅ 不要なスクリプト5個を削除
+- ✅ CLIコマンドを新形式に更新 (spike query/embed)
+- ✅ ドキュメントを最新状態に更新
+
+**2024年07月01日 完了**:
 
 - ✅ 不要なディレクトリ削除 (experiments/, organization/, utilities/)
 - ✅ 古いファイル削除 (重複・非使用スクリプト)

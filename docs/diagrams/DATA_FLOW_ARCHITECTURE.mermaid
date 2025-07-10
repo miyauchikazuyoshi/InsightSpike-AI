@@ -40,7 +40,8 @@ flowchart TB
             Raw[data/raw/<br/>Input Data]
             Proc[data/processed/<br/>Processed Data]
             Cache[data/cache/<br/>Temporary Cache]
-            Logs[data/logs/<br/>System Logs]
+            Logs[~/.insightspike/logs/<br/>System Logs]
+            Config[~/.insightspike/config/<br/>SimpleConfig]
         end
     end
     
@@ -67,7 +68,7 @@ flowchart TB
     subgraph "⚙️ Processing Pipeline"
         direction TB
         
-        P1[Data Ingestion]
+        P1[Data Ingestion<br/>spike embed]
         P2[Text Processing<br/>& Embedding]
         P3[Episode Creation<br/>store_episode()]
         P4[Graph Update<br/>ScalableGraphManager]

@@ -42,6 +42,16 @@ graph:
   spike_ig_threshold: 0.2     # Information Gain threshold
   use_gnn: false              # Use Graph Neural Networks
   gnn_hidden_dim: 64
+  
+  # GED/IG Algorithm Selection
+  ged_algorithm: "hybrid"     # Options: simple, advanced, networkx, hybrid
+  ig_algorithm: "hybrid"      # Options: simple, advanced, entropy, hybrid
+  
+  # Hybrid algorithm weights (when using hybrid mode)
+  hybrid_weights:
+    structure: 0.4      # Graph structure changes (NetworkX)
+    semantic: 0.4       # Semantic changes (Entropy)
+    quality: 0.2        # Embedding quality factor
 
 # Reasoning Layer Configuration
 reasoning:

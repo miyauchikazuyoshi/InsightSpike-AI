@@ -121,7 +121,10 @@ def test_cli_insights_commands():
         print(f"✓ Added {len(extracted_insights)} test insights to registry")
         
         # Test CLI commands by importing their functions
-        from insightspike.cli import insights, insights_search
+        # Note: insights commands have moved to new CLI
+        # Use: poetry run spike insights
+        # Use: poetry run spike insights-search "concept"
+        print("✓ Insights CLI commands are now in 'spike' CLI")
         
         # Mock typer for testing
         class MockTyper:
@@ -353,9 +356,9 @@ def run_integration_summary():
     print("  • Integrate actual LLM models for production use:")
     print("    `poetry run pip install transformers torch`")
     print("  • Test with real questions using CLI:")
-    print("    `poetry run insightspike ask \"What is quantum computing?\"`")
+    print("    `poetry run spike query \"What is quantum computing?\"`")
     print("  • Validate insights using enhanced CLI commands:")
-    print("    `poetry run insightspike insights`")
+    print("    `poetry run spike insights`")
     print("  • Monitor cross-domain synthesis performance and optimize")
 
 if __name__ == "__main__":

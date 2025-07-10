@@ -12,7 +12,7 @@ def test_list_command():
             [sys.executable, "-m", "insightspike.cli.deps_typer", "list"],
             capture_output=True,
             text=True,
-            cwd="/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI"
+            cwd=None  # Use current working directory
         )
         
         print("=== LIST COMMAND TEST ===")
@@ -43,7 +43,7 @@ def test_export_command():
             [sys.executable, "-m", "insightspike.cli.deps_typer", "export-requirements", "--output", "test_output.txt"],
             capture_output=True,
             text=True,
-            cwd="/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI"
+            cwd=None  # Use current working directory
         )
         
         print("\n=== EXPORT COMMAND TEST ===")

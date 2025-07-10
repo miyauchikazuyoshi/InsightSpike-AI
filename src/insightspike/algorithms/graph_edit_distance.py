@@ -251,10 +251,10 @@ class GraphEditDistance:
         try:
             ged = nx.graph_edit_distance(
                 graph1, graph2,
-                node_del_cost=self.node_cost,
-                node_ins_cost=self.node_cost,
-                edge_del_cost=self.edge_cost,
-                edge_ins_cost=self.edge_cost,
+                node_del_cost=lambda n: self.node_cost,
+                node_ins_cost=lambda n: self.node_cost,
+                edge_del_cost=lambda e: self.edge_cost,
+                edge_ins_cost=lambda e: self.edge_cost,
                 timeout=self.timeout_seconds
             )
             

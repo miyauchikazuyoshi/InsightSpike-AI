@@ -59,6 +59,7 @@ imageio = "^2.34.0"
 toml = "^0.10.2"
 psutil = "^5.9.0"
 notebook = { version = "^7.4.4", optional = true }
+faiss-cpu = "^1.11.0"
 
 
 
@@ -94,6 +95,7 @@ full = ["faiss-cpu", "torch-geometric", "jupyter", "pandas", "seaborn"]
 
 [tool.poetry.scripts]
 insightspike = "insightspike.cli.main:main"
+spike = "insightspike.cli.improved_cli:main"
 
 [tool.pytest.ini_options]
 markers = [

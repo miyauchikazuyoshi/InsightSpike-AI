@@ -6,16 +6,18 @@ flowchart TD
     User[👤 ユーザー] --> CLI{🖥️ CLI Interface}
     User --> API{🔌 API Interface}
     
-    %% CLI Commands
-    CLI --> Ask[❓ ask 質問]
-    CLI --> Insights[🧠 insights]
-    CLI --> Search[🔍 insights-search]
-    CLI --> Validate[✅ insights-validate]
-    CLI --> Cleanup[🧹 insights-cleanup]
-    CLI --> Stats[📊 stats]
+    %% CLI Commands (New spike commands)
+    CLI --> Query[❓ spike query 質問]
+    CLI --> Embed[📄 spike embed ドキュメント埋め込み]
+    CLI --> Insights[🧠 spike insights]
+    CLI --> Search[🔍 spike insights-search]
+    CLI --> Validate[✅ spike insights-validate]
+    CLI --> Cleanup[🧹 spike insights-cleanup]
+    CLI --> Stats[📊 spike stats]
     
     %% Main Processing Flow
-    Ask --> MainAgent[🤖 MainAgent]
+    Query --> MainAgent[🤖 MainAgent]
+    Embed --> DocumentLoader[📄 Document Loader]
     API --> MainAgent
     
     %% 4-Layer Architecture
@@ -36,8 +38,10 @@ flowchart TD
     Layer3 --> ConceptMapping[概念マッピング]
     Layer3 --> GraphDB[(🕸️ Graph Database)]
     
-    Layer4 --> LocalLLM[🏠 Local LLM]
-    Layer4 --> ModelProcessing[モデル処理]
+    Layer4 --> UnifiedLLM[🏠 UnifiedLLMProvider]
+    UnifiedLLM --> LocalLLM[Local LLM]
+    UnifiedLLM --> MockLLM[Mock LLM (safe_mode)]
+    UnifiedLLM --> ModelProcessing[モデル処理]
     
     %% Response Processing
     Layer4 --> ResponseGeneration[📝 応答生成]
@@ -63,6 +67,11 @@ flowchart TD
     Validate --> ManualValidation[手動検証]
     Cleanup --> QualityFiltering[品質フィルタリング]
     
+    %% Document Loading Flow
+    DocumentLoader --> LoadDocuments[ドキュメント読み込み]
+    LoadDocuments --> Embedder[埋め込み生成]
+    Embedder --> Layer2
+    
     %% Feedback Loop
     InsightRegistry --> FeedbackLoop[🔄 フィードバックループ]
     FeedbackLoop --> Layer2
@@ -74,11 +83,14 @@ flowchart TD
     ConceptSearch --> UserResponse
     ManualValidation --> UserResponse
     
-    %% Configuration System
-    Config[⚙️ Configuration] --> MainAgent
-    Config --> LLMConfig[🤖 LLM設定]
-    Config --> MemoryConfig[🧠 メモリ設定]
-    Config --> GraphConfig[🕸️ グラフ設定]
+    %% Configuration System (SimpleConfig with presets)
+    Config[⚙️ SimpleConfig] --> MainAgent
+    Config --> Presets[📋 Presets]
+    Presets --> Development[🔧 development]
+    Presets --> Testing[🧪 testing]
+    Presets --> Production[🚀 production]
+    Presets --> Experiment[🧬 experiment]
+    Presets --> Cloud[☁️ cloud]
     
     %% Data Flow Styling
     classDef userInterface fill:#e1f5fe

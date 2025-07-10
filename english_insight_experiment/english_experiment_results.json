@@ -1,0 +1,320 @@
+[
+  {
+    "query": "What is the relationship between energy and information?",
+    "timestamp": "2025-07-11T00:44:49.822397",
+    "direct_llm": {
+      "response": "The relationship between information and information is about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about",
+      "time": 2.342137098312378,
+      "quality": {
+        "length": 1.0,
+        "depth": 0.0,
+        "specificity": 0.2,
+        "integration": 0.2,
+        "insight": 0.0,
+        "overall": 0.27999999999999997
+      }
+    },
+    "standard_rag": {
+      "response": "Energy is the capacity to do work.",
+      "context": [
+        "Energy is the capacity to do work.",
+        "Information is defined as the reduction of uncertainty.",
+        "Erasing information requires minimum energy (Landauer's principle)."
+      ],
+      "time": 2.5664420127868652,
+      "quality": {
+        "length": 0.34,
+        "depth": 0.0,
+        "specificity": 0.2,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.10800000000000001
+      }
+    },
+    "insightspike": {
+      "response": "Energy is a measure of energy degradation.",
+      "spike_detected": true,
+      "confidence": 1.0,
+      "context": [
+        "[Deep Integration] Energy, information, and entropy form the fundamental trinity of the universe.",
+        "[Integration and Circulation] The evolution of the universe can be understood as increasing information processing capacity.",
+        "[Relationships] Maxwell's demon is a thought experiment showing the relationship between information and energy.",
+        "[Basic Concepts] Entropy is a measure of energy degradation.",
+        "[Emergent Insights] Is the interior of a black hole the ultimate compression state of information?"
+      ],
+      "time": 2.4442989826202393,
+      "quality": {
+        "length": 0.42,
+        "depth": 0.0,
+        "specificity": 0.2,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.124
+      }
+    }
+  },
+  {
+    "query": "Why does consciousness emerge?",
+    "timestamp": "2025-07-11T00:44:57.175685",
+    "direct_llm": {
+      "response": "Why does consciousness emerge?",
+      "time": 2.253394842147827,
+      "quality": {
+        "length": 0.3,
+        "depth": 0.0,
+        "specificity": 0.2,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.1
+      }
+    },
+    "standard_rag": {
+      "response": "- The universe is a system that processes information and creates order within the flow of entropy.",
+      "context": [
+        "Life and consciousness are inevitable consequences of the universe recognizing itself.",
+        "Can the origin of life be explained as self-organization of information?",
+        "Life is a system that maintains order within the flow of entropy."
+      ],
+      "time": 2.4777109622955322,
+      "quality": {
+        "length": 0.99,
+        "depth": 0.0,
+        "specificity": 0.4,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.278
+      }
+    },
+    "insightspike": {
+      "response": "It's not a single one.",
+      "spike_detected": true,
+      "confidence": 0.8,
+      "context": [
+        "[Emergent Insights] Is evolution a process for the universe to recognize itself?",
+        "[Deep Integration] Consciousness might be quantified by Integrated Information Theory (IIT).",
+        "[Integration and Circulation] The Internet functions as a planetary nervous system.",
+        "[Relationships] Life is a system that maintains order within the flow of entropy."
+      ],
+      "time": 2.3322842121124268,
+      "quality": {
+        "length": 0.22,
+        "depth": 0.0,
+        "specificity": 0.0,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.044
+      }
+    }
+  },
+  {
+    "query": "What is the mechanism of creativity at the edge of chaos?",
+    "timestamp": "2025-07-11T00:45:04.239401",
+    "direct_llm": {
+      "response": "The answer to this question is that the problem of creativity is not the problem of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of the disorder of",
+      "time": 2.2510221004486084,
+      "quality": {
+        "length": 1.0,
+        "depth": 0.0,
+        "specificity": 0.0,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.2
+      }
+    },
+    "standard_rag": {
+      "response": "It is not in the system that we are concerned with; we are concerned with the fundamental concepts of intelligence, the concepts of materialism, the concepts of physics and the concepts of energy.",
+      "context": [
+        "Life is a system that maintains order within the flow of entropy.",
+        "The entropy of the entire universe is constantly increasing.",
+        "Maxwell's demon is a thought experiment showing the relationship between information and energy."
+      ],
+      "time": 2.437371015548706,
+      "quality": {
+        "length": 1.0,
+        "depth": 0.0,
+        "specificity": 0.2,
+        "integration": 0.0,
+        "insight": 0.2,
+        "overall": 0.27999999999999997
+      }
+    },
+    "insightspike": {
+      "response": "The most fundamental principle of creativity is that the brain is an organism that can be programmed to think, think, and act.",
+      "spike_detected": false,
+      "confidence": 0.2,
+      "context": [
+        "[Integration and Circulation] The Internet functions as a planetary nervous system."
+      ],
+      "time": 2.340564012527466,
+      "quality": {
+        "length": 1.0,
+        "depth": 0.0,
+        "specificity": 0.0,
+        "integration": 0.0,
+        "insight": 0.4,
+        "overall": 0.27999999999999997
+      }
+    }
+  },
+  {
+    "query": "What is entropy?",
+    "timestamp": "2025-07-11T00:45:11.268671",
+    "direct_llm": {
+      "response": "There is a finite number of elements that are in a finite number of values.",
+      "time": 2.240710973739624,
+      "quality": {
+        "length": 0.75,
+        "depth": 0.0,
+        "specificity": 0.0,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.15
+      }
+    },
+    "standard_rag": {
+      "response": "- The entropy of the universe is constantly increasing.",
+      "context": [
+        "Life is a system that maintains order within the flow of entropy.",
+        "In quantum systems, observation changes the system's state.",
+        "The entropy of the entire universe is constantly increasing."
+      ],
+      "time": 2.421396017074585,
+      "quality": {
+        "length": 0.55,
+        "depth": 0.0,
+        "specificity": 0.2,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.15
+      }
+    },
+    "insightspike": {
+      "response": "When a certain state is being calculated, which state is the result of the process that is being applied to the entity that is being applied to the entity that is being applied to the entity that is being applied to the entity that is being applied to the entity that is being applied to the entity that is being applied to the entity that is being applied to the entity that is being applied to the entity that is being applied to the entity that is being applied to the entity that is being applied to the entity",
+      "spike_detected": true,
+      "confidence": 1.0,
+      "context": [
+        "[Basic Concepts] Entropy is a measure of energy degradation.",
+        "[Deep Integration] Heat death of the universe is the state of maximum entropy.",
+        "[Relationships] Life is a system that maintains order within the flow of entropy.",
+        "[Integration and Circulation] Energy, information, and consciousness are different aspects of the same reality.",
+        "[Emergent Insights] If information is a physical entity, how is its mass calculated?"
+      ],
+      "time": 2.3581109046936035,
+      "quality": {
+        "length": 1.0,
+        "depth": 0.0,
+        "specificity": 0.0,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.2
+      }
+    }
+  },
+  {
+    "query": "Can you explain quantum entanglement?",
+    "timestamp": "2025-07-11T00:45:18.289193",
+    "direct_llm": {
+      "response": "Quantum entanglement is a physical phenomenon that arises when a quantum state is created, which is what makes quantum entanglement possible.",
+      "time": 2.2939293384552,
+      "quality": {
+        "length": 1.0,
+        "depth": 0.0,
+        "specificity": 0.2,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.24
+      }
+    },
+    "standard_rag": {
+      "response": "Yes.",
+      "context": [
+        "Do quantum entanglement and non-locality of consciousness share a common principle?",
+        "In quantum systems, observation changes the system's state.",
+        "Decoherence is the process of quantum information leaking into the environment."
+      ],
+      "time": 2.401237964630127,
+      "quality": {
+        "length": 0.04,
+        "depth": 0.0,
+        "specificity": 0.0,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.008
+      }
+    },
+    "insightspike": {
+      "response": "Quantum entanglement is a state where information is non-locally correlated.",
+      "spike_detected": true,
+      "confidence": 0.8,
+      "context": [
+        "[Deep Integration] Quantum entanglement is a state where information is non-locally correlated.",
+        "[Relationships] Quantum entanglement is a correlation that cannot be explained by classical information theory.",
+        "[Integration and Circulation] The unification of quantum mechanics and general relativity will be achieved based on information.",
+        "[Emergent Insights] Do quantum entanglement and non-locality of consciousness share a common principle?"
+      ],
+      "time": 2.3751609325408936,
+      "quality": {
+        "length": 0.76,
+        "depth": 0.0,
+        "specificity": 0.4,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.23200000000000004
+      }
+    }
+  },
+  {
+    "query": "Is there a principle that unifies all phenomena?",
+    "timestamp": "2025-07-11T00:45:25.359840",
+    "direct_llm": {
+      "response": "I have no idea.",
+      "time": 2.2430617809295654,
+      "quality": {
+        "length": 0.15,
+        "depth": 0.0,
+        "specificity": 0.0,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.03
+      }
+    },
+    "standard_rag": {
+      "response": "The principle is that the whole universe is finite, so that all phenomena in it are finite.",
+      "context": [
+        "Life and consciousness are inevitable consequences of the universe recognizing itself.",
+        "Can the hard problem of consciousness be solved from an information integration perspective?",
+        "The entropy of the entire universe is constantly increasing."
+      ],
+      "time": 2.462057113647461,
+      "quality": {
+        "length": 0.91,
+        "depth": 0.0,
+        "specificity": 0.0,
+        "integration": 0.0,
+        "insight": 0.2,
+        "overall": 0.22200000000000003
+      }
+    },
+    "insightspike": {
+      "response": "You have a theory that allows for the integration of all possible phenomena.",
+      "spike_detected": true,
+      "confidence": 1.0,
+      "context": [
+        "[Integration and Circulation] All physical laws reduce to laws of information conservation and transformation.",
+        "[Emergent Insights] Do quantum entanglement and non-locality of consciousness share a common principle?",
+        "[Deep Integration] Life is a dissipative structure that locally decreases entropy.",
+        "[Basic Concepts] Observation is the process of extracting information from a system.",
+        "[Relationships] Quantum entanglement is a correlation that cannot be explained by classical information theory."
+      ],
+      "time": 2.356292247772217,
+      "quality": {
+        "length": 0.76,
+        "depth": 0.0,
+        "specificity": 0.0,
+        "integration": 0.2,
+        "insight": 0.0,
+        "overall": 0.192
+      }
+    }
+  }
+]

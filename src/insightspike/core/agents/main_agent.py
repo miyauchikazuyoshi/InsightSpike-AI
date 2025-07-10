@@ -105,7 +105,7 @@ class MainAgent:
             self.config.embedding, "dimension"
         ):
             memory_dim = self.config.embedding.dimension
-        self.l2_memory = Memory(dim=memory_dim)
+        self.l2_memory = Memory(dim=memory_dim, config=self.config)
 
         self.l3_graph = (
             L3GraphReasoner(self.config) if GRAPH_REASONER_AVAILABLE else None

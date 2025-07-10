@@ -242,16 +242,17 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         self.conflict_scorer = ConflictScore(config)
         self.previous_graph = None
         
-        # Use advanced metrics if available
-        self.use_advanced_metrics = getattr(config, 'use_advanced_metrics', True) if config else True
-        if self.use_advanced_metrics and ADVANCED_METRICS_AVAILABLE:
-            self.delta_ged = advanced_delta_ged
-            self.delta_ig = advanced_delta_ig
-            logger.info("Using advanced GED/IG algorithms")
-        else:
-            self.delta_ged = simple_delta_ged
-            self.delta_ig = simple_delta_ig
-            logger.info("Using simple GED/IG algorithms")
+        # Initialize metrics selector with configuration
+        from ...utils.metrics_selector import MetricsSelector
+        self.metrics_selector = MetricsSelector(config)
+        
+        # Set methods from selector
+        self.delta_ged = self.metrics_selector.delta_ged
+        self.delta_ig = self.metrics_selector.delta_ig
+        
+        # Log algorithm selection
+        algo_info = self.metrics_selector.get_algorithm_info()
+        logger.info(f"Metrics algorithms - GED: {algo_info['ged_algorithm']}, IG: {algo_info['ig_algorithm']}")
 
         # Initialize simple GNN if needed
         self.gnn = None

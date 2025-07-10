@@ -1,0 +1,51 @@
+id,phase,content,importance
+1,Basic Concepts,Energy is the capacity to do work.,Basic
+2,Basic Concepts,Energy can change forms but cannot be created or destroyed.,Basic
+3,Basic Concepts,Entropy is a measure of energy degradation.,Basic
+4,Basic Concepts,Information and entropy have a deep mathematical relationship.,Basic
+5,Basic Concepts,Information is defined as the reduction of uncertainty.,Basic
+6,Basic Concepts,Describing a system's state requires information.,Basic
+7,Basic Concepts,Observation is the process of extracting information from a system.,Basic
+8,Basic Concepts,Observation always involves energy exchange.,Basic
+9,Basic Concepts,In quantum systems observation changes the system's state.,Basic
+10,Basic Concepts,Measurement precision has fundamental limits.,Basic
+11,Relationships,The second law of thermodynamics and Shannon's information theory share the same mathematical structure.,Intermediate
+12,Relationships,Maxwell's demon is a thought experiment showing the relationship between information and energy.,Intermediate
+13,Relationships,Erasing information requires minimum energy (Landauer's principle).,Intermediate
+14,Relationships,Black hole entropy represents its information capacity.,Intermediate
+15,Relationships,In the holographic principle information is encoded on boundary surfaces.,Intermediate
+16,Relationships,Quantum entanglement is a correlation that cannot be explained by classical information theory.,Intermediate
+17,Relationships,Quantum information has fundamentally different properties from classical information.,Intermediate
+18,Relationships,Decoherence is the process of quantum information leaking into the environment.,Intermediate
+19,Relationships,Life is a system that maintains order within the flow of entropy.,Intermediate
+20,Relationships,DNA is chemically encoded digital information.,Intermediate
+21,Deep Integration,Energy information and entropy form the fundamental trinity of the universe.,Advanced
+22,Deep Integration,The measurement problem can be reformulated in information-theoretic terms.,Advanced
+23,Deep Integration,Wave function collapse can be understood as an information update process.,Advanced
+24,Deep Integration,Quantum entanglement is a state where information is non-locally correlated.,Advanced
+25,Deep Integration,The black hole information paradox shows the contradiction between quantum mechanics and general relativity.,Advanced
+26,Deep Integration,Through Hawking radiation black hole information is gradually released.,Advanced
+27,Deep Integration,The entropy of the entire universe is constantly increasing.,Advanced
+28,Deep Integration,Heat death of the universe is the state of maximum entropy.,Advanced
+29,Deep Integration,Life is a dissipative structure that locally decreases entropy.,Advanced
+30,Deep Integration,Consciousness might be quantified by Integrated Information Theory (IIT).,Advanced
+31,Emergent Insights,If information is a physical entity how is its mass calculated?,Emergent
+32,Emergent Insights,Can the hard problem of consciousness be solved from an information integration perspective?,Emergent
+33,Emergent Insights,Do quantum entanglement and non-locality of consciousness share a common principle?,Emergent
+34,Emergent Insights,Can we view the entire universe as a quantum computer?,Emergent
+35,Emergent Insights,Can the origin of life be explained as self-organization of information?,Emergent
+36,Emergent Insights,Is evolution a process for the universe to recognize itself?,Emergent
+37,Emergent Insights,Does artificial consciousness emerge from sufficient information integration?,Emergent
+38,Emergent Insights,Can quantum gravity theory be built with information as the fundamental element?,Emergent
+39,Emergent Insights,Is the interior of a black hole the ultimate compression state of information?,Emergent
+40,Emergent Insights,Can the many-worlds interpretation be understood as branching of information?,Emergent
+41,Integration,Energy information and consciousness are different aspects of the same reality.,Integration
+42,Integration,The evolution of the universe can be understood as increasing information processing capacity.,Integration
+43,Integration,Life and consciousness are inevitable consequences of the universe recognizing itself.,Integration
+44,Integration,The unification of quantum mechanics and general relativity will be achieved based on information.,Integration
+45,Integration,All physical laws reduce to laws of information conservation and transformation.,Integration
+46,Integration,Consciousness is the most sophisticated form of information processing in the universe.,Integration
+47,Integration,Artificial intelligence represents a new stage of the universe's information processing capacity.,Integration
+48,Integration,Quantum computers directly utilize the computational principles of the universe.,Integration
+49,Integration,Blockchain ensures information reliability in a distributed manner.,Integration
+50,Integration,The Internet functions as a planetary nervous system.,Integration
