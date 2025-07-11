@@ -30,6 +30,18 @@ class LLMConfig:
     device: str = "cpu"
     use_gpu: bool = False
     safe_mode: bool = False  # Use mock provider to avoid model loading issues
+    
+    # Direct generation mode settings
+    use_direct_generation: bool = False  # Enable direct response generation
+    direct_generation_threshold: float = 0.7  # Reasoning quality threshold
+    fallback_to_llm: bool = True  # Fallback to LLM if direct generation fails
+    
+    # Layer 4 pipeline settings
+    use_layer4_pipeline: bool = False  # Use new Layer 4 pipeline architecture
+    enable_polish: bool = True  # Enable Layer 4.1 polish
+    polish_threshold: float = 0.6  # Confidence threshold for polishing
+    always_polish_below: float = 0.4  # Always polish below this confidence
+    force_direct_generation: bool = False  # Force direct mode in pipeline
 
 
 @dataclass

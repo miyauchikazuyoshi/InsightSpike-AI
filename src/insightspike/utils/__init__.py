@@ -1,7 +1,6 @@
 """Utility modules for InsightSpike-AI"""
 
 # Export commonly used utilities
-from .prompt_builder import *
 from .text_utils import clean_text, iter_text
 
 # Export new visualization utilities

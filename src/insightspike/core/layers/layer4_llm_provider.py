@@ -1,8 +1,13 @@
 """
-L4 LLM Interface - Enhanced Language Model Integration
-===================================================
+Layer 4.1 LLM Polish - Optional Text Enhancement Layer
+====================================================
 
-Provides flexible LLM integration with multiple providers and enhanced prompt building.
+Optional Layer 4.1 that polishes the structured responses from Layer 4 (PromptBuilder).
+When direct generation mode is enabled, this layer can be bypassed entirely.
+
+Architecture:
+- Layer 4 (L4PromptBuilder): Core semantic generation
+- Layer 4.1 (L4LLMProvider): Optional text polishing
 """
 
 import logging
@@ -10,7 +15,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional
 
 from ...config import get_config
-from ...utils.prompt_builder import PromptBuilder
+from .layer4_prompt_builder import L4PromptBuilder
 from ..interfaces import L4LLMInterface
 
 logger = logging.getLogger(__name__)
@@ -23,7 +28,7 @@ class L4LLMProvider(L4LLMInterface):
 
     def __init__(self, config=None):
         self.config = config or get_config()
-        self.prompt_builder = PromptBuilder(config)
+        self.prompt_builder = L4PromptBuilder(config)  # Using Layer 4 directly
         self._initialized = False
 
     def generate_response(
@@ -36,6 +41,38 @@ class L4LLMProvider(L4LLMInterface):
         try:
             # Build enhanced prompt
             prompt = self.prompt_builder.build_prompt(context, question)
+
+            # Check if we should use direct generation
+            reasoning_quality = context.get("reasoning_quality", 0.0)
+            use_direct_generation = (
+                hasattr(self.config.llm, "use_direct_generation") 
+                and self.config.llm.use_direct_generation
+                and reasoning_quality > getattr(self.config.llm, "direct_generation_threshold", 0.7)
+                and not streaming  # Direct generation doesn't support streaming yet
+            )
+
+            if use_direct_generation:
+                # Use PromptBuilder to generate a complete response
+                logger.info(f"Using direct generation (reasoning_quality={reasoning_quality:.3f})")
+                
+                # Generate direct response
+                direct_response = self.prompt_builder.build_direct_response(context, question)
+                
+                # Analyze the response for insights
+                insight_analysis = self.analyze_insight_potential(question, direct_response)
+                
+                return {
+                    "response": direct_response,
+                    "prompt": prompt,
+                    "streaming": False,
+                    "success": True,
+                    "confidence": reasoning_quality,
+                    "reasoning_quality": reasoning_quality,
+                    "insight_analysis": insight_analysis,
+                    "synthesis_detected": insight_analysis["synthesis_detected"],
+                    "cross_domain_score": insight_analysis["cross_domain_score"],
+                    "direct_generation": True,
+                }
 
             # Generate response
             if streaming:

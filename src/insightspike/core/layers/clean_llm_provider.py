@@ -20,6 +20,8 @@ import random
 from typing import Any, Dict, Optional, List
 import hashlib
 
+from .layer4_prompt_builder import L4PromptBuilder
+
 logger = logging.getLogger(__name__)
 
 class CleanLLMProvider:
@@ -37,6 +39,7 @@ class CleanLLMProvider:
     def __init__(self, config=None):
         self.config = config
         self._initialized = False
+        self.prompt_builder = L4PromptBuilder(config)  # Add Layer 4 prompt builder
         
         # Fair baseline performance parameters (no inflation)
         self.base_confidence = 0.65  # Realistic baseline

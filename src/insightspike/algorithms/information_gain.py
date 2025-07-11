@@ -44,6 +44,20 @@ except ImportError:
     silhouette_score = None
     mutual_info_classif = None
 
+# Import structural entropy measures
+try:
+    from .structural_entropy import (
+        degree_distribution_entropy,
+        von_neumann_entropy,
+        structural_entropy as calc_structural_entropy
+    )
+    STRUCTURAL_ENTROPY_AVAILABLE = True
+except ImportError:
+    STRUCTURAL_ENTROPY_AVAILABLE = False
+    degree_distribution_entropy = None
+    von_neumann_entropy = None
+    calc_structural_entropy = None
+
 logger = logging.getLogger(__name__)
 
 __all__ = [
@@ -62,6 +76,9 @@ class EntropyMethod(Enum):
     CLUSTERING = "clustering"     # Clustering-based entropy using silhouette score
     MUTUAL_INFO = "mutual_info"   # Mutual information-based
     FEATURE_ENTROPY = "feature_entropy"  # Feature distribution entropy
+    STRUCTURAL = "structural"     # Graph structural entropy
+    DEGREE_DISTRIBUTION = "degree_distribution"  # Degree distribution entropy
+    VON_NEUMANN = "von_neumann"   # Von Neumann spectral entropy
 
 
 @dataclass
@@ -219,6 +236,12 @@ class InformationGain:
             return self._mutual_info_entropy(data)
         elif self.method == EntropyMethod.FEATURE_ENTROPY:
             return self._feature_entropy(data)
+        elif self.method == EntropyMethod.STRUCTURAL:
+            return self._structural_entropy(data)
+        elif self.method == EntropyMethod.DEGREE_DISTRIBUTION:
+            return self._degree_distribution_entropy(data)
+        elif self.method == EntropyMethod.VON_NEUMANN:
+            return self._von_neumann_entropy(data)
         else:
             logger.warning(f"Unknown method {self.method}, using Shannon")
             return self._shannon_entropy(data)
@@ -427,6 +450,43 @@ class InformationGain:
             float: Information gain value
         """
         return self.calculate(data_before, data_after).ig_value
+    
+    def _structural_entropy(self, data: Any) -> float:
+        """Calculate combined structural entropy measures."""
+        if not STRUCTURAL_ENTROPY_AVAILABLE:
+            logger.warning("Structural entropy unavailable, using Shannon fallback")
+            return self._shannon_entropy(data)
+        
+        try:
+            measures = calc_structural_entropy(data)
+            return float(measures.get("combined", 0.0))
+        except Exception as e:
+            logger.error(f"Structural entropy calculation failed: {e}")
+            return self._shannon_entropy(data)
+    
+    def _degree_distribution_entropy(self, data: Any) -> float:
+        """Calculate degree distribution entropy."""
+        if not STRUCTURAL_ENTROPY_AVAILABLE:
+            logger.warning("Degree distribution entropy unavailable, using Shannon fallback")
+            return self._shannon_entropy(data)
+        
+        try:
+            return float(degree_distribution_entropy(data))
+        except Exception as e:
+            logger.error(f"Degree distribution entropy calculation failed: {e}")
+            return self._shannon_entropy(data)
+    
+    def _von_neumann_entropy(self, data: Any) -> float:
+        """Calculate Von Neumann entropy."""
+        if not STRUCTURAL_ENTROPY_AVAILABLE:
+            logger.warning("Von Neumann entropy unavailable, using Shannon fallback")
+            return self._shannon_entropy(data)
+        
+        try:
+            return float(von_neumann_entropy(data))
+        except Exception as e:
+            logger.error(f"Von Neumann entropy calculation failed: {e}")
+            return self._shannon_entropy(data)
 
 
 # Convenience functions for external API
