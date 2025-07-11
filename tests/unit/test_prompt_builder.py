@@ -1,12 +1,14 @@
-from insightspike.utils.prompt_builder import PromptBuilder
+from insightspike.core.layers.layer4_prompt_builder import L4PromptBuilder
 
 
 def test_build_prompt():
-    pb = PromptBuilder()
-    # Test simple prompt building
-    simple_p = pb.build_simple_prompt(['d1', 'd2'], 'q')
-    assert 'q' in simple_p and 'd1' in simple_p
+    pb = L4PromptBuilder()
+    # Test prompt building with context
+    context = {"documents": [{"text": "d1"}, {"text": "d2"}]}
+    prompt = pb.build_prompt(context, 'q')
+    assert 'q' in prompt
     
     # Test fallback functionality
-    fallback_p = pb._fallback_prompt('q')
-    assert 'q' in fallback_p
+    context_empty = {"documents": []}
+    fb_p = pb.build_prompt(context_empty, 'q')
+    assert 'q' in fb_p

@@ -16,7 +16,7 @@ from typing import Any, Dict, Iterator, List, Optional
 
 from ...config import get_config
 from .layer4_prompt_builder import L4PromptBuilder
-from ..interfaces import L4LLMInterface
+from ..interfaces import L4LLMInterface, LayerInput, LayerOutput
 
 logger = logging.getLogger(__name__)
 
@@ -31,10 +31,55 @@ class L4LLMProvider(L4LLMInterface):
         self.prompt_builder = L4PromptBuilder(config)  # Using Layer 4 directly
         self._initialized = False
 
-    def generate_response(
+    def generate_response(self, context: str, question: str) -> str:
+        """Generate response using the LLM."""
+        if not self._initialized:
+            self.initialize()
+
+        try:
+            # Parse context if it's a dict (for backward compatibility)
+            if isinstance(context, dict):
+                reasoning_quality = context.get("reasoning_quality", 0.0)
+                context_str = str(context)
+            else:
+                reasoning_quality = 0.5
+                context_str = context
+
+            # Build enhanced prompt
+            prompt = self.prompt_builder.build_prompt({"context": context_str, "reasoning_quality": reasoning_quality}, question)
+
+            # Check if we should use direct generation
+            use_direct_generation = (
+                hasattr(self.config, "llm") 
+                and hasattr(self.config.llm, "use_direct_generation") 
+                and self.config.llm.use_direct_generation
+                and reasoning_quality > getattr(self.config.llm, "direct_generation_threshold", 0.7)
+            )
+
+            if use_direct_generation:
+                # Use PromptBuilder to generate a complete response
+                logger.info(f"Using direct generation (reasoning_quality={reasoning_quality:.3f})")
+                
+                # Generate direct response
+                direct_response = self.prompt_builder.build_direct_response(context, question)
+                
+                # Analyze the response for insights
+                insight_analysis = self.analyze_insight_potential(question, direct_response)
+                
+                return direct_response
+
+            # Generate response
+            response = self._generate_sync(prompt)
+            return response
+
+        except Exception as e:
+            logger.error(f"LLM generation failed: {e}")
+            return f"Error generating response: {str(e)}"
+
+    def generate_response_detailed(
         self, context: Dict[str, Any], question: str, streaming: bool = False
     ) -> Dict[str, Any]:
-        """Generate response using the LLM."""
+        """Generate detailed response with metadata (for internal use)."""
         if not self._initialized:
             self.initialize()
 
@@ -45,7 +90,8 @@ class L4LLMProvider(L4LLMInterface):
             # Check if we should use direct generation
             reasoning_quality = context.get("reasoning_quality", 0.0)
             use_direct_generation = (
-                hasattr(self.config.llm, "use_direct_generation") 
+                hasattr(self.config, "llm") 
+                and hasattr(self.config.llm, "use_direct_generation") 
                 and self.config.llm.use_direct_generation
                 and reasoning_quality > getattr(self.config.llm, "direct_generation_threshold", 0.7)
                 and not streaming  # Direct generation doesn't support streaming yet
@@ -426,28 +472,45 @@ You are a helpful AI assistant. Answer the question based on the provided contex
 
         return "\n\n".join(context_parts)
 
-    def process(self, input_data) -> Dict[str, Any]:
+    def process(self, input_data: LayerInput) -> LayerOutput:
         """Process input through LLM layer."""
-        from ..interfaces import LayerInput, LayerOutput
+        if not isinstance(input_data, LayerInput):
+            # Convert dict to LayerInput for backward compatibility
+            if isinstance(input_data, dict):
+                input_data = LayerInput(
+                    data=input_data.get("question", str(input_data)),
+                    context=input_data.get("context", {}),
+                    metadata=input_data.get("metadata", {})
+                )
+            else:
+                input_data = LayerInput(data=str(input_data))
 
-        if isinstance(input_data, LayerInput):
-            context = input_data.context or {}
-            question = input_data.data
+        context = input_data.context or {}
+        question = input_data.data
+
+        # Convert context to string for generate_response
+        if isinstance(context, dict):
+            context_str = self.format_context(context.get("episodes", []))
         else:
-            # Handle direct dict input for backward compatibility
-            context = input_data.get("context", {})
-            question = input_data.get("question", str(input_data))
+            context_str = str(context)
 
-        result = self.generate_response(context, question)
+        # Generate response (returns string)
+        response = self.generate_response(context_str, question)
 
-        if isinstance(input_data, LayerInput):
+        # For detailed metadata, use the internal method
+        if hasattr(self, "generate_response_detailed"):
+            detailed_result = self.generate_response_detailed(input_data.context or {}, question)
             return LayerOutput(
-                result=result["response"],
-                confidence=0.8 if result["success"] else 0.0,
-                metadata=result,
+                result=response,
+                confidence=detailed_result.get("confidence", 0.8),
+                metadata=detailed_result
             )
         else:
-            return result
+            return LayerOutput(
+                result=response,
+                confidence=0.8,
+                metadata={"response": response, "success": True}
+            )
 
     def cleanup(self):
         """Cleanup resources."""
@@ -525,12 +588,8 @@ def generate(prompt: str) -> str:
     """Legacy generate function for backward compatibility."""
     try:
         provider = get_llm_provider()
-        result = provider.generate_response({}, prompt)
-
-        if result["success"]:
-            return result["response"]
-        else:
-            return "Error generating response."
+        result = provider.generate_response("", prompt)
+        return result
 
     except Exception as e:
         logger.error(f"Legacy generate failed: {e}")

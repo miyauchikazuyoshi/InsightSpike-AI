@@ -39,7 +39,7 @@ class ConflictScore:
 
     def __init__(self, config=None):
         self.config = config or get_config()
-        self.conflict_threshold = self.config.reasoning.conflict_threshold
+        self.conflict_threshold = getattr(self.config.reasoning, "conflict_threshold", 0.5) if hasattr(self.config, "reasoning") else 0.5
 
     def calculate_conflict(
         self, graph_old: Data, graph_new: Data, context: Dict[str, Any]
@@ -139,7 +139,7 @@ class GraphBuilder:
 
     def __init__(self, config=None):
         self.config = config or get_config()
-        self.similarity_threshold = self.config.reasoning.similarity_threshold
+        self.similarity_threshold = getattr(self.config.reasoning, "similarity_threshold", 0.3) if hasattr(self.config, "reasoning") else 0.3
 
     def build_graph(
         self, documents: List[Dict[str, Any]], embeddings: Optional[np.ndarray] = None
@@ -256,7 +256,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
 
         # Initialize simple GNN if needed
         self.gnn = None
-        if self.config.reasoning.use_gnn:
+        if hasattr(self.config, "reasoning") and getattr(self.config.reasoning, "use_gnn", False):
             self._init_gnn()
 
     def initialize(self) -> bool:
@@ -401,9 +401,9 @@ class L3GraphReasoner(L3GraphReasonerInterface):
     ) -> Dict[str, float]:
         """Calculate reward signal for memory updates."""
         # Get weights from config
-        w1 = self.config.reasoning.weight_ged
-        w2 = self.config.reasoning.weight_ig
-        w3 = self.config.reasoning.weight_conflict
+        w1 = getattr(self.config.reasoning, "weight_ged", 0.3) if hasattr(self.config, "reasoning") else 0.3
+        w2 = getattr(self.config.reasoning, "weight_ig", 0.5) if hasattr(self.config, "reasoning") else 0.5
+        w3 = getattr(self.config.reasoning, "weight_conflict", 0.2) if hasattr(self.config, "reasoning") else 0.2
 
         # Base reward calculation: R = w1*ΔGED + w2*ΔIG - w3*conflict
         base_reward = (
@@ -448,9 +448,9 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         self, metrics: Dict[str, float], conflicts: Dict[str, float]
     ) -> bool:
         """Detect if current state represents an insight spike."""
-        ged_threshold = self.config.reasoning.spike_ged_threshold
-        ig_threshold = self.config.reasoning.spike_ig_threshold
-        conflict_threshold = self.config.reasoning.conflict_threshold
+        ged_threshold = getattr(self.config.reasoning, "spike_ged_threshold", -0.5) if hasattr(self.config, "reasoning") else -0.5
+        ig_threshold = getattr(self.config.reasoning, "spike_ig_threshold", 0.2) if hasattr(self.config, "reasoning") else 0.2
+        conflict_threshold = getattr(self.config.reasoning, "conflict_threshold", 0.5) if hasattr(self.config, "reasoning") else 0.5
 
         high_ged = metrics.get("delta_ged", 0) > ged_threshold
         high_ig = metrics.get("delta_ig", 0) > ig_threshold
@@ -472,7 +472,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
     def _init_gnn(self):
         """Initialize a simple GNN for graph processing."""
         try:
-            hidden_dim = self.config.reasoning.gnn_hidden_dim
+            hidden_dim = getattr(self.config.reasoning, "gnn_hidden_dim", 128) if hasattr(self.config, "reasoning") else 128
             input_dim = self.config.embedding.dimension
 
             self.gnn = torch.nn.Sequential(
@@ -526,7 +526,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
     def save_graph(self, graph: Data, path: Optional[Path] = None) -> Path:
         """Save graph to disk."""
         if path is None:
-            path = Path(self.config.reasoning.graph_file)
+            path = Path(getattr(self.config.reasoning, "graph_file", "data/graph.pt") if hasattr(self.config, "reasoning") else "data/graph.pt")
 
         path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -549,7 +549,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
     def load_graph(self, path: Optional[Path] = None) -> Optional[Data]:
         """Load graph from disk."""
         if path is None:
-            path = Path(self.config.reasoning.graph_file)
+            path = Path(getattr(self.config.reasoning, "graph_file", "data/graph.pt") if hasattr(self.config, "reasoning") else "data/graph.pt")
 
         if not path.exists():
             logger.warning(f"Graph file not found: {path}")
@@ -585,7 +585,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
     def calculate_ged(self, graph1: Any, graph2: Any) -> float:
         """Calculate graph edit distance"""
         try:
-            return delta_ged(graph1, graph2)
+            return advanced_delta_ged(graph1, graph2)
         except Exception as e:
             logger.error(f"GED calculation failed: {e}")
             return 0.0
@@ -593,7 +593,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
     def calculate_ig(self, old_state: Any, new_state: Any) -> float:
         """Calculate information gain"""
         try:
-            return delta_ig(old_state, new_state)
+            return advanced_delta_ig(old_state, new_state)
         except Exception as e:
             logger.error(f"IG calculation failed: {e}")
             return 0.0

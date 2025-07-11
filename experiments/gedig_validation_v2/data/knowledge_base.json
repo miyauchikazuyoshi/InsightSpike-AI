@@ -1,0 +1,312 @@
+{
+  "Phase 1: Fundamental Concepts": [
+    {
+      "id": "P1_E1",
+      "text": "Energy is the capacity to do work or cause change. It exists in various forms including kinetic, potential, thermal, and electromagnetic energy. The fundamental principle is that energy cannot be created or destroyed, only transformed from one form to another.",
+      "keywords": [
+        "energy",
+        "work",
+        "transformation",
+        "conservation"
+      ]
+    },
+    {
+      "id": "P1_E2",
+      "text": "Information represents patterns of organization that reduce uncertainty. In its most basic form, information is the resolution of uncertainty through the communication of meaningful patterns or structures.",
+      "keywords": [
+        "information",
+        "patterns",
+        "uncertainty",
+        "communication"
+      ]
+    },
+    {
+      "id": "P1_E3",
+      "text": "Structure refers to the arrangement and organization of parts within a whole. It determines how components relate to each other and influences the properties and behaviors of the system.",
+      "keywords": [
+        "structure",
+        "organization",
+        "arrangement",
+        "system"
+      ]
+    },
+    {
+      "id": "P1_E4",
+      "text": "Order is a state of arrangement where components follow predictable patterns or rules. It contrasts with disorder or chaos, representing lower entropy and higher organization.",
+      "keywords": [
+        "order",
+        "patterns",
+        "entropy",
+        "organization"
+      ]
+    },
+    {
+      "id": "P1_E5",
+      "text": "Change is the process by which things become different over time. It can be gradual or sudden, predictable or random, and is fundamental to all dynamic systems.",
+      "keywords": [
+        "change",
+        "process",
+        "time",
+        "dynamics"
+      ]
+    },
+    {
+      "id": "P1_E6",
+      "text": "Complexity arises from the interaction of multiple simple components. It is characterized by emergent properties that cannot be predicted from individual parts alone.",
+      "keywords": [
+        "complexity",
+        "interaction",
+        "emergence",
+        "components"
+      ]
+    }
+  ],
+  "Phase 2: Mathematical Principles": [
+    {
+      "id": "P2_E1",
+      "text": "Entropy in mathematics measures the amount of disorder or randomness in a system. Shannon entropy quantifies information content as H = -Σ p(x) log p(x), where higher entropy indicates more uncertainty.",
+      "keywords": [
+        "entropy",
+        "Shannon",
+        "probability",
+        "uncertainty"
+      ]
+    },
+    {
+      "id": "P2_E2",
+      "text": "Graph theory studies relationships between objects using nodes and edges. Graph structures can represent networks, dependencies, and complex relationships in abstract mathematical form.",
+      "keywords": [
+        "graph",
+        "nodes",
+        "edges",
+        "networks"
+      ]
+    },
+    {
+      "id": "P2_E3",
+      "text": "Probability theory provides a mathematical framework for quantifying uncertainty. It allows us to reason about random events and make predictions based on likelihood.",
+      "keywords": [
+        "probability",
+        "uncertainty",
+        "random",
+        "likelihood"
+      ]
+    },
+    {
+      "id": "P2_E4",
+      "text": "Optimization seeks to find the best solution among all possible alternatives. It involves maximizing or minimizing objective functions subject to constraints.",
+      "keywords": [
+        "optimization",
+        "maximum",
+        "minimum",
+        "constraints"
+      ]
+    },
+    {
+      "id": "P2_E5",
+      "text": "Topology studies properties that remain unchanged under continuous deformations. It reveals fundamental structures that persist despite superficial changes.",
+      "keywords": [
+        "topology",
+        "invariant",
+        "deformation",
+        "structure"
+      ]
+    },
+    {
+      "id": "P2_E6",
+      "text": "Fractals exhibit self-similarity at different scales. They demonstrate how simple recursive rules can generate infinitely complex patterns with fractional dimensions.",
+      "keywords": [
+        "fractals",
+        "self-similarity",
+        "recursion",
+        "dimension"
+      ]
+    }
+  ],
+  "Phase 3: Physical Theories": [
+    {
+      "id": "P3_E1",
+      "text": "Thermodynamics governs energy transformations in physical systems. The second law states that entropy always increases in isolated systems, defining the arrow of time.",
+      "keywords": [
+        "thermodynamics",
+        "entropy",
+        "energy",
+        "time"
+      ]
+    },
+    {
+      "id": "P3_E2",
+      "text": "Quantum mechanics reveals that information and physical reality are fundamentally connected. Quantum states encode information that determines measurable properties.",
+      "keywords": [
+        "quantum",
+        "information",
+        "states",
+        "measurement"
+      ]
+    },
+    {
+      "id": "P3_E3",
+      "text": "Statistical mechanics bridges microscopic and macroscopic descriptions. It shows how collective behavior emerges from individual particle interactions through statistical laws.",
+      "keywords": [
+        "statistical",
+        "microscopic",
+        "macroscopic",
+        "emergence"
+      ]
+    },
+    {
+      "id": "P3_E4",
+      "text": "Phase transitions occur when systems undergo qualitative changes in their properties. Critical points mark boundaries between different organizational states of matter.",
+      "keywords": [
+        "phase",
+        "transition",
+        "critical",
+        "states"
+      ]
+    },
+    {
+      "id": "P3_E5",
+      "text": "Conservation laws constrain physical processes. Energy, momentum, and information follow conservation principles that shape all physical interactions.",
+      "keywords": [
+        "conservation",
+        "constraints",
+        "energy",
+        "momentum"
+      ]
+    },
+    {
+      "id": "P3_E6",
+      "text": "Field theory describes how forces and interactions propagate through space. Fields carry both energy and information, mediating influences between distant objects.",
+      "keywords": [
+        "field",
+        "forces",
+        "propagation",
+        "space"
+      ]
+    }
+  ],
+  "Phase 4: Biological Systems": [
+    {
+      "id": "P4_E1",
+      "text": "Evolution operates through variation, selection, and heredity. It creates complex organisms by accumulating information in genetic sequences over generations.",
+      "keywords": [
+        "evolution",
+        "selection",
+        "genetic",
+        "information"
+      ]
+    },
+    {
+      "id": "P4_E2",
+      "text": "Neural networks process information through interconnected neurons. They demonstrate how simple processing units can collectively perform complex computations and learning.",
+      "keywords": [
+        "neural",
+        "networks",
+        "processing",
+        "learning"
+      ]
+    },
+    {
+      "id": "P4_E3",
+      "text": "Ecosystems exhibit complex interdependencies between organisms. Energy flows and information transfer create stable patterns and cycles in biological communities.",
+      "keywords": [
+        "ecosystems",
+        "interdependence",
+        "energy",
+        "cycles"
+      ]
+    },
+    {
+      "id": "P4_E4",
+      "text": "Adaptation allows organisms to optimize their fit to environments. It represents a form of information accumulation about environmental constraints and opportunities.",
+      "keywords": [
+        "adaptation",
+        "optimization",
+        "environment",
+        "fitness"
+      ]
+    },
+    {
+      "id": "P4_E5",
+      "text": "Metabolism transforms energy and matter to maintain living systems. It creates local order by increasing entropy in the surroundings, following thermodynamic laws.",
+      "keywords": [
+        "metabolism",
+        "energy",
+        "order",
+        "thermodynamics"
+      ]
+    },
+    {
+      "id": "P4_E6",
+      "text": "Self-organization in biological systems creates patterns without external control. It demonstrates how local interactions can produce global order and functionality.",
+      "keywords": [
+        "self-organization",
+        "patterns",
+        "emergence",
+        "order"
+      ]
+    }
+  ],
+  "Phase 5: Information Theory": [
+    {
+      "id": "P5_E1",
+      "text": "Information theory quantifies the capacity to transmit and store data. Channel capacity sets fundamental limits on communication rates given noise and bandwidth constraints.",
+      "keywords": [
+        "information",
+        "capacity",
+        "communication",
+        "limits"
+      ]
+    },
+    {
+      "id": "P5_E2",
+      "text": "Compression exploits redundancy to reduce information size. It reveals the true information content by removing predictable patterns while preserving essential data.",
+      "keywords": [
+        "compression",
+        "redundancy",
+        "patterns",
+        "efficiency"
+      ]
+    },
+    {
+      "id": "P5_E3",
+      "text": "Error correction adds controlled redundancy to protect information. It enables reliable communication over noisy channels by detecting and correcting corrupted data.",
+      "keywords": [
+        "error",
+        "correction",
+        "redundancy",
+        "reliability"
+      ]
+    },
+    {
+      "id": "P5_E4",
+      "text": "Mutual information measures the shared content between variables. It quantifies how much knowing one variable reduces uncertainty about another.",
+      "keywords": [
+        "mutual",
+        "information",
+        "correlation",
+        "uncertainty"
+      ]
+    },
+    {
+      "id": "P5_E5",
+      "text": "Algorithmic complexity defines information by the shortest program that generates it. This connects information theory to computation and compressibility.",
+      "keywords": [
+        "algorithmic",
+        "complexity",
+        "computation",
+        "program"
+      ]
+    },
+    {
+      "id": "P5_E6",
+      "text": "Information geometry treats probability distributions as points in a manifold. It provides geometric tools for understanding information relationships and transformations.",
+      "keywords": [
+        "geometry",
+        "probability",
+        "manifold",
+        "transformations"
+      ]
+    }
+  ]
+}

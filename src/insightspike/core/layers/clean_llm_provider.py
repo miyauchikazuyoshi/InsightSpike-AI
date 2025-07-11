@@ -21,10 +21,11 @@ from typing import Any, Dict, Optional, List
 import hashlib
 
 from .layer4_prompt_builder import L4PromptBuilder
+from .layer4_llm_provider import L4LLMProvider
 
 logger = logging.getLogger(__name__)
 
-class CleanLLMProvider:
+class CleanLLMProvider(L4LLMProvider):
     """
     Clean LLM provider with no data leaks or hardcoded advantages
     
@@ -56,7 +57,14 @@ class CleanLLMProvider:
         logger.info("Clean LLM provider ready - fair evaluation mode")
         return True
     
-    def generate_response(self, context: Dict[str, Any], prompt: str) -> Dict[str, Any]:
+    def generate_response(self, context: str, question: str) -> str:
+        """Generate response using clean LLM (interface method)."""
+        # Convert context string to dict for internal use
+        context_dict = {"context": context} if isinstance(context, str) else context
+        result = self.generate_response_detailed(context_dict, question)
+        return result["response"]
+    
+    def generate_response_detailed(self, context: Dict[str, Any], prompt: str) -> Dict[str, Any]:
         """
         Generate response WITHOUT any hardcoded answers or data leaks
         
@@ -269,6 +277,29 @@ class CleanLLMProvider:
     def is_available(self) -> bool:
         """Check if provider is available"""
         return True
+    
+    def cleanup(self):
+        """Cleanup resources."""
+        # No resources to cleanup for clean provider
+        pass
+    
+    def format_context(self, episodes: List[Dict[str, Any]]) -> str:
+        """Format episodes into context string."""
+        if not episodes:
+            return ""
+        
+        context_parts = []
+        for i, episode in enumerate(episodes[:10]):
+            text = episode.get("text", str(episode))
+            c_value = episode.get("c", 0.5)
+            context_parts.append(f"Context {i+1} (relevance: {c_value:.2f}):\n{text}")
+        
+        return "\n\n".join(context_parts)
+    
+    def process(self, input_data) -> Any:
+        """Process input through LLM layer."""
+        # Delegate to parent class
+        return super().process(input_data)
 
 class FairComparisonBaseline:
     """
