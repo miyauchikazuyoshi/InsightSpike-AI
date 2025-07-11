@@ -10,10 +10,10 @@ Mathematical Foundation:
     
     Where H(S) = -Σ p(x) log₂ p(x) is Shannon entropy
     
-    ΔIG = IG_after - IG_before
+    ΔIG = H(before) - H(after) = entropy_before - entropy_after
 
 Key Insight Detection:
-    - Positive ΔIG values indicate information gain (learning progress)
+    - Positive ΔIG values indicate information gain (entropy reduction)
     - ΔIG ≥ 0.2 threshold typically indicates EurekaSpike
     - Combined with ΔGED ≤ -0.5 for full geDIG detection
 
@@ -149,8 +149,9 @@ class InformationGain:
             entropy_before = self._calculate_entropy(data_before)
             entropy_after = self._calculate_entropy(data_after)
             
-            # Information gain is the difference
-            ig_value = entropy_after - entropy_before
+            # Information gain is the reduction in entropy
+            # Positive IG means entropy decreased (gained information)
+            ig_value = entropy_before - entropy_after
             
             computation_time = time.time() - start_time
             self.total_computation_time += computation_time
@@ -199,7 +200,7 @@ class InformationGain:
             state_after: Final state representation
             
         Returns:
-            float: ΔIG value (positive indicates learning progress)
+            float: ΔIG value (positive indicates information gain/entropy reduction)
         """
         result = self.calculate(state_before, state_after)
         logger.debug(f"ΔIG calculated: {result.ig_value:.3f}")
@@ -474,7 +475,7 @@ def compute_delta_ig(state_before: Any, state_after: Any,
         **kwargs: Additional parameters for InformationGain constructor
         
     Returns:
-        float: ΔIG value (positive indicates learning progress)
+        float: ΔIG value (positive indicates information gain/entropy reduction)
     """
     calculator = InformationGain(method=method, **kwargs)
     return calculator.compute_delta_ig(state_before, state_after)
