@@ -61,25 +61,11 @@ jobs:
         mkdir -p data/raw logs
         echo "Test data for integration tests" > data/raw/test_sentences.txt
     
-    - name: Run unit tests with coverage
+    - name: Run all tests with coverage
       run: |
-        echo "🧪 Running unit tests..."
-        poetry run pytest tests/unit/ -v --tb=short -k "not test_add_nodes" --cov=src --cov-report=xml:coverage-unit.xml --cov-report=term-missing --cov-fail-under=0
-        echo "✅ Unit tests completed"
-    
-    - name: Run integration tests with coverage
-      run: |
-        echo "🧪 Running integration tests..."
-        poetry run pytest tests/integration/ -v --tb=short --maxfail=3 --cov=src --cov-report=xml:coverage-integration.xml --cov-report=term-missing --cov-append --cov-fail-under=0
-        echo "✅ Integration tests completed"
-    
-    - name: Check coverage threshold
-      run: |
-        echo "📊 Checking combined coverage..."
-        poetry run coverage combine
-        poetry run coverage report --fail-under=45
-        poetry run coverage xml -o coverage.xml
-        echo "✅ Coverage check completed"
+        echo "🧪 Running all tests with coverage..."
+        poetry run pytest tests/unit/ tests/integration/ -v --tb=short -k "not test_add_nodes" --maxfail=3 --cov=src --cov-report=xml --cov-report=term-missing --cov-fail-under=45
+        echo "✅ All tests completed with coverage"
     
     - name: Upload coverage reports
       uses: codecov/codecov-action@v3
