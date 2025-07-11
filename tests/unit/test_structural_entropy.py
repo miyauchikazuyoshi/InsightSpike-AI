@@ -221,7 +221,7 @@ def test_pytorch_geometric_compatibility():
         edge_index = torch.tensor([[0, 1, 1, 2],
                                   [1, 0, 2, 1]], dtype=getattr(torch, 'long', int))
         x = torch.randn(3, 16)
-        data = Data(x=x, edge_index=edge_index, num_nodes=3)
+        data = Data(x=x, edge_index=edge_index)
         
         # Test all functions
         assert degree_distribution_entropy(data) >= 0

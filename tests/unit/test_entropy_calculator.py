@@ -220,7 +220,7 @@ def test_pytorch_geometric_compatibility():
         edge_index = torch.tensor([[0, 1, 1, 2, 2, 3],
                                   [1, 0, 2, 1, 3, 2]], dtype=getattr(torch, 'long', int))
         x = torch.randn(4, 16)
-        data = Data(x=x, edge_index=edge_index, num_nodes=4)
+        data = Data(x=x, edge_index=edge_index)
         
         calc = EntropyCalculator()
         result = calc.calculate_entropy(data)
