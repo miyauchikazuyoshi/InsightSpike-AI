@@ -110,12 +110,21 @@ class ContentStructureSeparation:
         content = ContentStructureSeparation.extract_content(data)
         if content is not None and len(content) > 1:
             try:
-                from sklearn.metrics.pairwise import cosine_similarity
                 import networkx as nx
-                
-                # Build similarity graph
-                sim_matrix = cosine_similarity(content)
-                threshold = np.percentile(sim_matrix.flatten(), 75)  # Top 25% similarities
+                try:
+                    from sklearn.metrics.pairwise import cosine_similarity
+                    # Build similarity graph
+                    sim_matrix = cosine_similarity(content)
+                    threshold = np.percentile(sim_matrix.flatten(), 75)  # Top 25% similarities
+                except ImportError:
+                    # Fallback to manual cosine similarity if sklearn not available
+                    logger.warning("sklearn not available, using manual cosine similarity")
+                    # Normalize vectors
+                    norms = np.linalg.norm(content, axis=1, keepdims=True)
+                    normalized = content / (norms + 1e-8)
+                    # Compute cosine similarity
+                    sim_matrix = np.dot(normalized, normalized.T)
+                    threshold = np.percentile(sim_matrix.flatten(), 75)
                 
                 G = nx.Graph()
                 n_nodes = len(content)
