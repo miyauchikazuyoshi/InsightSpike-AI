@@ -64,19 +64,21 @@ jobs:
     - name: Run unit tests with coverage
       run: |
         echo "🧪 Running unit tests..."
-        poetry run pytest tests/unit/ -v --tb=short -k "not test_add_nodes" --cov=src --cov-report=xml:coverage-unit.xml --cov-report=term
+        poetry run pytest tests/unit/ -v --tb=short -k "not test_add_nodes" --cov=src --cov-report=xml:coverage-unit.xml --cov-report=term-missing --cov-fail-under=0
         echo "✅ Unit tests completed"
     
     - name: Run integration tests with coverage
       run: |
         echo "🧪 Running integration tests..."
-        poetry run pytest tests/integration/ -v --tb=short --maxfail=3 --cov=src --cov-report=xml:coverage-integration.xml --cov-report=term --cov-append
+        poetry run pytest tests/integration/ -v --tb=short --maxfail=3 --cov=src --cov-report=xml:coverage-integration.xml --cov-report=term-missing --cov-append --cov-fail-under=0
         echo "✅ Integration tests completed"
     
     - name: Check coverage threshold
       run: |
         echo "📊 Checking combined coverage..."
+        poetry run coverage combine
         poetry run coverage report --fail-under=45
+        poetry run coverage xml -o coverage.xml
         echo "✅ Coverage check completed"
     
     - name: Upload coverage reports
