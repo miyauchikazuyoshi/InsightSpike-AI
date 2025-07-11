@@ -191,12 +191,12 @@ def with_error_handling(
         @wraps(func)
         def wrapper(*args, **kwargs):
             logger = get_logger(func.__module__)
-            
+
             try:
                 return func(*args, **kwargs)
             except Exception as e:
                 if log_errors:
-                    error_info = handle_error(
+                    handle_error(
                         e,
                         context={
                             "function": func.__name__,
@@ -205,13 +205,13 @@ def with_error_handling(
                         },
                         logger=logger
                     )
-                    
+
                 # InsightSpikeErrorでなければ、指定されたエラークラスで再発生
                 if not isinstance(e, InsightSpikeError):
                     raise error_class(f"Error in {func.__name__}: {e}") from e
                 else:
                     raise
-                    
+
         return wrapper
     return decorator
 
@@ -219,26 +219,26 @@ def with_error_handling(
 def validate_config(config: Dict[str, Any], required_fields: Dict[str, type]) -> None:
     """
     設定の検証を行う
-    
+
     Args:
         config: 検証する設定辞書
         required_fields: 必須フィールドとその型
-        
+
     Raises:
         ConfigurationError: 設定が不正な場合
     """
     logger = get_logger("config_validator")
-    
+
     for field, expected_type in required_fields.items():
         if field not in config:
             raise ConfigurationError(f"Required field '{field}' is missing")
-            
+
         if not isinstance(config[field], expected_type):
             raise ConfigurationError(
                 f"Field '{field}' must be of type {expected_type.__name__}, "
                 f"got {type(config[field]).__name__}"
             )
-            
+
     logger.debug(f"Config validation passed for fields: {list(required_fields.keys())}")
 
 
@@ -248,15 +248,15 @@ def setup_debug_mode():
     if os.environ.get("INSIGHTSPIKE_DEBUG", "").lower() == "true":
         logger = get_logger("debug")
         logger.info("Debug mode enabled")
-        
+
         # すべてのログレベルをDEBUGに
         logging.getLogger("insightspike").setLevel(logging.DEBUG)
-        
+
         # より詳細なフォーマッター
         for handler in logging.getLogger("insightspike").handlers:
             if isinstance(handler, logging.StreamHandler):
                 handler.setLevel(logging.DEBUG)
-                
-                
+
+
 # モジュール初期化時にデバッグモードをチェック
 setup_debug_mode()

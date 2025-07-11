@@ -1,14 +1,14 @@
 """Tests for config module coverage"""
 import pytest
-from insightspike.config import Config, get_config
+from insightspike.config import SimpleConfig, get_config
 
 
 def test_config_keys():
     """Test Config class and get_config function."""
-    # Test get_config returns a Config instance
+    # Test get_config returns a SimpleConfig instance
     config = get_config()
     assert config is not None
-    assert isinstance(config, Config)
+    assert isinstance(config, SimpleConfig)
     
     # Test config has expected attributes
     assert hasattr(config, 'reasoning')
