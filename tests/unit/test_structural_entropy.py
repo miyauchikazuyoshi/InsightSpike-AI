@@ -219,7 +219,7 @@ def test_pytorch_geometric_compatibility():
         
         # Create a simple PyG graph
         edge_index = torch.tensor([[0, 1, 1, 2],
-                                  [1, 0, 2, 1]], dtype=torch.long)
+                                  [1, 0, 2, 1]], dtype=getattr(torch, 'long', int))
         x = torch.randn(3, 16)
         data = Data(x=x, edge_index=edge_index, num_nodes=3)
         
