@@ -506,12 +506,17 @@ class TestL3GraphReasoner:
     def test_advanced_metrics_usage(self, mock_config):
         """Test usage of advanced metrics when available."""
         mock_config.use_advanced_metrics = True
+        mock_config.ged_algorithm = 'advanced'
+        mock_config.ig_algorithm = 'advanced'
         
         with patch('insightspike.core.layers.layer3_graph_reasoner.ADVANCED_METRICS_AVAILABLE', True):
             with patch('insightspike.core.layers.layer3_graph_reasoner.get_config', return_value=mock_config):
                 reasoner = L3GraphReasoner(config=mock_config)
                 
-                # Should use advanced metrics
-                from insightspike.utils.advanced_graph_metrics import delta_ged, delta_ig
-                assert reasoner.delta_ged == delta_ged
-                assert reasoner.delta_ig == delta_ig
+                # Check that metrics selector was initialized with the config
+                assert hasattr(reasoner, 'metrics_selector')
+                
+                # Verify algorithm info shows advanced metrics
+                algo_info = reasoner.metrics_selector.get_algorithm_info()
+                assert algo_info['ged_algorithm'] == 'advanced'
+                assert algo_info['ig_algorithm'] == 'advanced'

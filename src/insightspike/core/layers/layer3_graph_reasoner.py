@@ -389,7 +389,12 @@ class L3GraphReasoner(L3GraphReasonerInterface):
 
         except Exception as e:
             logger.error(f"Metrics calculation failed: {e}")
-            return {"delta_ged": 0.0, "delta_ig": 0.0}
+            return {
+                "delta_ged": 0.0, 
+                "delta_ig": 0.0,
+                "graph_size_current": current_graph.num_nodes if current_graph else 0,
+                "graph_size_previous": previous_graph.num_nodes if previous_graph else 0
+            }
 
     def _calculate_reward(
         self, metrics: Dict[str, float], conflicts: Dict[str, float]
