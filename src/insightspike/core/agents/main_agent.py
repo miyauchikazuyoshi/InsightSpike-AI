@@ -335,13 +335,27 @@ class MainAgent:
             # Convert search_episodes results to documents format
             documents = []
             for result in results:
-                documents.append({
-                    "text": result["text"],
-                    "similarity": result["similarity"],
-                    "index": result["index"],
-                    "c_value": result["c_value"],
-                    "timestamp": result.get("timestamp", time.time())
-                })
+                # Get the actual episode to include embedding
+                episode_idx = result["index"]
+                if 0 <= episode_idx < len(self.l2_memory.episodes):
+                    episode = self.l2_memory.episodes[episode_idx]
+                    documents.append({
+                        "text": result["text"],
+                        "similarity": result["similarity"],
+                        "index": result["index"],
+                        "c_value": result["c_value"],
+                        "timestamp": result.get("timestamp", time.time()),
+                        "embedding": episode.vec  # Include the embedding vector
+                    })
+                else:
+                    # Fallback without embedding
+                    documents.append({
+                        "text": result["text"],
+                        "similarity": result["similarity"],
+                        "index": result["index"],
+                        "c_value": result["c_value"],
+                        "timestamp": result.get("timestamp", time.time())
+                    })
 
             stats = self.l2_memory.get_memory_stats()
 
