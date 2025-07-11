@@ -16,6 +16,14 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from dataclasses import dataclass
 import numpy as np
 
+# Try to import optional dependencies
+try:
+    from sklearn.metrics.pairwise import cosine_similarity
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
+    logging.getLogger(__name__).warning("sklearn not available, will use numpy fallback for cosine similarity")
+
 from .information_gain import InformationGain, EntropyMethod
 from .structural_entropy import (
     degree_distribution_entropy,
@@ -111,20 +119,16 @@ class ContentStructureSeparation:
         if content is not None and len(content) > 1:
             try:
                 import networkx as nx
-                try:
-                    from sklearn.metrics.pairwise import cosine_similarity
-                    # Build similarity graph
+                if SKLEARN_AVAILABLE:
+                    # Build similarity graph using sklearn
                     sim_matrix = cosine_similarity(content)
-                    threshold = np.percentile(sim_matrix.flatten(), 75)  # Top 25% similarities
-                except ImportError:
-                    # Fallback to manual cosine similarity if sklearn not available
-                    logger.warning("sklearn not available, using manual cosine similarity")
-                    # Normalize vectors
+                else:
+                    # Fallback to manual cosine similarity
                     norms = np.linalg.norm(content, axis=1, keepdims=True)
                     normalized = content / (norms + 1e-8)
-                    # Compute cosine similarity
                     sim_matrix = np.dot(normalized, normalized.T)
-                    threshold = np.percentile(sim_matrix.flatten(), 75)
+                
+                threshold = np.percentile(sim_matrix.flatten(), 75)  # Top 25% similarities
                 
                 G = nx.Graph()
                 n_nodes = len(content)
