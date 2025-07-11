@@ -5,10 +5,13 @@ from insightspike.config import SimpleConfig, get_config
 
 def test_config_keys():
     """Test Config class and get_config function."""
-    # Test get_config returns a SimpleConfig instance
+    # Test get_config returns a config (legacy by default)
     config = get_config()
     assert config is not None
-    assert isinstance(config, SimpleConfig)
+    
+    # Test simple config
+    simple_config = get_config(legacy=False)
+    assert isinstance(simple_config, SimpleConfig)
     
     # Test config has expected attributes
     assert hasattr(config, 'reasoning')

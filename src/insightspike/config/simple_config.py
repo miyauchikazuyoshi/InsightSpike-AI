@@ -286,7 +286,8 @@ class ConfigManager:
         
         legacy.embedding = EmbeddingConfig(
             model_name=self.config.embedding_model,
-            device=self.config.mode
+            device=self.config.mode,
+            dimension=384  # Default dimension for MiniLM
         )
         
         legacy.spike = SpikeConfig(
@@ -294,10 +295,20 @@ class ConfigManager:
             spike_ig=self.config.spike_ig_threshold
         )
         
-        # Add memory config
+        # Add memory config with all required fields
         legacy.memory = MemoryConfig(
             max_retrieved_docs=self.config.top_k_results,
-            min_similarity=self.config.similarity_threshold
+            min_similarity=self.config.similarity_threshold,
+            nlist=256,  # Default values from MemoryConfig
+            pq_segments=16,
+            c_value_gamma=0.5,
+            c_value_min=0.0,
+            c_value_max=1.0,
+            merge_ged=0.4,
+            split_ig=-0.15,
+            prune_c=0.05,
+            inactive_n=30,
+            index_file="data/index.faiss"
         )
         
         # Add retrieval config
