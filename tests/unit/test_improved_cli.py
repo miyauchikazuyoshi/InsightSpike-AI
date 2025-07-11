@@ -3,20 +3,20 @@
 Test suite for improved CLI
 """
 
+import sys
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
-
-from typer.testing import CliRunner
 import pytest
 
+from typer.testing import CliRunner
+
 # Mock the dependencies to avoid import issues during testing
-with patch.dict('sys.modules', {
-    'insightspike.core.agents.main_agent': Mock(),
-    'insightspike.core.layers': Mock()
-}):
-    from insightspike.cli.improved_cli import app, state, get_or_create_agent
-    from insightspike.config import ConfigPresets, SimpleConfig
+sys.modules['insightspike.core.agents.main_agent'] = Mock()
+sys.modules['insightspike.core.layers'] = Mock()
+
+from insightspike.cli.improved_cli import app, state, get_or_create_agent
+from insightspike.config import ConfigPresets, SimpleConfig
 
 
 runner = CliRunner()
@@ -214,7 +214,7 @@ def test_error_handling():
     print("\n=== Test Error Handling ===")
     
     # Test invalid file path
-    result = runner.invoke(app, ["learn", "/nonexistent/path"])
+    result = runner.invoke(app, ["embed", "/nonexistent/path"])
     assert result.exit_code == 1
     assert "Path not found" in result.stdout
     print("✓ Invalid path error handled")
