@@ -1,0 +1,9 @@
+Question_ID,Question_Text,Question_Category,Insight_Number,Insight_Text,Spike_Detected,Delta_GED,Delta_IG,Confidence,Phases_Integrated,Documents_Retrieved
+Q1,What is entropy?,N/A,1,1. Life doesn't violate the second law but rather accelerates entropy production globally while maintaining local organization,False,-0.150,0.180,0.55,N/A,3
+Q1,What is entropy?,N/A,2,"• Living systems create local order by processing information and exporting entropy, demonstrating how information processing requires energy",False,-0.150,0.180,0.55,N/A,3
+Q2,How does life maintain order despite the second law of thermodynamics?,N/A,1,"1. Multiple knowledge fragments have been unified into a simpler, more elegant framework that explains more with less",True,-0.520,0.450,0.85,N/A,3
+Q2,How does life maintain order despite the second law of thermodynamics?,N/A,2,2. The integration reveals emergent properties that were not apparent when considering each concept in isolation,True,-0.520,0.450,0.85,N/A,3
+Q3,What connects information processing and energy consumption?,N/A,1,1. Previously separate concepts of entropy and information are fundamentally connected through shared principles,False,-0.380,0.320,0.72,N/A,3
+Q3,What connects information processing and energy consumption?,N/A,2,"2. Multiple knowledge fragments have been unified into a simpler, more elegant framework that explains more with less",False,-0.380,0.320,0.72,N/A,3
+Q3,What connects information processing and energy consumption?,N/A,3,3. The integration reveals emergent properties that were not apparent when considering each concept in isolation,False,-0.380,0.320,0.72,N/A,3
+Q3,What connects information processing and energy consumption?,N/A,4,"• Thermodynamic entropy and information entropy are mathematically equivalent, revealing deep unity between physics and information theory",False,-0.380,0.320,0.72,N/A,3

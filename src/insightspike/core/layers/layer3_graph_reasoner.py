@@ -376,9 +376,8 @@ class L3GraphReasoner(L3GraphReasonerInterface):
             # Calculate graph edit distance change using configured method
             ged = self.delta_ged(previous_graph, current_graph)
 
-            # Calculate information gain change with context
-            query = context.get("query", None) if context else None
-            ig = self.delta_ig(previous_graph, current_graph, query)
+            # Calculate information gain change
+            ig = self.delta_ig(previous_graph, current_graph)
 
             return {
                 "delta_ged": float(ged),

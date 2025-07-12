@@ -61,6 +61,11 @@ psutil = "^5.9.0"
 notebook = { version = "^7.4.4", optional = true }
 faiss-cpu = "^1.11.0"
 
+# LLM providers - lightweight local models
+accelerate = { version = "^0.25.0", optional = true }
+bitsandbytes = { version = "^0.41.0", optional = true }
+einops = { version = "^0.7.0", optional = true }
+
 
 
 [tool.poetry.group.dev]
@@ -91,7 +96,8 @@ flake8 = "^6.0.0"
 [tool.poetry.extras]
 cpu = ["faiss-cpu", "torch-geometric"]
 gpu = ["torch-geometric"]
-full = ["faiss-cpu", "torch-geometric", "jupyter", "pandas", "seaborn"]
+llm = ["accelerate", "bitsandbytes", "einops"]
+full = ["faiss-cpu", "torch-geometric", "jupyter", "pandas", "seaborn", "accelerate", "bitsandbytes", "einops"]
 
 [tool.poetry.scripts]
 insightspike = "insightspike.cli.main:main"

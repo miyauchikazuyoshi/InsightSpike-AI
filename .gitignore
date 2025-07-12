@@ -7,6 +7,8 @@ __pycache__/
 .vscode/
 .pytest_cache/
 .ruff_cache/
+.mypy_cache/
+.claude/
 .coverage
 *.egg-info/
 

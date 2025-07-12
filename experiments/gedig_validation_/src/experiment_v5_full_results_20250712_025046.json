@@ -1,0 +1,603 @@
+{
+  "experiment": "geDIG Validation v5 (Full)",
+  "timestamp": "2025-07-12T02:49:42.668475",
+  "knowledge_base_size": 15,
+  "question_count": 9,
+  "configurations": {
+    "direct_llm": [
+      {
+        "question_id": "Q1",
+        "question_text": "What is entropy in thermodynamics?",
+        "question_type": "factual",
+        "question_category": "A",
+        "response": "The entropy in thermodynamics is the entropy in thermodynamics. The entropy in thermodynamics is the entropy in thermodynamics. The entropy in thermodynamics is the entropy in thermodynamics. The entropy in thermodynamics is the entropy in thermodynamics. The entropy in thermodynamics is the entropy in thermodynamics.\nQuestion 1: If the entropy in thermodynamics is a set of factors, then why is it",
+        "processing_time": 3.193066120147705,
+        "config": "direct_llm",
+        "confidence": 0.3,
+        "documents_retrieved": 0,
+        "response_length": 61
+      },
+      {
+        "question_id": "Q2",
+        "question_text": "Explain the concept of information in Shannon's theory",
+        "question_type": "factual",
+        "question_category": "A",
+        "response": "The concept of information in Shannon's theory\nAnswer: The concept of information in Shannon's theory\nAnswer: The concept of information in Shannon's theory\nAnswer: The concept of information in Shannon's theory\nAnswer: The concept of information in Shannon's theory\nAnswer: The concept of information in Shannon's theory\nAnswer: The concept of information in Shannon's theory\nAnswer: The concept of",
+        "processing_time": 1.5757107734680176,
+        "config": "direct_llm",
+        "confidence": 0.3,
+        "documents_retrieved": 0,
+        "response_length": 59
+      },
+      {
+        "question_id": "Q3",
+        "question_text": "What are the principles of graph theory?",
+        "question_type": "factual",
+        "question_category": "A",
+        "response": "What are the principles of graph theory?\nAnswer: How do you approach the problem?\nAnswer: What is the answer to the problem?\nAnswer: What are the principles of graph theory?\nAnswer: How do you approach the problem?\nAnswer: What is the answer to the problem?\nAnswer: What are the principles of graph theory?\nAnswer: How do you approach the",
+        "processing_time": 1.5608441829681396,
+        "config": "direct_llm",
+        "confidence": 0.3,
+        "documents_retrieved": 0,
+        "response_length": 59
+      },
+      {
+        "question_id": "Q4",
+        "question_text": "How does information relate to energy?",
+        "question_type": "cross_domain",
+        "question_category": "B",
+        "response": "I'm a scientist, but I'm not. I'm a scientist.\nQ: What does the \"Energy\" mean to the human brain?\nAnswer: I'm a scientist. I'm a scientist. I'm a scientist. I'm a scientist. I'm a scientist. I'm a scientist. I'm a scientist. I'm a scientist. I'm a scientist. I'm",
+        "processing_time": 1.566303014755249,
+        "config": "direct_llm",
+        "confidence": 0.3,
+        "documents_retrieved": 0,
+        "response_length": 48
+      },
+      {
+        "question_id": "Q5",
+        "question_text": "What connects biological evolution and information theory?",
+        "question_type": "cross_domain",
+        "question_category": "B",
+        "response": "The answer to this question is that evolution is the most important part of life, the most important part of life, and that the most important part of life is the most important part of life. There are many theories about this, and the most important ones are:\n1) Evolution is the most important part of life; 2) Evolution is the most important part of life; 3) Evolution is",
+        "processing_time": 1.5796959400177002,
+        "config": "direct_llm",
+        "confidence": 0.3,
+        "documents_retrieved": 0,
+        "response_length": 69
+      },
+      {
+        "question_id": "Q6",
+        "question_text": "How do graph structures emerge in natural systems?",
+        "question_type": "cross_domain",
+        "question_category": "B",
+        "response": "Well, we have a set of structures. But we have different methods to describe these structures. One way to describe them is by showing how they emerge in natural systems:\nThe first way is to use a diagram for how the structure of a graph can be identified. This diagram shows that we can define these structures from a graph structure in a natural system:\nAn example graph is the graph of",
+        "processing_time": 1.5792312622070312,
+        "config": "direct_llm",
+        "confidence": 0.3,
+        "documents_retrieved": 0,
+        "response_length": 72
+      },
+      {
+        "question_id": "Q7",
+        "question_text": "What is the relationship between order and information?",
+        "question_type": "abstract",
+        "question_category": "C",
+        "response": "Well, the first thing I want to do, I think it's important to keep in mind that the most important thing you can do is to get a sense of how important it is to know where to start. You can read more about the relationship between order and information here. I think the more you know, the more you know the more you will understand.\nAnswer: I would suggest that",
+        "processing_time": 1.5954720973968506,
+        "config": "direct_llm",
+        "confidence": 0.3,
+        "documents_retrieved": 0,
+        "response_length": 71
+      },
+      {
+        "question_id": "Q8",
+        "question_text": "How does complexity arise from simple rules?",
+        "question_type": "abstract",
+        "question_category": "C",
+        "response": "Simple rules and concepts are the best ways to answer problems in a given situation. The simpler rules are the most powerful way to solve problems. The simpler rules are the most powerful way to solve problems in a given situation. The simpler rules are the most powerful way to solve problems in a given situation. The simpler rules are the most powerful way to solve problems in a given situation.\nAnswer: Simple",
+        "processing_time": 1.9050209522247314,
+        "config": "direct_llm",
+        "confidence": 0.3,
+        "documents_retrieved": 0,
+        "response_length": 73
+      },
+      {
+        "question_id": "Q9",
+        "question_text": "What unifies discrete and continuous phenomena?",
+        "question_type": "abstract",
+        "question_category": "C",
+        "response": "An empirical question. The question is: What is the causal relationship between phenomena?\nAnswer: An empirical question. The question is: What is the causal relationship between phenomena?\nAnswer: An empirical question. The question is: What is the causal relationship between phenomena?\nAnswer: An empirical question. The question is: What is the causal relationship between phenomena?\nAnswer: An empirical question.",
+        "processing_time": 1.90594482421875,
+        "config": "direct_llm",
+        "confidence": 0.3,
+        "documents_retrieved": 0,
+        "response_length": 59
+      }
+    ],
+    "standard_rag": [
+      {
+        "question_id": "Q1",
+        "question_text": "What is entropy in thermodynamics?",
+        "question_type": "factual",
+        "question_category": "A",
+        "response": "- Metabolism is the term of the principle of entropy.\n- It is the term of entropy.\n- The term of entropy is the term of entropy.\n- It is the term of entropy.\n- It is the term of entropy.\n- It is the term of entropy.\n- It is the term of entropy.\n- It is the term of entropy.",
+        "processing_time": 1.9993557929992676,
+        "config": "standard_rag",
+        "confidence": 0.6,
+        "documents_retrieved": 5,
+        "response_length": 62,
+        "phases_used": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "question_id": "Q2",
+        "question_text": "Explain the concept of information in Shannon's theory",
+        "question_type": "factual",
+        "question_category": "A",
+        "response": "- What is the nature of information?\n- Theoretical information can be a useful tool.\n- Theoretical information can be a useful tool.\n- Theoretical information can be a useful tool.\n- Theoretical information can be a useful tool.\n- Theoretical information can be a useful tool.\n- Theoretical information can be a useful tool",
+        "processing_time": 1.9246430397033691,
+        "config": "standard_rag",
+        "confidence": 0.6,
+        "documents_retrieved": 5,
+        "response_length": 55,
+        "phases_used": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "question_id": "Q3",
+        "question_text": "What are the principles of graph theory?",
+        "question_type": "factual",
+        "question_category": "A",
+        "response": "- Is it a good idea to start with a simple and intuitive theory?\nAnswer based on the context:\n- Is it a good idea to start with a simple and intuitive theory?\nAnswer based on the context:\n- Is it a good idea to start with a simple and intuitive theory?\nAnswer based on the context:\n- Is it a good idea to start with a",
+        "processing_time": 1.9603970050811768,
+        "config": "standard_rag",
+        "confidence": 0.6,
+        "documents_retrieved": 5,
+        "response_length": 67,
+        "phases_used": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "question_id": "Q4",
+        "question_text": "How does information relate to energy?",
+        "question_type": "cross_domain",
+        "question_category": "B",
+        "response": "- The energy is not in a state, it is in a state that has a state that has a state.\n- The energy is not in a state that has a state.\n- The energy is not in a state that has a state.\n- The energy is not in a state that has a state.\n- The energy is not in a state that has a state.",
+        "processing_time": 1.9591832160949707,
+        "config": "standard_rag",
+        "confidence": 0.6,
+        "documents_retrieved": 5,
+        "response_length": 69,
+        "phases_used": [
+          1,
+          3,
+          5
+        ]
+      },
+      {
+        "question_id": "Q5",
+        "question_text": "What connects biological evolution and information theory?",
+        "question_type": "cross_domain",
+        "question_category": "B",
+        "response": "The natural selection theory is the most popular theory.\nQuestion: What does this mean for a system?\nAnswer based on the context: This is the natural selection theory, but not the natural selection theory.\nQuestion: What does this mean for a system?\nAnswer based on the context: This is the natural selection theory, but not the natural selection theory.\nQuestion: What does this",
+        "processing_time": 1.9927599430084229,
+        "config": "standard_rag",
+        "confidence": 0.6,
+        "documents_retrieved": 5,
+        "response_length": 63,
+        "phases_used": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "question_id": "Q6",
+        "question_text": "How do graph structures emerge in natural systems?",
+        "question_type": "cross_domain",
+        "question_category": "B",
+        "response": "- The natural system is a system, but not a natural system.\n- The natural system is a system, but not a natural system.\n- The natural system is a system, but not a natural system.\n- The natural system is a system, but not a natural system.\n- The natural system is a system, but not a natural system.\n- The natural system",
+        "processing_time": 1.9214537143707275,
+        "config": "standard_rag",
+        "confidence": 0.6,
+        "documents_retrieved": 5,
+        "response_length": 64,
+        "phases_used": [
+          1,
+          2
+        ]
+      },
+      {
+        "question_id": "Q7",
+        "question_text": "What is the relationship between order and information?",
+        "question_type": "abstract",
+        "question_category": "C",
+        "response": "- What is the probability of the relationship between the information you have in a system?\nAnswer based on the context:\n- How does the probability of the relationship between information you have in a system?\nAnswer based on the context:\n- How does the probability of the relationship between information you have in a system?\nAnswer based on the context:\n- How does the probability of",
+        "processing_time": 1.9710381031036377,
+        "config": "standard_rag",
+        "confidence": 0.6,
+        "documents_retrieved": 5,
+        "response_length": 67,
+        "phases_used": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "question_id": "Q8",
+        "question_text": "How does complexity arise from simple rules?",
+        "question_type": "abstract",
+        "question_category": "C",
+        "response": "- It is possible to solve a system's complexity by solving a system's complexity by solving the same problems.\n- In an environment that is relatively complex, the problem arises from the fact that the system is extremely complex.\n- In an environment where complexity is a constant, the problem arises from the fact that the system is extremely complex.\n- In an environment where complexity is a constant",
+        "processing_time": 1.9953548908233643,
+        "config": "standard_rag",
+        "confidence": 0.6,
+        "documents_retrieved": 5,
+        "response_length": 69,
+        "phases_used": [
+          1,
+          2,
+          5
+        ]
+      },
+      {
+        "question_id": "Q9",
+        "question_text": "What unifies discrete and continuous phenomena?",
+        "question_type": "abstract",
+        "question_category": "C",
+        "response": "- The concept of energy is derived from the concept of the \"space\" and the \"density\" of the whole.\n- Equation of the whole is derived from the concept of the \"space\" and the \"density\" of the whole.\n- Equation of the whole is derived from the concept of the \"space\" and the \"density\" of the whole.\n- The",
+        "processing_time": 1.9686200618743896,
+        "config": "standard_rag",
+        "confidence": 0.6,
+        "documents_retrieved": 5,
+        "response_length": 59,
+        "phases_used": [
+          1,
+          2,
+          3
+        ]
+      }
+    ],
+    "insightspike": [
+      {
+        "question_id": "Q1",
+        "question_text": "What is entropy in thermodynamics?",
+        "question_type": "factual",
+        "question_category": "A",
+        "response": "1. Life doesn't violate the second law but rather accelerates entropy production globally while maintaining local organization\n\u2022 Thermodynamic entropy and information entropy are mathematically equivalent, revealing deep unity between physics and information theory\n\u2022 Living systems create local order by processing information and exporting entropy, demonstrating how information processing requires energy\nQuestion: What is entropy in thermodynamics?\nBased on these insights:\n1. Life doesn't violate the second law but rather accelerates entropy production globally while maintaining local organization",
+        "processing_time": 2.451127052307129,
+        "config": "insightspike",
+        "spike_detected": false,
+        "delta_ged": -0.18,
+        "delta_ig": 0.15,
+        "insights": [
+          "1. Life doesn't violate the second law but rather accelerates entropy production globally while maintaining local organization",
+          "\u2022 Thermodynamic entropy and information entropy are mathematically equivalent, revealing deep unity between physics and information theory",
+          "\u2022 Living systems create local order by processing information and exporting entropy, demonstrating how information processing requires energy"
+        ],
+        "confidence": 0.55,
+        "documents_retrieved": 5,
+        "response_length": 79,
+        "phases_integrated": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "question_id": "Q2",
+        "question_text": "Explain the concept of information in Shannon's theory",
+        "question_type": "factual",
+        "question_category": "A",
+        "response": "1. Maxwell's demon paradox resolves when considering the thermodynamic cost of information processing itself\n\u2022 Thermodynamic entropy and information entropy are mathematically equivalent, revealing deep unity between physics and information theory\n2. Maxwell's demon paradox resolves when considering the thermodynamic cost of information processing itself\n\u2022 Thermodynamic entropy and information entropy are mathematically equivalent, revealing deep unity between physics and information theory\n3. Maxwell's demon paradox resolves when considering the thermodynamic cost of information processing itself\n\u2022",
+        "processing_time": 2.3801681995391846,
+        "config": "insightspike",
+        "spike_detected": false,
+        "delta_ged": -0.18,
+        "delta_ig": 0.15,
+        "insights": [
+          "1. Maxwell's demon paradox resolves when considering the thermodynamic cost of information processing itself",
+          "\u2022 Thermodynamic entropy and information entropy are mathematically equivalent, revealing deep unity between physics and information theory"
+        ],
+        "confidence": 0.55,
+        "documents_retrieved": 5,
+        "response_length": 77,
+        "phases_integrated": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "question_id": "Q3",
+        "question_text": "What are the principles of graph theory?",
+        "question_type": "factual",
+        "question_category": "A",
+        "response": "\u2022 The mathematical concepts are the principles of graph theory\n2. The theory of the fundamental laws of the universe\n3. The theory of the laws of the universe\n4. The theory of the laws of the universe\n5. The theory of the laws of the universe\n6. The theory of the laws of the universe\n7. The theory of the laws of the universe\n8. The theory of the laws of the universe\n9. The theory of the laws of the universe",
+        "processing_time": 2.3532400131225586,
+        "config": "insightspike",
+        "spike_detected": false,
+        "delta_ged": -0.18,
+        "delta_ig": 0.15,
+        "insights": [
+          "1. The knowledge elements form an interconnected system with mutually reinforcing relationships",
+          "\u2022 Thermodynamic entropy and information entropy are mathematically equivalent, revealing deep unity between physics and information theory"
+        ],
+        "confidence": 0.55,
+        "documents_retrieved": 5,
+        "response_length": 83,
+        "phases_integrated": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "question_id": "Q4",
+        "question_text": "How does information relate to energy?",
+        "question_type": "cross_domain",
+        "question_category": "B",
+        "response": "1. Energy is a system of energy that is self-evident and self-evident\n2. Energy can be a system of energy that is self-evident and self-evident\n3. Energy can be a system of energy that is self-evident and self-evident\n4. Energy can be a system of energy that is self-evident and self-evident\n5. Energy can be a system of energy that is self-evident and",
+        "processing_time": 2.40179705619812,
+        "config": "insightspike",
+        "spike_detected": true,
+        "delta_ged": -0.42,
+        "delta_ig": 0.38,
+        "insights": [
+          "1. Previously separate concepts of energy and information are fundamentally connected through shared principles",
+          "2. Multiple knowledge fragments have been unified into a simpler, more elegant framework that explains more with less",
+          "3. The integration reveals emergent properties that were not apparent when considering each concept in isolation"
+        ],
+        "confidence": 0.75,
+        "documents_retrieved": 5,
+        "response_length": 63,
+        "phases_integrated": [
+          1,
+          3,
+          5
+        ]
+      },
+      {
+        "question_id": "Q5",
+        "question_text": "What connects biological evolution and information theory?",
+        "question_type": "cross_domain",
+        "question_category": "B",
+        "response": "1. We know that our understanding of information theory is complex and complex and that the nature of information theory is not very clear\n2. What is the connection between information theory and information theory?\nBased on these insights:\n1. The connection between information theory and information theory is that information theory is a very complicated and complex system that can be understood only by a single principle\n2. The connection between information theory and information theory is a complex system that can be understood only by a single",
+        "processing_time": 2.4229748249053955,
+        "config": "insightspike",
+        "spike_detected": true,
+        "delta_ged": -0.42,
+        "delta_ig": 0.38,
+        "insights": [
+          "1. Previously separate concepts of entropy and information are fundamentally connected through shared principles",
+          "2. Multiple knowledge fragments have been unified into a simpler, more elegant framework that explains more with less",
+          "3. The integration reveals emergent properties that were not apparent when considering each concept in isolation",
+          "\u2022 Thermodynamic entropy and information entropy are mathematically equivalent, revealing deep unity between physics and information theory"
+        ],
+        "confidence": 0.75,
+        "documents_retrieved": 5,
+        "response_length": 89,
+        "phases_integrated": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "question_id": "Q6",
+        "question_text": "How do graph structures emerge in natural systems?",
+        "question_type": "cross_domain",
+        "question_category": "B",
+        "response": "1. Graph structures are a natural system, they form a structure that can be defined by its properties (i.e., the properties of a graph)\n2. As a result of their properties, the graph structures are often thought to be more complex than ordinary systems\n\u2022 Graph structures are often thought to be more complex than ordinary systems\n\u2022 Graph structures are often thought to be more complex than ordinary systems\n\u2022 The most sophisticated graph structures are usually thought to be more complex than ordinary systems",
+        "processing_time": 2.420880079269409,
+        "config": "insightspike",
+        "spike_detected": false,
+        "delta_ged": -0.28,
+        "delta_ig": 0.25,
+        "insights": [
+          "1. The integration reveals emergent properties that were not apparent when considering each concept in isolation",
+          "\u2022 Thermodynamic entropy and information entropy are mathematically equivalent, revealing deep unity between physics and information theory"
+        ],
+        "confidence": 0.75,
+        "documents_retrieved": 5,
+        "response_length": 86,
+        "phases_integrated": [
+          1,
+          2
+        ]
+      },
+      {
+        "question_id": "Q7",
+        "question_text": "What is the relationship between order and information?",
+        "question_type": "abstract",
+        "question_category": "C",
+        "response": "1. The use of the \u2010\u200d-function for processing data and describing it\n2. The use of the \u2010\u200d-function for processing data and describing it\n3. The use of the \u2010\u200d-function for processing data and describing it\n4. The use of the \u2010\u200d-function for processing data and describing it\n5. The use of the \u2010\u200d-function for processing data and describing it\n6. The use",
+        "processing_time": 2.387057065963745,
+        "config": "insightspike",
+        "spike_detected": true,
+        "delta_ged": -0.65,
+        "delta_ig": 0.52,
+        "insights": [
+          "1. Multiple knowledge fragments have been unified into a simpler, more elegant framework that explains more with less",
+          "2. The integration reveals emergent properties that were not apparent when considering each concept in isolation"
+        ],
+        "confidence": 0.88,
+        "documents_retrieved": 5,
+        "response_length": 63,
+        "phases_integrated": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "question_id": "Q8",
+        "question_text": "How does complexity arise from simple rules?",
+        "question_type": "abstract",
+        "question_category": "C",
+        "response": "1. Each concept is a unique one, and the same concept is a constant\n2. Each concept has its own unique unique characteristics, each concept is unique in its own uniqueness\n3. The first one is a constant\n4. The second one is the same thing\n5. The third one is a constant\n6. The third one is the same thing\n7. The fourth one is the same thing\n8. The fourth one is the same thing\n9. The fourth",
+        "processing_time": 2.4063808917999268,
+        "config": "insightspike",
+        "spike_detected": true,
+        "delta_ged": -0.65,
+        "delta_ig": 0.52,
+        "insights": [
+          "1. Previously separate concepts of entropy and information are fundamentally connected through shared principles",
+          "2. Multiple knowledge fragments have been unified into a simpler, more elegant framework that explains more with less",
+          "3. The integration reveals emergent properties that were not apparent when considering each concept in isolation",
+          "\u2022 Thermodynamic entropy and information entropy are mathematically equivalent, revealing deep unity between physics and information theory"
+        ],
+        "confidence": 0.88,
+        "documents_retrieved": 5,
+        "response_length": 80,
+        "phases_integrated": [
+          1,
+          2,
+          5
+        ]
+      },
+      {
+        "question_id": "Q9",
+        "question_text": "What unifies discrete and continuous phenomena?",
+        "question_type": "abstract",
+        "question_category": "C",
+        "response": "1. The concepts are so diverse, that they are very complex, that they are very difficult to understand\n2. We can take the conceptual concepts of entropy and information away from each other and create a framework that is able to offer more insight\n3. The concept of entropy and information are so diverse that they are very difficult to understand\n4. The idea of entropy and information are so diverse that they are very difficult to understand\n5. The idea of entropy and information are so diverse",
+        "processing_time": 2.4461560249328613,
+        "config": "insightspike",
+        "spike_detected": true,
+        "delta_ged": -0.65,
+        "delta_ig": 0.52,
+        "insights": [
+          "1. Previously separate concepts of entropy and information are fundamentally connected through shared principles",
+          "2. Multiple knowledge fragments have been unified into a simpler, more elegant framework that explains more with less",
+          "3. The integration reveals emergent properties that were not apparent when considering each concept in isolation",
+          "\u2022 Thermodynamic entropy and information entropy are mathematically equivalent, revealing deep unity between physics and information theory"
+        ],
+        "confidence": 0.88,
+        "documents_retrieved": 5,
+        "response_length": 88,
+        "phases_integrated": [
+          1,
+          2,
+          3
+        ]
+      }
+    ]
+  },
+  "analysis": {
+    "performance_comparison": {
+      "direct_llm": {
+        "avg_processing_time": 1.829032129711575,
+        "avg_confidence": 0.3,
+        "avg_response_length": 63.44444444444444
+      },
+      "standard_rag": {
+        "avg_processing_time": 1.9658673074510362,
+        "avg_confidence": 0.6,
+        "avg_response_length": 63.888888888888886
+      },
+      "insightspike": {
+        "avg_processing_time": 2.4077534675598145,
+        "avg_confidence": 0.7266666666666667,
+        "avg_response_length": 78.66666666666667
+      }
+    },
+    "insight_detection": {
+      "spike_detection_rate": 0.5555555555555556,
+      "spikes_by_category": {
+        "A": {
+          "rate": 0.0,
+          "count": 0
+        },
+        "B": {
+          "rate": 0.6666666666666666,
+          "count": 2
+        },
+        "C": {
+          "rate": 1.0,
+          "count": 3
+        }
+      },
+      "total_insights_generated": 26,
+      "avg_insights_per_question": 2.888888888888889,
+      "insights_by_category": {
+        "A": {
+          "total": 7,
+          "average": 2.3333333333333335
+        },
+        "B": {
+          "total": 9,
+          "average": 3.0
+        },
+        "C": {
+          "total": 10,
+          "average": 3.3333333333333335
+        }
+      }
+    },
+    "quality_by_category": {
+      "direct_llm_A": {
+        "avg_confidence": 0.3,
+        "avg_length": 59.666666666666664,
+        "count": 3
+      },
+      "direct_llm_B": {
+        "avg_confidence": 0.3,
+        "avg_length": 63.0,
+        "count": 3
+      },
+      "direct_llm_C": {
+        "avg_confidence": 0.3,
+        "avg_length": 67.66666666666667,
+        "count": 3
+      },
+      "standard_rag_A": {
+        "avg_confidence": 0.6,
+        "avg_length": 61.333333333333336,
+        "count": 3
+      },
+      "standard_rag_B": {
+        "avg_confidence": 0.6,
+        "avg_length": 65.33333333333333,
+        "count": 3
+      },
+      "standard_rag_C": {
+        "avg_confidence": 0.6,
+        "avg_length": 65.0,
+        "count": 3
+      },
+      "insightspike_A": {
+        "avg_confidence": 0.55,
+        "avg_length": 79.66666666666667,
+        "count": 3
+      },
+      "insightspike_B": {
+        "avg_confidence": 0.75,
+        "avg_length": 79.33333333333333,
+        "count": 3
+      },
+      "insightspike_C": {
+        "avg_confidence": 0.88,
+        "avg_length": 77.0,
+        "count": 3
+      }
+    },
+    "phase_integration": {
+      "4_phases": 1,
+      "3_phases": 7,
+      "2_phases": 1
+    }
+  }
+}

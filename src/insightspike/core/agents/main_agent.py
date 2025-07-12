@@ -271,7 +271,17 @@ class MainAgent:
                 "reasoning_quality": graph_analysis.get("reasoning_quality", 0.0),
             }
 
-            llm_result = self.l4_llm.generate_response(llm_context, question)
+            # Call generate_response_detailed to get full result dict
+            if hasattr(self.l4_llm, 'generate_response_detailed'):
+                llm_result = self.l4_llm.generate_response_detailed(llm_context, question)
+            else:
+                # Fallback for simple providers - wrap string result
+                response = self.l4_llm.generate_response(llm_context, question)
+                llm_result = {
+                    "response": response,
+                    "success": True,
+                    "confidence": 0.5
+                }
 
             # Calculate overall reasoning quality
             reasoning_quality = self._calculate_reasoning_quality(

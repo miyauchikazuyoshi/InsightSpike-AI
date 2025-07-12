@@ -1,0 +1,7 @@
+Knowledge_ID,Text,Domain
+K1,Entropy measures disorder in thermodynamic systems.,thermodynamics
+K2,The second law states that entropy always increases in isolated systems.,thermodynamics
+K3,Shannon entropy quantifies uncertainty in information.,information
+K4,Information processing requires energy according to Landauer's principle.,information
+K5,Living systems maintain low entropy by consuming energy.,biology
+K6,Organisms export entropy to their environment through metabolism.,biology
