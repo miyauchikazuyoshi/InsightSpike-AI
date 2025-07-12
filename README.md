@@ -174,15 +174,17 @@ InsightSpike actually:
 ```mermaid
 graph TD
     Query[User Query] --> L1[Layer 1: Error Monitor<br/>🧠 Cerebellum]
-    L1 --> L2[Layer 2: Memory Manager<br/>🧠 Hippocampus]
+    L1 -->|Error Detection| NA[⚡ Noradrenaline Release<br/>Exploration Trigger]
+    NA --> L2[Layer 2: Memory Manager<br/>🧠 Hippocampus]
     L2 --> L3[Layer 3: Graph Reasoner<br/>🧠 Prefrontal Cortex]
     L3 --> L4[Layer 4: Language Interface<br/>🧠 Language Areas]
     L4 --> Response[Insight Response]
     
-    L3 -.->|ΔGED < -0.5 & ΔIG > 0.2| Spike[🎯 Eureka Spike!<br/>Noradrenaline-Dopamine]
+    L3 -.->|ΔGED < -0.5 & ΔIG > 0.2| Spike[🎯 Eureka Spike!<br/>Dopamine Reward]
     Spike -.->|Reward Signal| L2
     Spike -.->|Structural Update| L3
     
+    style NA fill:#ff9,stroke:#f90,stroke-width:3px
     style Spike fill:#f96,stroke:#f00,stroke-width:4px
     style L3 fill:#9cf,stroke:#069,stroke-width:2px
 ```
@@ -192,12 +194,20 @@ graph TD
 3. **Graph Reasoner** (Prefrontal Cortex) - PyTorch Geometric GNN for structural reasoning
 4. **Language Interface** (Language Areas) - Natural language understanding and generation
 
-**🧠 Neuroscience-Inspired Spike Mechanism:**
+**🧠 Neuroscience-Inspired Dual Mechanism:**
 
-- When ΔGED < -0.5 (structural simplification) AND ΔIG > 0.2 (information gain)
-- Triggers "Eureka!" moment similar to noradrenaline-dopamine release
-- Rewards the system for discovering novel connections
-- Updates knowledge graph structure permanently
+**Noradrenaline System (Exploration):**
+
+- Error detection in Layer 1 triggers exploration mode
+- Similar to how noradrenaline promotes attention and learning
+- Initiates search through memory and knowledge graph
+
+**Dopamine System (Reward):**
+
+- When ΔGED < -0.5 AND ΔIG > 0.2, triggers "Eureka!" moment
+- Dopamine-like reward signal reinforces novel connections
+- Permanently updates knowledge graph structure
+- Creates lasting memory of the insight
 
 ### Scalable Implementation
 
