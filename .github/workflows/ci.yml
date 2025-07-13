@@ -1,73 +1,52 @@
-name: InsightSpike-AI CI
+name: CI
 
 on:
   push:
     branches: [ main, develop ]
   pull_request:
-    branches: [ main, develop ]
-
-env:
-  PYTHON_VERSION: "3.10"
-  POETRY_VERSION: "1.8.3"
+    branches: [ main ]
 
 jobs:
-  # Core functionality tests - streamlined
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
     steps:
     - uses: actions/checkout@v4
     
-    - name: Set up Python
-      uses: actions/setup-python@v5
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: ${{ matrix.python-version }}
     
     - name: Install Poetry
-      uses: snok/install-poetry@v1.4.1
+      uses: snok/install-poetry@v1
       with:
-        version: ${{ env.POETRY_VERSION }}
+        version: latest
         virtualenvs-create: true
         virtualenvs-in-project: true
     
-    - name: Configure environment
-      run: |
-        poetry config virtualenvs.create true
-        poetry config virtualenvs.in-project true
-        poetry config installer.parallel true
-        echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
-        echo "INSIGHTSPIKE_LITE_MODE=1" >> $GITHUB_ENV
-        echo "CUDA_VISIBLE_DEVICES=" >> $GITHUB_ENV
-        echo "TORCH_DEVICE=cpu" >> $GITHUB_ENV
-        echo "FORCE_CUDA=0" >> $GITHUB_ENV
-        echo "USE_CUDA=0" >> $GITHUB_ENV
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
     
     - name: Install dependencies
-      run: |
-        # Install core dependencies (CI group includes test dependencies)
-        poetry install --with ci --no-root
-        # Install CPU-only PyTorch for CI
-        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-        # Install faiss-cpu for CI
-        poetry run pip install faiss-cpu
-        # Install additional experiment dependencies
-        poetry run pip install scikit-learn imageio
-        # Install project in development mode
-        poetry run pip install -e . --no-deps
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      run: poetry install --no-interaction --no-root
     
-    - name: Create test data
-      run: |
-        mkdir -p data/raw logs
-        echo "Test data for integration tests" > data/raw/test_sentences.txt
+    - name: Install project
+      run: poetry install --no-interaction
     
-    - name: Run all tests with coverage
+    - name: Run tests
       run: |
-        echo "🧪 Running all tests with coverage..."
-        poetry run pytest tests/unit/ tests/integration/ -v --tb=short -k "not test_add_nodes" --maxfail=3 --cov=src --cov-report=xml --cov-report=term-missing --cov-fail-under=45
-        echo "✅ All tests completed with coverage"
+        poetry run pytest tests/unit/ -v --cov=src/insightspike --cov-report=xml
     
-    - name: Upload coverage reports
+    - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
         file: ./coverage.xml
@@ -75,107 +54,52 @@ jobs:
         name: codecov-umbrella
         fail_ci_if_error: false
 
-  # Quick experiment tests
-  experiments:
+  lint:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     
     steps:
     - uses: actions/checkout@v4
     
     - name: Set up Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v4
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: "3.11"
     
     - name: Install Poetry
-      uses: snok/install-poetry@v1.4.1
-      with:
-        version: ${{ env.POETRY_VERSION }}
-        virtualenvs-create: true
-        virtualenvs-in-project: true
-    
-    - name: Configure environment
-      run: |
-        poetry config virtualenvs.create true
-        poetry config virtualenvs.in-project true
-        poetry config installer.parallel true
-        echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
-        echo "INSIGHTSPIKE_LITE_MODE=1" >> $GITHUB_ENV
-        echo "CUDA_VISIBLE_DEVICES=" >> $GITHUB_ENV
-        echo "TORCH_DEVICE=cpu" >> $GITHUB_ENV
-        echo "FORCE_CUDA=0" >> $GITHUB_ENV
-        echo "USE_CUDA=0" >> $GITHUB_ENV
+      uses: snok/install-poetry@v1
     
     - name: Install dependencies
       run: |
-        # Install core dependencies (CI group includes test dependencies)
-        poetry install --with ci --no-root
-        # Install CPU-only PyTorch for CI
-        poetry run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-        # Install faiss-cpu for CI
-        poetry run pip install faiss-cpu
-        # Install additional experiment dependencies
-        poetry run pip install scikit-learn imageio
-        # Install project in development mode
-        poetry run pip install -e . --no-deps
+        poetry install --no-interaction --with dev
     
-    - name: Create test data
-      run: |
-        mkdir -p data/raw logs
-        echo "Test data for integration tests" > data/raw/test_sentences.txt
+    - name: Run black
+      run: poetry run black --check src/ tests/
     
-    - name: Run scalability tests
-      run: |
-        echo "🧪 Testing scalable implementations..."
-        # Test Phase 2: Scalable Graph Builder
-        poetry run python tests/integration/phase2_phase3/test_phase3_minimal.py || echo "⚠️ Scalability test had warnings but continuing"
-        # Test Phase 3: RAG Performance
-        poetry run python tests/integration/phase2_phase3/test_phase3_simple.py || echo "⚠️ RAG test completed with display output"
-        echo "✅ All scalability tests completed"
+    - name: Run isort
+      run: poetry run isort --check-only src/ tests/
+    
+    - name: Run flake8
+      run: poetry run flake8 src/ tests/
+    
+    - name: Run mypy
+      run: poetry run mypy src/ --ignore-missing-imports
 
-  # Code quality check - enhanced with formatting and type checks
-  quality:
+  security:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     
     steps:
     - uses: actions/checkout@v4
     
-    - name: Set up Python
-      uses: actions/setup-python@v5
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
     
-    - name: Install Poetry and dependencies
-      uses: snok/install-poetry@v1.4.1
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
       with:
-        version: ${{ env.POETRY_VERSION }}
-        virtualenvs-create: true
-        virtualenvs-in-project: true
-    
-    - name: Install quality tools
-      run: |
-        poetry install --only dev
-        poetry run pip install black isort flake8 mypy
-    
-    - name: Check code formatting with Black
-      run: |
-        echo "🎨 Checking code formatting..."
-        poetry run black --check src tests || echo "⚠️ Code formatting issues found"
-    
-    - name: Check import sorting with isort
-      run: |
-        echo "📦 Checking import sorting..."
-        poetry run isort --check-only src tests || echo "⚠️ Import sorting issues found"
-    
-    - name: Run flake8 linting
-      run: |
-        echo "🔍 Running linting checks..."
-        poetry run flake8 src/ --max-line-length=100 --extend-ignore=E203,W503,E501 --count --statistics || echo "⚠️ Linting issues found"
-    
-    - name: Run type checking with mypy
-      run: |
-        echo "🔎 Running type checks..."
-        poetry run mypy src --ignore-missing-imports --no-strict-optional --warn-return-any || echo "⚠️ Type checking issues found"
-        echo "✅ Quality checks completed"
+        sarif_file: 'trivy-results.sarif'

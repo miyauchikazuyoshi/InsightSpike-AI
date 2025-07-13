@@ -6,6 +6,8 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Poetry](https://img.shields.io/badge/dependency-Poetry-blue)](https://python-poetry.org/)
 
+![InsightSpike Demo](demo.gif)
+
 ## 🎯 What is InsightSpike-AI?
 
 InsightSpike-AI is a **neurobiologically-inspired AI system** that can detect and generate "Aha!" moments - those sudden insights when disparate pieces of knowledge connect to form new understanding. Unlike traditional AI that simply retrieves and summarizes existing information, InsightSpike actively discovers novel connections between concepts, mimicking human creative cognition.
