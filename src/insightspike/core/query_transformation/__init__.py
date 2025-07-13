@@ -11,6 +11,13 @@ from .enhanced_query_transformer import (
     MultiHopGNN,
     AdaptiveExplorer
 )
+from .evolution_tracker import (
+    EvolutionTracker,
+    EvolutionPattern,
+    PatternDatabase,
+    QueryTypeClassifier,
+    TrajectoryAnalyzer
+)
 
 __all__ = [
     "QueryState", 
@@ -19,5 +26,10 @@ __all__ = [
     "EnhancedQueryTransformer",
     "QueryBranch",
     "MultiHopGNN",
-    "AdaptiveExplorer"
+    "AdaptiveExplorer",
+    "EvolutionTracker",
+    "EvolutionPattern",
+    "PatternDatabase",
+    "QueryTypeClassifier",
+    "TrajectoryAnalyzer"
 ]
