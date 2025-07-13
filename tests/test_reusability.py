@@ -5,9 +5,9 @@ Test Generic InsightSpike Components
 Test the reusable components to ensure they work correctly.
 """
 
+import logging
 import sys
 import traceback
-import logging
 from pathlib import Path
 
 # Configure logging
@@ -22,10 +22,10 @@ def test_imports():
     try:
         # Test generic interfaces
         from insightspike.core.interfaces.generic_interfaces import (
-            TaskType,
+            EnvironmentInterface,
             EnvironmentState,
             InsightMoment,
-            EnvironmentInterface,
+            TaskType,
         )
 
         print("✅ Generic interfaces imported successfully")
@@ -45,16 +45,16 @@ def test_imports():
 
         # Test agent factory
         from insightspike.core.agents.agent_factory import (
-            create_maze_agent,
             AgentConfigBuilder,
+            create_maze_agent,
         )
 
         print("✅ Agent factory imported successfully")
 
         # Test standalone reasoner
         from insightspike.core.reasoners.standalone_l3 import (
-            create_standalone_reasoner,
             analyze_documents_simple,
+            create_standalone_reasoner,
         )
 
         print("✅ Standalone reasoner imported successfully")
@@ -109,8 +109,8 @@ def test_maze_agent_creation():
 
     try:
         from insightspike.core.agents.agent_factory import (
-            create_maze_agent,
             AgentConfigBuilder,
+            create_maze_agent,
         )
 
         # Test basic agent creation
@@ -149,10 +149,10 @@ def test_environment_adapter():
     print("\nTesting environment adapter...")
 
     try:
+        from insightspike.core.interfaces.generic_interfaces import TaskType
         from insightspike.core.interfaces.maze_implementation import (
             MazeEnvironmentAdapter,
         )
-        from insightspike.core.interfaces.generic_interfaces import TaskType
 
         # Create environment
         env = MazeEnvironmentAdapter(maze_size=5)

@@ -1,6 +1,6 @@
 """Tests for metrics module to improve coverage"""
-import pytest
 import numpy as np
+import pytest
 
 from insightspike.metrics import delta_ged, delta_ig
 from tests.helpers.test_helpers import assert_metric_in_range

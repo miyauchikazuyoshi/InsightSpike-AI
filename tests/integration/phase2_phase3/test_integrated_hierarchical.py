@@ -8,9 +8,10 @@ Test Integrated Hierarchical Manager
 
 import sys
 import time
+from pathlib import Path
+
 import numpy as np
 import pytest
-from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
@@ -194,8 +195,8 @@ def test_persistence():
     """永続化のテスト"""
     print("\n\n=== Persistence Test ===\n")
 
-    import tempfile
     import os
+    import tempfile
 
     # 一時ファイル
     temp_path = os.path.join(tempfile.gettempdir(), "integrated_manager_test.pkl")

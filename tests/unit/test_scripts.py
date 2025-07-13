@@ -3,14 +3,15 @@
 Test suite for important scripts
 """
 
+import json
+import shutil
 import subprocess
 import sys
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
-import pytest
 import tempfile
-import shutil
-import json
+from pathlib import Path
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 
 # Import script modules for unit testing
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))

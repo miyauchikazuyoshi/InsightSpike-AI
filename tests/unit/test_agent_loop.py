@@ -1,8 +1,9 @@
 """
 Test agent_loop module functionality
 """
-import pytest
 import numpy as np
+import pytest
+
 from insightspike import agent_loop
 
 

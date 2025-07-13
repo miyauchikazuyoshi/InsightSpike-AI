@@ -1,4 +1,6 @@
-import sys, types
+import sys
+import types
+
 import numpy as np
 
 sys.path.insert(0, "src")  # Add src to path for imports
@@ -55,12 +57,12 @@ except ImportError:
 
 from insightspike import graph_metrics
 
-
 """
 Test graph_metrics module functionality
 """
-import pytest
 import numpy as np
+import pytest
+
 from insightspike import graph_metrics
 
 

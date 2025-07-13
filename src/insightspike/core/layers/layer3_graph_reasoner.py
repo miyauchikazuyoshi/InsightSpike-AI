@@ -17,16 +17,12 @@ from torch_geometric.data import Data
 from torch_geometric.nn import GCNConv, global_mean_pool
 
 # Import both simple and advanced metrics
-from ...utils.graph_metrics import (
-    delta_ged as simple_delta_ged,
-    delta_ig as simple_delta_ig,
-)
+from ...utils.graph_metrics import delta_ged as simple_delta_ged
+from ...utils.graph_metrics import delta_ig as simple_delta_ig
 
 try:
-    from ...utils.advanced_graph_metrics import (
-        delta_ged as advanced_delta_ged,
-        delta_ig as advanced_delta_ig,
-    )
+    from ...utils.advanced_graph_metrics import delta_ged as advanced_delta_ged
+    from ...utils.advanced_graph_metrics import delta_ig as advanced_delta_ig
 
     ADVANCED_METRICS_AVAILABLE = True
 except ImportError:

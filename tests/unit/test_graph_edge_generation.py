@@ -1,10 +1,11 @@
 """
 Unit tests for graph edge generation improvements
 """
+from dataclasses import dataclass
+from unittest.mock import Mock, patch
+
 import numpy as np
 import pytest
-from unittest.mock import Mock, patch
-from dataclasses import dataclass
 
 from insightspike.core.layers.scalable_graph_builder import ScalableGraphBuilder
 from insightspike.core.learning.knowledge_graph_memory import KnowledgeGraphMemory

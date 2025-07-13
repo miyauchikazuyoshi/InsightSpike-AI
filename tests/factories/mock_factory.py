@@ -1,10 +1,11 @@
 """Mock factory for creating consistent test objects across the test suite."""
 
-import numpy as np
-import networkx as nx
-from typing import Optional, List, Tuple, Dict, Any
-from unittest.mock import Mock, MagicMock
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import MagicMock, Mock
+
+import networkx as nx
+import numpy as np
 
 
 @dataclass

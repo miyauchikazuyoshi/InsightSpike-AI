@@ -23,8 +23,8 @@ def main():
         # Test 2: Import memory manager
         print("Step 2: Testing memory manager import...")
         from insightspike.core.layers.layer2_memory_manager import (
-            L2MemoryManager,
             Episode,
+            L2MemoryManager,
         )
 
         memory_manager = L2MemoryManager(dim=384, config=config)

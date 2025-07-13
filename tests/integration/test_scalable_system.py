@@ -2,16 +2,17 @@
 Integration tests for the scalable graph system (Phase 2 & 3)
 """
 
-import pytest
-import numpy as np
 import time
 from unittest.mock import Mock, patch
 
+import numpy as np
+import pytest
+
+from insightspike.core.agents.main_agent_graph_centric import GraphCentricMainAgent
 from insightspike.core.layers.integrated_hierarchical_manager import (
     IntegratedHierarchicalManager,
 )
 from insightspike.core.layers.scalable_graph_builder import ScalableGraphBuilder
-from insightspike.core.agents.main_agent_graph_centric import GraphCentricMainAgent
 
 
 class TestScalableSystem:

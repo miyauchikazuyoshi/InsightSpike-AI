@@ -5,24 +5,24 @@ End-to-end integration test for InsightSpike MVP
 This test verifies that the core ΔGED/ΔIG mechanism works and can detect EurekaSpikes.
 """
 
-import pytest
-import numpy as np
-import networkx as nx
-from pathlib import Path
-import tempfile
 import shutil
 import sys
+import tempfile
+from pathlib import Path
+
+import networkx as nx
+import numpy as np
+import pytest
 
 # Add src to Python path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+from insightspike.core.layers.layer2_memory_manager import Episode
+from insightspike.core.layers.layer2_memory_manager import L2MemoryManager as Memory
+from insightspike.detection.eureka_spike import EurekaDetector, detect_eureka_spike
+
 # Test imports
 from insightspike.metrics.graph_metrics import delta_ged, delta_ig
-from insightspike.detection.eureka_spike import EurekaDetector, detect_eureka_spike
-from insightspike.core.layers.layer2_memory_manager import (
-    L2MemoryManager as Memory,
-    Episode,
-)
 
 
 class TestInsightSpikeMVP:

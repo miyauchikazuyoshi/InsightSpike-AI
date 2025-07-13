@@ -7,11 +7,11 @@ Phase 2: Multi-hop reasoning, adaptive exploration, and query branching.
 
 import logging
 import time
-from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Tuple
 
-import torch
 import networkx as nx
+import torch
 
 from ..query_transformation import QueryState, QueryTransformationHistory
 from ..query_transformation.enhanced_query_transformer import (

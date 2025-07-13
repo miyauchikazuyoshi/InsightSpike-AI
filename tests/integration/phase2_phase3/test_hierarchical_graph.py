@@ -8,9 +8,10 @@ Test Hierarchical Graph Builder - Phase 3
 
 import sys
 import time
-import numpy as np
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
+
+import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 

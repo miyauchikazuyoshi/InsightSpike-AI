@@ -1,7 +1,8 @@
 """Basic tests for algorithm modules to improve coverage"""
-import pytest
-import numpy as np
 from unittest.mock import Mock, patch
+
+import numpy as np
+import pytest
 
 from insightspike.algorithms import GraphEditDistance, InformationGain
 

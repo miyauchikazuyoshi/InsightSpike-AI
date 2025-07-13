@@ -9,10 +9,11 @@ import asyncio
 import logging
 import time
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass
-import torch
+from typing import Any, Dict, List, Optional, Tuple
+
 import numpy as np
+import torch
 
 from ..config import Config
 from ..query_transformation import QueryState, QueryTransformationHistory
@@ -22,7 +23,7 @@ from ..query_transformation.evolution_tracker import (
     QueryTypeClassifier,
     TrajectoryAnalyzer,
 )
-from .main_agent_advanced import MainAgentAdvanced, AdvancedTransformationResult
+from .main_agent_advanced import AdvancedTransformationResult, MainAgentAdvanced
 
 logger = logging.getLogger(__name__)
 
@@ -369,8 +370,9 @@ class MainAgentOptimized(MainAgentAdvanced):
 
     def _get_memory_usage(self) -> float:
         """Get current memory usage in MB"""
-        import psutil
         import os
+
+        import psutil
 
         process = psutil.Process(os.getpid())
         return process.memory_info().rss / 1024 / 1024

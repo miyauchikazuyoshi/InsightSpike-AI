@@ -3,8 +3,8 @@ import platform
 import subprocess
 import sys
 from dataclasses import dataclass
-from typing import Optional
 from datetime import datetime
+from typing import Optional
 
 
 def timestamp() -> str:

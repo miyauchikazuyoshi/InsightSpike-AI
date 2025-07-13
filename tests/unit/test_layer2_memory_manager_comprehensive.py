@@ -3,16 +3,17 @@ Comprehensive tests for Layer 2 Memory Manager
 Covers more functionality to improve coverage
 """
 
-import pytest
-import numpy as np
-import tempfile
 import json
+import tempfile
 from pathlib import Path
-from unittest.mock import patch, MagicMock, Mock
-import faiss
+from unittest.mock import MagicMock, Mock, patch
 
-from insightspike.core.layers.layer2_memory_manager import L2MemoryManager, Episode
+import faiss
+import numpy as np
+import pytest
+
 from insightspike.core.config import get_config
+from insightspike.core.layers.layer2_memory_manager import Episode, L2MemoryManager
 
 
 class TestL2MemoryManagerCore:

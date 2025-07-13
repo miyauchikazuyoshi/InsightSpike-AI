@@ -11,24 +11,24 @@ Features:
 - Progress indicators
 """
 
-import sys
 import json
-from pathlib import Path
-from typing import Optional, List
+import sys
 import time
+from pathlib import Path
+from typing import List, Optional
 
 import typer
 from rich import print
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.prompt import Confirm, Prompt
 from rich.table import Table
-from rich.prompt import Prompt, Confirm
 
 # Import our simplified config system
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from insightspike.config import ConfigManager, ConfigPresets, SimpleConfig, get_config
 from insightspike.core.agents.main_agent import MainAgent
-from insightspike.utils.error_handler import get_logger, InsightSpikeError
+from insightspike.utils.error_handler import InsightSpikeError, get_logger
 
 app = typer.Typer(
     name="spike",

@@ -8,10 +8,11 @@ Lightweight RAG Performance Test
 
 import sys
 import time
+from pathlib import Path
+from typing import Dict, List
+
 import numpy as np
 import pytest
-from pathlib import Path
-from typing import List, Dict
 
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 

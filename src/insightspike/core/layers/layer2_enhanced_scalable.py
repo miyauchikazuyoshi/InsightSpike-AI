@@ -7,13 +7,14 @@ Extends L2MemoryManager with scalable graph features and conflict detection.
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+
 import numpy as np
 
-from .layer2_memory_manager import L2MemoryManager, Episode
-from ..learning.scalable_graph_manager import ScalableGraphManager
 from ...config import get_config
 from ...utils.embedder import get_model
+from ..learning.scalable_graph_manager import ScalableGraphManager
+from .layer2_memory_manager import Episode, L2MemoryManager
 
 logger = logging.getLogger(__name__)
 

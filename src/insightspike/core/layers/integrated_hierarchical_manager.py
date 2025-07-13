@@ -6,12 +6,13 @@ Integrated Hierarchical Memory Manager
 """
 
 import logging
-from typing import Dict, Any, List, Optional
-import numpy as np
 import time
+from typing import Any, Dict, List, Optional
 
-from .layer2_graph_centric import GraphCentricMemoryManager
+import numpy as np
+
 from .hierarchical_graph_builder import HierarchicalGraphBuilder
+from .layer2_graph_centric import GraphCentricMemoryManager
 
 logger = logging.getLogger(__name__)
 

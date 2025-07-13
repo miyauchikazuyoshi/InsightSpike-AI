@@ -10,21 +10,19 @@ from .graph_metrics import delta_ged, delta_ig
 
 # Import new algorithm implementations
 try:
-    from ..algorithms import (
-        GraphEditDistance,
-        InformationGain,
-        compute_delta_ged as algo_delta_ged,
-        compute_delta_ig as algo_delta_ig,
-        get_algorithm_info,
-    )
+    from ..algorithms import GraphEditDistance, InformationGain
+    from ..algorithms import compute_delta_ged as algo_delta_ged
+    from ..algorithms import compute_delta_ig as algo_delta_ig
+    from ..algorithms import get_algorithm_info
 
     ALGORITHMS_AVAILABLE = True
 except ImportError:
     ALGORITHMS_AVAILABLE = False
 
+import logging
+
 # Public API for external researchers
 from typing import Any, Dict, Optional, Union
-import logging
 
 logger = logging.getLogger(__name__)
 

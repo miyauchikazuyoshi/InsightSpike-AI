@@ -4,9 +4,10 @@ Tracks how a query evolves through the knowledge graph
 """
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Any
-import torch
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+import torch
 
 
 @dataclass

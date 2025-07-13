@@ -7,8 +7,8 @@ from .text_utils import clean_text, iter_text
 try:
     from .visualization import (
         InsightSpikeVisualizer,
-        quick_performance_chart,
         quick_comparison,
+        quick_performance_chart,
         quick_progress_chart,
     )
 
@@ -52,7 +52,7 @@ except ImportError as e:
 
 # Export graph importance utilities
 try:
-    from .graph_importance import GraphImportanceCalculator, DynamicImportanceTracker
+    from .graph_importance import DynamicImportanceTracker, GraphImportanceCalculator
 
     __all__.extend(["GraphImportanceCalculator", "DynamicImportanceTracker"])
 except ImportError:

@@ -1,12 +1,13 @@
 """Tests for processing modules to improve coverage"""
-import pytest
 from unittest.mock import Mock, patch
-import numpy as np
 
+import numpy as np
+import pytest
+
+from insightspike.processing.retrieval import retrieve
 from insightspike.training.predict import predict
 from insightspike.training.quantizer import quantize
 from insightspike.training.train import train
-from insightspike.processing.retrieval import retrieve
 
 
 def test_predict():

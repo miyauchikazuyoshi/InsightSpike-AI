@@ -3,27 +3,28 @@
 Integration tests for the generic experiment framework and visualization utilities.
 """
 
-import pytest
 import json
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
+
 import numpy as np
+import pytest
 
 # Import the modules we're testing
 from insightspike.core.experiment_framework import (
     BaseExperiment,
     ExperimentConfig,
     ExperimentResult,
-    PerformanceMetrics,
     ExperimentSuite,
-    create_simple_experiment_config,
+    PerformanceMetrics,
     create_performance_metrics,
+    create_simple_experiment_config,
 )
 from insightspike.utils.visualization import (
     InsightSpikeVisualizer,
-    quick_performance_chart,
     quick_comparison,
+    quick_performance_chart,
     quick_progress_chart,
 )
 

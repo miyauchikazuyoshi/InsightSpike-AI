@@ -24,18 +24,18 @@ References:
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Union, Tuple
 import time
+from collections import Counter
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
-from collections import Counter
 
 try:
     from sklearn.cluster import KMeans
-    from sklearn.metrics import silhouette_score
     from sklearn.feature_selection import mutual_info_classif
+    from sklearn.metrics import silhouette_score
 
     SKLEARN_AVAILABLE = True
 except ImportError:
@@ -47,11 +47,9 @@ except ImportError:
 
 # Import structural entropy measures
 try:
-    from .structural_entropy import (
-        degree_distribution_entropy,
-        von_neumann_entropy,
-        structural_entropy as calc_structural_entropy,
-    )
+    from .structural_entropy import degree_distribution_entropy
+    from .structural_entropy import structural_entropy as calc_structural_entropy
+    from .structural_entropy import von_neumann_entropy
 
     STRUCTURAL_ENTROPY_AVAILABLE = True
 except ImportError:

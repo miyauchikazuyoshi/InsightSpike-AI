@@ -5,14 +5,14 @@ Test Unified Entropy Calculator
 Tests for the unified entropy calculator with content/structure separation.
 """
 
-import pytest
-import numpy as np
 import networkx as nx
+import numpy as np
+import pytest
 
 from insightspike.algorithms.entropy_calculator import (
+    ContentStructureSeparation,
     EntropyCalculator,
     EntropyResult,
-    ContentStructureSeparation,
 )
 
 
@@ -213,8 +213,8 @@ class TestEntropyCalculator:
 def test_pytorch_geometric_compatibility():
     """Test compatibility with PyTorch Geometric."""
     try:
-        from torch_geometric.data import Data
         import torch
+        from torch_geometric.data import Data
 
         # Create PyG data with features
         edge_index = torch.tensor(

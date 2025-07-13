@@ -4,6 +4,7 @@ PyTorch Geometric to NetworkX adapter for GED/IG calculations
 
 import logging
 from typing import Any, Optional, Tuple
+
 import numpy as np
 
 try:

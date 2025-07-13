@@ -5,8 +5,10 @@ Tests for Layer 4 direct generation mode
 Tests the new direct response generation capability without LLM.
 """
 
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+
 from insightspike.core.layers.layer4_llm_provider import LocalProvider
 from insightspike.core.layers.layer4_prompt_builder import L4PromptBuilder
 

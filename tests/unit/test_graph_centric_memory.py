@@ -2,11 +2,12 @@
 Tests for Graph-Centric Memory Manager (C-value free)
 """
 
-import pytest
-import numpy as np
-import torch
 import time
 from unittest.mock import Mock, patch
+
+import numpy as np
+import pytest
+import torch
 
 from insightspike.core.layers.layer2_graph_centric import GraphCentricMemoryManager
 

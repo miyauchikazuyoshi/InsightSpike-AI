@@ -6,12 +6,13 @@ Manages the flow of data through InsightSpike layers.
 """
 
 import logging
-from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+
+from ..memory import Memory
 
 # No need for interface import, define directly
 from .layers import L1Embedder, L2Indexer, L3GraphReasoner, L4PromptAugmenter
-from ..memory import Memory
 
 logger = logging.getLogger(__name__)
 

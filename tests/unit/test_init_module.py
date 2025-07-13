@@ -1,7 +1,8 @@
 """Tests for __init__ module coverage"""
-import pytest
-from unittest.mock import patch, MagicMock
 import sys
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 def test_insightspike_init_imports():

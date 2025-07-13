@@ -6,12 +6,13 @@ Replaces static C-values with dynamic graph-based importance metrics.
 """
 
 import logging
+import time
+from collections import defaultdict
 from typing import Dict, List, Optional, Tuple
+
 import numpy as np
 import torch
 from torch_geometric.data import Data
-from collections import defaultdict
-import time
 
 logger = logging.getLogger(__name__)
 

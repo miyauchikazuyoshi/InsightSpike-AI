@@ -5,16 +5,16 @@ Test Structural Entropy Measures
 Tests for graph structural entropy calculations.
 """
 
-import pytest
-import numpy as np
 import networkx as nx
+import numpy as np
+import pytest
 
 from insightspike.algorithms.structural_entropy import (
-    degree_distribution_entropy,
-    von_neumann_entropy,
-    structural_entropy,
     clustering_coefficient_entropy,
+    degree_distribution_entropy,
     path_length_entropy,
+    structural_entropy,
+    von_neumann_entropy,
 )
 
 
@@ -214,8 +214,8 @@ class TestStructuralEntropy:
 def test_pytorch_geometric_compatibility():
     """Test that functions work with PyTorch Geometric Data objects."""
     try:
-        from torch_geometric.data import Data
         import torch
+        from torch_geometric.data import Data
 
         # Create a simple PyG graph
         edge_index = torch.tensor(

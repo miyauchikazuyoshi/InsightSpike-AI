@@ -1,4 +1,5 @@
 import numpy as np
+
 from insightspike.core.learning.knowledge_graph_memory import KnowledgeGraphMemory
 
 

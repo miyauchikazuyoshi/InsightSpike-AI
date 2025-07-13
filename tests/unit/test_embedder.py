@@ -3,8 +3,9 @@ Test embedder module functionality
 """
 import os
 import sys
-import pytest
+
 import numpy as np
+import pytest
 
 
 def test_get_model_singleton():

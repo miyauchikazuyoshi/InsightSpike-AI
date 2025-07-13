@@ -2,9 +2,10 @@
 Tests for Hierarchical Graph Builder (Phase 3)
 """
 
-import pytest
-import numpy as np
 from unittest.mock import Mock, patch
+
+import numpy as np
+import pytest
 
 from insightspike.core.layers.hierarchical_graph_builder import HierarchicalGraphBuilder
 

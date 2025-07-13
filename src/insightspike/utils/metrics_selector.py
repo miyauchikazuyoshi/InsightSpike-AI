@@ -6,21 +6,20 @@ Selects appropriate GED/IG calculation methods based on configuration.
 """
 
 import logging
-from typing import Any, Callable, Optional, Dict
 from functools import lru_cache
+from typing import Any, Callable, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
 # Import different implementations
-from .graph_metrics import delta_ged as simple_delta_ged, delta_ig as simple_delta_ig
+from .graph_metrics import delta_ged as simple_delta_ged
+from .graph_metrics import delta_ig as simple_delta_ig
 
 try:
-    from .advanced_graph_metrics import (
-        delta_ged as advanced_delta_ged,
-        delta_ig as advanced_delta_ig,
-    )
     from ..algorithms.graph_edit_distance import GraphEditDistance
     from ..algorithms.information_gain import InformationGain
+    from .advanced_graph_metrics import delta_ged as advanced_delta_ged
+    from .advanced_graph_metrics import delta_ig as advanced_delta_ig
 
     ADVANCED_AVAILABLE = True
 except ImportError:

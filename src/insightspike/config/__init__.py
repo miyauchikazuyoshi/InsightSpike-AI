@@ -6,12 +6,12 @@ Provides simplified configuration management.
 """
 
 from .simple_config import (
-    SimpleConfig,
-    ConfigPresets,
     ConfigManager,
-    get_config as _get_simple_config,
+    ConfigPresets,
+    SimpleConfig,
     create_config_file,
 )
+from .simple_config import get_config as _get_simple_config
 
 
 # Create a wrapper that returns legacy config for backward compatibility

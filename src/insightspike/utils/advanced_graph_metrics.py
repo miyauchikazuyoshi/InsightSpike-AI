@@ -3,7 +3,8 @@ Advanced graph metrics using high-quality GED/IG implementations
 """
 
 import logging
-from typing import Any, Optional, Tuple, Dict
+from typing import Any, Dict, Optional, Tuple
+
 import numpy as np
 
 try:
@@ -15,12 +16,10 @@ except ImportError:
     TORCH_AVAILABLE = False
 
 # Import our advanced algorithms
-from ..algorithms.graph_edit_distance import (
-    GraphEditDistance,
-    compute_delta_ged as nx_delta_ged,
-)
+from ..algorithms.graph_edit_distance import GraphEditDistance
+from ..algorithms.graph_edit_distance import compute_delta_ged as nx_delta_ged
 from ..algorithms.information_gain import InformationGain
-from ..algorithms.pyg_adapter import PyGGraphEditDistance, PyGAdapter
+from ..algorithms.pyg_adapter import PyGAdapter, PyGGraphEditDistance
 
 logger = logging.getLogger(__name__)
 

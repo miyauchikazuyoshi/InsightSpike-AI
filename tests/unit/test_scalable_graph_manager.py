@@ -1,13 +1,14 @@
 """
 Tests for ScalableGraphManager with O(n log n) performance
 """
+import os
+import tempfile
+from unittest.mock import Mock, patch
+
+import numpy as np
 import pytest
 import torch
-import numpy as np
 from torch_geometric.data import Data
-from unittest.mock import Mock, patch
-import tempfile
-import os
 
 from insightspike.core.learning.scalable_graph_manager import ScalableGraphManager
 

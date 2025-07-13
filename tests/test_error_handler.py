@@ -3,26 +3,26 @@
 エラーハンドリングのテスト
 """
 
-import sys
 import os
-from pathlib import Path
-import tempfile
 import shutil
+import sys
+import tempfile
+from pathlib import Path
 
 # プロジェクトルートを追加
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root / "src"))
 
 from insightspike.utils.error_handler import (
-    InsightSpikeError,
     ConfigurationError,
-    ModelNotFoundError,
     InitializationError,
+    InsightSpikeError,
+    ModelNotFoundError,
     ProcessingError,
     get_logger,
     handle_error,
-    with_error_handling,
     validate_config,
+    with_error_handling,
 )
 
 
@@ -172,6 +172,7 @@ def test_debug_mode():
 
     # error_handlerモジュールを再インポート
     import importlib
+
     import insightspike.utils.error_handler as eh
 
     importlib.reload(eh)

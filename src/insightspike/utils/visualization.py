@@ -13,12 +13,13 @@ This module provides standardized visualization functions for:
 - Insight detection visualization
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from typing import Dict, List, Any, Optional, Tuple
-from pathlib import Path
 import json
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
 
 
 class InsightSpikeVisualizer:

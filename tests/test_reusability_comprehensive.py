@@ -8,15 +8,16 @@ improvements.
 """
 
 import logging
-from typing import Dict, Any
+from typing import Any, Dict
+
 import numpy as np
 
-from insightspike.core.agents.agent_factory import create_maze_agent, AgentConfigBuilder
-from insightspike.core.reasoners.standalone_l3 import create_standalone_reasoner
+from insightspike.core.agents.agent_factory import AgentConfigBuilder, create_maze_agent
 from insightspike.core.interfaces.maze_implementation import (
     MazeEnvironmentAdapter,
     MazeInsightDetector,
 )
+from insightspike.core.reasoners.standalone_l3 import create_standalone_reasoner
 
 logger = logging.getLogger(__name__)
 

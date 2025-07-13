@@ -173,17 +173,17 @@ class AgentInterface(ABC):
 # Import generic interfaces
 try:
     from .generic_interfaces import (
-        TaskType,
-        EnvironmentState,
         ActionSpace,
-        InsightMoment,
         EnvironmentInterface,
-        RewardNormalizer,
-        StateEncoder,
-        InsightDetectorInterface,
+        EnvironmentState,
         GenericAgentInterface,
+        InsightDetectorInterface,
+        InsightMoment,
         MemoryManagerInterface,
         ReasonerInterface,
+        RewardNormalizer,
+        StateEncoder,
+        TaskType,
     )
 
     GENERIC_INTERFACES_AVAILABLE = True
@@ -194,9 +194,9 @@ except ImportError:
 try:
     from .maze_implementation import (
         MazeEnvironmentAdapter,
-        MazeStateEncoder,
-        MazeRewardNormalizer,
         MazeInsightDetector,
+        MazeRewardNormalizer,
+        MazeStateEncoder,
     )
 
     MAZE_IMPLEMENTATIONS_AVAILABLE = True

@@ -3,9 +3,9 @@
 Test suite for simplified configuration system
 """
 
-import sys
-import os
 import json
+import os
+import sys
 import tempfile
 from pathlib import Path
 
@@ -14,11 +14,11 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root / "src"))
 
 from insightspike.config import (
-    SimpleConfig,
-    ConfigPresets,
     ConfigManager,
-    get_config,
+    ConfigPresets,
+    SimpleConfig,
     create_config_file,
+    get_config,
 )
 from insightspike.utils.error_handler import ConfigurationError
 

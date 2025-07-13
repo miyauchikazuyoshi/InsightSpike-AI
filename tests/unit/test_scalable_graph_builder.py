@@ -2,9 +2,10 @@
 Tests for Scalable Graph Builder (Phase 2)
 """
 
-import pytest
-import numpy as np
 from unittest.mock import Mock, patch
+
+import numpy as np
+import pytest
 
 from insightspike.core.layers.scalable_graph_builder import ScalableGraphBuilder
 

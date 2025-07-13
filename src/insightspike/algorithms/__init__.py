@@ -15,35 +15,32 @@ External Research API:
     for replicating and extending InsightSpike-AI's core functionality.
 """
 
-from .graph_edit_distance import (
-    GraphEditDistance,
-    OptimizationLevel,
-    GEDResult,
-    compute_graph_edit_distance,
-    compute_delta_ged,
-)
-
-from .information_gain import (
-    InformationGain,
-    EntropyMethod,
-    IGResult,
-    compute_shannon_entropy,
-    compute_information_gain,
-    compute_delta_ig,
-)
-
-from .structural_entropy import (
-    degree_distribution_entropy,
-    von_neumann_entropy,
-    structural_entropy,
-    clustering_coefficient_entropy,
-    path_length_entropy,
-)
-
 from .entropy_calculator import (
+    ContentStructureSeparation,
     EntropyCalculator,
     EntropyResult,
-    ContentStructureSeparation,
+)
+from .graph_edit_distance import (
+    GEDResult,
+    GraphEditDistance,
+    OptimizationLevel,
+    compute_delta_ged,
+    compute_graph_edit_distance,
+)
+from .information_gain import (
+    EntropyMethod,
+    IGResult,
+    InformationGain,
+    compute_delta_ig,
+    compute_information_gain,
+    compute_shannon_entropy,
+)
+from .structural_entropy import (
+    clustering_coefficient_entropy,
+    degree_distribution_entropy,
+    path_length_entropy,
+    structural_entropy,
+    von_neumann_entropy,
 )
 
 # Primary algorithm classes for external research use

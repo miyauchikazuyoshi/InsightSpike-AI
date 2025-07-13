@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 
-from insightspike.core.agents.agent_factory import create_maze_agent, AgentConfigBuilder
+from insightspike.core.agents.agent_factory import AgentConfigBuilder, create_maze_agent
 from insightspike.core.interfaces.generic_interfaces import (
     EnvironmentInterface,
     EnvironmentState,

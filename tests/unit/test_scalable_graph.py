@@ -3,13 +3,14 @@ Unit tests for scalable graph features
 =====================================
 """
 
-import pytest
+import tempfile
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
 import numpy as np
+import pytest
 import torch
 import torch_geometric
-from pathlib import Path
-import tempfile
-from unittest.mock import patch, MagicMock
 
 # Mock torch if needed
 if not hasattr(torch, "randn"):
@@ -17,11 +18,11 @@ if not hasattr(torch, "randn"):
         requires_grad_=lambda x: MagicMock()
     )
 
+from insightspike.core.config import get_config
 from insightspike.core.layers.scalable_graph_builder import ScalableGraphBuilder
 from insightspike.core.learning.scalable_graph_manager import ScalableGraphManager
-from insightspike.utils.graph_importance import GraphImportanceCalculator
 from insightspike.monitoring import GraphOperationMonitor
-from insightspike.core.config import get_config
+from insightspike.utils.graph_importance import GraphImportanceCalculator
 
 
 class TestScalableGraphBuilder:

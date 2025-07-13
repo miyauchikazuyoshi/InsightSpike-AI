@@ -13,14 +13,14 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import torch
 
+from ...utils.graph_construction import GraphBuilder
+from ..agents.main_agent import CycleResult, MainAgent
+from ..layers.layer3_graph_reasoner import L3GraphReasoner
 from ..query_transformation import (
     QueryState,
     QueryTransformationHistory,
     QueryTransformer,
 )
-from ..agents.main_agent import MainAgent, CycleResult
-from ..layers.layer3_graph_reasoner import L3GraphReasoner
-from ...utils.graph_construction import GraphBuilder
 
 logger = logging.getLogger(__name__)
 

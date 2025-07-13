@@ -1,5 +1,6 @@
 """Tests for config module coverage"""
 import pytest
+
 from insightspike.config import SimpleConfig, get_config
 
 

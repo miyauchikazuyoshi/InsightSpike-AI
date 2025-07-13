@@ -2,13 +2,14 @@
 Comprehensive tests for ScalableGraphManager with FAISS integration.
 """
 
-import pytest
-import numpy as np
-import torch
-import faiss
-from unittest.mock import patch, MagicMock
-import tempfile
 import os
+import tempfile
+from unittest.mock import MagicMock, patch
+
+import faiss
+import numpy as np
+import pytest
+import torch
 
 from insightspike.core.learning.scalable_graph_manager import ScalableGraphManager
 

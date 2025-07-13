@@ -1,10 +1,11 @@
 """Tests for FAISS mock implementation"""
 import numpy as np
 import pytest
+
 from insightspike.utils.faiss_mock import (
-    MockFaissIndex,
     IndexFlatIP,
     IndexFlatL2,
+    MockFaissIndex,
     get_faiss_index,
 )
 

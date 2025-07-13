@@ -6,13 +6,14 @@ Phase 3 RAG Performance Test
 階層的グラフシステムのRAG性能を標準RAGと比較
 """
 
+import json
 import sys
 import time
+from pathlib import Path
+from typing import Any, Dict, List
+
 import numpy as np
 import pytest
-from pathlib import Path
-from typing import List, Dict, Any
-import json
 
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 

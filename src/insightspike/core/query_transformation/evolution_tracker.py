@@ -8,13 +8,14 @@ Phase 3: Track and learn from query transformation patterns.
 import json
 import logging
 import sqlite3
+from collections import defaultdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
-from dataclasses import dataclass, asdict
+from typing import Any, Dict, List, Optional, Tuple
+
 import numpy as np
 import torch
-from collections import defaultdict
 
 from .query_state import QueryState, QueryTransformationHistory
 

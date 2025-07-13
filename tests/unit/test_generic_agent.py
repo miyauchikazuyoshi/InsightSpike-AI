@@ -1,25 +1,26 @@
 """
 Unit tests for generic agent implementation
 """
+from collections import deque
+from unittest.mock import MagicMock, Mock, patch
+
 import numpy as np
 import pytest
-from unittest.mock import Mock, MagicMock, patch
-from collections import deque
 
 from insightspike.core.agents.generic_agent import (
+    GenericInsightSpikeAgent,
     GenericMemoryManager,
     GenericReasoner,
-    GenericInsightSpikeAgent,
 )
 from insightspike.core.interfaces.generic_interfaces import (
-    EnvironmentState,
-    InsightMoment,
-    TaskType,
     ActionSpace,
     EnvironmentInterface,
+    EnvironmentState,
     InsightDetectorInterface,
-    StateEncoder,
+    InsightMoment,
     RewardNormalizer,
+    StateEncoder,
+    TaskType,
 )
 
 

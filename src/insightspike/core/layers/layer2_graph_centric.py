@@ -9,19 +9,19 @@ from __future__ import annotations
 
 import json
 import logging
+import time
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-from dataclasses import dataclass
-import time
 
 import faiss
 import numpy as np
 import torch
 
-from .layer2_memory_manager import L2MemoryManager
 from ...config import get_config
-from ..config import get_config as get_core_config
 from ...utils.embedder import get_model
+from ..config import get_config as get_core_config
+from .layer2_memory_manager import L2MemoryManager
 
 logger = logging.getLogger(__name__)
 

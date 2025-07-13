@@ -9,10 +9,10 @@ try:
         BaseExperiment,
         ExperimentConfig,
         ExperimentResult,
-        PerformanceMetrics,
         ExperimentSuite,
-        create_simple_experiment_config,
+        PerformanceMetrics,
         create_performance_metrics,
+        create_simple_experiment_config,
     )
 
     EXPERIMENT_FRAMEWORK_AVAILABLE = True
@@ -31,7 +31,7 @@ except ImportError as e:
 
 # Import agents
 try:
-    from .agents.main_agent import MainAgent, CycleResult
+    from .agents.main_agent import CycleResult, MainAgent
 
     MAIN_AGENT_AVAILABLE = True
 except ImportError as e:
@@ -40,16 +40,16 @@ except ImportError as e:
 
 # Import generic agents and factory
 try:
+    from .agents.agent_factory import (
+        AgentConfigBuilder,
+        InsightSpikeAgentFactory,
+        create_configured_maze_agent,
+        create_maze_agent,
+    )
     from .agents.generic_agent import (
         GenericInsightSpikeAgent,
         GenericMemoryManager,
         GenericReasoner,
-    )
-    from .agents.agent_factory import (
-        InsightSpikeAgentFactory,
-        AgentConfigBuilder,
-        create_maze_agent,
-        create_configured_maze_agent,
     )
 
     GENERIC_AGENTS_AVAILABLE = True
@@ -66,8 +66,8 @@ if not LITE_MODE:
     try:
         from .reasoners.standalone_l3 import (
             StandaloneL3GraphReasoner,
-            create_standalone_reasoner,
             analyze_documents_simple,
+            create_standalone_reasoner,
         )
 
         STANDALONE_REASONER_AVAILABLE = True

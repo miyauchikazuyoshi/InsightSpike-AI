@@ -6,10 +6,10 @@ Integrates enhanced L2 memory manager with graph-based episode management.
 """
 
 import logging
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
-from .main_agent import MainAgent
 from ..layers.layer2_enhanced import EnhancedL2MemoryManager, upgrade_to_enhanced
+from .main_agent import MainAgent
 
 logger = logging.getLogger(__name__)
 

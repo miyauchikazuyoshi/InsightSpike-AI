@@ -22,10 +22,10 @@ References:
 """
 
 import logging
-from typing import Any, Dict, Optional, Union, Tuple
 import time
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Dict, Optional, Tuple, Union
 
 import numpy as np
 

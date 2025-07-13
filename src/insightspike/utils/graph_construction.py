@@ -6,7 +6,8 @@ Build knowledge graphs from documents and episodes.
 """
 
 import logging
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
+
 import networkx as nx
 import numpy as np
 from sentence_transformers import SentenceTransformer

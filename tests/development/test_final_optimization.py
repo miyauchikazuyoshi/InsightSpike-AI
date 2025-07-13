@@ -4,9 +4,10 @@ InsightSpike-AI 最終効果確認テスト
 エッジ生成を最適化して完全なGNN効果を測定
 """
 
-import sys
 import os
+import sys
 import time
+
 import numpy as np
 import torch
 
@@ -25,7 +26,7 @@ def test_optimized_edge_generation():
         )
 
         try:
-            from torch_geometric.nn import GCNConv, GATConv, global_mean_pool
+            from torch_geometric.nn import GATConv, GCNConv, global_mean_pool
         except ImportError:
             print("⚠️ torch_geometric components not available, using mocked versions")
             GCNConv = lambda *args, **kwargs: None

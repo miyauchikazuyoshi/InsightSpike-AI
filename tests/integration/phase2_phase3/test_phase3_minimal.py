@@ -8,9 +8,10 @@ Minimal Phase 3 Test
 
 import sys
 import time
+from pathlib import Path
+
 import numpy as np
 import pytest
-from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 

@@ -3,10 +3,11 @@ Updated tests for Layer 2 Memory Manager
 Compatible with graph-centric implementation
 """
 
-import pytest
+from unittest.mock import MagicMock, Mock, patch
+
 import numpy as np
+import pytest
 import torch
-from unittest.mock import patch, MagicMock, Mock
 
 from insightspike.core.layers.layer2_graph_centric import GraphCentricMemoryManager
 

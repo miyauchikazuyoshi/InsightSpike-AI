@@ -3,21 +3,21 @@ Query Transformation Module
 Human-like thinking process through graph exploration
 """
 
-from .query_state import QueryState, QueryTransformationHistory
-from .query_transformer import QueryTransformer
 from .enhanced_query_transformer import (
-    EnhancedQueryTransformer,
-    QueryBranch,
-    MultiHopGNN,
     AdaptiveExplorer,
+    EnhancedQueryTransformer,
+    MultiHopGNN,
+    QueryBranch,
 )
 from .evolution_tracker import (
-    EvolutionTracker,
     EvolutionPattern,
+    EvolutionTracker,
     PatternDatabase,
     QueryTypeClassifier,
     TrajectoryAnalyzer,
 )
+from .query_state import QueryState, QueryTransformationHistory
+from .query_transformer import QueryTransformer
 
 __all__ = [
     "QueryState",

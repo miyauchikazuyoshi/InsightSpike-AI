@@ -3,15 +3,16 @@ Query Transformer
 Core logic for transforming queries through graph exploration
 """
 
+import logging
+from typing import Any, Dict, List, Optional, Tuple
+
+import networkx as nx
 import torch
 import torch.nn as nn
-from typing import Dict, List, Optional, Tuple, Any
 from sentence_transformers import SentenceTransformer
-import networkx as nx
-import logging
 
-from .query_state import QueryState, QueryTransformationHistory
 from ...algorithms.graph_edit_distance import GraphEditDistance
+from .query_state import QueryState, QueryTransformationHistory
 
 logger = logging.getLogger(__name__)
 

@@ -1,12 +1,13 @@
 """
 Comprehensive unit tests for embedder module
 """
+import os
+from unittest.mock import MagicMock, Mock, patch
+
 import numpy as np
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-import os
 
-from insightspike.utils.embedder import get_model, EmbeddingManager
+from insightspike.utils.embedder import EmbeddingManager, get_model
 
 
 class TestEmbeddingManager:

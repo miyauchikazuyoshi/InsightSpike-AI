@@ -1,20 +1,21 @@
 """
 Tests for Poetry integration module - Fixed version
 """
-import pytest
-import tempfile
 import os
+import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock, mock_open
+from unittest.mock import MagicMock, Mock, mock_open, patch
 
+import pytest
+
+from insightspike.utils.dependency_resolver import DependencySpec, ResolvedDependency
+from insightspike.utils.platform_utils import PlatformInfo
 from insightspike.utils.poetry_integration import (
+    DependencyInstallationError,
     PoetryIntegration,
     PoetryNotFoundError,
     PyprojectTomlError,
-    DependencyInstallationError,
 )
-from insightspike.utils.dependency_resolver import DependencySpec, ResolvedDependency
-from insightspike.utils.platform_utils import PlatformInfo
 
 
 class TestPoetryIntegration:

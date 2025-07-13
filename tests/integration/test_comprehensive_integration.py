@@ -4,8 +4,8 @@ Comprehensive InsightSpike-AI Integration Test with torch-geometric
 Test the complete pipeline including L3 Graph Reasoner
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
@@ -20,8 +20,8 @@ def test_l3_integration():
 
     try:
         from insightspike.core.layers.layer3_graph_reasoner import (
-            L3GraphReasoner,
             ConflictScore,
+            L3GraphReasoner,
         )
 
         print("✓ L3GraphReasoner imported successfully")
@@ -130,7 +130,7 @@ def test_gnn_information_processing():
     print("\n=== Testing GNN Information Processing ===")
 
     try:
-        from torch_geometric.nn import GCNConv, GATConv, global_mean_pool
+        from torch_geometric.nn import GATConv, GCNConv, global_mean_pool
 
         # Create a realistic knowledge graph scenario
         num_nodes = 20

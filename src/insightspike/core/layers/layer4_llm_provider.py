@@ -15,8 +15,8 @@ from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional
 
 from ...config import get_config
-from .layer4_prompt_builder import L4PromptBuilder
 from ..interfaces import L4LLMInterface, LayerInput, LayerOutput
+from .layer4_prompt_builder import L4PromptBuilder
 
 logger = logging.getLogger(__name__)
 

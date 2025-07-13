@@ -4,14 +4,15 @@ InsightSpike-AI 統合前後比較テスト
 torch-geometric有無での具体的効果測定
 """
 
-import sys
-import os
-import time
-import numpy as np
-import torch
 import json
+import os
+import sys
+import time
 from datetime import datetime
 from unittest.mock import MagicMock
+
+import numpy as np
+import torch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
@@ -52,13 +53,14 @@ def test_actual_insightspike_workflow():
             },
         }
 
-    from insightspike.core.learning.knowledge_graph_memory import KnowledgeGraphMemory
-    from insightspike.core.layers.layer3_graph_reasoner import (
-        L3GraphReasoner,
-        ConflictScore,
-    )
     from torch_geometric.data import Data
     from torch_geometric.nn import GCNConv, global_mean_pool
+
+    from insightspike.core.layers.layer3_graph_reasoner import (
+        ConflictScore,
+        L3GraphReasoner,
+    )
+    from insightspike.core.learning.knowledge_graph_memory import KnowledgeGraphMemory
 
     results = {}
 

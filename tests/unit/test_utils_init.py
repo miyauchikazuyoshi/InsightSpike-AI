@@ -1,6 +1,8 @@
 """Tests for utils __init__ module"""
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
+
 from insightspike import utils
 
 

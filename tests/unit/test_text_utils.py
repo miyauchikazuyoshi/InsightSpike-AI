@@ -1,5 +1,6 @@
 """Tests for text utilities"""
 import pytest
+
 from insightspike.utils.text_utils import clean_text, iter_text
 
 
@@ -24,8 +25,8 @@ def test_clean_text():
 def test_iter_text():
     """Test text iteration function."""
     # Test with Path object
-    from pathlib import Path
     import tempfile
+    from pathlib import Path
 
     with tempfile.TemporaryDirectory() as tmpdir:
         tmppath = Path(tmpdir)

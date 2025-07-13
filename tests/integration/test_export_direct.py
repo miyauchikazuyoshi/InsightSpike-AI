@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Direct test of the export-requirements function."""
 
+import os
 import sys
 from pathlib import Path
-import os
 
 # Add the source directory to Python path
 sys.path.insert(0, str(Path(__file__).parent / "src"))

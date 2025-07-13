@@ -2,20 +2,21 @@
 Comprehensive tests for Layer 3 Graph Reasoner
 """
 
-import pytest
-import numpy as np
-import torch
-from torch_geometric.data import Data
-from unittest.mock import Mock, patch, MagicMock
 import tempfile
 from pathlib import Path
+from unittest.mock import MagicMock, Mock, patch
 
+import numpy as np
+import pytest
+import torch
+from torch_geometric.data import Data
+
+from insightspike.core.interfaces import LayerInput
 from insightspike.core.layers.layer3_graph_reasoner import (
-    L3GraphReasoner,
     ConflictScore,
     GraphBuilder,
+    L3GraphReasoner,
 )
-from insightspike.core.interfaces import LayerInput
 
 
 class TestConflictScore:

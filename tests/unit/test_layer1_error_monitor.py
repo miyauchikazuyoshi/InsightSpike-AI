@@ -2,6 +2,7 @@
 Test layer1_error_monitor functionality
 """
 import pytest
+
 from insightspike.core.layers.layer1_error_monitor import uncertainty
 
 

@@ -6,7 +6,8 @@ Hybrid Metrics Calculation
 """
 
 import logging
-from typing import Any, Dict, Tuple, Optional
+from typing import Any, Dict, Optional, Tuple
+
 import numpy as np
 import torch
 

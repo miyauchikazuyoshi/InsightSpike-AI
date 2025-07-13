@@ -3,9 +3,10 @@ Mock implementation of FAISS for macOS compatibility issues.
 This provides a simple numpy-based alternative when FAISS has issues.
 """
 
-import numpy as np
-from typing import Optional, Tuple
 import logging
+from typing import Optional, Tuple
+
+import numpy as np
 
 logger = logging.getLogger(__name__)
 

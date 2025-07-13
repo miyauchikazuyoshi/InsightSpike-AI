@@ -16,7 +16,7 @@ try:
     print("✓ Config import successful")
 
     # Test memory manager
-    from insightspike.core.layers.layer2_memory_manager import L2MemoryManager, Episode
+    from insightspike.core.layers.layer2_memory_manager import Episode, L2MemoryManager
 
     print("✓ Memory manager import successful")
 

@@ -7,17 +7,18 @@ and query branching capabilities.
 """
 
 import logging
-from typing import List, Dict, Any, Optional, Tuple, Set
 from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Set, Tuple
+
+import networkx as nx
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import networkx as nx
-import numpy as np
 from sentence_transformers import SentenceTransformer
 
 from .query_state import QueryState
-from .query_transformer import QueryTransformer, QueryGraphGNN
+from .query_transformer import QueryGraphGNN, QueryTransformer
 
 logger = logging.getLogger(__name__)
 

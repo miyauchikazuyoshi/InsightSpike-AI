@@ -1,9 +1,10 @@
 """
 Test loader functionality
 """
-import pytest
 from pathlib import Path
 from unittest.mock import patch
+
+import pytest
 
 
 def test_load_corpus_file(tmp_path):

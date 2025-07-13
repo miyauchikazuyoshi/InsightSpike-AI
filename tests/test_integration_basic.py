@@ -3,11 +3,11 @@
 基本的な統合テスト - InsightSpikeの主要機能をエンドツーエンドでテスト
 """
 
-import sys
-from pathlib import Path
 import json
+import sys
 import time
-from typing import Dict, Any, List
+from pathlib import Path
+from typing import Any, Dict, List
 
 # プロジェクトルートを追加
 project_root = Path(__file__).parent.parent
@@ -268,8 +268,9 @@ class PerformanceScenario(TestScenario):
         )
 
         # メモリ使用量の確認（簡易版）
-        import psutil
         import os
+
+        import psutil
 
         process = psutil.Process(os.getpid())
         memory_mb = process.memory_info().rss / 1024 / 1024

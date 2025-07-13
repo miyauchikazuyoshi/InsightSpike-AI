@@ -7,8 +7,9 @@ Verifies that the sign convention is correct:
 - Negative ΔIG means information loss (entropy increase)
 """
 
-import pytest
 import numpy as np
+import pytest
+
 from insightspike.algorithms.information_gain import InformationGain, compute_delta_ig
 
 

@@ -6,13 +6,14 @@ Hierarchical Graph Builder - Phase 3 Implementation
 """
 
 import logging
-from typing import List, Dict, Any, Tuple, Optional
+from collections import defaultdict
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Tuple
+
+import faiss
 import numpy as np
 import torch
-from torch_geometric.data import Data, Batch
-import faiss
-from collections import defaultdict
+from torch_geometric.data import Batch, Data
 
 logger = logging.getLogger(__name__)
 

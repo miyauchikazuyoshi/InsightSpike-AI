@@ -4,7 +4,8 @@ Supports large-scale graph construction with O(n log n) complexity.
 """
 
 import logging
-from typing import List, Dict, Any, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+
 import numpy as np
 import torch
 from torch_geometric.data import Data

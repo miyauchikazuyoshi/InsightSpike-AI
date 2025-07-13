@@ -1,9 +1,10 @@
 """Graph fixtures for consistent test data across the test suite."""
 
-import pytest
+from typing import Any, Dict, List, Tuple
+
 import networkx as nx
 import numpy as np
-from typing import Tuple, List, Dict, Any
+import pytest
 
 
 @pytest.fixture

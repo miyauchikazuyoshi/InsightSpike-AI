@@ -13,6 +13,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 import pytest
+
 from insightspike.core.agents.main_agent_graph_centric import GraphCentricMainAgent
 
 

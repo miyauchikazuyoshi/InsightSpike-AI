@@ -6,8 +6,8 @@ Performance monitoring and logging for various system components.
 """
 
 from .graph_monitor import (
-    GraphOperationMonitor,
     GraphOperationMetric,
+    GraphOperationMonitor,
     MonitoredOperation,
     create_default_monitor,
 )

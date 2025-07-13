@@ -2,11 +2,12 @@
 Comprehensive tests for L2EnhancedScalableMemory with conflict-based splitting.
 """
 
-import pytest
-import numpy as np
-from unittest.mock import patch, MagicMock, PropertyMock
 import tempfile
 from pathlib import Path
+from unittest.mock import MagicMock, PropertyMock, patch
+
+import numpy as np
+import pytest
 
 from insightspike.core.layers.layer2_enhanced_scalable import L2EnhancedScalableMemory
 from insightspike.core.layers.layer2_memory_manager import Episode

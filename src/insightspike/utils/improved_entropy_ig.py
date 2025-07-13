@@ -6,12 +6,13 @@ Improved Entropy-based Information Gain Calculation
 """
 
 import logging
-import numpy as np
 from typing import Any, Optional, Tuple
-from sklearn.decomposition import PCA
-from sklearn.cluster import KMeans
-from scipy.stats import entropy as scipy_entropy
+
+import numpy as np
 import torch
+from scipy.stats import entropy as scipy_entropy
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
 
 logger = logging.getLogger(__name__)
 

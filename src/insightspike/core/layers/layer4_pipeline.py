@@ -9,8 +9,8 @@ to provide flexible text generation with optional LLM enhancement.
 import logging
 from typing import Any, Dict, Optional
 
-from .layer4_prompt_builder import L4PromptBuilder
 from .layer4_1_llm_polish import L4_1LLMPolish
+from .layer4_prompt_builder import L4PromptBuilder
 
 logger = logging.getLogger(__name__)
 

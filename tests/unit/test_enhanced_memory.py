@@ -1,16 +1,17 @@
 """
 Tests for L2EnhancedScalableMemory with O(n log n) performance
 """
-import pytest
-import numpy as np
-import tempfile
-import os
 import json
+import os
+import tempfile
+from pathlib import Path
 from unittest.mock import Mock, patch
+
+import numpy as np
+import pytest
 
 from insightspike.core.layers.layer2_enhanced_scalable import L2EnhancedScalableMemory
 from insightspike.utils.embedder import get_model
-from pathlib import Path
 
 
 class TestL2EnhancedScalableMemory:

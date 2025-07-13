@@ -10,8 +10,9 @@ of graph structures, complementing the content-based entropy measures.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Union
 from collections import Counter
+from typing import Any, Dict, List, Optional, Union
+
 import numpy as np
 
 try:
@@ -23,8 +24,8 @@ except ImportError:
     nx = None
 
 try:
-    from torch_geometric.data import Data
     import torch
+    from torch_geometric.data import Data
 
     TORCH_GEOMETRIC_AVAILABLE = True
 except ImportError:

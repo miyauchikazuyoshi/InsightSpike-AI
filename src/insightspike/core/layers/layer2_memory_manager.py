@@ -16,8 +16,8 @@ import faiss
 import numpy as np
 
 from ...config import get_config
-from ..config import get_config as get_core_config
 from ...utils.embedder import get_model
+from ..config import get_config as get_core_config
 from ..interfaces import L2MemoryInterface
 from ..learning.knowledge_graph_memory import KnowledgeGraphMemory
 

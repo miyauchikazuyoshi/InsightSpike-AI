@@ -12,8 +12,9 @@ This module provides a unified interface for calculating:
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Union
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 import numpy as np
 
 # Try to import optional dependencies
@@ -27,13 +28,13 @@ except ImportError:
         "sklearn not available, will use numpy fallback for cosine similarity"
     )
 
-from .information_gain import InformationGain, EntropyMethod
+from .information_gain import EntropyMethod, InformationGain
 from .structural_entropy import (
-    degree_distribution_entropy,
-    von_neumann_entropy,
-    structural_entropy as calc_structural_entropy,
     clustering_coefficient_entropy,
+    degree_distribution_entropy,
 )
+from .structural_entropy import structural_entropy as calc_structural_entropy
+from .structural_entropy import von_neumann_entropy
 
 logger = logging.getLogger(__name__)
 

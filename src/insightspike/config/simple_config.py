@@ -5,11 +5,12 @@ Simplified Configuration System for InsightSpike
 A cleaner, more intuitive configuration system with presets and validation.
 """
 
-import os
 import json
+import os
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Dict, Any, Optional, Union
-from dataclasses import dataclass, field, asdict
+from typing import Any, Dict, Optional, Union
+
 from insightspike.utils.error_handler import ConfigurationError, get_logger
 
 logger = get_logger("config")
@@ -274,13 +275,13 @@ class ConfigManager:
         """Convert to legacy Config object for backward compatibility"""
         from insightspike.core.config import (
             Config,
-            LLMConfig,
             EmbeddingConfig,
-            SpikeConfig,
-            MemoryConfig,
-            RetrievalConfig,
-            ReasoningConfig,
             GraphConfig,
+            LLMConfig,
+            MemoryConfig,
+            ReasoningConfig,
+            RetrievalConfig,
+            SpikeConfig,
         )
 
         legacy = Config()

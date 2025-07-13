@@ -7,8 +7,8 @@ torch-geometricの依存関係問題を回避して、
 InsightSpike-AIの基本機能をテストします。
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 # プロジェクトルートを追加

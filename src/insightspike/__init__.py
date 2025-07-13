@@ -80,17 +80,17 @@ else:
 # Generic agent system exports
 if not LITE_MODE:
     try:
-        from .core.agents.generic_agent import GenericInsightSpikeAgent
         from .core.agents.agent_factory import (
-            InsightSpikeAgentFactory,
-            create_maze_agent,
-            create_configured_maze_agent,
             AgentConfigBuilder,
+            InsightSpikeAgentFactory,
+            create_configured_maze_agent,
+            create_maze_agent,
         )
+        from .core.agents.generic_agent import GenericInsightSpikeAgent
         from .core.interfaces.generic_interfaces import (
-            TaskType,
             EnvironmentInterface,
             InsightMoment,
+            TaskType,
         )
     except ImportError:
         # Fallback if generic agents are not available
@@ -118,8 +118,8 @@ if not LITE_MODE:
     try:
         from .core.reasoners.standalone_l3 import (
             StandaloneL3GraphReasoner,
-            create_standalone_reasoner,
             analyze_documents_simple,
+            create_standalone_reasoner,
         )
     except ImportError:
         # Fallback if standalone reasoner is not available
@@ -134,7 +134,7 @@ else:
     analyze_documents_simple = None
 
 # Import the unified config system
-from .core.config import get_config, Config
+from .core.config import Config, get_config
 
 
 # Create a legacy config module object for backward compatibility

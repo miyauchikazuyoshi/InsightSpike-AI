@@ -10,12 +10,12 @@ Enhanced configuration system for InsightSpike-AI that supports:
 - Random seed management for reproducibility
 """
 
-import os
 import json
 import logging
+import os
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
-from dataclasses import dataclass, asdict, field
 
 try:
     import yaml

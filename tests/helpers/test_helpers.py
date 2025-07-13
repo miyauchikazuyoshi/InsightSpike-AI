@@ -1,10 +1,11 @@
 """Common test helper functions and utilities."""
 
-import numpy as np
-import networkx as nx
-from typing import Tuple, List, Dict, Any, Optional
 import time
 from contextlib import contextmanager
+from typing import Any, Dict, List, Optional, Tuple
+
+import networkx as nx
+import numpy as np
 
 
 def assert_graphs_equal(

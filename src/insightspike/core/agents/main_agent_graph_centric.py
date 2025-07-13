@@ -6,10 +6,10 @@ Graph-Centric Main Agent (C値なし)
 """
 
 import logging
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
 
-from .main_agent import MainAgent
 from ..layers.layer2_graph_centric import GraphCentricMemoryManager
+from .main_agent import MainAgent
 
 logger = logging.getLogger(__name__)
 

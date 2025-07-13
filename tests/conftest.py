@@ -1,31 +1,33 @@
 """Pytest configuration and shared fixtures."""
 
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add src to path for imports
 src_path = Path(__file__).parent.parent / "src"
 if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
 
+from tests.factories.mock_factory import (
+    config_factory,
+    document_factory,
+    embedding_factory,
+    graph_factory,
+    llm_factory,
+    memory_factory,
+)
+
 # Import all fixtures to make them available
 from tests.fixtures.graph_fixtures import *
-from tests.factories.mock_factory import (
-    graph_factory,
-    embedding_factory,
-    memory_factory,
-    config_factory,
-    llm_factory,
-    document_factory,
-)
 from tests.helpers.test_helpers import (
+    PerformanceMetrics,
+    assert_embeddings_similar,
     assert_graphs_equal,
     assert_graphs_similar,
-    assert_embeddings_similar,
-    create_test_embedding,
     create_mock_config_object,
-    PerformanceMetrics,
+    create_test_embedding,
 )
 
 
@@ -44,8 +46,9 @@ def performance_tracker():
 @pytest.fixture(autouse=True)
 def reset_random_seed():
     """Reset random seed before each test for reproducibility."""
-    import numpy as np
     import random
+
+    import numpy as np
 
     np.random.seed(42)
     random.seed(42)

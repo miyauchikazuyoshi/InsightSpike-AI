@@ -5,11 +5,13 @@ Tests for Layer 4 Pipeline Architecture
 Tests the new Layer 4 (PromptBuilder) + Layer 4.1 (LLM Polish) pipeline.
 """
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
+
+from insightspike.core.layers.layer4_1_llm_polish import L4_1LLMPolish
 from insightspike.core.layers.layer4_pipeline import Layer4Pipeline
 from insightspike.core.layers.layer4_prompt_builder import L4PromptBuilder
-from insightspike.core.layers.layer4_1_llm_polish import L4_1LLMPolish
 
 
 class TestLayer4Pipeline:

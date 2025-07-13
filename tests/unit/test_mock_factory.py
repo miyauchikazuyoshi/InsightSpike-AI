@@ -1,5 +1,6 @@
 """Tests for mock factory utilities"""
 import pytest
+
 from insightspike.utils.mock_factory import create_mock_components
 
 

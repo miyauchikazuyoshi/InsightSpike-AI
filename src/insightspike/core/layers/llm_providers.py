@@ -6,10 +6,10 @@ Provides actual LLM functionality using OpenAI, Anthropic, or Ollama.
 This module integrates with InsightSpike's Layer 4 architecture.
 """
 
-import os
 import logging
-from typing import Dict, Any, Optional, List
+import os
 import time
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

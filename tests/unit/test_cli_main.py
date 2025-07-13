@@ -7,7 +7,8 @@ Many commands have been moved to the new 'spike' CLI in improved_cli.py.
 import json
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
 from typer.testing import CliRunner
 
@@ -17,7 +18,6 @@ pytestmark = pytest.mark.skip(
 )
 
 from insightspike.cli.main import app
-
 
 runner = CliRunner()
 
