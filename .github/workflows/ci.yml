@@ -43,6 +43,8 @@ jobs:
       run: poetry install --no-interaction --with dev
     
     - name: Run tests
+      env:
+        CI: true
       run: |
         poetry run pytest tests/unit/ -v --cov=src/insightspike --cov-report=xml
     
