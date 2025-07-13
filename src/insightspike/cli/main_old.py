@@ -27,7 +27,9 @@ app.add_typer(deps_app, name="deps")
 @app.command("legacy-ask")
 def ask(question: str = typer.Argument(..., help="Ask a question to the AI agent")):
     """[DEPRECATED] Use 'spike ask' instead. Legacy ask command."""
-    print("[yellow]⚠️  This command is deprecated. Please use 'spike ask' instead.[/yellow]\n")
+    print(
+        "[yellow]⚠️  This command is deprecated. Please use 'spike ask' instead.[/yellow]\n"
+    )
     try:
         print(f"[bold blue]Question:[/bold blue] {question}")
         print("[yellow]Initializing AI agent...[/yellow]")
@@ -103,7 +105,9 @@ def load_documents(
 @app.command("legacy-stats")
 def stats():
     """[DEPRECATED] Use 'spike stats' instead. Show agent statistics"""
-    print("[yellow]⚠️  This command is deprecated. Please use 'spike stats' instead.[/yellow]\n")
+    print(
+        "[yellow]⚠️  This command is deprecated. Please use 'spike stats' instead.[/yellow]\n"
+    )
     try:
         agent = MainAgent()
         if not agent.initialize():
@@ -152,6 +156,7 @@ def config_info():
 # Experimental commands
 # Removed experiment command - run scripts directly
 # Use: python scripts/run_poc_simple.py
+
 
 @app.command()
 def experiment():
@@ -282,6 +287,7 @@ def experiment():
 # Removed benchmark command - run scripts directly
 # Use: python scripts/run_poc_*.py
 
+
 @app.command()
 def benchmark(
     dataset: str = typer.Option(
@@ -337,7 +343,7 @@ def benchmark(
 # Removed legacy embed command - use load_documents instead
 # Removed legacy query command - use legacy-ask instead
 # Removed insight_experiment - run scripts directly
-# Removed compare_experiments - run scripts directly  
+# Removed compare_experiments - run scripts directly
 # Removed experiment_suite function - use individual experiments instead
 # Removed demo command - moved to new CLI (spike demo)
 # Removed insights command - moved to new CLI (spike insights)

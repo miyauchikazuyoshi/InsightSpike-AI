@@ -19,7 +19,7 @@ __all__ = ["L4PromptBuilder"]
 
 class L4PromptBuilder(L4Interface):
     """Layer 4: Semantic Response Generation
-    
+
     This is the true Layer 4 that performs semantic processing:
     - Transforms graph analysis into structured responses
     - Synthesizes insights from retrieved documents
@@ -222,7 +222,7 @@ Please answer the question based on the provided context documents."""
 
     def build_direct_response(self, context: Dict[str, Any], question: str) -> str:
         """Build a direct response without LLM processing.
-        
+
         This method generates a complete, structured response based on the
         context and reasoning analysis, suitable for high-confidence scenarios.
         """
@@ -231,53 +231,61 @@ Please answer the question based on the provided context documents."""
             documents = context.get("retrieved_documents", [])
             graph_info = context.get("graph_analysis", {})
             reasoning_quality = context.get("reasoning_quality", 0.0)
-            
+
             # Start building the response
             response_parts = []
-            
+
             # Add insight spike notification if detected
             if graph_info.get("spike_detected", False):
                 response_parts.append("🧠 **INSIGHT SPIKE DETECTED**")
                 response_parts.append("")
-            
+
             # Main answer section
             response_parts.append("## Answer")
-            
+
             # Synthesize information from documents
             if documents:
                 key_points = self._extract_key_points(documents)
                 response_parts.append(self._synthesize_answer(key_points, question))
             else:
-                response_parts.append("Based on the analysis of the knowledge graph structure:")
+                response_parts.append(
+                    "Based on the analysis of the knowledge graph structure:"
+                )
                 response_parts.append("")
-            
+
             # Add reasoning metrics if significant
             metrics = graph_info.get("metrics", {})
             if metrics:
                 delta_ged = metrics.get("delta_ged", 0)
                 delta_ig = metrics.get("delta_ig", 0)
-                
+
                 if abs(delta_ged) > 0.1 or abs(delta_ig) > 0.1:
                     response_parts.append("")
                     response_parts.append("## Reasoning Metrics")
-                    response_parts.append(f"- Structure simplification (ΔGED): {delta_ged:.3f}")
+                    response_parts.append(
+                        f"- Structure simplification (ΔGED): {delta_ged:.3f}"
+                    )
                     response_parts.append(f"- Information gain (ΔIG): {delta_ig:.3f}")
-            
+
             # Add confidence level
             response_parts.append("")
-            response_parts.append(f"**Confidence Level**: {self._get_confidence_indicator(reasoning_quality, reasoning_quality)}")
-            
+            response_parts.append(
+                f"**Confidence Level**: {self._get_confidence_indicator(reasoning_quality, reasoning_quality)}"
+            )
+
             # Add synthesis note if cross-domain connections detected
             if reasoning_quality > 0.7:
                 response_parts.append("")
-                response_parts.append("*This response synthesizes information across multiple knowledge domains.*")
-            
+                response_parts.append(
+                    "*This response synthesizes information across multiple knowledge domains.*"
+                )
+
             return "\n".join(response_parts)
-            
+
         except Exception as e:
             logger.error(f"Direct response building failed: {e}")
             return self._fallback_response(question)
-    
+
     def _extract_key_points(self, documents: List[Dict[str, Any]]) -> List[str]:
         """Extract key points from documents."""
         key_points = []
@@ -289,12 +297,12 @@ Please answer the question based on the provided context documents."""
                 if sentences:
                     key_points.append(sentences[0] + ".")
         return key_points
-    
+
     def _synthesize_answer(self, key_points: List[str], question: str) -> str:
         """Synthesize key points into a coherent answer."""
         if not key_points:
             return "No relevant information was found in the knowledge base."
-        
+
         # Simple synthesis - join key points with transitions
         synthesis = []
         for i, point in enumerate(key_points):
@@ -304,56 +312,58 @@ Please answer the question based on the provided context documents."""
                 synthesis.append(f"Additionally, {point.lower()}")
             else:
                 synthesis.append(f"Furthermore, {point.lower()}")
-        
+
         return " ".join(synthesis)
-    
+
     def _fallback_response(self, question: str) -> str:
         """Fallback response for direct generation."""
         return f"Unable to generate a direct response for: {question}\n\nPlease try using standard LLM generation mode."
-    
+
     def process(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """Process input through Layer 4.
-        
+
         Implements the L4Interface process method.
         """
         context = input_data.get("context", {})
         question = input_data.get("question", "")
         mode = input_data.get("mode", None)
-        
+
         # Determine generation mode if not specified
         if mode is None:
             mode = self.get_generation_mode(context)
-        
+
         # Generate output based on mode
         if mode == "direct":
             output = self.build_direct_response(context, question)
         else:
             output = self.build_prompt(context, question)
-        
+
         # Calculate confidence
         reasoning_quality = context.get("reasoning_quality", 0.0)
-        
+
         return {
             "output": output,
             "mode": mode,
             "confidence": reasoning_quality,
             "metadata": {
-                "spike_detected": context.get("graph_analysis", {}).get("spike_detected", False),
-                "metrics": context.get("graph_analysis", {}).get("metrics", {})
-            }
+                "spike_detected": context.get("graph_analysis", {}).get(
+                    "spike_detected", False
+                ),
+                "metrics": context.get("graph_analysis", {}).get("metrics", {}),
+            },
         }
-    
+
     def get_generation_mode(self, context: Dict[str, Any]) -> str:
         """Determine the appropriate generation mode.
-        
+
         Returns 'direct' for high-quality reasoning, 'prompt' otherwise.
         """
         reasoning_quality = context.get("reasoning_quality", 0.0)
-        
+
         # Check if direct generation is enabled in config
         use_direct = getattr(self.config.llm, "use_direct_generation", False)
         threshold = getattr(self.config.llm, "direct_generation_threshold", 0.7)
-        
+
         if use_direct and reasoning_quality > threshold:
             return "direct"
         return "prompt"

@@ -46,26 +46,36 @@ class L4LLMProvider(L4LLMInterface):
                 context_str = context
 
             # Build enhanced prompt
-            prompt = self.prompt_builder.build_prompt({"context": context_str, "reasoning_quality": reasoning_quality}, question)
+            prompt = self.prompt_builder.build_prompt(
+                {"context": context_str, "reasoning_quality": reasoning_quality},
+                question,
+            )
 
             # Check if we should use direct generation
             use_direct_generation = (
-                hasattr(self.config, "llm") 
-                and hasattr(self.config.llm, "use_direct_generation") 
+                hasattr(self.config, "llm")
+                and hasattr(self.config.llm, "use_direct_generation")
                 and self.config.llm.use_direct_generation
-                and reasoning_quality > getattr(self.config.llm, "direct_generation_threshold", 0.7)
+                and reasoning_quality
+                > getattr(self.config.llm, "direct_generation_threshold", 0.7)
             )
 
             if use_direct_generation:
                 # Use PromptBuilder to generate a complete response
-                logger.info(f"Using direct generation (reasoning_quality={reasoning_quality:.3f})")
-                
+                logger.info(
+                    f"Using direct generation (reasoning_quality={reasoning_quality:.3f})"
+                )
+
                 # Generate direct response
-                direct_response = self.prompt_builder.build_direct_response(context, question)
-                
+                direct_response = self.prompt_builder.build_direct_response(
+                    context, question
+                )
+
                 # Analyze the response for insights
-                insight_analysis = self.analyze_insight_potential(question, direct_response)
-                
+                insight_analysis = self.analyze_insight_potential(
+                    question, direct_response
+                )
+
                 return direct_response
 
             # Generate response
@@ -90,23 +100,30 @@ class L4LLMProvider(L4LLMInterface):
             # Check if we should use direct generation
             reasoning_quality = context.get("reasoning_quality", 0.0)
             use_direct_generation = (
-                hasattr(self.config, "llm") 
-                and hasattr(self.config.llm, "use_direct_generation") 
+                hasattr(self.config, "llm")
+                and hasattr(self.config.llm, "use_direct_generation")
                 and self.config.llm.use_direct_generation
-                and reasoning_quality > getattr(self.config.llm, "direct_generation_threshold", 0.7)
+                and reasoning_quality
+                > getattr(self.config.llm, "direct_generation_threshold", 0.7)
                 and not streaming  # Direct generation doesn't support streaming yet
             )
 
             if use_direct_generation:
                 # Use PromptBuilder to generate a complete response
-                logger.info(f"Using direct generation (reasoning_quality={reasoning_quality:.3f})")
-                
+                logger.info(
+                    f"Using direct generation (reasoning_quality={reasoning_quality:.3f})"
+                )
+
                 # Generate direct response
-                direct_response = self.prompt_builder.build_direct_response(context, question)
-                
+                direct_response = self.prompt_builder.build_direct_response(
+                    context, question
+                )
+
                 # Analyze the response for insights
-                insight_analysis = self.analyze_insight_potential(question, direct_response)
-                
+                insight_analysis = self.analyze_insight_potential(
+                    question, direct_response
+                )
+
                 return {
                     "response": direct_response,
                     "prompt": prompt,
@@ -375,7 +392,9 @@ class OpenAIProvider(L4LLMProvider):
             return ""
 
         context_parts = []
-        for i, episode in enumerate(episodes[:10]):  # Limit to 10 most relevant episodes
+        for i, episode in enumerate(
+            episodes[:10]
+        ):  # Limit to 10 most relevant episodes
             text = episode.get("text", str(episode))
             c_value = episode.get("c", 0.5)
             context_parts.append(f"Context {i+1} (relevance: {c_value:.2f}):\n{text}")
@@ -390,7 +409,7 @@ class OpenAIProvider(L4LLMProvider):
                 input_data = LayerInput(
                     data=input_data.get("question", str(input_data)),
                     context=input_data.get("context", {}),
-                    metadata=input_data.get("metadata", {})
+                    metadata=input_data.get("metadata", {}),
                 )
             else:
                 input_data = LayerInput(data=str(input_data))
@@ -419,8 +438,8 @@ class OpenAIProvider(L4LLMProvider):
                 "question": question,
                 "context_length": len(context_str),
                 "response_length": len(response),
-                "insight_analysis": self.analyze_insight_potential(question, response)
-            }
+                "insight_analysis": self.analyze_insight_potential(question, response),
+            },
         )
 
     def cleanup(self):
@@ -544,7 +563,7 @@ You are a helpful AI assistant. Answer the question based on the provided contex
                 input_data = LayerInput(
                     data=input_data.get("question", str(input_data)),
                     context=input_data.get("context", {}),
-                    metadata=input_data.get("metadata", {})
+                    metadata=input_data.get("metadata", {}),
                 )
             else:
                 input_data = LayerInput(data=str(input_data))
@@ -563,17 +582,19 @@ You are a helpful AI assistant. Answer the question based on the provided contex
 
         # For detailed metadata, use the internal method
         if hasattr(self, "generate_response_detailed"):
-            detailed_result = self.generate_response_detailed(input_data.context or {}, question)
+            detailed_result = self.generate_response_detailed(
+                input_data.context or {}, question
+            )
             return LayerOutput(
                 result=response,
                 confidence=detailed_result.get("confidence", 0.8),
-                metadata=detailed_result
+                metadata=detailed_result,
             )
         else:
             return LayerOutput(
                 result=response,
                 confidence=0.8,
-                metadata={"response": response, "success": True}
+                metadata={"response": response, "success": True},
             )
 
     def cleanup(self):

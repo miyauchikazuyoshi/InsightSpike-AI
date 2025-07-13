@@ -12,13 +12,20 @@ if str(src_path) not in sys.path:
 # Import all fixtures to make them available
 from tests.fixtures.graph_fixtures import *
 from tests.factories.mock_factory import (
-    graph_factory, embedding_factory, memory_factory,
-    config_factory, llm_factory, document_factory
+    graph_factory,
+    embedding_factory,
+    memory_factory,
+    config_factory,
+    llm_factory,
+    document_factory,
 )
 from tests.helpers.test_helpers import (
-    assert_graphs_equal, assert_graphs_similar,
-    assert_embeddings_similar, create_test_embedding,
-    create_mock_config_object, PerformanceMetrics
+    assert_graphs_equal,
+    assert_graphs_similar,
+    assert_embeddings_similar,
+    create_test_embedding,
+    create_mock_config_object,
+    PerformanceMetrics,
 )
 
 
@@ -39,6 +46,7 @@ def reset_random_seed():
     """Reset random seed before each test for reproducibility."""
     import numpy as np
     import random
+
     np.random.seed(42)
     random.seed(42)
     yield
@@ -57,15 +65,9 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"
     )
-    config.addinivalue_line(
-        "markers", "integration: marks tests as integration tests"
-    )
-    config.addinivalue_line(
-        "markers", "unit: marks tests as unit tests"
-    )
-    config.addinivalue_line(
-        "markers", "requires_gpu: marks tests that require GPU"
-    )
+    config.addinivalue_line("markers", "integration: marks tests as integration tests")
+    config.addinivalue_line("markers", "unit: marks tests as unit tests")
+    config.addinivalue_line("markers", "requires_gpu: marks tests that require GPU")
 
 
 # Global test configuration
@@ -76,5 +78,5 @@ def test_config():
         "default_embedding_dim": 384,
         "default_timeout": 5.0,
         "max_test_samples": 100,
-        "lite_mode": True  # For CI environment
+        "lite_mode": True,  # For CI environment
     }

@@ -57,32 +57,34 @@ class ErrorMonitor(L1ErrorMonitorInterface):
     def reset(self) -> None:
         """Reset the error monitor state"""
         self.error_history = []
-        if hasattr(self, '_is_initialized'):
+        if hasattr(self, "_is_initialized"):
             self._is_initialized = True
 
-    def analyze_uncertainty(self, question: str, previous_state: Dict[str, Any] = None) -> Dict[str, Any]:
+    def analyze_uncertainty(
+        self, question: str, previous_state: Dict[str, Any] = None
+    ) -> Dict[str, Any]:
         """
         Analyze uncertainty for a given question and previous state
-        
+
         Args:
             question: The question to analyze
             previous_state: Previous reasoning state
-            
+
         Returns:
             Dict containing uncertainty analysis
         """
         try:
             # Use the existing analyze_input function for comprehensive analysis
             analysis = analyze_input(question)
-            
+
             # Calculate uncertainty metrics
             uncertainty_score = analysis.query_complexity
-            
+
             # Add state-based uncertainty if we have previous state
             if previous_state:
                 state_uncertainty = self._analyze_state_uncertainty(previous_state)
                 uncertainty_score = (uncertainty_score + state_uncertainty) / 2
-            
+
             return {
                 "uncertainty_score": uncertainty_score,
                 "error_threshold": analysis.error_threshold,
@@ -90,9 +92,9 @@ class ErrorMonitor(L1ErrorMonitorInterface):
                 "requires_synthesis": analysis.requires_synthesis,
                 "known_elements": analysis.known_elements,
                 "unknown_elements": analysis.unknown_elements,
-                "certainty_scores": analysis.certainty_scores
+                "certainty_scores": analysis.certainty_scores,
             }
-            
+
         except Exception as e:
             # Fallback to simple uncertainty calculation
             return {
@@ -102,23 +104,25 @@ class ErrorMonitor(L1ErrorMonitorInterface):
                 "requires_synthesis": True,
                 "known_elements": [],
                 "unknown_elements": [question],
-                "certainty_scores": {}
+                "certainty_scores": {},
             }
-    
+
     def _analyze_state_uncertainty(self, previous_state: Dict[str, Any]) -> float:
         """Analyze uncertainty based on previous reasoning state"""
         try:
             # Check reasoning quality from previous cycle
             prev_quality = previous_state.get("reasoning_quality", 0.5)
-            
+
             # Higher uncertainty if previous quality was low
             quality_uncertainty = 1.0 - prev_quality
-            
+
             # Check if we have error history
-            history_uncertainty = len(self.error_history) * 0.01  # Small penalty for errors
-            
+            history_uncertainty = (
+                len(self.error_history) * 0.01
+            )  # Small penalty for errors
+
             return min(1.0, (quality_uncertainty + history_uncertainty) / 2)
-            
+
         except Exception:
             return 0.5  # Default uncertainty
 

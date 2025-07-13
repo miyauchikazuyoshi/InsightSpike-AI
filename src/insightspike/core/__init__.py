@@ -7,13 +7,14 @@ from .config_manager import ConfigManager
 try:
     from .experiment_framework import (
         BaseExperiment,
-        ExperimentConfig, 
+        ExperimentConfig,
         ExperimentResult,
         PerformanceMetrics,
         ExperimentSuite,
         create_simple_experiment_config,
-        create_performance_metrics
+        create_performance_metrics,
     )
+
     EXPERIMENT_FRAMEWORK_AVAILABLE = True
 except ImportError as e:
     print(f"Warning: Experiment framework not available: {e}")
@@ -22,6 +23,7 @@ except ImportError as e:
 # Layer implementations
 try:
     from .layers import *
+
     LAYERS_AVAILABLE = True
 except ImportError as e:
     print(f"Warning: Some core layers not available: {e}")
@@ -30,6 +32,7 @@ except ImportError as e:
 # Import agents
 try:
     from .agents.main_agent import MainAgent, CycleResult
+
     MAIN_AGENT_AVAILABLE = True
 except ImportError as e:
     print(f"Warning: MainAgent not available: {e}")
@@ -38,12 +41,17 @@ except ImportError as e:
 # Import generic agents and factory
 try:
     from .agents.generic_agent import (
-        GenericInsightSpikeAgent, GenericMemoryManager, GenericReasoner
+        GenericInsightSpikeAgent,
+        GenericMemoryManager,
+        GenericReasoner,
     )
     from .agents.agent_factory import (
-        InsightSpikeAgentFactory, AgentConfigBuilder,
-        create_maze_agent, create_configured_maze_agent
+        InsightSpikeAgentFactory,
+        AgentConfigBuilder,
+        create_maze_agent,
+        create_configured_maze_agent,
     )
+
     GENERIC_AGENTS_AVAILABLE = True
 except ImportError as e:
     print(f"Warning: Generic agents not available: {e}")
@@ -51,14 +59,17 @@ except ImportError as e:
 
 # Import standalone reasoner - skip in LITE_MODE
 import os
-LITE_MODE = os.getenv('INSIGHTSPIKE_LITE_MODE', '0') == '1'
+
+LITE_MODE = os.getenv("INSIGHTSPIKE_LITE_MODE", "0") == "1"
 
 if not LITE_MODE:
     try:
         from .reasoners.standalone_l3 import (
-            StandaloneL3GraphReasoner, create_standalone_reasoner,
-            analyze_documents_simple
+            StandaloneL3GraphReasoner,
+            create_standalone_reasoner,
+            analyze_documents_simple,
         )
+
         STANDALONE_REASONER_AVAILABLE = True
     except ImportError as e:
         print(f"Warning: Standalone reasoner not available: {e}")
@@ -76,6 +87,7 @@ else:
 # Import interfaces
 try:
     from .interfaces import *
+
     INTERFACES_AVAILABLE = True
 except ImportError as e:
     print(f"Warning: Some interfaces not available: {e}")
@@ -85,26 +97,41 @@ except ImportError as e:
 base_exports = ["ConfigManager"]
 
 if EXPERIMENT_FRAMEWORK_AVAILABLE:
-    base_exports.extend([
-        "BaseExperiment", "ExperimentConfig", "ExperimentResult", 
-        "PerformanceMetrics", "ExperimentSuite",
-        "create_simple_experiment_config", "create_performance_metrics"
-    ])
+    base_exports.extend(
+        [
+            "BaseExperiment",
+            "ExperimentConfig",
+            "ExperimentResult",
+            "PerformanceMetrics",
+            "ExperimentSuite",
+            "create_simple_experiment_config",
+            "create_performance_metrics",
+        ]
+    )
 
 if MAIN_AGENT_AVAILABLE:
     base_exports.append("MainAgent")
 
 if GENERIC_AGENTS_AVAILABLE:
-    base_exports.extend([
-        "GenericInsightSpikeAgent", "GenericMemoryManager", "GenericReasoner",
-        "InsightSpikeAgentFactory", "AgentConfigBuilder",
-        "create_maze_agent", "create_configured_maze_agent"
-    ])
+    base_exports.extend(
+        [
+            "GenericInsightSpikeAgent",
+            "GenericMemoryManager",
+            "GenericReasoner",
+            "InsightSpikeAgentFactory",
+            "AgentConfigBuilder",
+            "create_maze_agent",
+            "create_configured_maze_agent",
+        ]
+    )
 
 if STANDALONE_REASONER_AVAILABLE:
-    base_exports.extend([
-        "StandaloneL3GraphReasoner", "create_standalone_reasoner",
-        "analyze_documents_simple"
-    ])
+    base_exports.extend(
+        [
+            "StandaloneL3GraphReasoner",
+            "create_standalone_reasoner",
+            "analyze_documents_simple",
+        ]
+    )
 
 __all__ = base_exports

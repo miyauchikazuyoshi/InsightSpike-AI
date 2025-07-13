@@ -18,85 +18,88 @@ from pathlib import Path
 # カスタム例外クラス
 class InsightSpikeError(Exception):
     """InsightSpike基底例外"""
+
     pass
 
 
 class ConfigurationError(InsightSpikeError):
     """設定関連のエラー"""
+
     pass
 
 
 class ModelNotFoundError(InsightSpikeError):
     """モデルが見つからない"""
+
     pass
 
 
 class InitializationError(InsightSpikeError):
     """初期化エラー"""
+
     pass
 
 
 class ProcessingError(InsightSpikeError):
     """処理中のエラー"""
+
     pass
 
 
 class InsightSpikeLogger:
     """統一ロギングクラス"""
-    
+
     _instance = None
     _initialized = False
-    
+
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
-    
+
     def __init__(self):
         if not self._initialized:
             self._setup_logging()
             self._initialized = True
-            
+
     def _setup_logging(self):
         """ロギングの設定"""
         # ログディレクトリの作成
         log_dir = Path.home() / ".insightspike" / "logs"
         log_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # ログファイル名（日付付き）
         log_file = log_dir / f"insightspike_{datetime.now().strftime('%Y%m%d')}.log"
-        
+
         # ルートロガーの設定
         self.logger = logging.getLogger("insightspike")
         self.logger.setLevel(logging.DEBUG)
-        
+
         # ファイルハンドラー（詳細ログ）
-        fh = logging.FileHandler(log_file, encoding='utf-8')
+        fh = logging.FileHandler(log_file, encoding="utf-8")
         fh.setLevel(logging.DEBUG)
-        
+
         # コンソールハンドラー（重要なログのみ）
         ch = logging.StreamHandler()
         ch.setLevel(logging.INFO)
-        
+
         # フォーマッター
         detailed_formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s'
+            "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
         )
-        simple_formatter = logging.Formatter(
-            '%(levelname)s: %(message)s'
-        )
-        
+        simple_formatter = logging.Formatter("%(levelname)s: %(message)s")
+
         fh.setFormatter(detailed_formatter)
         ch.setFormatter(simple_formatter)
-        
+
         # ハンドラーの追加（既存のものは削除）
         self.logger.handlers.clear()
         self.logger.addHandler(fh)
         self.logger.addHandler(ch)
-        
+
         # 初期メッセージ
         self.logger.info(f"InsightSpike logging initialized. Log file: {log_file}")
-        
+
     def get_logger(self, name: str) -> logging.Logger:
         """名前付きロガーを取得"""
         return logging.getLogger(f"insightspike.{name}")
@@ -115,35 +118,35 @@ def handle_error(
     error: Exception,
     context: Optional[Dict[str, Any]] = None,
     logger: Optional[logging.Logger] = None,
-    user_message: Optional[str] = None
+    user_message: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     エラーを処理して構造化された応答を返す
-    
+
     Args:
         error: 発生した例外
         context: エラーのコンテキスト情報
         logger: 使用するロガー（Noneの場合はデフォルト）
         user_message: ユーザーに表示するメッセージ
-        
+
     Returns:
         エラー情報を含む辞書
     """
     if logger is None:
         logger = get_logger("error_handler")
-        
+
     # エラーの詳細情報を収集
     error_info = {
         "error_type": type(error).__name__,
         "error_message": str(error),
         "timestamp": datetime.now().isoformat(),
-        "context": context or {}
+        "context": context or {},
     }
-    
+
     # スタックトレースを取得
     tb = traceback.format_exc()
     error_info["traceback"] = tb
-    
+
     # ログに記録
     if isinstance(error, InsightSpikeError):
         # 既知のエラー
@@ -154,7 +157,7 @@ def handle_error(
         # 予期しないエラー
         logger.error(f"Unexpected error: {error}")
         logger.error(tb)
-        
+
     # ユーザー向けメッセージ
     if user_message:
         error_info["user_message"] = user_message
@@ -169,24 +172,25 @@ def handle_error(
             error_info["user_message"] = f"処理エラー: {error}"
         else:
             error_info["user_message"] = "予期しないエラーが発生しました。ログを確認してください。"
-            
+
     return error_info
 
 
 def with_error_handling(
     default_return: Any = None,
     error_class: type = ProcessingError,
-    log_errors: bool = True
+    log_errors: bool = True,
 ):
     """
     エラーハンドリングデコレーター
-    
+
     使用例:
         @with_error_handling(default_return={}, error_class=ProcessingError)
         def process_data(data):
             # 処理
             return result
     """
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -201,9 +205,9 @@ def with_error_handling(
                         context={
                             "function": func.__name__,
                             "args": str(args)[:100],
-                            "kwargs": str(kwargs)[:100]
+                            "kwargs": str(kwargs)[:100],
                         },
-                        logger=logger
+                        logger=logger,
                     )
 
                 # InsightSpikeErrorでなければ、指定されたエラークラスで再発生
@@ -213,6 +217,7 @@ def with_error_handling(
                     raise
 
         return wrapper
+
     return decorator
 
 

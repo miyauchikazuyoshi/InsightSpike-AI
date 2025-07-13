@@ -173,11 +173,19 @@ class AgentInterface(ABC):
 # Import generic interfaces
 try:
     from .generic_interfaces import (
-        TaskType, EnvironmentState, ActionSpace, InsightMoment,
-        EnvironmentInterface, RewardNormalizer, StateEncoder,
-        InsightDetectorInterface, GenericAgentInterface,
-        MemoryManagerInterface, ReasonerInterface
+        TaskType,
+        EnvironmentState,
+        ActionSpace,
+        InsightMoment,
+        EnvironmentInterface,
+        RewardNormalizer,
+        StateEncoder,
+        InsightDetectorInterface,
+        GenericAgentInterface,
+        MemoryManagerInterface,
+        ReasonerInterface,
     )
+
     GENERIC_INTERFACES_AVAILABLE = True
 except ImportError:
     GENERIC_INTERFACES_AVAILABLE = False
@@ -185,9 +193,12 @@ except ImportError:
 # Import maze implementations
 try:
     from .maze_implementation import (
-        MazeEnvironmentAdapter, MazeStateEncoder, 
-        MazeRewardNormalizer, MazeInsightDetector
+        MazeEnvironmentAdapter,
+        MazeStateEncoder,
+        MazeRewardNormalizer,
+        MazeInsightDetector,
     )
+
     MAZE_IMPLEMENTATIONS_AVAILABLE = True
 except ImportError:
     MAZE_IMPLEMENTATIONS_AVAILABLE = False
@@ -195,7 +206,7 @@ except ImportError:
 # Export main interfaces
 __all__ = [
     "LayerInput",
-    "LayerOutput", 
+    "LayerOutput",
     "LayerInterface",
     "L1ErrorMonitorInterface",
     "L2MemoryInterface",
@@ -206,25 +217,29 @@ __all__ = [
 
 # Add generic interfaces if available
 if GENERIC_INTERFACES_AVAILABLE:
-    __all__.extend([
-        "TaskType",
-        "EnvironmentState",
-        "ActionSpace", 
-        "InsightMoment",
-        "EnvironmentInterface",
-        "RewardNormalizer",
-        "StateEncoder",
-        "InsightDetectorInterface", 
-        "GenericAgentInterface",
-        "MemoryManagerInterface",
-        "ReasonerInterface"
-    ])
+    __all__.extend(
+        [
+            "TaskType",
+            "EnvironmentState",
+            "ActionSpace",
+            "InsightMoment",
+            "EnvironmentInterface",
+            "RewardNormalizer",
+            "StateEncoder",
+            "InsightDetectorInterface",
+            "GenericAgentInterface",
+            "MemoryManagerInterface",
+            "ReasonerInterface",
+        ]
+    )
 
 # Add maze implementations if available
 if MAZE_IMPLEMENTATIONS_AVAILABLE:
-    __all__.extend([
-        "MazeEnvironmentAdapter",
-        "MazeStateEncoder",
-        "MazeRewardNormalizer", 
-        "MazeInsightDetector"
-    ])
+    __all__.extend(
+        [
+            "MazeEnvironmentAdapter",
+            "MazeStateEncoder",
+            "MazeRewardNormalizer",
+            "MazeInsightDetector",
+        ]
+    )

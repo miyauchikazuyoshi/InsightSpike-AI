@@ -59,18 +59,18 @@ class EmbeddingManager:
             from sentence_transformers import SentenceTransformer
 
             # Optimize environment for CPU-only stable execution
-            os.environ['PYTORCH_MPS_HIGH_WATERMARK_RATIO'] = '0.0'
-            os.environ['TOKENIZERS_PARALLELISM'] = 'false'
+            os.environ["PYTORCH_MPS_HIGH_WATERMARK_RATIO"] = "0.0"
+            os.environ["TOKENIZERS_PARALLELISM"] = "false"
             torch.set_num_threads(1)
 
             logger.info(f"Loading embedding model: {self.model_name}")
-            
+
             # Safe initialization with explicit parameters
             model = SentenceTransformer(
                 self.model_name,
                 device="cpu",
                 cache_folder=None,  # Avoid cache conflicts
-                trust_remote_code=False
+                trust_remote_code=False,
             )
 
             _model_cache[self.model_name] = model
@@ -148,7 +148,7 @@ class FallbackEmbedder:
 
     def __init__(self, dimension: int = 384):
         self.dimension = dimension
-    
+
     def get_sentence_embedding_dimension(self):
         """Return the dimension of the embeddings."""
         return self.dimension

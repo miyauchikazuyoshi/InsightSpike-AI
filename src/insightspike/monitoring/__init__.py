@@ -9,12 +9,12 @@ from .graph_monitor import (
     GraphOperationMonitor,
     GraphOperationMetric,
     MonitoredOperation,
-    create_default_monitor
+    create_default_monitor,
 )
 
 __all__ = [
     "GraphOperationMonitor",
-    "GraphOperationMetric", 
+    "GraphOperationMetric",
     "MonitoredOperation",
-    "create_default_monitor"
+    "create_default_monitor",
 ]

@@ -233,7 +233,7 @@ class MainAgent:
             # L2: Memory search and retrieval
             memory_results = self._search_memory(question)
             retrieved_docs = memory_results["documents"]
-            
+
             logger.debug(f"Memory search returned {len(retrieved_docs)} documents")
 
             # L3: Graph reasoning and analysis
@@ -241,16 +241,22 @@ class MainAgent:
                 "previous_state": self.previous_state,
                 "error_state": error_state,
                 "memory_stats": memory_results.get("stats", {}),
-                "previous_graph": self.previous_state.get("graph_state") if self.previous_state else None,
+                "previous_graph": self.previous_state.get("graph_state")
+                if self.previous_state
+                else None,
             }
 
             # L3: Graph analysis (optional)
             if self.l3_graph:
-                logger.debug(f"L3GraphReasoner available, processing {len(retrieved_docs)} documents")
+                logger.debug(
+                    f"L3GraphReasoner available, processing {len(retrieved_docs)} documents"
+                )
                 graph_analysis = self.l3_graph.analyze_documents(
                     retrieved_docs, graph_context
                 )
-                logger.debug(f"Graph analysis result: {graph_analysis.keys() if graph_analysis else 'None'}")
+                logger.debug(
+                    f"Graph analysis result: {graph_analysis.keys() if graph_analysis else 'None'}"
+                )
             else:
                 logger.warning("L3GraphReasoner not available")
                 # Fallback when graph reasoner is not available
@@ -272,16 +278,14 @@ class MainAgent:
             }
 
             # Call generate_response_detailed to get full result dict
-            if hasattr(self.l4_llm, 'generate_response_detailed'):
-                llm_result = self.l4_llm.generate_response_detailed(llm_context, question)
+            if hasattr(self.l4_llm, "generate_response_detailed"):
+                llm_result = self.l4_llm.generate_response_detailed(
+                    llm_context, question
+                )
             else:
                 # Fallback for simple providers - wrap string result
                 response = self.l4_llm.generate_response(llm_context, question)
-                llm_result = {
-                    "response": response,
-                    "success": True,
-                    "confidence": 0.5
-                }
+                llm_result = {"response": response, "success": True, "confidence": 0.5}
 
             # Calculate overall reasoning quality
             reasoning_quality = self._calculate_reasoning_quality(
@@ -304,18 +308,22 @@ class MainAgent:
             # Update memory with reward signal if spike detected
             if cycle_result.spike_detected:
                 self._update_memory_rewards(retrieved_docs, graph_analysis)
-                
+
             # Store question and response in memory for future retrieval
             memory_text = f"Q: {question}\nA: {cycle_result.response}"
-            
+
             # Use L2MemoryManager's store_episode method which properly uses SentenceTransformer
             try:
-                success = self.l2_memory.store_episode(memory_text, c_value=reasoning_quality)
+                success = self.l2_memory.store_episode(
+                    memory_text, c_value=reasoning_quality
+                )
                 if success:
-                    logger.debug(f"Stored episode in memory: {len(memory_text)} chars with quality {reasoning_quality:.3f}")
+                    logger.debug(
+                        f"Stored episode in memory: {len(memory_text)} chars with quality {reasoning_quality:.3f}"
+                    )
                 else:
                     logger.warning("Failed to store episode in memory")
-                
+
             except Exception as e:
                 logger.warning(f"Failed to add to memory: {e}")
 
@@ -349,23 +357,27 @@ class MainAgent:
                 episode_idx = result["index"]
                 if 0 <= episode_idx < len(self.l2_memory.episodes):
                     episode = self.l2_memory.episodes[episode_idx]
-                    documents.append({
-                        "text": result["text"],
-                        "similarity": result["similarity"],
-                        "index": result["index"],
-                        "c_value": result["c_value"],
-                        "timestamp": result.get("timestamp", time.time()),
-                        "embedding": episode.vec  # Include the embedding vector
-                    })
+                    documents.append(
+                        {
+                            "text": result["text"],
+                            "similarity": result["similarity"],
+                            "index": result["index"],
+                            "c_value": result["c_value"],
+                            "timestamp": result.get("timestamp", time.time()),
+                            "embedding": episode.vec,  # Include the embedding vector
+                        }
+                    )
                 else:
                     # Fallback without embedding
-                    documents.append({
-                        "text": result["text"],
-                        "similarity": result["similarity"],
-                        "index": result["index"],
-                        "c_value": result["c_value"],
-                        "timestamp": result.get("timestamp", time.time())
-                    })
+                    documents.append(
+                        {
+                            "text": result["text"],
+                            "similarity": result["similarity"],
+                            "index": result["index"],
+                            "c_value": result["c_value"],
+                            "timestamp": result.get("timestamp", time.time()),
+                        }
+                    )
 
             stats = self.l2_memory.get_memory_stats()
 
@@ -433,50 +445,72 @@ class MainAgent:
         except Exception as e:
             logger.error(f"Memory reward update failed: {e}")
 
-    def _check_episode_management_triggers(self, graph_analysis: Dict, episode_indices: List[int]):
+    def _check_episode_management_triggers(
+        self, graph_analysis: Dict, episode_indices: List[int]
+    ):
         """Check if graph metrics trigger episode merge/split/prune operations"""
         try:
             metrics = graph_analysis.get("metrics", {})
             conflicts = graph_analysis.get("conflicts", {})
-            
+
             # Get threshold values from config
-            merge_threshold = getattr(self.config.reasoning, 'episode_merge_threshold', 0.8)
-            split_threshold = getattr(self.config.reasoning, 'episode_split_threshold', 0.3)
-            prune_threshold = getattr(self.config.reasoning, 'episode_prune_threshold', 0.1)
-            
+            merge_threshold = getattr(
+                self.config.reasoning, "episode_merge_threshold", 0.8
+            )
+            split_threshold = getattr(
+                self.config.reasoning, "episode_split_threshold", 0.3
+            )
+            prune_threshold = getattr(
+                self.config.reasoning, "episode_prune_threshold", 0.1
+            )
+
             # High similarity + low conflict might trigger merge
             delta_ged = metrics.get("delta_ged", 0.0)
             total_conflicts = conflicts.get("total", 0.0)
-            
+
             if delta_ged < 0.2 and total_conflicts < 0.3 and len(episode_indices) >= 2:
                 # Similarity is high, conflict is low - consider merging
-                if hasattr(self.l2_memory, 'get_episode_similarity'):
-                    similarities = self.l2_memory.get_episode_similarity(episode_indices)
+                if hasattr(self.l2_memory, "get_episode_similarity"):
+                    similarities = self.l2_memory.get_episode_similarity(
+                        episode_indices
+                    )
                     if max(similarities) > merge_threshold:
-                        logger.info(f"Graph analysis suggests merging episodes {episode_indices[:2]}")
+                        logger.info(
+                            f"Graph analysis suggests merging episodes {episode_indices[:2]}"
+                        )
                         merged_idx = self.l2_memory.merge(episode_indices[:2])
                         if merged_idx >= 0:
                             logger.info(f"Auto-merged episodes to index {merged_idx}")
-            
+
             # High conflict or low quality might trigger split
             elif total_conflicts > 0.7 or delta_ged > split_threshold:
                 for idx in episode_indices:
-                    episode = self.l2_memory.episodes[idx] if idx < len(self.l2_memory.episodes) else None
-                    if episode and len(episode.text.split('.')) > 2:  # Has multiple sentences
+                    episode = (
+                        self.l2_memory.episodes[idx]
+                        if idx < len(self.l2_memory.episodes)
+                        else None
+                    )
+                    if (
+                        episode and len(episode.text.split(".")) > 2
+                    ):  # Has multiple sentences
                         logger.info(f"Graph analysis suggests splitting episode {idx}")
                         split_indices = self.l2_memory.split(idx)
                         if split_indices:
-                            logger.info(f"Auto-split episode {idx} into {split_indices}")
+                            logger.info(
+                                f"Auto-split episode {idx} into {split_indices}"
+                            )
                         break
-            
+
             # Very low C-values might trigger pruning
             memory_stats = self.l2_memory.get_memory_stats()
             if memory_stats.get("c_value_min", 1.0) < prune_threshold:
                 logger.info("Graph analysis suggests pruning low-value episodes")
-                pruned_count = self.l2_memory.prune(prune_threshold * 2)  # Conservative pruning
+                pruned_count = self.l2_memory.prune(
+                    prune_threshold * 2
+                )  # Conservative pruning
                 if pruned_count > 0:
                     logger.info(f"Auto-pruned {pruned_count} low-value episodes")
-                    
+
         except Exception as e:
             logger.error(f"Episode management trigger check failed: {e}")
 
@@ -586,7 +620,9 @@ class MainAgent:
         """Add a document to memory"""
         return self.l2_memory.store_episode(text, c_value, metadata)
 
-    def add_episode_with_graph_update(self, text: str, c_value: float = 0.5) -> Dict[str, Any]:
+    def add_episode_with_graph_update(
+        self, text: str, c_value: float = 0.5
+    ) -> Dict[str, Any]:
         """
         Add an episode to memory and update graph efficiently using Layer2's ScalableGraphManager.
         """
@@ -595,47 +631,58 @@ class MainAgent:
             success = self.l2_memory.store_episode(text, c_value)
             if not success:
                 raise Exception("Failed to store episode")
-            
+
             # Get the last added episode
             episode_idx = len(self.l2_memory.episodes) - 1
             episode = self.l2_memory.episodes[episode_idx]
             vector = episode.vec
-            
+
             # Get graph state from Layer2's ScalableGraphManager
             graph_nodes = 0
             graph_analysis = None
-            
+
             # Check if Layer2 is using ScalableGraphManager
-            if hasattr(self.l2_memory, 'scalable_graph') and self.l2_memory.scalable_graph:
+            if (
+                hasattr(self.l2_memory, "scalable_graph")
+                and self.l2_memory.scalable_graph
+            ):
                 # Get current graph from Layer2
                 current_graph = self.l2_memory.scalable_graph.get_current_graph()
                 graph_nodes = current_graph.num_nodes if current_graph else 0
-                
+
                 # Only use Layer3 for analysis, not rebuilding
                 if self.l3_graph and current_graph and graph_nodes > 0:
                     # Analyze the existing graph (no rebuilding)
                     graph_analysis = self.l3_graph.analyze_documents(
                         [],  # Empty documents - just analyze existing graph
-                        context={"graph": current_graph}
+                        context={"graph": current_graph},
                     )
                     logger.debug(f"Graph analysis on {graph_nodes} nodes")
             else:
                 # Fallback to old behavior if not using ScalableGraphManager
-                logger.warning("Layer2 not using ScalableGraphManager, falling back to full rebuild")
+                logger.warning(
+                    "Layer2 not using ScalableGraphManager, falling back to full rebuild"
+                )
                 if self.l3_graph:
                     # This is the inefficient path we want to avoid
                     all_documents = []
                     for i, ep in enumerate(self.l2_memory.episodes):
-                        all_documents.append({
-                            "text": ep.text,
-                            "embedding": ep.vec,
-                            "c_value": getattr(ep, 'c_value', 0.5),
-                            "episode_idx": i,
-                            "timestamp": getattr(ep, 'timestamp', time.time())
-                        })
+                        all_documents.append(
+                            {
+                                "text": ep.text,
+                                "embedding": ep.vec,
+                                "c_value": getattr(ep, "c_value", 0.5),
+                                "episode_idx": i,
+                                "timestamp": getattr(ep, "timestamp", time.time()),
+                            }
+                        )
                     graph_analysis = self.l3_graph.analyze_documents(all_documents)
-                    graph_nodes = graph_analysis['metrics'].get('graph_size_current', 0) if graph_analysis and 'metrics' in graph_analysis else 0
-            
+                    graph_nodes = (
+                        graph_analysis["metrics"].get("graph_size_current", 0)
+                        if graph_analysis and "metrics" in graph_analysis
+                        else 0
+                    )
+
             result = {
                 "episode_idx": episode_idx,
                 "vector": vector,
@@ -644,39 +691,37 @@ class MainAgent:
                 "graph_analysis": graph_analysis,
                 "total_episodes": len(self.l2_memory.episodes),
                 "graph_nodes": graph_nodes,
-                "success": True
+                "success": True,
             }
-            
+
             return result
-            
+
         except Exception as e:
             logger.error(f"Failed to add episode with graph update: {e}")
-            return {
-                "episode_idx": -1,
-                "success": False,
-                "error": str(e)
-            }
+            return {"episode_idx": -1, "success": False, "error": str(e)}
 
     def get_memory_graph_state(self) -> Dict[str, Any]:
         """Get current state of memory and graph for analysis."""
         try:
             memory_stats = self.l2_memory.get_memory_stats()
-            
+
             graph_state = {}
             if self.l3_graph and self.l3_graph.previous_graph is not None:
                 graph = self.l3_graph.previous_graph
                 graph_state = {
                     "num_nodes": graph.num_nodes,
-                    "num_edges": graph.edge_index.size(1) if hasattr(graph, 'edge_index') else 0,
-                    "has_features": hasattr(graph, 'x') and graph.x is not None
+                    "num_edges": graph.edge_index.size(1)
+                    if hasattr(graph, "edge_index")
+                    else 0,
+                    "has_features": hasattr(graph, "x") and graph.x is not None,
                 }
-            
+
             return {
                 "memory": memory_stats,
                 "graph": graph_state,
-                "synchronized": True  # Since we use unified method
+                "synchronized": True,  # Since we use unified method
             }
-            
+
         except Exception as e:
             logger.error(f"Failed to get memory/graph state: {e}")
             return {"memory": {}, "graph": {}, "synchronized": False, "error": str(e)}
@@ -697,7 +742,7 @@ class MainAgent:
         """Save agent state (memory and graph) to disk."""
         try:
             success = True
-            
+
             # Save L2 memory
             if self.l2_memory:
                 memory_saved = self.l2_memory.save()
@@ -706,7 +751,7 @@ class MainAgent:
                     success = False
                 else:
                     logger.info("L2 memory saved successfully")
-            
+
             # Save L3 graph
             if self.l3_graph and self.l3_graph.previous_graph is not None:
                 try:
@@ -715,9 +760,9 @@ class MainAgent:
                 except Exception as e:
                     logger.warning(f"Failed to save L3 graph: {e}")
                     success = False
-            
+
             return success
-            
+
         except Exception as e:
             logger.error(f"Failed to save agent state: {e}")
             return False
@@ -726,16 +771,18 @@ class MainAgent:
         """Load agent state (memory and graph) from disk."""
         try:
             success = True
-            
+
             # Load L2 memory
             if self.l2_memory:
                 memory_loaded = self.l2_memory.load()
                 if memory_loaded:
-                    logger.info(f"L2 memory loaded: {len(self.l2_memory.episodes)} episodes")
+                    logger.info(
+                        f"L2 memory loaded: {len(self.l2_memory.episodes)} episodes"
+                    )
                 else:
                     logger.warning("No existing L2 memory found")
                     success = False
-            
+
             # Load L3 graph
             if self.l3_graph:
                 loaded_graph = self.l3_graph.load_graph()
@@ -745,12 +792,13 @@ class MainAgent:
                 else:
                     logger.warning("No existing L3 graph found")
                     success = False
-            
+
             return success
-            
+
         except Exception as e:
             logger.error(f"Failed to load agent state: {e}")
             return False
+
 
 # Backward compatibility function
 def cycle(memory, question: str, previous_graph=None, **kwargs) -> Dict[str, Any]:

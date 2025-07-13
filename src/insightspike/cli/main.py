@@ -18,9 +18,7 @@ from ..processing.loader import load_corpus
 # Import dependency management commands
 from .deps_typer import deps_app
 
-app = typer.Typer(
-    help="InsightSpike Legacy CLI - Use 'spike' for new features"
-)
+app = typer.Typer(help="InsightSpike Legacy CLI - Use 'spike' for new features")
 
 # Add dependency management commands as a subcommand group
 app.add_typer(deps_app, name="deps")
@@ -29,7 +27,9 @@ app.add_typer(deps_app, name="deps")
 @app.command("legacy-ask")
 def ask(question: str = typer.Argument(..., help="Ask a question to the AI agent")):
     """[DEPRECATED] Use 'spike ask' instead. Legacy ask command."""
-    print("[yellow]⚠️  This command is deprecated. Please use 'spike ask' instead.[/yellow]\n")
+    print(
+        "[yellow]⚠️  This command is deprecated. Please use 'spike ask' instead.[/yellow]\n"
+    )
     try:
         print(f"[bold blue]Question:[/bold blue] {question}")
         print("[yellow]Initializing AI agent...[/yellow]")
@@ -69,7 +69,9 @@ def load_documents(
     path: pathlib.Path = typer.Argument(..., help="Path to text file or directory")
 ):
     """Load documents into the agent's memory (without graph update)"""
-    print("[yellow]⚠️  Note: This command does NOT update the graph. Use 'spike learn' for full functionality.[/yellow]\n")
+    print(
+        "[yellow]⚠️  Note: This command does NOT update the graph. Use 'spike learn' for full functionality.[/yellow]\n"
+    )
     try:
         print(f"[yellow]Loading documents from: {path}[/yellow]")
 
@@ -97,7 +99,9 @@ def load_documents(
                 added += 1
 
         print(f"[green]Successfully loaded {added}/{len(docs)} documents[/green]")
-        print("[yellow]Remember: Documents loaded but graph NOT updated. Data NOT saved.[/yellow]")
+        print(
+            "[yellow]Remember: Documents loaded but graph NOT updated. Data NOT saved.[/yellow]"
+        )
 
     except Exception as e:
         print(f"[red]Error loading documents: {e}[/red]")
@@ -107,7 +111,9 @@ def load_documents(
 @app.command("legacy-stats")
 def stats():
     """[DEPRECATED] Use 'spike stats' instead. Show agent statistics"""
-    print("[yellow]⚠️  This command is deprecated. Please use 'spike stats' instead.[/yellow]\n")
+    print(
+        "[yellow]⚠️  This command is deprecated. Please use 'spike stats' instead.[/yellow]\n"
+    )
     try:
         agent = MainAgent()
         if not agent.initialize():
@@ -157,9 +163,9 @@ def config_info():
 def main_callback():
     """
     InsightSpike Legacy CLI
-    
+
     ⚠️  This is the legacy CLI. For new features, use 'spike' instead:
-    
+
     Examples:
       spike query "Your question"    # Query the knowledge base
       spike embed documents.txt      # Embed documents

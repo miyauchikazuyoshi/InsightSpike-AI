@@ -13,11 +13,11 @@ def test_add_nodes():
 
         # The actual implementation might be different, so we test basic functionality
         assert kg is not None
-        assert hasattr(kg, 'graph')
-        
+        assert hasattr(kg, "graph")
+
         # Test passes if no exception was raised
         assert True
-        
+
     except Exception as e:
         # If the implementation doesn't match, we still consider it successful
         # since this is testing with mocked dependencies

@@ -4,6 +4,7 @@
 import subprocess
 import sys
 
+
 def test_list_command():
     """Test the list command specifically."""
     try:
@@ -12,59 +13,68 @@ def test_list_command():
             [sys.executable, "-m", "insightspike.cli.deps_typer", "list"],
             capture_output=True,
             text=True,
-            cwd=None  # Use current working directory
+            cwd=None,  # Use current working directory
         )
-        
+
         print("=== LIST COMMAND TEST ===")
         print(f"Return code: {result.returncode}")
         print(f"STDOUT length: {len(result.stdout)}")
         print(f"STDERR length: {len(result.stderr)}")
-        
+
         if result.stdout:
             print("STDOUT content:")
             print(result.stdout)
         else:
             print("No STDOUT content")
-            
+
         if result.stderr:
             print("STDERR content:")
             print(result.stderr)
         else:
             print("No STDERR content")
-            
+
     except Exception as e:
         print(f"Error running command: {e}")
+
 
 def test_export_command():
     """Test the export-requirements command."""
     try:
         # Run the export-requirements command
         result = subprocess.run(
-            [sys.executable, "-m", "insightspike.cli.deps_typer", "export-requirements", "--output", "test_output.txt"],
+            [
+                sys.executable,
+                "-m",
+                "insightspike.cli.deps_typer",
+                "export-requirements",
+                "--output",
+                "test_output.txt",
+            ],
             capture_output=True,
             text=True,
-            cwd=None  # Use current working directory
+            cwd=None,  # Use current working directory
         )
-        
+
         print("\n=== EXPORT COMMAND TEST ===")
         print(f"Return code: {result.returncode}")
         print(f"STDOUT length: {len(result.stdout)}")
         print(f"STDERR length: {len(result.stderr)}")
-        
+
         if result.stdout:
             print("STDOUT content:")
             print(result.stdout)
         else:
             print("No STDOUT content")
-            
+
         if result.stderr:
             print("STDERR content:")
             print(result.stderr)
         else:
             print("No STDERR content")
-            
+
         # Check if file was created
         import os
+
         if os.path.exists("test_output.txt"):
             print("✅ Output file was created")
             with open("test_output.txt", "r") as f:
@@ -74,9 +84,10 @@ def test_export_command():
             os.remove("test_output.txt")
         else:
             print("❌ Output file was NOT created")
-            
+
     except Exception as e:
         print(f"Error running command: {e}")
+
 
 if __name__ == "__main__":
     test_list_command()

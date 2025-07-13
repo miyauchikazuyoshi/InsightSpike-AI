@@ -103,13 +103,19 @@ class L2MemoryManager(L2MemoryInterface):
 
             # Check if this should be integrated with existing episodes
             integration_result = self._check_episode_integration(vec, text, c_value)
-            
+
             if integration_result["should_integrate"]:
                 # Integrate with existing episode
                 target_idx = integration_result["target_index"]
-                similarity = integration_result.get('similarity', integration_result.get('integration_score', 0))
-                logger.info(f"Integrating with existing episode {target_idx} (similarity: {similarity:.3f})")
-                episode_idx = self._integrate_with_existing(target_idx, vec, text, c_value)
+                similarity = integration_result.get(
+                    "similarity", integration_result.get("integration_score", 0)
+                )
+                logger.info(
+                    f"Integrating with existing episode {target_idx} (similarity: {similarity:.3f})"
+                )
+                episode_idx = self._integrate_with_existing(
+                    target_idx, vec, text, c_value
+                )
                 return episode_idx >= 0
             else:
                 # Add as new episode
@@ -118,7 +124,9 @@ class L2MemoryManager(L2MemoryInterface):
 
                 if self.knowledge_graph is not None:
                     try:
-                        self.knowledge_graph.add_episode_node(vec, len(self.episodes) - 1)
+                        self.knowledge_graph.add_episode_node(
+                            vec, len(self.episodes) - 1
+                        )
                     except Exception as e:
                         logger.warning(f"KnowledgeGraph update failed: {e}")
 
@@ -128,7 +136,9 @@ class L2MemoryManager(L2MemoryInterface):
                 elif self.is_trained:
                     self._add_to_index(episode)
 
-                logger.debug(f"Stored new episode with C={c_value:.3f}: {text[:100]}...")
+                logger.debug(
+                    f"Stored new episode with C={c_value:.3f}: {text[:100]}..."
+                )
                 return True
 
         except Exception as e:
@@ -256,10 +266,10 @@ class L2MemoryManager(L2MemoryInterface):
                     elif isinstance(obj, list):
                         return [convert_numpy_types(v) for v in obj]
                     return obj
-                
+
                 # Convert all data before saving
                 episodes_data = [convert_numpy_types(ep) for ep in episodes_data]
-                
+
                 with open(episodes_path, "w", encoding="utf-8") as f:
                     json.dump(episodes_data, f, ensure_ascii=False, indent=2)
 
@@ -302,7 +312,9 @@ class L2MemoryManager(L2MemoryInterface):
                     )
                     self.episodes.append(episode)
 
-                logger.info(f"Loaded {len(self.episodes)} episodes from {episodes_path}")
+                logger.info(
+                    f"Loaded {len(self.episodes)} episodes from {episodes_path}"
+                )
             else:
                 logger.warning(f"Episodes file not found: {episodes_path}")
                 return False
@@ -450,7 +462,9 @@ class L2MemoryManager(L2MemoryInterface):
             if integration_result["should_integrate"]:
                 # Integrate with existing episode
                 target_idx = integration_result["target_index"]
-                logger.info(f"Integrating new episode with existing episode {target_idx}")
+                logger.info(
+                    f"Integrating new episode with existing episode {target_idx}"
+                )
                 return self._integrate_with_existing(target_idx, vector, text, c_value)
             else:
                 # Add as new episode node
@@ -502,7 +516,9 @@ class L2MemoryManager(L2MemoryInterface):
                     current_c = self.episodes[episode_id].c
                     new_c = max(self.c_min, min(self.c_max, current_c + eta * reward))
                     self.episodes[episode_id].c = new_c
-                    logger.debug(f"Updated episode {episode_id} C-value: {current_c:.3f} -> {new_c:.3f}")
+                    logger.debug(
+                        f"Updated episode {episode_id} C-value: {current_c:.3f} -> {new_c:.3f}"
+                    )
                 else:
                     logger.warning(f"Invalid episode index: {episode_id}")
                     return False
@@ -623,7 +639,9 @@ class L2MemoryManager(L2MemoryInterface):
             # Retrain index
             if len(self.episodes) >= 2:
                 self._train_index()
-                logger.info(f"Merged {len(valid_indices)} episodes into episode {merged_index}")
+                logger.info(
+                    f"Merged {len(valid_indices)} episodes into episode {merged_index}"
+                )
             else:
                 self.is_trained = False
 
@@ -654,7 +672,9 @@ class L2MemoryManager(L2MemoryInterface):
             sentences = [s.strip() for s in episode.text.split(".") if s.strip()]
 
             if len(sentences) < 2:
-                logger.info(f"Episode {episode_index} cannot be split (too few sentences)")
+                logger.info(
+                    f"Episode {episode_index} cannot be split (too few sentences)"
+                )
                 return []
 
             # Create new episodes from sentences
@@ -694,7 +714,9 @@ class L2MemoryManager(L2MemoryInterface):
             # Retrain index
             if len(self.episodes) >= 2:
                 self._train_index()
-                logger.info(f"Split episode {episode_index} into {len(adjusted_indices)} episodes")
+                logger.info(
+                    f"Split episode {episode_index} into {len(adjusted_indices)} episodes"
+                )
             else:
                 self.is_trained = False
 
@@ -778,7 +800,9 @@ class L2MemoryManager(L2MemoryInterface):
                 for j in range(i + 1, len(episode_indices)):
                     idx1, idx2 = episode_indices[i], episode_indices[j]
 
-                    if 0 <= idx1 < len(self.episodes) and 0 <= idx2 < len(self.episodes):
+                    if 0 <= idx1 < len(self.episodes) and 0 <= idx2 < len(
+                        self.episodes
+                    ):
                         ep1 = self.episodes[idx1]
                         ep2 = self.episodes[idx2]
 
@@ -819,17 +843,23 @@ class L2MemoryManager(L2MemoryInterface):
             unique_word_ratio = len(set(text.lower().split())) / max(1, word_count)
 
             # Normalize and combine metrics
-            sentence_complexity = min(1.0, sentence_count / 5.0)  # Max 5 sentences = 1.0
+            sentence_complexity = min(
+                1.0, sentence_count / 5.0
+            )  # Max 5 sentences = 1.0
             length_complexity = min(1.0, word_count / 100.0)  # Max 100 words = 1.0
 
-            complexity = (sentence_complexity + length_complexity + unique_word_ratio) / 3.0
+            complexity = (
+                sentence_complexity + length_complexity + unique_word_ratio
+            ) / 3.0
             return float(complexity)
 
         except Exception as e:
             logger.error(f"Failed to calculate episode complexity: {e}")
             return 0.0
 
-    def _check_episode_integration(self, vector: np.ndarray, text: str, c_value: float) -> Dict[str, Any]:
+    def _check_episode_integration(
+        self, vector: np.ndarray, text: str, c_value: float
+    ) -> Dict[str, Any]:
         """
         Check if new episode should be integrated with existing episodes or added as new node.
 
@@ -843,12 +873,22 @@ class L2MemoryManager(L2MemoryInterface):
         """
         try:
             if len(self.episodes) == 0:
-                return {"should_integrate": False, "target_index": -1, "reason": "no_existing_episodes"}
+                return {
+                    "should_integrate": False,
+                    "target_index": -1,
+                    "reason": "no_existing_episodes",
+                }
 
             # Configuration thresholds
-            similarity_threshold = getattr(self.config.reasoning, "episode_integration_similarity_threshold", 0.85)
-            content_overlap_threshold = getattr(self.config.reasoning, "episode_integration_content_threshold", 0.7)
-            c_value_diff_threshold = getattr(self.config.reasoning, "episode_integration_c_threshold", 0.3)
+            similarity_threshold = getattr(
+                self.config.reasoning, "episode_integration_similarity_threshold", 0.85
+            )
+            content_overlap_threshold = getattr(
+                self.config.reasoning, "episode_integration_content_threshold", 0.7
+            )
+            c_value_diff_threshold = getattr(
+                self.config.reasoning, "episode_integration_c_threshold", 0.3
+            )
 
             best_candidate = {
                 "index": -1,
@@ -884,7 +924,9 @@ class L2MemoryManager(L2MemoryInterface):
 
                 # 3. C-value compatibility (similar importance levels)
                 c_value_diff = abs(c_value - episode.c)
-                c_value_compatibility = 1.0 - min(1.0, c_value_diff / c_value_diff_threshold)
+                c_value_compatibility = 1.0 - min(
+                    1.0, c_value_diff / c_value_diff_threshold
+                )
 
                 # Combined integration score
                 integration_score = (
@@ -908,7 +950,8 @@ class L2MemoryManager(L2MemoryInterface):
             should_integrate = (
                 best_candidate["similarity"] >= similarity_threshold
                 and best_candidate["content_overlap"] >= content_overlap_threshold
-                and best_candidate["integration_score"] >= 0.65  # Lowered overall threshold
+                and best_candidate["integration_score"]
+                >= 0.65  # Lowered overall threshold
             )
 
             return {
@@ -922,7 +965,13 @@ class L2MemoryManager(L2MemoryInterface):
             logger.error(f"Episode integration check failed: {e}")
             return {"should_integrate": False, "target_index": -1, "reason": "error"}
 
-    def _integrate_with_existing(self, target_index: int, new_vector: np.ndarray, new_text: str, new_c_value: float) -> int:
+    def _integrate_with_existing(
+        self,
+        target_index: int,
+        new_vector: np.ndarray,
+        new_text: str,
+        new_c_value: float,
+    ) -> int:
         """
         Integrate new episode content with existing episode.
 
@@ -961,16 +1010,22 @@ class L2MemoryManager(L2MemoryInterface):
             integrated_c = max(existing_episode.c, new_c_value)
 
             # Update metadata
-            integrated_metadata = existing_episode.metadata.copy() if existing_episode.metadata else {}
+            integrated_metadata = (
+                existing_episode.metadata.copy() if existing_episode.metadata else {}
+            )
             integrated_metadata.setdefault("integration_history", [])
             integrated_metadata["integration_history"].append(
                 {
                     "integrated_text": new_text,
                     "integrated_c": new_c_value,
-                    "integration_timestamp": len(integrated_metadata["integration_history"]),
+                    "integration_timestamp": len(
+                        integrated_metadata["integration_history"]
+                    ),
                 }
             )
-            integrated_metadata["integration_count"] = len(integrated_metadata["integration_history"])
+            integrated_metadata["integration_count"] = len(
+                integrated_metadata["integration_history"]
+            )
 
             # Update the existing episode
             self.episodes[target_index] = Episode(
@@ -981,7 +1036,9 @@ class L2MemoryManager(L2MemoryInterface):
             if self.is_trained:
                 self._retrain_index_single(target_index)
 
-            logger.info(f"Integrated new content with episode {target_index}, C-value: {integrated_c:.3f}")
+            logger.info(
+                f"Integrated new content with episode {target_index}, C-value: {integrated_c:.3f}"
+            )
             return target_index
 
         except Exception as e:

@@ -50,6 +50,7 @@ else:
         def __init__(self, **kwargs):
             pass
 
+
 # New unified layer exports (recommended for new code)
 if not LITE_MODE:
     try:
@@ -81,11 +82,15 @@ if not LITE_MODE:
     try:
         from .core.agents.generic_agent import GenericInsightSpikeAgent
         from .core.agents.agent_factory import (
-            InsightSpikeAgentFactory, create_maze_agent, 
-            create_configured_maze_agent, AgentConfigBuilder
+            InsightSpikeAgentFactory,
+            create_maze_agent,
+            create_configured_maze_agent,
+            AgentConfigBuilder,
         )
         from .core.interfaces.generic_interfaces import (
-            TaskType, EnvironmentInterface, InsightMoment
+            TaskType,
+            EnvironmentInterface,
+            InsightMoment,
         )
     except ImportError:
         # Fallback if generic agents are not available
@@ -112,8 +117,9 @@ else:
 if not LITE_MODE:
     try:
         from .core.reasoners.standalone_l3 import (
-            StandaloneL3GraphReasoner, create_standalone_reasoner,
-            analyze_documents_simple
+            StandaloneL3GraphReasoner,
+            create_standalone_reasoner,
+            analyze_documents_simple,
         )
     except ImportError:
         # Fallback if standalone reasoner is not available
@@ -156,18 +162,17 @@ from .metrics import graph_metrics
 # Version info
 __version__ = About.VERSION
 
+
 # Export About as a module attribute for backward compatibility
 def about():
     """Return package information as a dictionary."""
-    return {
-        "name": About.NAME,
-        "version": About.VERSION
-    }
+    return {"name": About.NAME, "version": About.VERSION}
+
 
 # Main exports
 __all__ = [
     "MainAgent",
-    "CycleResult", 
+    "CycleResult",
     "get_config",
     "Config",
     "About",
@@ -178,14 +183,14 @@ __all__ = [
     "utils",
     # Layer exports
     "ErrorMonitor",
-    "L2MemoryManager", 
+    "L2MemoryManager",
     "get_llm_provider",
     "L3GraphReasoner",
     # Generic agent system exports
     "GenericInsightSpikeAgent",
     "InsightSpikeAgentFactory",
     "create_maze_agent",
-    "create_configured_maze_agent", 
+    "create_configured_maze_agent",
     "AgentConfigBuilder",
     "TaskType",
     "EnvironmentInterface",
@@ -193,5 +198,5 @@ __all__ = [
     # Standalone reasoner exports
     "StandaloneL3GraphReasoner",
     "create_standalone_reasoner",
-    "analyze_documents_simple"
+    "analyze_documents_simple",
 ]

@@ -6,11 +6,12 @@ from .text_utils import clean_text, iter_text
 # Export new visualization utilities
 try:
     from .visualization import (
-        InsightSpikeVisualizer, 
-        quick_performance_chart, 
-        quick_comparison, 
-        quick_progress_chart
+        InsightSpikeVisualizer,
+        quick_performance_chart,
+        quick_comparison,
+        quick_progress_chart,
     )
+
     VISUALIZATION_AVAILABLE = True
 except ImportError as e:
     print(f"Warning: Visualization utilities not available: {e}")
@@ -23,9 +24,15 @@ try:
 
     if VISUALIZATION_AVAILABLE:
         __all__ = [
-            "get_model", "clean_text", "iter_text", "delta_ged", "delta_ig",
-            "InsightSpikeVisualizer", "quick_performance_chart", 
-            "quick_comparison", "quick_progress_chart"
+            "get_model",
+            "clean_text",
+            "iter_text",
+            "delta_ged",
+            "delta_ig",
+            "InsightSpikeVisualizer",
+            "quick_performance_chart",
+            "quick_comparison",
+            "quick_progress_chart",
         ]
     else:
         __all__ = ["get_model", "clean_text", "iter_text", "delta_ged", "delta_ig"]
@@ -33,8 +40,12 @@ except ImportError as e:
     print(f"Warning: Some utilities could not be imported: {e}")
     if VISUALIZATION_AVAILABLE:
         __all__ = [
-            "clean_text", "iter_text", "InsightSpikeVisualizer", 
-            "quick_performance_chart", "quick_comparison", "quick_progress_chart"
+            "clean_text",
+            "iter_text",
+            "InsightSpikeVisualizer",
+            "quick_performance_chart",
+            "quick_comparison",
+            "quick_progress_chart",
         ]
     else:
         __all__ = ["clean_text", "iter_text"]
@@ -42,9 +53,11 @@ except ImportError as e:
 # Export graph importance utilities
 try:
     from .graph_importance import GraphImportanceCalculator, DynamicImportanceTracker
+
     __all__.extend(["GraphImportanceCalculator", "DynamicImportanceTracker"])
 except ImportError:
     pass
+
 
 # Model availability utilities
 def get_available_models():
@@ -52,9 +65,10 @@ def get_available_models():
     # Default models that are commonly available
     return [
         "paraphrase-MiniLM-L6-v2",
-        "all-MiniLM-L6-v2", 
+        "all-MiniLM-L6-v2",
         "all-mpnet-base-v2",
-        "multi-qa-MiniLM-L6-cos-v1"
+        "multi-qa-MiniLM-L6-cos-v1",
     ]
+
 
 __all__.append("get_available_models")

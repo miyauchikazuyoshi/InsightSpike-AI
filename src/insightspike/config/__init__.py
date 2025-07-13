@@ -10,14 +10,15 @@ from .simple_config import (
     ConfigPresets,
     ConfigManager,
     get_config as _get_simple_config,
-    create_config_file
+    create_config_file,
 )
+
 
 # Create a wrapper that returns legacy config for backward compatibility
 def get_config(preset: str = "development", legacy: bool = True):
     """Get configuration with optional legacy format"""
     simple_config = _get_simple_config(preset)
-    
+
     if legacy:
         # Return legacy config for backward compatibility
         manager = ConfigManager(simple_config)
@@ -25,10 +26,11 @@ def get_config(preset: str = "development", legacy: bool = True):
     else:
         return simple_config
 
+
 __all__ = [
     "SimpleConfig",
-    "ConfigPresets", 
+    "ConfigPresets",
     "ConfigManager",
     "get_config",
-    "create_config_file"
+    "create_config_file",
 ]

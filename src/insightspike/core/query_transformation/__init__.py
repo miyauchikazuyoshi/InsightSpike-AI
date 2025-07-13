@@ -9,19 +9,19 @@ from .enhanced_query_transformer import (
     EnhancedQueryTransformer,
     QueryBranch,
     MultiHopGNN,
-    AdaptiveExplorer
+    AdaptiveExplorer,
 )
 from .evolution_tracker import (
     EvolutionTracker,
     EvolutionPattern,
     PatternDatabase,
     QueryTypeClassifier,
-    TrajectoryAnalyzer
+    TrajectoryAnalyzer,
 )
 
 __all__ = [
-    "QueryState", 
-    "QueryTransformationHistory", 
+    "QueryState",
+    "QueryTransformationHistory",
     "QueryTransformer",
     "EnhancedQueryTransformer",
     "QueryBranch",
@@ -31,5 +31,5 @@ __all__ = [
     "EvolutionPattern",
     "PatternDatabase",
     "QueryTypeClassifier",
-    "TrajectoryAnalyzer"
+    "TrajectoryAnalyzer",
 ]

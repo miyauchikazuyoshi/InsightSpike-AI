@@ -1,1 +1,1 @@
-__all__ = ['KnowledgeGraphMemory']
+__all__ = ["KnowledgeGraphMemory"]

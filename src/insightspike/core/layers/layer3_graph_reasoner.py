@@ -17,9 +17,17 @@ from torch_geometric.data import Data
 from torch_geometric.nn import GCNConv, global_mean_pool
 
 # Import both simple and advanced metrics
-from ...utils.graph_metrics import delta_ged as simple_delta_ged, delta_ig as simple_delta_ig
+from ...utils.graph_metrics import (
+    delta_ged as simple_delta_ged,
+    delta_ig as simple_delta_ig,
+)
+
 try:
-    from ...utils.advanced_graph_metrics import delta_ged as advanced_delta_ged, delta_ig as advanced_delta_ig
+    from ...utils.advanced_graph_metrics import (
+        delta_ged as advanced_delta_ged,
+        delta_ig as advanced_delta_ig,
+    )
+
     ADVANCED_METRICS_AVAILABLE = True
 except ImportError:
     ADVANCED_METRICS_AVAILABLE = False
@@ -39,7 +47,11 @@ class ConflictScore:
 
     def __init__(self, config=None):
         self.config = config or get_config()
-        self.conflict_threshold = getattr(self.config.reasoning, "conflict_threshold", 0.5) if hasattr(self.config, "reasoning") else 0.5
+        self.conflict_threshold = (
+            getattr(self.config.reasoning, "conflict_threshold", 0.5)
+            if hasattr(self.config, "reasoning")
+            else 0.5
+        )
 
     def calculate_conflict(
         self, graph_old: Data, graph_new: Data, context: Dict[str, Any]
@@ -91,8 +103,16 @@ class ConflictScore:
 
         try:
             # Compare node feature distributions
-            old_features = graph_old.x.cpu().numpy() if hasattr(graph_old.x, 'cpu') else graph_old.x.numpy()
-            new_features = graph_new.x.cpu().numpy() if hasattr(graph_new.x, 'cpu') else graph_new.x.numpy()
+            old_features = (
+                graph_old.x.cpu().numpy()
+                if hasattr(graph_old.x, "cpu")
+                else graph_old.x.numpy()
+            )
+            new_features = (
+                graph_new.x.cpu().numpy()
+                if hasattr(graph_new.x, "cpu")
+                else graph_new.x.numpy()
+            )
 
             # Handle empty features
             if old_features.size == 0 or new_features.size == 0:
@@ -106,16 +126,16 @@ class ConflictScore:
                 # Check for non-zero vectors
                 old_norm = np.linalg.norm(old_mean)
                 new_norm = np.linalg.norm(new_mean)
-                
+
                 if old_norm == 0 or new_norm == 0:
                     return 0.0
-                
+
                 similarity = cosine_similarity(old_mean, new_mean)[0, 0]
-                
+
                 # Handle NaN results
                 if not np.isfinite(similarity):
                     return 0.0
-                    
+
                 return float(1.0 - similarity)  # Convert similarity to conflict
 
         except Exception as e:
@@ -139,7 +159,11 @@ class GraphBuilder:
 
     def __init__(self, config=None):
         self.config = config or get_config()
-        self.similarity_threshold = getattr(self.config.reasoning, "similarity_threshold", 0.3) if hasattr(self.config, "reasoning") else 0.3
+        self.similarity_threshold = (
+            getattr(self.config.reasoning, "similarity_threshold", 0.3)
+            if hasattr(self.config, "reasoning")
+            else 0.3
+        )
 
     def build_graph(
         self, documents: List[Dict[str, Any]], embeddings: Optional[np.ndarray] = None
@@ -241,22 +265,27 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         self.graph_builder = ScalableGraphBuilder(config)
         self.conflict_scorer = ConflictScore(config)
         self.previous_graph = None
-        
+
         # Initialize metrics selector with configuration
         from ...utils.metrics_selector import MetricsSelector
+
         self.metrics_selector = MetricsSelector(config)
-        
+
         # Set methods from selector
         self.delta_ged = self.metrics_selector.delta_ged
         self.delta_ig = self.metrics_selector.delta_ig
-        
+
         # Log algorithm selection
         algo_info = self.metrics_selector.get_algorithm_info()
-        logger.info(f"Metrics algorithms - GED: {algo_info['ged_algorithm']}, IG: {algo_info['ig_algorithm']}")
+        logger.info(
+            f"Metrics algorithms - GED: {algo_info['ged_algorithm']}, IG: {algo_info['ig_algorithm']}"
+        )
 
         # Initialize simple GNN if needed
         self.gnn = None
-        if hasattr(self.config, "reasoning") and getattr(self.config.reasoning, "use_gnn", False):
+        if hasattr(self.config, "reasoning") and getattr(
+            self.config.reasoning, "use_gnn", False
+        ):
             self._init_gnn()
 
     def initialize(self) -> bool:
@@ -306,14 +335,18 @@ class L3GraphReasoner(L3GraphReasonerInterface):
             # Check if a pre-built graph is provided in context
             if context.get("graph") is not None:
                 current_graph = context["graph"]
-                logger.debug(f"Using pre-built graph with {current_graph.num_nodes} nodes")
+                logger.debug(
+                    f"Using pre-built graph with {current_graph.num_nodes} nodes"
+                )
             elif not documents:
                 # Handle empty documents case - create a minimal synthetic graph
-                synthetic_embedding = np.random.normal(0, 0.1, (1, 384))  # Small variance
+                synthetic_embedding = np.random.normal(
+                    0, 0.1, (1, 384)
+                )  # Small variance
                 current_graph = Data(
                     x=torch.tensor(synthetic_embedding, dtype=torch.float),
                     edge_index=torch.tensor([[0], [0]], dtype=torch.long),  # Self-loop
-                    num_nodes=1
+                    num_nodes=1,
                 )
                 logger.debug("Created synthetic graph for empty documents")
             else:
@@ -339,7 +372,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
 
             # Store current graph for next iteration
             self.previous_graph = current_graph
-            
+
             # Save graph to disk
             self.save_graph(current_graph)
 
@@ -361,15 +394,18 @@ class L3GraphReasoner(L3GraphReasonerInterface):
             return self._fallback_result()
 
     def _calculate_metrics(
-        self, current_graph: Data, previous_graph: Optional[Data], context: Optional[Dict[str, Any]] = None
+        self,
+        current_graph: Data,
+        previous_graph: Optional[Data],
+        context: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, float]:
         """Calculate ΔGED and ΔIG metrics."""
         if previous_graph is None:
             return {
-                "delta_ged": 0.0, 
+                "delta_ged": 0.0,
                 "delta_ig": 0.0,
                 "graph_size_current": current_graph.num_nodes if current_graph else 0,
-                "graph_size_previous": 0
+                "graph_size_previous": 0,
             }
 
         try:
@@ -389,10 +425,12 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         except Exception as e:
             logger.error(f"Metrics calculation failed: {e}")
             return {
-                "delta_ged": 0.0, 
+                "delta_ged": 0.0,
                 "delta_ig": 0.0,
                 "graph_size_current": current_graph.num_nodes if current_graph else 0,
-                "graph_size_previous": previous_graph.num_nodes if previous_graph else 0
+                "graph_size_previous": previous_graph.num_nodes
+                if previous_graph
+                else 0,
             }
 
     def _calculate_reward(
@@ -400,9 +438,21 @@ class L3GraphReasoner(L3GraphReasonerInterface):
     ) -> Dict[str, float]:
         """Calculate reward signal for memory updates."""
         # Get weights from config
-        w1 = getattr(self.config.reasoning, "weight_ged", 0.3) if hasattr(self.config, "reasoning") else 0.3
-        w2 = getattr(self.config.reasoning, "weight_ig", 0.5) if hasattr(self.config, "reasoning") else 0.5
-        w3 = getattr(self.config.reasoning, "weight_conflict", 0.2) if hasattr(self.config, "reasoning") else 0.2
+        w1 = (
+            getattr(self.config.reasoning, "weight_ged", 0.3)
+            if hasattr(self.config, "reasoning")
+            else 0.3
+        )
+        w2 = (
+            getattr(self.config.reasoning, "weight_ig", 0.5)
+            if hasattr(self.config, "reasoning")
+            else 0.5
+        )
+        w3 = (
+            getattr(self.config.reasoning, "weight_conflict", 0.2)
+            if hasattr(self.config, "reasoning")
+            else 0.2
+        )
 
         # Base reward calculation: R = w1*ΔGED + w2*ΔIG - w3*conflict
         base_reward = (
@@ -447,9 +497,21 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         self, metrics: Dict[str, float], conflicts: Dict[str, float]
     ) -> bool:
         """Detect if current state represents an insight spike."""
-        ged_threshold = getattr(self.config.reasoning, "spike_ged_threshold", -0.5) if hasattr(self.config, "reasoning") else -0.5
-        ig_threshold = getattr(self.config.reasoning, "spike_ig_threshold", 0.2) if hasattr(self.config, "reasoning") else 0.2
-        conflict_threshold = getattr(self.config.reasoning, "conflict_threshold", 0.5) if hasattr(self.config, "reasoning") else 0.5
+        ged_threshold = (
+            getattr(self.config.reasoning, "spike_ged_threshold", -0.5)
+            if hasattr(self.config, "reasoning")
+            else -0.5
+        )
+        ig_threshold = (
+            getattr(self.config.reasoning, "spike_ig_threshold", 0.2)
+            if hasattr(self.config, "reasoning")
+            else 0.2
+        )
+        conflict_threshold = (
+            getattr(self.config.reasoning, "conflict_threshold", 0.5)
+            if hasattr(self.config, "reasoning")
+            else 0.5
+        )
 
         high_ged = metrics.get("delta_ged", 0) > ged_threshold
         high_ig = metrics.get("delta_ig", 0) > ig_threshold
@@ -471,7 +533,11 @@ class L3GraphReasoner(L3GraphReasonerInterface):
     def _init_gnn(self):
         """Initialize a simple GNN for graph processing."""
         try:
-            hidden_dim = getattr(self.config.reasoning, "gnn_hidden_dim", 128) if hasattr(self.config, "reasoning") else 128
+            hidden_dim = (
+                getattr(self.config.reasoning, "gnn_hidden_dim", 128)
+                if hasattr(self.config, "reasoning")
+                else 128
+            )
             input_dim = self.config.embedding.dimension
 
             self.gnn = torch.nn.Sequential(
@@ -525,7 +591,11 @@ class L3GraphReasoner(L3GraphReasonerInterface):
     def save_graph(self, graph: Data, path: Optional[Path] = None) -> Path:
         """Save graph to disk."""
         if path is None:
-            path = Path(getattr(self.config.reasoning, "graph_file", "data/graph.pt") if hasattr(self.config, "reasoning") else "data/graph.pt")
+            path = Path(
+                getattr(self.config.reasoning, "graph_file", "data/graph.pt")
+                if hasattr(self.config, "reasoning")
+                else "data/graph.pt"
+            )
 
         path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -548,7 +618,11 @@ class L3GraphReasoner(L3GraphReasonerInterface):
     def load_graph(self, path: Optional[Path] = None) -> Optional[Data]:
         """Load graph from disk."""
         if path is None:
-            path = Path(getattr(self.config.reasoning, "graph_file", "data/graph.pt") if hasattr(self.config, "reasoning") else "data/graph.pt")
+            path = Path(
+                getattr(self.config.reasoning, "graph_file", "data/graph.pt")
+                if hasattr(self.config, "reasoning")
+                else "data/graph.pt"
+            )
 
         if not path.exists():
             logger.warning(f"Graph file not found: {path}")

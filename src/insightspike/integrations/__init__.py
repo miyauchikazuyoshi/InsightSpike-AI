@@ -5,7 +5,7 @@ from .educational import *
 
 __all__ = [
     "Student",
-    "LearningPath", 
+    "LearningPath",
     "AssessmentResult",
-    "EducationalSystemIntegration"
+    "EducationalSystemIntegration",
 ]
