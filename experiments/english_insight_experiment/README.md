@@ -1,205 +1,166 @@
-# InsightSpike: English Insight Generation Experiment
-
-## Experiment Metadata
-
-### Environment
-- **Date**: July 11, 2025
-- **Time**: 00:47 UTC
-- **Platform**: macOS Darwin 24.5.0
-- **Python Version**: 3.x (assumed from environment)
-- **Hardware**: CPU-only execution
-
-### Dependencies
-```requirements
-transformers==4.x
-torch>=2.0
-sentence-transformers==2.x
-scikit-learn>=1.0
-numpy>=1.20
-matplotlib>=3.5
-networkx>=2.8
-```
-
-### Reproducibility
-- **Random Seed**: 42 (set in `set_seed(42)`)
-- **Model**: distilgpt2 (Hugging Face)
-- **Embedding Model**: sentence-transformers/all-MiniLM-L6-v2
-- **Temperature**: 0.7
-- **Top-p**: 0.95
-- **Max New Tokens**: 100
-- **Configuration File**: `experiment_config.yaml` (complete parameter documentation)
+# Experiment: English Insight Generation
 
 ## Overview
+- **Created**: 2025-07-11
+- **Author**: InsightSpike Team
+- **Status**: ✅ Completed
+- **Duration**: 2-3 minutes
 
-This experiment demonstrates InsightSpike's ability to generate insights by integrating knowledge from multiple phases, using real LLM (DistilGPT-2).
+## Purpose
+Demonstrate InsightSpike's ability to generate insights by integrating knowledge from multiple conceptual phases using real LLM (DistilGPT-2), validating multi-phase knowledge integration for emergent insight discovery.
 
-## Experimental Design
+## Background
+This experiment tests the hypothesis that InsightSpike can generate higher-quality insights than traditional RAG by:
+1. Integrating knowledge from multiple conceptual levels (phases)
+2. Detecting when sufficient integration creates "insight spikes"
+3. Generating emergent properties not present in individual knowledge pieces
 
-### Hypothesis
-InsightSpike can generate higher-quality insights than traditional RAG by integrating knowledge from multiple conceptual levels (phases).
+## Methods
 
-### Method
-
-1. **Three Approaches Compared**
-   - Direct LLM: Answer without any knowledge base
-   - Standard RAG: Traditional similarity-based retrieval
-   - InsightSpike: Multi-phase knowledge integration
-
-2. **Insight Detection Criteria**
-   - Knowledge integration from 3+ different phases
-   - Confidence score above 60%
-   - Generation of new conceptual connections
-
-### Variables
-- **Independent Variable**: Approach type (Direct/RAG/InsightSpike)
-- **Dependent Variables**: 
-  - Response quality score
-  - Insight detection rate
-  - Number of integrated phases
-  - Structural complexity increase
-
-### Key Parameters (from experiment_config.yaml)
-- **Spike Detection**: ≥3 phases, similarity threshold 0.3, confidence ≥0.6
-- **RAG Retrieval**: top-k=3
-- **Graph Complexity Weights**: density(0.3), clustering(0.2), avg_degree(0.3), connectivity(0.2)
-
-### Knowledge Base
-- **Size**: 50 episodes
-- **Structure**: 5 phases (10 episodes each)
+### Data
+- **Input data**: 50 knowledge episodes in `data/input/english_knowledge_base.json`
+- **Data source**: Synthetic knowledge base about energy, information, and consciousness
+- **Structure**: 5 phases × 10 episodes each
   - Phase 1: Basic Concepts
   - Phase 2: Relationships
   - Phase 3: Deep Integration
   - Phase 4: Emergent Insights
   - Phase 5: Integration and Circulation
-- **Language**: English
-- **Domain**: Energy, Information, Consciousness interconnections
+
+### Algorithm
+Three approaches compared:
+1. **Direct LLM**: DistilGPT-2 without knowledge base
+2. **Standard RAG**: Traditional similarity-based retrieval + LLM
+3. **InsightSpike**: Multi-phase knowledge integration with spike detection
+
+**Spike Detection Criteria**:
+- Integration from ≥3 different phases
+- Similarity threshold: 0.3
+- Confidence score ≥ 60%
+
+### Evaluation Metrics
+- ✅ Response Quality Score
+- ✅ Multi-phase Integration Rate
+- ✅ Spike Detection Success
+- ✅ Graph Structural Complexity
+- ✅ Emergent Concept Generation
+
+### Configuration
+```yaml
+llm:
+  model: "distilgpt2"
+  temperature: 0.7
+  top_p: 0.95
+  max_new_tokens: 100
+
+spike_detection:
+  min_phases: 3
+  similarity_threshold: 0.3
+  confidence_threshold: 0.6
+
+retrieval:
+  top_k: 3
+  embedding_model: "all-MiniLM-L6-v2"
+```
+
+## How to Run
+```bash
+cd experiments/english_insight_experiment
+# Create knowledge base
+python src/create_english_dataset.py
+
+# Run main experiment
+python src/run_english_experiment.py
+
+# Generate visualizations
+python src/visualize_english_insights.py
+```
 
 ## Results
 
-### Quantitative Results
-
-#### Performance Metrics
+### Performance Summary
 
 | Metric | Direct LLM | Standard RAG | InsightSpike |
 |--------|------------|--------------|--------------|
-| Average Quality Score | 0.167 | 0.174 | 0.179 |
-| Average Response Time (s) | 0.32 | 0.41 | 0.48 |
-| Context Utilization | N/A | Partial | Full |
-| Multi-phase Integration | 0% | 0% | 83.3% |
+| **Avg Quality Score** | 0.167 | 0.174 | **0.179** |
+| **Multi-phase Integration** | 0% | 0% | **83.3%** |
+| **Response Time** | 0.32s | 0.41s | 0.48s |
+| **Spike Detection Rate** | N/A | N/A | **83.3%** |
 
-#### Insight Detection Results
+### Insight Detection Results
 
-| Question ID | Query | Spike Detected | Confidence | Phases Integrated |
-|------------|-------|----------------|------------|-------------------|
-| 1 | Energy-Information Relationship | Yes | 100% | 5 |
-| 2 | Consciousness Emergence | Yes | 80% | 4 |
-| 3 | Creativity at Edge of Chaos | No | 20% | 1 |
-| 4 | What is Entropy | Yes | 100% | 5 |
-| 5 | Quantum Entanglement | Yes | 80% | 4 |
-| 6 | Unifying Principle | Yes | 100% | 5 |
+| Question | Spike Detected | Confidence | Phases Integrated |
+|----------|----------------|------------|-------------------|
+| Energy-Information Relationship | ✅ | 100% | 5 |
+| Consciousness Emergence | ✅ | 80% | 4 |
+| Creativity at Edge of Chaos | ❌ | 20% | 1 |
+| What is Entropy | ✅ | 100% | 5 |
+| Quantum Entanglement | ✅ | 80% | 4 |
+| Unifying Principle | ✅ | 100% | 5 |
 
-### Qualitative Analysis
+### Key Findings
 
-#### Example: Energy-Information Relationship
+1. **83.3% Spike Detection**: Successfully identified insight opportunities in 5/6 questions
+2. **Graph Evolution**: Average structural complexity increase of 127.4% (SD=45.2%)
+3. **Emergent Properties**: New concepts emerged that weren't in retrieved contexts
+4. **Phase Integration**: Successfully integrated all 5 phases for fundamental questions
 
-![Before and After](english_insight_before_after_1.png)
+### Example: Energy-Information Relationship
 
-**Graph Structural Changes:**
-- **Nodes**: 5 → 7 (+40%)
-- **Edges**: 4 → 11 (+175%)
-- **Density**: 0.200 → 0.262 (+31%)
-- **Complexity Score**: 0.120 → 0.185 (+54.2%)
+**Graph Structural Changes**:
+- Nodes: 5 → 7 (+40%)
+- Edges: 4 → 11 (+175%)
+- Density: 0.200 → 0.262 (+31%)
+- Complexity Score: 0.120 → 0.185 (+54.2%)
 
-**Emergent Properties:**
-- New concept "Energy" emerged despite not being in the retrieved contexts
-- All 5 phases were integrated into a single coherent response
-- Graph topology changed from linear to hub-and-spoke pattern
+![Before and After Graph](results/visualizations/english_insight_before_after_1.png)
 
-## Statistical Analysis
+## Discussion
 
-### Hypothesis Testing
-- **Null Hypothesis (H0)**: No difference in insight generation between approaches
-- **Alternative Hypothesis (H1)**: InsightSpike generates more insights than traditional approaches
-- **Result**: H0 rejected (p < 0.05, Fisher's exact test on insight detection rates)
+### Strengths
+1. **Multi-phase Integration**: Successfully combines knowledge across conceptual levels
+2. **Emergent Insights**: Generates new connections not explicit in source material
+3. **Visual Evidence**: Graph structure changes clearly show insight formation
+4. **Language Agnostic**: Demonstrates concept works beyond original Japanese implementation
 
-### Effect Size
-- **Cohen's d**: 1.82 (large effect) for quality score improvement
-- **Structural Complexity Increase**: Mean 127.4% (SD = 45.2%)
+### Limitations
+1. Small model (DistilGPT-2) limits generation quality
+2. Limited test set (6 questions)
+3. Domain-specific to physics/philosophy concepts
+4. Synthetic knowledge base may not reflect real-world complexity
+
+### Statistical Analysis
+- **Effect Size**: Cohen's d = 1.82 (large effect) for quality improvement
+- **Significance**: p < 0.05 (Fisher's exact test on spike detection)
+- **Structural Complexity**: Mean increase 127.4% when spikes detected
+
+## Next Steps
+- [ ] Test with larger language models (GPT-3.5, LLaMA)
+- [ ] Expand to 100+ diverse questions
+- [ ] Implement on real-world knowledge bases
+- [ ] Add human evaluation of insight quality
+- [ ] Create multilingual experiments
 
 ## File Structure
-
-```plaintext
+```
 english_insight_experiment/
-├── README.md                           # This file
-├── experiment_config.yaml              # Complete configuration parameters
-├── run_english_experiment.py           # Main experiment script
-├── english_knowledge_base.json         # 50 knowledge episodes
-├── knowledge_base.csv                  # Knowledge base in CSV format
-├── english_experiment_results.json     # Raw experiment results
-├── qa_results_with_spike.csv          # Q&A results with spike detection
-├── visualize_english_insights.py       # Visualization script
-├── english_insight_report.md          # Detailed analysis report
-└── english_insight_before_after_*.png  # Visualization images
+├── src/
+│   ├── run_english_experiment.py      # Main experiment
+│   └── visualize_english_insights.py  # Visualization
+├── data/
+│   └── input/
+│       ├── english_knowledge_base.json
+│       ├── knowledge_base.csv
+│       └── experiment_config.yaml
+├── results/
+│   ├── outputs/
+│   │   ├── english_experiment_results.json
+│   │   └── qa_results_with_spike.csv
+│   ├── visualizations/
+│   │   └── english_insight_before_after_*.png
+│   └── english_insight_report.md
+└── data_snapshots/
 ```
-
-## Replication Instructions
-
-### Prerequisites
-```bash
-pip install transformers torch sentence-transformers scikit-learn numpy matplotlib networkx
-```
-
-### Running the Experiment
-```bash
-# 1. Create English knowledge base
-python create_english_dataset.py
-
-# 2. Run the main experiment
-python run_english_experiment.py
-
-# 3. Generate visualizations and analysis
-python visualize_english_insights.py
-```
-
-### Expected Runtime
-- Knowledge base creation: ~5 seconds
-- Main experiment: ~2-3 minutes
-- Visualization generation: ~30 seconds
-
-## Limitations
-
-1. **Model Size**: DistilGPT-2 is limited in generation quality
-2. **Sample Size**: Only 6 questions tested
-3. **Domain Specificity**: Knowledge base focused on physics/philosophy
-4. **Language**: English-only experiment
-
-## Future Work
-
-1. Test with larger LLMs (GPT-3.5, LLaMA 2)
-2. Expand to multilingual experiments
-3. Increase question diversity and sample size
-4. Implement statistical significance tests for all metrics
-5. Add human evaluation of insight quality
 
 ## Conclusion
-
-This experiment provides empirical evidence that InsightSpike's multi-phase knowledge integration approach can generate emergent insights that traditional RAG systems cannot achieve. The 83.3% insight detection rate and consistent structural complexity increases support the hypothesis that knowledge graph evolution through phase integration is a viable approach for advanced AI reasoning.
-
-## Citation
-
-```bibtex
-@experiment{insightspike2025english,
-  title={InsightSpike English Insight Generation Experiment},
-  author={[Author Name]},
-  date={2025-07-11},
-  version={1.0},
-  doi={pending}
-}
-```
-
-## Contact
-
-For questions about this experiment or to request the full dataset, please contact: [contact information]
-
----
-*Last updated: July 11, 2025*
+This experiment provides empirical evidence that InsightSpike's multi-phase knowledge integration can generate emergent insights beyond traditional RAG capabilities, with 83.3% spike detection rate validating the approach for advanced AI reasoning.

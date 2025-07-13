@@ -470,12 +470,24 @@ class LocalProvider(L4LLMProvider):
                 model_name, trust_remote_code=True
             )
 
+            # Check if accelerate is available for device_map
+            device_config = {}
+            if hasattr(self.config.llm, "use_gpu") and self.config.llm.use_gpu:
+                try:
+                    import accelerate
+                    device_config["device_map"] = "auto"
+                except ImportError:
+                    logger.warning("Accelerate not installed, using CPU mode")
+                    device_config["device_map"] = None
+                    import torch
+                    device_config["torch_dtype"] = torch.float32
+            else:
+                device_config["device_map"] = None
+                
             self.model = AutoModelForCausalLM.from_pretrained(
                 model_name,
                 trust_remote_code=True,
-                device_map="auto"
-                if hasattr(self.config.llm, "use_gpu") and self.config.llm.use_gpu
-                else "cpu",
+                **device_config
             )
 
             # Create pipeline

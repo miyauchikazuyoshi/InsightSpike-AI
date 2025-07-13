@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>InsightSpike vs Traditional RAG Comparison</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .comparison { border: 1px solid #ddd; margin: 20px 0; padding: 15px; }
+        .query { font-weight: bold; color: #333; margin-bottom: 10px; }
+        .responses { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .response-box { padding: 10px; border-radius: 5px; }
+        .rag { background-color: #f0f0f0; }
+        .spike { background-color: #e8f4f8; }
+        .insight { background-color: #ffffcc; padding: 5px; margin-top: 10px; }
+        .metrics { font-size: 0.9em; color: #666; margin-top: 10px; }
+        h3 { margin-top: 0; }
+    </style>
+</head>
+<body>
+    <h1>InsightSpike vs Traditional RAG: Response Comparison</h1>
+
+    <div class="comparison">
+        <div class="query">Question: What is the relationship between sleep and memory consolidation?</div>
+        <div class="responses">
+            <div class="response-box rag">
+                <h3>Traditional RAG</h3>
+                <p>Based on the documents: Studies show that REM sleep is associated with pro.... Lack of sleep significantly impairs both short-ter.... Exercise has been shown to improve sleep quality a...</p>
+                <div class="metrics">
+                    Time: 0.03ms | 
+                    Confidence: 0.61 | 
+                    Docs used: 3
+                </div>
+            </div>
+            <div class="response-box spike">
+                <h3>InsightSpike</h3>
+                <p>I've discovered a causal relationship: Sleep directly impacts memory consolidation through REM-stage processing, while physical exercise enhances this process by increasing BDNF production, creating a synergistic effect on cognitive function.</p>
+                <div class="insight">🎯 Insight detected: causal_relationship</div>
+                <div class="metrics">
+                    Time: 0.63ms | 
+                    Confidence: 0.89 | 
+                    ΔIG: 0.60 | ΔGED: 0.79
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="comparison">
+        <div class="query">Question: How does physical exercise affect cognitive function and brain health?</div>
+        <div class="responses">
+            <div class="response-box rag">
+                <h3>Traditional RAG</h3>
+                <p>Based on the documents: Regular physical activity improves cognitive funct.... Physical activity reduces inflammation and oxidati.... Aerobic exercise enhances neuroplasticity and prom...</p>
+                <div class="metrics">
+                    Time: 0.03ms | 
+                    Confidence: 0.62 | 
+                    Docs used: 3
+                </div>
+            </div>
+            <div class="response-box spike">
+                <h3>InsightSpike</h3>
+                <p>Pattern detected across multiple sources: The documents reveal a consistent pattern where biological rhythms (sleep cycles) interact with neural plasticity mechanisms, suggesting a fundamental principle in brain optimization.</p>
+                <div class="insight">🎯 Insight detected: pattern_recognition</div>
+                <div class="metrics">
+                    Time: 0.18ms | 
+                    Confidence: 0.92 | 
+                    ΔIG: 0.48 | ΔGED: 0.43
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="comparison">
+        <div class="query">Question: What are the mechanisms of neuroplasticity in learning?</div>
+        <div class="responses">
+            <div class="response-box rag">
+                <h3>Traditional RAG</h3>
+                <p>Based on the documents: Neuroplasticity involves structural and functional.... Myelination of axons improves signal transmission .... Critical periods exist where plasticity is heighte...</p>
+                <div class="metrics">
+                    Time: 0.02ms | 
+                    Confidence: 0.80 | 
+                    Docs used: 3
+                </div>
+            </div>
+            <div class="response-box spike">
+                <h3>InsightSpike</h3>
+                <p>Analysis shows: Dendritic spine formation increases with repeated neural activation..... Neuroplasticity involves structural and functional changes in neural c.... Myelination of axons improves signal transmission speed in frequently ...</p>
+                
+                <div class="metrics">
+                    Time: 0.16ms | 
+                    Confidence: 0.73 | 
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="comparison">
+        <div class="query">Question: How do stress hormones impact memory and learning?</div>
+        <div class="responses">
+            <div class="response-box rag">
+                <h3>Traditional RAG</h3>
+                <p>Based on the documents: Cortisol, the primary stress hormone, can impair m.... Acute stress can enhance memory consolidation for .... Chronic stress damages hippocampal neurons and red...</p>
+                <div class="metrics">
+                    Time: 0.02ms | 
+                    Confidence: 0.73 | 
+                    Docs used: 3
+                </div>
+            </div>
+            <div class="response-box spike">
+                <h3>InsightSpike</h3>
+                <p>Conceptual bridge identified: The connection between sleep, memory, and exercise appears to be mediated by neuroplasticity factors, offering a unified framework for understanding cognitive enhancement.</p>
+                <div class="insight">🎯 Insight detected: conceptual_bridge</div>
+                <div class="metrics">
+                    Time: 0.16ms | 
+                    Confidence: 0.87 | 
+                    ΔIG: 0.82 | ΔGED: 0.41
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="comparison">
+        <div class="query">Question: What is the role of sleep in creativity and problem-solving?</div>
+        <div class="responses">
+            <div class="response-box rag">
+                <h3>Traditional RAG</h3>
+                <p>Based on the documents: The default mode network is active during sleep, p.... Memory replay during sleep can reorganize informat.... REM sleep facilitates creative problem-solving by ...</p>
+                <div class="metrics">
+                    Time: 0.02ms | 
+                    Confidence: 0.73 | 
+                    Docs used: 3
+                </div>
+            </div>
+            <div class="response-box spike">
+                <h3>InsightSpike</h3>
+                <p>Pattern detected across multiple sources: The documents reveal a consistent pattern where biological rhythms (sleep cycles) interact with neural plasticity mechanisms, suggesting a fundamental principle in brain optimization.</p>
+                <div class="insight">🎯 Insight detected: pattern_recognition</div>
+                <div class="metrics">
+                    Time: 0.16ms | 
+                    Confidence: 0.86 | 
+                    ΔIG: 0.60 | ΔGED: 0.36
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

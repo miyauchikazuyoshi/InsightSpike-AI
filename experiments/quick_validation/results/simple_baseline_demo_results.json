@@ -1,0 +1,115 @@
+{
+  "test_cases": [
+    {
+      "query": "What is the relationship between sleep and memory?",
+      "traditional_rag": {
+        "method": "Traditional RAG",
+        "response": "Based on the documents: Studies show that REM sleep is associated with pro.... Lack of sleep significantly impairs both short-ter.... Exercise has been shown to improve sleep quality a...",
+        "time": 2.8848648071289062e-05,
+        "docs_retrieved": 3,
+        "insight_detected": false,
+        "insight_type": null,
+        "confidence": 0.6620199195390536
+      },
+      "insightspike": {
+        "method": "InsightSpike",
+        "response": "I've discovered a causal relationship: Sleep directly impacts memory consolidation through REM-stage processing, while physical exercise enhances this process by increasing BDNF production, creating a synergistic effect on cognitive function.",
+        "time": 0.000225067138671875,
+        "docs_retrieved": 5,
+        "insight_detected": true,
+        "insight_type": "causal_relationship",
+        "confidence": 0.8634919909672001,
+        "metrics": {
+          "delta_ged": 0.5561710032558771,
+          "delta_ig": 0.6650796523648287,
+          "connections_found": 10
+        }
+      },
+      "improvement": {
+        "insight_gain": true,
+        "confidence_boost": 0.2014720714281465,
+        "processing_overhead": 0.00019621849060058594
+      }
+    },
+    {
+      "query": "How does exercise affect brain health?",
+      "traditional_rag": {
+        "method": "Traditional RAG",
+        "response": "Based on the documents: Exercise increases BDNF (brain-derived neurotrophi.... Aerobic exercise enhances neuroplasticity and prom.... Studies link regular exercise to reduced risk of d...",
+        "time": 2.09808349609375e-05,
+        "docs_retrieved": 3,
+        "insight_detected": false,
+        "insight_type": null,
+        "confidence": 0.7163652089049314
+      },
+      "insightspike": {
+        "method": "InsightSpike",
+        "response": "Pattern detected across multiple sources: The documents reveal a consistent pattern where biological rhythms (sleep cycles) interact with neural plasticity mechanisms, suggesting a fundamental principle in brain optimization.",
+        "time": 0.00014781951904296875,
+        "docs_retrieved": 5,
+        "insight_detected": true,
+        "insight_type": "pattern_recognition",
+        "confidence": 0.9317581524519029,
+        "metrics": {
+          "delta_ged": 0.30554773406139035,
+          "delta_ig": 0.6727847686531758,
+          "connections_found": 7
+        }
+      },
+      "improvement": {
+        "insight_gain": true,
+        "confidence_boost": 0.21539294354697147,
+        "processing_overhead": 0.00012683868408203125
+      }
+    },
+    {
+      "query": "What factors influence learning efficiency?",
+      "traditional_rag": {
+        "method": "Traditional RAG",
+        "response": "Based on the documents: Sleep between learning sessions consolidates memor.... Physical exercise before learning can enhance focu.... Spaced repetition significantly improves long-term...",
+        "time": 2.002716064453125e-05,
+        "docs_retrieved": 3,
+        "insight_detected": false,
+        "insight_type": null,
+        "confidence": 0.6605352109076554
+      },
+      "insightspike": {
+        "method": "InsightSpike",
+        "response": "Analysis shows: Physical exercise before learning can enhance focus and retention..... Active recall testing enhances memory more than passive review..... Spaced repetition significantly improves long-term retention compared ...",
+        "time": 0.00013709068298339844,
+        "docs_retrieved": 5,
+        "insight_detected": false,
+        "insight_type": null,
+        "confidence": 0.7220422794786968,
+        "metrics": {
+          "delta_ged": 0.2251488232964728,
+          "delta_ig": 0.2950693097595686,
+          "connections_found": 0
+        }
+      },
+      "improvement": {
+        "insight_gain": false,
+        "confidence_boost": 0.06150706857104138,
+        "processing_overhead": 0.00011706352233886719
+      }
+    }
+  ],
+  "summary": {
+    "traditional_rag": {
+      "avg_time": 2.3285547892252605e-05,
+      "avg_confidence": 0.6796401131172134,
+      "insights_detected": 0
+    },
+    "insightspike": {
+      "avg_time": 0.00016999244689941406,
+      "avg_confidence": 0.8390974742992666,
+      "insights_detected": 2,
+      "insight_rate": 0.6666666666666666
+    },
+    "performance_gain": {
+      "confidence_improvement": 0.15945736118205311,
+      "insight_discovery_rate": 0.6666666666666666,
+      "processing_overhead": 7.300341296928328
+    }
+  }
+}
