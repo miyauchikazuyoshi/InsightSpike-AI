@@ -7,13 +7,13 @@ import pytest
 
 @pytest.mark.skipif(
     "CI" in os.environ or "GITHUB_ACTIONS" in os.environ,
-    reason="Skip in CI due to complex torch_geometric dependencies"
+    reason="Skip in CI due to complex torch_geometric dependencies",
 )
 def test_generate():
     """Test LLM generation in safe mode."""
     # Force LITE_MODE for CI tests to avoid torch import issues
     os.environ["INSIGHTSPIKE_LITE_MODE"] = "1"
-    
+
     # Skip transformers import in LITE_MODE
     if os.environ.get("INSIGHTSPIKE_LITE_MODE", "0") == "1":
         # In LITE_MODE, just test that we can get a mock provider
