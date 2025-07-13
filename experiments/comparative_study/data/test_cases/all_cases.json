@@ -1,0 +1,189 @@
+[
+  {
+    "id": "sci_001",
+    "category": "causal",
+    "question": "Why does water expand when it freezes, unlike most other substances?",
+    "context": [
+      "Water molecules form hydrogen bonds",
+      "Ice has a crystalline structure with hexagonal symmetry",
+      "Hydrogen bonds in ice are more ordered than in liquid water",
+      "The density of ice is about 0.92 g/cm\u00b3 while water is 1.0 g/cm\u00b3",
+      "Most substances contract when they solidify"
+    ],
+    "expected_insights": [
+      "Hydrogen bonding creates open hexagonal structure",
+      "Ordered structure takes more space than random liquid arrangement",
+      "This anomaly is crucial for life (ice floats)"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "sci_002",
+    "category": "comparative",
+    "question": "How do quantum tunneling and classical diffusion differ in their mechanisms?",
+    "context": [
+      "Quantum tunneling allows particles to pass through energy barriers",
+      "Classical diffusion follows Fick's laws",
+      "Tunneling probability depends on barrier width and height",
+      "Diffusion rate depends on temperature and concentration gradient",
+      "Both involve particle movement but different physics"
+    ],
+    "expected_insights": [
+      "Quantum tunneling is probabilistic and instantaneous",
+      "Classical diffusion is deterministic and time-dependent",
+      "Energy conservation works differently in each case"
+    ],
+    "difficulty": "hard"
+  },
+  {
+    "id": "sci_003",
+    "category": "analytical",
+    "question": "What role does entropy play in both biological evolution and technological innovation?",
+    "context": [
+      "Entropy measures disorder in systems",
+      "Evolution creates complex organisms from simple ones",
+      "Technology tends toward increasing complexity",
+      "The second law of thermodynamics states entropy increases",
+      "Living systems maintain low entropy by consuming energy",
+      "Innovation often involves combining existing elements in new ways"
+    ],
+    "expected_insights": [
+      "Both processes create local order at the cost of global entropy",
+      "Information and energy flow are crucial for maintaining complexity",
+      "Selection pressure drives both biological and technological evolution"
+    ],
+    "difficulty": "expert"
+  },
+  {
+    "id": "hist_001",
+    "category": "causal",
+    "question": "What factors led to the simultaneous invention of calculus by Newton and Leibniz?",
+    "context": [
+      "17th century saw rapid mathematical development",
+      "Both had access to works by Fermat, Descartes, and others",
+      "Scientific revolution created demand for new mathematical tools",
+      "They worked on different problems (physics vs philosophy)",
+      "Communication between scholars was limited but existed"
+    ],
+    "expected_insights": [
+      "Mathematical prerequisites were in place",
+      "Different approaches led to same fundamental concepts",
+      "Scientific needs drove mathematical innovation"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "hist_002",
+    "category": "comparative",
+    "question": "Compare the collapse of the Roman Empire with the fall of the Soviet Union",
+    "context": [
+      "Rome fell gradually over centuries, USSR collapsed rapidly",
+      "Both were vast multi-ethnic empires",
+      "Economic problems plagued both systems",
+      "Military overextension was a factor",
+      "Internal political instability",
+      "External pressures and competition"
+    ],
+    "expected_insights": [
+      "Speed of collapse differs due to communication technology",
+      "Economic unsustainability is common factor",
+      "Ideological rigidity contributed to both collapses"
+    ],
+    "difficulty": "hard"
+  },
+  {
+    "id": "tech_001",
+    "category": "analytical",
+    "question": "How might quantum computing fundamentally change machine learning algorithms?",
+    "context": [
+      "Quantum computers can explore multiple states simultaneously",
+      "Current ML relies on gradient descent optimization",
+      "Quantum algorithms like Grover's offer quadratic speedup",
+      "Quantum entanglement could enable new types of correlations",
+      "NISQ devices have high error rates",
+      "Quantum machine learning is an emerging field"
+    ],
+    "expected_insights": [
+      "Superposition enables parallel exploration of solution space",
+      "Quantum kernels could capture non-classical patterns",
+      "Hybrid classical-quantum algorithms most promising near-term"
+    ],
+    "difficulty": "expert"
+  },
+  {
+    "id": "tech_002",
+    "category": "causal",
+    "question": "Why did blockchain technology emerge when it did and not earlier?",
+    "context": [
+      "Cryptographic hash functions existed since 1970s",
+      "Public key cryptography developed in 1976",
+      "P2P networks emerged in late 1990s",
+      "2008 financial crisis created distrust in institutions",
+      "Internet penetration reached critical mass",
+      "Previous attempts like HashCash and b-money failed"
+    ],
+    "expected_insights": [
+      "Technical prerequisites converged by 2008",
+      "Social/economic conditions created demand",
+      "Satoshi's innovation was combining existing technologies"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "phil_001",
+    "category": "analytical",
+    "question": "Is consciousness an emergent property of complexity or something fundamentally different?",
+    "context": [
+      "Emergent properties arise from complex interactions",
+      "Consciousness seems to have subjective qualities (qualia)",
+      "Information integration theory proposes consciousness as integrated information",
+      "The hard problem of consciousness remains unsolved",
+      "Some argue for panpsychism or dualism",
+      "Neuroscience shows correlation between brain states and consciousness"
+    ],
+    "expected_insights": [
+      "Emergence alone may not explain subjective experience",
+      "Information integration provides measurable framework",
+      "The question may require new conceptual frameworks"
+    ],
+    "difficulty": "expert"
+  },
+  {
+    "id": "inter_001",
+    "category": "comparative",
+    "question": "How do network effects in social media parallel phase transitions in physics?",
+    "context": [
+      "Phase transitions occur at critical points",
+      "Network effects show non-linear growth",
+      "Both exhibit sudden qualitative changes",
+      "Critical mass concepts apply to both",
+      "Metcalfe's law describes network value",
+      "Percolation theory models connectivity"
+    ],
+    "expected_insights": [
+      "Both show threshold behavior and criticality",
+      "Small changes can trigger large-scale transformations",
+      "Mathematical frameworks from physics apply to social phenomena"
+    ],
+    "difficulty": "hard"
+  },
+  {
+    "id": "inter_002",
+    "category": "analytical",
+    "question": "What can ant colony optimization teach us about human urban planning?",
+    "context": [
+      "Ants use pheromone trails for pathfinding",
+      "Stigmergic communication enables coordination",
+      "Ant colonies optimize for efficiency without central planning",
+      "Cities face traffic, resource distribution challenges",
+      "Decentralized systems can be robust and adaptive",
+      "Feedback loops reinforce successful paths"
+    ],
+    "expected_insights": [
+      "Decentralized optimization can outperform central planning",
+      "Local information and feedback create global patterns",
+      "Adaptive systems handle uncertainty better"
+    ],
+    "difficulty": "medium"
+  }
+]

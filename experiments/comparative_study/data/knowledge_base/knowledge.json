@@ -1,0 +1,86 @@
+{
+  "physics": [
+    "Energy cannot be created or destroyed, only transformed",
+    "Entropy always increases in isolated systems",
+    "Quantum mechanics describes probabilistic behavior at small scales",
+    "Relativity unifies space and time into spacetime",
+    "Forces are mediated by exchange of virtual particles",
+    "Wave-particle duality is fundamental to quantum mechanics",
+    "Conservation laws arise from symmetries (Noether's theorem)",
+    "Phase transitions occur at critical points",
+    "Chaos theory describes sensitive dependence on initial conditions",
+    "Thermodynamic equilibrium is a statistical concept"
+  ],
+  "computer_science": [
+    "Algorithms transform input to output through defined steps",
+    "Computational complexity measures resource requirements",
+    "Data structures organize information for efficient access",
+    "Machine learning extracts patterns from data",
+    "Networks enable communication between distributed systems",
+    "Cryptography ensures secure communication",
+    "Parallel processing speeds up computation",
+    "Abstraction hides implementation details",
+    "Recursion solves problems by self-reference",
+    "Optimization finds best solutions under constraints"
+  ],
+  "biology": [
+    "Evolution operates through natural selection",
+    "DNA encodes genetic information",
+    "Cells are the basic unit of life",
+    "Ecosystems involve complex interactions",
+    "Homeostasis maintains stable internal conditions",
+    "Energy flows through food chains",
+    "Proteins perform most cellular functions",
+    "Mutations provide genetic variation",
+    "Symbiosis involves mutual benefit",
+    "Emergent properties arise from biological complexity"
+  ],
+  "mathematics": [
+    "Numbers form various algebraic structures",
+    "Calculus studies continuous change",
+    "Probability quantifies uncertainty",
+    "Topology studies properties preserved under deformation",
+    "Logic provides foundations for reasoning",
+    "Set theory underlies modern mathematics",
+    "Symmetry groups describe invariances",
+    "Fractals show self-similarity at all scales",
+    "Graph theory models relationships",
+    "Category theory abstracts mathematical structures"
+  ],
+  "philosophy": [
+    "Epistemology studies nature of knowledge",
+    "Ethics examines moral principles",
+    "Metaphysics explores nature of reality",
+    "Logic analyzes valid reasoning",
+    "Consciousness poses the hard problem",
+    "Free will may be compatible with determinism",
+    "Language shapes thought (Sapir-Whorf hypothesis)",
+    "Empiricism emphasizes sensory experience",
+    "Rationalism emphasizes reason",
+    "Pragmatism judges ideas by consequences"
+  ],
+  "history": [
+    "Civilizations rise and fall in patterns",
+    "Technology drives social change",
+    "Economic systems evolve over time",
+    "Ideas spread through cultural exchange",
+    "Revolutions occur when conditions align",
+    "Geography influences development",
+    "Trade networks connect civilizations",
+    "Conflict shapes political boundaries",
+    "Innovation clusters in specific times/places",
+    "Historical events have multiple causes"
+  ],
+  "interdisciplinary": [
+    "Complex systems show emergent behavior",
+    "Feedback loops amplify or dampen changes",
+    "Networks exhibit small-world properties",
+    "Information theory applies across domains",
+    "Optimization principles appear everywhere",
+    "Symmetry breaking creates diversity",
+    "Scaling laws describe size relationships",
+    "Phase transitions mark qualitative changes",
+    "Hierarchies organize complex systems",
+    "Adaptation occurs at multiple levels"
+  ]
+}

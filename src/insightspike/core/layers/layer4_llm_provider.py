@@ -369,6 +369,70 @@ class OpenAIProvider(L4LLMProvider):
             logger.error(f"OpenAI streaming failed: {e}")
             yield f"Error: {e}"
 
+    def format_context(self, episodes: List[Dict[str, Any]]) -> str:
+        """Format episodes into context string."""
+        if not episodes:
+            return ""
+
+        context_parts = []
+        for i, episode in enumerate(episodes[:10]):  # Limit to 10 most relevant episodes
+            text = episode.get("text", str(episode))
+            c_value = episode.get("c", 0.5)
+            context_parts.append(f"Context {i+1} (relevance: {c_value:.2f}):\n{text}")
+
+        return "\n\n".join(context_parts)
+
+    def process(self, input_data: LayerInput) -> LayerOutput:
+        """Process input through LLM layer."""
+        if not isinstance(input_data, LayerInput):
+            # Convert dict to LayerInput for backward compatibility
+            if isinstance(input_data, dict):
+                input_data = LayerInput(
+                    data=input_data.get("question", str(input_data)),
+                    context=input_data.get("context", {}),
+                    metadata=input_data.get("metadata", {})
+                )
+            else:
+                input_data = LayerInput(data=str(input_data))
+
+        context = input_data.context or {}
+        question = input_data.data
+
+        # Convert context to string for generate_response
+        if isinstance(context, dict):
+            context_str = self.format_context(context.get("episodes", []))
+        else:
+            context_str = str(context)
+
+        # Generate response (returns string)
+        response = self.generate_response(context_str, question)
+
+        # Create LayerOutput with enhanced metadata
+        return LayerOutput(
+            data=response,
+            confidence=self.calculate_confidence(question, response),
+            layer_name="L4_LLM",
+            processing_time=0.0,  # Will be set by decorator if used
+            metadata={
+                "model": self.model,
+                "provider": "openai",
+                "question": question,
+                "context_length": len(context_str),
+                "response_length": len(response),
+                "insight_analysis": self.analyze_insight_potential(question, response)
+            }
+        )
+
+    def cleanup(self):
+        """Cleanup OpenAI provider resources."""
+        try:
+            # OpenAI client doesn't need explicit cleanup
+            self._initialized = False
+            self.client = None
+            logger.info("OpenAI provider cleaned up")
+        except Exception as e:
+            logger.error(f"Error during OpenAI cleanup: {e}")
+
 
 class LocalProvider(L4LLMProvider):
     """Local model provider using transformers."""
