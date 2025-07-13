@@ -1,5 +1,5 @@
 %% InsightSpike-AI Technical Architecture Flow v2
-%% Updated: 2025-07-06 - ScalableGraphManager Integration
+%% Updated: 2025-07-13 - Query Transformation Integration
 
 flowchart LR
     %% User Interaction Layer
@@ -22,10 +22,12 @@ flowchart LR
     subgraph "🧠 Core Intelligence Layers"
         direction TB
         
-        subgraph "Layer 1: Input"
+        subgraph "Layer 1: Input & Query Transformation"
             L1_Input[Input Processing]
             L1_Valid[Validation]
             L1_Format[Formatting]
+            L1_QT[Query Transformation<br/>⚡ NEW]
+            L1_QS[Query State Tracking<br/>(Initial→Exploring→Insight)]
         end
         
         subgraph "Layer 2: Memory (Enhanced Scalable)"
@@ -39,6 +41,7 @@ flowchart LR
         subgraph "Layer 3: Reasoning (Graph-Enhanced)"
             L3_Graph[PyTorch Geometric Graph<br/>(Pre-built from L2)]
             L3_Builder[ScalableGraphBuilder<br/>⚡ Efficient Updates]
+            L3_GNN[GNN Message Passing<br/>⚡ Query Evolution]
             L3_geDIG[geDIG Analysis<br/>(ΔGED + ΔIG)]
             L3_Spike[Spike Detection<br/>Eureka Moments]
         end
@@ -95,7 +98,9 @@ flowchart LR
     Main_Agent --> L1_Input
     
     %% Layer Flow with ScalableGraphManager
-    L1_Format --> L2_Enhanced
+    L1_Format --> L1_QT
+    L1_QT --> L1_QS
+    L1_QS --> L2_Enhanced
     L2_Enhanced --> L2_Episode
     L2_Episode --> L2_SGM
     L2_SGM --> L2_Conflict
@@ -104,8 +109,12 @@ flowchart LR
     %% Efficient Graph Building
     L2_SGM -.-> |Pre-built Graph| L3_Graph
     L3_Graph --> L3_Builder
-    L3_Builder --> L3_geDIG
+    L3_Builder --> L3_GNN
+    L3_GNN --> L3_geDIG
     L3_geDIG --> L3_Spike
+    
+    %% Query Transformation Feedback Loop
+    L3_GNN -.-> |Query Evolution| L1_QS
     L3_Spike --> L4_LLM
     L4_LLM --> L4_Local --> L4_Response
     
@@ -137,6 +146,6 @@ flowchart LR
     
     class U1,U2,U3 userLayer
     class CLI_App,Agent_Loop,Main_Agent appLayer
-    class L2_Enhanced,L2_SGM,L3_Builder enhanced
+    class L2_Enhanced,L2_SGM,L3_Builder,L1_QT,L3_GNN enhanced
     class Core_Episodes,Core_Index,Core_Graph,DB_Insights dataLayer
     class E1,E2,E3,E4,Exp_Active expLayer

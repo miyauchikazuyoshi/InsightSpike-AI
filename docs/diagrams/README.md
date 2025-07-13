@@ -6,8 +6,10 @@ This directory contains Mermaid diagrams illustrating the InsightSpike-AI archit
 
 ### Core System Architecture
 - **TECHNICAL_ARCHITECTURE.mermaid** - Overall system architecture with scalable graph implementation
-- **TECHNICAL_ARCHITECTURE_v2.mermaid** - ⚡ **NEW** Updated architecture with L2EnhancedScalableMemory integration
-- **DATA_FLOW_ARCHITECTURE.mermaid** - ⚡ **NEW** Data flow and directory structure (data/, experiments/)
+- **TECHNICAL_ARCHITECTURE_v2.mermaid** - ⚡ **UPDATED** Architecture with Query Transformation & L2EnhancedScalableMemory
+- **DATA_FLOW_ARCHITECTURE.mermaid** - Data flow and directory structure (data/, experiments/)
+- **DATA_FLOW_ARCHITECTURE_v2.mermaid** - ⚡ **NEW** Updated data flow with Query Transformation tracking
+- **QUERY_TRANSFORMATION_ARCHITECTURE.mermaid** - ⚡ **NEW** Query evolution through knowledge graphs
 - **WORKFLOW_TREE.mermaid** - Processing workflow and decision trees
 - **SYSTEM_DASHBOARD.mermaid** - Real-time system metrics with hierarchical graph performance
 
@@ -19,7 +21,33 @@ This directory contains Mermaid diagrams illustrating the InsightSpike-AI archit
 ### Insight Processing
 - **INSIGHT_LIFECYCLE.mermaid** - Insight discovery and quality assessment lifecycle
 
-## 🚀 Latest Updates (2025-07-06)
+## 🚀 Latest Updates (2025-07-13)
+
+### Query Transformation Architecture Added
+1. **QUERY_TRANSFORMATION_ARCHITECTURE.mermaid** ⚡ **NEW**
+   - Shows how queries evolve through knowledge graphs via message passing
+   - Illustrates 4 query stages: Initial → Exploring → Transforming → Insight
+   - Demonstrates GNN message passing for concept absorption
+   - Includes query state tracking and evolution history
+
+2. **TECHNICAL_ARCHITECTURE_v2.mermaid** - Updated
+   - Added Query Transformation components in Layer 1
+   - Added GNN Message Passing in Layer 3
+   - Shows feedback loop from Layer 3 to Query State
+   - Highlights Query Evolution as a core process
+
+3. **INSIGHT_LIFECYCLE.mermaid** - Updated
+   - Added Query Transformation stage between Agent and Layers
+   - Shows concept absorption feeding back to context
+   - Reflects human-like thinking process
+
+4. **DATA_FLOW_ARCHITECTURE_v2.mermaid** ⚡ **NEW**
+   - Adds Query Transformation data flow
+   - Shows query history database tracking
+   - Illustrates evolution pattern learning
+   - Includes Query Evolution Pipeline
+
+## 🚀 Previous Updates (2025-07-06)
 
 ### New Diagrams Added
 1. **TECHNICAL_ARCHITECTURE_v2.mermaid**

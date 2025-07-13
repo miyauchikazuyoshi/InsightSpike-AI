@@ -1,0 +1,95 @@
+graph TB
+    %% Query Transformation Architecture
+    %% Shows how queries evolve through knowledge graphs via message passing
+
+    subgraph "Query Transformation Process"
+        Q1[Initial Query<br/>Stage: Initial<br/>Color: Yellow]
+        Q2[Exploring Query<br/>Stage: Exploring<br/>Color: Orange]
+        Q3[Transforming Query<br/>Stage: Transforming<br/>Color: Dark Orange]
+        Q4[Insight Query<br/>Stage: Insight<br/>Color: Green]
+        
+        Q1 -->|Find Connections| Q2
+        Q2 -->|Absorb Concepts| Q3
+        Q3 -->|Synthesize Understanding| Q4
+    end
+
+    subgraph "Knowledge Graph"
+        KG[Knowledge Graph<br/>Nodes & Edges]
+        N1[Concept Node 1]
+        N2[Concept Node 2]
+        N3[Concept Node 3]
+        N4[Concept Node 4]
+        
+        KG --> N1
+        KG --> N2
+        KG --> N3
+        KG --> N4
+        
+        N1 -.->|Edge| N2
+        N2 -.->|Edge| N3
+        N3 -.->|Edge| N4
+        N1 -.->|Edge| N4
+    end
+
+    subgraph "GNN Message Passing"
+        MP1[Message Pass 1<br/>Local Concepts]
+        MP2[Message Pass 2<br/>Multi-hop Connections]
+        MP3[Message Pass 3<br/>Deep Synthesis]
+        
+        MP1 --> MP2
+        MP2 --> MP3
+    end
+
+    subgraph "Query State Tracking"
+        QS[QueryState]
+        QH[QueryHistory]
+        QM[Metrics]
+        
+        QS -->|Records| QH
+        QS -->|Tracks| QM
+    end
+
+    %% Connections between subgraphs
+    Q1 --> KG
+    KG --> MP1
+    Q2 --> MP1
+    MP1 --> Q2
+    
+    Q2 --> MP2
+    MP2 --> Q3
+    
+    Q3 --> MP3
+    MP3 --> Q4
+    
+    Q1 --> QS
+    Q2 --> QS
+    Q3 --> QS
+    Q4 --> QS
+
+    %% Outputs
+    Q4 -->|Spike Detected!| INSIGHT[Novel Insight<br/>Cross-domain Connection]
+    QH -->|Evolution Path| VIS[Visualization<br/>Trajectory & Metrics]
+
+    %% Style
+    classDef initial fill:#ffeb3b,stroke:#f57f17,stroke-width:2px
+    classDef exploring fill:#ff9800,stroke:#e65100,stroke-width:2px
+    classDef transforming fill:#ff5722,stroke:#bf360c,stroke-width:2px
+    classDef insight fill:#4caf50,stroke:#1b5e20,stroke-width:2px
+    classDef knowledge fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef gnn fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef state fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef output fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+
+    class Q1 initial
+    class Q2 exploring
+    class Q3 transforming
+    class Q4 insight
+    class KG,N1,N2,N3,N4 knowledge
+    class MP1,MP2,MP3 gnn
+    class QS,QH,QM state
+    class INSIGHT,VIS output
+
+    %% Title
+    graph TD
+        TITLE[Query Transformation Architecture<br/>Queries evolve through message passing on knowledge graphs]
+        style TITLE fill:#fff,stroke:none,font-size:20px

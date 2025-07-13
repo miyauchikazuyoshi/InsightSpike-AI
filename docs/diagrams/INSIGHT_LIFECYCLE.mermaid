@@ -11,6 +11,7 @@ flowchart TD
     %% Processing Stage
     subgraph "⚙️ Processing Stage"
         Agent[🤖 MainAgent処理]
+        QT[🔄 Query Transformation<br/>クエリ進化]
         Layers[🧠 4層アーキテクチャ]
         Response[📝 応答生成]
     end
@@ -112,7 +113,9 @@ flowchart TD
     %% Flow Connections
     Question --> Agent
     Context --> Agent
-    Agent --> Layers
+    Agent --> QT
+    QT --> Layers
+    QT -.->|概念吸収| Context
     Layers --> Response
     Response --> Extract
     
@@ -165,7 +168,7 @@ flowchart TD
     classDef cli fill:#f1f8e9
     
     class Question,Context input
-    class Agent,Layers,Response process
+    class Agent,QT,Layers,Response process
     class Extract,Pattern1,Pattern2,Pattern3,Pattern4 discovery
     class Evaluate,Conf,Novel,Coher,Spec,Score,Filter quality
     class Store,Index,ID,Text,Concepts,Meta,Timestamp storage
