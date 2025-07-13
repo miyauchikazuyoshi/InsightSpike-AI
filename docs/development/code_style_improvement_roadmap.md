@@ -99,6 +99,39 @@ poetry run mypy src/ --ignore-missing-imports
 - run: poetry run flake8 src/ tests/ --max-line-length=79
 ```
 
+### Phase 7: Fix Security Scanning (Week 8)
+**Goal**: Re-enable and fix GitHub security scanning
+
+**Current Issue**: 
+- CodeQL upload-sarif action fails with "Resource not accessible by integration"
+- This is a GitHub Actions permission issue, not a code security issue
+
+**Steps to Fix**:
+1. Review GitHub repository settings for security permissions
+2. Update workflow permissions in `.github/workflows/ci.yml`:
+   ```yaml
+   permissions:
+     contents: read
+     security-events: write
+   ```
+3. Re-enable the security job in CI workflow
+4. Consider alternative security scanning tools if CodeQL issues persist
+
+**CI Configuration**:
+```yaml
+security:
+  runs-on: ubuntu-latest
+  permissions:
+    contents: read
+    security-events: write
+  steps:
+    - uses: actions/checkout@v4
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+    - name: Upload results to GitHub Security
+      uses: github/codeql-action/upload-sarif@v3
+```
+
 ## Pre-commit Hook Setup
 
 Create `.pre-commit-config.yaml`:
@@ -175,7 +208,7 @@ poetry run mypy src/ --ignore-missing-imports
 
 ## Timeline
 - **Start Date**: 2025-01-20
-- **Target Completion**: 2025-03-10
+- **Target Completion**: 2025-03-10 (Extended to 2025-03-17 for security phase)
 - **Review Frequency**: Weekly
 
 ## Notes
