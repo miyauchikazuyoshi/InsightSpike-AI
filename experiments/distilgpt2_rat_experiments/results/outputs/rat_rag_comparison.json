@@ -1,0 +1,139 @@
+{
+  "experiment": "RAT with RAG comparison",
+  "results": [
+    {
+      "problem": {
+        "words": [
+          "COTTAGE",
+          "SWISS",
+          "CAKE"
+        ],
+        "answer": "CHEESE",
+        "documents": {
+          "COTTAGE": [
+            "cottage cheese",
+            "small rural house"
+          ],
+          "SWISS": [
+            "Swiss cheese",
+            "from Switzerland"
+          ],
+          "CAKE": [
+            "cheesecake",
+            "birthday dessert"
+          ]
+        }
+      },
+      "base": {
+        "answer": "CAKE?",
+        "time": 1.8110251426696777,
+        "method": "Base LLM"
+      },
+      "rag": {
+        "answer": "IT",
+        "time": 0.23963069915771484,
+        "method": "RAG",
+        "context_length": 143
+      },
+      "insight": {
+        "answer": "CHEESE",
+        "time": 0.4762697219848633,
+        "method": "InsightSpike",
+        "spike_detected": true,
+        "connections_found": 1,
+        "confidence": 0.6666666666666666
+      }
+    },
+    {
+      "problem": {
+        "words": [
+          "CREAM",
+          "SKATE",
+          "WATER"
+        ],
+        "answer": "ICE",
+        "documents": {
+          "CREAM": [
+            "ice cream",
+            "dairy product"
+          ],
+          "SKATE": [
+            "ice skate",
+            "skating rink"
+          ],
+          "WATER": [
+            "ice water",
+            "frozen water"
+          ]
+        }
+      },
+      "base": {
+        "answer": "WATER?",
+        "time": 0.12155389785766602,
+        "method": "Base LLM"
+      },
+      "rag": {
+        "answer": "THE",
+        "time": 0.24486780166625977,
+        "method": "RAG",
+        "context_length": 121
+      },
+      "insight": {
+        "answer": "WATER",
+        "time": 0.45677900314331055,
+        "method": "InsightSpike",
+        "spike_detected": true,
+        "connections_found": 1,
+        "confidence": 0.6666666666666666
+      }
+    },
+    {
+      "problem": {
+        "words": [
+          "DUCK",
+          "FOLD",
+          "DOLLAR"
+        ],
+        "answer": "BILL",
+        "documents": {
+          "DUCK": [
+            "duck bill",
+            "water bird"
+          ],
+          "FOLD": [
+            "fold bills",
+            "paper folding"
+          ],
+          "DOLLAR": [
+            "dollar bill",
+            "US currency"
+          ]
+        }
+      },
+      "base": {
+        "answer": "DOLLAR?",
+        "time": 0.12783217430114746,
+        "method": "Base LLM"
+      },
+      "rag": {
+        "answer": "DUCK:",
+        "time": 0.24505114555358887,
+        "method": "RAG",
+        "context_length": 120
+      },
+      "insight": {
+        "answer": "BILL",
+        "time": 0.4611198902130127,
+        "method": "InsightSpike",
+        "spike_detected": true,
+        "connections_found": 1,
+        "confidence": 0.6666666666666666
+      }
+    }
+  ],
+  "summary": {
+    "base_accuracy": 0.0,
+    "rag_accuracy": 0.0,
+    "insight_accuracy": 0.6666666666666666
+  }
+}
