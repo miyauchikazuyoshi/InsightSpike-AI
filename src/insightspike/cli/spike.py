@@ -55,7 +55,9 @@ class DependencyFactory:
     This allows each command to get its own properly configured agent.
     """
 
-    def __init__(self, base_config: InsightSpikeConfig, datastore: Optional[Any] = None):
+    def __init__(
+        self, base_config: InsightSpikeConfig, datastore: Optional[Any] = None
+    ):
         self.base_config = base_config
         self.datastore = datastore
         self._agents = {}  # Cache for initialized agents
