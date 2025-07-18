@@ -15,7 +15,7 @@ import json
 import sys
 import time
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
 import typer
 from rich import print
@@ -55,7 +55,7 @@ class DependencyFactory:
     This allows each command to get its own properly configured agent.
     """
 
-    def __init__(self, base_config: InsightSpikeConfig, datastore: DataStore):
+    def __init__(self, base_config: InsightSpikeConfig, datastore: Optional[Any] = None):
         self.base_config = base_config
         self.datastore = datastore
         self._agents = {}  # Cache for initialized agents
@@ -109,7 +109,7 @@ class DependencyFactory:
             pydantic_config = InsightSpikeConfig(**config_dict)
 
         # Create and initialize agent with Pydantic config directly
-        agent = MainAgent(config=pydantic_config, datastore=self.datastore)
+        agent = MainAgent(config=pydantic_config)
 
         if not agent.initialize():
             raise InsightSpikeError(f"Failed to initialize agent with preset: {preset}")
@@ -127,13 +127,13 @@ class DependencyFactory:
         return ConfigLoader()
 
 
-def run_cli(config: InsightSpikeConfig, datastore: DataStore):
+def run_cli(config: InsightSpikeConfig, datastore: Optional[Any] = None):
     """
     Main entry point for the CLI, called from __main__.py
 
     Args:
         config: Base configuration
-        datastore: DataStore instance
+        datastore: Optional DataStore instance
     """
     # Create the dependency factory
     factory = DependencyFactory(config, datastore)

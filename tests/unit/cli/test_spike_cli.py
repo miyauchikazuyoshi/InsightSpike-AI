@@ -23,7 +23,7 @@ def runner():
 @pytest.fixture
 def mock_datastore():
     """Create a mock datastore."""
-    return Mock(spec=DataStore)
+    return Mock()
 
 
 @pytest.fixture
