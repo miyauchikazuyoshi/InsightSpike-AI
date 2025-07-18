@@ -95,7 +95,8 @@ class GraphAnalyzer:
         thresholds: Dict[str, float]
     ) -> bool:
         """Detect if current state represents an insight spike."""
-        high_ged = metrics.get("delta_ged", 0) > thresholds.get("ged", -0.5)
+        # GED is negative for improvement, so check if it's below (more negative than) threshold
+        high_ged = metrics.get("delta_ged", 0) < thresholds.get("ged", -0.5)
         high_ig = metrics.get("delta_ig", 0) > thresholds.get("ig", 0.2)
         low_conflict = conflicts.get("total", 1.0) < thresholds.get("conflict", 0.5)
         
@@ -108,7 +109,12 @@ class GraphAnalyzer:
     ) -> float:
         """Assess overall quality of reasoning process."""
         # Combine multiple factors
-        metric_score = (metrics.get("delta_ged", 0) + metrics.get("delta_ig", 0)) / 2
+        # GED is negative for improvement, so we negate it to get positive score
+        ged_score = abs(metrics.get("delta_ged", 0))
+        ig_score = metrics.get("delta_ig", 0)
+        
+        # Average of both scores
+        metric_score = (ged_score + ig_score) / 2
         conflict_penalty = conflicts.get("total", 0)
         
         quality = max(0.0, min(1.0, metric_score - conflict_penalty))

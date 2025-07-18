@@ -294,6 +294,17 @@ def config(
         if action == "show":
             # Convert config to dict and display as JSON
             config_dict = config.dict()
+            # Convert Path objects to strings for JSON serialization
+            def convert_paths(obj):
+                if isinstance(obj, Path):
+                    return str(obj)
+                elif isinstance(obj, dict):
+                    return {k: convert_paths(v) for k, v in obj.items()}
+                elif isinstance(obj, list):
+                    return [convert_paths(item) for item in obj]
+                return obj
+            
+            config_dict = convert_paths(config_dict)
             console.print(json.dumps(config_dict, indent=2))
 
         elif action == "set":
@@ -346,6 +357,14 @@ def config(
             factory.base_config = config_loader.load(config_path=path)
             console.print(f"[green]✅ Configuration loaded from {path}[/green]")
 
+        elif action == "list-presets":
+            # List available presets
+            console.print("[bold]Available Configuration Presets:[/bold]")
+            console.print("  - development: Local development with mock LLM")
+            console.print("  - experiment: For running experiments") 
+            console.print("  - production: Production deployment")
+            console.print("  - research: Academic research configuration")
+            
         elif action == "preset":
             valid_presets = [
                 "development",
@@ -361,10 +380,49 @@ def config(
                 raise typer.Exit(code=1)
             factory.base_config = load_config(preset=key)
             console.print(f"[green]✅ Applied {key} preset[/green]")
+            
+        elif action == "export":
+            path = Path(key) if key else Path("config.json")
+            # Export config to JSON file
+            config_dict = config.dict()
+            # Convert Path objects to strings
+            def convert_paths(obj):
+                if isinstance(obj, Path):
+                    return str(obj)
+                elif isinstance(obj, dict):
+                    return {k: convert_paths(v) for k, v in obj.items()}
+                elif isinstance(obj, list):
+                    return [convert_paths(item) for item in obj]
+                return obj
+            config_dict = convert_paths(config_dict)
+            
+            with open(path, "w") as f:
+                json.dump(config_dict, f, indent=2)
+            console.print(f"[green]✅ Configuration exported to {path}[/green]")
+            
+        elif action == "validate":
+            if not key:
+                console.print("[red]Usage: spike config validate <path>[/red]")
+                raise typer.Exit(code=1)
+            
+            path = Path(key)
+            if not path.exists():
+                console.print(f"[red]File not found: {path}[/red]")
+                raise typer.Exit(code=1)
+                
+            try:
+                # Try to load and validate the config
+                from ..config.loader import ConfigLoader
+                loader = ConfigLoader()
+                _ = loader.load(config_path=path)
+                console.print(f"[green]✅ Configuration is valid[/green]")
+            except Exception as e:
+                console.print(f"[red]Validation error: {e}[/red]")
+                raise typer.Exit(code=1)
 
         else:
             console.print(
-                "[red]Unknown action. Use: show, set, save, load, preset[/red]"
+                "[red]Unknown action. Use: show, set, save, load, preset, list-presets, export, validate[/red]"
             )
             raise typer.Exit(code=1)
 
