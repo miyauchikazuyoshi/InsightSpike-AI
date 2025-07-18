@@ -40,7 +40,12 @@ jobs:
       run: poetry install --no-interaction --no-root --with dev
     
     - name: Install project
-      run: poetry install --no-interaction --with dev
+      run: |
+        poetry install --no-interaction --with dev
+        echo "Checking installed packages:"
+        poetry show
+        echo "Python path after install:"
+        poetry run python -c "import sys; print('\n'.join(sys.path))"
     
     - name: Run tests
       env:
@@ -49,7 +54,7 @@ jobs:
         INSIGHTSPIKE_LLM__PROVIDER: "mock"
         PYTHONPATH: ${{ github.workspace }}/src
       run: |
-        cd ${{ github.workspace }} && poetry run python -m pytest tests/unit/ -v --cov=src/insightspike --cov-report=xml
+        poetry run pytest tests/unit/ -v --cov=src/insightspike --cov-report=xml -s
         # Run integration tests separately (if needed)
         # poetry run pytest tests/integration/ -v -m integration
         # poetry run pytest tests/e2e/ -v -m e2e
