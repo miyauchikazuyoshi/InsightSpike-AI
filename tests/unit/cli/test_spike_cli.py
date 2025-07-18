@@ -214,7 +214,7 @@ class TestSpikeConfig:
             print(f"Exit code: {result.exit_code}")
             print(f"Output: {result.stdout}")
             print(f"Exception: {result.exception}")
-        
+
         assert result.exit_code == 0
         # Config command outputs JSON
         assert "{" in result.stdout
@@ -356,7 +356,7 @@ class TestDependencyFactory:
 
             # Should have development preset values
             assert passed_config.environment == "development"
-            
+
             # Since base config has llm settings, they should be preserved
             assert passed_config.llm.temperature == 0.9
             assert passed_config.llm.max_tokens == 2048
