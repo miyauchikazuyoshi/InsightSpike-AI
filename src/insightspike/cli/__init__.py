@@ -1,8 +1,16 @@
 """CLI package initialization"""
-# This file makes the cli directory a Python package
 
-from .dependency_commands import deps
-from .deps_typer import deps_app
-from .main import app
+try:
+    from .spike import app as spike_app
+except ImportError:
+    spike_app = None
 
-__all__ = ["app", "deps_app", "deps"]
+try:
+    from .legacy import app as legacy_app
+except ImportError:
+    legacy_app = None
+    
+# from .commands.deps import app as deps_app  # Temporarily disabled
+deps_app = None
+
+__all__ = ["spike_app", "legacy_app", "deps_app"]

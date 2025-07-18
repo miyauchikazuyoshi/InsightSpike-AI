@@ -11,7 +11,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
-from insightspike.utils.error_handler import ConfigurationError, get_logger
+from ..core.error_handler import ConfigurationError, get_logger
 
 logger = get_logger("config")
 
@@ -273,7 +273,7 @@ class ConfigManager:
 
     def to_legacy_config(self):
         """Convert to legacy Config object for backward compatibility"""
-        from insightspike.core.config import (
+        from .legacy_config import (
             Config,
             EmbeddingConfig,
             GraphConfig,

@@ -1,0 +1,331 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "node_type": "word",
+      "is_answer": false,
+      "importance": 0.5,
+      "centrality": 0.05,
+      "betweenness": 0.0,
+      "id": "COTTAGE"
+    },
+    {
+      "node_type": "word",
+      "is_answer": false,
+      "importance": 0.5,
+      "centrality": 0.15,
+      "betweenness": 0.4122807017543859,
+      "id": "SWISS"
+    },
+    {
+      "node_type": "word",
+      "is_answer": false,
+      "importance": 0.5,
+      "centrality": 0.05,
+      "betweenness": 0.0,
+      "id": "CAKE"
+    },
+    {
+      "node_type": "word",
+      "is_answer": true,
+      "importance": 0.7,
+      "centrality": 0.2,
+      "betweenness": 0.23391812865497075,
+      "id": "CHEESE"
+    },
+    {
+      "node_type": "word",
+      "is_answer": false,
+      "importance": 0.5,
+      "centrality": 0.1,
+      "betweenness": 0.13157894736842105,
+      "id": "CREAM"
+    },
+    {
+      "node_type": "word",
+      "is_answer": false,
+      "importance": 0.5,
+      "centrality": 0.05,
+      "betweenness": 0.0,
+      "id": "SKATE"
+    },
+    {
+      "node_type": "word",
+      "is_answer": false,
+      "importance": 0.5,
+      "centrality": 0.15,
+      "betweenness": 0.06042884990253411,
+      "id": "WATER"
+    },
+    {
+      "node_type": "word",
+      "is_answer": true,
+      "importance": 0.7,
+      "centrality": 0.4,
+      "betweenness": 0.38693957115009747,
+      "id": "ICE"
+    },
+    {
+      "node_type": "word",
+      "is_answer": false,
+      "importance": 0.5,
+      "centrality": 0.1,
+      "betweenness": 0.008771929824561403,
+      "id": "DUCK"
+    },
+    {
+      "node_type": "word",
+      "is_answer": false,
+      "importance": 0.5,
+      "centrality": 0.05,
+      "betweenness": 0.0,
+      "id": "FOLD"
+    },
+    {
+      "node_type": "word",
+      "is_answer": false,
+      "importance": 0.5,
+      "centrality": 0.2,
+      "betweenness": 0.054580896686159834,
+      "id": "DOLLAR"
+    },
+    {
+      "node_type": "word",
+      "is_answer": true,
+      "importance": 0.7,
+      "centrality": 0.2,
+      "betweenness": 0.1530214424951267,
+      "id": "BILL"
+    },
+    {
+      "node_type": "word",
+      "is_answer": false,
+      "importance": 0.5,
+      "centrality": 0.05,
+      "betweenness": 0.0,
+      "id": "NIGHT"
+    },
+    {
+      "node_type": "word",
+      "is_answer": false,
+      "importance": 0.5,
+      "centrality": 0.05,
+      "betweenness": 0.0,
+      "id": "WRIST"
+    },
+    {
+      "node_type": "word",
+      "is_answer": false,
+      "importance": 0.5,
+      "centrality": 0.05,
+      "betweenness": 0.0,
+      "id": "STOP"
+    },
+    {
+      "node_type": "word",
+      "is_answer": true,
+      "importance": 0.7,
+      "centrality": 0.2,
+      "betweenness": 0.2982456140350877,
+      "id": "WATCH"
+    },
+    {
+      "node_type": "word",
+      "is_answer": true,
+      "importance": 0.7,
+      "centrality": 0.3,
+      "betweenness": 0.3742690058479532,
+      "id": "BANK"
+    },
+    {
+      "node_type": "word",
+      "is_answer": false,
+      "importance": 0.5,
+      "centrality": 0.1,
+      "betweenness": 0.02631578947368421,
+      "id": "RIVER"
+    },
+    {
+      "node_type": "word",
+      "is_answer": false,
+      "importance": 0.5,
+      "centrality": 0.15,
+      "betweenness": 0.0,
+      "id": "NOTE"
+    },
+    {
+      "node_type": "word",
+      "is_answer": false,
+      "importance": 0.5,
+      "centrality": 0.1,
+      "betweenness": 0.0,
+      "id": "ACCOUNT"
+    }
+  ],
+  "links": [
+    {
+      "weight": 0.8,
+      "edge_type": "semantic",
+      "source": "COTTAGE",
+      "target": "CHEESE"
+    },
+    {
+      "weight": 0.6,
+      "edge_type": "semantic",
+      "source": "SWISS",
+      "target": "WATCH"
+    },
+    {
+      "weight": 0.8,
+      "edge_type": "semantic",
+      "source": "SWISS",
+      "target": "CHEESE"
+    },
+    {
+      "weight": 0.6,
+      "edge_type": "semantic",
+      "source": "SWISS",
+      "target": "BANK"
+    },
+    {
+      "weight": 0.6,
+      "edge_type": "semantic",
+      "source": "CAKE",
+      "target": "CHEESE"
+    },
+    {
+      "weight": 0.6,
+      "edge_type": "semantic",
+      "source": "CHEESE",
+      "target": "CREAM"
+    },
+    {
+      "weight": 0.8,
+      "edge_type": "semantic",
+      "source": "CREAM",
+      "target": "ICE"
+    },
+    {
+      "weight": 0.8,
+      "edge_type": "semantic",
+      "source": "SKATE",
+      "target": "ICE"
+    },
+    {
+      "weight": 0.8,
+      "edge_type": "semantic",
+      "source": "WATER",
+      "target": "ICE"
+    },
+    {
+      "weight": 0.6,
+      "edge_type": "semantic",
+      "source": "WATER",
+      "target": "DUCK"
+    },
+    {
+      "weight": 0.8,
+      "edge_type": "semantic",
+      "source": "WATER",
+      "target": "RIVER"
+    },
+    {
+      "weight": 0.6,
+      "edge_type": "semantic",
+      "source": "ICE",
+      "target": "NOTE"
+    },
+    {
+      "weight": 0.6,
+      "edge_type": "semantic",
+      "source": "ICE",
+      "target": "DOLLAR"
+    },
+    {
+      "weight": 0.6,
+      "edge_type": "semantic",
+      "source": "ICE",
+      "target": "BILL"
+    },
+    {
+      "weight": 0.6,
+      "edge_type": "semantic",
+      "source": "ICE",
+      "target": "BANK"
+    },
+    {
+      "weight": 0.6,
+      "edge_type": "semantic",
+      "source": "ICE",
+      "target": "ACCOUNT"
+    },
+    {
+      "weight": 0.8,
+      "edge_type": "semantic",
+      "source": "DUCK",
+      "target": "BILL"
+    },
+    {
+      "weight": 0.8,
+      "edge_type": "semantic",
+      "source": "FOLD",
+      "target": "BILL"
+    },
+    {
+      "weight": 0.6,
+      "edge_type": "semantic",
+      "source": "DOLLAR",
+      "target": "NOTE"
+    },
+    {
+      "weight": 0.8,
+      "edge_type": "semantic",
+      "source": "DOLLAR",
+      "target": "BILL"
+    },
+    {
+      "weight": 0.6,
+      "edge_type": "semantic",
+      "source": "DOLLAR",
+      "target": "BANK"
+    },
+    {
+      "weight": 0.8,
+      "edge_type": "semantic",
+      "source": "NIGHT",
+      "target": "WATCH"
+    },
+    {
+      "weight": 0.8,
+      "edge_type": "semantic",
+      "source": "WRIST",
+      "target": "WATCH"
+    },
+    {
+      "weight": 0.8,
+      "edge_type": "semantic",
+      "source": "STOP",
+      "target": "WATCH"
+    },
+    {
+      "weight": 0.8,
+      "edge_type": "semantic",
+      "source": "BANK",
+      "target": "RIVER"
+    },
+    {
+      "weight": 0.8,
+      "edge_type": "semantic",
+      "source": "BANK",
+      "target": "NOTE"
+    },
+    {
+      "weight": 0.6,
+      "edge_type": "semantic",
+      "source": "BANK",
+      "target": "ACCOUNT"
+    }
+  ]
+}

@@ -1,36 +1,30 @@
 """
-InsightSpike Configuration Module
-================================
+Unified Configuration System for InsightSpike
+============================================
 
-Provides simplified configuration management.
+Provides a clean interface for configuration management:
+- Pydantic-based configuration models
+- YAML/JSON file support
+- Environment variable overrides
+- Presets for common use cases
+- Backward compatibility with legacy config
 """
 
-from .simple_config import (
-    ConfigManager,
-    ConfigPresets,
-    SimpleConfig,
-    create_config_file,
-)
-from .simple_config import get_config as _get_simple_config
+from .loader import get_config, load_config
+from .models import InsightSpikeConfig
+from .presets import ConfigPresets
 
-
-# Create a wrapper that returns legacy config for backward compatibility
-def get_config(preset: str = "development", legacy: bool = True):
-    """Get configuration with optional legacy format"""
-    simple_config = _get_simple_config(preset)
-
-    if legacy:
-        # Return legacy config for backward compatibility
-        manager = ConfigManager(simple_config)
-        return manager.to_legacy_config()
-    else:
-        return simple_config
-
+# Legacy imports for backward compatibility
+from .simple_config import ConfigManager, SimpleConfig, create_config_file
 
 __all__ = [
-    "SimpleConfig",
-    "ConfigPresets",
-    "ConfigManager",
+    # Primary interface
     "get_config",
+    "load_config",
+    "InsightSpikeConfig",
+    "ConfigPresets",
+    # Legacy compatibility
+    "SimpleConfig",
+    "ConfigManager",
     "create_config_file",
 ]

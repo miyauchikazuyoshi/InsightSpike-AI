@@ -1,0 +1,82 @@
+{
+  "metadata": {
+    "experiment": "InsightSpike-style Creative Association",
+    "description": "Proper problem format with geDIG detection",
+    "timestamp": "20250715_232726"
+  },
+  "summary": {
+    "accuracy": 0.0,
+    "spike_rate": 0.0,
+    "total": 3
+  },
+  "results": [
+    {
+      "problem": {
+        "id": 1,
+        "prompt": "What word associates with COTTAGE and SWISS?",
+        "words": [
+          "COTTAGE",
+          "SWISS"
+        ],
+        "expected": "CHEESE",
+        "hint": "Think about food products"
+      },
+      "solution": {
+        "answer": "UNKNOWN",
+        "confidence": 0.0,
+        "candidates": [],
+        "spike_info": {
+          "spike_detected": false
+        },
+        "graph_metrics": {}
+      },
+      "correct": false
+    },
+    {
+      "problem": {
+        "id": 2,
+        "prompt": "Find a word that connects CREAM, SKATE, and WATER",
+        "words": [
+          "CREAM",
+          "SKATE",
+          "WATER"
+        ],
+        "expected": "ICE",
+        "hint": "Think about states of matter"
+      },
+      "solution": {
+        "answer": "UNKNOWN",
+        "confidence": 0.0,
+        "candidates": [],
+        "spike_info": {
+          "spike_detected": false
+        },
+        "graph_metrics": {}
+      },
+      "correct": false
+    },
+    {
+      "problem": {
+        "id": 3,
+        "prompt": "What concept links DUCK, FOLD, and DOLLAR?",
+        "words": [
+          "DUCK",
+          "FOLD",
+          "DOLLAR"
+        ],
+        "expected": "BILL",
+        "hint": "Think about multiple meanings"
+      },
+      "solution": {
+        "answer": "UNKNOWN",
+        "confidence": 0.0,
+        "candidates": [],
+        "spike_info": {
+          "spike_detected": false
+        },
+        "graph_metrics": {}
+      },
+      "correct": false
+    }
+  ]
+}

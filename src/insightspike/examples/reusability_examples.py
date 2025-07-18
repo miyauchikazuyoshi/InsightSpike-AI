@@ -21,7 +21,7 @@ from insightspike.core.interfaces.generic_interfaces import (
     TaskType,
 )
 from insightspike.core.interfaces.maze_implementation import MazeEnvironmentAdapter
-from insightspike.core.reasoners.standalone_l3 import create_standalone_reasoner
+from insightspike.tools.standalone.standalone_l3 import create_standalone_reasoner
 
 logger = logging.getLogger(__name__)
 

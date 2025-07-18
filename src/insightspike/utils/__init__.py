@@ -3,9 +3,9 @@
 # Export commonly used utilities
 from .text_utils import clean_text, iter_text
 
-# Export new visualization utilities
+# Export new visualization utilities - moved to visualization.dashboards
 try:
-    from .visualization import (
+    from ..visualization.dashboards import (
         InsightSpikeVisualizer,
         quick_comparison,
         quick_performance_chart,
@@ -13,8 +13,7 @@ try:
     )
 
     VISUALIZATION_AVAILABLE = True
-except ImportError as e:
-    print(f"Warning: Visualization utilities not available: {e}")
+except ImportError:
     VISUALIZATION_AVAILABLE = False
 
 # Re-export from reorganized modules for backward compatibility
@@ -50,9 +49,9 @@ except ImportError as e:
     else:
         __all__ = ["clean_text", "iter_text"]
 
-# Export graph importance utilities
+# Export graph importance utilities - moved to algorithms
 try:
-    from .graph_importance import DynamicImportanceTracker, GraphImportanceCalculator
+    from ..algorithms.graph_importance import DynamicImportanceTracker, GraphImportanceCalculator
 
     __all__.extend(["GraphImportanceCalculator", "DynamicImportanceTracker"])
 except ImportError:

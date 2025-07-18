@@ -1,0 +1,119 @@
+%% InsightSpike CLI Architecture
+%% Typer Context-based Dependency Injection
+
+flowchart LR
+    %% Entry Point
+    subgraph "🚀 Entry Point"
+        Main[__main__.py<br/>Composition Root]
+        Config[Load Config]
+        DataStore[Create DataStore]
+    end
+    
+    %% CLI Application
+    subgraph "🖥️ CLI Layer"
+        direction TB
+        
+        subgraph "Typer App"
+            CLI[spike.py<br/>run_cli()]
+            Context[Typer Context<br/>Dependency Container]
+            Commands[Command Functions]
+        end
+        
+        subgraph "Dependency Factory"
+            Factory[DependencyFactory]
+            AgentCache[Agent Cache<br/>Per-preset Instances]
+            CreateAgent[get_agent()]
+        end
+    end
+    
+    %% Commands
+    subgraph "📋 Commands"
+        direction TB
+        Query[query<br/>Process Question]
+        Embed[embed<br/>Load Documents]
+        Insights[insights<br/>Show Statistics]
+        Search[insights-search<br/>Search Concepts]
+        Validate[insights-validate<br/>Manual Validation]
+        Cleanup[insights-cleanup<br/>Remove Low Quality]
+        Stats[stats<br/>System Stats]
+        Demo[demo<br/>Interactive Demo]
+        Experiment[experiment<br/>Run Experiments]
+    end
+    
+    %% Tools
+    subgraph "🔧 Tools & Features"
+        ExperimentRunner[ExperimentRunner<br/>tools/experiments.py]
+        InsightManager[Insight Management<br/>detection/insight_registry.py]
+        Embedder[Document Embedder<br/>processing/embedder.py]
+    end
+    
+    %% Core System
+    subgraph "🤖 Core System"
+        MainAgent[MainAgent<br/>Stateful Processing]
+        Layers[4-Layer Architecture]
+        DataStorage[(DataStore<br/>Episodes & Graph)]
+    end
+    
+    %% Flow
+    Main --> Config
+    Main --> DataStore
+    Main --> CLI
+    
+    Config --> Context
+    DataStore --> Context
+    
+    CLI --> Context
+    Context --> Factory
+    Factory --> AgentCache
+    Factory --> CreateAgent
+    
+    Commands --> Query
+    Commands --> Embed
+    Commands --> Insights
+    Commands --> Search
+    Commands --> Validate
+    Commands --> Cleanup
+    Commands --> Stats
+    Commands --> Demo
+    Commands --> Experiment
+    
+    Query --> Factory
+    Embed --> Factory
+    Demo --> Factory
+    Experiment --> Factory
+    
+    Factory --> MainAgent
+    
+    Experiment --> ExperimentRunner
+    Insights --> InsightManager
+    Search --> InsightManager
+    Validate --> InsightManager
+    Cleanup --> InsightManager
+    Embed --> Embedder
+    
+    ExperimentRunner --> MainAgent
+    MainAgent --> Layers
+    MainAgent --> DataStorage
+    
+    %% Key Points
+    subgraph "🔑 Key Design Patterns"
+        DI[Dependency Injection<br/>via Typer Context]
+        Composition[Composition Root<br/>Single Setup Point]
+        NoGlobal[No Global State<br/>All Dependencies Injected]
+        Caching[Agent Caching<br/>Per Configuration]
+    end
+    
+    %% Styling
+    classDef entry fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px
+    classDef cli fill:#e0f2f1,stroke:#009688,stroke-width:2px
+    classDef command fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    classDef tool fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    classDef core fill:#e8f5e9,stroke:#4caf50,stroke-width:2px
+    classDef pattern fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    
+    class Main,Config,DataStore entry
+    class CLI,Context,Factory,AgentCache,CreateAgent cli
+    class Query,Embed,Insights,Search,Validate,Cleanup,Stats,Demo,Experiment command
+    class ExperimentRunner,InsightManager,Embedder tool
+    class MainAgent,Layers,DataStorage core
+    class DI,Composition,NoGlobal,Caching pattern

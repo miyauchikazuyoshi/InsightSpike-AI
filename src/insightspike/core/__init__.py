@@ -1,100 +1,35 @@
 """Core InsightSpike-AI modules"""
 
-# Configuration and management
-from .config_manager import ConfigManager
+# Configuration and management - removed to avoid circular import
 
-# Data structures and framework
-try:
-    from .experiment_framework import (
-        BaseExperiment,
-        ExperimentConfig,
-        ExperimentResult,
-        ExperimentSuite,
-        PerformanceMetrics,
-        create_performance_metrics,
-        create_simple_experiment_config,
-    )
+# Data structures and framework - removed after refactoring
+EXPERIMENT_FRAMEWORK_AVAILABLE = False
 
-    EXPERIMENT_FRAMEWORK_AVAILABLE = True
-except ImportError as e:
-    print(f"Warning: Experiment framework not available: {e}")
-    EXPERIMENT_FRAMEWORK_AVAILABLE = False
+# Layer implementations - moved to implementations.layers
+LAYERS_AVAILABLE = False
 
-# Layer implementations
-try:
-    from .layers import *
+# Import agents - moved to implementations.agents
+MAIN_AGENT_AVAILABLE = False
 
-    LAYERS_AVAILABLE = True
-except ImportError as e:
-    print(f"Warning: Some core layers not available: {e}")
-    LAYERS_AVAILABLE = False
-
-# Import agents
-try:
-    from .agents.main_agent import CycleResult, MainAgent
-
-    MAIN_AGENT_AVAILABLE = True
-except ImportError as e:
-    print(f"Warning: MainAgent not available: {e}")
-    MAIN_AGENT_AVAILABLE = False
-
-# Import generic agents and factory
-try:
-    from .agents.agent_factory import (
-        AgentConfigBuilder,
-        InsightSpikeAgentFactory,
-        create_configured_maze_agent,
-        create_maze_agent,
-    )
-    from .agents.generic_agent import (
-        GenericInsightSpikeAgent,
-        GenericMemoryManager,
-        GenericReasoner,
-    )
-
-    GENERIC_AGENTS_AVAILABLE = True
-except ImportError as e:
-    print(f"Warning: Generic agents not available: {e}")
-    GENERIC_AGENTS_AVAILABLE = False
+# Import generic agents and factory - removed after refactoring
+GENERIC_AGENTS_AVAILABLE = False
 
 # Import standalone reasoner - skip in LITE_MODE
 import os
 
 LITE_MODE = os.getenv("INSIGHTSPIKE_LITE_MODE", "0") == "1"
 
-if not LITE_MODE:
-    try:
-        from .reasoners.standalone_l3 import (
-            StandaloneL3GraphReasoner,
-            analyze_documents_simple,
-            create_standalone_reasoner,
-        )
+# Standalone reasoner - moved to tools.standalone
+StandaloneL3GraphReasoner = None
+create_standalone_reasoner = None
+analyze_documents_simple = None
+STANDALONE_REASONER_AVAILABLE = False
 
-        STANDALONE_REASONER_AVAILABLE = True
-    except ImportError as e:
-        print(f"Warning: Standalone reasoner not available: {e}")
-        StandaloneL3GraphReasoner = None
-        create_standalone_reasoner = None
-        analyze_documents_simple = None
-        STANDALONE_REASONER_AVAILABLE = False
-else:
-    StandaloneL3GraphReasoner = None
-    create_standalone_reasoner = None
-    analyze_documents_simple = None
-    STANDALONE_REASONER_AVAILABLE = False
-    STANDALONE_REASONER_AVAILABLE = False
-
-# Import interfaces
-try:
-    from .interfaces import *
-
-    INTERFACES_AVAILABLE = True
-except ImportError as e:
-    print(f"Warning: Some interfaces not available: {e}")
-    INTERFACES_AVAILABLE = False
+# Import interfaces - moved to core.base
+INTERFACES_AVAILABLE = False
 
 # Export list
-base_exports = ["ConfigManager"]
+base_exports = []
 
 if EXPERIMENT_FRAMEWORK_AVAILABLE:
     base_exports.extend(

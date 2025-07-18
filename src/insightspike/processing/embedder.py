@@ -24,14 +24,26 @@ class EmbeddingManager:
     """Manages text embedding models with caching and fallback support."""
 
     def __init__(self, model_name: str = None, config=None):
-        try:
-            from ...config import get_config
-
-            self.config = config or get_config()
+        from ..config.models import InsightSpikeConfig
+        
+        # Handle both Pydantic config and legacy config
+        if config and isinstance(config, InsightSpikeConfig):
+            self.config = config
             self.model_name = model_name or self.config.embedding.model_name
             self.dimension = self.config.embedding.dimension
-        except ImportError:
-            # Fallback configuration
+        elif config:
+            # Legacy config support
+            try:
+                self.config = config
+                self.model_name = model_name or self.config.embedding.model_name
+                self.dimension = self.config.embedding.dimension
+            except AttributeError:
+                # Fallback for incomplete config
+                self.config = config
+                self.model_name = model_name or "sentence-transformers/all-MiniLM-L6-v2"
+                self.dimension = 384
+        else:
+            # No config provided, use defaults
             self.config = None
             self.model_name = model_name or "sentence-transformers/all-MiniLM-L6-v2"
             self.dimension = 384
@@ -54,20 +66,24 @@ class EmbeddingManager:
             return self._fallback_model()
 
         try:
-            # Try sentence-transformers first
+            # Try sentence-transformers first with safe initialization
+            import torch
             from sentence_transformers import SentenceTransformer
 
+            # Optimize environment for CPU-only stable execution
+            os.environ["PYTORCH_MPS_HIGH_WATERMARK_RATIO"] = "0.0"
+            os.environ["TOKENIZERS_PARALLELISM"] = "false"
+            torch.set_num_threads(1)
+
             logger.info(f"Loading embedding model: {self.model_name}")
-            # Try to create model, handle device parameter issues gracefully
-            try:
-                # Explicitly use CPU to avoid GPU segfaults
-                model = SentenceTransformer(self.model_name, device="cpu")
-            except (TypeError, ValueError) as device_error:
-                # If device parameter is not supported, try without it
-                logger.warning(
-                    f"Device parameter not supported: {device_error}. Trying without device parameter."
-                )
-                model = SentenceTransformer(self.model_name)
+
+            # Safe initialization with explicit parameters
+            model = SentenceTransformer(
+                self.model_name,
+                device="cpu",
+                cache_folder=None,  # Avoid cache conflicts
+                trust_remote_code=False,
+            )
 
             _model_cache[self.model_name] = model
             self._model = model
@@ -144,6 +160,10 @@ class FallbackEmbedder:
 
     def __init__(self, dimension: int = 384):
         self.dimension = dimension
+
+    def get_sentence_embedding_dimension(self):
+        """Return the dimension of the embeddings."""
+        return self.dimension
 
     def encode(self, texts: Union[str, List[str]], **kwargs) -> np.ndarray:
         """Generate simple hash-based embeddings."""

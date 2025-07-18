@@ -1,158 +1,207 @@
 # Data Directory Structure
 
-This directory contains all data files used by InsightSpike-AI. The structure and usage patterns are documented below to ensure consistency across all experiments and components.
+## Overview
 
-## Directory Structure
+This directory follows a structured organization for all InsightSpike data files:
 
 ```
 data/
-├── raw/                    # Raw input data (corpus files, etc.)
-├── processed/              # Processed data files
-├── embedding/              # Embedding models cache
-├── logs/                   # Application logs
-├── learning/               # Auto-learning system data
-├── models/                 # Model checkpoints
-├── experiments/            # Experiment-specific data
-├── index.faiss            # FAISS vector index
-├── episodes.json          # Episode metadata
-├── graph_pyg.pt           # PyTorch Geometric graph
-├── insight_facts.db       # SQLite database for insights
-└── scalable_index.faiss   # Scalable FAISS index (when using ScalableGraphManager)
+├── core/                    # Core system files (persistent)
+│   ├── index.faiss         # FAISS vector index
+│   ├── episodes.json       # Episode metadata  
+│   ├── graph_pyg.pt        # PyTorch graph
+│   └── graph_pyg_clean.pt  # Clean backup graph
+│
+├── db/                      # Databases (persistent)
+│   ├── insight_facts.db    # Insight registry (40KB)
+│   └── unknown_learning.db # Auto-learning system (108KB)
+│
+├── experiments/             # Experiment results (archivable)
+│   ├── integrated_rag_memory/  # RAG experiments
+│   └── processed_results/      # Analysis results
+│       ├── comprehensive_rag_analysis.json
+│       ├── experiment_results.json
+│       ├── graph_visualization_results.json
+│       ├── simple_metadata.json
+│       └── test_questions.json
+│
+├── raw/                     # Input data (read-only)
+│   ├── indirect_knowledge.txt
+│   ├── insight_dataset.txt
+│   ├── simple_dataset.txt
+│   └── test_sentences.txt
+│
+├── clean_backup/            # Clean reference files
+│   ├── episodes_clean.json
+│   ├── graph_pyg_clean.pt
+│   ├── index_clean.faiss
+│   ├── insight_facts_clean.db
+│   ├── unknown_learning_clean.db
+│   └── README.md
+│
+├── logs/                   # Log files (rotatable)
+│   ├── system/            # System logs (empty)
+│   └── graph_operations/  # Graph ops logs (empty)
+│
+├── learning/               # Auto-learning data (empty)
+├── cache/                  # Temporary cache (empty)
+├── temp/                   # Temporary files (empty)
+├── backup/                 # Backups (contains timestamps)
+├── processed/              # Now empty (moved to experiments)
+└── samples/                # Sample data
+    └── benchmark_data.json
 ```
 
-## File Types and Their Usage
+## Key Files
 
-### Core System Files
+- `config.yaml` - Central configuration for data paths
+- `validate.py` - Data validation script
+- `cleanup.py` - Cleanup utility
 
-| File | Component | Description | Format |
-|------|-----------|-------------|--------|
-| `index.faiss` | L2MemoryManager | Vector search index | FAISS binary |
-| `episodes.json` | L2MemoryManager | Episode metadata and text | JSON |
-| `graph_pyg.pt` | L3GraphReasoner | Knowledge graph structure | PyTorch tensor |
-| `scalable_index.faiss` | ScalableGraphManager | Scalable vector index | FAISS binary |
-| `insight_facts.db` | InsightRegistry | Discovered insights database | SQLite |
+## Core System Files
 
-### Auto-Learning System Files
+| File | Component | Description | Location |
+|------|-----------|-------------|----------|
+| `index.faiss` | Layer2 Memory Manager | Vector search index | `core/` |
+| `episodes.json` | Layer2 Memory Manager | Episode metadata | `core/` |
+| `graph_pyg.pt` | Layer3 Graph Reasoner | Knowledge graph | `core/` |
+| `scalable_index.faiss` | Scalable Graph Manager | Scalable vectors | `core/` |
+| `insight_facts.db` | Insight Registry | Insights database | `db/` |
+| `unknown_learning.db` | Auto Learning System | Learning database | `db/` |
 
-Located in `data/learning/`:
-- `unknown_concepts.json` - Concepts to learn
-- `learning_sessions.json` - Learning history
-- `concept_relationships.json` - Concept graph
-- `auto_learned_knowledge.txt` - Accumulated knowledge
+Component implementations are now in:
+- `src/insightspike/implementations/layers/layer2_memory_manager.py`
+- `src/insightspike/implementations/layers/layer3_graph_reasoner.py`
+- `src/insightspike/implementations/memory/scalable_graph_manager.py`
 
-### Log Files
+## Usage
 
-Located in `data/logs/`:
-- `graph_operations/graph_operations_YYYYMMDD.jsonl` - Daily graph operation logs
-- Application logs (various components)
+### Validate Data
+```bash
+python validate.py
+```
 
-## Path Configuration
+### Clean Up
+```bash
+# Dry run to see what would be deleted
+python cleanup.py --dry-run
 
-All paths are configured in `src/insightspike/core/config.py`:
+# Actually clean up
+python cleanup.py
+```
+
+### Data Store Integration
+
+With the new DataStore abstraction:
 
 ```python
-@dataclass
-class PathConfig:
-    data_dir: Path = "data/raw"      # Raw data directory
-    log_dir: Path = "data/logs"      # Log directory
-    index_file: Path = "data/index.faiss"
-    graph_file: Path = "data/graph_pyg.pt"
+from insightspike.implementations.datastore import DataStoreFactory
+
+# Create datastore (uses config.json settings)
+datastore = DataStoreFactory.create("filesystem", base_path="data")
+
+# Save episodes
+datastore.save_episodes(episodes, namespace="l2_memory")
+
+# Load episodes
+episodes = datastore.load_episodes(namespace="l2_memory")
+
+# Search vectors
+indices, distances = datastore.search_vectors(query_vec, k=10)
 ```
 
-## Usage Guidelines
+## File Formats
 
-### 1. Loading Data
-
-```python
-# Load existing memory state
-agent = MainAgent(config)
-success = agent.load_state()  # Loads from configured paths
-
-# Or specify custom path
-agent.l2_memory.load(Path("data/backup/index.faiss"))
-```
-
-### 2. Saving Data
-
-```python
-# Save current state
-agent.save_state()  # Saves to configured paths
-
-# Or specify custom path
-agent.l2_memory.save(Path("data/backup/index.faiss"))
-```
-
-### 3. File Format Specifications
-
-#### episodes.json
+### episodes.json
 ```json
 [
   {
-    "id": 0,
     "text": "Episode text content",
-    "c": 0.5,
-    "metadata": {},
-    "vec": [0.1, 0.2, ...]  // 384-dimensional vector
+    "vec": [0.1, 0.2, ...],  // 384-dimensional vector
+    "c": 0.5,                // C-value
+    "timestamp": 1234567890,
+    "metadata": {}
   }
 ]
 ```
 
-#### graph_pyg.pt
+### graph_pyg.pt
 PyTorch tensor containing:
 - `x`: Node features (embeddings)
 - `edge_index`: Edge connectivity
-- `num_nodes`: Total nodes in graph
+- `num_nodes`: Total nodes
 
-### 4. Best Practices
+## Cleanup Policies
 
-1. **Always use configured paths** - Don't hardcode paths in experiments
-2. **Create directories before use** - Use `path.parent.mkdir(parents=True, exist_ok=True)`
-3. **Handle missing files gracefully** - Check existence before loading
-4. **Use consistent formats** - JSON for metadata, FAISS for vectors, PyTorch for graphs
-5. **Clean up experiments** - Remove temporary files after experiments
+Based on `config.yaml`:
 
-### 5. Data Lifecycle
+- **temp/**: Max 7 days, cleaned on startup
+- **cache/**: Max 10GB, files older than 30 days
+- **logs/**: Rotated at 100MB, kept for 90 days
+- **experiments/**: Keep latest 10, archive older
 
-1. **Initialization**: Empty directories, no files
-2. **Training**: Files created as episodes are added
-3. **Persistence**: Save state before shutting down
-4. **Recovery**: Load state on startup
-5. **Backup**: Copy critical files before major changes
+## Migration from Old Structure
 
-### 6. Troubleshooting
+The data directory has been reorganized for better maintainability:
 
-**Issue**: "File not found" errors
-- **Solution**: Ensure data directory exists and paths are correctly configured
+1. **Files moved to `core/`**:
+   - `index.faiss`
+   - `episodes.json`
+   - `graph_pyg.pt`
 
-**Issue**: Incompatible file versions
-- **Solution**: Check file format matches expected schema
+2. **Files moved to `db/`**:
+   - `insight_facts.db`
+   - `unknown_learning.db`
 
-**Issue**: Large file sizes
-- **Solution**: Use `prune()` methods to remove low-value episodes
+3. **Experiment data moved to `experiments/`**
 
-## Experimental Data Management
+The old structure is preserved in `backup/` for reference.
 
-For experiments, follow this pattern:
+## Best Practices
 
-```python
-# 1. Backup existing data
-shutil.copytree("data", f"data_backup_{timestamp}")
+1. **Always use DataStore API** - Don't directly access files
+2. **Regular validation** - Run `validate.py` weekly
+3. **Cleanup before experiments** - Use `cleanup.py`
+4. **Backup critical data** - Core and DB directories
+5. **Monitor disk usage** - Especially cache and experiments
 
-# 2. Run experiment with clean state
-agent = MainAgent(config)
-# ... run experiment ...
+## Troubleshooting
 
-# 3. Save results
-results_path = f"experiments/results/exp_{timestamp}.json"
-save_results(results, results_path)
-
-# 4. Restore if needed
-shutil.copytree(f"data_backup_{timestamp}", "data")
+**Missing files**: Run validation to check structure
+```bash
+python validate.py
 ```
 
-## Notes
+**Disk space issues**: Run cleanup
+```bash
+python cleanup.py
+```
 
-- The `raw/` subdirectory contains nested copies from previous experiments - these can be cleaned up
-- FAISS indices can become large with many episodes - monitor disk usage
-- SQLite databases should be properly closed to avoid corruption
-- PyTorch files (.pt) require PyTorch to be installed for loading
+**Corrupt files**: Restore from clean backup
+```bash
+cp clean_backup/episodes_clean.json core/episodes.json
+cp clean_backup/index_clean.faiss core/index.faiss
+cp clean_backup/graph_pyg_clean.pt core/graph_pyg.pt
+cp clean_backup/insight_facts_clean.db db/insight_facts.db
+cp clean_backup/unknown_learning_clean.db db/unknown_learning.db
+```
+
+## Future Extensions
+
+The DataStore abstraction supports:
+- PostgreSQL backend
+- Vector databases (Pinecone, Weaviate)
+- S3/Cloud storage
+- Redis cache
+
+Simply change the config:
+```json
+{
+  "datastore": {
+    "type": "postgresql",
+    "params": {
+      "connection_string": "..."
+    }
+  }
+}
+```

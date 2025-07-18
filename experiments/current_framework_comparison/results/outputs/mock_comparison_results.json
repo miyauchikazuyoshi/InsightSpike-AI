@@ -1,0 +1,353 @@
+[
+  {
+    "query": "What is the relationship between energy and information?",
+    "timestamp": "2025-07-17T16:58:03.650334",
+    "direct_llm": {
+      "response": "The relationship between information and information is about information...",
+      "time": 2.4278853596915764,
+      "quality": {
+        "length": 0.76,
+        "depth": 0.0,
+        "specificity": 0.0,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.28
+      }
+    },
+    "standard_rag": {
+      "response": "Energy is the capacity to do work.",
+      "context": [
+        "Energy is the capacity to do work.",
+        "Information is defined as the reduction of uncertainty.",
+        "The entropy of the entire universe is constantly increasing."
+      ],
+      "time": 2.4050021510445334,
+      "quality": {
+        "length": 0.34,
+        "depth": 0.0,
+        "specificity": 0.2,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.11
+      }
+    },
+    "insightspike_improved": {
+      "response": "Energy and information are fundamentally connected through entropy. Information processing requires energy, and energy transformations create information patterns.",
+      "spike_detected": true,
+      "confidence": 0.85,
+      "context": [
+        "[Basic Concepts] Energy is the capacity to do work.",
+        "[Relationships] Information and entropy have a deep mathematical relationship.",
+        "[Deep Integration] Energy, information, and entropy form the fundamental trinity."
+      ],
+      "time": 2.5825087955107358,
+      "quality": {
+        "length": 1.0,
+        "depth": 0.4,
+        "specificity": 0.6,
+        "integration": 0.6,
+        "insight": 0.4,
+        "overall": 0.45
+      },
+      "reasoning_path": [
+        "Detected cross-phase knowledge convergence",
+        "Found relevant information in 3 phases",
+        "Applying integrated reasoning approach",
+        "Synthesizing insights across knowledge domains"
+      ]
+    }
+  },
+  {
+    "query": "Why does consciousness emerge?",
+    "timestamp": "2025-07-17T16:58:03.650387",
+    "direct_llm": {
+      "response": "Why does consciousness emerge?",
+      "time": 2.3446421476297643,
+      "quality": {
+        "length": 0.3,
+        "depth": 0.0,
+        "specificity": 0.0,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.1
+      }
+    },
+    "standard_rag": {
+      "response": "The universe is a system that processes information and creates order.",
+      "context": [
+        "Energy is the capacity to do work.",
+        "Information is defined as the reduction of uncertainty.",
+        "The entropy of the entire universe is constantly increasing."
+      ],
+      "time": 2.5472942428328023,
+      "quality": {
+        "length": 0.7,
+        "depth": 0.0,
+        "specificity": 0.2,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.28
+      }
+    },
+    "insightspike_improved": {
+      "response": "Consciousness emerges as an integrated information processing system. When sufficient complexity and integration occurs, awareness naturally arises.",
+      "spike_detected": true,
+      "confidence": 0.78,
+      "context": [
+        "[Basic Concepts] Energy is the capacity to do work.",
+        "[Relationships] Information and entropy have a deep mathematical relationship.",
+        "[Deep Integration] Energy, information, and entropy form the fundamental trinity.",
+        "[Emergent Insights] Do quantum entanglement and consciousness share a principle?"
+      ],
+      "time": 2.7030098462268732,
+      "quality": {
+        "length": 1.0,
+        "depth": 0.4,
+        "specificity": 0.6,
+        "integration": 0.6,
+        "insight": 0.4,
+        "overall": 0.52
+      },
+      "reasoning_path": [
+        "Detected cross-phase knowledge convergence",
+        "Found relevant information in 4 phases",
+        "Applying integrated reasoning approach",
+        "Synthesizing insights across knowledge domains"
+      ]
+    }
+  },
+  {
+    "query": "What is the mechanism of creativity at the edge of chaos?",
+    "timestamp": "2025-07-17T16:58:03.650411",
+    "direct_llm": {
+      "response": "The answer to this question is that the problem of creativity...",
+      "time": 2.478435913540969,
+      "quality": {
+        "length": 0.64,
+        "depth": 0.0,
+        "specificity": 0.0,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.2
+      }
+    },
+    "standard_rag": {
+      "response": "It is not in the system that we are concerned with...",
+      "context": [
+        "Energy is the capacity to do work.",
+        "Information is defined as the reduction of uncertainty.",
+        "The entropy of the entire universe is constantly increasing."
+      ],
+      "time": 2.417387766525883,
+      "quality": {
+        "length": 0.53,
+        "depth": 0.0,
+        "specificity": 0.2,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.28
+      }
+    },
+    "insightspike_improved": {
+      "response": "Creativity emerges at the boundary between order and chaos, where structured patterns can flexibly reorganize. This dynamic balance enables novel combinations.",
+      "spike_detected": true,
+      "confidence": 0.72,
+      "context": [
+        "[Basic Concepts] Energy is the capacity to do work.",
+        "[Relationships] Information and entropy have a deep mathematical relationship.",
+        "[Deep Integration] Energy, information, and entropy form the fundamental trinity."
+      ],
+      "time": 2.626576545905581,
+      "quality": {
+        "length": 1.0,
+        "depth": 0.4,
+        "specificity": 0.6,
+        "integration": 0.6,
+        "insight": 0.4,
+        "overall": 0.48
+      },
+      "reasoning_path": [
+        "Detected cross-phase knowledge convergence",
+        "Found relevant information in 3 phases",
+        "Applying integrated reasoning approach",
+        "Synthesizing insights across knowledge domains"
+      ]
+    }
+  },
+  {
+    "query": "What is entropy?",
+    "timestamp": "2025-07-17T16:58:03.650428",
+    "direct_llm": {
+      "response": "There is a finite number of elements that are in a finite number of values.",
+      "time": 2.305959443887614,
+      "quality": {
+        "length": 0.75,
+        "depth": 0.0,
+        "specificity": 0.0,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.15
+      }
+    },
+    "standard_rag": {
+      "response": "The entropy of the universe is constantly increasing.",
+      "context": [
+        "Energy is the capacity to do work.",
+        "Information is defined as the reduction of uncertainty.",
+        "The entropy of the entire universe is constantly increasing."
+      ],
+      "time": 2.4437275949607207,
+      "quality": {
+        "length": 0.53,
+        "depth": 0.0,
+        "specificity": 0.2,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.15
+      }
+    },
+    "insightspike_improved": {
+      "response": "Entropy measures the degradation of energy and the dispersal of information. It represents the arrow of time and the universe's tendency toward disorder.",
+      "spike_detected": true,
+      "confidence": 0.9,
+      "context": [
+        "[Basic Concepts] Energy is the capacity to do work.",
+        "[Relationships] Information and entropy have a deep mathematical relationship.",
+        "[Deep Integration] Energy, information, and entropy form the fundamental trinity.",
+        "[Emergent Insights] Do quantum entanglement and consciousness share a principle?"
+      ],
+      "time": 2.6516065864310088,
+      "quality": {
+        "length": 1.0,
+        "depth": 0.4,
+        "specificity": 0.6,
+        "integration": 0.6,
+        "insight": 0.4,
+        "overall": 0.38
+      },
+      "reasoning_path": [
+        "Detected cross-phase knowledge convergence",
+        "Found relevant information in 4 phases",
+        "Applying integrated reasoning approach",
+        "Synthesizing insights across knowledge domains"
+      ]
+    }
+  },
+  {
+    "query": "Can you explain quantum entanglement?",
+    "timestamp": "2025-07-17T16:58:03.650442",
+    "direct_llm": {
+      "response": "Quantum entanglement is a physical phenomenon that arises when...",
+      "time": 2.3053071939367724,
+      "quality": {
+        "length": 0.65,
+        "depth": 0.0,
+        "specificity": 0.2,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.24
+      }
+    },
+    "standard_rag": {
+      "response": "Yes.",
+      "context": [
+        "Energy is the capacity to do work.",
+        "Information is defined as the reduction of uncertainty.",
+        "The entropy of the entire universe is constantly increasing."
+      ],
+      "time": 2.4397675301373294,
+      "quality": {
+        "length": 0.04,
+        "depth": 0.0,
+        "specificity": 0.2,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.01
+      }
+    },
+    "insightspike_improved": {
+      "response": "Quantum entanglement is non-local correlation of information between particles. This fundamental connection transcends classical physics boundaries.",
+      "spike_detected": true,
+      "confidence": 0.82,
+      "context": [
+        "[Basic Concepts] Energy is the capacity to do work.",
+        "[Relationships] Information and entropy have a deep mathematical relationship.",
+        "[Deep Integration] Energy, information, and entropy form the fundamental trinity."
+      ],
+      "time": 2.694965331333857,
+      "quality": {
+        "length": 1.0,
+        "depth": 0.4,
+        "specificity": 0.6,
+        "integration": 0.6,
+        "insight": 0.4,
+        "overall": 0.42
+      },
+      "reasoning_path": [
+        "Detected cross-phase knowledge convergence",
+        "Found relevant information in 3 phases",
+        "Applying integrated reasoning approach",
+        "Synthesizing insights across knowledge domains"
+      ]
+    }
+  },
+  {
+    "query": "Is there a principle that unifies all phenomena?",
+    "timestamp": "2025-07-17T16:58:03.650465",
+    "direct_llm": {
+      "response": "I have no idea.",
+      "time": 2.408988296120643,
+      "quality": {
+        "length": 0.15,
+        "depth": 0.0,
+        "specificity": 0.0,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.03
+      }
+    },
+    "standard_rag": {
+      "response": "The principle is that the whole universe is finite...",
+      "context": [
+        "Energy is the capacity to do work.",
+        "Information is defined as the reduction of uncertainty.",
+        "The entropy of the entire universe is constantly increasing."
+      ],
+      "time": 2.444088124408139,
+      "quality": {
+        "length": 0.53,
+        "depth": 0.0,
+        "specificity": 0.2,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.22
+      }
+    },
+    "insightspike_improved": {
+      "response": "Information conservation and transformation unify all phenomena. Energy, matter, and consciousness are different manifestations of information processing.",
+      "spike_detected": true,
+      "confidence": 0.95,
+      "context": [
+        "[Basic Concepts] Energy is the capacity to do work.",
+        "[Relationships] Information and entropy have a deep mathematical relationship.",
+        "[Deep Integration] Energy, information, and entropy form the fundamental trinity.",
+        "[Emergent Insights] Do quantum entanglement and consciousness share a principle?"
+      ],
+      "time": 2.6767797051627724,
+      "quality": {
+        "length": 1.0,
+        "depth": 0.4,
+        "specificity": 0.6,
+        "integration": 0.6,
+        "insight": 0.4,
+        "overall": 0.58
+      },
+      "reasoning_path": [
+        "Detected cross-phase knowledge convergence",
+        "Found relevant information in 4 phases",
+        "Applying integrated reasoning approach",
+        "Synthesizing insights across knowledge domains"
+      ]
+    }
+  }
+]

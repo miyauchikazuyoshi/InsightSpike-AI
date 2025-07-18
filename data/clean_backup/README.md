@@ -17,16 +17,13 @@
 ## 🔧 復元方法
 
 ```bash
-# 現在のdataディレクトリから実行
-# 全ファイルを一括復元
-cp clean_backup/episodes_clean.json episodes.json
-cp clean_backup/graph_pyg_clean.pt graph_pyg.pt
-cp clean_backup/index_clean.faiss index.faiss
-cp clean_backup/insight_facts_clean.db insight_facts.db
-cp clean_backup/unknown_learning_clean.db unknown_learning.db
-
-# または専用スクリプトを使用
-python scripts/utilities/restore_clean_data.py
+# dataディレクトリから実行
+# 全ファイルを一括復元（新しい構造に対応）
+cp clean_backup/episodes_clean.json core/episodes.json
+cp clean_backup/graph_pyg_clean.pt core/graph_pyg.pt
+cp clean_backup/index_clean.faiss core/index.faiss
+cp clean_backup/insight_facts_clean.db db/insight_facts.db
+cp clean_backup/unknown_learning_clean.db db/unknown_learning.db
 ```
 
 ## 📊 バックアップ作成時の状態

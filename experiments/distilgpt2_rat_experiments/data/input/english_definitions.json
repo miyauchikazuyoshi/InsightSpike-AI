@@ -1,0 +1,150 @@
+{
+  "metadata": {
+    "name": "English Dictionary Definitions for RAT",
+    "description": "English-English dictionary sentences as episodes for InsightSpike",
+    "created": "2025-07-15",
+    "purpose": "Use sentence transformer embeddings with FAISS for insight detection"
+  },
+  "definitions": {
+    "COTTAGE": [
+      "A cottage is a small house, particularly a traditional or old-fashioned house in the countryside.",
+      "Cottage cheese is a type of soft white cheese made from the curds of skimmed milk.",
+      "The word cottage often evokes images of thatched roofs and gardens in rural England.",
+      "Many people rent a cottage for their summer holidays in scenic locations.",
+      "In fairy tales, cottages are often where woodcutters or witches live deep in the forest."
+    ],
+    "SWISS": [
+      "Swiss refers to anything from or related to Switzerland, a country in central Europe.",
+      "Swiss cheese is a generic name for several varieties of cheese that resemble Emmental cheese, with characteristic holes.",
+      "The Swiss are known for their precision in watchmaking and their neutrality in international conflicts.",
+      "Swiss banks have historically been known for their secrecy and security.",
+      "Swiss chocolate is considered among the finest in the world, with brands like Lindt and Toblerone."
+    ],
+    "CAKE": [
+      "A cake is a sweet baked dessert that is often decorated and served at celebrations.",
+      "Birthday cake is traditionally served with candles that the celebrant blows out while making a wish.",
+      "Cheesecake is a sweet dessert consisting of one or more layers with a mixture of soft cheese, eggs, and sugar.",
+      "The phrase 'piece of cake' means something is very easy to accomplish.",
+      "Wedding cakes are often elaborate multi-tiered constructions decorated with icing and flowers."
+    ],
+    "CHEESE": [
+      "Cheese is a dairy product made from pressed milk curds, produced in a variety of flavors, textures, and forms.",
+      "The process of making cheese involves curdling milk using rennet or acid, then aging the resulting curds.",
+      "Common types of cheese include cheddar, mozzarella, Swiss cheese, cottage cheese, and cream cheese.",
+      "The phrase 'say cheese' is commonly used by photographers to make people smile for pictures.",
+      "Cheese is rich in calcium and protein, making it a nutritious food when consumed in moderation."
+    ],
+    "CREAM": [
+      "Cream is the thick white or pale yellow fatty liquid that rises to the top of milk when it is left to stand.",
+      "Ice cream is a frozen dessert made from cream or milk, sugar, and flavorings, churned while freezing.",
+      "Whipped cream is cream that has been beaten until it is light and fluffy, often used as a topping.",
+      "The cream of the crop refers to the best of a group of people or things.",
+      "Face cream is a cosmetic product used to moisturize and protect the skin."
+    ],
+    "SKATE": [
+      "To skate means to glide along a surface, typically ice or a hard floor, using ice skates or roller skates.",
+      "Ice skating involves moving on ice using metal-bladed ice skates attached to shoes.",
+      "A skateboard is a board with wheels that people ride by pushing with one foot while balancing.",
+      "Figure skating is a sport in which individuals perform jumps, spins, and other movements on ice skates.",
+      "The phrase 'skating on thin ice' means to be in a risky or dangerous situation."
+    ],
+    "WATER": [
+      "Water is a transparent, odorless, tasteless liquid that forms seas, lakes, rivers, and rain, with the chemical formula H2O.",
+      "Ice is water frozen into a solid state, forming at 0 degrees Celsius or 32 degrees Fahrenheit.",
+      "Water is essential for all known forms of life and covers about 71% of Earth's surface.",
+      "The water cycle describes how water evaporates, forms clouds, and returns as precipitation.",
+      "Holy water is water that has been blessed and is used in religious ceremonies."
+    ],
+    "ICE": [
+      "Ice is water frozen into a solid state, typically forming at temperatures below 0°C (32°F).",
+      "Ice cream is a sweetened frozen dessert made from dairy products such as milk and cream.",
+      "Ice skating is the act of moving on ice using ice skates, popular both as recreation and sport.",
+      "The phrase 'break the ice' means to do something to relieve tension or start a conversation.",
+      "Dry ice is the solid form of carbon dioxide, used for cooling and creating fog effects."
+    ],
+    "DUCK": [
+      "A duck is a waterbird with webbed feet, a broad flat bill, and a quacking call.",
+      "To duck means to lower one's head or body quickly to avoid something.",
+      "A duck's bill is the flat, broad beak that ducks use to filter food from water.",
+      "Rubber ducks are toy ducks made of rubber or plastic, commonly used in bathtubs.",
+      "The phrase 'water off a duck's back' means criticism that has no effect on someone."
+    ],
+    "FOLD": [
+      "To fold means to bend something over on itself so that one part covers another.",
+      "A billfold is a wallet, especially one that folds in half to hold paper money.",
+      "In poker, to fold means to drop out of a hand by laying down your cards.",
+      "Origami is the Japanese art of folding paper into decorative shapes and figures.",
+      "The fold of a newspaper is the crease where it is folded in half for display."
+    ],
+    "DOLLAR": [
+      "A dollar is the basic monetary unit of the United States and several other countries.",
+      "A dollar bill is a banknote worth one dollar, featuring George Washington in the US.",
+      "The dollar sign ($) is a symbol used to indicate various forms of currency.",
+      "The phrase 'bottom dollar' means one's last dollar or final amount of money.",
+      "Dollar stores are retail stores where most items cost one dollar or a similar low price."
+    ],
+    "BILL": [
+      "A bill can be a statement of charges for goods or services, an invoice requiring payment.",
+      "The bill of a bird, especially a duck's bill, is its beak used for eating and preening.",
+      "A dollar bill is paper money, with denominations like one dollar bill, five dollar bill, etc.",
+      "A billfold is another name for a wallet, designed to fold and hold bills.",
+      "In legislation, a bill is a proposed law presented to parliament or congress for discussion."
+    ],
+    "NIGHT": [
+      "Night is the period of darkness between sunset and sunrise when the sun is below the horizon.",
+      "A night watchman is a person who keeps guard during the night at a building or property.",
+      "Nighttime is the time between evening and morning when it is dark outside.",
+      "The phrase 'night owl' refers to a person who stays up late or is most active at night.",
+      "Night vision is the ability to see in low-light conditions, naturally or with technology."
+    ],
+    "WRIST": [
+      "The wrist is the joint connecting the hand with the forearm, allowing flexible movement.",
+      "A wristwatch is a watch worn on a strap or band around the wrist.",
+      "Wrist injuries are common in sports and can include sprains, fractures, or carpal tunnel syndrome.",
+      "The pulse can be felt at the wrist where the radial artery passes close to the skin.",
+      "Wristbands are bands worn around the wrist for decoration, identification, or to absorb sweat."
+    ],
+    "STOP": [
+      "To stop means to cease movement or activity, to come to a halt.",
+      "A stopwatch is a handheld timepiece designed to measure elapsed time from a particular starting point.",
+      "A stop sign is a red octagonal sign requiring vehicles to come to a complete stop.",
+      "The phrase 'full stop' is another term for a period in punctuation.",
+      "A bus stop is a designated place where buses stop to pick up and drop off passengers."
+    ],
+    "WATCH": [
+      "A watch is a small timepiece worn typically on a strap on one's wrist.",
+      "To watch means to look at or observe attentively over a period of time.",
+      "Night watch refers to a period of duty or vigil during the night hours.",
+      "A stopwatch is a special type of watch used to time races or other events.",
+      "The phrase 'watch out' is a warning to be careful or vigilant about danger."
+    ],
+    "BANK": [
+      "A bank is a financial institution licensed to receive deposits and make loans.",
+      "The bank of a river is the land alongside or sloping down to a river or lake.",
+      "A blood bank is a place where blood is collected, stored, and preserved for transfusion.",
+      "Bank notes are paper money issued by a central bank as legal tender.",
+      "To bank on something means to rely on it or expect it to happen."
+    ],
+    "RIVER": [
+      "A river is a large natural stream of water flowing in a channel to the sea, lake, or another river.",
+      "River banks are the sides of a river that contain the flow of water.",
+      "River boats are vessels designed specifically for navigating rivers and inland waterways.",
+      "The phrase 'cry me a river' means to complain excessively about something.",
+      "River deltas form where rivers meet the sea and deposit sediment in triangular formations."
+    ],
+    "NOTE": [
+      "A note is a brief written record of something to aid memory or for future reference.",
+      "A bank note is a piece of paper money issued by a bank or government as legal tender.",
+      "In music, a note is a single tone of definite pitch made by a musical instrument or voice.",
+      "To take note means to pay attention to something or regard it as important.",
+      "A promissory note is a signed document containing a written promise to pay a stated sum."
+    ],
+    "ACCOUNT": [
+      "An account is an arrangement with a bank to keep money there and access various services.",
+      "A bank account allows customers to deposit, withdraw, and manage their money.",
+      "To give an account means to describe or explain what happened in a situation.",
+      "The phrase 'on account of' means because of or due to something.",
+      "User accounts are profiles that allow individuals to access computer systems or online services."
+    ]
+  }
+}

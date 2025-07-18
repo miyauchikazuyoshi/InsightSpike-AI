@@ -45,8 +45,13 @@ jobs:
     - name: Run tests
       env:
         CI: true
+        INSIGHTSPIKE_TEST_MODE: "1"
+        INSIGHTSPIKE_LLM__PROVIDER: "mock"
       run: |
         poetry run pytest tests/unit/ -v --cov=src/insightspike --cov-report=xml
+        # Run integration tests separately (if needed)
+        # poetry run pytest tests/integration/ -v -m integration
+        # poetry run pytest tests/e2e/ -v -m e2e
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3

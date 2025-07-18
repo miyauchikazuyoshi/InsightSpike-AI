@@ -5,11 +5,11 @@ This directory contains Mermaid diagrams illustrating the InsightSpike-AI archit
 ## 🧠 Architecture Diagrams
 
 ### Core System Architecture
-- **TECHNICAL_ARCHITECTURE.mermaid** - Overall system architecture with scalable graph implementation
-- **TECHNICAL_ARCHITECTURE_v2.mermaid** - ⚡ **UPDATED** Architecture with Query Transformation & L2EnhancedScalableMemory
+- **CURRENT_ARCHITECTURE.mermaid** - ⚡ **LATEST** Current simplified architecture (2025-01)
+- **CONFIG_SYSTEM.mermaid** - ⚡ **NEW** Pydantic-based configuration system
+- **CLI_ARCHITECTURE.mermaid** - ⚡ **NEW** CLI dependency injection with Typer Context
+- **TECHNICAL_ARCHITECTURE.mermaid** - System architecture with scalable graph implementation
 - **DATA_FLOW_ARCHITECTURE.mermaid** - Data flow and directory structure (data/, experiments/)
-- **DATA_FLOW_ARCHITECTURE_v2.mermaid** - ⚡ **NEW** Updated data flow with Query Transformation tracking
-- **QUERY_TRANSFORMATION_ARCHITECTURE.mermaid** - ⚡ **NEW** Query evolution through knowledge graphs
 - **WORKFLOW_TREE.mermaid** - Processing workflow and decision trees
 - **SYSTEM_DASHBOARD.mermaid** - Real-time system metrics with hierarchical graph performance
 
@@ -21,39 +21,43 @@ This directory contains Mermaid diagrams illustrating the InsightSpike-AI archit
 ### Insight Processing
 - **INSIGHT_LIFECYCLE.mermaid** - Insight discovery and quality assessment lifecycle
 
-## 🚀 Latest Updates (2025-07-13)
+## 🚀 Latest Updates (2025-01-18)
 
-### Query Transformation Architecture Added
-1. **QUERY_TRANSFORMATION_ARCHITECTURE.mermaid** ⚡ **NEW**
-   - Shows how queries evolve through knowledge graphs via message passing
-   - Illustrates 4 query stages: Initial → Exploring → Transforming → Insight
-   - Demonstrates GNN message passing for concept absorption
-   - Includes query state tracking and evolution history
+### Major Refactoring Complete
+1. **CURRENT_ARCHITECTURE.mermaid** ⚡ **NEW**
+   - Simplified architecture without Query Transformation
+   - Clean separation of concerns with Composition Root pattern
+   - Type-safe API with CycleResult dataclass
+   - Dependency injection via Typer Context
 
-2. **TECHNICAL_ARCHITECTURE_v2.mermaid** - Updated
-   - Added Query Transformation components in Layer 1
-   - Added GNN Message Passing in Layer 3
-   - Shows feedback loop from Layer 3 to Query State
-   - Highlights Query Evolution as a core process
+2. **CONFIG_SYSTEM.mermaid** ⚡ **NEW**
+   - New Pydantic-based configuration system
+   - Environment variable overrides
+   - Multiple presets (development, experiment, production)
+   - Legacy config converter for backward compatibility
 
-3. **INSIGHT_LIFECYCLE.mermaid** - Updated
-   - Added Query Transformation stage between Agent and Layers
-   - Shows concept absorption feeding back to context
-   - Reflects human-like thinking process
+3. **CLI_ARCHITECTURE.mermaid** ⚡ **NEW**
+   - Typer Context-based dependency injection
+   - Composition Root pattern implementation
+   - Agent caching per configuration
+   - No global state design
 
-4. **DATA_FLOW_ARCHITECTURE_v2.mermaid** ⚡ **NEW**
-   - Adds Query Transformation data flow
-   - Shows query history database tracking
-   - Illustrates evolution pattern learning
-   - Includes Query Evolution Pipeline
+4. **Updated Diagrams**
+   - INTRINSIC_MOTIVATION_FLOW.mermaid - Removed C-value references, added dynamic importance
+   - WORKFLOW_TREE.mermaid - Updated config system to Pydantic-based
+
+5. **Removed Outdated Diagrams**
+   - QUERY_TRANSFORMATION_ARCHITECTURE.mermaid (feature removed)
+   - TECHNICAL_ARCHITECTURE_v2.mermaid (outdated)
+   - DATA_FLOW_ARCHITECTURE_v2.mermaid (outdated)
 
 ## 🚀 Previous Updates (2025-07-06)
 
-### New Diagrams Added
-1. **TECHNICAL_ARCHITECTURE_v2.mermaid**
-   - Shows MainAgent using L2EnhancedScalableMemory
-   - Highlights ScalableGraphManager with O(n log n) performance
-   - Updated data storage paths (data/core/, data/db/, etc.)
+### Historical Updates
+1. **TECHNICAL_ARCHITECTURE.mermaid**
+   - Shows scalable graph implementation
+   - ScalableGraphManager with O(n log n) performance
+   - Updated data storage paths
 
 2. **DATA_FLOW_ARCHITECTURE.mermaid**
    - Complete data directory structure
@@ -98,11 +102,13 @@ The diagrams now show the **C-value free** implementation:
 ## 📊 Key Features Illustrated
 
 - ✅ **4-Layer Neurobiological Architecture**
+- ✅ **Clean Separation of Concerns (Composition Root)**
+- ✅ **Type-safe API with CycleResult**
+- ✅ **Pydantic-based Configuration System**
+- ✅ **Dependency Injection via Typer Context**
 - ✅ **Scalable FAISS-indexed Memory (O(n log n))**
-- ✅ **Hierarchical Graph Structure (O(log n) search)**
-- ✅ **Graph-Centric Episode Management (No C-values)**
+- ✅ **Graph-Centric Episode Management**
 - ✅ **Dynamic Importance from Graph Structure**
-- ✅ **Graph-Informed Integration/Splitting**
 - ✅ **100K+ Episode Handling (<5ms search)**
 - ✅ **geDIG Algorithm with Scalable Implementation**
 

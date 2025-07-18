@@ -34,6 +34,11 @@ class DataValidator:
         self.errors: List[str] = []
         self.warnings: List[str] = []
         
+        # Define paths based on new structure
+        self.core_dir = self.data_dir / "core"
+        self.db_dir = self.data_dir / "db"
+        self.learning_dir = self.data_dir / "learning"
+        
     def validate_all(self) -> Tuple[bool, Dict[str, any]]:
         """Run all validation checks."""
         print("🔍 Starting data validation...\n")
@@ -68,7 +73,7 @@ class DataValidator:
         """Validate episodes.json file."""
         print("📄 Validating episodes.json...")
         
-        episodes_path = self.data_dir / "episodes.json"
+        episodes_path = self.core_dir / "episodes.json"
         if not episodes_path.exists():
             self.warnings.append("episodes.json not found")
             return None
@@ -115,7 +120,7 @@ class DataValidator:
         """Validate FAISS index."""
         print("🔍 Validating FAISS index...")
         
-        index_path = self.data_dir / "index.faiss"
+        index_path = self.core_dir / "index.faiss"
         if not index_path.exists():
             self.warnings.append("index.faiss not found")
             return None
@@ -141,7 +146,7 @@ class DataValidator:
         """Validate PyTorch graph."""
         print("📊 Validating graph_pyg.pt...")
         
-        graph_path = self.data_dir / "graph_pyg.pt"
+        graph_path = self.core_dir / "graph_pyg.pt"
         if not graph_path.exists():
             self.warnings.append("graph_pyg.pt not found")
             return None
@@ -169,14 +174,14 @@ class DataValidator:
         all_valid = True
         
         # Check insight_facts.db
-        insights_db = self.data_dir / "insight_facts.db"
+        insights_db = self.db_dir / "insight_facts.db"
         if insights_db.exists():
             print(f"  ✓ insight_facts.db: {insights_db.stat().st_size / 1024:.1f} KB")
         else:
             self.warnings.append("insight_facts.db not found")
             
         # Check unknown_learning.db
-        learning_db = self.data_dir / "unknown_learning.db"
+        learning_db = self.db_dir / "unknown_learning.db"
         if learning_db.exists():
             print(f"  ✓ unknown_learning.db: {learning_db.stat().st_size / 1024:.1f} KB")
         else:
@@ -189,7 +194,7 @@ class DataValidator:
         print("🔗 Validating cross-file consistency...")
         
         # Load episodes
-        episodes_path = self.data_dir / "episodes.json"
+        episodes_path = self.core_dir / "episodes.json"
         if episodes_path.exists():
             with open(episodes_path, 'r') as f:
                 episodes = json.load(f)
@@ -199,7 +204,7 @@ class DataValidator:
             return None
             
         # Check index
-        index_path = self.data_dir / "index.faiss"
+        index_path = self.core_dir / "index.faiss"
         if index_path.exists():
             index = faiss.read_index(str(index_path))
             index_count = index.ntotal
@@ -213,7 +218,7 @@ class DataValidator:
         
         # Check graph
         if PYTORCH_AVAILABLE:
-            graph_path = self.data_dir / "graph_pyg.pt"
+            graph_path = self.core_dir / "graph_pyg.pt"
             if graph_path.exists():
                 graph = torch.load(graph_path, map_location='cpu')
                 if hasattr(graph, 'x'):

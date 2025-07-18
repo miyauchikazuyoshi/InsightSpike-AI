@@ -76,18 +76,28 @@ flowchart TD
     %% Episode Management Triggers
     subgraph "🔄 Episode Management"
         direction TB
-        UpdateCValues[📈 C-Value Updates]
+        UpdateImportance[📈 Dynamic Importance Updates]
+        
+        subgraph "Importance Calculation"
+            GraphDegree[Graph Degree: 40%]
+            AccessFreq[Access Frequency: 30%]
+            TimeDecay[Time Decay: 30%]
+        end
+        
+        UpdateImportance --> GraphDegree
+        UpdateImportance --> AccessFreq
+        UpdateImportance --> TimeDecay
         
         subgraph "Management Triggers"
             direction LR
             MergeTrigger[🔗 Merge Trigger<br/>Low ΔGED + High Similarity]
             SplitTrigger[✂️ Split Trigger<br/>High Conflict + Complexity]
-            PruneTrigger[🗑️ Prune Trigger<br/>Low C-Values]
+            PruneTrigger[🗑️ Prune Trigger<br/>Low Importance]
         end
         
-        UpdateCValues --> MergeTrigger
-        UpdateCValues --> SplitTrigger
-        UpdateCValues --> PruneTrigger
+        UpdateImportance --> MergeTrigger
+        UpdateImportance --> SplitTrigger
+        UpdateImportance --> PruneTrigger
         
         subgraph "Actions"
             MergeEpisodes[🔗 Merge Similar Episodes]
@@ -97,7 +107,7 @@ flowchart TD
         
         MergeTrigger -->|Similarity > 0.8| MergeEpisodes
         SplitTrigger -->|Conflict > 0.7| SplitEpisodes
-        PruneTrigger -->|C-Value < 0.1| PruneEpisodes
+        PruneTrigger -->|Importance < 0.1| PruneEpisodes
     end
     
     %% Flow Connections
@@ -105,7 +115,7 @@ flowchart TD
     Search --> GraphBuild
     GraphBuild --> MetricsCalc
     TotalReward --> SpikeCheck
-    SpikeDetected --> UpdateCValues
+    SpikeDetected --> UpdateImportance
     
     MergeEpisodes --> IndexRetrain[🔄 Index Retrain]
     SplitEpisodes --> IndexRetrain
@@ -125,4 +135,4 @@ flowchart TD
     class Search,NewEpisode,Check,Integrate,AddNew memoryClass
     class GraphBuild,MetricsCalc,BaseReward,NoveltyReward,StructureReward,TotalReward graphClass
     class SpikeCheck,HighReward,LowGED,HighIG,SpikeDetected spikeClass
-    class UpdateCValues,MergeTrigger,SplitTrigger,PruneTrigger,MergeEpisodes,SplitEpisodes,PruneEpisodes managementClass
+    class UpdateImportance,GraphDegree,AccessFreq,TimeDecay,MergeTrigger,SplitTrigger,PruneTrigger,MergeEpisodes,SplitEpisodes,PruneEpisodes managementClass

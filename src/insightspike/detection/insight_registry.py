@@ -88,10 +88,10 @@ class InsightFactRegistry:
     def __init__(self, db_path: Optional[Path] = None):
         """Initialize the insight fact registry"""
         if db_path is None:
-            from ..core.config import get_config
+            from ..config import get_config
 
             config = get_config()
-            db_path = config.paths.root_dir / "data" / "insight_facts.db"
+            db_path = Path("data") / "insight_facts.db"
 
         self.db_path = db_path
         self.db_path.parent.mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,8 @@
+Metric,Direct LLM,Standard RAG,Original InsightSpike,Current Framework
+Average Quality,0.167,0.175,0.159,0.472
+Insight Detection Rate,0%,0%,83.3%,100%
+Response Coherence,Low,Medium,Low,High
+Knowledge Integration,None,Single-phase,Basic multi-phase,Advanced multi-phase
+Prompt Engineering,None,Basic,Custom,Layer4 structured
+Memory Management,None,Static retrieval,Phase-based,C-value weighted
+Insight Detection,None,None,Similarity-based,geDIG algorithm

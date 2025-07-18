@@ -83,9 +83,12 @@ flowchart TD
     ConceptSearch --> UserResponse
     ManualValidation --> UserResponse
     
-    %% Configuration System (SimpleConfig with presets)
-    Config[⚙️ SimpleConfig] --> MainAgent
-    Config --> Presets[📋 Presets]
+    %% Configuration System (Pydantic-based)
+    Config[⚙️ InsightSpikeConfig] --> MainAgent
+    Config --> ConfigLoader[📋 Config Loader]
+    ConfigLoader --> EnvVars[🌍 Environment Variables]
+    ConfigLoader --> ConfigYAML[📄 config.yaml]
+    ConfigLoader --> Presets[📋 Built-in Presets]
     Presets --> Development[🔧 development]
     Presets --> Testing[🧪 testing]
     Presets --> Production[🚀 production]

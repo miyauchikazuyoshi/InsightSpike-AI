@@ -7,7 +7,7 @@ from typing import List, Optional
 from sentence_transformers import SentenceTransformer
 
 from insightspike.core.layers.layer2_memory_manager import L2MemoryManager
-from insightspike.utils.embedder import get_model
+from insightspike.processing.embedder import get_model
 
 
 class MemoryHelper:

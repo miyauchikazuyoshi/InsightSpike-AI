@@ -49,6 +49,8 @@ InsightSpike-AIプロジェクトの各種スクリプト・ツール・ユー�
 | `production/` | 🚀 本番運用スクリプト | システム検証 |
 | `colab/` | 📓 Colab統合スクリプト | Google Colab用ツール |
 | `ci/` | ⚙️ CI/CD スクリプト | 自動化・継続統合 |
+| `benchmarks/` | 📊 ベンチマーク | パフォーマンス測定 |
+| `monitoring/` | 📈 モニタリング | 運用監視・ダッシュボード |
 
 ## 🚀 使用方法
 
@@ -64,6 +66,12 @@ python scripts/testing/safe_component_test.py
 
 # 検証
 python scripts/validation/validate_mermaid.py
+
+# ベンチマーク
+python scripts/benchmarks/performance_suite.py
+
+# モニタリング
+python scripts/monitoring/production_monitor.py
 ```
 
 ## 🔧 その他のスクリプト
@@ -77,6 +85,12 @@ python scripts/validation/validate_mermaid.py
 - `utilities/persistent_load_documents.py` - ドキュメントの永続的な読み込み
 
 ## 📊 整理完了実績
+
+**2025年01月18日 更新**:
+- ✅ 低優先度スクリプトを削除（GIF作成、デモ、可視化）
+- ✅ benchmarksとmonitoringをscriptsディレクトリに統合
+- ✅ scripts/archiveディレクトリを削除
+- ✅ ディレクトリ構造を整理・簡素化
 
 **2025年01月10日 更新**:
 - ✅ 不要なスクリプト5個を削除

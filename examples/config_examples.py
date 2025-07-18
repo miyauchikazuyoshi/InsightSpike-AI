@@ -3,9 +3,10 @@
 Configuration Examples for InsightSpike
 ======================================
 
-Shows how to use the simplified configuration system.
+Shows how to use the new Pydantic-based configuration system.
 """
 
+import os
 import sys
 from pathlib import Path
 
@@ -13,22 +14,23 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root / "src"))
 
-from insightspike.config import (
-    SimpleConfig, ConfigPresets, ConfigManager,
-    get_config, create_config_file
-)
-from insightspike.core.agents.main_agent import MainAgent
+from insightspike.config.models import InsightSpikeConfig, LLMConfig, MemoryConfig
+from insightspike.config.presets import ConfigPresets
+from insightspike.config.loader import ConfigLoader
+from insightspike.implementations.agents.main_agent import MainAgent
+from insightspike.core.base.datastore import DataStore
 
 
 def example_basic_usage():
-    """Basic configuration usage"""
-    print("=== Basic Configuration Usage ===\n")
+    """Basic Pydantic configuration usage"""
+    print("=== Basic Pydantic Configuration Usage ===\n")
     
-    # 1. Use default configuration
-    config = SimpleConfig()
-    print(f"Default mode: {config.mode}")
-    print(f"Safe mode: {config.safe_mode}")
-    print(f"LLM model: {config.llm_model}")
+    # Create default configuration
+    config = InsightSpikeConfig()
+    print(f"Default environment: {config.environment}")
+    print(f"LLM provider: {config.llm.provider}")
+    print(f"LLM model: {config.llm.model}")
+    print(f"Embedding model: {config.embedding.model_name}")
     print()
 
 
@@ -36,28 +38,28 @@ def example_presets():
     """Using configuration presets"""
     print("=== Configuration Presets ===\n")
     
-    # Development preset - fast, safe, debug-friendly
+    # Development preset
     dev_config = ConfigPresets.development()
     print("Development preset:")
-    print(f"  Safe mode: {dev_config.safe_mode}")
-    print(f"  Debug: {dev_config.debug}")
-    print(f"  Spike sensitivity: {dev_config.spike_sensitivity}")
+    print(f"  Environment: {dev_config.environment}")
+    print(f"  LLM provider: {dev_config.llm.provider}")
+    print(f"  Debug logging: {dev_config.logging.level}")
     print()
     
-    # Experiment preset - real LLM, moderate performance
-    exp_config = ConfigPresets.experiment()
-    print("Experiment preset:")
-    print(f"  Safe mode: {exp_config.safe_mode}")
-    print(f"  Max tokens: {exp_config.max_tokens}")
-    print(f"  Spike sensitivity: {exp_config.spike_sensitivity}")
-    print()
-    
-    # Production preset - optimized for performance
+    # Production preset
     prod_config = ConfigPresets.production()
     print("Production preset:")
-    print(f"  Mode: {prod_config.mode}")
-    print(f"  Batch size: {prod_config.batch_size}")
-    print(f"  Advanced metrics: {prod_config.use_advanced_metrics}")
+    print(f"  Environment: {prod_config.environment}")
+    print(f"  LLM provider: {prod_config.llm.provider}")
+    print(f"  Max tokens: {prod_config.llm.max_tokens}")
+    print()
+    
+    # Research preset
+    research_config = ConfigPresets.research()
+    print("Research preset:")
+    print(f"  Environment: {research_config.environment}")
+    print(f"  Enable monitoring: {research_config.monitoring.enabled}")
+    print(f"  Performance tracking: {research_config.monitoring.performance_tracking}")
     print()
 
 
@@ -66,66 +68,62 @@ def example_custom_config():
     print("=== Custom Configuration ===\n")
     
     # Create custom configuration
-    config = SimpleConfig(
-        mode="cpu",
-        safe_mode=False,
-        max_tokens=512,
-        temperature=0.5,
-        spike_sensitivity=1.5,  # More sensitive spike detection
-        batch_size=48,
-        debug=True
+    config = InsightSpikeConfig(
+        environment="custom",
+        llm=LLMConfig(
+            provider="openai",
+            model="gpt-4",
+            temperature=0.5,
+            max_tokens=1024,
+            api_key="sk-..."  # Would use env var in practice
+        ),
+        memory=MemoryConfig(
+            max_episodes=2000,
+            max_retrieved_docs=15,
+            similarity_threshold=0.8
+        )
     )
     
     print(f"Custom configuration:")
-    print(f"  Mode: {config.mode}")
-    print(f"  Max tokens: {config.max_tokens}")
-    print(f"  Spike GED threshold: {config.spike_ged_threshold}")  # 0.5 * 1.5 = 0.75
+    print(f"  Environment: {config.environment}")
+    print(f"  LLM model: {config.llm.model}")
+    print(f"  Max episodes: {config.memory.max_episodes}")
+    print(f"  Similarity threshold: {config.memory.similarity_threshold}")
     print()
 
 
-def example_config_manager():
-    """Using ConfigManager for dynamic configuration"""
-    print("=== ConfigManager Usage ===\n")
+def example_config_loader():
+    """Using ConfigLoader for file-based configuration"""
+    print("=== ConfigLoader Usage ===\n")
     
-    # Create manager with experiment preset
-    manager = ConfigManager(ConfigPresets.experiment())
+    # Create a config loader
+    loader = ConfigLoader()
     
-    # Get values
-    print(f"Current mode: {manager.get('mode')}")
-    print(f"Safe mode: {manager.get('safe_mode')}")
+    # Example: Create a temporary config file
+    config_data = {
+        "environment": "experiment",
+        "llm": {
+            "provider": "local",
+            "model": "distilgpt2",
+            "temperature": 0.7
+        },
+        "graph": {
+            "spike_ged_threshold": -0.4,
+            "spike_ig_threshold": 0.25
+        }
+    }
     
-    # Update values
-    manager.set('debug', True)
-    manager.update(
-        max_tokens=1024,
-        temperature=0.7
-    )
-    
-    print(f"\nAfter updates:")
-    print(f"  Debug: {manager.config.debug}")
-    print(f"  Max tokens: {manager.config.max_tokens}")
-    print(f"  Temperature: {manager.config.temperature}")
-    print()
-
-
-def example_save_load():
-    """Saving and loading configuration"""
-    print("=== Save/Load Configuration ===\n")
-    
-    # Create configuration
-    config = ConfigPresets.experiment()
-    
-    # Save to file
+    import json
     config_path = Path("experiment_config.json")
-    config.save(config_path)
-    print(f"Configuration saved to: {config_path}")
+    with open(config_path, "w") as f:
+        json.dump(config_data, f, indent=2)
     
     # Load from file
-    loaded_config = SimpleConfig.load(config_path)
-    print(f"\nLoaded configuration:")
-    print(f"  Mode: {loaded_config.mode}")
-    print(f"  Safe mode: {loaded_config.safe_mode}")
-    print(f"  Spike sensitivity: {loaded_config.spike_sensitivity}")
+    config = loader.load_from_file(config_path)
+    print(f"Loaded configuration from {config_path}:")
+    print(f"  Environment: {config.environment}")
+    print(f"  LLM model: {config.llm.model}")
+    print(f"  Spike thresholds: GED={config.graph.spike_ged_threshold}, IG={config.graph.spike_ig_threshold}")
     
     # Clean up
     config_path.unlink()
@@ -136,81 +134,131 @@ def example_env_overrides():
     """Environment variable overrides"""
     print("=== Environment Variable Overrides ===\n")
     
-    import os
-    
     # Set environment variables
-    os.environ["INSIGHTSPIKE_DEBUG"] = "true"
-    os.environ["INSIGHTSPIKE_MAX_TOKENS"] = "1024"
-    os.environ["INSIGHTSPIKE_SPIKE_SENSITIVITY"] = "2.0"
+    os.environ["INSIGHTSPIKE_ENVIRONMENT"] = "testing"
+    os.environ["INSIGHTSPIKE_LLM__PROVIDER"] = "anthropic"
+    os.environ["INSIGHTSPIKE_LLM__MODEL"] = "claude-2"
+    os.environ["INSIGHTSPIKE_LLM__TEMPERATURE"] = "0.8"
     
-    # Create manager - env vars will override defaults
-    manager = ConfigManager()
+    # Load config with env overrides
+    loader = ConfigLoader()
+    config = loader.load_config()
     
     print("Configuration with env overrides:")
-    print(f"  Debug: {manager.config.debug}")
-    print(f"  Max tokens: {manager.config.max_tokens}")
-    print(f"  Spike sensitivity: {manager.config.spike_sensitivity}")
+    print(f"  Environment: {config.environment}")
+    print(f"  LLM provider: {config.llm.provider}")
+    print(f"  LLM model: {config.llm.model}")
+    print(f"  Temperature: {config.llm.temperature}")
     
     # Clean up
-    for key in ["INSIGHTSPIKE_DEBUG", "INSIGHTSPIKE_MAX_TOKENS", "INSIGHTSPIKE_SPIKE_SENSITIVITY"]:
-        del os.environ[key]
+    for key in list(os.environ.keys()):
+        if key.startswith("INSIGHTSPIKE_"):
+            del os.environ[key]
+    print()
+
+
+def example_validation():
+    """Configuration validation examples"""
+    print("=== Configuration Validation ===\n")
+    
+    # Valid configuration
+    try:
+        config = InsightSpikeConfig(
+            llm=LLMConfig(
+                provider="openai",
+                temperature=0.7,  # Valid: 0.0-2.0
+                max_tokens=500    # Valid: > 0
+            )
+        )
+        print("✓ Valid configuration created successfully")
+    except Exception as e:
+        print(f"✗ Validation error: {e}")
+    
+    # Invalid configuration examples
+    print("\nValidation errors:")
+    try:
+        config = InsightSpikeConfig(
+            llm=LLMConfig(
+                provider="invalid_provider",  # Will fail validation
+                temperature=3.0  # Out of range
+            )
+        )
+    except Exception as e:
+        print(f"✗ Provider validation: {e}")
+    
     print()
 
 
 def example_with_agent():
-    """Using configuration with MainAgent"""
-    print("=== Using Configuration with Agent ===\n")
+    """Using Pydantic configuration with MainAgent"""
+    print("=== Using Pydantic Configuration with Agent ===\n")
     
-    # Use ConfigManager for easy management
-    manager = ConfigManager(ConfigPresets.development())
+    # Create configuration
+    config = ConfigPresets.development()
     
-    # Convert to legacy format for MainAgent
-    legacy_config = manager.to_legacy_config()
+    # Create a simple in-memory datastore
+    datastore = DataStore()
     
-    # Create agent
-    agent = MainAgent(config=legacy_config)
+    # Create agent with Pydantic config directly
+    agent = MainAgent(config=config, datastore=datastore)
     agent.initialize()
     
-    print("Agent initialized with configuration:")
-    print(f"  LLM provider: {legacy_config.llm.provider}")
-    print(f"  Safe mode: {legacy_config.llm.safe_mode}")
-    print(f"  Spike thresholds: GED={legacy_config.spike.spike_ged}, IG={legacy_config.spike.spike_ig}")
+    print("Agent initialized with Pydantic configuration:")
+    print(f"  Environment: {config.environment}")
+    print(f"  LLM provider: {config.llm.provider}")
+    print(f"  Embedding dimension: {config.embedding.dimension}")
     
-    # Add some episodes
-    episodes = [
-        "システムAは独立して動作する。",
-        "システムBも独立して動作する。",
-        "AとBを統合すると新しい性質が生まれる。"
-    ]
-    
-    for episode in episodes:
-        result = agent.add_episode_with_graph_update(text=episode)
-        if result.get("graph_analysis", {}).get("spike_detected"):
-            print(f"\n🎯 Spike detected: {episode}")
+    # Process a simple question
+    result = agent.process_question("What is InsightSpike?", max_cycles=1)
+    print(f"\nProcessed question, success: {result.success}")
     print()
 
 
-def example_quick_start():
-    """Quick start example"""
-    print("=== Quick Start ===\n")
+def example_config_migration():
+    """Example of migrating from legacy to Pydantic config"""
+    print("=== Config Migration Example ===\n")
     
-    # Method 1: Use preset directly
-    config = get_config("experiment")
-    print(f"1. Got experiment config: safe_mode={config.safe_mode}")
+    # Old way (would use ConfigConverter internally)
+    print("Old way (with ConfigConverter):")
+    print("  config = get_config()  # Returns legacy format")
+    print("  agent = MainAgent(config)")
+    print()
     
-    # Method 2: Create config file for editing
-    create_config_file("my_config.json", "development")
-    print(f"\n2. Created config file: my_config.json")
+    # New way (direct Pydantic)
+    print("New way (direct Pydantic):")
+    print("  config = InsightSpikeConfig()  # Or ConfigPresets.development()")
+    print("  agent = MainAgent(config)")
+    print()
     
-    # Method 3: One-liner with environment override
-    import os
-    os.environ["INSIGHTSPIKE_SAFE_MODE"] = "false"
-    manager = ConfigManager(get_config("development"))
-    print(f"\n3. Development config with override: safe_mode={manager.config.safe_mode}")
+    # Show the difference
+    pydantic_config = ConfigPresets.development()
+    print("Pydantic config access:")
+    print(f"  config.llm.provider = {pydantic_config.llm.provider}")
+    print(f"  config.embedding.dimension = {pydantic_config.embedding.dimension}")
+    print()
+
+
+def example_serialization():
+    """Configuration serialization examples"""
+    print("=== Configuration Serialization ===\n")
     
-    # Clean up
-    Path("my_config.json").unlink()
-    del os.environ["INSIGHTSPIKE_SAFE_MODE"]
+    # Create a config
+    config = ConfigPresets.research()
+    
+    # Serialize to dict
+    config_dict = config.dict()
+    print("Serialized to dict:")
+    print(f"  Keys: {list(config_dict.keys())}")
+    
+    # Serialize to JSON
+    config_json = config.json(indent=2)
+    print(f"\nSerialized to JSON (first 200 chars):")
+    print(config_json[:200] + "...")
+    
+    # Load from dict
+    new_config = InsightSpikeConfig(**config_dict)
+    print(f"\nLoaded from dict: environment={new_config.environment}")
+    print()
 
 
 def main():
@@ -219,22 +267,23 @@ def main():
         example_basic_usage,
         example_presets,
         example_custom_config,
-        example_config_manager,
-        example_save_load,
+        example_config_loader,
         example_env_overrides,
+        example_validation,
         example_with_agent,
-        example_quick_start
+        example_config_migration,
+        example_serialization
     ]
     
     for example in examples:
         try:
             example()
-            print("\n" + "="*50 + "\n")
+            print("\n" + "="*60 + "\n")
         except Exception as e:
             print(f"Error in {example.__name__}: {e}")
             import traceback
             traceback.print_exc()
-            print("\n" + "="*50 + "\n")
+            print("\n" + "="*60 + "\n")
 
 
 if __name__ == "__main__":

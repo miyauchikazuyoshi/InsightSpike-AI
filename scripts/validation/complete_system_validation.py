@@ -112,8 +112,9 @@ def test_core_functionality():
     try:
         # Test configuration system
         print("1. Testing configuration system...")
-        from insightspike.core.config import get_config
-        config = get_config()
+        from insightspike.config.loader import load_config
+        from insightspike.config.presets import ConfigPresets
+        config = load_config(preset="development")
         # Use safe config access
         embedding_model = getattr(config, 'embedding_model', 'paraphrase-MiniLM-L6-v2')
         print(f"✅ Config loaded: {embedding_model}")
@@ -121,12 +122,12 @@ def test_core_functionality():
         # Test embedder system
         print("2. Testing embedding system...")
         if os.environ.get('INSIGHTSPIKE_SAFE_MODE') == '1':
-            from insightspike.utils.embedder import FallbackEmbedder
+            from insightspike.processing.embedder import FallbackEmbedder
             embedder = FallbackEmbedder(384)
             print("✅ Using fallback embedder (safe mode)")
         else:
-            from insightspike.utils.embedder import get_model
-            embedder = get_model()
+            from insightspike.processing.embedder import EmbeddingManager
+            embedder = EmbeddingManager(config=config)
             print("✅ Using standard embedder")
         
         # Test embedding generation
@@ -191,8 +192,9 @@ def test_environment_compatibility():
     
     try:
         # Test environment detection
-        from insightspike.core.config import get_config
-        config = get_config()
+        from insightspike.config.loader import load_config
+        from insightspike.config.presets import ConfigPresets
+        config = load_config(preset="development")
         print(f"✅ Environment detected: {config.environment}")
         
         # Test device configuration with safe access
@@ -241,8 +243,9 @@ def test_production_readiness():
         # Enable safe mode temporarily
         os.environ['INSIGHTSPIKE_SAFE_MODE'] = '1'
         
-        from insightspike.utils.embedder import FallbackEmbedder
-        fallback_embedder = FallbackEmbedder(384)
+        from insightspike.processing.embedder import FallbackEmbedder
+        # Create embedder with fallback mode
+        fallback_embedder = FallbackEmbedder(dimension=384)  # Will use fallback
         test_result = fallback_embedder.encode(['Production test'])
         print(f"✅ Safe mode embedder working: shape {test_result.shape}")
         
@@ -264,8 +267,9 @@ def test_production_readiness():
         
         # Test configuration validation
         print("3. Testing configuration validation...")
-        from insightspike.core.config import get_config
-        config = get_config()
+        from insightspike.config.loader import load_config
+        from insightspike.config.presets import ConfigPresets
+        config = load_config(preset="development")
         
         # Check critical configuration attributes
         critical_attrs = [

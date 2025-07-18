@@ -2,7 +2,7 @@
 from pathlib import Path
 from typing import List
 
-from ..core.config import get_config
+from ..config import get_config
 from ..utils.text_utils import clean_text, iter_text
 
 __all__ = ["load_corpus"]

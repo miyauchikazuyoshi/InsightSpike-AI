@@ -1,0 +1,8 @@
+query,direct_llm_response,standard_rag_response,insightspike_current_response,spike_detected,confidence,direct_quality,rag_quality,spike_quality
+What is the relationship between energy and information?,The relationship between information and information is about information about information about in,The key to understanding the relationship between energy and information is to understand it.,Error: 'Config' object has no attribute 'processing',False,0.00%,0.280,0.306,0.000
+Why does consciousness emerge?,"Consciousness is not the basis for consciousness, it is the basis for consciousness.
+I think that we",Why does the universe arise?,Error: 'Config' object has no attribute 'processing',False,0.00%,0.240,0.056,0.000
+What is the mechanism of creativity at the edge of chaos?,It is the ability to be creative.,- The process of thinking is the process of thinking that is the process of thinking that is the pro,Error: 'Config' object has no attribute 'processing',False,0.00%,0.066,0.200,0.000
+What is entropy?,The entropy of the universe is the entropy of the universe.,It is a measure of entropy.,Error: 'Config' object has no attribute 'processing',False,0.00%,0.158,0.094,0.000
+Can you explain quantum entanglement?,"Yes, I can.",There is no point in quantum entanglement.,Error: 'Config' object has no attribute 'processing',False,0.00%,0.022,0.124,0.000
+Is there a principle that unifies all phenomena?,No.,- A principle that sets out the general condition of an object is not simply the principle of the st,Error: 'Config' object has no attribute 'processing',False,0.00%,0.006,0.240,0.000

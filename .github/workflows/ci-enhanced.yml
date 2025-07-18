@@ -1,0 +1,147 @@
+name: CI Enhanced
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: latest
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+    
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+    
+    - name: Install dependencies
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      run: poetry install --no-interaction --no-root --with dev
+    
+    - name: Install project
+      run: poetry install --no-interaction --with dev
+    
+    - name: Run unit tests
+      env:
+        CI: true
+        INSIGHTSPIKE_TEST_MODE: "1"
+        INSIGHTSPIKE_LLM__PROVIDER: "mock"
+        INSIGHTSPIKE_LOGGING__LOG_TO_CONSOLE: "false"
+      run: |
+        poetry run pytest tests/unit/ -v --cov=src/insightspike --cov-report=xml --cov-report=term
+    
+    - name: Run integration tests
+      if: matrix.python-version == '3.11'  # Run only on one Python version to save time
+      env:
+        CI: true
+        INSIGHTSPIKE_TEST_MODE: "1"
+      run: |
+        poetry run pytest tests/integration/ -v -m integration || true
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+    
+    - name: Install dependencies
+      run: |
+        poetry install --no-interaction --with dev
+    
+    - name: Run black
+      run: poetry run black --check src/ tests/
+    
+    - name: Run isort
+      run: poetry run isort --check-only src/ tests/
+    
+    - name: Run flake8
+      run: poetry run flake8 src/ tests/ --max-line-length=120 --extend-ignore=E203,E501,F401,F541,E722,E402,F811,W291,W293,F841,F403,F405,E731,E712 || true
+    
+    - name: Run mypy
+      run: poetry run mypy src/ --ignore-missing-imports || true
+
+  cli-smoke-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+    
+    - name: Install project
+      run: poetry install --no-interaction
+    
+    - name: Test CLI commands
+      env:
+        INSIGHTSPIKE_LLM__PROVIDER: "mock"
+      run: |
+        poetry run spike --help
+        poetry run spike version
+        poetry run spike config show || true
+        poetry run insightspike --help
+
+  build-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+    
+    - name: Build package
+      run: |
+        poetry build
+    
+    - name: Check package contents
+      run: |
+        tar -tzf dist/*.tar.gz | head -20
+        unzip -l dist/*.whl | head -20

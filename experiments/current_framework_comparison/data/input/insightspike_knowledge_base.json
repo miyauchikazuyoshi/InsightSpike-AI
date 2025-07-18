@@ -1,0 +1,660 @@
+{
+  "metadata": {
+    "created": "2025-07-17T16:49:22.910942",
+    "source": "english_insight_experiment",
+    "total_episodes": 50,
+    "description": "English knowledge base converted for InsightSpike framework comparison"
+  },
+  "episodes": [
+    {
+      "id": "feb08198-b159-402d-965e-7173d2af887e",
+      "content": "Energy is the capacity to do work.",
+      "timestamp": "2025-07-17T16:49:22.910552",
+      "metadata": {
+        "original_id": 1,
+        "phase": 1,
+        "category": "basic_concepts",
+        "source": "english_knowledge_base",
+        "importance": 0.6,
+        "c_value": 0.5
+      }
+    },
+    {
+      "id": "f7fce728-5419-465f-96d2-ced0e6666fee",
+      "content": "Energy can change forms but cannot be created or destroyed.",
+      "timestamp": "2025-07-17T16:49:22.910585",
+      "metadata": {
+        "original_id": 2,
+        "phase": 1,
+        "category": "basic_concepts",
+        "source": "english_knowledge_base",
+        "importance": 0.6,
+        "c_value": 0.5
+      }
+    },
+    {
+      "id": "b56b528b-466e-4a37-9c30-292e1375d365",
+      "content": "Entropy is a measure of energy degradation.",
+      "timestamp": "2025-07-17T16:49:22.910596",
+      "metadata": {
+        "original_id": 3,
+        "phase": 1,
+        "category": "basic_concepts",
+        "source": "english_knowledge_base",
+        "importance": 0.6,
+        "c_value": 0.5
+      }
+    },
+    {
+      "id": "bae64431-ac41-4d18-bdcc-a5b46247f910",
+      "content": "Information and entropy have a deep mathematical relationship.",
+      "timestamp": "2025-07-17T16:49:22.910605",
+      "metadata": {
+        "original_id": 4,
+        "phase": 1,
+        "category": "basic_concepts",
+        "source": "english_knowledge_base",
+        "importance": 0.6,
+        "c_value": 0.5
+      }
+    },
+    {
+      "id": "1f047756-1c4e-4549-ab50-2566b355a4a0",
+      "content": "Information is defined as the reduction of uncertainty.",
+      "timestamp": "2025-07-17T16:49:22.910612",
+      "metadata": {
+        "original_id": 5,
+        "phase": 1,
+        "category": "basic_concepts",
+        "source": "english_knowledge_base",
+        "importance": 0.6,
+        "c_value": 0.5
+      }
+    },
+    {
+      "id": "e86708ad-d081-41a9-b333-796cff3ea0a5",
+      "content": "Describing a system's state requires information.",
+      "timestamp": "2025-07-17T16:49:22.910620",
+      "metadata": {
+        "original_id": 6,
+        "phase": 1,
+        "category": "basic_concepts",
+        "source": "english_knowledge_base",
+        "importance": 0.6,
+        "c_value": 0.5
+      }
+    },
+    {
+      "id": "29257e48-7139-487d-ac8d-fec79256db1b",
+      "content": "Observation is the process of extracting information from a system.",
+      "timestamp": "2025-07-17T16:49:22.910627",
+      "metadata": {
+        "original_id": 7,
+        "phase": 1,
+        "category": "basic_concepts",
+        "source": "english_knowledge_base",
+        "importance": 0.6,
+        "c_value": 0.5
+      }
+    },
+    {
+      "id": "99790505-5c70-4e77-a843-3c2eb54bc66c",
+      "content": "Observation always involves energy exchange.",
+      "timestamp": "2025-07-17T16:49:22.910638",
+      "metadata": {
+        "original_id": 8,
+        "phase": 1,
+        "category": "basic_concepts",
+        "source": "english_knowledge_base",
+        "importance": 0.6,
+        "c_value": 0.5
+      }
+    },
+    {
+      "id": "ac848570-bb87-4c75-8a62-42b97d8b3f03",
+      "content": "In quantum systems, observation changes the system's state.",
+      "timestamp": "2025-07-17T16:49:22.910646",
+      "metadata": {
+        "original_id": 9,
+        "phase": 1,
+        "category": "basic_concepts",
+        "source": "english_knowledge_base",
+        "importance": 0.6,
+        "c_value": 0.5
+      }
+    },
+    {
+      "id": "16a79462-96c3-4fee-b17b-710e263977dc",
+      "content": "Measurement precision has fundamental limits.",
+      "timestamp": "2025-07-17T16:49:22.910653",
+      "metadata": {
+        "original_id": 10,
+        "phase": 1,
+        "category": "basic_concepts",
+        "source": "english_knowledge_base",
+        "importance": 0.6,
+        "c_value": 0.5
+      }
+    },
+    {
+      "id": "5ac99c83-bfcd-4158-9569-d3198b660e69",
+      "content": "The second law of thermodynamics and Shannon's information theory share the same mathematical structure.",
+      "timestamp": "2025-07-17T16:49:22.910660",
+      "metadata": {
+        "original_id": 11,
+        "phase": 2,
+        "category": "relationships",
+        "source": "english_knowledge_base",
+        "importance": 0.6,
+        "c_value": 0.5
+      }
+    },
+    {
+      "id": "0c9f28d9-74aa-4b0c-8068-19d52b65676d",
+      "content": "Maxwell's demon is a thought experiment showing the relationship between information and energy.",
+      "timestamp": "2025-07-17T16:49:22.910667",
+      "metadata": {
+        "original_id": 12,
+        "phase": 2,
+        "category": "relationships",
+        "source": "english_knowledge_base",
+        "importance": 0.6,
+        "c_value": 0.5
+      }
+    },
+    {
+      "id": "977ea186-1d0d-42e6-85c5-358a6b0d6f76",
+      "content": "Erasing information requires minimum energy (Landauer's principle).",
+      "timestamp": "2025-07-17T16:49:22.910674",
+      "metadata": {
+        "original_id": 13,
+        "phase": 2,
+        "category": "relationships",
+        "source": "english_knowledge_base",
+        "importance": 0.6,
+        "c_value": 0.5
+      }
+    },
+    {
+      "id": "9d4a2b58-97e8-430b-b717-025ec3cba644",
+      "content": "Black hole entropy represents its information capacity.",
+      "timestamp": "2025-07-17T16:49:22.910683",
+      "metadata": {
+        "original_id": 14,
+        "phase": 2,
+        "category": "relationships",
+        "source": "english_knowledge_base",
+        "importance": 0.6,
+        "c_value": 0.5
+      }
+    },
+    {
+      "id": "f3b3427a-f9ab-45c2-9c6d-db221de9345c",
+      "content": "In the holographic principle, information is encoded on boundary surfaces.",
+      "timestamp": "2025-07-17T16:49:22.910690",
+      "metadata": {
+        "original_id": 15,
+        "phase": 2,
+        "category": "relationships",
+        "source": "english_knowledge_base",
+        "importance": 0.6,
+        "c_value": 0.5
+      }
+    },
+    {
+      "id": "7c74b948-b7cf-4646-bb88-939b0b2546f6",
+      "content": "Quantum entanglement is a correlation that cannot be explained by classical information theory.",
+      "timestamp": "2025-07-17T16:49:22.910697",
+      "metadata": {
+        "original_id": 16,
+        "phase": 2,
+        "category": "relationships",
+        "source": "english_knowledge_base",
+        "importance": 0.6,
+        "c_value": 0.5
+      }
+    },
+    {
+      "id": "fddcd47f-6605-4574-860a-3d6347f8ad78",
+      "content": "Quantum information has fundamentally different properties from classical information.",
+      "timestamp": "2025-07-17T16:49:22.910703",
+      "metadata": {
+        "original_id": 17,
+        "phase": 2,
+        "category": "relationships",
+        "source": "english_knowledge_base",
+        "importance": 0.6,
+        "c_value": 0.5
+      }
+    },
+    {
+      "id": "5220cb65-db58-419f-9acd-595bdf6d27c7",
+      "content": "Decoherence is the process of quantum information leaking into the environment.",
+      "timestamp": "2025-07-17T16:49:22.910710",
+      "metadata": {
+        "original_id": 18,
+        "phase": 2,
+        "category": "relationships",
+        "source": "english_knowledge_base",
+        "importance": 0.6,
+        "c_value": 0.5
+      }
+    },
+    {
+      "id": "c5f059a9-8384-48a8-aa83-1eb79a10fe4f",
+      "content": "Life is a system that maintains order within the flow of entropy.",
+      "timestamp": "2025-07-17T16:49:22.910717",
+      "metadata": {
+        "original_id": 19,
+        "phase": 2,
+        "category": "relationships",
+        "source": "english_knowledge_base",
+        "importance": 0.6,
+        "c_value": 0.5
+      }
+    },
+    {
+      "id": "b5e87bfa-91cf-41a6-ac09-0e56dc5b6465",
+      "content": "DNA is chemically encoded digital information.",
+      "timestamp": "2025-07-17T16:49:22.910724",
+      "metadata": {
+        "original_id": 20,
+        "phase": 2,
+        "category": "relationships",
+        "source": "english_knowledge_base",
+        "importance": 0.6,
+        "c_value": 0.5
+      }
+    },
+    {
+      "id": "24644e61-e69d-45dd-933c-2259483297a9",
+      "content": "Energy, information, and entropy form the fundamental trinity of the universe.",
+      "timestamp": "2025-07-17T16:49:22.910730",
+      "metadata": {
+        "original_id": 31,
+        "phase": 3,
+        "category": "deep_integration",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "a7c94960-10c2-4d45-a414-88a6d7a178d0",
+      "content": "The measurement problem can be reformulated in information-theoretic terms.",
+      "timestamp": "2025-07-17T16:49:22.910739",
+      "metadata": {
+        "original_id": 32,
+        "phase": 3,
+        "category": "deep_integration",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "d0f57c57-5285-4ca2-8be6-1d0f61f07a19",
+      "content": "Wave function collapse can be understood as an information update process.",
+      "timestamp": "2025-07-17T16:49:22.910746",
+      "metadata": {
+        "original_id": 33,
+        "phase": 3,
+        "category": "deep_integration",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "e4b6d16b-59af-461f-a58b-266f22e6a687",
+      "content": "Quantum entanglement is a state where information is non-locally correlated.",
+      "timestamp": "2025-07-17T16:49:22.910753",
+      "metadata": {
+        "original_id": 34,
+        "phase": 3,
+        "category": "deep_integration",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "f42bee74-250f-4298-858f-23ab9b941df6",
+      "content": "The black hole information paradox shows the contradiction between quantum mechanics and general relativity.",
+      "timestamp": "2025-07-17T16:49:22.910759",
+      "metadata": {
+        "original_id": 35,
+        "phase": 3,
+        "category": "deep_integration",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "f06a687a-6822-4f04-9bfb-c82247410f74",
+      "content": "Through Hawking radiation, black hole information is gradually released.",
+      "timestamp": "2025-07-17T16:49:22.910766",
+      "metadata": {
+        "original_id": 36,
+        "phase": 3,
+        "category": "deep_integration",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "c9417fec-80d3-4339-8323-66abb7a4bd94",
+      "content": "The entropy of the entire universe is constantly increasing.",
+      "timestamp": "2025-07-17T16:49:22.910774",
+      "metadata": {
+        "original_id": 37,
+        "phase": 3,
+        "category": "deep_integration",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "60962b08-3766-4a2e-b7e8-97ccfd528dde",
+      "content": "Heat death of the universe is the state of maximum entropy.",
+      "timestamp": "2025-07-17T16:49:22.910781",
+      "metadata": {
+        "original_id": 38,
+        "phase": 3,
+        "category": "deep_integration",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "ba0d20f5-0b31-4fc5-ab96-5be8d75f5901",
+      "content": "Life is a dissipative structure that locally decreases entropy.",
+      "timestamp": "2025-07-17T16:49:22.910787",
+      "metadata": {
+        "original_id": 39,
+        "phase": 3,
+        "category": "deep_integration",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "9d990b40-eaef-4bdc-889d-58ef393acc2a",
+      "content": "Consciousness might be quantified by Integrated Information Theory (IIT).",
+      "timestamp": "2025-07-17T16:49:22.910793",
+      "metadata": {
+        "original_id": 40,
+        "phase": 3,
+        "category": "deep_integration",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "d6a00a9d-3502-410f-9a60-b32ca5fbf313",
+      "content": "If information is a physical entity, how is its mass calculated?",
+      "timestamp": "2025-07-17T16:49:22.910800",
+      "metadata": {
+        "original_id": 61,
+        "phase": 4,
+        "category": "emergent_insights",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "44ff1ad1-531d-4999-a25f-159736a9e3b6",
+      "content": "Can the hard problem of consciousness be solved from an information integration perspective?",
+      "timestamp": "2025-07-17T16:49:22.910806",
+      "metadata": {
+        "original_id": 62,
+        "phase": 4,
+        "category": "emergent_insights",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "c563eeff-36b0-4b44-96e9-181158b44f46",
+      "content": "Do quantum entanglement and non-locality of consciousness share a common principle?",
+      "timestamp": "2025-07-17T16:49:22.910815",
+      "metadata": {
+        "original_id": 63,
+        "phase": 4,
+        "category": "emergent_insights",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "a6be3bb4-737b-4324-8ac1-e76689eb9a1d",
+      "content": "Can we view the entire universe as a quantum computer?",
+      "timestamp": "2025-07-17T16:49:22.910822",
+      "metadata": {
+        "original_id": 64,
+        "phase": 4,
+        "category": "emergent_insights",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "157ac3ac-8ee7-468d-99f2-4f473467ace6",
+      "content": "Can the origin of life be explained as self-organization of information?",
+      "timestamp": "2025-07-17T16:49:22.910829",
+      "metadata": {
+        "original_id": 65,
+        "phase": 4,
+        "category": "emergent_insights",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "8a9b15ae-926b-402c-b747-b62c435b7208",
+      "content": "Is evolution a process for the universe to recognize itself?",
+      "timestamp": "2025-07-17T16:49:22.910835",
+      "metadata": {
+        "original_id": 66,
+        "phase": 4,
+        "category": "emergent_insights",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "a629bd4c-9c85-4dda-b2db-224a3d5f1f8f",
+      "content": "Does artificial consciousness emerge from sufficient information integration?",
+      "timestamp": "2025-07-17T16:49:22.910842",
+      "metadata": {
+        "original_id": 67,
+        "phase": 4,
+        "category": "emergent_insights",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "d7dd366d-8904-4b89-8173-d5076d7e59b6",
+      "content": "Can quantum gravity theory be built with information as the fundamental element?",
+      "timestamp": "2025-07-17T16:49:22.910848",
+      "metadata": {
+        "original_id": 68,
+        "phase": 4,
+        "category": "emergent_insights",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "908a558e-18f5-4b48-aea4-a57ed6376f45",
+      "content": "Is the interior of a black hole the ultimate compression state of information?",
+      "timestamp": "2025-07-17T16:49:22.910855",
+      "metadata": {
+        "original_id": 69,
+        "phase": 4,
+        "category": "emergent_insights",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "a8b1170e-8ec8-4f40-a304-ffee3d17e15a",
+      "content": "Can the many-worlds interpretation be understood as branching of information?",
+      "timestamp": "2025-07-17T16:49:22.910861",
+      "metadata": {
+        "original_id": 70,
+        "phase": 4,
+        "category": "emergent_insights",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "fe6304c2-2a20-41c2-8dc3-749fe7a4a80f",
+      "content": "Energy, information, and consciousness are different aspects of the same reality.",
+      "timestamp": "2025-07-17T16:49:22.910877",
+      "metadata": {
+        "original_id": 111,
+        "phase": 5,
+        "category": "integration_circulation",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "2a3c1a38-571b-49fb-8f10-83398205c0bd",
+      "content": "The evolution of the universe can be understood as increasing information processing capacity.",
+      "timestamp": "2025-07-17T16:49:22.910884",
+      "metadata": {
+        "original_id": 112,
+        "phase": 5,
+        "category": "integration_circulation",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "22bbd865-3818-494b-985e-c15e41450e57",
+      "content": "Life and consciousness are inevitable consequences of the universe recognizing itself.",
+      "timestamp": "2025-07-17T16:49:22.910891",
+      "metadata": {
+        "original_id": 113,
+        "phase": 5,
+        "category": "integration_circulation",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "6d96530e-973a-4a82-af8c-2729660c4fc3",
+      "content": "The unification of quantum mechanics and general relativity will be achieved based on information.",
+      "timestamp": "2025-07-17T16:49:22.910898",
+      "metadata": {
+        "original_id": 114,
+        "phase": 5,
+        "category": "integration_circulation",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "865b5f72-6dfa-4722-84a4-3c62a1031e1b",
+      "content": "All physical laws reduce to laws of information conservation and transformation.",
+      "timestamp": "2025-07-17T16:49:22.910904",
+      "metadata": {
+        "original_id": 115,
+        "phase": 5,
+        "category": "integration_circulation",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "c86f6d19-dc8d-4550-b3dc-d9c74f140ad2",
+      "content": "Consciousness is the most sophisticated form of information processing in the universe.",
+      "timestamp": "2025-07-17T16:49:22.910911",
+      "metadata": {
+        "original_id": 116,
+        "phase": 5,
+        "category": "integration_circulation",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "501b09d0-8a79-4c50-9787-c9579e910f39",
+      "content": "Artificial intelligence represents a new stage of the universe's information processing capacity.",
+      "timestamp": "2025-07-17T16:49:22.910920",
+      "metadata": {
+        "original_id": 117,
+        "phase": 5,
+        "category": "integration_circulation",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "f84dc4e9-40e0-485c-a5bc-2853a1597b8e",
+      "content": "Quantum computers directly utilize the computational principles of the universe.",
+      "timestamp": "2025-07-17T16:49:22.910926",
+      "metadata": {
+        "original_id": 118,
+        "phase": 5,
+        "category": "integration_circulation",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "0536a3d4-3a8d-4868-a7c1-27331d5d93e4",
+      "content": "Blockchain ensures information reliability in a distributed manner.",
+      "timestamp": "2025-07-17T16:49:22.910933",
+      "metadata": {
+        "original_id": 119,
+        "phase": 5,
+        "category": "integration_circulation",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    },
+    {
+      "id": "fc1b7a36-9c95-43c2-be3c-9c5b39d6af77",
+      "content": "The Internet functions as a planetary nervous system.",
+      "timestamp": "2025-07-17T16:49:22.910940",
+      "metadata": {
+        "original_id": 120,
+        "phase": 5,
+        "category": "integration_circulation",
+        "source": "english_knowledge_base",
+        "importance": 0.8,
+        "c_value": 0.7
+      }
+    }
+  ]
+}

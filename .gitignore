@@ -21,6 +21,9 @@ __pycache__/
 Dockerfile.codex
 prepare_push.sh
 
+# Claude専用設定
+CLAUDE.md
+
 # 一時・バックアップファイル
 *.backup
 *.tmp
@@ -153,6 +156,15 @@ experiments/data_preservation/temp/               # 一時ファイルは除外
 # 実験データディレクトリ内のデータベースは保持
 !experiments/*/data/**/*.db
 
+# 低優先度スクリプト
+scripts/archive/
+scripts/create_*_gif*.py
+scripts/demo_*.py
+scripts/visualize_*.py
+scripts/test_gif*.py
+scripts/record_demo.sh
+scripts/*.bak.*
+
 # グラフファイル（本番使用は保持、実験用は除外）
 /data/graph_experimental_*.pt
 /data/graph_test_*.pt
@@ -251,3 +263,39 @@ experiments_colab/*/results/*_large.json
 # 重要な結果サマリーは保持
 !experiments/*/RESULTS_SUMMARY.json
 !experiments_colab/*/RESULTS_SUMMARY.json
+
+# Backup files with timestamps
+*.bak.*
+*.bak.20*
+
+# Duplicate data directories (cleaned up)
+/data/core/
+/data/db/
+/data/experiments/
+
+# Old backup directories
+*_old_backup/
+tests_old_backup/
+
+# Empty placeholder directories
+src/insightspike/core/base/
+src/insightspike/features/
+src/insightspike/implementations/
+src/insightspike/tools/
+
+# Test documentation
+test_docs/
+
+# Migration scripts (if temporary)
+scripts/migrate_*.bak.*
+scripts/config_migration_guide.bak.*
+
+# Configuration files that might be local
+config.json
+!experiments/*/config.json
+!src/*/config.json
+
+# Temporary test files
+test_results_*.json
+run_tests.sh
+PUSH_CHECKLIST.md

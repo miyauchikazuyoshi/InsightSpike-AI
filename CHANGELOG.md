@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.8.2] - 2025-01-10
+## [0.8.2] - 2025-07-10
 
 ### Changed
 - Renamed CLI commands to follow industry standards:
@@ -19,7 +19,7 @@
 - CLI guide with updated examples
 - Legacy CLI help text to show new commands
 
-## [0.8.1] - 2025-01-10
+## [0.8.1] - 2025-07-10
 
 ### Added
 - New improved CLI (`spike`) with better user experience

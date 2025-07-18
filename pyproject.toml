@@ -48,6 +48,7 @@ scikit-learn = "^1.3.0"
 matplotlib = "^3.7.0"
 pyyaml = "^6.0.1"
 packaging = "^23.0"
+pydantic = "^1.10.0"
 
 # Vector search - CPU version (GPU version can be added optionally)
 
@@ -101,8 +102,8 @@ llm = ["accelerate", "bitsandbytes", "einops"]
 full = ["faiss-cpu", "torch-geometric", "jupyter", "pandas", "seaborn", "accelerate", "bitsandbytes", "einops"]
 
 [tool.poetry.scripts]
-insightspike = "insightspike.cli.main:main"
-spike = "insightspike.cli.improved_cli:main"
+insightspike = "insightspike.cli.legacy:main"
+spike = "insightspike.__main__:run_app"
 
 [tool.pytest.ini_options]
 markers = [

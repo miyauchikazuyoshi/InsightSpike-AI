@@ -1,0 +1,710 @@
+{
+  "metadata": {
+    "name": "RAT-100 Dataset",
+    "description": "100 Remote Associates Test problems for comprehensive evaluation",
+    "created": "2025-07-15",
+    "categories": ["food", "nature", "objects", "actions", "abstract"]
+  },
+  "problems": [
+    {
+      "id": 1,
+      "words": ["COTTAGE", "SWISS", "CAKE"],
+      "answer": "CHEESE",
+      "category": "food",
+      "difficulty": "easy"
+    },
+    {
+      "id": 2,
+      "words": ["CREAM", "SKATE", "WATER"],
+      "answer": "ICE",
+      "category": "nature",
+      "difficulty": "easy"
+    },
+    {
+      "id": 3,
+      "words": ["DUCK", "FOLD", "DOLLAR"],
+      "answer": "BILL",
+      "category": "objects",
+      "difficulty": "medium"
+    },
+    {
+      "id": 4,
+      "words": ["SHOW", "LIFE", "ROW"],
+      "answer": "BOAT",
+      "category": "objects",
+      "difficulty": "medium"
+    },
+    {
+      "id": 5,
+      "words": ["NIGHT", "WRIST", "STOP"],
+      "answer": "WATCH",
+      "category": "objects",
+      "difficulty": "easy"
+    },
+    {
+      "id": 6,
+      "words": ["SLEEPING", "BEAN", "TRASH"],
+      "answer": "BAG",
+      "category": "objects",
+      "difficulty": "medium"
+    },
+    {
+      "id": 7,
+      "words": ["LIGHT", "BIRTHDAY", "STICK"],
+      "answer": "CANDLE",
+      "category": "objects",
+      "difficulty": "easy"
+    },
+    {
+      "id": 8,
+      "words": ["RIVER", "NOTE", "ACCOUNT"],
+      "answer": "BANK",
+      "category": "abstract",
+      "difficulty": "medium"
+    },
+    {
+      "id": 9,
+      "words": ["BROKEN", "CLEAR", "EYE"],
+      "answer": "GLASS",
+      "category": "objects",
+      "difficulty": "easy"
+    },
+    {
+      "id": 10,
+      "words": ["LICK", "SPRINKLE", "MINES"],
+      "answer": "SALT",
+      "category": "food",
+      "difficulty": "medium"
+    },
+    {
+      "id": 11,
+      "words": ["PALM", "SHOE", "HOUSE"],
+      "answer": "TREE",
+      "category": "nature",
+      "difficulty": "hard"
+    },
+    {
+      "id": 12,
+      "words": ["MAIN", "SWEEPER", "LIGHT"],
+      "answer": "STREET",
+      "category": "objects",
+      "difficulty": "medium"
+    },
+    {
+      "id": 13,
+      "words": ["TOOTH", "POTATO", "HEART"],
+      "answer": "SWEET",
+      "category": "food",
+      "difficulty": "hard"
+    },
+    {
+      "id": 14,
+      "words": ["TIME", "HAIR", "STRETCH"],
+      "answer": "LONG",
+      "category": "abstract",
+      "difficulty": "medium"
+    },
+    {
+      "id": 15,
+      "words": ["MANNERS", "ROUND", "TENNIS"],
+      "answer": "TABLE",
+      "category": "objects",
+      "difficulty": "easy"
+    },
+    {
+      "id": 16,
+      "words": ["FLY", "CLIP", "WALL"],
+      "answer": "PAPER",
+      "category": "objects",
+      "difficulty": "easy"
+    },
+    {
+      "id": 17,
+      "words": ["MOTION", "POKE", "DOWN"],
+      "answer": "SLOW",
+      "category": "abstract",
+      "difficulty": "hard"
+    },
+    {
+      "id": 18,
+      "words": ["PIECE", "MIND", "DATING"],
+      "answer": "GAME",
+      "category": "abstract",
+      "difficulty": "medium"
+    },
+    {
+      "id": 19,
+      "words": ["FLOWER", "FRIEND", "SCOUT"],
+      "answer": "GIRL",
+      "category": "abstract",
+      "difficulty": "medium"
+    },
+    {
+      "id": 20,
+      "words": ["HOME", "SEA", "BED"],
+      "answer": "SICK",
+      "category": "abstract",
+      "difficulty": "hard"
+    },
+    {
+      "id": 21,
+      "words": ["SANDWICH", "HOUSE", "GOLF"],
+      "answer": "CLUB",
+      "category": "objects",
+      "difficulty": "medium"
+    },
+    {
+      "id": 22,
+      "words": ["AID", "RUBBER", "WAGON"],
+      "answer": "BAND",
+      "category": "objects",
+      "difficulty": "medium"
+    },
+    {
+      "id": 23,
+      "words": ["BOARD", "MAGIC", "DEATH"],
+      "answer": "BLACK",
+      "category": "abstract",
+      "difficulty": "easy"
+    },
+    {
+      "id": 24,
+      "words": ["FRENCH", "CAR", "SHOE"],
+      "answer": "HORN",
+      "category": "objects",
+      "difficulty": "hard"
+    },
+    {
+      "id": 25,
+      "words": ["HIGH", "DISTRICT", "HOUSE"],
+      "answer": "SCHOOL",
+      "category": "abstract",
+      "difficulty": "easy"
+    },
+    {
+      "id": 26,
+      "words": ["WATER", "MINE", "SHAKER"],
+      "answer": "SALT",
+      "category": "nature",
+      "difficulty": "easy"
+    },
+    {
+      "id": 27,
+      "words": ["BASKET", "EIGHT", "SNOW"],
+      "answer": "BALL",
+      "category": "objects",
+      "difficulty": "easy"
+    },
+    {
+      "id": 28,
+      "words": ["LOSER", "THROAT", "SPOT"],
+      "answer": "SORE",
+      "category": "abstract",
+      "difficulty": "hard"
+    },
+    {
+      "id": 29,
+      "words": ["MOUSE", "SHARP", "BLUE"],
+      "answer": "CHEESE",
+      "category": "food",
+      "difficulty": "medium"
+    },
+    {
+      "id": 30,
+      "words": ["BALD", "SCREECH", "EMBLEM"],
+      "answer": "EAGLE",
+      "category": "nature",
+      "difficulty": "medium"
+    },
+    {
+      "id": 31,
+      "words": ["CAST", "SIDE", "JUMP"],
+      "answer": "IRON",
+      "category": "objects",
+      "difficulty": "hard"
+    },
+    {
+      "id": 32,
+      "words": ["OPERA", "HAND", "DISH"],
+      "answer": "SOAP",
+      "category": "objects",
+      "difficulty": "medium"
+    },
+    {
+      "id": 33,
+      "words": ["FOX", "MAN", "PEEP"],
+      "answer": "HOLE",
+      "category": "nature",
+      "difficulty": "hard"
+    },
+    {
+      "id": 34,
+      "words": ["FOOD", "FORWARD", "BREAK"],
+      "answer": "FAST",
+      "category": "abstract",
+      "difficulty": "easy"
+    },
+    {
+      "id": 35,
+      "words": ["PRINT", "BERRY", "BIRD"],
+      "answer": "BLUE",
+      "category": "abstract",
+      "difficulty": "easy"
+    },
+    {
+      "id": 36,
+      "words": ["ROCKING", "WHEEL", "HIGH"],
+      "answer": "CHAIR",
+      "category": "objects",
+      "difficulty": "easy"
+    },
+    {
+      "id": 37,
+      "words": ["SAFETY", "CUSHION", "POINT"],
+      "answer": "PIN",
+      "category": "objects",
+      "difficulty": "medium"
+    },
+    {
+      "id": 38,
+      "words": ["RIGHT", "CAT", "CARBON"],
+      "answer": "COPY",
+      "category": "abstract",
+      "difficulty": "hard"
+    },
+    {
+      "id": 39,
+      "words": ["FENCE", "CARD", "MASTER"],
+      "answer": "POST",
+      "category": "objects",
+      "difficulty": "medium"
+    },
+    {
+      "id": 40,
+      "words": ["CATCHER", "FOOD", "HOT"],
+      "answer": "FLY",
+      "category": "nature",
+      "difficulty": "hard"
+    },
+    {
+      "id": 41,
+      "words": ["DRESS", "DIAL", "FLOWER"],
+      "answer": "SUN",
+      "category": "nature",
+      "difficulty": "hard"
+    },
+    {
+      "id": 42,
+      "words": ["CRACKER", "UNION", "RABBIT"],
+      "answer": "JACK",
+      "category": "abstract",
+      "difficulty": "medium"
+    },
+    {
+      "id": 43,
+      "words": ["DEW", "COMB", "BEE"],
+      "answer": "HONEY",
+      "category": "food",
+      "difficulty": "easy"
+    },
+    {
+      "id": 44,
+      "words": ["OFFICER", "CASH", "LEMON"],
+      "answer": "POUND",
+      "category": "abstract",
+      "difficulty": "hard"
+    },
+    {
+      "id": 45,
+      "words": ["ILLNESS", "BUS", "COMPUTER"],
+      "answer": "TERMINAL",
+      "category": "abstract",
+      "difficulty": "hard"
+    },
+    {
+      "id": 46,
+      "words": ["CHIPS", "TIPS", "NAIL"],
+      "answer": "FINGER",
+      "category": "objects",
+      "difficulty": "easy"
+    },
+    {
+      "id": 47,
+      "words": ["FORCE", "LINE", "MAIL"],
+      "answer": "AIR",
+      "category": "nature",
+      "difficulty": "medium"
+    },
+    {
+      "id": 48,
+      "words": ["COAT", "WATER", "WRIST"],
+      "answer": "RAIN",
+      "category": "nature",
+      "difficulty": "medium"
+    },
+    {
+      "id": 49,
+      "words": ["CROSS", "RAIN", "TIE"],
+      "answer": "BOW",
+      "category": "objects",
+      "difficulty": "easy"
+    },
+    {
+      "id": 50,
+      "words": ["WRITER", "CIGARETTE", "TRAFFIC"],
+      "answer": "BLOCK",
+      "category": "abstract",
+      "difficulty": "hard"
+    },
+    {
+      "id": 51,
+      "words": ["LINE", "BIRTHDAY", "SURPRISE"],
+      "answer": "PARTY",
+      "category": "abstract",
+      "difficulty": "easy"
+    },
+    {
+      "id": 52,
+      "words": ["AGE", "MILE", "SAND"],
+      "answer": "STONE",
+      "category": "nature",
+      "difficulty": "medium"
+    },
+    {
+      "id": 53,
+      "words": ["EIGHT", "SKATE", "STICK"],
+      "answer": "FIGURE",
+      "category": "abstract",
+      "difficulty": "hard"
+    },
+    {
+      "id": 54,
+      "words": ["MAKE", "CHAIR", "CLEAR"],
+      "answer": "UP",
+      "category": "abstract",
+      "difficulty": "medium"
+    },
+    {
+      "id": 55,
+      "words": ["GUN", "COAT", "BUSINESS"],
+      "answer": "SMOKING",
+      "category": "abstract",
+      "difficulty": "hard"
+    },
+    {
+      "id": 56,
+      "words": ["ARM", "COAL", "PEACH"],
+      "answer": "PIT",
+      "category": "nature",
+      "difficulty": "medium"
+    },
+    {
+      "id": 57,
+      "words": ["TYPE", "GHOST", "SCREEN"],
+      "answer": "WRITER",
+      "category": "abstract",
+      "difficulty": "medium"
+    },
+    {
+      "id": 58,
+      "words": ["BATH", "MONEY", "BLOOD"],
+      "answer": "BANK",
+      "category": "abstract",
+      "difficulty": "hard"
+    },
+    {
+      "id": 59,
+      "words": ["CHAMBER", "MASK", "NATURAL"],
+      "answer": "GAS",
+      "category": "nature",
+      "difficulty": "medium"
+    },
+    {
+      "id": 60,
+      "words": ["PUSS", "CORN", "FOLK"],
+      "answer": "FOOT",
+      "category": "objects",
+      "difficulty": "hard"
+    },
+    {
+      "id": 61,
+      "words": ["MEASURE", "WORM", "VIDEO"],
+      "answer": "TAPE",
+      "category": "objects",
+      "difficulty": "easy"
+    },
+    {
+      "id": 62,
+      "words": ["FOUNTAIN", "BAKING", "SODA"],
+      "answer": "POP",
+      "category": "food",
+      "difficulty": "hard"
+    },
+    {
+      "id": 63,
+      "words": ["PRESERVE", "RANGER", "TROPICAL"],
+      "answer": "FOREST",
+      "category": "nature",
+      "difficulty": "medium"
+    },
+    {
+      "id": 64,
+      "words": ["AID", "CORPORATE", "CIRCUIT"],
+      "answer": "LADDER",
+      "category": "abstract",
+      "difficulty": "hard"
+    },
+    {
+      "id": 65,
+      "words": ["FLAKE", "MOBILE", "CONE"],
+      "answer": "SNOW",
+      "category": "nature",
+      "difficulty": "easy"
+    },
+    {
+      "id": 66,
+      "words": ["GOLD", "STOOL", "TENDER"],
+      "answer": "BAR",
+      "category": "objects",
+      "difficulty": "medium"
+    },
+    {
+      "id": 67,
+      "words": ["BASE", "SNOW", "DANCE"],
+      "answer": "BALL",
+      "category": "objects",
+      "difficulty": "easy"
+    },
+    {
+      "id": 68,
+      "words": ["SOAP", "SHOE", "TISSUE"],
+      "answer": "BOX",
+      "category": "objects",
+      "difficulty": "easy"
+    },
+    {
+      "id": 69,
+      "words": ["RATTLE", "POISON", "CHARM"],
+      "answer": "SNAKE",
+      "category": "nature",
+      "difficulty": "medium"
+    },
+    {
+      "id": 70,
+      "words": ["NUCLEAR", "FEUD", "ALBUM"],
+      "answer": "FAMILY",
+      "category": "abstract",
+      "difficulty": "medium"
+    },
+    {
+      "id": 71,
+      "words": ["WHEEL", "HAND", "SHOPPING"],
+      "answer": "CART",
+      "category": "objects",
+      "difficulty": "easy"
+    },
+    {
+      "id": 72,
+      "words": ["HOME", "ARM", "ROOM"],
+      "answer": "REST",
+      "category": "abstract",
+      "difficulty": "hard"
+    },
+    {
+      "id": 73,
+      "words": ["SAGE", "PAINT", "HAIR"],
+      "answer": "BRUSH",
+      "category": "objects",
+      "difficulty": "easy"
+    },
+    {
+      "id": 74,
+      "words": ["BOOT", "SUMMER", "GROUND"],
+      "answer": "CAMP",
+      "category": "abstract",
+      "difficulty": "medium"
+    },
+    {
+      "id": 75,
+      "words": ["WALKER", "MAIN", "SWEEPER"],
+      "answer": "STREET",
+      "category": "objects",
+      "difficulty": "medium"
+    },
+    {
+      "id": 76,
+      "words": ["TANK", "HILL", "SECRET"],
+      "answer": "TOP",
+      "category": "abstract",
+      "difficulty": "medium"
+    },
+    {
+      "id": 77,
+      "words": ["SELF", "MEMBER", "GOLF"],
+      "answer": "CLUB",
+      "category": "abstract",
+      "difficulty": "medium"
+    },
+    {
+      "id": 78,
+      "words": ["BOARD", "BLADE", "BACK"],
+      "answer": "SWITCH",
+      "category": "objects",
+      "difficulty": "hard"
+    },
+    {
+      "id": 79,
+      "words": ["SLEEP", "BEAN", "GARBAGE"],
+      "answer": "BAG",
+      "category": "objects",
+      "difficulty": "easy"
+    },
+    {
+      "id": 80,
+      "words": ["CHAMBER", "STAFF", "BOX"],
+      "answer": "MUSIC",
+      "category": "abstract",
+      "difficulty": "hard"
+    },
+    {
+      "id": 81,
+      "words": ["BLOOD", "MUSIC", "CHEESE"],
+      "answer": "BLUE",
+      "category": "abstract",
+      "difficulty": "hard"
+    },
+    {
+      "id": 82,
+      "words": ["PIE", "LUCK", "BELLY"],
+      "answer": "POT",
+      "category": "objects",
+      "difficulty": "medium"
+    },
+    {
+      "id": 83,
+      "words": ["DATE", "ALLEY", "FOLD"],
+      "answer": "BLIND",
+      "category": "abstract",
+      "difficulty": "hard"
+    },
+    {
+      "id": 84,
+      "words": ["DIVE", "LIGHT", "ROCKET"],
+      "answer": "SKY",
+      "category": "nature",
+      "difficulty": "medium"
+    },
+    {
+      "id": 85,
+      "words": ["END", "BURNING", "BLUE"],
+      "answer": "LIGHT",
+      "category": "nature",
+      "difficulty": "medium"
+    },
+    {
+      "id": 86,
+      "words": ["MAN", "GLUE", "STAR"],
+      "answer": "SUPER",
+      "category": "abstract",
+      "difficulty": "medium"
+    },
+    {
+      "id": 87,
+      "words": ["SHINE", "BEAM", "STRUCK"],
+      "answer": "MOON",
+      "category": "nature",
+      "difficulty": "medium"
+    },
+    {
+      "id": 88,
+      "words": ["PEACH", "ARM", "TAR"],
+      "answer": "PIT",
+      "category": "nature",
+      "difficulty": "easy"
+    },
+    {
+      "id": 89,
+      "words": ["WATER", "TOBACCO", "STOVE"],
+      "answer": "PIPE",
+      "category": "objects",
+      "difficulty": "easy"
+    },
+    {
+      "id": 90,
+      "words": ["UP", "BOOK", "CHARGE"],
+      "answer": "COVER",
+      "category": "abstract",
+      "difficulty": "medium"
+    },
+    {
+      "id": 91,
+      "words": ["UP", "OUT", "WORK"],
+      "answer": "MAKE",
+      "category": "abstract",
+      "difficulty": "hard"
+    },
+    {
+      "id": 92,
+      "words": ["TAIL", "WATER", "FLOOD"],
+      "answer": "GATE",
+      "category": "objects",
+      "difficulty": "medium"
+    },
+    {
+      "id": 93,
+      "words": ["MARSHAL", "CHILD", "PIANO"],
+      "answer": "GRAND",
+      "category": "abstract",
+      "difficulty": "hard"
+    },
+    {
+      "id": 94,
+      "words": ["JUMP", "KILL", "BLISS"],
+      "answer": "JOY",
+      "category": "abstract",
+      "difficulty": "hard"
+    },
+    {
+      "id": 95,
+      "words": ["OFF", "DRINK", "BACK"],
+      "answer": "CUT",
+      "category": "abstract",
+      "difficulty": "medium"
+    },
+    {
+      "id": 96,
+      "words": ["PLANT", "FAMILY", "FLOWER"],
+      "answer": "TREE",
+      "category": "nature",
+      "difficulty": "easy"
+    },
+    {
+      "id": 97,
+      "words": ["DUST", "MOVIE", "GAZE"],
+      "answer": "STAR",
+      "category": "nature",
+      "difficulty": "medium"
+    },
+    {
+      "id": 98,
+      "words": ["TOOTH", "TALK", "POTATO"],
+      "answer": "SWEET",
+      "category": "abstract",
+      "difficulty": "hard"
+    },
+    {
+      "id": 99,
+      "words": ["BEE", "COMB", "MOON"],
+      "answer": "HONEY",
+      "category": "nature",
+      "difficulty": "easy"
+    },
+    {
+      "id": 100,
+      "words": ["OVER", "PLANT", "HORSE"],
+      "answer": "POWER",
+      "category": "abstract",
+      "difficulty": "medium"
+    }
+  ]
+}

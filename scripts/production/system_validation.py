@@ -29,7 +29,7 @@ from typing import Dict, List, Any, Optional
 import logging
 
 # Add project root to Python path
-project_root = Path(__file__).parent.parent
+project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root / "src"))
 
 # Check for CI environment and enable safe mode
@@ -91,7 +91,7 @@ class SystemValidator:
         imports = {}
         
         try:
-            from insightspike.core.agents.main_agent import MainAgent
+            from insightspike.implementations.agents.main_agent import MainAgent
             imports["MainAgent"] = True
         except ImportError as e:
             imports["MainAgent"] = False
@@ -103,13 +103,14 @@ class SystemValidator:
             imports["InsightFactRegistry"] = False
             
         try:
-            from insightspike.core.config import get_config
+            from insightspike.config.loader import load_config
+            from insightspike.config.models import InsightSpikeConfig
             imports["Config"] = True
         except ImportError:
             imports["Config"] = False
             
         try:
-            from insightspike.cli import app
+            from insightspike.cli import spike_app
             imports["CLI"] = True
         except ImportError:
             imports["CLI"] = False
@@ -121,13 +122,15 @@ class SystemValidator:
     
     def validate_configuration(self) -> Dict[str, Any]:
         """Validate configuration system"""
-        from insightspike.core.config import get_config
+        from insightspike.config.loader import load_config
+        from insightspike.config.presets import ConfigPresets
         
-        config = get_config()
+        # Load config with production preset
+        config = load_config(preset="production")
         
         # Check required attributes
         required_attrs = [
-            'environment', 'llm.provider', 'llm.model_name', 
+            'environment', 'llm.provider', 'llm.model', 
             'memory.max_retrieved_docs', 'graph', 'reasoning'
         ]
         
@@ -146,8 +149,7 @@ class SystemValidator:
         return {
             "environment": config.environment,
             "llm_provider": config.llm.provider,
-            "model_name": config.llm.model_name,
-            "use_gpu": config.llm.use_gpu,
+            "model_name": config.llm.model,
             "max_docs": config.memory.max_retrieved_docs
         }
     
@@ -177,8 +179,10 @@ class SystemValidator:
         """Validate MainAgent functionality"""
         if CI_MODE or INSIGHTSPIKE_LITE_MODE:
             # In CI mode, just verify the class can be imported
-            from insightspike.core.agents.main_agent import MainAgent
-            agent = MainAgent()
+            from insightspike.implementations.agents.main_agent import MainAgent
+            from insightspike.config.loader import load_config
+            config = load_config(preset="production")
+            agent = MainAgent(config=config)
             # Don't try to initialize in CI mode as it may cause segfaults
             return {
                 "initialization": "skipped_in_ci",
@@ -186,9 +190,10 @@ class SystemValidator:
                 "agent_type": type(agent).__name__
             }
         
-        from insightspike.core.agents.main_agent import MainAgent
-        
-        agent = MainAgent()
+        from insightspike.implementations.agents.main_agent import MainAgent
+        from insightspike.config.loader import load_config
+        config = load_config(preset="production")
+        agent = MainAgent(config=config)
         initialization_success = agent.initialize()
         
         if not initialization_success:
@@ -314,8 +319,10 @@ class SystemValidator:
             end_memory = current_memory
         else:
             # Run comprehensive system test
-            from insightspike.core.agents.main_agent import MainAgent
-            agent = MainAgent()
+            from insightspike.implementations.agents.main_agent import MainAgent
+            from insightspike.config.loader import load_config
+            config = load_config(preset="production")
+            agent = MainAgent(config=config)
             result = agent.process_question("Test question for memory validation", max_cycles=2)
             if PSUTIL_AVAILABLE:
                 end_memory = psutil.Process().memory_info().rss / (1024**2)
@@ -343,7 +350,7 @@ class SystemValidator:
             }
         
         from insightspike.detection.insight_registry import InsightFactRegistry
-        from insightspike.core.agents.main_agent import MainAgent
+        from insightspike.implementations.agents.main_agent import MainAgent
         
         # Test insight extraction performance
         registry = InsightFactRegistry()
@@ -392,11 +399,13 @@ class SystemValidator:
                 "integration_stable": True
             }
         
-        from insightspike.core.agents.main_agent import MainAgent
+        from insightspike.implementations.agents.main_agent import MainAgent
         from insightspike.detection.insight_registry import InsightFactRegistry
+        from insightspike.config.loader import load_config
         
         # Test full workflow
-        agent = MainAgent()
+        config = load_config(preset="production")
+        agent = MainAgent(config=config)
         registry = InsightFactRegistry()
         
         if not agent.initialize():

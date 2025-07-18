@@ -2,108 +2,76 @@
 # ==========================================
 # 
 # This configuration file is placed in the project root directory.
-# Load this file by setting: export INSIGHTSPIKE_CONFIG_PATH="./config.yaml"
+# It will be automatically loaded if present, or you can specify:
+# - export INSIGHTSPIKE_CONFIG_PATH="./config.yaml"
+# - config = load_config(config_path="./config.yaml")
 # 
-# This approach is useful for:
-# - Project-specific configurations
-# - Development environments
-# - Version control of settings (if desired)
+# This configuration is merged with the selected preset.
+# Settings here override preset values.
 
 # Core Language Model Settings
 core:
   model_name: "paraphrase-MiniLM-L6-v2"  # Embedding model
-  llm_provider: "local"                   # LLM provider: local, openai, anthropic
-  llm_model: "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+  llm_provider: "clean"                   # LLM provider: local, openai, anthropic, clean, mock
+  llm_model: "clean"
   max_tokens: 256
   temperature: 0.3
   device: "cpu"
-  use_gpu: false
-  safe_mode: false
 
 # Memory System Configuration
 memory:
   max_retrieved_docs: 15
-  short_term_capacity: 10
-  working_memory_capacity: 20
   episodic_memory_capacity: 60
-  pattern_cache_capacity: 15
 
-# Retrieval Settings (Top-K Configuration)
+# Retrieval Settings
 retrieval:
   similarity_threshold: 0.35
-  top_k: 15                # Main retrieval top-k
-  layer1_top_k: 20        # Layer 1 specific top-k
-  layer2_top_k: 15        # Layer 2 specific top-k  
-  layer3_top_k: 12        # Layer 3 specific top-k
+  top_k: 15
 
 # Graph Processing & Spike Detection
 graph:
   spike_ged_threshold: 0.5    # Graph Edit Distance threshold
   spike_ig_threshold: 0.2     # Information Gain threshold
-  use_gnn: false              # Use Graph Neural Networks
-  gnn_hidden_dim: 64
   
   # GED/IG Algorithm Selection
-  ged_algorithm: "hybrid"     # Options: simple, advanced, networkx, hybrid
-  ig_algorithm: "hybrid"      # Options: simple, advanced, entropy, hybrid
+  ged_algorithm: "advanced"   # Options: simple, advanced, networkx
+  ig_algorithm: "advanced"    # Options: simple, advanced, entropy
   
-  # Hybrid algorithm weights (when using hybrid mode)
-  hybrid_weights:
-    structure: 0.4      # Graph structure changes (NetworkX)
-    semantic: 0.4       # Semantic changes (Entropy)
-    quality: 0.2        # Embedding quality factor
-
-# Reasoning Layer Configuration
-reasoning:
-  similarity_threshold: 0.3
-  conflict_threshold: 0.6
-  weight_ged: 1.0            # Weight for GED in geDIG algorithm
-  weight_ig: 1.0             # Weight for IG in geDIG algorithm
-  weight_conflict: 0.5
+  # Graph Management
+  max_graph_size: 10000
+  use_llm_cache: true
+  rebuild_on_startup: false
+  prune_threshold: 0.1
   
-  # Episode Integration Thresholds
-  episode_integration_similarity_threshold: 0.85
-  episode_integration_content_threshold: 0.4
-  episode_integration_c_threshold: 0.3
+  # Episode Integration
+  integration_similarity_threshold: 0.85
+  content_overlap_threshold: 0.4
   
-  # Episode Management
-  episode_merge_threshold: 0.8
-  episode_split_threshold: 0.3
-  episode_prune_threshold: 0.1
+  # Dynamic Importance Weights
+  graph_importance_weight: 0.4    # Graph degree importance
+  access_importance_weight: 0.3   # Access frequency importance
+  time_importance_weight: 0.3     # Time decay importance
 
-# Eureka Spike Detection
-spike:
-  spike_ged: 0.5
-  spike_ig: 0.2
-  eta_spike: 0.2
+# Embedding Configuration
+embedding:
+  model_name: "paraphrase-MiniLM-L6-v2"
+  dimension: 384
+  normalize: true
 
-# Unknown Learning System
-unknown_learner:
-  initial_confidence: 0.1
-  cleanup_threshold: 0.15
-  confidence_boost: 0.05
-  max_weak_edges: 1000
-  cleanup_interval: 300
+# LLM Configuration
+llm:
+  provider: "clean"
+  model: "clean"
+  temperature: 0.3
+  max_tokens: 256
 
-# File Paths (relative to project root)
-paths:
-  data_dir: "data/raw"
-  log_dir: "data/logs"
-  index_file: "data/index.faiss"
-  graph_file: "data/graph_pyg.pt"
-
-# Environment
-environment: "local"  # local, colab, ci
-
-# Processing Settings
-processing:
-  batch_size: 32
-  max_workers: 4
-  timeout_seconds: 300
-
-# Output Configuration
-output:
-  default_format: "text"
-  save_results: true
-  generate_visualizations: false
-  verbose: false
+# Environment Variables Override Example:
+# ======================================
+# You can override any setting using environment variables:
+# 
+# export INSIGHTSPIKE_CORE_LLM_PROVIDER=openai
+# export INSIGHTSPIKE_GRAPH_GED_ALGORITHM=networkx
+# export INSIGHTSPIKE_GRAPH_SPIKE_GED_THRESHOLD=0.7
+#
+# The pattern is: INSIGHTSPIKE_<SECTION>_<KEY>=<value>
+# For nested values, use underscores: INSIGHTSPIKE_GRAPH_SPIKE_GED_THRESHOLD

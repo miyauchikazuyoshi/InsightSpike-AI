@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Tuple
 
 try:
     # Import from the modern config system directly
-    from ..core.config import get_config
+    from ..config import get_config
 
     config = get_config()
     SPIKE_GED = config.spike.spike_ged

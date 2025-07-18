@@ -1,0 +1,2336 @@
+{
+  "metadata": {
+    "total_problems": 100,
+    "timestamp": "20250715_230453",
+    "model": "DistilGPT-2"
+  },
+  "overall_accuracy": {
+    "base_llm": 0.0,
+    "rag": 0.0,
+    "insightspike": 0.02
+  },
+  "category_accuracy": {
+    "food": {
+      "base": 0.0,
+      "rag": 0.0,
+      "insight": 0.0
+    },
+    "nature": {
+      "base": 0.0,
+      "rag": 0.0,
+      "insight": 0.0
+    },
+    "objects": {
+      "base": 0.0,
+      "rag": 0.0,
+      "insight": 0.06060606060606061
+    },
+    "abstract": {
+      "base": 0.0,
+      "rag": 0.0,
+      "insight": 0.0
+    }
+  },
+  "detailed_results": [
+    {
+      "problem_id": 1,
+      "words": [
+        "COTTAGE",
+        "SWISS",
+        "CAKE"
+      ],
+      "correct_answer": "CHEESE",
+      "category": "food",
+      "difficulty": "easy",
+      "base": {
+        "answer": "CAKE?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "COTTAGE:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "IS:",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 2,
+      "words": [
+        "CREAM",
+        "SKATE",
+        "WATER"
+      ],
+      "correct_answer": "ICE",
+      "category": "nature",
+      "difficulty": "easy",
+      "base": {
+        "answer": "WATER?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "THE",
+        "correct": false
+      },
+      "insight": {
+        "answer": "WATER",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 3,
+      "words": [
+        "DUCK",
+        "FOLD",
+        "DOLLAR"
+      ],
+      "correct_answer": "BILL",
+      "category": "objects",
+      "difficulty": "medium",
+      "base": {
+        "answer": "DOLLAR?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "UNKNOWN",
+        "correct": false
+      },
+      "insight": {
+        "answer": "SAME",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 4,
+      "words": [
+        "SHOW",
+        "LIFE",
+        "ROW"
+      ],
+      "correct_answer": "BOAT",
+      "category": "objects",
+      "difficulty": "medium",
+      "base": {
+        "answer": "ROW?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "LIFE:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "\u201c\u201d",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 5,
+      "words": [
+        "NIGHT",
+        "WRIST",
+        "STOP"
+      ],
+      "correct_answer": "WATCH",
+      "category": "objects",
+      "difficulty": "easy",
+      "base": {
+        "answer": "ST",
+        "correct": false
+      },
+      "rag": {
+        "answer": "NIGHT:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "HERE.\"",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 6,
+      "words": [
+        "SLEEPING",
+        "BEAN",
+        "TRASH"
+      ],
+      "correct_answer": "BAG",
+      "category": "objects",
+      "difficulty": "medium",
+      "base": {
+        "answer": "TRASH?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "COMMON",
+        "correct": false
+      },
+      "insight": {
+        "answer": "HEART",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 7,
+      "words": [
+        "LIGHT",
+        "BIRTHDAY",
+        "STICK"
+      ],
+      "correct_answer": "CANDLE",
+      "category": "objects",
+      "difficulty": "easy",
+      "base": {
+        "answer": "THERE\ufffd",
+        "correct": false
+      },
+      "rag": {
+        "answer": "LIGHT:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "TO",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 8,
+      "words": [
+        "RIVER",
+        "NOTE",
+        "ACCOUNT"
+      ],
+      "correct_answer": "BANK",
+      "category": "abstract",
+      "difficulty": "medium",
+      "base": {
+        "answer": "ACCOUNT?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "RIVER:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "SORRY,",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 9,
+      "words": [
+        "BROKEN",
+        "CLEAR",
+        "EYE"
+      ],
+      "correct_answer": "GLASS",
+      "category": "objects",
+      "difficulty": "easy",
+      "base": {
+        "answer": "YES",
+        "correct": false
+      },
+      "rag": {
+        "answer": "BROKEN:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "OF",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 10,
+      "words": [
+        "LICK",
+        "SPRINKLE",
+        "MINES"
+      ],
+      "correct_answer": "SALT",
+      "category": "food",
+      "difficulty": "medium",
+      "base": {
+        "answer": "MINES?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "LICK:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "THE",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 11,
+      "words": [
+        "PALM",
+        "SHOE",
+        "HOUSE"
+      ],
+      "correct_answer": "TREE",
+      "category": "nature",
+      "difficulty": "hard",
+      "base": {
+        "answer": "THE",
+        "correct": false
+      },
+      "rag": {
+        "answer": "COMMON",
+        "correct": false
+      },
+      "insight": {
+        "answer": "MAN",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 12,
+      "words": [
+        "MAIN",
+        "SWEEPER",
+        "LIGHT"
+      ],
+      "correct_answer": "STREET",
+      "category": "objects",
+      "difficulty": "medium",
+      "base": {
+        "answer": "LIGHT?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "MAIN:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "A",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 13,
+      "words": [
+        "TOOTH",
+        "POTATO",
+        "HEART"
+      ],
+      "correct_answer": "SWEET",
+      "category": "food",
+      "difficulty": "hard",
+      "base": {
+        "answer": "FOR",
+        "correct": false
+      },
+      "rag": {
+        "answer": "\"A-Y-O-O-",
+        "correct": false
+      },
+      "insight": {
+        "answer": "GOING",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 14,
+      "words": [
+        "TIME",
+        "HAIR",
+        "STRETCH"
+      ],
+      "correct_answer": "LONG",
+      "category": "abstract",
+      "difficulty": "medium",
+      "base": {
+        "answer": "STRETCH?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "TIME:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "ALONE",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 15,
+      "words": [
+        "MANNERS",
+        "ROUND",
+        "TENNIS"
+      ],
+      "correct_answer": "TABLE",
+      "category": "objects",
+      "difficulty": "easy",
+      "base": {
+        "answer": "TENNIS?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "AMANDA:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "MY",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 16,
+      "words": [
+        "FLY",
+        "CLIP",
+        "WALL"
+      ],
+      "correct_answer": "PAPER",
+      "category": "objects",
+      "difficulty": "easy",
+      "base": {
+        "answer": "HAS",
+        "correct": false
+      },
+      "rag": {
+        "answer": "THIS",
+        "correct": false
+      },
+      "insight": {
+        "answer": "TO",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 17,
+      "words": [
+        "MOTION",
+        "POKE",
+        "DOWN"
+      ],
+      "correct_answer": "SLOW",
+      "category": "abstract",
+      "difficulty": "hard",
+      "base": {
+        "answer": "IS",
+        "correct": false
+      },
+      "rag": {
+        "answer": "\u201cI\u201c\ufe0f",
+        "correct": false
+      },
+      "insight": {
+        "answer": "KNOW",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 18,
+      "words": [
+        "PIECE",
+        "MIND",
+        "DATING"
+      ],
+      "correct_answer": "GAME",
+      "category": "abstract",
+      "difficulty": "medium",
+      "base": {
+        "answer": "THE",
+        "correct": false
+      },
+      "rag": {
+        "answer": "THE",
+        "correct": false
+      },
+      "insight": {
+        "answer": "I",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 19,
+      "words": [
+        "FLOWER",
+        "FRIEND",
+        "SCOUT"
+      ],
+      "correct_answer": "GIRL",
+      "category": "abstract",
+      "difficulty": "medium",
+      "base": {
+        "answer": "TIM",
+        "correct": false
+      },
+      "rag": {
+        "answer": "FLOWER:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "IS:",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 20,
+      "words": [
+        "HOME",
+        "SEA",
+        "BED"
+      ],
+      "correct_answer": "SICK",
+      "category": "abstract",
+      "difficulty": "hard",
+      "base": {
+        "answer": "EARLY",
+        "correct": false
+      },
+      "rag": {
+        "answer": "THE",
+        "correct": false
+      },
+      "insight": {
+        "answer": "\u201cI\u2019",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 21,
+      "words": [
+        "SANDWICH",
+        "HOUSE",
+        "GOLF"
+      ],
+      "correct_answer": "CLUB",
+      "category": "objects",
+      "difficulty": "medium",
+      "base": {
+        "answer": "STORY",
+        "correct": false
+      },
+      "rag": {
+        "answer": "HISTORY:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "HERE.\"",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 22,
+      "words": [
+        "AID",
+        "RUBBER",
+        "WAGON"
+      ],
+      "correct_answer": "BAND",
+      "category": "objects",
+      "difficulty": "medium",
+      "base": {
+        "answer": "WAGON?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "WAGON:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "\u06af",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 23,
+      "words": [
+        "BOARD",
+        "MAGIC",
+        "DEATH"
+      ],
+      "correct_answer": "BLACK",
+      "category": "abstract",
+      "difficulty": "easy",
+      "base": {
+        "answer": "THE",
+        "correct": false
+      },
+      "rag": {
+        "answer": "COMMON",
+        "correct": false
+      },
+      "insight": {
+        "answer": "TO",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 24,
+      "words": [
+        "FRENCH",
+        "CAR",
+        "SHOE"
+      ],
+      "correct_answer": "HORN",
+      "category": "objects",
+      "difficulty": "hard",
+      "base": {
+        "answer": "SHOE?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "YES,",
+        "correct": false
+      },
+      "insight": {
+        "answer": "YOU,",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 25,
+      "words": [
+        "HIGH",
+        "DISTRICT",
+        "HOUSE"
+      ],
+      "correct_answer": "SCHOOL",
+      "category": "abstract",
+      "difficulty": "easy",
+      "base": {
+        "answer": "HOUSE?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "HIGH:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "\"DILK!\"",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 26,
+      "words": [
+        "WATER",
+        "MINE",
+        "SHAKER"
+      ],
+      "correct_answer": "SALT",
+      "category": "nature",
+      "difficulty": "easy",
+      "base": {
+        "answer": "\ufffd",
+        "correct": false
+      },
+      "rag": {
+        "answer": "SHAKER,",
+        "correct": false
+      },
+      "insight": {
+        "answer": "WATER",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 27,
+      "words": [
+        "BASKET",
+        "EIGHT",
+        "SNOW"
+      ],
+      "correct_answer": "BALL",
+      "category": "objects",
+      "difficulty": "easy",
+      "base": {
+        "answer": "WORLD",
+        "correct": false
+      },
+      "rag": {
+        "answer": "ICE,",
+        "correct": false
+      },
+      "insight": {
+        "answer": "BALL",
+        "correct": true
+      }
+    },
+    {
+      "problem_id": 28,
+      "words": [
+        "LOSER",
+        "THROAT",
+        "SPOT"
+      ],
+      "correct_answer": "SORE",
+      "category": "abstract",
+      "difficulty": "hard",
+      "base": {
+        "answer": "SPOT?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "LOSER",
+        "correct": false
+      },
+      "insight": {
+        "answer": "MAN",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 29,
+      "words": [
+        "MOUSE",
+        "SHARP",
+        "BLUE"
+      ],
+      "correct_answer": "CHEESE",
+      "category": "food",
+      "difficulty": "medium",
+      "base": {
+        "answer": "BLUE?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "MOUSE:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "THING,\"",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 30,
+      "words": [
+        "BALD",
+        "SCREECH",
+        "EMBLEM"
+      ],
+      "correct_answer": "EAGLE",
+      "category": "nature",
+      "difficulty": "medium",
+      "base": {
+        "answer": "BALD-C",
+        "correct": false
+      },
+      "rag": {
+        "answer": "BALD:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "PERSON,'",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 31,
+      "words": [
+        "CAST",
+        "SIDE",
+        "JUMP"
+      ],
+      "correct_answer": "IRON",
+      "category": "objects",
+      "difficulty": "hard",
+      "base": {
+        "answer": "JUMP?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "CAST:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "THE",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 32,
+      "words": [
+        "OPERA",
+        "HAND",
+        "DISH"
+      ],
+      "correct_answer": "SOAP",
+      "category": "objects",
+      "difficulty": "medium",
+      "base": {
+        "answer": "DISH?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "HAND:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "IS:",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 33,
+      "words": [
+        "FOX",
+        "MAN",
+        "PEEP"
+      ],
+      "correct_answer": "HOLE",
+      "category": "nature",
+      "difficulty": "hard",
+      "base": {
+        "answer": "PEEP?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "FOX:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "OR",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 34,
+      "words": [
+        "FOOD",
+        "FORWARD",
+        "BREAK"
+      ],
+      "correct_answer": "FAST",
+      "category": "abstract",
+      "difficulty": "easy",
+      "base": {
+        "answer": "FOOD,",
+        "correct": false
+      },
+      "rag": {
+        "answer": "FOOD:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "IS:",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 35,
+      "words": [
+        "PRINT",
+        "BERRY",
+        "BIRD"
+      ],
+      "correct_answer": "BLUE",
+      "category": "abstract",
+      "difficulty": "easy",
+      "base": {
+        "answer": "BIRD?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "COMMON",
+        "correct": false
+      },
+      "insight": {
+        "answer": "\"B",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 36,
+      "words": [
+        "ROCKING",
+        "WHEEL",
+        "HIGH"
+      ],
+      "correct_answer": "CHAIR",
+      "category": "objects",
+      "difficulty": "easy",
+      "base": {
+        "answer": "\"I'M",
+        "correct": false
+      },
+      "rag": {
+        "answer": "\"ROCK\"",
+        "correct": false
+      },
+      "insight": {
+        "answer": "HERE.\"",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 37,
+      "words": [
+        "SAFETY",
+        "CUSHION",
+        "POINT"
+      ],
+      "correct_answer": "PIN",
+      "category": "objects",
+      "difficulty": "medium",
+      "base": {
+        "answer": "POINT?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "SAFETY:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "IS:",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 38,
+      "words": [
+        "RIGHT",
+        "CAT",
+        "CARBON"
+      ],
+      "correct_answer": "COPY",
+      "category": "abstract",
+      "difficulty": "hard",
+      "base": {
+        "answer": "DO",
+        "correct": false
+      },
+      "rag": {
+        "answer": "COMMON",
+        "correct": false
+      },
+      "insight": {
+        "answer": "A",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 39,
+      "words": [
+        "FENCE",
+        "CARD",
+        "MASTER"
+      ],
+      "correct_answer": "POST",
+      "category": "objects",
+      "difficulty": "medium",
+      "base": {
+        "answer": "FROM",
+        "correct": false
+      },
+      "rag": {
+        "answer": "FENCE,",
+        "correct": false
+      },
+      "insight": {
+        "answer": "IS:",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 40,
+      "words": [
+        "CATCHER",
+        "FOOD",
+        "HOT"
+      ],
+      "correct_answer": "FLY",
+      "category": "nature",
+      "difficulty": "hard",
+      "base": {
+        "answer": "THE",
+        "correct": false
+      },
+      "rag": {
+        "answer": "HOT:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "(1)",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 41,
+      "words": [
+        "DRESS",
+        "DIAL",
+        "FLOWER"
+      ],
+      "correct_answer": "SUN",
+      "category": "nature",
+      "difficulty": "hard",
+      "base": {
+        "answer": "ARE",
+        "correct": false
+      },
+      "rag": {
+        "answer": "DRESS:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "IS:",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 42,
+      "words": [
+        "CRACKER",
+        "UNION",
+        "RABBIT"
+      ],
+      "correct_answer": "JACK",
+      "category": "abstract",
+      "difficulty": "medium",
+      "base": {
+        "answer": "KNOW.",
+        "correct": false
+      },
+      "rag": {
+        "answer": "CRACKER:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "IS:",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 43,
+      "words": [
+        "DEW",
+        "COMB",
+        "BEE"
+      ],
+      "correct_answer": "HONEY",
+      "category": "food",
+      "difficulty": "easy",
+      "base": {
+        "answer": "BEE?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "COW:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "MUSICIAN",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 44,
+      "words": [
+        "OFFICER",
+        "CASH",
+        "LEMON"
+      ],
+      "correct_answer": "POUND",
+      "category": "abstract",
+      "difficulty": "hard",
+      "base": {
+        "answer": "GREAT",
+        "correct": false
+      },
+      "rag": {
+        "answer": "CASH:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "GOOD",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 45,
+      "words": [
+        "ILLNESS",
+        "BUS",
+        "COMPUTER"
+      ],
+      "correct_answer": "TERMINAL",
+      "category": "abstract",
+      "difficulty": "hard",
+      "base": {
+        "answer": "OFTEN",
+        "correct": false
+      },
+      "rag": {
+        "answer": "ILLNESS",
+        "correct": false
+      },
+      "insight": {
+        "answer": "IS:",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 46,
+      "words": [
+        "CHIPS",
+        "TIPS",
+        "NAIL"
+      ],
+      "correct_answer": "FINGER",
+      "category": "objects",
+      "difficulty": "easy",
+      "base": {
+        "answer": "NAIL?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "IT'S",
+        "correct": false
+      },
+      "insight": {
+        "answer": "CONNECTED",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 47,
+      "words": [
+        "FORCE",
+        "LINE",
+        "MAIL"
+      ],
+      "correct_answer": "AIR",
+      "category": "nature",
+      "difficulty": "medium",
+      "base": {
+        "answer": "LINK:",
+        "correct": false
+      },
+      "rag": {
+        "answer": "IN",
+        "correct": false
+      },
+      "insight": {
+        "answer": "\u2011\u2011\ufffd",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 48,
+      "words": [
+        "COAT",
+        "WATER",
+        "WRIST"
+      ],
+      "correct_answer": "RAIN",
+      "category": "nature",
+      "difficulty": "medium",
+      "base": {
+        "answer": "WRIST?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "COAT:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "WATER",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 49,
+      "words": [
+        "CROSS",
+        "RAIN",
+        "TIE"
+      ],
+      "correct_answer": "BOW",
+      "category": "objects",
+      "difficulty": "easy",
+      "base": {
+        "answer": "TIE?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "\"CROSS:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "IS:",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 50,
+      "words": [
+        "WRITER",
+        "CIGARETTE",
+        "TRAFFIC"
+      ],
+      "correct_answer": "BLOCK",
+      "category": "abstract",
+      "difficulty": "hard",
+      "base": {
+        "answer": "TO",
+        "correct": false
+      },
+      "rag": {
+        "answer": "WRITER:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "IS:",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 51,
+      "words": [
+        "LINE",
+        "BIRTHDAY",
+        "SURPRISE"
+      ],
+      "correct_answer": "PARTY",
+      "category": "abstract",
+      "difficulty": "easy",
+      "base": {
+        "answer": "SURPRISE?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "LINE:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "IS:",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 52,
+      "words": [
+        "AGE",
+        "MILE",
+        "SAND"
+      ],
+      "correct_answer": "STONE",
+      "category": "nature",
+      "difficulty": "medium",
+      "base": {
+        "answer": "ACTUALLY",
+        "correct": false
+      },
+      "rag": {
+        "answer": "AGE,",
+        "correct": false
+      },
+      "insight": {
+        "answer": "IS:",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 53,
+      "words": [
+        "EIGHT",
+        "SKATE",
+        "STICK"
+      ],
+      "correct_answer": "FIGURE",
+      "category": "abstract",
+      "difficulty": "hard",
+      "base": {
+        "answer": "STICK?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "DIFFERENT",
+        "correct": false
+      },
+      "insight": {
+        "answer": "\u201c\u018f\ufffd",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 54,
+      "words": [
+        "MAKE",
+        "CHAIR",
+        "CLEAR"
+      ],
+      "correct_answer": "UP",
+      "category": "abstract",
+      "difficulty": "medium",
+      "base": {
+        "answer": "\"",
+        "correct": false
+      },
+      "rag": {
+        "answer": "MUM-BOOKE.",
+        "correct": false
+      },
+      "insight": {
+        "answer": "MADE",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 55,
+      "words": [
+        "GUN",
+        "COAT",
+        "BUSINESS"
+      ],
+      "correct_answer": "SMOKING",
+      "category": "abstract",
+      "difficulty": "hard",
+      "base": {
+        "answer": "BUSINESS?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "\"THE",
+        "correct": false
+      },
+      "insight": {
+        "answer": "TO",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 56,
+      "words": [
+        "ARM",
+        "COAL",
+        "PEACH"
+      ],
+      "correct_answer": "PIT",
+      "category": "nature",
+      "difficulty": "medium",
+      "base": {
+        "answer": "PEACH?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "ARM:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "HERE",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 57,
+      "words": [
+        "TYPE",
+        "GHOST",
+        "SCREEN"
+      ],
+      "correct_answer": "WRITER",
+      "category": "abstract",
+      "difficulty": "medium",
+      "base": {
+        "answer": "I",
+        "correct": false
+      },
+      "rag": {
+        "answer": "TYPE:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "BEING.",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 58,
+      "words": [
+        "BATH",
+        "MONEY",
+        "BLOOD"
+      ],
+      "correct_answer": "BANK",
+      "category": "abstract",
+      "difficulty": "hard",
+      "base": {
+        "answer": "HAS",
+        "correct": false
+      },
+      "rag": {
+        "answer": "BATH:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "\u202a.\u201c",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 59,
+      "words": [
+        "CHAMBER",
+        "MASK",
+        "NATURAL"
+      ],
+      "correct_answer": "GAS",
+      "category": "nature",
+      "difficulty": "medium",
+      "base": {
+        "answer": "NATURAL?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "CHAMBER=\u2030T.\ufffd",
+        "correct": false
+      },
+      "insight": {
+        "answer": "HERE!\"",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 60,
+      "words": [
+        "PUSS",
+        "CORN",
+        "FOLK"
+      ],
+      "correct_answer": "FOOT",
+      "category": "objects",
+      "difficulty": "hard",
+      "base": {
+        "answer": "YEAR",
+        "correct": false
+      },
+      "rag": {
+        "answer": "PUSS:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "IS:",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 61,
+      "words": [
+        "MEASURE",
+        "WORM",
+        "VIDEO"
+      ],
+      "correct_answer": "TAPE",
+      "category": "objects",
+      "difficulty": "easy",
+      "base": {
+        "answer": "VIDEO?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "MEASURE:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "\u201cI\u201c",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 62,
+      "words": [
+        "FOUNTAIN",
+        "BAKING",
+        "SODA"
+      ],
+      "correct_answer": "POP",
+      "category": "food",
+      "difficulty": "hard",
+      "base": {
+        "answer": "FOUN",
+        "correct": false
+      },
+      "rag": {
+        "answer": "FOUNTAIN:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "OF",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 63,
+      "words": [
+        "PRESERVE",
+        "RANGER",
+        "TROPICAL"
+      ],
+      "correct_answer": "FOREST",
+      "category": "nature",
+      "difficulty": "medium",
+      "base": {
+        "answer": "TROPICAL?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "\"A",
+        "correct": false
+      },
+      "insight": {
+        "answer": "WHAT",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 64,
+      "words": [
+        "AID",
+        "CORPORATE",
+        "CIRCUIT"
+      ],
+      "correct_answer": "LADDER",
+      "category": "abstract",
+      "difficulty": "hard",
+      "base": {
+        "answer": "CIRCUIT?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "AID:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "MAN",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 65,
+      "words": [
+        "FLAKE",
+        "MOBILE",
+        "CONE"
+      ],
+      "correct_answer": "SNOW",
+      "category": "nature",
+      "difficulty": "easy",
+      "base": {
+        "answer": "CONE?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "HOW",
+        "correct": false
+      },
+      "insight": {
+        "answer": "IN",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 66,
+      "words": [
+        "GOLD",
+        "STOOL",
+        "TENDER"
+      ],
+      "correct_answer": "BAR",
+      "category": "objects",
+      "difficulty": "medium",
+      "base": {
+        "answer": "TENDER?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "WHAT",
+        "correct": false
+      },
+      "insight": {
+        "answer": "CONNECTED",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 67,
+      "words": [
+        "BASE",
+        "SNOW",
+        "DANCE"
+      ],
+      "correct_answer": "BALL",
+      "category": "objects",
+      "difficulty": "easy",
+      "base": {
+        "answer": "2008",
+        "correct": false
+      },
+      "rag": {
+        "answer": "BASE:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "BALL",
+        "correct": true
+      }
+    },
+    {
+      "problem_id": 68,
+      "words": [
+        "SOAP",
+        "SHOE",
+        "TISSUE"
+      ],
+      "correct_answer": "BOX",
+      "category": "objects",
+      "difficulty": "easy",
+      "base": {
+        "answer": "A",
+        "correct": false
+      },
+      "rag": {
+        "answer": "SOAP",
+        "correct": false
+      },
+      "insight": {
+        "answer": "A",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 69,
+      "words": [
+        "RATTLE",
+        "POISON",
+        "CHARM"
+      ],
+      "correct_answer": "SNAKE",
+      "category": "nature",
+      "difficulty": "medium",
+      "base": {
+        "answer": "I",
+        "correct": false
+      },
+      "rag": {
+        "answer": "RATTLE:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "WORD.",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 70,
+      "words": [
+        "NUCLEAR",
+        "FEUD",
+        "ALBUM"
+      ],
+      "correct_answer": "FAMILY",
+      "category": "abstract",
+      "difficulty": "medium",
+      "base": {
+        "answer": "NUC",
+        "correct": false
+      },
+      "rag": {
+        "answer": "NUCLEAR:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "ONE",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 71,
+      "words": [
+        "WHEEL",
+        "HAND",
+        "SHOPPING"
+      ],
+      "correct_answer": "CART",
+      "category": "objects",
+      "difficulty": "easy",
+      "base": {
+        "answer": "SHOPPING?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "WHEEL:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "THE",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 72,
+      "words": [
+        "HOME",
+        "ARM",
+        "ROOM"
+      ],
+      "correct_answer": "REST",
+      "category": "abstract",
+      "difficulty": "hard",
+      "base": {
+        "answer": "AN",
+        "correct": false
+      },
+      "rag": {
+        "answer": "ROOM:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "\"",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 73,
+      "words": [
+        "SAGE",
+        "PAINT",
+        "HAIR"
+      ],
+      "correct_answer": "BRUSH",
+      "category": "objects",
+      "difficulty": "easy",
+      "base": {
+        "answer": "WORD",
+        "correct": false
+      },
+      "rag": {
+        "answer": "SAGE:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "MY",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 74,
+      "words": [
+        "BOOT",
+        "SUMMER",
+        "GROUND"
+      ],
+      "correct_answer": "CAMP",
+      "category": "abstract",
+      "difficulty": "medium",
+      "base": {
+        "answer": "GROUND?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "BOOT,",
+        "correct": false
+      },
+      "insight": {
+        "answer": "TO",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 75,
+      "words": [
+        "WALKER",
+        "MAIN",
+        "SWEEPER"
+      ],
+      "correct_answer": "STREET",
+      "category": "objects",
+      "difficulty": "medium",
+      "base": {
+        "answer": "SWEEPER?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "WALKER:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "GO",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 76,
+      "words": [
+        "TANK",
+        "HILL",
+        "SECRET"
+      ],
+      "correct_answer": "TOP",
+      "category": "abstract",
+      "difficulty": "medium",
+      "base": {
+        "answer": "SECRET?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "TANK:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "CAN",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 77,
+      "words": [
+        "SELF",
+        "MEMBER",
+        "GOLF"
+      ],
+      "correct_answer": "CLUB",
+      "category": "abstract",
+      "difficulty": "medium",
+      "base": {
+        "answer": "IS",
+        "correct": false
+      },
+      "rag": {
+        "answer": "(SELF)",
+        "correct": false
+      },
+      "insight": {
+        "answer": "IS:",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 78,
+      "words": [
+        "BOARD",
+        "BLADE",
+        "BACK"
+      ],
+      "correct_answer": "SWITCH",
+      "category": "objects",
+      "difficulty": "hard",
+      "base": {
+        "answer": "[",
+        "correct": false
+      },
+      "rag": {
+        "answer": "A",
+        "correct": false
+      },
+      "insight": {
+        "answer": "BABY",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 79,
+      "words": [
+        "SLEEP",
+        "BEAN",
+        "GARBAGE"
+      ],
+      "correct_answer": "BAG",
+      "category": "objects",
+      "difficulty": "easy",
+      "base": {
+        "answer": "GARBAGE?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "COMMON",
+        "correct": false
+      },
+      "insight": {
+        "answer": "PERSON",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 80,
+      "words": [
+        "CHAMBER",
+        "STAFF",
+        "BOX"
+      ],
+      "correct_answer": "MUSIC",
+      "category": "abstract",
+      "difficulty": "hard",
+      "base": {
+        "answer": "BOX?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "CHAMBER:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "YOU.\"",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 81,
+      "words": [
+        "BLOOD",
+        "MUSIC",
+        "CHEESE"
+      ],
+      "correct_answer": "BLUE",
+      "category": "abstract",
+      "difficulty": "hard",
+      "base": {
+        "answer": "CHEESE?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "BLOOD:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "MY",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 82,
+      "words": [
+        "PIE",
+        "LUCK",
+        "BELLY"
+      ],
+      "correct_answer": "POT",
+      "category": "objects",
+      "difficulty": "medium",
+      "base": {
+        "answer": "NO.",
+        "correct": false
+      },
+      "rag": {
+        "answer": "PIE:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "\"LOVE",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 83,
+      "words": [
+        "DATE",
+        "ALLEY",
+        "FOLD"
+      ],
+      "correct_answer": "BLIND",
+      "category": "abstract",
+      "difficulty": "hard",
+      "base": {
+        "answer": "VIDEO",
+        "correct": false
+      },
+      "rag": {
+        "answer": "DATE:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "MEAN",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 84,
+      "words": [
+        "DIVE",
+        "LIGHT",
+        "ROCKET"
+      ],
+      "correct_answer": "SKY",
+      "category": "nature",
+      "difficulty": "medium",
+      "base": {
+        "answer": "WAY",
+        "correct": false
+      },
+      "rag": {
+        "answer": "DIVE:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "HERE.\"",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 85,
+      "words": [
+        "END",
+        "BURNING",
+        "BLUE"
+      ],
+      "correct_answer": "LIGHT",
+      "category": "nature",
+      "difficulty": "medium",
+      "base": {
+        "answer": "BLUE?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "DELIMINATION:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "IS:",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 86,
+      "words": [
+        "MAN",
+        "GLUE",
+        "STAR"
+      ],
+      "correct_answer": "SUPER",
+      "category": "abstract",
+      "difficulty": "medium",
+      "base": {
+        "answer": "STAR?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "MAN:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "HAVE",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 87,
+      "words": [
+        "SHINE",
+        "BEAM",
+        "STRUCK"
+      ],
+      "correct_answer": "MOON",
+      "category": "nature",
+      "difficulty": "medium",
+      "base": {
+        "answer": "LET",
+        "correct": false
+      },
+      "rag": {
+        "answer": "SHINE:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "A",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 88,
+      "words": [
+        "PEACH",
+        "ARM",
+        "TAR"
+      ],
+      "correct_answer": "PIT",
+      "category": "nature",
+      "difficulty": "easy",
+      "base": {
+        "answer": "IS",
+        "correct": false
+      },
+      "rag": {
+        "answer": "PEACH:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "\u201c(\u201c",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 89,
+      "words": [
+        "WATER",
+        "TOBACCO",
+        "STOVE"
+      ],
+      "correct_answer": "PIPE",
+      "category": "objects",
+      "difficulty": "easy",
+      "base": {
+        "answer": "STOVE?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "WATER:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "WATER",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 90,
+      "words": [
+        "UP",
+        "BOOK",
+        "CHARGE"
+      ],
+      "correct_answer": "COVER",
+      "category": "abstract",
+      "difficulty": "medium",
+      "base": {
+        "answer": "CHARGE?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "YES!",
+        "correct": false
+      },
+      "insight": {
+        "answer": "YOU",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 91,
+      "words": [
+        "UP",
+        "OUT",
+        "WORK"
+      ],
+      "correct_answer": "MAKE",
+      "category": "abstract",
+      "difficulty": "hard",
+      "base": {
+        "answer": "IS",
+        "correct": false
+      },
+      "rag": {
+        "answer": "I",
+        "correct": false
+      },
+      "insight": {
+        "answer": "TO",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 92,
+      "words": [
+        "TAIL",
+        "WATER",
+        "FLOOD"
+      ],
+      "correct_answer": "GATE",
+      "category": "objects",
+      "difficulty": "medium",
+      "base": {
+        "answer": "COMMON",
+        "correct": false
+      },
+      "rag": {
+        "answer": "\"WATER\"",
+        "correct": false
+      },
+      "insight": {
+        "answer": "WATER",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 93,
+      "words": [
+        "MARSHAL",
+        "CHILD",
+        "PIANO"
+      ],
+      "correct_answer": "GRAND",
+      "category": "abstract",
+      "difficulty": "hard",
+      "base": {
+        "answer": "BEEN",
+        "correct": false
+      },
+      "rag": {
+        "answer": "MARSHAL:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "TO",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 94,
+      "words": [
+        "JUMP",
+        "KILL",
+        "BLISS"
+      ],
+      "correct_answer": "JOY",
+      "category": "abstract",
+      "difficulty": "hard",
+      "base": {
+        "answer": "ABOUT",
+        "correct": false
+      },
+      "rag": {
+        "answer": "JUMPING.",
+        "correct": false
+      },
+      "insight": {
+        "answer": "\"",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 95,
+      "words": [
+        "OFF",
+        "DRINK",
+        "BACK"
+      ],
+      "correct_answer": "CUT",
+      "category": "abstract",
+      "difficulty": "medium",
+      "base": {
+        "answer": "BACK?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "DRINK:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "THE",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 96,
+      "words": [
+        "PLANT",
+        "FAMILY",
+        "FLOWER"
+      ],
+      "correct_answer": "TREE",
+      "category": "nature",
+      "difficulty": "easy",
+      "base": {
+        "answer": "FLOWER?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "PLANT:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "WORD",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 97,
+      "words": [
+        "DUST",
+        "MOVIE",
+        "GAZE"
+      ],
+      "correct_answer": "STAR",
+      "category": "nature",
+      "difficulty": "medium",
+      "base": {
+        "answer": "GAZE?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "DUST:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "HELP",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 98,
+      "words": [
+        "TOOTH",
+        "TALK",
+        "POTATO"
+      ],
+      "correct_answer": "SWEET",
+      "category": "abstract",
+      "difficulty": "hard",
+      "base": {
+        "answer": "FIRST",
+        "correct": false
+      },
+      "rag": {
+        "answer": "TALK:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "ONE",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 99,
+      "words": [
+        "BEE",
+        "COMB",
+        "MOON"
+      ],
+      "correct_answer": "HONEY",
+      "category": "nature",
+      "difficulty": "easy",
+      "base": {
+        "answer": "MOON?",
+        "correct": false
+      },
+      "rag": {
+        "answer": "BEE:",
+        "correct": false
+      },
+      "insight": {
+        "answer": "IS:",
+        "correct": false
+      }
+    },
+    {
+      "problem_id": 100,
+      "words": [
+        "OVER",
+        "PLANT",
+        "HORSE"
+      ],
+      "correct_answer": "POWER",
+      "category": "abstract",
+      "difficulty": "medium",
+      "base": {
+        "answer": "NEWS",
+        "correct": false
+      },
+      "rag": {
+        "answer": "\"I",
+        "correct": false
+      },
+      "insight": {
+        "answer": "TO",
+        "correct": false
+      }
+    }
+  ]
+}

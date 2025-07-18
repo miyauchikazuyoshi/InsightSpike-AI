@@ -93,6 +93,31 @@ python experiment_v5_efficient.py
 # See insights being generated in real-time!
 ```
 
+## 🌟 Key Features
+
+### 1. **geDIG Technology**
+Mathematical modeling of insight generation using Graph Edit Distance + Information Gain.
+
+### 2. **Configurable Agent System**
+- 6 operation modes: Basic, Enhanced, Query Transform, Advanced, Optimized, Graph-Centric
+- Feature toggles for fine-grained control
+- Production-ready with caching and async processing
+
+### 3. **Clean Architecture**
+- Clear separation between abstractions and implementations
+- Dependency injection ready
+- Easy to test and extend
+
+### 4. **Flexible Data Persistence**
+- Abstract DataStore interface
+- Support for filesystem, databases, vector stores
+- Easy migration between backends
+
+### 5. **Graph-Based Reasoning**
+- PyTorch Geometric integration
+- Similarity graph construction
+- Spike detection algorithms
+
 ## 🌟 Key Innovation: geDIG Technology
 
 ### The Science Behind Insights
@@ -196,55 +221,57 @@ Through multiple independent experiments, we've proven InsightSpike can:
    - Minimal computational cost
    - Practical for real-world applications
 
-## 🏗️ Architecture
+## 🏗️ Architecture Overview
 
-### 4-Layer Brain-Inspired Design
+### Clean Architecture Design
+
+```
+src/insightspike/
+├── core/                    # 🎯 Abstract Interfaces & Contracts
+│   ├── base/               # Base interfaces for all components
+│   ├── contracts/          # System-wide contracts
+│   └── error_handler.py    # Core error handling
+│
+├── implementations/         # 🔧 Concrete Implementations
+│   ├── agents/            # Agent implementations
+│   ├── layers/            # 4-layer brain-inspired components
+│   ├── memory/            # Memory management
+│   └── datastore/         # Data persistence
+│
+├── features/               # ✨ Feature Modules
+│   ├── query_transformation/
+│   └── graph_reasoning/
+│
+├── tools/                  # 🛠️ Standalone Tools
+│   ├── standalone/
+│   └── experiments/
+│
+└── config/                 # ⚙️ Configuration System
+    ├── models.py          # Pydantic config models
+    └── loader.py          # Config loading logic
+```
+
+### 4-Layer Neurobiological Architecture
 
 ```mermaid
 graph TD
-    Query[User Query] --> L1[Layer 1: Error Monitor<br/>🧠 Cerebellum]
-    L1 -->|Error Detection| NA[⚡ Noradrenaline Release<br/>Exploration Trigger]
-    NA --> L2[Layer 2: Memory Manager<br/>🧠 Hippocampus]
-    L2 --> L3[Layer 3: Graph Reasoner<br/>🧠 Prefrontal Cortex]
-    L3 --> L4[Layer 4: Language Interface<br/>🧠 Language Areas]
+    Query[User Query] --> L1[Layer 1: Error Monitor<br/>Cerebellum Analog]
+    L1 --> L2[Layer 2: Memory Manager<br/>Hippocampus Analog]
+    L2 --> L3[Layer 3: Graph Reasoner<br/>Prefrontal Cortex Analog]
+    L3 --> L4[Layer 4: Language Interface<br/>Broca's/Wernicke's Analog]
     L4 --> Response[Insight Response]
     
-    L3 -.->|ΔGED < -0.5 & ΔIG > 0.2| Spike[🎯 Eureka Spike!<br/>Dopamine Reward]
-    Spike -.->|Reward Signal| L2
-    Spike -.->|Structural Update| L3
-    
-    style NA fill:#ff9,stroke:#f90,stroke-width:3px
-    style Spike fill:#f96,stroke:#f00,stroke-width:4px
-    style L3 fill:#9cf,stroke:#069,stroke-width:2px
+    L3 -.->|Spike Detection| Insight[💡 Eureka Moment!]
 ```
 
-1. **Error Monitor** (Cerebellum) - Query validation and error correction
-2. **Memory Manager** (Hippocampus) - Dynamic episodic memory with graph-based importance
-3. **Graph Reasoner** (Prefrontal Cortex) - PyTorch Geometric GNN for structural reasoning
-4. **Language Interface** (Language Areas) - Natural language understanding and generation
+### Data Store Abstraction
 
-**🧠 Neuroscience-Inspired Dual Mechanism:**
+```python
+# Flexible data persistence - easily swap backends
+datastore = DataStoreFactory.create("filesystem")  # or "postgresql", "pinecone", etc.
+datastore.save_episodes(episodes)
+```
 
-**Noradrenaline System (Exploration):**
-
-- Error detection in Layer 1 triggers exploration mode
-- Similar to how noradrenaline promotes attention and learning
-- Initiates search through memory and knowledge graph
-
-**Dopamine System (Reward):**
-
-- When ΔGED < -0.5 AND ΔIG > 0.2, triggers "Eureka!" moment
-- Dopamine-like reward signal reinforces novel connections
-- Permanently updates knowledge graph structure
-- Creates lasting memory of the insight
-
-### Scalable Implementation
-
-Handles 100,000+ knowledge episodes through:
-
-- FAISS-based O(n log n) indexing
-- 3-layer hierarchical graph structure
-- Dynamic memory management without fixed importance values
 
 ## 📖 Usage
 
@@ -266,19 +293,38 @@ poetry run spike chat
 **Python API:**
 
 ```python
-from insightspike.core.agents.main_agent import MainAgent
+from insightspike.implementations.agents import MainAgent
 
+# Initialize agent
 agent = MainAgent()
 agent.initialize()
 
-# Add knowledge and let it evolve
-agent.add_episode_with_graph_update(
-    "Quantum computing uses superposition for parallel computation"
-)
+# Process a question
+result = agent.process_question("How does quantum entanglement relate to information theory?")
 
-# Get insights
-response = agent.process_question("How does consciousness emerge?")
-agent.save_state()  # Persist the evolved knowledge graph
+print(f"Response: {result.response}")
+print(f"Spike Detected: {result.spike_detected}")
+if result.spike_detected:
+    print(f"Insight: {result.insights[0]}")
+```
+
+### Advanced Configuration
+
+```python
+from insightspike.implementations.agents import ConfigurableAgent, AgentMode
+
+# Use specific agent mode
+agent = ConfigurableAgent(mode=AgentMode.GRAPH_CENTRIC)
+
+# Or with custom configuration
+from insightspike.config import InsightSpikeConfig
+
+config = InsightSpikeConfig(
+    core={"llm_model": "gpt-4"},
+    reasoning={"spike_threshold": 0.7},
+    datastore={"type": "postgresql", "params": {...}}
+)
+agent = ConfigurableAgent(config=config)
 ```
 
 ### 📚 Full Documentation
@@ -308,9 +354,91 @@ Licensed under the InsightSpike AI Responsible Use License v1.0.
 - **Email**: `miyauchikazuyoshi@gmail.com`
 - **Issues**: [GitHub Issues](https://github.com/miyauchikazuyoshi/InsightSpike-AI/issues)
 
+## 🙏 Acknowledgments
+
+- Brain-inspired architecture based on neuroscience research
+- Community contributors and testers
+- Open source dependencies that make this possible
+
 ---
 
-### InsightSpike-AI: Exploring the frontiers of machine insight and analogical reasoning
+**"Connecting the dots to create new knowledge"** 🧠✨
+
+## 📊 Project Structure
+
+```
+InsightSpike-AI/
+├── src/insightspike/       # Main package
+├── experiments/            # Research experiments
+├── data/                   # Organized data directory
+│   ├── core/              # Core system files
+│   ├── db/                # Databases
+│   └── experiments/       # Experiment results
+├── docs/                   # Documentation
+│   ├── architecture/      # Architecture docs
+│   └── development/       # Development guides
+├── scripts/               # Utility scripts
+└── tests/                 # Test suites
+```
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+poetry run pytest
+
+# Run specific test suite
+poetry run pytest tests/test_core_interfaces.py
+
+# Run with coverage
+poetry run pytest --cov=insightspike
+```
+
+## 📖 Documentation
+
+- [Architecture Overview](docs/architecture/README.md)
+- [Layer Architecture](docs/architecture/layer_architecture.md)
+- [Agent Types](docs/architecture/agent_types.md)
+- [CLI Commands](docs/architecture/cli_commands.md)
+- [Configuration Guide](docs/development/config_migration.md)
+- [Data Store Guide](data/README.md)
+
+## 🔄 Recent Updates (July 2025)
+
+### Major Refactoring Complete! 🎉
+- **Unified Configuration**: Single Pydantic-based config system
+- **Clean Architecture**: Separated interfaces from implementations
+- **Data Store Abstraction**: Flexible persistence layer
+- **Consolidated Components**: 6 agents → 1 configurable, 17 layers → 6 clean files
+- **Removed Legacy Code**: Cleaned deprecated directories
+
+## 🚦 Development Status
+
+- ✅ Core architecture refactored
+- ✅ Configuration system unified
+- ✅ Data persistence abstracted
+- ✅ Legacy code cleaned up
+- 🚧 Test coverage expansion
+- 🚧 Documentation updates
+- 📋 Dependency injection improvements
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md).
+
+### Development Setup
+
+```bash
+# Install with dev dependencies
+poetry install --with dev
+
+# Run linters
+poetry run ruff check .
+poetry run mypy .
+
+# Format code
+poetry run black .
+```
 
 ## 📚 Additional Documentation
 

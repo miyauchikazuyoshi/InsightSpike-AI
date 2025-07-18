@@ -1,0 +1,18 @@
+# Temporary and demo scripts
+create_*_gif*.py
+demo_*.py
+visualize_*.py
+test_gif*.py
+record_demo.sh
+
+# Backup files
+*.bak.*
+
+# Experimental scripts
+*_v2.py
+*_advanced.py
+*_simple.py
+
+# Keep essential scripts
+!setup_models.py
+!migrate_config.py

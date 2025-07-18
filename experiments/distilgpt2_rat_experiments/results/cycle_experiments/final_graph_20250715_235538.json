@@ -1,0 +1,594 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "node_type": "word",
+      "id": "COTTAGE"
+    },
+    {
+      "node_type": "definition",
+      "text": "A cottage is a small house, particularly a traditional or old-fashioned house in the countryside.",
+      "source_word": "COTTAGE",
+      "id": "COTTAGE_def_0"
+    },
+    {
+      "node_type": "definition",
+      "text": "Cottage cheese is a type of soft white cheese made from the curds of skimmed milk.",
+      "source_word": "COTTAGE",
+      "id": "COTTAGE_def_1"
+    },
+    {
+      "node_type": "definition",
+      "text": "The word cottage often evokes images of thatched roofs and gardens in rural England.",
+      "source_word": "COTTAGE",
+      "id": "COTTAGE_def_2"
+    },
+    {
+      "node_type": "word",
+      "id": "SWISS"
+    },
+    {
+      "node_type": "definition",
+      "text": "Swiss refers to anything from or related to Switzerland, a country in central Europe.",
+      "source_word": "SWISS",
+      "id": "SWISS_def_0"
+    },
+    {
+      "node_type": "definition",
+      "text": "Swiss cheese is a generic name for several varieties of cheese that resemble Emmental cheese, with characteristic holes.",
+      "source_word": "SWISS",
+      "id": "SWISS_def_1"
+    },
+    {
+      "node_type": "definition",
+      "text": "The Swiss are known for their precision in watchmaking and their neutrality in international conflicts.",
+      "source_word": "SWISS",
+      "id": "SWISS_def_2"
+    },
+    {
+      "node_type": "word",
+      "id": "CAKE"
+    },
+    {
+      "node_type": "definition",
+      "text": "A cake is a sweet baked dessert that is often decorated and served at celebrations.",
+      "source_word": "CAKE",
+      "id": "CAKE_def_0"
+    },
+    {
+      "node_type": "definition",
+      "text": "Birthday cake is traditionally served with candles that the celebrant blows out while making a wish.",
+      "source_word": "CAKE",
+      "id": "CAKE_def_1"
+    },
+    {
+      "node_type": "definition",
+      "text": "Cheesecake is a sweet dessert consisting of one or more layers with a mixture of soft cheese, eggs, and sugar.",
+      "source_word": "CAKE",
+      "id": "CAKE_def_2"
+    },
+    {
+      "node_type": "word",
+      "id": "CREAM"
+    },
+    {
+      "node_type": "definition",
+      "text": "Cream is the thick white or pale yellow fatty liquid that rises to the top of milk when it is left to stand.",
+      "source_word": "CREAM",
+      "id": "CREAM_def_0"
+    },
+    {
+      "node_type": "definition",
+      "text": "Ice cream is a frozen dessert made from cream or milk, sugar, and flavorings, churned while freezing.",
+      "source_word": "CREAM",
+      "id": "CREAM_def_1"
+    },
+    {
+      "node_type": "definition",
+      "text": "Whipped cream is cream that has been beaten until it is light and fluffy, often used as a topping.",
+      "source_word": "CREAM",
+      "id": "CREAM_def_2"
+    },
+    {
+      "node_type": "word",
+      "id": "SKATE"
+    },
+    {
+      "node_type": "definition",
+      "text": "To skate means to glide along a surface, typically ice or a hard floor, using ice skates or roller skates.",
+      "source_word": "SKATE",
+      "id": "SKATE_def_0"
+    },
+    {
+      "node_type": "definition",
+      "text": "Ice skating involves moving on ice using metal-bladed ice skates attached to shoes.",
+      "source_word": "SKATE",
+      "id": "SKATE_def_1"
+    },
+    {
+      "node_type": "definition",
+      "text": "A skateboard is a board with wheels that people ride by pushing with one foot while balancing.",
+      "source_word": "SKATE",
+      "id": "SKATE_def_2"
+    },
+    {
+      "node_type": "word",
+      "id": "WATER"
+    },
+    {
+      "node_type": "definition",
+      "text": "Water is a transparent, odorless, tasteless liquid that forms seas, lakes, rivers, and rain, with the chemical formula H2O.",
+      "source_word": "WATER",
+      "id": "WATER_def_0"
+    },
+    {
+      "node_type": "definition",
+      "text": "Ice is water frozen into a solid state, forming at 0 degrees Celsius or 32 degrees Fahrenheit.",
+      "source_word": "WATER",
+      "id": "WATER_def_1"
+    },
+    {
+      "node_type": "definition",
+      "text": "Water is essential for all known forms of life and covers about 71% of Earth's surface.",
+      "source_word": "WATER",
+      "id": "WATER_def_2"
+    },
+    {
+      "node_type": "word",
+      "id": "DUCK"
+    },
+    {
+      "node_type": "definition",
+      "text": "A duck is a waterbird with webbed feet, a broad flat bill, and a quacking call.",
+      "source_word": "DUCK",
+      "id": "DUCK_def_0"
+    },
+    {
+      "node_type": "definition",
+      "text": "To duck means to lower one's head or body quickly to avoid something.",
+      "source_word": "DUCK",
+      "id": "DUCK_def_1"
+    },
+    {
+      "node_type": "definition",
+      "text": "A duck's bill is the flat, broad beak that ducks use to filter food from water.",
+      "source_word": "DUCK",
+      "id": "DUCK_def_2"
+    },
+    {
+      "node_type": "word",
+      "id": "FOLD"
+    },
+    {
+      "node_type": "definition",
+      "text": "To fold means to bend something over on itself so that one part covers another.",
+      "source_word": "FOLD",
+      "id": "FOLD_def_0"
+    },
+    {
+      "node_type": "definition",
+      "text": "A billfold is a wallet, especially one that folds in half to hold paper money.",
+      "source_word": "FOLD",
+      "id": "FOLD_def_1"
+    },
+    {
+      "node_type": "definition",
+      "text": "In poker, to fold means to drop out of a hand by laying down your cards.",
+      "source_word": "FOLD",
+      "id": "FOLD_def_2"
+    },
+    {
+      "node_type": "word",
+      "id": "DOLLAR"
+    },
+    {
+      "node_type": "definition",
+      "text": "A dollar is the basic monetary unit of the United States and several other countries.",
+      "source_word": "DOLLAR",
+      "id": "DOLLAR_def_0"
+    },
+    {
+      "node_type": "definition",
+      "text": "A dollar bill is a banknote worth one dollar, featuring George Washington in the US.",
+      "source_word": "DOLLAR",
+      "id": "DOLLAR_def_1"
+    },
+    {
+      "node_type": "definition",
+      "text": "The dollar sign ($) is a symbol used to indicate various forms of currency.",
+      "source_word": "DOLLAR",
+      "id": "DOLLAR_def_2"
+    },
+    {
+      "node_type": "word",
+      "id": "NIGHT"
+    },
+    {
+      "node_type": "definition",
+      "text": "Night is the period of darkness between sunset and sunrise when the sun is below the horizon.",
+      "source_word": "NIGHT",
+      "id": "NIGHT_def_0"
+    },
+    {
+      "node_type": "definition",
+      "text": "A night watchman is a person who keeps guard during the night at a building or property.",
+      "source_word": "NIGHT",
+      "id": "NIGHT_def_1"
+    },
+    {
+      "node_type": "definition",
+      "text": "Nighttime is the time between evening and morning when it is dark outside.",
+      "source_word": "NIGHT",
+      "id": "NIGHT_def_2"
+    },
+    {
+      "node_type": "word",
+      "id": "WRIST"
+    },
+    {
+      "node_type": "definition",
+      "text": "The wrist is the joint connecting the hand with the forearm, allowing flexible movement.",
+      "source_word": "WRIST",
+      "id": "WRIST_def_0"
+    },
+    {
+      "node_type": "definition",
+      "text": "A wristwatch is a watch worn on a strap or band around the wrist.",
+      "source_word": "WRIST",
+      "id": "WRIST_def_1"
+    },
+    {
+      "node_type": "definition",
+      "text": "Wrist injuries are common in sports and can include sprains, fractures, or carpal tunnel syndrome.",
+      "source_word": "WRIST",
+      "id": "WRIST_def_2"
+    },
+    {
+      "node_type": "word",
+      "id": "STOP"
+    },
+    {
+      "node_type": "definition",
+      "text": "To stop means to cease movement or activity, to come to a halt.",
+      "source_word": "STOP",
+      "id": "STOP_def_0"
+    },
+    {
+      "node_type": "definition",
+      "text": "A stopwatch is a handheld timepiece designed to measure elapsed time from a particular starting point.",
+      "source_word": "STOP",
+      "id": "STOP_def_1"
+    },
+    {
+      "node_type": "definition",
+      "text": "A stop sign is a red octagonal sign requiring vehicles to come to a complete stop.",
+      "source_word": "STOP",
+      "id": "STOP_def_2"
+    },
+    {
+      "node_type": "word",
+      "id": "RIVER"
+    },
+    {
+      "node_type": "definition",
+      "text": "A river is a large natural stream of water flowing in a channel to the sea, lake, or another river.",
+      "source_word": "RIVER",
+      "id": "RIVER_def_0"
+    },
+    {
+      "node_type": "definition",
+      "text": "River banks are the sides of a river that contain the flow of water.",
+      "source_word": "RIVER",
+      "id": "RIVER_def_1"
+    },
+    {
+      "node_type": "definition",
+      "text": "River boats are vessels designed specifically for navigating rivers and inland waterways.",
+      "source_word": "RIVER",
+      "id": "RIVER_def_2"
+    },
+    {
+      "node_type": "word",
+      "id": "NOTE"
+    },
+    {
+      "node_type": "definition",
+      "text": "A note is a brief written record of something to aid memory or for future reference.",
+      "source_word": "NOTE",
+      "id": "NOTE_def_0"
+    },
+    {
+      "node_type": "definition",
+      "text": "A bank note is a piece of paper money issued by a bank or government as legal tender.",
+      "source_word": "NOTE",
+      "id": "NOTE_def_1"
+    },
+    {
+      "node_type": "definition",
+      "text": "In music, a note is a single tone of definite pitch made by a musical instrument or voice.",
+      "source_word": "NOTE",
+      "id": "NOTE_def_2"
+    },
+    {
+      "node_type": "word",
+      "id": "ACCOUNT"
+    },
+    {
+      "node_type": "definition",
+      "text": "An account is an arrangement with a bank to keep money there and access various services.",
+      "source_word": "ACCOUNT",
+      "id": "ACCOUNT_def_0"
+    },
+    {
+      "node_type": "definition",
+      "text": "A bank account allows customers to deposit, withdraw, and manage their money.",
+      "source_word": "ACCOUNT",
+      "id": "ACCOUNT_def_1"
+    },
+    {
+      "node_type": "definition",
+      "text": "To give an account means to describe or explain what happened in a situation.",
+      "source_word": "ACCOUNT",
+      "id": "ACCOUNT_def_2"
+    }
+  ],
+  "links": [
+    {
+      "weight": 1.0,
+      "source": "COTTAGE",
+      "target": "COTTAGE_def_0"
+    },
+    {
+      "weight": 1.0,
+      "source": "COTTAGE",
+      "target": "COTTAGE_def_1"
+    },
+    {
+      "weight": 1.0,
+      "source": "COTTAGE",
+      "target": "COTTAGE_def_2"
+    },
+    {
+      "weight": 1.0,
+      "source": "SWISS",
+      "target": "SWISS_def_0"
+    },
+    {
+      "weight": 1.0,
+      "source": "SWISS",
+      "target": "SWISS_def_1"
+    },
+    {
+      "weight": 1.0,
+      "source": "SWISS",
+      "target": "SWISS_def_2"
+    },
+    {
+      "weight": 0.5,
+      "edge_type": "conceptual",
+      "source": "SWISS",
+      "target": "CAKE"
+    },
+    {
+      "weight": 1.0,
+      "source": "CAKE",
+      "target": "CAKE_def_0"
+    },
+    {
+      "weight": 1.0,
+      "source": "CAKE",
+      "target": "CAKE_def_1"
+    },
+    {
+      "weight": 1.0,
+      "source": "CAKE",
+      "target": "CAKE_def_2"
+    },
+    {
+      "weight": 1.0,
+      "source": "CREAM",
+      "target": "CREAM_def_0"
+    },
+    {
+      "weight": 1.0,
+      "source": "CREAM",
+      "target": "CREAM_def_1"
+    },
+    {
+      "weight": 1.0,
+      "source": "CREAM",
+      "target": "CREAM_def_2"
+    },
+    {
+      "weight": 0.3,
+      "edge_type": "conceptual",
+      "source": "CREAM",
+      "target": "SKATE"
+    },
+    {
+      "weight": 0.4,
+      "edge_type": "conceptual",
+      "source": "CREAM",
+      "target": "WATER"
+    },
+    {
+      "weight": 1.0,
+      "source": "SKATE",
+      "target": "SKATE_def_0"
+    },
+    {
+      "weight": 1.0,
+      "source": "SKATE",
+      "target": "SKATE_def_1"
+    },
+    {
+      "weight": 1.0,
+      "source": "SKATE",
+      "target": "SKATE_def_2"
+    },
+    {
+      "weight": 1.0,
+      "source": "WATER",
+      "target": "WATER_def_0"
+    },
+    {
+      "weight": 1.0,
+      "source": "WATER",
+      "target": "WATER_def_1"
+    },
+    {
+      "weight": 1.0,
+      "source": "WATER",
+      "target": "WATER_def_2"
+    },
+    {
+      "weight": 1.0,
+      "source": "DUCK",
+      "target": "DUCK_def_0"
+    },
+    {
+      "weight": 1.0,
+      "source": "DUCK",
+      "target": "DUCK_def_1"
+    },
+    {
+      "weight": 1.0,
+      "source": "DUCK",
+      "target": "DUCK_def_2"
+    },
+    {
+      "weight": 0.4,
+      "edge_type": "conceptual",
+      "source": "DUCK",
+      "target": "FOLD"
+    },
+    {
+      "weight": 1.0,
+      "source": "FOLD",
+      "target": "FOLD_def_0"
+    },
+    {
+      "weight": 1.0,
+      "source": "FOLD",
+      "target": "FOLD_def_1"
+    },
+    {
+      "weight": 1.0,
+      "source": "FOLD",
+      "target": "FOLD_def_2"
+    },
+    {
+      "weight": 1.0,
+      "source": "DOLLAR",
+      "target": "DOLLAR_def_0"
+    },
+    {
+      "weight": 1.0,
+      "source": "DOLLAR",
+      "target": "DOLLAR_def_1"
+    },
+    {
+      "weight": 1.0,
+      "source": "DOLLAR",
+      "target": "DOLLAR_def_2"
+    },
+    {
+      "weight": 1.0,
+      "source": "NIGHT",
+      "target": "NIGHT_def_0"
+    },
+    {
+      "weight": 1.0,
+      "source": "NIGHT",
+      "target": "NIGHT_def_1"
+    },
+    {
+      "weight": 1.0,
+      "source": "NIGHT",
+      "target": "NIGHT_def_2"
+    },
+    {
+      "weight": 1.0,
+      "source": "WRIST",
+      "target": "WRIST_def_0"
+    },
+    {
+      "weight": 1.0,
+      "source": "WRIST",
+      "target": "WRIST_def_1"
+    },
+    {
+      "weight": 1.0,
+      "source": "WRIST",
+      "target": "WRIST_def_2"
+    },
+    {
+      "weight": 1.0,
+      "source": "STOP",
+      "target": "STOP_def_0"
+    },
+    {
+      "weight": 1.0,
+      "source": "STOP",
+      "target": "STOP_def_1"
+    },
+    {
+      "weight": 1.0,
+      "source": "STOP",
+      "target": "STOP_def_2"
+    },
+    {
+      "weight": 1.0,
+      "source": "RIVER",
+      "target": "RIVER_def_0"
+    },
+    {
+      "weight": 1.0,
+      "source": "RIVER",
+      "target": "RIVER_def_1"
+    },
+    {
+      "weight": 1.0,
+      "source": "RIVER",
+      "target": "RIVER_def_2"
+    },
+    {
+      "weight": 1.0,
+      "source": "NOTE",
+      "target": "NOTE_def_0"
+    },
+    {
+      "weight": 1.0,
+      "source": "NOTE",
+      "target": "NOTE_def_1"
+    },
+    {
+      "weight": 1.0,
+      "source": "NOTE",
+      "target": "NOTE_def_2"
+    },
+    {
+      "weight": 0.3,
+      "edge_type": "conceptual",
+      "source": "NOTE",
+      "target": "ACCOUNT"
+    },
+    {
+      "weight": 1.0,
+      "source": "ACCOUNT",
+      "target": "ACCOUNT_def_0"
+    },
+    {
+      "weight": 1.0,
+      "source": "ACCOUNT",
+      "target": "ACCOUNT_def_1"
+    },
+    {
+      "weight": 1.0,
+      "source": "ACCOUNT",
+      "target": "ACCOUNT_def_2"
+    }
+  ]
+}

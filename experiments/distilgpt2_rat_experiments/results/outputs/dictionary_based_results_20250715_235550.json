@@ -1,0 +1,215 @@
+{
+  "metadata": {
+    "experiment": "Dictionary-based RAT with Episode Integration",
+    "description": "English dictionary sentences as episodes, 3-word problems",
+    "timestamp": "20250715_235550"
+  },
+  "summary": {
+    "accuracy": 100.0,
+    "spike_rate": 0.2,
+    "total": 5
+  },
+  "results": [
+    {
+      "problem": {
+        "id": 1,
+        "question": "What word associates with COTTAGE, SWISS, and CAKE?",
+        "words": [
+          "COTTAGE",
+          "SWISS",
+          "CAKE"
+        ],
+        "expected": "CHEESE",
+        "category": "food"
+      },
+      "solution": {
+        "answer": "CHEESE",
+        "confidence": 0.6,
+        "candidates": [
+          [
+            "CHEESE",
+            9.0
+          ],
+          [
+            "WATCH",
+            1.5
+          ],
+          [
+            "BANK",
+            1.5
+          ]
+        ],
+        "episode_stats": {
+          "total_definitions": 15,
+          "integrated_episodes": 14,
+          "integration_rate": 0.06666666666666667
+        },
+        "spike_info": {
+          "spike_detected": false,
+          "delta_ged": -0.06666666666666667,
+          "delta_ig": 0.48,
+          "reduction_ratio": 0.06666666666666667,
+          "episodes_before": 15,
+          "episodes_after": 14
+        }
+      },
+      "correct": true
+    },
+    {
+      "problem": {
+        "id": 2,
+        "question": "What word connects CREAM, SKATE, and WATER?",
+        "words": [
+          "CREAM",
+          "SKATE",
+          "WATER"
+        ],
+        "expected": "ICE",
+        "category": "nature"
+      },
+      "solution": {
+        "answer": "ICE",
+        "confidence": 0.5,
+        "candidates": [
+          [
+            "ICE",
+            7.5
+          ]
+        ],
+        "episode_stats": {
+          "total_definitions": 15,
+          "integrated_episodes": 7,
+          "integration_rate": 0.5333333333333333
+        },
+        "spike_info": {
+          "spike_detected": true,
+          "delta_ged": -0.5333333333333333,
+          "delta_ig": 0.4,
+          "reduction_ratio": 0.5333333333333333,
+          "episodes_before": 15,
+          "episodes_after": 7
+        }
+      },
+      "correct": true
+    },
+    {
+      "problem": {
+        "id": 3,
+        "question": "What concept links DUCK, FOLD, and DOLLAR?",
+        "words": [
+          "DUCK",
+          "FOLD",
+          "DOLLAR"
+        ],
+        "expected": "BILL",
+        "category": "objects"
+      },
+      "solution": {
+        "answer": "BILL",
+        "confidence": 0.4,
+        "candidates": [
+          [
+            "BILL",
+            6.0
+          ],
+          [
+            "BANK",
+            1.5
+          ]
+        ],
+        "episode_stats": {
+          "total_definitions": 15,
+          "integrated_episodes": 11,
+          "integration_rate": 0.26666666666666666
+        },
+        "spike_info": {
+          "spike_detected": false,
+          "delta_ged": -0.26666666666666666,
+          "delta_ig": 0.32000000000000006,
+          "reduction_ratio": 0.26666666666666666,
+          "episodes_before": 15,
+          "episodes_after": 11
+        }
+      },
+      "correct": true
+    },
+    {
+      "problem": {
+        "id": 4,
+        "question": "Find the word that relates to NIGHT, WRIST, and STOP",
+        "words": [
+          "NIGHT",
+          "WRIST",
+          "STOP"
+        ],
+        "expected": "WATCH",
+        "category": "objects"
+      },
+      "solution": {
+        "answer": "WATCH",
+        "confidence": 0.23333333333333334,
+        "candidates": [
+          [
+            "WATCH",
+            3.5
+          ]
+        ],
+        "episode_stats": {
+          "total_definitions": 15,
+          "integrated_episodes": 10,
+          "integration_rate": 0.3333333333333333
+        },
+        "spike_info": {
+          "spike_detected": false,
+          "delta_ged": -0.3333333333333333,
+          "delta_ig": 0.18666666666666668,
+          "reduction_ratio": 0.3333333333333333,
+          "episodes_before": 15,
+          "episodes_after": 10
+        }
+      },
+      "correct": true
+    },
+    {
+      "problem": {
+        "id": 5,
+        "question": "What connects RIVER, NOTE, and ACCOUNT?",
+        "words": [
+          "RIVER",
+          "NOTE",
+          "ACCOUNT"
+        ],
+        "expected": "BANK",
+        "category": "abstract"
+      },
+      "solution": {
+        "answer": "BANK",
+        "confidence": 0.4,
+        "candidates": [
+          [
+            "BANK",
+            6.0
+          ],
+          [
+            "ICE",
+            2.0
+          ]
+        ],
+        "episode_stats": {
+          "total_definitions": 15,
+          "integrated_episodes": 9,
+          "integration_rate": 0.4
+        },
+        "spike_info": {
+          "spike_detected": false,
+          "delta_ged": -0.4,
+          "delta_ig": 0.32000000000000006,
+          "reduction_ratio": 0.4,
+          "episodes_before": 15,
+          "episodes_after": 9
+        }
+      },
+      "correct": true
+    }
+  ]
+}

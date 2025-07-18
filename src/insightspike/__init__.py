@@ -12,12 +12,12 @@ class About:
 LITE_MODE = os.environ.get("INSIGHTSPIKE_LITE_MODE", "0") == "1"
 
 # Legacy compatibility exports - import the config.py file specifically
-from .core.config import get_config
+from .config import get_config
 
 # Export new main agent for easy access
 if not LITE_MODE:
     try:
-        from .core.agents.main_agent import CycleResult, MainAgent
+        from .implementations.agents.main_agent import CycleResult, MainAgent
     except ImportError:
         # Define a placeholder if main_agent is not available
         class MainAgent:
@@ -54,9 +54,9 @@ else:
 # New unified layer exports (recommended for new code)
 if not LITE_MODE:
     try:
-        from .core.layers.layer1_error_monitor import ErrorMonitor
-        from .core.layers.layer2_memory_manager import L2MemoryManager
-        from .core.layers.layer4_llm_provider import get_llm_provider
+        from .implementations.layers.layer1_error_monitor import ErrorMonitor
+        from .implementations.layers.layer2_memory_manager import L2MemoryManager
+        from .implementations.layers.layer4_llm_interface import get_llm_provider
     except ImportError:
         # Fallback if core layers are not available
         ErrorMonitor = None
@@ -71,7 +71,7 @@ else:
 # Optional Layer3 with PyTorch dependency - skip in LITE_MODE
 if not LITE_MODE:
     try:
-        from .core.layers.layer3_graph_reasoner import L3GraphReasoner
+        from .implementations.layers.layer3_graph_reasoner import L3GraphReasoner
     except ImportError:
         L3GraphReasoner = None
 else:
@@ -80,14 +80,14 @@ else:
 # Generic agent system exports
 if not LITE_MODE:
     try:
-        from .core.agents.agent_factory import (
+        from .implementations.agents.agent_factory import (
             AgentConfigBuilder,
             InsightSpikeAgentFactory,
             create_configured_maze_agent,
             create_maze_agent,
         )
-        from .core.agents.generic_agent import GenericInsightSpikeAgent
-        from .core.interfaces.generic_interfaces import (
+        from .implementations.agents.generic_agent import GenericInsightSpikeAgent
+        from .core.base.generic_interfaces import (
             EnvironmentInterface,
             InsightMoment,
             TaskType,
@@ -116,7 +116,7 @@ else:
 # Standalone reasoner export - skip in LITE_MODE
 if not LITE_MODE:
     try:
-        from .core.reasoners.standalone_l3 import (
+        from .tools.standalone.standalone_l3 import (
             StandaloneL3GraphReasoner,
             analyze_documents_simple,
             create_standalone_reasoner,
@@ -134,13 +134,14 @@ else:
     analyze_documents_simple = None
 
 # Import the unified config system
-from .core.config import Config, get_config
+from .config.legacy_config import Config
+from .config import get_config
 
 
 # Create a legacy config module object for backward compatibility
 class LegacyConfigModule:
     def __init__(self):
-        from .core.config import get_legacy_config
+        from .config.legacy_config import get_legacy_config
 
         legacy = get_legacy_config()
         for key, value in legacy.items():

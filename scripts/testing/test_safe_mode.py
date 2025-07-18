@@ -25,13 +25,13 @@ def test_core_functionality():
     try:
         # Test configuration system
         print('1. Testing configuration system...')
-        from insightspike.core.config import Config
-        config = Config()
-        print(f'✅ Config loaded: {config.embedding.model_name}')
+        from insightspike.config import InsightSpikeConfig
+        config = InsightSpikeConfig()
+        print(f'✅ Config loaded: {config.core.model_name}')
         
         # Test fallback embedder directly
         print('2. Testing fallback embedder...')
-        from insightspike.utils.embedder import FallbackEmbedder
+        from insightspike.processing.embedder import FallbackEmbedder
         embedder = FallbackEmbedder(384)
         result = embedder.encode(['The cat sat on the mat.', 'Neural networks are powerful.'])
         print(f'✅ Fallback encoding works: shape {result.shape}')

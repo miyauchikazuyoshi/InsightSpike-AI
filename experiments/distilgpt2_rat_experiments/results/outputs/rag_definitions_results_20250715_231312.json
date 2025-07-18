@@ -1,0 +1,10 @@
+{
+  "experiment": "RAG with Definitions",
+  "results": {
+    "basic": 0,
+    "definitions": 0,
+    "hints": 0
+  },
+  "total_problems": 10,
+  "timestamp": "20250715_231312"
+}

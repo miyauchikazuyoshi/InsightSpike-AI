@@ -1,0 +1,266 @@
+[
+  {
+    "query": "What is the relationship between energy and information?",
+    "timestamp": "2025-07-17T18:22:28.579816",
+    "direct_llm": {
+      "response": "The relationship between information and information is about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about information about",
+      "time": 3.2206530570983887,
+      "quality": {
+        "length": 1.0,
+        "depth": 0.0,
+        "specificity": 0.2,
+        "integration": 0.2,
+        "insight": 0.0,
+        "overall": 0.27999999999999997
+      }
+    },
+    "standard_rag": {
+      "response": "The key to understanding the relationship between energy and information is to understand it.",
+      "context": [
+        "Maxwell's demon is a thought experiment showing the relationship between information and energy.",
+        "Information and entropy have a deep mathematical relationship.",
+        "The second law of thermodynamics and Shannon's information theory share the same mathematical structure."
+      ],
+      "time": 2.6301469802856445,
+      "quality": {
+        "length": 0.93,
+        "depth": 0.0,
+        "specificity": 0.4,
+        "integration": 0.2,
+        "insight": 0.0,
+        "overall": 0.306
+      }
+    },
+    "insightspike_current": {
+      "response": "Error: 'Config' object has no attribute 'processing'",
+      "spike_detected": false,
+      "confidence": 0.0,
+      "context": [],
+      "time": 0,
+      "quality": {
+        "overall": 0.0
+      },
+      "error": "'Config' object has no attribute 'processing'"
+    }
+  },
+  {
+    "query": "Why does consciousness emerge?",
+    "timestamp": "2025-07-17T18:22:34.431183",
+    "direct_llm": {
+      "response": "Consciousness is not the basis for consciousness, it is the basis for consciousness.\nI think that we have to find a way to explain consciousness, to explain it, to explain it, to explain it.\nBut I think it is not possible to do so.",
+      "time": 2.310459852218628,
+      "quality": {
+        "length": 1.0,
+        "depth": 0.0,
+        "specificity": 0.2,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.24
+      }
+    },
+    "standard_rag": {
+      "response": "Why does the universe arise?",
+      "context": [
+        "Consciousness is the most sophisticated form of information processing in the universe.",
+        "Life and consciousness are inevitable consequences of the universe recognizing itself.",
+        "Does artificial consciousness emerge from sufficient information integration?"
+      ],
+      "time": 2.481387138366699,
+      "quality": {
+        "length": 0.28,
+        "depth": 0.0,
+        "specificity": 0.0,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.05600000000000001
+      }
+    },
+    "insightspike_current": {
+      "response": "Error: 'Config' object has no attribute 'processing'",
+      "spike_detected": false,
+      "confidence": 0.0,
+      "context": [],
+      "time": 0,
+      "quality": {
+        "overall": 0.0
+      },
+      "error": "'Config' object has no attribute 'processing'"
+    }
+  },
+  {
+    "query": "What is the mechanism of creativity at the edge of chaos?",
+    "timestamp": "2025-07-17T18:22:39.223510",
+    "direct_llm": {
+      "response": "It is the ability to be creative.",
+      "time": 2.3008460998535156,
+      "quality": {
+        "length": 0.33,
+        "depth": 0.0,
+        "specificity": 0.0,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.066
+      }
+    },
+    "standard_rag": {
+      "response": "- The process of thinking is the process of thinking that is the process of thinking that is the process of thinking that is the process of thinking that is the process of thinking that is the process of thinking that is the process of thinking that is the process of thinking that is the process of thinking that is the process of thinking that is the process of thinking that is the process of thinking that is the process of thinking that is the process of thinking that is the process of thinking that is the process of",
+      "context": [
+        "Life is a system that maintains order within the flow of entropy.",
+        "Can the origin of life be explained as self-organization of information?",
+        "Is evolution a process for the universe to recognize itself?"
+      ],
+      "time": 2.473322868347168,
+      "quality": {
+        "length": 1.0,
+        "depth": 0.0,
+        "specificity": 0.0,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.2
+      }
+    },
+    "insightspike_current": {
+      "response": "Error: 'Config' object has no attribute 'processing'",
+      "spike_detected": false,
+      "confidence": 0.0,
+      "context": [],
+      "time": 0,
+      "quality": {
+        "overall": 0.0
+      },
+      "error": "'Config' object has no attribute 'processing'"
+    }
+  },
+  {
+    "query": "What is entropy?",
+    "timestamp": "2025-07-17T18:22:43.998181",
+    "direct_llm": {
+      "response": "The entropy of the universe is the entropy of the universe.",
+      "time": 2.340384006500244,
+      "quality": {
+        "length": 0.59,
+        "depth": 0.0,
+        "specificity": 0.2,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.158
+      }
+    },
+    "standard_rag": {
+      "response": "It is a measure of entropy.",
+      "context": [
+        "Entropy is a measure of energy degradation.",
+        "Information and entropy have a deep mathematical relationship.",
+        "Life is a system that maintains order within the flow of entropy."
+      ],
+      "time": 2.5048091411590576,
+      "quality": {
+        "length": 0.27,
+        "depth": 0.0,
+        "specificity": 0.2,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.094
+      }
+    },
+    "insightspike_current": {
+      "response": "Error: 'Config' object has no attribute 'processing'",
+      "spike_detected": false,
+      "confidence": 0.0,
+      "context": [],
+      "time": 0,
+      "quality": {
+        "overall": 0.0
+      },
+      "error": "'Config' object has no attribute 'processing'"
+    }
+  },
+  {
+    "query": "Can you explain quantum entanglement?",
+    "timestamp": "2025-07-17T18:22:48.843903",
+    "direct_llm": {
+      "response": "Yes, I can.",
+      "time": 2.3023691177368164,
+      "quality": {
+        "length": 0.11,
+        "depth": 0.0,
+        "specificity": 0.0,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.022
+      }
+    },
+    "standard_rag": {
+      "response": "There is no point in quantum entanglement.",
+      "context": [
+        "Quantum entanglement is a correlation that cannot be explained by classical information theory.",
+        "Quantum entanglement is a state where information is non-locally correlated.",
+        "Decoherence is the process of quantum information leaking into the environment."
+      ],
+      "time": 2.4663801193237305,
+      "quality": {
+        "length": 0.42,
+        "depth": 0.0,
+        "specificity": 0.2,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.124
+      }
+    },
+    "insightspike_current": {
+      "response": "Error: 'Config' object has no attribute 'processing'",
+      "spike_detected": false,
+      "confidence": 0.0,
+      "context": [],
+      "time": 0,
+      "quality": {
+        "overall": 0.0
+      },
+      "error": "'Config' object has no attribute 'processing'"
+    }
+  },
+  {
+    "query": "Is there a principle that unifies all phenomena?",
+    "timestamp": "2025-07-17T18:22:53.613130",
+    "direct_llm": {
+      "response": "No.",
+      "time": 2.311737060546875,
+      "quality": {
+        "length": 0.03,
+        "depth": 0.0,
+        "specificity": 0.0,
+        "integration": 0.0,
+        "insight": 0.0,
+        "overall": 0.006
+      }
+    },
+    "standard_rag": {
+      "response": "- A principle that sets out the general condition of an object is not simply the principle of the state of the mind.",
+      "context": [
+        "All physical laws reduce to laws of information conservation and transformation.",
+        "Observation always involves energy exchange.",
+        "Maxwell's demon is a thought experiment showing the relationship between information and energy."
+      ],
+      "time": 2.4939048290252686,
+      "quality": {
+        "length": 1.0,
+        "depth": 0.0,
+        "specificity": 0.0,
+        "integration": 0.0,
+        "insight": 0.2,
+        "overall": 0.24
+      }
+    },
+    "insightspike_current": {
+      "response": "Error: 'Config' object has no attribute 'processing'",
+      "spike_detected": false,
+      "confidence": 0.0,
+      "context": [],
+      "time": 0,
+      "quality": {
+        "overall": 0.0
+      },
+      "error": "'Config' object has no attribute 'processing'"
+    }
+  }
+]

@@ -138,9 +138,15 @@ def create_data_snapshot(experiment_path, metadata):
     # Copy data folder
     shutil.copytree(f"{experiment_path}/data", snapshot_dir)
     
-    # Save metadata
+    # Save metadata (including config)
     metadata['timestamp'] = timestamp
     metadata['data_size_mb'] = get_directory_size(snapshot_dir) / 1024 / 1024
+    
+    # Add experiment configuration if using InsightSpike
+    if 'config' not in metadata:
+        from insightspike.config import load_config
+        config = load_config()  # Load current config
+        metadata['config'] = config.dict()  # Convert Pydantic model to dict
     
     with open(f"{experiment_path}/data_snapshots/snapshot_{timestamp}_metadata.json", 'w') as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)

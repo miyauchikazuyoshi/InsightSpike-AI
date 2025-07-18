@@ -348,7 +348,7 @@ class MonitoredOperation:
 
 def create_default_monitor() -> GraphOperationMonitor:
     """Create a monitor with default settings."""
-    from ..core.config import get_config
+    from ..config import get_config
 
     config = get_config()
 
