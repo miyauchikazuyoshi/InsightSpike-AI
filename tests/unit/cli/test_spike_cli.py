@@ -1,8 +1,15 @@
 """Tests for the spike CLI with Pydantic configuration."""
 
+import sys
+from pathlib import Path
+
+# Add src to path for imports
+src_path = str(Path(__file__).parent.parent.parent.parent / "src")
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
+
 import json
 import tempfile
-from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest

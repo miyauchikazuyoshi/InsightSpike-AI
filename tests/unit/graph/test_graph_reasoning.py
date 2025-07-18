@@ -1,5 +1,13 @@
 """Unit tests for graph reasoning components."""
 
+import sys
+from pathlib import Path
+
+# Add src to path for imports
+src_path = str(Path(__file__).parent.parent.parent.parent / "src")
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
+
 import pytest
 
 from insightspike.features.graph_reasoning import GraphAnalyzer, RewardCalculator
