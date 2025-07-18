@@ -273,9 +273,9 @@ class TestSpikeConfig:
         finally:
             valid_path.unlink()
 
-        # Test invalid config
+        # Test invalid config (missing required fields)
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-            json.dump({"llm": {"provider": "invalid_provider"}}, f)
+            json.dump({"invalid_field": "value"}, f)  # Missing required llm field
             invalid_path = Path(f.name)
 
         try:
