@@ -11,7 +11,6 @@ from typer.testing import CliRunner
 from insightspike.cli.spike import DependencyFactory, app
 from insightspike.config.models import InsightSpikeConfig
 from insightspike.config.presets import ConfigPresets
-from insightspike.core.base.datastore import DataStore
 from insightspike.implementations.agents.main_agent import CycleResult
 
 
