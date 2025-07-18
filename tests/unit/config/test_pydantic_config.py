@@ -1,24 +1,24 @@
 """Tests for Pydantic-based configuration system."""
 
-import os
 import json
+import os
 import tempfile
 from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
 
+from insightspike.config.loader import ConfigLoader
 from insightspike.config.models import (
+    EmbeddingConfig,
+    GraphConfig,
     InsightSpikeConfig,
     LLMConfig,
-    EmbeddingConfig,
-    MemoryConfig,
-    GraphConfig,
-    MonitoringConfig,
     LoggingConfig,
+    MemoryConfig,
+    MonitoringConfig,
 )
 from insightspike.config.presets import ConfigPresets
-from insightspike.config.loader import ConfigLoader
 
 
 class TestInsightSpikeConfig:

@@ -618,8 +618,8 @@ class ImprovedEntropyMethods:
             return 0.0
 
         try:
-            from sklearn.decomposition import PCA
             from scipy.stats import entropy as scipy_entropy
+            from sklearn.decomposition import PCA
 
             # Perform PCA
             n_comp = min(n_components, len(embeddings) - 1, embeddings.shape[1])

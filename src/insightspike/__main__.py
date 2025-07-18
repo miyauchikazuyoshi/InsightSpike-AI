@@ -21,10 +21,10 @@ def run_app():
     """
     try:
         # Import here to avoid circular imports
-        from .config.loader import load_config
-        from .implementations.datastore.factory import DataStoreFactory
-        from .implementations.agents.main_agent import MainAgent
         from .cli import spike
+        from .config.loader import load_config
+        from .implementations.agents.main_agent import MainAgent
+        from .implementations.datastore.factory import DataStoreFactory
 
         logger.info("Starting InsightSpike composition root...")
 

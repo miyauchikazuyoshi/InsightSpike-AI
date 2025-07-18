@@ -6,11 +6,13 @@ import tempfile
 from pathlib import Path
 from unittest.mock import Mock
 
-import pytest
 import numpy as np
+import pytest
 
 # Add src to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+src_path = str(Path(__file__).parent.parent / "src")
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
 
 from insightspike.config.models import InsightSpikeConfig
 from insightspike.config.presets import ConfigPresets

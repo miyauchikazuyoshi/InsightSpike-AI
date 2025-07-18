@@ -14,13 +14,14 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+import typer
+
+from .cli.spike import app as cli_app
 from .config.loader import load_config
 from .config.models import Config
 from .core.base.datastore import DataStore
-from .implementations.datastore.factory import DataStoreFactory
 from .implementations.agents.main_agent import MainAgent
-from .cli.spike import app as cli_app
-import typer
+from .implementations.datastore.factory import DataStoreFactory
 
 logger = logging.getLogger(__name__)
 

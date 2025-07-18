@@ -80,6 +80,11 @@ else:
 # Generic agent system exports
 if not LITE_MODE:
     try:
+        from .core.base.generic_interfaces import (
+            EnvironmentInterface,
+            InsightMoment,
+            TaskType,
+        )
         from .implementations.agents.agent_factory import (
             AgentConfigBuilder,
             InsightSpikeAgentFactory,
@@ -87,11 +92,6 @@ if not LITE_MODE:
             create_maze_agent,
         )
         from .implementations.agents.generic_agent import GenericInsightSpikeAgent
-        from .core.base.generic_interfaces import (
-            EnvironmentInterface,
-            InsightMoment,
-            TaskType,
-        )
     except ImportError:
         # Fallback if generic agents are not available
         GenericInsightSpikeAgent = None
@@ -133,9 +133,10 @@ else:
     create_standalone_reasoner = None
     analyze_documents_simple = None
 
+from .config import get_config
+
 # Import the unified config system
 from .config.legacy_config import Config
-from .config import get_config
 
 
 # Create a legacy config module object for backward compatibility

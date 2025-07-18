@@ -253,17 +253,14 @@ class InsightSpikeConfig(BaseModel):
 
     def to_legacy_config(self) -> "Config":
         """Convert to legacy Config format for backward compatibility"""
-        from .legacy_config import (
-            Config,
-            EmbeddingConfig,
-            LLMConfig,
-            MemoryConfig as LegacyMemoryConfig,
-            RetrievalConfig as LegacyRetrievalConfig,
-            GraphConfig as LegacyGraphConfig,
-            ReasoningConfig as LegacyReasoningConfig,
-            PathConfig,
-            ProcessingConfig as LegacyProcessingConfig,
-        )
+        from .legacy_config import Config, EmbeddingConfig
+        from .legacy_config import GraphConfig as LegacyGraphConfig
+        from .legacy_config import LLMConfig
+        from .legacy_config import MemoryConfig as LegacyMemoryConfig
+        from .legacy_config import PathConfig
+        from .legacy_config import ProcessingConfig as LegacyProcessingConfig
+        from .legacy_config import ReasoningConfig as LegacyReasoningConfig
+        from .legacy_config import RetrievalConfig as LegacyRetrievalConfig
 
         return Config(
             embedding=EmbeddingConfig(

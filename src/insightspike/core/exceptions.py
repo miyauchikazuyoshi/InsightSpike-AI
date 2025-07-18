@@ -5,7 +5,7 @@ Custom Exceptions for InsightSpike
 Defines specific exception classes for better error handling and debugging.
 """
 
-from typing import Optional, Any
+from typing import Any, Optional
 
 
 class InsightSpikeException(Exception):

@@ -5,10 +5,11 @@ Episode Data Structure
 Core data structure for memory episodes in InsightSpike.
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, Optional, Any
-import numpy as np
 import time
+from dataclasses import dataclass, field
+from typing import Any, Dict, Optional
+
+import numpy as np
 
 
 @dataclass

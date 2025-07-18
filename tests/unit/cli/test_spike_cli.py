@@ -3,12 +3,12 @@
 import json
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from typer.testing import CliRunner
 
-from insightspike.cli.spike import app, DependencyFactory
+from insightspike.cli.spike import DependencyFactory, app
 from insightspike.config.models import InsightSpikeConfig
 from insightspike.config.presets import ConfigPresets
 from insightspike.core.base.datastore import DataStore

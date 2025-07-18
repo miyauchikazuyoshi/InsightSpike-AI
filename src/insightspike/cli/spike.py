@@ -26,17 +26,18 @@ from rich.table import Table
 
 # Import our simplified config system
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from functools import lru_cache
+
 from insightspike.config import (
-    InsightSpikeConfig,
     ConfigPresets,
-    load_config,
+    InsightSpikeConfig,
     get_config,
+    load_config,
 )
 from insightspike.config.loader import ConfigLoader
-from insightspike.implementations.agents.main_agent import MainAgent
-from insightspike.core.error_handler import InsightSpikeError, get_logger
 from insightspike.core.base.datastore import DataStore
-from functools import lru_cache
+from insightspike.core.error_handler import InsightSpikeError, get_logger
+from insightspike.implementations.agents.main_agent import MainAgent
 
 app = typer.Typer(
     name="spike",

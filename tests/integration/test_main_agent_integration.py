@@ -4,14 +4,14 @@ import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-import pytest
 import numpy as np
+import pytest
 
 from insightspike.config.models import InsightSpikeConfig
 from insightspike.config.presets import ConfigPresets
-from insightspike.implementations.agents.main_agent import MainAgent, CycleResult
 from insightspike.core.base.datastore import DataStore
 from insightspike.core.episode import Episode
+from insightspike.implementations.agents.main_agent import CycleResult, MainAgent
 
 
 @pytest.fixture

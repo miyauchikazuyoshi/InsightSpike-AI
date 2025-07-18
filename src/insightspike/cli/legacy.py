@@ -9,10 +9,11 @@ from typing import Optional
 import typer
 from rich import print
 
-# New imports for refactored structure
-from ..implementations.agents.main_agent import MainAgent
 from ..config import get_config
 from ..detection.insight_registry import InsightFactRegistry
+
+# New imports for refactored structure
+from ..implementations.agents.main_agent import MainAgent
 from ..processing.loader import load_corpus
 
 # Import dependency management commands

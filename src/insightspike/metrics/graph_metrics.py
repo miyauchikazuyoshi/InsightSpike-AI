@@ -1,6 +1,6 @@
 """ΔGED / ΔIG utilities - Wrappers for algorithm implementations."""
-import numpy as np
 import networkx as nx
+import numpy as np
 
 try:
     from ..algorithms.graph_edit_distance import GraphEditDistance

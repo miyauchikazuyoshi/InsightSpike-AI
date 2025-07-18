@@ -1,10 +1,10 @@
 """End-to-end tests for complete InsightSpike workflows."""
 
 import json
-import tempfile
-from pathlib import Path
 import subprocess
 import sys
+import tempfile
+from pathlib import Path
 
 import pytest
 

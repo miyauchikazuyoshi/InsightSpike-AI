@@ -8,13 +8,13 @@ Pre-defined configuration sets for common use cases.
 from typing import Any, Dict
 
 from .models import (
-    InsightSpikeConfig,
-    LLMConfig,
-    MemoryConfig,
     EmbeddingConfig,
     GraphConfig,
-    MonitoringConfig,
+    InsightSpikeConfig,
+    LLMConfig,
     LoggingConfig,
+    MemoryConfig,
+    MonitoringConfig,
 )
 
 
