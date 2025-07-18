@@ -47,6 +47,7 @@ jobs:
         CI: true
         INSIGHTSPIKE_TEST_MODE: "1"
         INSIGHTSPIKE_LLM__PROVIDER: "mock"
+        PYTHONPATH: ${{ github.workspace }}/src
       run: |
         poetry run pytest tests/unit/ -v --cov=src/insightspike --cov-report=xml
         # Run integration tests separately (if needed)
