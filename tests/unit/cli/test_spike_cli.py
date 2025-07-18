@@ -9,7 +9,7 @@ import pytest
 from typer.testing import CliRunner
 
 from insightspike.cli.spike import DependencyFactory, app
-from insightspike.config.models import InsightSpikeConfig
+from insightspike.config.models import InsightSpikeConfig, LLMConfig
 from insightspike.config.presets import ConfigPresets
 from insightspike.implementations.agents.main_agent import CycleResult
 
