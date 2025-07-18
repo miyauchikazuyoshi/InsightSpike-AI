@@ -40,12 +40,7 @@ jobs:
       run: poetry install --no-interaction --no-root --with dev
     
     - name: Install project
-      run: |
-        poetry install --no-interaction --with dev
-        echo "Checking installed packages:"
-        poetry show
-        echo "Python path after install:"
-        poetry run python -c "import sys; print('\n'.join(sys.path))"
+      run: poetry install --no-interaction --with dev
     
     - name: Run tests
       env:
