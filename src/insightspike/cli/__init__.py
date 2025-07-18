@@ -9,7 +9,7 @@ try:
     from .legacy import app as legacy_app
 except ImportError:
     legacy_app = None
-    
+
 # from .commands.deps import app as deps_app  # Temporarily disabled
 deps_app = None
 

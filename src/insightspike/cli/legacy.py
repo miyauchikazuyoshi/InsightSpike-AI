@@ -150,14 +150,16 @@ def config_info():
 
         print("[bold blue]Current Configuration:[/bold blue]")
         # Handle both Pydantic and legacy config
-        if hasattr(config, 'environment'):
+        if hasattr(config, "environment"):
             print(f"  Environment: {config.environment}")
-        if hasattr(config, 'llm'):
+        if hasattr(config, "llm"):
             print(f"  LLM Provider: {config.llm.provider}")
-            print(f"  Model: {getattr(config.llm, 'model', config.llm.model_name if hasattr(config.llm, 'model_name') else 'N/A')}")
-        if hasattr(config, 'memory'):
+            print(
+                f"  Model: {getattr(config.llm, 'model', config.llm.model_name if hasattr(config.llm, 'model_name') else 'N/A')}"
+            )
+        if hasattr(config, "memory"):
             print(f"  Memory max docs: {config.memory.max_retrieved_docs}")
-        if hasattr(config, 'graph'):
+        if hasattr(config, "graph"):
             print(
                 f"  Graph spike thresholds - GED: {config.graph.spike_ged_threshold}, IG: {config.graph.spike_ig_threshold}"
             )

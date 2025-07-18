@@ -26,7 +26,12 @@ from rich.table import Table
 
 # Import our simplified config system
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from insightspike.config import InsightSpikeConfig, ConfigPresets, load_config, get_config
+from insightspike.config import (
+    InsightSpikeConfig,
+    ConfigPresets,
+    load_config,
+    get_config,
+)
 from insightspike.config.loader import ConfigLoader
 from insightspike.implementations.agents.main_agent import MainAgent
 from insightspike.core.error_handler import InsightSpikeError, get_logger
@@ -49,12 +54,12 @@ class DependencyFactory:
     Factory for creating agents with different configurations.
     This allows each command to get its own properly configured agent.
     """
-    
+
     def __init__(self, base_config: InsightSpikeConfig, datastore: DataStore):
         self.base_config = base_config
         self.datastore = datastore
         self._agents = {}  # Cache for initialized agents
-        
+
     @lru_cache(maxsize=None)
     def get_agent(self, preset: str = "development") -> MainAgent:
         """
@@ -63,12 +68,12 @@ class DependencyFactory:
         """
         if preset in self._agents:
             return self._agents[preset]
-            
+
         logger.info(f"Creating agent with preset: {preset}")
-        
+
         # Load preset-specific configuration
         from insightspike.config.presets import ConfigPresets
-        
+
         # Get the Pydantic config directly
         if preset == "development":
             pydantic_config = ConfigPresets.development()
@@ -81,38 +86,42 @@ class DependencyFactory:
         else:
             # Default to development
             pydantic_config = ConfigPresets.development()
-        
+
         # Merge with base config if provided
         if self.base_config:
             # Update the Pydantic config with values from base_config
             # This ensures config.yaml values take precedence
             config_dict = pydantic_config.dict()
             base_dict = self.base_config.dict()
-            
+
             # Deep merge base config into preset config
             for key, value in base_dict.items():
-                if key in config_dict and isinstance(value, dict) and isinstance(config_dict[key], dict):
+                if (
+                    key in config_dict
+                    and isinstance(value, dict)
+                    and isinstance(config_dict[key], dict)
+                ):
                     config_dict[key].update(value)
                 else:
                     config_dict[key] = value
-            
+
             # Create new config from merged dict
             pydantic_config = InsightSpikeConfig(**config_dict)
-        
+
         # Create and initialize agent with Pydantic config directly
         agent = MainAgent(config=pydantic_config, datastore=self.datastore)
-        
+
         if not agent.initialize():
             raise InsightSpikeError(f"Failed to initialize agent with preset: {preset}")
-            
+
         # Try to load existing state
         agent.load_state()
-        
+
         # Cache the agent
         self._agents[preset] = agent
-        
+
         return agent
-        
+
     def get_config_loader(self) -> ConfigLoader:
         """Get a config loader instance."""
         return ConfigLoader()
@@ -121,14 +130,14 @@ class DependencyFactory:
 def run_cli(config: InsightSpikeConfig, datastore: DataStore):
     """
     Main entry point for the CLI, called from __main__.py
-    
+
     Args:
         config: Base configuration
         datastore: DataStore instance
     """
     # Create the dependency factory
     factory = DependencyFactory(config, datastore)
-    
+
     # Run the Typer app with the factory in context
     app(obj=factory)
 
@@ -148,7 +157,7 @@ def query(
 
         # Get factory from context
         factory: DependencyFactory = ctx.obj
-        
+
         # Get agent with specified preset
         agent = factory.get_agent(preset)
 
@@ -182,7 +191,11 @@ def query(
 
         if spike_detected:
             console.print("\n[bold red]🚀 INSIGHT SPIKE DETECTED![/bold red]")
-            metrics = graph_analysis.get('metrics', {}) if isinstance(graph_analysis, dict) else {}
+            metrics = (
+                graph_analysis.get("metrics", {})
+                if isinstance(graph_analysis, dict)
+                else {}
+            )
             console.print(
                 f"This represents a significant insight with GED: {metrics.get('delta_ged', 0):.3f}"
             )
@@ -214,7 +227,7 @@ def embed(
 
         # Get factory from context
         factory: DependencyFactory = ctx.obj
-        
+
         # Get agent with specified preset
         agent = factory.get_agent(preset)
 
@@ -237,7 +250,9 @@ def embed(
             TextColumn("[progress.description]{task.description}"),
             console=console,
         ) as progress:
-            task = progress.add_task("Embedding documents...", total=len(files_to_process))
+            task = progress.add_task(
+                "Embedding documents...", total=len(files_to_process)
+            )
 
             for file_path in files_to_process:
                 try:
@@ -267,10 +282,10 @@ def config(
     try:
         # Get factory from context
         factory: DependencyFactory = ctx.obj
-        
+
         # Get config loader
         config_loader = factory.get_config_loader()
-        
+
         # Get current config
         config = factory.base_config
 
@@ -294,7 +309,7 @@ def config(
 
             # Parse nested key (e.g., "core.model_name")
             keys = key.split(".")
-            
+
             # Update config with the new value
             config_dict = config.dict()
             current = config_dict
@@ -303,13 +318,13 @@ def config(
                     console.print(f"[red]Invalid config key: {key}[/red]")
                     raise typer.Exit(code=1)
                 current = current[k]
-            
+
             if keys[-1] not in current:
                 console.print(f"[red]Invalid config key: {key}[/red]")
                 raise typer.Exit(code=1)
-                
+
             current[keys[-1]] = value
-            
+
             # Update factory's base config
             factory.base_config = InsightSpikeConfig(**config_dict)
             console.print(f"[green]✅ Set {key} = {value}[/green]")
@@ -330,7 +345,13 @@ def config(
             console.print(f"[green]✅ Configuration loaded from {path}[/green]")
 
         elif action == "preset":
-            valid_presets = ["development", "experiment", "production", "testing", "cloud"]
+            valid_presets = [
+                "development",
+                "experiment",
+                "production",
+                "testing",
+                "cloud",
+            ]
             if key not in valid_presets:
                 console.print(
                     f"[red]Invalid preset. Choose: {', '.join(valid_presets)}[/red]"
@@ -359,7 +380,7 @@ def interactive(ctx: typer.Context):
 
     # Get factory from context
     factory: DependencyFactory = ctx.obj
-    
+
     # Get agent with default preset
     agent = factory.get_agent("development")
 
@@ -456,21 +477,22 @@ def experiment(
     """Run experiments to demonstrate capabilities"""
     try:
         console.print(f"[bold blue]🧪 Running {name} experiment[/bold blue]")
-        
+
         # Get factory from context
         factory: DependencyFactory = ctx.obj
-        
+
         # Get agent with experiment preset
         agent = factory.get_agent("experiment")
-        
+
         # Use ExperimentRunner to run experiment
         from ..tools.experiments import ExperimentRunner
+
         runner = ExperimentRunner(agent)
         result = runner.run(name, episodes)
-        
+
         # Display results
         console.print(f"\n[green]✅ Experiment completed: {result['type']}[/green]")
-        
+
         if "error" in result:
             console.print(f"[red]Error: {result['error']}[/red]")
         else:
@@ -479,27 +501,27 @@ def experiment(
             table.add_column("Episode", style="cyan")
             table.add_column("Question", style="white")
             table.add_column("Result", style="green")
-            
+
             for i, episode in enumerate(result.get("episodes", [])):
                 if name == "simple":
                     table.add_row(
                         str(i + 1),
                         episode["question"][:40] + "...",
-                        "✅" if episode["success"] else "❌"
+                        "✅" if episode["success"] else "❌",
                     )
                 elif name == "insight":
                     table.add_row(
                         str(i + 1),
                         episode["question"][:40] + "...",
-                        "🚀 Spike!" if episode["spike_detected"] else "Normal"
+                        "🚀 Spike!" if episode["spike_detected"] else "Normal",
                     )
                 elif name == "math":
                     table.add_row(
                         str(i + 1),
                         episode["question"],
-                        episode.get("answer", "No answer")[:30]
+                        episode.get("answer", "No answer")[:30],
                     )
-            
+
             console.print(table)
 
     except Exception as e:
@@ -517,17 +539,18 @@ def demo(ctx: typer.Context):
 
     # Get factory from context
     factory: DependencyFactory = ctx.obj
-    
+
     # Initialize with experiment preset for real responses
     agent = factory.get_agent("experiment")
-    
+
     # Use DemoRunner to run demo
     from ..tools.experiments import DemoRunner
+
     runner = DemoRunner(agent)
-    
+
     with console.status("[yellow]Running demo...[/yellow]"):
         demo_results = runner.run()
-    
+
     # Display demo results
     for result in demo_results:
         if "action" in result and result["action"] == "stored":
@@ -537,47 +560,47 @@ def demo(ctx: typer.Context):
             if "question" in result:
                 console.print(f"[cyan]Q:[/cyan] {result['question']}")
                 console.print(f"[yellow]A:[/yellow] {result['answer']}")
-                if result.get('spike_detected'):
+                if result.get("spike_detected"):
                     console.print("[red bold]🚀 INSIGHT SPIKE DETECTED![/red bold]")
                 console.print(f"[dim]Quality: {result.get('quality', 0):.3f}[/dim]")
-    
+
     console.print("\n[green]✅ Demo completed![/green]")
     console.print("[dim]Try 'spike query' to ask your own questions[/dim]")
 
 
 @app.command()
-def insights(ctx: typer.Context, limit: int = typer.Option(5, help="Number of insights to show")):
+def insights(
+    ctx: typer.Context, limit: int = typer.Option(5, help="Number of insights to show")
+):
     """Show discovered insights and statistics"""
     try:
         # Get factory from context
         factory: DependencyFactory = ctx.obj
-        
+
         # Get agent
         agent = factory.get_agent("development")
         insights_data = agent.get_insights(limit=limit)
-        
+
         # Create stats table
         table = Table(title="Insight Statistics")
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
-        
+
         total_insights = insights_data.get("total_insights", 0)
         table.add_row("Total Insights", str(total_insights))
-        
+
         # Show categories if available
         categories = insights_data.get("categories", [])
         if categories:
             table.add_row("Categories", ", ".join(categories[:5]))
-        
+
         console.print(table)
-        
+
         recent = insights_data.get("recent_insights", [])
         if recent:
             # Show recent insights
-            console.print(
-                f"\n[bold]Recent Insights (showing {len(recent)}):[/bold]\n"
-            )
-            
+            console.print(f"\n[bold]Recent Insights (showing {len(recent)}):[/bold]\n")
+
             for i, insight in enumerate(recent, 1):
                 console.print(f"[bold]{i}. Q: {insight['question']}[/bold]")
                 console.print(
@@ -600,19 +623,20 @@ def insights(ctx: typer.Context, limit: int = typer.Option(5, help="Number of in
 @app.command("insights-search")
 def insights_search(
     ctx: typer.Context,
-    concept: str, limit: int = typer.Option(10, help="Maximum results to show")
+    concept: str,
+    limit: int = typer.Option(10, help="Maximum results to show"),
 ):
     """Search for insights related to a concept"""
     try:
         # Get factory from context
         factory: DependencyFactory = ctx.obj
-        
+
         # Get agent
         agent = factory.get_agent("development")
         results = agent.search_insights(concept, limit=limit)
-        
+
         console.print(f"[bold blue]🔍 Insights about '{concept}'[/bold blue]\n")
-        
+
         if results:
             for i, insight in enumerate(results, 1):
                 console.print(f"[bold]{i}. Q: {insight['question']}[/bold]")

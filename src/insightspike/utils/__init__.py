@@ -51,7 +51,10 @@ except ImportError as e:
 
 # Export graph importance utilities - moved to algorithms
 try:
-    from ..algorithms.graph_importance import DynamicImportanceTracker, GraphImportanceCalculator
+    from ..algorithms.graph_importance import (
+        DynamicImportanceTracker,
+        GraphImportanceCalculator,
+    )
 
     __all__.extend(["GraphImportanceCalculator", "DynamicImportanceTracker"])
 except ImportError:

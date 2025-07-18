@@ -20,7 +20,7 @@ warnings.warn(
     "legacy_config is deprecated and will be removed in 3 months. "
     "Please migrate to InsightSpikeConfig from insightspike.config.models",
     DeprecationWarning,
-    stacklevel=2
+    stacklevel=2,
 )
 
 
@@ -270,8 +270,14 @@ def get_legacy_config():
         "LOG_DIR": config.paths.log_dir,
         "INDEX_FILE": config.paths.index_file,
         "GRAPH_FILE": config.paths.graph_file,
-        "EMBED_MODEL_NAME": getattr(config.core, 'model_name', 'paraphrase-MiniLM-L6-v2') if hasattr(config, 'core') else 'paraphrase-MiniLM-L6-v2',
-        "LLM_NAME": getattr(config.core, 'llm_model', 'distilgpt2') if hasattr(config, 'core') else 'distilgpt2',
+        "EMBED_MODEL_NAME": getattr(
+            config.core, "model_name", "paraphrase-MiniLM-L6-v2"
+        )
+        if hasattr(config, "core")
+        else "paraphrase-MiniLM-L6-v2",
+        "LLM_NAME": getattr(config.core, "llm_model", "distilgpt2")
+        if hasattr(config, "core")
+        else "distilgpt2",
         "SIM_THRESHOLD": config.retrieval.similarity_threshold,
         "TOP_K": config.retrieval.top_k,
         "LAYER1_TOP_K": config.retrieval.layer1_top_k,

@@ -25,7 +25,7 @@ class EmbeddingManager:
 
     def __init__(self, model_name: str = None, config=None):
         from ..config.models import InsightSpikeConfig
-        
+
         # Handle both Pydantic config and legacy config
         if config and isinstance(config, InsightSpikeConfig):
             self.config = config
