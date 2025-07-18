@@ -49,6 +49,13 @@ jobs:
         INSIGHTSPIKE_LLM__PROVIDER: "mock"
         PYTHONPATH: ${{ github.workspace }}/src
       run: |
+        echo "Checking directory structure:"
+        ls -la src/insightspike/
+        ls -la src/insightspike/features/
+        ls -la src/insightspike/implementations/
+        echo "Testing imports directly:"
+        poetry run python -c "import insightspike.features; print('features OK')"
+        poetry run python -c "import insightspike.implementations; print('implementations OK')"
         poetry run pytest tests/unit/ -v --cov=src/insightspike --cov-report=xml -s
         # Run integration tests separately (if needed)
         # poetry run pytest tests/integration/ -v -m integration
