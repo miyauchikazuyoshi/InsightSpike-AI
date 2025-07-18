@@ -283,7 +283,8 @@ class TestSpikeConfig:
                 app, ["config", "validate", str(invalid_path)], obj=mock_factory
             )
 
-            assert result.exit_code != 0
+            # Invalid config should return non-zero exit code
+            assert result.exit_code == 1
             assert "Validation error" in result.stdout
         finally:
             invalid_path.unlink()
