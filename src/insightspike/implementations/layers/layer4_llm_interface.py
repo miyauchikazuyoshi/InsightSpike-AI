@@ -57,6 +57,80 @@ class LLMProviderType(Enum):
     MOCK = "mock"             # Mock for testing
 
 
+class LLMProviderRegistry:
+    """
+    Registry for caching and reusing LLM provider instances.
+    Implements singleton pattern per provider/model combination.
+    """
+    _instances: Dict[tuple, 'L4LLMInterface'] = {}
+    _lock = None
+    
+    @classmethod
+    def _get_lock(cls):
+        """Lazy initialization of lock to avoid import issues"""
+        if cls._lock is None:
+            import threading
+            cls._lock = threading.Lock()
+        return cls._lock
+    
+    @classmethod
+    def get_instance(cls, config: Union[LLMConfig, 'InsightSpikeConfig']) -> 'L4LLMInterface':
+        """
+        Get or create a cached LLM provider instance.
+        
+        Args:
+            config: LLM configuration
+            
+        Returns:
+            L4LLMInterface: Cached or newly created instance
+        """
+        from ...config.models import InsightSpikeConfig
+        
+        # Normalize config to LLMConfig
+        if isinstance(config, InsightSpikeConfig):
+            llm_config = LLMConfig.from_provider(
+                config.llm.provider,
+                model_name=config.llm.model,
+                temperature=config.llm.temperature,
+                max_tokens=config.llm.max_tokens,
+                api_key=config.llm.api_key,
+                system_prompt=config.llm.system_prompt
+            )
+        else:
+            llm_config = config
+            
+        # Create cache key from provider and model name
+        cache_key = (llm_config.provider.value, llm_config.model_name)
+        
+        # Thread-safe instance retrieval/creation
+        with cls._get_lock():
+            if cache_key not in cls._instances:
+                logger.info(f"[LLMRegistry] Creating new instance for {cache_key}")
+                provider = L4LLMInterface(llm_config)
+                if provider.initialize():
+                    cls._instances[cache_key] = provider
+                    logger.info(f"[LLMRegistry] Successfully initialized {cache_key}")
+                else:
+                    raise RuntimeError(f"Failed to initialize LLM provider {cache_key}")
+            else:
+                logger.info(f"[LLMRegistry] Reusing existing instance for {cache_key}")
+                
+        return cls._instances[cache_key]
+    
+    @classmethod
+    def clear_cache(cls):
+        """Clear all cached instances (useful for testing)"""
+        with cls._get_lock():
+            cls._instances.clear()
+            logger.info("[LLMRegistry] Cache cleared")
+    
+    @classmethod
+    def get_cached_providers(cls) -> List[tuple]:
+        """Get list of currently cached provider keys"""
+        with cls._get_lock():
+            return list(cls._instances.keys())
+
+
 @dataclass
 class LLMConfig:
     """Unified configuration for LLM providers"""
@@ -283,32 +357,59 @@ class L4LLMInterface:
             
     def _build_prompt(self, context: Dict[str, Any], question: str) -> str:
         """Build prompt from context and question"""
+        # Check for simple prompt mode (for lightweight models)
+        use_simple = getattr(self.config, 'use_simple_prompt', False)
+        prompt_style = getattr(self.config, 'prompt_style', 'standard')
+        if use_simple or prompt_style == "minimal":
+            return self._build_simple_prompt(context, question)
+            
         # Extract relevant information
         retrieved_docs = context.get("retrieved_documents", [])
         graph_analysis = context.get("graph_analysis", {})
         reasoning_quality = context.get("reasoning_quality", 0.0)
         
-        # Build context section
+        # Limit documents based on config
+        max_docs = getattr(self.config, 'max_context_docs', 5)
+        retrieved_docs = retrieved_docs[:max_docs]
+        
+        # Build context section based on prompt style
         context_parts = []
         
         if retrieved_docs:
-            context_parts.append("Retrieved Information:")
-            for i, doc in enumerate(retrieved_docs[:3], 1):
-                text = doc.get("text", "")
-                relevance = doc.get("relevance", 0.0)
-                context_parts.append(f"{i}. {text} (relevance: {relevance:.2f})")
-                
-        if graph_analysis and graph_analysis.get("spike_detected", False):
+            if prompt_style == "detailed" and getattr(self.config, 'include_metadata', True):
+                context_parts.append("Retrieved Information:")
+                for i, doc in enumerate(retrieved_docs, 1):
+                    text = doc.get("text", "")
+                    relevance = doc.get("relevance", 0.0)
+                    context_parts.append(f"{i}. {text} (relevance: {relevance:.2f})")
+            else:
+                # Standard style - just the text
+                for doc in retrieved_docs:
+                    context_parts.append(doc.get("text", ""))
+        
+        # Include Query Transformation insights if available
+        query_state = context.get("query_state")
+        if query_state and hasattr(query_state, "insights_discovered") and query_state.insights_discovered:
+            context_parts.append("\n[Discovered Insights from Query Evolution]")
+            for insight in query_state.insights_discovered[:3]:  # Limit to top 3 insights
+                context_parts.append(f"- {insight}")
+        
+        if query_state and hasattr(query_state, "absorbed_concepts") and query_state.absorbed_concepts:
+            context_parts.append("\n[Key Concepts Absorbed]")
+            context_parts.append(f"- {', '.join(query_state.absorbed_concepts[:5])}")  # Limit to 5 concepts
+                    
+        if getattr(self.config, 'include_metadata', True) and graph_analysis and graph_analysis.get("spike_detected", False):
             context_parts.append("\nInsight Detection: Significant pattern identified")
             
-        # Use template if provided
-        if self.config.prompt_template:
-            prompt = self.config.prompt_template.format(
+        # Use custom template if provided
+        prompt_template = getattr(self.config, 'prompt_template', None)
+        if prompt_template:
+            prompt = prompt_template.format(
                 context="\n".join(context_parts),
                 question=question
             )
         else:
-            # Default template
+            # Default template based on style
             if context_parts:
                 prompt = f"Context:\n{chr(10).join(context_parts)}\n\nQuestion: {question}\n\nAnswer:"
             else:
@@ -319,11 +420,51 @@ class L4LLMInterface:
             prompt = self._add_special_tokens(prompt)
             
         return prompt
+    
+    def _build_simple_prompt(self, context: Dict[str, Any], question: str) -> str:
+        """Build simplified prompt for lightweight models like GPT-2"""
+        # Use custom template if provided
+        prompt_template = getattr(self.config, 'prompt_template', None)
+        if prompt_template:
+            docs = context.get("retrieved_documents", [])
+            simple_context = " ".join([doc.get("text", "")[:100] for doc in docs[:2]])
+            
+            # Add first insight if available
+            query_state = context.get("query_state")
+            if query_state and hasattr(query_state, "insights_discovered") and query_state.insights_discovered:
+                simple_context += f" Insight: {query_state.insights_discovered[0][:50]}"
+            
+            return prompt_template.format(
+                context=simple_context,
+                question=question
+            )
+        
+        # Default minimal prompt
+        docs = context.get("retrieved_documents", [])
+        context_parts = []
+        
+        if docs:
+            # Take only first 2 docs, limit text length
+            texts = [doc.get("text", "")[:150] for doc in docs[:2]]
+            context_parts.extend(texts)
+        
+        # Add first insight in minimal format
+        query_state = context.get("query_state")
+        if query_state and hasattr(query_state, "insights_discovered") and query_state.insights_discovered:
+            context_parts.append(f"[{query_state.insights_discovered[0][:50]}]")
+        
+        if context_parts:
+            context_text = " ".join(context_parts)
+            return f"Context: {context_text}\nQ: {question}\nA:"
+        else:
+            return f"Q: {question}\nA:"
         
     def _add_special_tokens(self, prompt: str) -> str:
         """Add special tokens for local models"""
-        if self.config.use_system_prompt and self.config.system_prompt:
-            return f"<|system|>\n{self.config.system_prompt}\n\n<|user|>\n{prompt}\n\n<|assistant|>\n"
+        use_system = getattr(self.config, 'use_system_prompt', False)
+        system_prompt = getattr(self.config, 'system_prompt', None)
+        if use_system and system_prompt:
+            return f"<|system|>\n{system_prompt}\n\n<|user|>\n{prompt}\n\n<|assistant|>\n"
         else:
             return f"<|user|>\n{prompt}\n\n<|assistant|>\n"
             
@@ -351,8 +492,10 @@ class L4LLMInterface:
         """Generate using OpenAI"""
         messages = []
         
-        if self.config.use_system_prompt and self.config.system_prompt:
-            messages.append({"role": "system", "content": self.config.system_prompt})
+        use_system = getattr(self.config, 'use_system_prompt', False)
+        system_prompt = getattr(self.config, 'system_prompt', None)
+        if use_system and system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
             
         messages.append({"role": "user", "content": prompt})
         
@@ -388,7 +531,7 @@ class L4LLMInterface:
         
     def _generate_anthropic(self, prompt: str) -> Dict[str, Any]:
         """Generate using Anthropic"""
-        system_prompt = self.config.system_prompt if self.config.use_system_prompt else None
+        system_prompt = getattr(self.config, 'system_prompt', None) if getattr(self.config, 'use_system_prompt', False) else None
         
         response = self.client.messages.create(
             model=self.config.model_name,
@@ -583,17 +726,38 @@ class L4LLMInterface:
 
 
 # Factory function for backward compatibility
-def get_llm_provider(config=None, safe_mode: bool = False) -> L4LLMInterface:
-    """Get LLM provider instance"""
+def get_llm_provider(config=None, safe_mode: bool = False, use_cache: bool = True) -> L4LLMInterface:
+    """
+    Get LLM provider instance.
+    
+    Args:
+        config: Configuration object (InsightSpikeConfig or legacy)
+        safe_mode: Use clean provider to avoid data leaks
+        use_cache: Whether to use cached instances (default: True)
+        
+    Returns:
+        L4LLMInterface instance
+    """
     from ...config.models import InsightSpikeConfig
     
     if safe_mode or config is None:
         # Use clean provider in safe mode
         llm_config = LLMConfig(provider=LLMProviderType.CLEAN)
-        return L4LLMInterface(llm_config)
+        if use_cache:
+            return LLMProviderRegistry.get_instance(llm_config)
+        else:
+            provider = L4LLMInterface(llm_config)
+            provider.initialize()
+            return provider
+            
     elif isinstance(config, InsightSpikeConfig):
         # Direct Pydantic config support
-        return L4LLMInterface(config)
+        if use_cache:
+            return LLMProviderRegistry.get_instance(config)
+        else:
+            provider = L4LLMInterface(config)
+            provider.initialize()
+            return provider
     else:
         # Legacy config support
         llm_config = LLMConfig()
@@ -605,7 +769,12 @@ def get_llm_provider(config=None, safe_mode: bool = False) -> L4LLMInterface:
                 max_tokens=getattr(config.llm, 'max_tokens', 500)
             )
             
-        return L4LLMInterface(llm_config, legacy_config=config)
+        if use_cache:
+            return LLMProviderRegistry.get_instance(llm_config)
+        else:
+            provider = L4LLMInterface(llm_config, legacy_config=config)
+            provider.initialize()
+            return provider
 
 
 # Aliases for backward compatibility

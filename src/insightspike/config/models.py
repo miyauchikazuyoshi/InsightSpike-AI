@@ -2,30 +2,13 @@
 Unified Configuration Models for InsightSpike
 ============================================
 
-Pydantic-based configuration models that match the YAML structure.
+Clean Pydantic-based configuration models without backward compatibility.
 """
 
 from pathlib import Path
 from typing import Any, Dict, Literal, Optional
 
 from pydantic import BaseModel, Field, validator
-
-
-class CoreConfig(BaseModel):
-    """Core language model settings"""
-
-    model_name: str = Field(
-        default="paraphrase-MiniLM-L6-v2", description="Embedding model"
-    )
-    llm_provider: Literal["local", "openai", "anthropic", "mock", "clean"] = Field(
-        default="local"
-    )
-    llm_model: str = Field(default="distilgpt2")
-    max_tokens: int = Field(default=256, ge=1, le=4096)
-    temperature: float = Field(default=0.3, ge=0.0, le=2.0)
-    device: str = Field(default="cpu")
-    use_gpu: bool = Field(default=False)
-    safe_mode: bool = Field(default=False, description="Use mock LLM for testing")
 
 
 class MemoryConfig(BaseModel):
@@ -36,16 +19,6 @@ class MemoryConfig(BaseModel):
     working_memory_capacity: int = Field(default=20, ge=1)
     episodic_memory_capacity: int = Field(default=60, ge=1)
     pattern_cache_capacity: int = Field(default=15, ge=1)
-
-
-class RetrievalConfig(BaseModel):
-    """Retrieval settings (Top-K configuration)"""
-
-    similarity_threshold: float = Field(default=0.35, ge=0.0, le=1.0)
-    top_k: int = Field(default=15, ge=1)
-    layer1_top_k: int = Field(default=20, ge=1)
-    layer2_top_k: int = Field(default=15, ge=1)
-    layer3_top_k: int = Field(default=12, ge=1)
 
 
 class HybridWeightsConfig(BaseModel):
@@ -67,11 +40,9 @@ class HybridWeightsConfig(BaseModel):
 class GraphConfig(BaseModel):
     """Graph processing & spike detection"""
 
-    spike_ged_threshold: float = Field(
-        default=0.5, ge=-1.0, le=1.0
-    )  # Allow negative for delta values
+    spike_ged_threshold: float = Field(default=0.5, ge=-1.0, le=1.0)
     spike_ig_threshold: float = Field(default=0.2, ge=0.0, le=1.0)
-    similarity_threshold: float = Field(default=0.3, ge=0.0, le=1.0)  # Add this field
+    similarity_threshold: float = Field(default=0.3, ge=0.0, le=1.0)
     use_gnn: bool = Field(default=False)
     gnn_hidden_dim: int = Field(default=64, ge=1)
     ged_algorithm: Literal["simple", "advanced", "networkx", "hybrid"] = Field(
@@ -83,104 +54,76 @@ class GraphConfig(BaseModel):
     hybrid_weights: HybridWeightsConfig = Field(default_factory=HybridWeightsConfig)
 
 
-class ReasoningConfig(BaseModel):
-    """Reasoning layer configuration"""
-
-    similarity_threshold: float = Field(default=0.3, ge=0.0, le=1.0)
-    conflict_threshold: float = Field(default=0.6, ge=0.0, le=1.0)
-    weight_ged: float = Field(default=1.0, ge=0.0)
-    weight_ig: float = Field(default=1.0, ge=0.0)
-    weight_conflict: float = Field(default=0.5, ge=0.0)
-
-    # Episode integration thresholds
-    episode_integration_similarity_threshold: float = Field(
-        default=0.85, ge=0.0, le=1.0
-    )
-    episode_integration_content_threshold: float = Field(default=0.4, ge=0.0, le=1.0)
-    episode_integration_c_threshold: float = Field(default=0.3, ge=0.0, le=1.0)
-
-    # Episode management
-    episode_merge_threshold: float = Field(default=0.8, ge=0.0, le=1.0)
-    episode_split_threshold: float = Field(default=0.3, ge=0.0, le=1.0)
-    episode_prune_threshold: float = Field(default=0.1, ge=0.0, le=1.0)
-
-
-class SpikeConfig(BaseModel):
-    """Eureka spike detection"""
-
-    spike_ged: float = Field(default=0.5, ge=0.0)
-    spike_ig: float = Field(default=0.2, ge=0.0)
-    eta_spike: float = Field(default=0.2, ge=0.0, le=1.0)
-
-
-class UnknownLearnerConfig(BaseModel):
-    """Unknown learning system"""
-
-    initial_confidence: float = Field(default=0.1, ge=0.0, le=1.0)
-    cleanup_threshold: float = Field(default=0.15, ge=0.0, le=1.0)
-    confidence_boost: float = Field(default=0.05, ge=0.0, le=1.0)
-    max_weak_edges: int = Field(default=1000, ge=1)
-    cleanup_interval: int = Field(default=300, ge=1)
-
-
 class PathsConfig(BaseModel):
-    """File paths configuration"""
+    """File system paths"""
 
-    data_dir: Path = Field(default=Path("data/raw"))
-    log_dir: Path = Field(default=Path("data/logs"))
-    index_file: Path = Field(default=Path("data/index.faiss"))
-    graph_file: Path = Field(default=Path("data/graph_pyg.pt"))
+    data_dir: Path = Field(default=Path("data"))
+    raw_dir: Path = Field(default=Path("data/raw"))
+    processed_dir: Path = Field(default=Path("data/processed"))
+    embeddings_dir: Path = Field(default=Path("data/embeddings"))
+    cache_dir: Path = Field(default=Path("data/cache"))
+    models_dir: Path = Field(default=Path("data/models"))
+    logs_dir: Path = Field(default=Path("/Users/miyauchikazuyoshi/.insightspike/logs"))
 
-    @validator("*", pre=True)
-    def convert_to_path(cls, v):
-        if isinstance(v, str):
-            return Path(v)
+    @validator("logs_dir", pre=True)
+    def expand_home_path(cls, v):
+        if isinstance(v, str) and v.startswith("~"):
+            return Path(v).expanduser()
         return v
 
 
 class ProcessingConfig(BaseModel):
-    """Processing settings"""
+    """Processing configuration"""
 
     batch_size: int = Field(default=32, ge=1)
     max_workers: int = Field(default=4, ge=1)
-    timeout_seconds: int = Field(default=300, ge=1)
+    chunk_size: int = Field(default=500, ge=50)
+    overlap: int = Field(default=50, ge=0)
+    min_chunk_size: int = Field(default=100, ge=10)
+
+
+class LLMConfig(BaseModel):
+    """Language Model configuration"""
+
+    provider: Literal["local", "openai", "anthropic", "ollama", "mock"] = Field(
+        default="local", description="LLM provider to use"
+    )
+    model: str = Field(
+        default="distilgpt2", description="Model name (provider-specific)"
+    )
+    max_tokens: int = Field(default=256, ge=1, le=4096)
+    temperature: float = Field(default=0.3, ge=0.0, le=2.0)
+    top_p: float = Field(default=0.9, ge=0.0, le=1.0)
+    timeout: int = Field(default=30, ge=1, description="Request timeout in seconds")
+    api_key: Optional[str] = Field(default=None, exclude=True)
+    api_base: Optional[str] = Field(default=None)
+    organization: Optional[str] = Field(default=None, exclude=True)
+    device: str = Field(default="cpu", description="Device for local models")
+    load_in_8bit: bool = Field(default=False, description="8-bit quantization")
+    system_prompt: Optional[str] = Field(default=None, description="System prompt for the model")
 
 
 class OutputConfig(BaseModel):
     """Output configuration"""
 
-    default_format: Literal["text", "json", "markdown"] = Field(default="text")
-    save_results: bool = Field(default=True)
-    generate_visualizations: bool = Field(default=False)
-    verbose: bool = Field(default=False)
-
-
-class DataStoreConfig(BaseModel):
-    """DataStore configuration"""
-
-    type: str = Field(
-        default="filesystem",
-        description="DataStore type (filesystem, memory, postgresql, etc.)",
+    format: Literal["json", "markdown", "html"] = Field(default="json")
+    include_reasoning: bool = Field(default=True)
+    include_sources: bool = Field(default=True)
+    max_sources: int = Field(
+        default=5, ge=1, description="Maximum number of sources to include"
     )
-    params: Dict[str, Any] = Field(
-        default_factory=dict, description="Parameters for DataStore initialization"
+    max_context_length: int = Field(
+        default=2000, ge=100,
+        description="Maximum number of characters to include in context"
     )
-
-
-# New Pydantic models for cleaner config structure
-class LLMConfig(BaseModel):
-    """LLM configuration"""
-
-    provider: Literal["local", "openai", "anthropic", "mock", "clean"] = Field(
-        default="local"
+    max_documents: int = Field(
+        default=10, ge=1,
+        description="Maximum number of documents to include in context"
     )
-    model: str = Field(default="distilgpt2", description="Model name")
-    temperature: float = Field(default=0.7, ge=0.0, le=2.0)
-    max_tokens: int = Field(default=512, ge=1, le=4096)
-    api_key: Optional[str] = Field(
-        default=None, description="API key for external providers"
+    include_metadata: bool = Field(
+        default=True,
+        description="Include relevance scores and graph analysis"
     )
-    system_prompt: Optional[str] = Field(default=None, description="System prompt")
 
 
 class EmbeddingConfig(BaseModel):
@@ -211,7 +154,7 @@ class LoggingConfig(BaseModel):
 
 
 class InsightSpikeConfig(BaseModel):
-    """Complete InsightSpike configuration - new structure"""
+    """Complete InsightSpike configuration - clean structure without backward compatibility"""
 
     # Top-level settings
     environment: Literal[
@@ -223,6 +166,10 @@ class InsightSpikeConfig(BaseModel):
         "testing",
         "custom",
     ] = Field(default="development")
+    pre_warm_models: bool = Field(
+        default=True,
+        description="Pre-warm LLM models on startup for faster experiment initialization"
+    )
 
     # Component configurations
     llm: LLMConfig = Field(default_factory=LLMConfig)
@@ -231,82 +178,12 @@ class InsightSpikeConfig(BaseModel):
     graph: GraphConfig = Field(default_factory=GraphConfig)
     monitoring: MonitoringConfig = Field(default_factory=MonitoringConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
-
-    # Keep the old fields for backward compatibility
-    core: Optional[CoreConfig] = Field(default=None, exclude=True)
-    retrieval: Optional[RetrievalConfig] = Field(default=None, exclude=True)
-    reasoning: Optional[ReasoningConfig] = Field(default=None, exclude=True)
-    spike: Optional[SpikeConfig] = Field(default=None, exclude=True)
-    unknown_learner: Optional[UnknownLearnerConfig] = Field(default=None, exclude=True)
-    paths: PathsConfig = Field(
-        default_factory=PathsConfig
-    )  # Keep this for backward compatibility
-    processing: Optional[ProcessingConfig] = Field(default=None, exclude=True)
-    output: Optional[OutputConfig] = Field(default=None, exclude=True)
-    datastore: Optional[DataStoreConfig] = Field(default=None, exclude=True)
+    paths: PathsConfig = Field(default_factory=PathsConfig)
+    processing: ProcessingConfig = Field(default_factory=ProcessingConfig)
+    output: OutputConfig = Field(default_factory=OutputConfig)
 
     class Config:
         """Pydantic configuration"""
 
         validate_assignment = True
         extra = "forbid"  # Prevent unknown fields
-
-    def to_legacy_config(self) -> "Config":
-        """Convert to legacy Config format for backward compatibility"""
-        from .legacy_config import Config, EmbeddingConfig
-        from .legacy_config import GraphConfig as LegacyGraphConfig
-        from .legacy_config import LLMConfig
-        from .legacy_config import MemoryConfig as LegacyMemoryConfig
-        from .legacy_config import PathConfig
-        from .legacy_config import ProcessingConfig as LegacyProcessingConfig
-        from .legacy_config import ReasoningConfig as LegacyReasoningConfig
-        from .legacy_config import RetrievalConfig as LegacyRetrievalConfig
-
-        return Config(
-            embedding=EmbeddingConfig(
-                model_name=self.core.model_name,
-                dimension=384,  # Default for MiniLM
-                device=self.core.device,
-            ),
-            llm=LLMConfig(
-                provider=self.core.llm_provider,
-                model_name=self.core.llm_model,
-                max_tokens=self.core.max_tokens,
-                temperature=self.core.temperature,
-                device=self.core.device,
-            ),
-            memory=LegacyMemoryConfig(
-                max_episodes=self.memory.episodic_memory_capacity,
-                merge_threshold=self.reasoning.episode_merge_threshold,
-                split_threshold=self.reasoning.episode_split_threshold,
-                prune_threshold=self.reasoning.episode_prune_threshold,
-            ),
-            retrieval=LegacyRetrievalConfig(
-                top_k=self.retrieval.top_k,
-                similarity_threshold=self.retrieval.similarity_threshold,
-            ),
-            graph=LegacyGraphConfig(
-                spike_threshold_ged=self.graph.spike_ged_threshold,
-                spike_threshold_ig=self.graph.spike_ig_threshold,
-                use_gpu=self.core.use_gpu,
-            ),
-            reasoning=LegacyReasoningConfig(
-                max_reasoning_steps=5,
-                convergence_threshold=0.9,
-                weight_ged=self.reasoning.weight_ged,
-                weight_ig=self.reasoning.weight_ig,
-            ),
-            paths=PathConfig(
-                root_dir=Path("."),
-                data_dir=self.paths.data_dir,
-                log_dir=self.paths.log_dir,
-                cache_dir=Path("data/cache"),
-            ),
-            processing=LegacyProcessingConfig(
-                batch_size=self.processing.batch_size,
-                num_workers=self.processing.max_workers,
-                use_multiprocessing=False,
-                timeout=self.processing.timeout_seconds,
-            ),
-            safe_mode=self.core.safe_mode,
-        )

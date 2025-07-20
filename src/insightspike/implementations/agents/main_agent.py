@@ -130,22 +130,19 @@ class MainAgent:
         try:
             logger.info("Initializing MainAgent components...")
 
-            # Initialize LLM with safe fallback
-            try:
-                if not self.l4_llm.initialize():
-                    logger.error("Failed to initialize LLM provider")
-                    return False
-            except Exception as e:
-                logger.warning(
-                    f"LLM initialization failed ({e}), switching to safe mode"
-                )
-                # Try to reinitialize with clean provider (no data leaks)
-                from ..layers.clean_llm_provider import CleanLLMProvider
-
-                self.l4_llm = CleanLLMProvider(self.config)
-                if not self.l4_llm.initialize():
-                    logger.error("Even clean LLM provider failed to initialize")
-                    return False
+            # Check if LLM is already initialized (from cache)
+            if hasattr(self.l4_llm, 'initialized') and self.l4_llm.initialized:
+                logger.info("LLM provider already initialized (cached)")
+            else:
+                # Initialize LLM with safe fallback
+                try:
+                    if not self.l4_llm.initialize():
+                        logger.error("Failed to initialize LLM provider")
+                        return False
+                except Exception as e:
+                    logger.error(f"LLM initialization failed: {e}")
+                    # Re-raise the error to see what's actually happening
+                    raise
 
             # Try to load existing memory
             if not self.l2_memory.load():
@@ -466,13 +463,13 @@ class MainAgent:
 
             # Get threshold values from config
             merge_threshold = getattr(
-                self.config.reasoning, "episode_merge_threshold", 0.8
+                self.config.graph, "episode_merge_threshold", 0.8
             )
             split_threshold = getattr(
-                self.config.reasoning, "episode_split_threshold", 0.3
+                self.config.graph, "episode_split_threshold", 0.3
             )
             prune_threshold = getattr(
-                self.config.reasoning, "episode_prune_threshold", 0.1
+                self.config.graph, "episode_prune_threshold", 0.1
             )
 
             # High similarity + low conflict might trigger merge
