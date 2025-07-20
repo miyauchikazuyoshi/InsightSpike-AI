@@ -124,8 +124,9 @@ Mathematical modeling of insight generation using Graph Edit Distance + Informat
 
 InsightSpike uses **geDIG** (Graph Edit Distance + Information Gain) to mathematically model insight generation:
 
-- **ΔGED**: Measures how knowledge structure simplifies during understanding
-- **ΔIG**: Quantifies information entropy changes as concepts connect
+- **ΔGED**: Measures how knowledge structure simplifies during understanding (negative values = better)
+- **ΔIG**: Quantifies information entropy changes as concepts connect (positive values = learning)
+- **Reward Formula**: R = w₁×ΔGED + w₂×ΔIG (simplified from previous 3-term formula)
 - **Spike Detection**: Triggers when both metrics indicate significant restructuring
 
 ### Multi-Phase Knowledge Integration

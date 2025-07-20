@@ -91,10 +91,11 @@ class ConfigLoader:
                 path = Path(env_path)
             else:
                 # Check default locations
+                # Prioritize YAML over JSON for better experiment control
                 for default_path in [
                     "config.yaml",
-                    "config.json",
                     ".insightspike.yaml",
+                    "config.json",  # JSON last to avoid accidental overrides
                 ]:
                     if Path(default_path).exists():
                         path = Path(default_path)

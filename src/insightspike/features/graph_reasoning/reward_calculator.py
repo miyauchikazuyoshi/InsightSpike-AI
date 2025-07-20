@@ -24,20 +24,18 @@ class RewardCalculator:
         # Extract weights from config with defaults from constants
         if hasattr(config, 'reasoning'):
             self.weights = {
-                "ged": getattr(config.reasoning, "weight_ged", Defaults.REWARD_WEIGHT_GED),
-                "ig": getattr(config.reasoning, "weight_ig", Defaults.REWARD_WEIGHT_IG),
-                "conflict": getattr(config.reasoning, "weight_conflict", Defaults.REWARD_WEIGHT_CONFLICT),
+                "ged": getattr(config.graph, "weight_ged", Defaults.REWARD_WEIGHT_GED),
+                "ig": getattr(config.graph, "weight_ig", Defaults.REWARD_WEIGHT_IG),
             }
         else:
             self.weights = {
                 "ged": Defaults.REWARD_WEIGHT_GED,
                 "ig": Defaults.REWARD_WEIGHT_IG,
-                "conflict": Defaults.REWARD_WEIGHT_CONFLICT,
             }
         
         # Optimal graph size for structure reward
         self.optimal_graph_size = (
-            getattr(config.reasoning, "optimal_graph_size", Defaults.OPTIMAL_GRAPH_SIZE) 
+            getattr(config.graph, "optimal_graph_size", Defaults.OPTIMAL_GRAPH_SIZE) 
             if hasattr(config, 'reasoning') 
             else Defaults.OPTIMAL_GRAPH_SIZE
         )
@@ -48,11 +46,10 @@ class RewardCalculator:
         conflicts: Dict[str, float]
     ) -> Dict[str, float]:
         """Calculate multi-component reward signal."""
-        # Base reward calculation: R = w1*ΔGED + w2*ΔIG - w3*conflict
+        # Base reward calculation: R = w1*ΔGED + w2*ΔIG
         base_reward = (
             self.weights["ged"] * metrics.get("delta_ged", 0)
             + self.weights["ig"] * metrics.get("delta_ig", 0)
-            - self.weights["conflict"] * conflicts.get("total", 0)
         )
         
         # Additional reward components
@@ -81,9 +78,7 @@ class RewardCalculator:
         metrics: Dict[str, float],
         conflicts: Dict[str, float]
     ) -> float:
-        """Reward for novel insights while penalizing excessive conflict."""
+        """Reward for novel insights."""
         novelty = metrics.get("delta_ig", 0)
-        conflict = conflicts.get("total", 0)
-        
-        # Balance novelty with stability
-        return max(0.0, novelty - 0.5 * conflict)
+        # Conflicts parameter kept for backward compatibility but ignored
+        return max(0.0, novelty)

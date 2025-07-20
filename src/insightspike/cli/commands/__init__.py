@@ -1,7 +1,7 @@
 """
-CLI command modules.
+CLI Commands for InsightSpike
 """
 
-from .deps import app as deps_app
+from .discover import discover_command
 
-__all__ = ["deps_app"]
+__all__ = ["discover_command"]

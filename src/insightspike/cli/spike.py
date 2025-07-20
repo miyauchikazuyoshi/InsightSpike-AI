@@ -47,6 +47,11 @@ app = typer.Typer(
 console = Console()
 logger = get_logger("cli")
 
+# Import command modules
+from .commands.discover import discover_command
+from .commands.bridge import bridge_command
+from .commands.graph import analyze_command, visualize_command
+
 
 # Dependency Factory for managing agent creation
 class DependencyFactory:
@@ -266,6 +271,8 @@ def embed(
                     console.print(f"[yellow]Skipped {file_path}: {e}[/yellow]")
                     progress.update(task, advance=1)
 
+        # Save the state after adding all documents
+        agent.save_state()
         console.print("[green]✅ Documents added successfully[/green]")
 
     except Exception as e:
@@ -728,6 +735,20 @@ def version():
     console.print("Brain-inspired AI for insight detection")
     console.print("\n[dim]GitHub: https://github.com/miyauchi/InsightSpike-AI[/dim]")
 
+
+# Register the discover command
+app.command("discover")(discover_command)
+
+# Register the bridge command
+app.command("bridge")(bridge_command)
+
+# Create graph subcommand group
+graph_app = typer.Typer(help="Knowledge graph analytics and visualization")
+app.add_typer(graph_app, name="graph")
+
+# Register graph subcommands
+graph_app.command("analyze")(analyze_command)
+graph_app.command("visualize")(visualize_command)
 
 # Aliases for common commands
 app.command("chat")(interactive)  # spike chat → interactive

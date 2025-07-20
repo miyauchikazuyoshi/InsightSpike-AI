@@ -1,281 +1,218 @@
 # InsightSpike CLI Commands
 
-## 🚀 Overview
+This document describes the unique CLI commands that showcase InsightSpike's core capabilities.
 
-InsightSpike provides two CLI interfaces:
-- **`spike`** - Modern, user-friendly CLI (recommended)
-- **`insightspike`** - Legacy CLI for backward compatibility
+## Table of Contents
 
-## 📋 Command Reference
-
-### Core Commands
-
-#### 1. **query** (`spike query` / `spike q`)
-Ask questions and get insights from the knowledge base.
-
-```bash
-# Basic usage
-spike query "What is machine learning?"
-
-# With options
-spike query "How does Python work?" --verbose
-spike query "Explain neural networks" --preset experiment
-```
-
-**Options:**
-- `--preset`: Config preset (development/experiment/production)
-- `--verbose/-v`: Show detailed output including quality scores
-
-**Aliases:** `q`, `ask`
+1. [spike discover - Insight Discovery](#spike-discover---insight-discovery)
+2. [spike bridge - Concept Bridging](#spike-bridge---concept-bridging) (Coming Soon)
+3. [spike graph - Knowledge Graph Analytics](#spike-graph---knowledge-graph-analytics) (Coming Soon)
 
 ---
 
-#### 2. **embed** (`spike embed` / `spike e`)
-Add documents to the knowledge base for learning.
+# spike discover - Insight Discovery
+
+## Overview
+
+The `spike discover` command analyzes your knowledge base to find hidden insights, unexpected connections, and emergent patterns using InsightSpike's unique geDIG (Graph Edit Distance + Information Gain) algorithm.
+
+## Features
+
+- 🔍 **Automatic Insight Detection**: Finds non-obvious connections between concepts
+- ⚡ **Spike Detection**: Identifies high-value insights based on graph metrics
+- 🌉 **Bridge Concept Discovery**: Finds concepts that connect different domains
+- 📊 **Pattern Recognition**: Detects emergent patterns in your knowledge base
+
+## Usage
 
 ```bash
-# Add single file
-spike embed document.txt
+# Basic usage - analyze current knowledge base
+spike discover
 
-# Add directory of files
-spike embed ./knowledge/
+# Analyze a specific corpus
+spike discover --corpus papers/
 
-# With specific preset
-spike embed data.md --preset production
+# Set minimum spike threshold
+spike discover --min-spike 0.8
+
+# Export results to JSON
+spike discover --export insights.json
+
+# Filter by insight categories
+spike discover --categories "causal,structural"
 ```
 
-**Options:**
-- `--preset`: Config preset to use
+## Options
 
-**Aliases:** `e`, `learn`, `l`
+- `--corpus, -c PATH`: Path to document corpus to analyze
+- `--min-spike, -s FLOAT`: Minimum spike threshold (0-1, default: 0.7)
+- `--max-insights, -m INTEGER`: Maximum insights to display (default: 20)
+- `--categories TEXT`: Filter by categories (comma-separated)
+- `--export, -e PATH`: Export insights to JSON file
+- `--verbose, -v`: Show detailed information
+
+## Output Format
+
+The command displays insights in a visually rich format:
+
+```
+⚡ Discovered 4 insights
+
+╭─ 💡 Insight #1 [Spike: 0.40] ────────────────────────────────────────────────╮
+│ Description: Recurring concept 'attention' found across 2 knowledge items    │
+│ Confidence: 32%                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+╭─ 💡 Insight #2 [Spike: 0.40] ────────────────────────────────────────────────╮
+│ Description: Connection discovered between concepts: networks, neural        │
+│ Confidence: 28%                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+🌉 Bridge Concepts:
+┏━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
+┃ Concept   ┃ Frequency ┃ Bridge Score ┃
+┡━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━┩
+│ neural    │         2 │         0.40 │
+│ networks  │         2 │         0.40 │
+│ attention │         2 │         0.40 │
+└───────────┴───────────┴──────────────┘
+```
+
+## Insight Types
+
+1. **reasoning_spike**: High-quality reasoning chains that reveal insights
+2. **recurring_concept**: Concepts that appear frequently across multiple documents
+3. **concept_bridge**: Connections discovered between related concepts
+4. **structural_pattern**: Patterns in the knowledge graph structure (planned)
+5. **causal**: Cause-and-effect relationships (planned)
+6. **analogical**: Similarities between different domains (planned)
+
+## Examples
+
+### Discovering Research Insights
+
+```bash
+# Load research papers and find insights
+spike embed research-papers/
+spike discover --corpus research-papers/ --min-spike 0.8
+
+# Output:
+# ⚡ Discovered connection between "quantum entanglement" and "neural synchronization"
+# Bridge concepts: information transfer, non-locality, coherence
+```
+
+### Analyzing Technical Documentation
+
+```bash
+# Find patterns in your codebase documentation
+spike discover --corpus docs/ --categories "structural" --export code-insights.json
+```
+
+### Cross-Domain Discovery
+
+```bash
+# Find connections between different fields
+spike embed biology-papers/
+spike embed physics-papers/
+spike discover --min-spike 0.7 --verbose
+
+# Might discover: "Protein folding exhibits phase transition behavior similar to magnetic materials"
+```
+
+## How It Works
+
+1. **Graph Construction**: Builds a knowledge graph from your documents
+2. **Pattern Analysis**: Analyzes graph structure for unusual patterns
+3. **Spike Detection**: Calculates geDIG metrics to identify insight spikes
+4. **Bridge Finding**: Identifies concepts that connect disparate areas
+5. **Ranking**: Sorts insights by spike value and confidence
+
+## Tips
+
+- **Lower thresholds** (0.5-0.7) for exploratory discovery
+- **Higher thresholds** (0.8-0.95) for high-confidence insights only
+- **Use categories** to focus on specific types of insights
+- **Export results** for further analysis or sharing
+
+## Integration with Other Commands
+
+```bash
+# Discover insights, then explore specific connections
+spike discover --export insights.json
+spike bridge "concept1" "concept2"  # Explore a discovered connection
+
+# Visualize the insight network
+spike graph visualize --insights-only
+```
+
+## Understanding Spike Values
+
+- **0.9-1.0**: 🔥 Exceptional insights with strong evidence
+- **0.8-0.9**: ⚡ High-value insights worth investigating
+- **0.7-0.8**: 💡 Interesting patterns that may lead to insights
+- **0.5-0.7**: 🔍 Potential connections requiring more exploration
+
+## Troubleshooting
+
+If no insights are found:
+1. Add more documents to your knowledge base
+2. Lower the minimum spike threshold
+3. Ensure documents contain related concepts
+4. Try without category filters
+
+## Future Enhancements
+
+- Real-time insight monitoring
+- Collaborative insight validation
+- Integration with external knowledge bases
+- Machine learning-based insight prediction
 
 ---
 
-#### 3. **interactive** (`spike interactive` / `spike chat`)
-Enter interactive chat mode for continuous conversation.
+# spike bridge - Concept Bridging (Coming Soon)
+
+## Overview
+
+The `spike bridge` command finds conceptual paths between seemingly unrelated ideas, revealing hidden connections through intermediate concepts.
+
+## Planned Features
+
+- Semantic pathfinding between concepts
+- Multiple path discovery
+- Bridge concept identification
+- Path confidence scoring
+
+## Usage (Planned)
 
 ```bash
-spike interactive
-# or
-spike chat
-```
+# Find bridges between concepts
+spike bridge "machine learning" "biological evolution"
 
-**Interactive Commands:**
-- Type any question to query
-- `stats` - Show current statistics
-- `clear` - Clear conversation history
-- `help` - Show available commands
-- `exit/quit/q` - Exit interactive mode
-
----
-
-### Analysis Commands
-
-#### 4. **insights** (`spike insights`)
-Display discovered insights and statistics.
-
-```bash
-# Show recent insights
-spike insights
-
-# Show more insights
-spike insights --limit 10
-```
-
-**Options:**
-- `--limit`: Number of insights to display (default: 5)
-
----
-
-#### 5. **insights-search** (`spike insights-search`)
-Search for insights related to specific concepts.
-
-```bash
-spike insights-search "neural networks"
-spike insights-search "quantum" --limit 20
-```
-
-**Options:**
-- `--limit`: Maximum results to show (default: 10)
-
----
-
-#### 6. **stats** (`spike stats`)
-Show agent statistics and performance metrics.
-
-```bash
-spike stats
-```
-
-**Displays:**
-- Initialization status
-- Total reasoning cycles
-- Average quality scores
-- Memory statistics
-
----
-
-### Experiment & Demo Commands
-
-#### 7. **experiment** (`spike experiment`)
-Run predefined experiments to test capabilities.
-
-```bash
-# Simple Q&A experiment
-spike experiment --name simple
-
-# Insight detection experiment
-spike experiment --name insight --episodes 15
-
-# Math reasoning experiment
-spike experiment --name math
-```
-
-**Options:**
-- `--name`: Experiment type (simple/insight/math)
-- `--episodes`: Number of episodes to run (default: 10)
-
----
-
-#### 8. **demo** (`spike demo`)
-Run an interactive demo showcasing InsightSpike's capabilities.
-
-```bash
-spike demo
-```
-
-Demonstrates:
-- Knowledge storage
-- Retrieval accuracy
-- Insight detection
-- Complex reasoning
-
----
-
-### Configuration Commands
-
-#### 9. **config** (`spike config`)
-Manage configuration settings.
-
-```bash
-# Show current configuration
-spike config show
-
-# Set a configuration value
-spike config set retrieval.top_k 20
-spike config set llm.temperature 0.5
-
-# Save configuration
-spike config save my_config.json
-
-# Load configuration
-spike config load my_config.json
-
-# Apply preset
-spike config preset experiment
-```
-
-**Actions:**
-- `show` - Display current configuration
-- `set <key> <value>` - Set configuration value
-- `save [path]` - Save to file
-- `load <path>` - Load from file
-- `preset <name>` - Apply preset (development/experiment/production)
-
----
-
-### Utility Commands
-
-#### 10. **version** (`spike version`)
-Display version information.
-
-```bash
-spike version
+# Multi-hop bridging
+spike bridge "quantum computing" "consciousness" --max-hops 4
 ```
 
 ---
 
-## 🎯 Common Workflows
+# spike graph - Knowledge Graph Analytics (Coming Soon)
 
-### 1. Basic Knowledge Q&A
+## Overview
+
+The `spike graph` command provides analytics and visualization of your knowledge structure.
+
+## Planned Features
+
+- Graph metrics calculation
+- Centrality analysis
+- Cluster detection
+- Interactive visualization export
+
+## Usage (Planned)
+
 ```bash
-# Add knowledge
-spike embed ./documents/
+# Analyze graph structure
+spike graph analyze --metrics all
 
-# Ask questions
-spike query "What did I just add?"
-spike query "Explain the main concepts" --verbose
+# Visualize knowledge graph
+spike graph visualize --output graph.html
 ```
-
-### 2. Insight Discovery
-```bash
-# Add diverse knowledge
-spike embed research_papers/
-spike embed lecture_notes/
-
-# Discover insights
-spike query "How are these concepts related?"
-spike insights
-spike insights-search "quantum computing"
-```
-
-### 3. Interactive Learning Session
-```bash
-# Start interactive mode
-spike chat
-
-# In chat:
-> What is machine learning?
-> How does it relate to neuroscience?
-> stats
-> clear
-> exit
-```
-
-### 4. Experimentation
-```bash
-# Test basic functionality
-spike experiment --name simple
-
-# Test insight detection
-spike experiment --name insight --episodes 20
-
-# Check statistics
-spike stats
-```
-
-## 🔧 Configuration Presets
-
-### development (default)
-- Fast processing
-- Lower quality thresholds
-- Local models only
-- Verbose logging
-
-### experiment
-- Balanced settings
-- Medium thresholds
-- Better model selection
-- Suitable for testing
-
-### production
-- High quality thresholds
-- Optimized for accuracy
-- Full model capabilities
-- Minimal logging
-
-## 💡 Tips
-
-1. **Use aliases for speed**: `spike q "question"` instead of `spike query`
-2. **Interactive mode** is great for exploration and testing
-3. **Verbose flag** helps understand reasoning quality
-4. **Experiments** are useful for benchmarking performance
-5. **Save configurations** for reproducible setups
-
-## 🆘 Troubleshooting
-
-If you encounter issues:
-1. Check initialization: `spike stats`
-2. Verify configuration: `spike config show`
-3. Try different preset: `spike query "test" --preset experiment`
-4. Clear state and retry: Start fresh with new agent instance

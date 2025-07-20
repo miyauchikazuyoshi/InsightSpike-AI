@@ -1,77 +1,38 @@
-# InsightSpike-AI Project Configuration File
-# ==========================================
-# 
-# This configuration file is placed in the project root directory.
-# It will be automatically loaded if present, or you can specify:
-# - export INSIGHTSPIKE_CONFIG_PATH="./config.yaml"
-# - config = load_config(config_path="./config.yaml")
-# 
-# This configuration is merged with the selected preset.
-# Settings here override preset values.
+# InsightSpike Configuration
+# This file sets the default configuration for the CLI
 
-# Core Language Model Settings
-core:
-  model_name: "paraphrase-MiniLM-L6-v2"  # Embedding model
-  llm_provider: "clean"                   # LLM provider: local, openai, anthropic, clean, mock
-  llm_model: "clean"
-  max_tokens: 256
-  temperature: 0.3
-  device: "cpu"
-
-# Memory System Configuration
-memory:
-  max_retrieved_docs: 15
-  episodic_memory_capacity: 60
-
-# Retrieval Settings
-retrieval:
-  similarity_threshold: 0.35
-  top_k: 15
-
-# Graph Processing & Spike Detection
-graph:
-  spike_ged_threshold: 0.5    # Graph Edit Distance threshold
-  spike_ig_threshold: 0.2     # Information Gain threshold
-  
-  # GED/IG Algorithm Selection
-  ged_algorithm: "advanced"   # Options: simple, advanced, networkx
-  ig_algorithm: "advanced"    # Options: simple, advanced, entropy
-  
-  # Graph Management
-  max_graph_size: 10000
-  use_llm_cache: true
-  rebuild_on_startup: false
-  prune_threshold: 0.1
-  
-  # Episode Integration
-  integration_similarity_threshold: 0.85
-  content_overlap_threshold: 0.4
-  
-  # Dynamic Importance Weights
-  graph_importance_weight: 0.4    # Graph degree importance
-  access_importance_weight: 0.3   # Access frequency importance
-  time_importance_weight: 0.3     # Time decay importance
-
-# Embedding Configuration
-embedding:
-  model_name: "paraphrase-MiniLM-L6-v2"
-  dimension: 384
-  normalize: true
-
-# LLM Configuration
+# LLM Provider Settings
 llm:
-  provider: "clean"
-  model: "clean"
-  temperature: 0.3
-  max_tokens: 256
+  # Use "clean" provider for fast initialization (no external dependencies)
+  # Options: openai, anthropic, ollama, local, clean, mock
+  provider: clean
+  
+  # Model name (used only for local provider)
+  model: distilgpt2
+  
+  # For experiments requiring actual LLM responses, uncomment:
+  # provider: local
+  # model: distilgpt2
 
-# Environment Variables Override Example:
-# ======================================
-# You can override any setting using environment variables:
-# 
-# export INSIGHTSPIKE_CORE_LLM_PROVIDER=openai
-# export INSIGHTSPIKE_GRAPH_GED_ALGORITHM=networkx
-# export INSIGHTSPIKE_GRAPH_SPIKE_GED_THRESHOLD=0.7
-#
-# The pattern is: INSIGHTSPIKE_<SECTION>_<KEY>=<value>
-# For nested values, use underscores: INSIGHTSPIKE_GRAPH_SPIKE_GED_THRESHOLD
+# Memory Settings
+memory:
+  # Batch size for memory operations
+  batch_size: 32
+  max_retrieved_docs: 10
+  # Use simple flat index for small datasets
+  index_type: flat
+
+# Reasoning Settings
+reasoning:
+  # Maximum cycles for convergence
+  max_cycles: 10
+  
+  # Quality thresholds
+  convergence_threshold: 0.8
+  spike_threshold: 0.7
+
+# Advanced Settings
+# Note: These are for future use
+# performance:
+#   enable_cache: true
+#   parallel_workers: 4

@@ -53,9 +53,9 @@ class Defaults:
     GRAPH_SIMILARITY_THRESHOLD = 0.3
 
     # Reward calculation weights
-    REWARD_WEIGHT_GED = 0.3
+    REWARD_WEIGHT_GED = 0.5
     REWARD_WEIGHT_IG = 0.5
-    REWARD_WEIGHT_CONFLICT = 0.2
+    REWARD_WEIGHT_CONFLICT = 0.0  # Deprecated, conflicts are no longer used in reward calculation
 
     # Spike detection thresholds
     SPIKE_GED_THRESHOLD = -0.5

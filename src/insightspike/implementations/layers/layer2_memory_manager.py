@@ -185,11 +185,13 @@ class L2MemoryManager:
         """Setup FAISS index based on configuration"""
         dim = self.config.embedding_dim
         
-        if not self.config.use_scalable_indexing or self.config.faiss_index_type == "Flat":
-            self.faiss_index = faiss.IndexFlatL2(dim)
-            logger.info("Using Flat FAISS index")
-            
-        elif self.config.faiss_index_type == "IVF":
+        # Always use Flat index initially, will be upgraded if needed
+        self.faiss_index = faiss.IndexFlatL2(dim)
+        logger.info("Using Flat FAISS index")
+        self._index_type = "Flat"
+        
+        # We'll upgrade to IVF when we have enough data
+        if False and self.config.faiss_index_type == "IVF":
             quantizer = faiss.IndexFlatL2(dim)
             self.faiss_index = faiss.IndexIVFFlat(quantizer, dim, self.config.ivf_nlist)
             logger.info(f"Using IVF FAISS index with {self.config.ivf_nlist} cells")

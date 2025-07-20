@@ -3,7 +3,7 @@ import networkx as nx
 import numpy as np
 
 try:
-    from ..algorithms.graph_edit_distance import GraphEditDistance
+    from ..algorithms.graph_edit_distance import GraphEditDistance, get_global_ged_calculator
     from ..algorithms.information_gain import InformationGain
 
     _ALGORITHMS_AVAILABLE = True
@@ -28,16 +28,18 @@ def delta_ged(g_old: nx.Graph, g_new: nx.Graph) -> float:
 
     This is a wrapper around the full GED implementation in algorithms.
     For advanced features, use GraphEditDistance directly.
+    
+    NOTE: This now uses the proper ΔGED calculation that maintains
+    a reference graph for correct insight detection.
     """
     if not _ALGORITHMS_AVAILABLE:
         # Fallback to simple NetworkX implementation
         ged = nx.graph_edit_distance(g_old, g_new, timeout=1.0)
         return float(ged) if ged is not None else 0.0
 
-    # Use the comprehensive implementation
-    ged_calc = GraphEditDistance()
-    result = ged_calc.calculate(g_old, g_new)
-    return result.ged_value
+    # Use the global GED calculator with state tracking
+    calculator = get_global_ged_calculator()
+    return calculator.compute_delta_ged(g_old, g_new)
 
 
 def delta_ig(vecs_old: np.ndarray, vecs_new: np.ndarray, k: int = 8) -> float:
@@ -45,19 +47,17 @@ def delta_ig(vecs_old: np.ndarray, vecs_new: np.ndarray, k: int = 8) -> float:
 
     This is a wrapper that maintains backward compatibility.
     For advanced features and different entropy methods, use InformationGain directly.
+    
+    Returns positive value when entropy decreases (information gain).
     """
     if _ALGORITHMS_AVAILABLE:
-        # Use the comprehensive implementation
-        ig_calc = InformationGain()
-
         if vecs_old is None or vecs_new is None:
             return 0.0
 
-        # Use clustering-based method (similar to original silhouette approach)
-        score_old = ig_calc.calculate_from_vectors(vecs_old, method="clustering", k=k)
-        score_new = ig_calc.calculate_from_vectors(vecs_new, method="clustering", k=k)
-
-        return score_new - score_old
+        # Use the fixed InformationGain implementation
+        ig_calc = InformationGain()
+        result = ig_calc.calculate(vecs_old, vecs_new)
+        return result.ig_value
 
     # Fallback implementation using sklearn directly
     if not _SKLEARN_AVAILABLE:

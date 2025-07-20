@@ -95,11 +95,11 @@ class ReasoningConfig:
     similarity_threshold: float = 0.2
     spike_ged_threshold: float = 0.5
     spike_ig_threshold: float = 0.2
-    conflict_threshold: float = 0.6
+    conflict_threshold: float = 0.6  # Kept for backward compatibility
     use_gnn: bool = False
     weight_ged: float = 1.0
     weight_ig: float = 1.0
-    weight_conflict: float = 0.5
+    weight_conflict: float = 0.0  # Deprecated, defaults to 0
     gnn_hidden_dim: int = 64
     graph_file: str = "data/graph_pyg.pt"
 

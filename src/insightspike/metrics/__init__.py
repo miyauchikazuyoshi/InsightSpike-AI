@@ -28,9 +28,8 @@ logger = logging.getLogger(__name__)
 
 # Default weights for fusion reward calculation
 DEFAULT_WEIGHTS = {
-    "ged": 0.4,  # Structure efficiency weight
-    "ig": 0.3,  # Information gain weight
-    "conflict": 0.3,  # Conflict penalty weight
+    "ged": 0.5,  # Structure efficiency weight
+    "ig": 0.5,  # Information gain weight
 }
 
 
@@ -102,34 +101,32 @@ def compute_delta_ig(state_before: Any, state_after: Any, **kwargs) -> float:
 def compute_fusion_reward(
     delta_ged: float,
     delta_ig: float,
-    conflict_score: float = 0.0,
+    conflict_score: float = 0.0,  # Kept for backward compatibility, but ignored
     weights: Optional[Dict[str, float]] = None,
 ) -> float:
     """
     Public API: Calculate combined insight reward using fusion scheme.
 
     Mathematical Definition:
-        R(w₁,w₂,w₃) = w₁ × ΔGED + w₂ × ΔIG - w₃ × ConflictScore
+        R = w₁ × ΔGED + w₂ × ΔIG
 
-    This fusion scheme combines three key components:
+    This fusion scheme combines two key components:
     1. ΔGED (Structure Efficiency): Measures how much the knowledge graph structure
        has been simplified or optimized. Negative values are rewarded.
     2. ΔIG (Information Gain): Measures learning progress through entropy changes.
        Positive values indicate knowledge acquisition.
-    3. ConflictScore (Consistency Penalty): Penalizes contradictory or inconsistent
-       insights that may lead to cognitive dissonance.
 
     Weight Configuration:
-        - Default: w₁=0.4, w₂=0.3, w₃=0.3 (balanced approach)
-        - Research: w₁=0.5, w₂=0.4, w₃=0.1 (high precision)
-        - Production: w₁=0.33, w₂=0.33, w₃=0.34 (equal balance)
-        - Education: w₁=0.2, w₂=0.6, w₃=0.2 (learning-focused)
+        - Default: w₁=0.5, w₂=0.5 (balanced approach)
+        - Research: w₁=0.6, w₂=0.4 (structure-focused)
+        - Production: w₁=0.5, w₂=0.5 (equal balance)
+        - Education: w₁=0.3, w₂=0.7 (learning-focused)
 
     Args:
         delta_ged: Graph edit distance change
         delta_ig: Information gain change
-        conflict_score: Conflict penalty (0.0 to 1.0)
-        weights: Custom weights {'ged': w1, 'ig': w2, 'conflict': w3}
+        conflict_score: Deprecated parameter, kept for backward compatibility
+        weights: Custom weights {'ged': w1, 'ig': w2}
 
     Returns:
         float: Combined insight reward
@@ -138,8 +135,7 @@ def compute_fusion_reward(
         >>> reward = compute_fusion_reward(
         ...     delta_ged=-0.6,  # Structure simplified
         ...     delta_ig=0.4,    # Information gained
-        ...     conflict_score=0.1,
-        ...     weights={'ged': 0.5, 'ig': 0.4, 'conflict': 0.1}
+        ...     weights={'ged': 0.6, 'ig': 0.4}
         ... )
         >>> print(f"Insight reward: {reward:.3f}")
     """
@@ -147,17 +143,15 @@ def compute_fusion_reward(
         weights = DEFAULT_WEIGHTS
 
     # Fusion reward calculation with detailed component tracking
-    ged_component = weights.get("ged", 0.4) * delta_ged
-    ig_component = weights.get("ig", 0.3) * delta_ig
-    conflict_component = weights.get("conflict", 0.3) * conflict_score
+    ged_component = weights.get("ged", DEFAULT_WEIGHTS["ged"]) * delta_ged
+    ig_component = weights.get("ig", DEFAULT_WEIGHTS["ig"]) * delta_ig
 
-    reward = ged_component + ig_component - conflict_component
+    reward = ged_component + ig_component
 
     # Log detailed breakdown for debugging
     logger.debug(
         f"Fusion reward breakdown: "
-        f"GED({ged_component:.3f}) + IG({ig_component:.3f}) - "
-        f"Conflict({conflict_component:.3f}) = {reward:.3f}"
+        f"GED({ged_component:.3f}) + IG({ig_component:.3f}) = {reward:.3f}"
     )
 
     return reward
@@ -230,7 +224,7 @@ def analyze_insight(
 
 # Configuration utilities
 def configure_default_weights(
-    ged_weight: float = 0.4, ig_weight: float = 0.3, conflict_weight: float = 0.3
+    ged_weight: float = 0.5, ig_weight: float = 0.5, conflict_weight: float = 0.0
 ):
     """
     Configure default weights for fusion reward calculation.
@@ -238,21 +232,21 @@ def configure_default_weights(
     Args:
         ged_weight: Weight for ΔGED term (structure efficiency)
         ig_weight: Weight for ΔIG term (information gain)
-        conflict_weight: Weight for conflict penalty term
+        conflict_weight: Deprecated parameter, kept for backward compatibility
 
     Example:
-        >>> # Research-focused configuration (high precision)
-        >>> configure_default_weights(ged_weight=0.5, ig_weight=0.4, conflict_weight=0.1)
+        >>> # Research-focused configuration (structure-focused)
+        >>> configure_default_weights(ged_weight=0.6, ig_weight=0.4)
 
         >>> # Production-focused configuration (balanced)
-        >>> configure_default_weights(ged_weight=0.33, ig_weight=0.33, conflict_weight=0.34)
+        >>> configure_default_weights(ged_weight=0.5, ig_weight=0.5)
     """
     global DEFAULT_WEIGHTS
-    total = ged_weight + ig_weight + conflict_weight
+    total = ged_weight + ig_weight
     if abs(total - 1.0) > 0.01:
         logger.warning(f"Weights sum to {total:.3f}, not 1.0. Consider normalizing.")
 
-    DEFAULT_WEIGHTS = {"ged": ged_weight, "ig": ig_weight, "conflict": conflict_weight}
+    DEFAULT_WEIGHTS = {"ged": ged_weight, "ig": ig_weight}
 
 
 def get_preset_configurations() -> Dict[str, Dict]:
@@ -281,7 +275,7 @@ def get_preset_configurations() -> Dict[str, Dict]:
     """
     return {
         "research_high_precision": {
-            "weights": {"ged": 0.5, "ig": 0.4, "conflict": 0.1},
+            "weights": {"ged": 0.6, "ig": 0.4},
             "thresholds": {"ged_threshold": -0.3, "ig_threshold": 0.3},
             "algorithm_params": {
                 "ged_optimization": "precise",
@@ -293,7 +287,7 @@ def get_preset_configurations() -> Dict[str, Dict]:
             "performance": {"accuracy": "very_high", "speed": "slow"},
         },
         "production_balanced": {
-            "weights": {"ged": 0.33, "ig": 0.33, "conflict": 0.34},
+            "weights": {"ged": 0.5, "ig": 0.5},
             "thresholds": {"ged_threshold": -0.5, "ig_threshold": 0.2},
             "algorithm_params": {
                 "ged_optimization": "standard",
@@ -305,7 +299,7 @@ def get_preset_configurations() -> Dict[str, Dict]:
             "performance": {"accuracy": "high", "speed": "medium"},
         },
         "education_focused": {
-            "weights": {"ged": 0.2, "ig": 0.6, "conflict": 0.2},
+            "weights": {"ged": 0.3, "ig": 0.7},
             "thresholds": {"ged_threshold": -0.4, "ig_threshold": 0.25},
             "algorithm_params": {
                 "ged_optimization": "standard",
@@ -317,7 +311,7 @@ def get_preset_configurations() -> Dict[str, Dict]:
             "performance": {"accuracy": "high", "speed": "medium"},
         },
         "structure_focused": {
-            "weights": {"ged": 0.7, "ig": 0.2, "conflict": 0.1},
+            "weights": {"ged": 0.8, "ig": 0.2},
             "thresholds": {"ged_threshold": -0.6, "ig_threshold": 0.15},
             "algorithm_params": {
                 "ged_optimization": "standard",
@@ -330,7 +324,7 @@ def get_preset_configurations() -> Dict[str, Dict]:
             "performance": {"accuracy": "high", "speed": "medium"},
         },
         "real_time_fast": {
-            "weights": {"ged": 0.4, "ig": 0.3, "conflict": 0.3},
+            "weights": {"ged": 0.5, "ig": 0.5},
             "thresholds": {"ged_threshold": -0.7, "ig_threshold": 0.3},
             "algorithm_params": {
                 "ged_optimization": "fast",
@@ -343,7 +337,7 @@ def get_preset_configurations() -> Dict[str, Dict]:
             "performance": {"accuracy": "medium", "speed": "very_fast"},
         },
         "domain_adaptive": {
-            "weights": {"ged": 0.4, "ig": 0.3, "conflict": 0.3},
+            "weights": {"ged": 0.5, "ig": 0.5},
             "thresholds": {"ged_threshold": -0.4, "ig_threshold": 0.2},
             "algorithm_params": {
                 "ged_optimization": "standard",
@@ -388,7 +382,6 @@ def apply_preset_configuration(preset_name: str) -> Dict[str, Any]:
     configure_default_weights(
         ged_weight=weights["ged"],
         ig_weight=weights["ig"],
-        conflict_weight=weights["conflict"],
     )
 
     logger.info(f"Applied preset configuration: {preset_name}")
@@ -424,7 +417,7 @@ def get_algorithm_metadata() -> Dict[str, Any]:
                 "complexity": "O(n log n) clustering, O(n) shannon",
             },
             "fusion_reward": {
-                "formula": "R(w₁,w₂,w₃) = w₁×ΔGED + w₂×ΔIG - w₃×ConflictScore",
+                "formula": "R = w₁×ΔGED + w₂×ΔIG",
                 "interpretation": "Combined insight detection score",
                 "typical_range": "[-1.0, +1.0]",
                 "eureka_condition": "ΔGED ≤ -0.5 AND ΔIG ≥ 0.2",

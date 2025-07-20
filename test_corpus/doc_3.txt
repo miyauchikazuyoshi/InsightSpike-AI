@@ -1,0 +1,1 @@
+Attention mechanisms allow models to focus on relevant parts of the input sequence.

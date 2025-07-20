@@ -153,6 +153,34 @@ class InformationGain:
             f"k_clusters={k_clusters}, min_samples={min_samples}"
         )
 
+    def calculate_from_vectors(self, vectors: np.ndarray, method: str = "clustering", k: int = None) -> float:
+        """
+        Calculate entropy from vector embeddings.
+
+        Args:
+            vectors: Input vector embeddings
+            method: Calculation method ('clustering', 'pca', 'combined')
+            k: Number of clusters (overrides self.k_clusters if provided)
+
+        Returns:
+            float: Entropy value
+        """
+        if vectors is None or len(vectors) == 0:
+            return 0.0
+
+        k = k or self.k_clusters
+
+        if method == "clustering":
+            return self._clustering_entropy(vectors)
+        elif method == "pca":
+            return ImprovedEntropyMethods.pca_entropy(vectors)
+        elif method == "combined":
+            # For combined, we need two sets of vectors, so just use cluster entropy
+            return self._clustering_entropy(vectors)
+        else:
+            # Default to clustering method
+            return self._clustering_entropy(vectors)
+
     def calculate(self, data_before: Any, data_after: Any) -> IGResult:
         """
         Calculate Information Gain between two data states.
@@ -289,11 +317,7 @@ class InformationGain:
             return 0.0
 
     def _clustering_entropy(self, data: Any) -> float:
-        """Calculate entropy using clustering-based approach."""
-        if not SKLEARN_AVAILABLE:
-            logger.warning("Sklearn unavailable, using Shannon entropy fallback")
-            return self._shannon_entropy(data)
-
+        """Calculate entropy using similarity-based approach."""
         try:
             # Convert data to numpy array
             if hasattr(data, "numpy"):  # PyTorch tensor
@@ -314,27 +338,15 @@ class InformationGain:
             if n_samples < self.min_samples:
                 return 0.0
 
-            # Adjust k_clusters based on data size
-            k_effective = min(self.k_clusters, n_samples - 1, max(2, n_samples // 2))
-
-            if k_effective < 2:
-                return 0.0
-
-            # Perform clustering
-            kmeans = KMeans(
-                n_clusters=k_effective, random_state=self.random_state, n_init=10
-            )
-            labels = kmeans.fit_predict(vectors)
-
-            # Use silhouette score as entropy measure
-            # Higher silhouette = better separation = higher information content
-            if len(np.unique(labels)) >= 2:
-                silhouette = silhouette_score(vectors, labels)
-                # Convert silhouette score (-1 to 1) to entropy-like measure (0 to log2(k))
-                entropy = (silhouette + 1) * np.log2(k_effective) / 2
-                return float(entropy)
-            else:
-                return 0.0
+            # Import and use improved similarity-based entropy with sigmoid normalization
+            try:
+                from .improved_similarity_entropy import calculate_similarity_entropy, NormalizationMethod
+                # Use sigmoid normalization for better sensitivity
+                return calculate_similarity_entropy(vectors, method=NormalizationMethod.SIGMOID, steepness=5.0)
+            except ImportError:
+                # Fallback to original implementation
+                from .similarity_entropy import calculate_similarity_entropy
+                return calculate_similarity_entropy(vectors)
 
         except Exception as e:
             logger.warning(f"Clustering entropy calculation failed: {e}")

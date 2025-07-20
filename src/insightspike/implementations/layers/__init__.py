@@ -27,7 +27,7 @@ from .layer4_llm_interface import (
     LLMProviderType,
     get_llm_provider,
 )
-from .layer4_prompt_builder import PromptBuilder
+# from .layer4_prompt_builder import PromptBuilder  # Temporarily disabled due to missing interfaces module
 
 # Supporting components
 from .scalable_graph_builder import ScalableGraphBuilder
@@ -51,7 +51,7 @@ __all__ = [
     "LLMConfig",
     "LLMProviderType", 
     "get_llm_provider",
-    "PromptBuilder",
+    # "PromptBuilder",  # Temporarily disabled
     
     # Supporting
     "ScalableGraphBuilder",

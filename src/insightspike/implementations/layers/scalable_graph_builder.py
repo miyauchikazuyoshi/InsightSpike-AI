@@ -76,7 +76,7 @@ class ScalableGraphBuilder:
             )
         
         self.config = config
-        self.similarity_threshold = getattr(self.config.reasoning, 'similarity_threshold', 0.7)
+        self.similarity_threshold = getattr(self.config.graph, 'similarity_threshold', 0.7)
         self.top_k = (
             self.config.scalable_graph.top_k_neighbors
             if hasattr(self.config, "scalable_graph")

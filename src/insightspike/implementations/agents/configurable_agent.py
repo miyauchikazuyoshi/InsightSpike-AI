@@ -302,9 +302,9 @@ class ConfigurableAgent:
                 graph_config = self.config.graph_config
                 if hasattr(graph_config, 'reasoning'):
                     # Respect config.yaml setting, but allow override if query transform is enabled
-                    if self.config.enable_query_transform and not getattr(graph_config.reasoning, 'use_gnn', False):
+                    if self.config.enable_query_transform and not getattr(graph_config.graph, 'use_gnn', False):
                         logger.info("Enabling GNN for query transformation")
-                        graph_config.reasoning.use_gnn = True
+                        graph_config.graph.use_gnn = True
                         
                 self.l3_graph = L3GraphReasoner(graph_config)
             except ImportError:

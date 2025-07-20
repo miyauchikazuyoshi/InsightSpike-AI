@@ -1,0 +1,1 @@
+Graph neural networks can process structured data and find patterns in relationships.

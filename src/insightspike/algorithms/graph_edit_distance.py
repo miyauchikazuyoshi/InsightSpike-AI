@@ -133,6 +133,10 @@ class GraphEditDistance:
         self.calculation_count = 0
         self.total_computation_time = 0.0
         self.approximation_count = 0
+        
+        # State for proper ΔGED calculation
+        self.initial_graph = None
+        self.previous_graph = None
 
         logger.info(
             f"GED Calculator initialized: {optimization_level.value} mode, "
@@ -220,33 +224,53 @@ class GraphEditDistance:
         self, graph_before: Any, graph_after: Any, reference_graph: Optional[Any] = None
     ) -> float:
         """
-        Compute ΔGED for insight detection.
+        Compute ΔGED for insight detection using proper formula.
 
         Mathematical Definition:
-            If reference_graph provided:
-                ΔGED = GED(graph_after, reference) - GED(graph_before, reference)
-            Else:
-                ΔGED = GED(graph_before, graph_after)
+            ΔGED = GED(graph_after, initial) - GED(graph_before, initial)
+            
+        Where initial is either:
+            - The provided reference_graph
+            - The first graph in the sequence (maintained internally)
 
         Args:
-            graph_before: Initial graph state
-            graph_after: Final graph state
+            graph_before: Previous graph state
+            graph_after: Current graph state
             reference_graph: Optional reference for comparison
 
         Returns:
             float: ΔGED value (negative indicates simplification/insight)
         """
+        # Set or use reference graph
         if reference_graph is not None:
-            # Calculate GED to reference for both states
-            ged_before = self.calculate(graph_before, reference_graph).ged_value
-            ged_after = self.calculate(graph_after, reference_graph).ged_value
-            delta_ged = ged_after - ged_before
-        else:
-            # Direct GED between before and after
-            delta_ged = self.calculate(graph_before, graph_after).ged_value
-
-        logger.debug(f"ΔGED calculated: {delta_ged:.3f}")
+            self.initial_graph = reference_graph
+        elif self.initial_graph is None:
+            # First call - use graph_before as initial
+            self.initial_graph = graph_before
+            self.previous_graph = graph_before
+            return 0.0  # No change on first call
+            
+        # Calculate GED from both states to initial
+        ged_before = self.calculate(graph_before, self.initial_graph).ged_value
+        ged_after = self.calculate(graph_after, self.initial_graph).ged_value
+        
+        # ΔGED = GED(current, initial) - GED(previous, initial)
+        delta_ged = ged_after - ged_before
+        
+        logger.debug(
+            f"ΔGED calculated: after→initial={ged_after:.3f}, "
+            f"before→initial={ged_before:.3f}, ΔGED={delta_ged:.3f}"
+        )
+        
+        # Update state
+        self.previous_graph = graph_after
+        
         return delta_ged
+    
+    def reset_state(self):
+        """Reset the internal state for ΔGED calculation."""
+        self.initial_graph = None
+        self.previous_graph = None
 
     def _validate_graphs(self, graph1: Any, graph2: Any):
         """Validate input graphs."""
@@ -266,10 +290,10 @@ class GraphEditDistance:
             ged = nx.graph_edit_distance(
                 graph1,
                 graph2,
-                node_del_cost=lambda n: self.node_cost,
-                node_ins_cost=lambda n: self.node_cost,
-                edge_del_cost=lambda e: self.edge_cost,
-                edge_ins_cost=lambda e: self.edge_cost,
+                node_del_cost=lambda _: self.node_cost,
+                node_ins_cost=lambda _: self.node_cost,
+                edge_del_cost=lambda _: self.edge_cost,
+                edge_ins_cost=lambda _: self.edge_cost,
                 timeout=self.timeout_seconds,
             )
 
@@ -302,8 +326,8 @@ class GraphEditDistance:
             edges_diff = abs(len(graph1.edges()) - len(graph2.edges()))
 
             # Degree sequence comparison
-            degrees1 = sorted([degree for node, degree in graph1.degree()])
-            degrees2 = sorted([degree for node, degree in graph2.degree()])
+            degrees1 = sorted([degree for _, degree in graph1.degree()])
+            degrees2 = sorted([degree for _, degree in graph2.degree()])
 
             # Pad shorter sequence with zeros
             max_len = max(len(degrees1), len(degrees2))
@@ -422,3 +446,22 @@ def compute_delta_ged(
     """
     calculator = GraphEditDistance(**kwargs)
     return calculator.compute_delta_ged(graph_before, graph_after, reference_graph)
+
+
+# Global instance for stateful calculations
+_global_ged_calculator = None
+
+
+def get_global_ged_calculator() -> GraphEditDistance:
+    """Get or create global GED calculator instance."""
+    global _global_ged_calculator
+    if _global_ged_calculator is None:
+        _global_ged_calculator = GraphEditDistance()
+    return _global_ged_calculator
+
+
+def reset_ged_state():
+    """Reset the global GED calculator state."""
+    global _global_ged_calculator
+    if _global_ged_calculator is not None:
+        _global_ged_calculator.reset_state()

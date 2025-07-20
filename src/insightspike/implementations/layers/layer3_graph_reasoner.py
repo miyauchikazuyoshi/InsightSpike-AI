@@ -48,7 +48,7 @@ class ConflictScore:
     def __init__(self, config=None):
         self.config = config or get_config()
         self.conflict_threshold = (
-            getattr(self.config.reasoning, "conflict_threshold", 0.5)
+            getattr(self.config.graph, "conflict_threshold", 0.5)
             if hasattr(self.config, "reasoning")
             else 0.5
         )
@@ -160,7 +160,7 @@ class GraphBuilder:
     def __init__(self, config=None):
         self.config = config or get_config()
         self.similarity_threshold = (
-            getattr(self.config.reasoning, "similarity_threshold", 0.3)
+            getattr(self.config.graph, "similarity_threshold", 0.3)
             if hasattr(self.config, "reasoning")
             else 0.3
         )
@@ -288,7 +288,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         # Initialize simple GNN if needed
         self.gnn = None
         if hasattr(self.config, "reasoning") and getattr(
-            self.config.reasoning, "use_gnn", False
+            self.config.graph, "use_gnn", False
         ):
             self._init_gnn()
 
@@ -405,17 +405,17 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         """Get spike detection thresholds from config."""
         return {
             "ged": (
-                getattr(self.config.reasoning, "spike_ged_threshold", -0.5)
+                getattr(self.config.graph, "spike_ged_threshold", -0.5)
                 if hasattr(self.config, "reasoning")
                 else -0.5
             ),
             "ig": (
-                getattr(self.config.reasoning, "spike_ig_threshold", 0.2)
+                getattr(self.config.graph, "spike_ig_threshold", 0.2)
                 if hasattr(self.config, "reasoning")
                 else 0.2
             ),
             "conflict": (
-                getattr(self.config.reasoning, "conflict_threshold", 0.5)
+                getattr(self.config.graph, "conflict_threshold", 0.5)
                 if hasattr(self.config, "reasoning")
                 else 0.5
             ),
@@ -486,17 +486,17 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         )
         # Get weights from config
         w1 = (
-            getattr(self.config.reasoning, "weight_ged", 0.3)
+            getattr(self.config.graph, "weight_ged", 0.3)
             if hasattr(self.config, "reasoning")
             else 0.3
         )
         w2 = (
-            getattr(self.config.reasoning, "weight_ig", 0.5)
+            getattr(self.config.graph, "weight_ig", 0.5)
             if hasattr(self.config, "reasoning")
             else 0.5
         )
         w3 = (
-            getattr(self.config.reasoning, "weight_conflict", 0.2)
+            getattr(self.config.graph, "weight_conflict", 0.2)
             if hasattr(self.config, "reasoning")
             else 0.2
         )
@@ -554,17 +554,17 @@ class L3GraphReasoner(L3GraphReasonerInterface):
             stacklevel=2
         )
         ged_threshold = (
-            getattr(self.config.reasoning, "spike_ged_threshold", -0.5)
+            getattr(self.config.graph, "spike_ged_threshold", -0.5)
             if hasattr(self.config, "reasoning")
             else -0.5
         )
         ig_threshold = (
-            getattr(self.config.reasoning, "spike_ig_threshold", 0.2)
+            getattr(self.config.graph, "spike_ig_threshold", 0.2)
             if hasattr(self.config, "reasoning")
             else 0.2
         )
         conflict_threshold = (
-            getattr(self.config.reasoning, "conflict_threshold", 0.5)
+            getattr(self.config.graph, "conflict_threshold", 0.5)
             if hasattr(self.config, "reasoning")
             else 0.5
         )
@@ -599,7 +599,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         """Initialize a simple GNN for graph processing."""
         try:
             hidden_dim = (
-                getattr(self.config.reasoning, "gnn_hidden_dim", 128)
+                getattr(self.config.graph, "gnn_hidden_dim", 128)
                 if hasattr(self.config, "reasoning")
                 else 128
             )
@@ -671,7 +671,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         )
         if path is None:
             path = Path(
-                getattr(self.config.reasoning, "graph_file", "data/graph.pt")
+                getattr(self.config.graph, "graph_file", "data/graph.pt")
                 if hasattr(self.config, "reasoning")
                 else "data/graph.pt"
             )
@@ -708,7 +708,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         )
         if path is None:
             path = Path(
-                getattr(self.config.reasoning, "graph_file", "data/graph.pt")
+                getattr(self.config.graph, "graph_file", "data/graph.pt")
                 if hasattr(self.config, "reasoning")
                 else "data/graph.pt"
             )

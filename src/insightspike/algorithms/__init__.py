@@ -100,8 +100,8 @@ ALGORITHM_INFO = {
     },
     "fusion_scheme": {
         "description": "Combined insight detection using ΔGED and ΔIG",
-        "mathematical_form": "R(w₁,w₂,w₃) = w₁×ΔGED + w₂×ΔIG - w₃×ConflictScore",
-        "default_weights": {"ged": 0.4, "ig": 0.3, "conflict": 0.3},
+        "mathematical_form": "R = w₁×ΔGED + w₂×ΔIG",
+        "default_weights": {"ged": 0.5, "ig": 0.5},
         "eureka_conditions": "ΔGED ≤ -0.5 AND ΔIG ≥ 0.2",
     },
 }
