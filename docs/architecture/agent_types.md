@@ -52,18 +52,35 @@
   - Environment adapter pattern
   - No hardcoded layer dependencies
 
+### 4. **DataStoreMainAgent** (`implementations/agents/datastore_agent.py`)
+- **Purpose**: Scalable agent using DataStore backend for persistence
+- **Use Case**: Production deployments with large knowledge bases
+- **Architecture**: Similar to MainAgent but with DataStore integration
+- **Key Differences**:
+  - Uses DataStore for all persistence (not in-memory)
+  - Working memory approach for active data
+  - Lazy loading of data on demand
+  - Better scalability for large datasets
+- **Features**:
+  - Transaction-based persistence
+  - Multi-user support with data isolation
+  - Reduced memory footprint
+  - Compatible with various DataStore backends (SQLite, PostgreSQL, etc.)
+
 ## 📊 Quick Comparison
 
-| Feature | MainAgent | ConfigurableAgent | GenericAgent |
-|---------|-----------|-------------------|--------------|
-| Q&A Tasks | ✅ | ✅ | ❌ |
-| Fixed Architecture | ✅ | ❌ | ❌ |
-| Configurable | ❌ | ✅ | ✅ |
-| Multiple Modes | ❌ | ✅ | ❌ |
-| Caching | ❌ | ✅ | ❌ |
-| Async Processing | ❌ | ✅ | ❌ |
-| Custom Environments | ❌ | ❌ | ✅ |
-| Production Ready | ✅ | ✅ | ⚠️ |
+| Feature | MainAgent | ConfigurableAgent | GenericAgent | DataStoreMainAgent |
+|---------|-----------|-------------------|--------------|-------------------|
+| Q&A Tasks | ✅ | ✅ | ❌ | ✅ |
+| Fixed Architecture | ✅ | ❌ | ❌ | ✅ |
+| Configurable | ❌ | ✅ | ✅ | ⚠️ |
+| Multiple Modes | ❌ | ✅ | ❌ | ❌ |
+| Caching | ❌ | ✅ | ❌ | ✅ |
+| Async Processing | ❌ | ✅ | ❌ | ⚠️ |
+| Custom Environments | ❌ | ❌ | ✅ | ❌ |
+| Scalable Storage | ❌ | ❌ | ❌ | ✅ |
+| Multi-User | ❌ | ❌ | ❌ | ✅ |
+| Production Ready | ✅ | ✅ | ⚠️ | ✅ |
 
 ## 🚀 Which Agent to Use?
 
@@ -80,6 +97,12 @@ agent = ConfigurableAgent(config)
 # For custom environments (games, etc.)
 from insightspike.implementations.agents import GenericInsightSpikeAgent
 agent = GenericInsightSpikeAgent(...)
+
+# For scalable production deployments with DataStore
+from insightspike.implementations.agents import DataStoreMainAgent
+from insightspike.implementations.datastore import DataStoreFactory
+datastore = DataStoreFactory.create("sqlite")  # or "postgresql", etc.
+agent = DataStoreMainAgent(datastore)
 ```
 
 ## 🔄 Migration Path

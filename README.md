@@ -12,7 +12,20 @@
 
 InsightSpike-AI is a **neurobiologically-inspired AI system** that can detect and generate "Aha!" moments - those sudden insights when disparate pieces of knowledge connect to form new understanding. Unlike traditional AI that simply retrieves and summarizes existing information, InsightSpike actively discovers novel connections between concepts, mimicking human creative cognition.
 
-### 🧠 The Vision: Beyond Traditional AI
+### 🧠 4-Layer Neurobiological Architecture
+
+```mermaid
+graph TD
+    Query[User Query] --> L1[Layer 1: Error Monitor<br/>Cerebellum Analog]
+    L1 --> L2[Layer 2: Memory Manager<br/>Hippocampus Analog]
+    L2 --> L3[Layer 3: Graph Reasoner<br/>Prefrontal Cortex Analog]
+    L3 --> L4[Layer 4: Language Interface<br/>Broca's/Wernicke's Analog]
+    L4 --> Response[Insight Response]
+    
+    L3 -.->|Spike Detection| Insight[💡 Eureka Moment!]
+```
+
+### 🔬 The Vision: Beyond Traditional AI
 
 **Traditional RAG Systems:**
 
@@ -62,7 +75,7 @@ This wasn't retrieval - it was **knowledge creation through insight**.
 
 ```python
 # Verify installation
-!python -c "from src.insightspike.core.system import InsightSpikeSystem; print('✅ InsightSpike-AI Ready!')"
+!python -c "from insightspike.implementations.agents import MainAgent; print('✅ InsightSpike-AI Ready!')"
 
 # Try it out
 !python scripts/validation/complete_system_validation.py
@@ -117,6 +130,8 @@ Mathematical modeling of insight generation using Graph Edit Distance + Informat
 - PyTorch Geometric integration
 - Similarity graph construction
 - Spike detection algorithms
+
+**Note**: Full graph reasoning capabilities require PyTorch and PyTorch Geometric. The system will work without them but with reduced graph analysis features.
 
 ## 🌟 Key Innovation: geDIG Technology
 
@@ -239,7 +254,9 @@ src/insightspike/
 ├── core/                    # 🎯 Abstract Interfaces & Contracts
 │   ├── base/               # Base interfaces for all components
 │   ├── contracts/          # System-wide contracts
-│   └── error_handler.py    # Core error handling
+│   ├── episode.py          # Episode data structures
+│   ├── error_handler.py    # Core error handling
+│   └── exceptions.py       # Custom exceptions
 │
 ├── implementations/         # 🔧 Concrete Implementations
 │   ├── agents/            # Agent implementations
@@ -251,26 +268,27 @@ src/insightspike/
 │   ├── query_transformation/
 │   └── graph_reasoning/
 │
-├── tools/                  # 🛠️ Standalone Tools
-│   ├── standalone/
-│   └── experiments/
+├── algorithms/             # 🧮 Core Algorithms
+│   ├── graph_edit_distance.py
+│   └── information_gain.py
 │
-└── config/                 # ⚙️ Configuration System
-    ├── models.py          # Pydantic config models
-    └── loader.py          # Config loading logic
-```
-
-### 4-Layer Neurobiological Architecture
-
-```mermaid
-graph TD
-    Query[User Query] --> L1[Layer 1: Error Monitor<br/>Cerebellum Analog]
-    L1 --> L2[Layer 2: Memory Manager<br/>Hippocampus Analog]
-    L2 --> L3[Layer 3: Graph Reasoner<br/>Prefrontal Cortex Analog]
-    L3 --> L4[Layer 4: Language Interface<br/>Broca's/Wernicke's Analog]
-    L4 --> Response[Insight Response]
-    
-    L3 -.->|Spike Detection| Insight[💡 Eureka Moment!]
+├── providers/              # 🤖 LLM Providers
+│   ├── openai_provider.py
+│   ├── anthropic_provider.py
+│   └── local.py           # DistilGPT2 support
+│
+├── cli/                    # 💻 Command Line Interface
+│   ├── spike.py           # Main CLI entry point
+│   └── commands/          # CLI commands
+│
+├── config/                 # ⚙️ Configuration System
+│   ├── models.py          # Pydantic config models
+│   ├── loader.py          # Config loading logic
+│   └── constants.py       # System constants
+│
+└── tools/                  # 🛠️ Standalone Tools
+    ├── standalone/
+    └── experiments/
 ```
 
 ### Data Store Abstraction
@@ -314,7 +332,8 @@ result = agent.process_question("How does quantum entanglement relate to informa
 print(f"Response: {result.response}")
 print(f"Spike Detected: {result.spike_detected}")
 if result.spike_detected:
-    print(f"Insight: {result.insights[0]}")
+    print(f"Graph Analysis: {result.graph_analysis}")
+    print(f"Reasoning Quality: {result.reasoning_quality}")
 ```
 
 ### Advanced Configuration
@@ -377,17 +396,33 @@ Licensed under the InsightSpike AI Responsible Use License v1.0.
 
 ```
 InsightSpike-AI/
-├── src/insightspike/       # Main package
-├── experiments/            # Research experiments
-├── data/                   # Organized data directory
-│   ├── core/              # Core system files
-│   ├── db/                # Databases
-│   └── experiments/       # Experiment results
+├── src/insightspike/       # Main package (see detailed structure above)
+├── experiments/            # Research experiments & validations
+├── data/                   # Data directory
+│   ├── cache/             # Cached data
+│   ├── knowledge_base/    # Knowledge base files
+│   ├── logs/              # System and operation logs
+│   ├── models/            # Model files
+│   └── sqlite/            # SQLite databases
 ├── docs/                   # Documentation
 │   ├── architecture/      # Architecture docs
-│   └── development/       # Development guides
+│   ├── development/       # Development guides
+│   ├── diagrams/          # Technical diagrams
+│   └── research/          # Research notes
 ├── scripts/               # Utility scripts
-└── tests/                 # Test suites
+│   ├── benchmarks/        # Performance benchmarks
+│   ├── colab/             # Google Colab scripts
+│   ├── debugging/         # Debug utilities
+│   ├── monitoring/        # Production monitoring
+│   └── validation/        # Validation scripts
+├── tests/                 # Test suites
+│   ├── unit/              # Unit tests
+│   ├── fixtures/          # Test data
+│   └── development/       # Development test scripts
+├── config/                # Configuration files
+│   └── examples/          # Example configs
+├── benchmarks/            # Benchmark results
+└── examples/              # Usage examples
 ```
 
 ## 🧪 Testing

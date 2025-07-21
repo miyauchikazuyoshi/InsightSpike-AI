@@ -18,6 +18,9 @@
   - Episode management (add, merge, split, prune)
   - C-value → Graph-based importance (transitioning)
 - **Modes**: Basic, Enhanced, Scalable, Graph-Centric
+- **Variants**:
+  - `layer2_compatibility.py`: Backward compatibility wrapper for old API
+  - `layer2_working_memory.py`: DataStore-centric implementation for scalability
 
 ### Layer 3: Graph Reasoner (`implementations/layers/layer3_graph_reasoner.py`)
 - **Brain Analog**: Prefrontal Cortex (executive function)
@@ -75,6 +78,8 @@ Natural Language Output
 - `implementations/layers/` - All layer implementations
   - `layer1_error_monitor.py`
   - `layer2_memory_manager.py` (unified)
+  - `layer2_compatibility.py` (backward compatibility)
+  - `layer2_working_memory.py` (DataStore-centric)
   - `layer3_graph_reasoner.py`
   - `layer4_llm_interface.py` (unified)
   - `layer4_prompt_builder.py`

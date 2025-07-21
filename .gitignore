@@ -277,11 +277,7 @@ experiments_colab/*/results/*_large.json
 *_old_backup/
 tests_old_backup/
 
-# Empty placeholder directories
-src/insightspike/core/base/
-src/insightspike/features/
-src/insightspike/implementations/
-src/insightspike/tools/
+# Empty placeholder directories (removed - these contain actual code now)
 
 # Test documentation
 test_docs/
