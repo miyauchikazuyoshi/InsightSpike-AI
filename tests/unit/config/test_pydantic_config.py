@@ -310,7 +310,9 @@ class TestBackwardCompatibility:
         assert hasattr(config, "paths")
         assert config.paths is not None
         assert hasattr(config.paths, "data_dir")
-        assert str(config.paths.data_dir) == "data/raw"
+        assert str(config.paths.data_dir) == "data"
+        assert hasattr(config.paths, "raw_dir")
+        assert str(config.paths.raw_dir) == "data/raw"
 
     def test_legacy_fields_excluded_from_dict(self):
         """Test that legacy fields are excluded from serialization."""

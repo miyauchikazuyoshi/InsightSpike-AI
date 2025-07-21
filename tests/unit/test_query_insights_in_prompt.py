@@ -89,7 +89,8 @@ class TestQueryInsightsInPrompt:
         prompt = self.llm._build_simple_prompt(context, "What is entropy?")
 
         # Verify insight is included (truncated for lightweight models)
-        assert "[Entropy connects physics and information theory fund" in prompt
+        # The actual format includes the insight within the context, not as a separate bracket
+        assert "Entropy connects physics and information theory fu" in prompt
 
     def test_no_insights_when_query_state_missing(self):
         """Test graceful handling when query_state is not present"""

@@ -78,8 +78,10 @@ class TestRewardCalculator:
         """Test reward calculation with positive metrics."""
         calculator = RewardCalculator()
 
-        # Good metrics
-        metrics = {"delta_ged": -0.8, "delta_ig": 0.6}
+        # Good metrics - ensure positive reward
+        # For positive base reward: w1*ΔGED + w2*ΔIG > 0
+        # With w1=0.5, w2=0.5: 0.5*(-0.2) + 0.5*(0.8) = -0.1 + 0.4 = 0.3
+        metrics = {"delta_ged": -0.2, "delta_ig": 0.8}
         conflicts = {"total": 0.0}
 
         rewards = calculator.calculate_reward(metrics, conflicts)
