@@ -81,14 +81,14 @@ poetry run python scripts/setup_models.py
 poetry run spike demo
 ```
 
-### 🚀 Try the v5 Experiment (DistilGPT-2)
+### 🚀 Try the English Insight Experiment (DistilGPT-2)
 
 Experience the breakthrough performance with just 82M parameters:
 
 ```bash
-# Run the efficient v5 experiment
-cd experiments/gedig_validation_v5_final/src
-python experiment_v5_efficient.py
+# Run the hybrid insight experiment
+cd experiments/english_insight_reproduction
+poetry run python src/hybrid_insightspike_experiment.py
 
 # See insights being generated in real-time!
 ```
