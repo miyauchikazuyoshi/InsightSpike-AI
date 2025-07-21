@@ -265,7 +265,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         self.graph_builder = ScalableGraphBuilder(config)
         self.conflict_scorer = ConflictScore(config)
         self.previous_graph = None
-        
+
         # Initialize refactored components
         self.graph_analyzer = GraphAnalyzer(config)
         self.reward_calculator = RewardCalculator(config)
@@ -391,7 +391,9 @@ class L3GraphReasoner(L3GraphReasonerInterface):
                     metrics, conflicts, self._get_spike_thresholds()
                 ),
                 "graph_features": graph_features,
-                "reasoning_quality": self.graph_analyzer.assess_quality(metrics, conflicts),
+                "reasoning_quality": self.graph_analyzer.assess_quality(
+                    metrics, conflicts
+                ),
             }
 
             logger.debug(f"Graph analysis complete: {metrics}")
@@ -420,7 +422,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
                 else 0.5
             ),
         }
-    
+
     # Deprecated methods - to be removed
     def _calculate_metrics(
         self,
@@ -429,14 +431,14 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         context: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, float]:
         """Calculate ΔGED and ΔIG metrics.
-        
+
         .. deprecated:: 2.0
            Use GraphAnalyzer.calculate_metrics instead.
         """
         warnings.warn(
             "_calculate_metrics is deprecated. Use GraphAnalyzer.calculate_metrics.",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
         if previous_graph is None:
             return {
@@ -475,14 +477,14 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         self, metrics: Dict[str, float], conflicts: Dict[str, float]
     ) -> Dict[str, float]:
         """Calculate reward signal for memory updates.
-        
+
         .. deprecated:: 2.0
            Use RewardCalculator.calculate_reward instead.
         """
         warnings.warn(
             "_calculate_reward is deprecated. Use RewardCalculator.calculate_reward.",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
         # Get weights from config
         w1 = (
@@ -544,14 +546,14 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         self, metrics: Dict[str, float], conflicts: Dict[str, float]
     ) -> bool:
         """Detect if current state represents an insight spike.
-        
+
         .. deprecated:: 2.0
            Use GraphAnalyzer.detect_spike instead.
         """
         warnings.warn(
             "_detect_spike is deprecated. Use GraphAnalyzer.detect_spike.",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
         ged_threshold = (
             getattr(self.config.graph, "spike_ged_threshold", -0.5)
@@ -579,14 +581,14 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         self, metrics: Dict[str, float], conflicts: Dict[str, float]
     ) -> float:
         """Assess overall quality of reasoning process.
-        
+
         .. deprecated:: 2.0
            Use GraphAnalyzer.assess_quality instead.
         """
         warnings.warn(
             "_assess_reasoning_quality is deprecated. Use GraphAnalyzer.assess_quality.",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
         # Combine multiple factors
         metric_score = (metrics.get("delta_ged", 0) + metrics.get("delta_ig", 0)) / 2
@@ -604,7 +606,9 @@ class L3GraphReasoner(L3GraphReasonerInterface):
                 else 128
             )
             # Handle both Pydantic and legacy config
-            if hasattr(self.config, "embedding") and hasattr(self.config.embedding, "dimension"):
+            if hasattr(self.config, "embedding") and hasattr(
+                self.config.embedding, "dimension"
+            ):
                 input_dim = self.config.embedding.dimension
             else:
                 input_dim = 384  # Default dimension
@@ -659,7 +663,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
 
     def save_graph(self, graph: Data, path: Optional[Path] = None) -> Path:
         """Save graph to disk.
-        
+
         .. deprecated:: 2.0
            This method is deprecated. Graph persistence should be handled
            by MainAgent using DataStore abstraction.
@@ -667,7 +671,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         warnings.warn(
             "save_graph is deprecated. Use MainAgent with DataStore for persistence.",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
         if path is None:
             path = Path(
@@ -696,7 +700,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
 
     def load_graph(self, path: Optional[Path] = None) -> Optional[Data]:
         """Load graph from disk.
-        
+
         .. deprecated:: 2.0
            This method is deprecated. Graph persistence should be handled
            by MainAgent using DataStore abstraction.
@@ -704,7 +708,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         warnings.warn(
             "load_graph is deprecated. Use MainAgent with DataStore for persistence.",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
         if path is None:
             path = Path(

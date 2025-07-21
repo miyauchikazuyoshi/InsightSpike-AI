@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import time
+
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 print("Testing DistilGPT2 loading...", flush=True)
@@ -8,6 +9,7 @@ print("Testing DistilGPT2 loading...", flush=True)
 start = time.time()
 print("1. Importing transformers...", flush=True)
 from transformers import AutoTokenizer, AutoModelForCausalLM
+
 print(f"   ✓ Import done ({time.time()-start:.2f}s)", flush=True)
 
 print("2. Loading tokenizer...", flush=True)

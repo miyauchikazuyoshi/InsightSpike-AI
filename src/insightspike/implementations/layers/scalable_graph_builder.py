@@ -12,6 +12,7 @@ import numpy as np
 try:
     import torch
     from torch_geometric.data import Data
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
@@ -37,10 +38,15 @@ try:
 except Exception as e:
     logger.warning(f"FAISS not available: {e}")
     FAISS_AVAILABLE = False
+
     # Create a minimal mock to avoid import errors
     class MockFaiss:
-        def IndexFlatIP(self, d): return None
-        def IndexIVFFlat(self, *args): return None
+        def IndexFlatIP(self, d):
+            return None
+
+        def IndexIVFFlat(self, *args):
+            return None
+
     faiss = MockFaiss()
 
 
@@ -57,7 +63,7 @@ class ScalableGraphBuilder:
 
     def __init__(self, config=None, monitor: Optional[GraphOperationMonitor] = None):
         """Initialize with configuration object.
-        
+
         Args:
             config: Configuration object (legacy format). If None, defaults will be used.
             monitor: Optional GraphOperationMonitor for tracking operations.
@@ -66,17 +72,17 @@ class ScalableGraphBuilder:
             # Create minimal default config
             logger.warning("No config provided to ScalableGraphBuilder, using defaults")
             from types import SimpleNamespace
+
             config = SimpleNamespace(
                 reasoning=SimpleNamespace(similarity_threshold=0.7),
-                scalable_graph=SimpleNamespace(
-                    top_k_neighbors=50,
-                    batch_size=1000
-                ),
-                embedding=SimpleNamespace(dimension=384)
+                scalable_graph=SimpleNamespace(top_k_neighbors=50, batch_size=1000),
+                embedding=SimpleNamespace(dimension=384),
             )
-        
+
         self.config = config
-        self.similarity_threshold = getattr(self.config.graph, 'similarity_threshold', 0.7)
+        self.similarity_threshold = getattr(
+            self.config.graph, "similarity_threshold", 0.7
+        )
         self.top_k = (
             self.config.scalable_graph.top_k_neighbors
             if hasattr(self.config, "scalable_graph")
@@ -91,7 +97,9 @@ class ScalableGraphBuilder:
         # FAISS index for efficient similarity search
         self.index = None
         # Handle both Pydantic and legacy config
-        if hasattr(self.config, "embedding") and hasattr(self.config.embedding, "dimension"):
+        if hasattr(self.config, "embedding") and hasattr(
+            self.config.embedding, "dimension"
+        ):
             self.dimension = self.config.embedding.dimension
         else:
             self.dimension = 384

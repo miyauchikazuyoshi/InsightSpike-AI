@@ -189,14 +189,15 @@ def create_qa_agent(mode: str = "basic", **kwargs):
             "optimized": AgentMode.OPTIMIZED,
             "graph_centric": AgentMode.GRAPH_CENTRIC,
         }
-        
+
         agent_mode = mode_map.get(mode.lower(), AgentMode.BASIC)
         config = AgentConfig.from_mode(agent_mode, **kwargs)
         return ConfigurableAgent(config)
-        
+
     except ImportError:
         # Fallback to basic MainAgent
         from .main_agent import MainAgent
+
         return MainAgent()
 
 

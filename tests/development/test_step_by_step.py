@@ -2,6 +2,7 @@
 import os
 import sys
 import time
+
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 print("Step-by-step test", flush=True)
@@ -10,13 +11,17 @@ print("Step-by-step test", flush=True)
 print("\n1. Loading config...", flush=True)
 start = time.time()
 from src.insightspike.config import load_config
-config = load_config(config_path="experiments/english_insight_reproduction/config_experiment.yaml")
+
+config = load_config(
+    config_path="experiments/english_insight_reproduction/config_experiment.yaml"
+)
 print(f"   ✓ Config loaded ({time.time()-start:.2f}s)", flush=True)
 
 # Step 2: ProviderFactory
 print("\n2. Importing ProviderFactory...", flush=True)
 start = time.time()
 from src.insightspike.providers import ProviderFactory
+
 print(f"   ✓ Imported ({time.time()-start:.2f}s)", flush=True)
 
 # Step 3: Create provider
@@ -28,6 +33,7 @@ try:
 except Exception as e:
     print(f"   ✗ Failed: {e}", flush=True)
     import traceback
+
     traceback.print_exc()
     sys.exit(1)
 

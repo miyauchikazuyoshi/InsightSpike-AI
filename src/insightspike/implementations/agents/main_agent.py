@@ -78,7 +78,7 @@ class MainAgent:
     def __init__(self, config=None, datastore: Optional[DataStore] = None):
         """
         Initialize MainAgent with injected dependencies.
-        
+
         Args:
             config: Configuration object (InsightSpikeConfig or legacy format)
             datastore: DataStore instance for persistence
@@ -86,7 +86,7 @@ class MainAgent:
         # Store config - should be provided by DependencyFactory
         if config is None:
             raise ValueError("Config must be provided to MainAgent")
-            
+
         # Handle both Pydantic and legacy config
         if isinstance(config, InsightSpikeConfig):
             self.config = config
@@ -95,7 +95,7 @@ class MainAgent:
             # Legacy config support
             self.config = config
             self.is_pydantic_config = False
-        
+
         # Store the datastore for persistence operations
         self.datastore = datastore
 
@@ -131,7 +131,7 @@ class MainAgent:
             logger.info("Initializing MainAgent components...")
 
             # Check if LLM is already initialized (from cache)
-            if hasattr(self.l4_llm, 'initialized') and self.l4_llm.initialized:
+            if hasattr(self.l4_llm, "initialized") and self.l4_llm.initialized:
                 logger.info("LLM provider already initialized (cached)")
             else:
                 # Initialize LLM with safe fallback
@@ -175,7 +175,9 @@ class MainAgent:
         """
         if not self._initialized:
             if not self.initialize():
-                return self._error_cycle_result(question, 0, "Failed to initialize agent")
+                return self._error_cycle_result(
+                    question, 0, "Failed to initialize agent"
+                )
 
         results = []
         convergence_reached = False
@@ -351,8 +353,8 @@ class MainAgent:
             if self.is_pydantic_config:
                 max_docs = self.config.memory.max_retrieved_docs
             else:
-                max_docs = getattr(self.config.memory, 'max_retrieved_docs', 10)
-                
+                max_docs = getattr(self.config.memory, "max_retrieved_docs", 10)
+
             results = self.l2_memory.search_episodes(
                 question,
                 k=max_docs,
@@ -462,15 +464,9 @@ class MainAgent:
             conflicts = graph_analysis.get("conflicts", {})
 
             # Get threshold values from config
-            merge_threshold = getattr(
-                self.config.graph, "episode_merge_threshold", 0.8
-            )
-            split_threshold = getattr(
-                self.config.graph, "episode_split_threshold", 0.3
-            )
-            prune_threshold = getattr(
-                self.config.graph, "episode_prune_threshold", 0.1
-            )
+            merge_threshold = getattr(self.config.graph, "episode_merge_threshold", 0.8)
+            split_threshold = getattr(self.config.graph, "episode_split_threshold", 0.3)
+            prune_threshold = getattr(self.config.graph, "episode_prune_threshold", 0.1)
 
             # High similarity + low conflict might trigger merge
             delta_ged = metrics.get("delta_ged", 0.0)
@@ -536,19 +532,25 @@ class MainAgent:
 
             # Check response similarity using semantic embeddings
             responses = [r.response for r in recent_results]
-            
+
             # Create embedder for semantic comparison
             from ...processing.embedder import get_model
+
             embedder = get_model()
             embeddings = embedder.encode(responses)
-            
+
             # Calculate cosine similarity between the last two responses
             from sklearn.metrics.pairwise import cosine_similarity
+
             similarity_matrix = cosine_similarity(embeddings)
-            response_similarity = similarity_matrix[0, 1]  # Similarity between first and second response
+            response_similarity = similarity_matrix[
+                0, 1
+            ]  # Similarity between first and second response
 
             # Convergence if quality is stable and responses are semantically similar
-            converged = quality_diff < 0.1 and response_similarity > 0.95  # Higher threshold for semantic similarity
+            converged = (
+                quality_diff < 0.1 and response_similarity > 0.95
+            )  # Higher threshold for semantic similarity
 
             if converged:
                 logger.info("Reasoning convergence detected")
@@ -558,7 +560,6 @@ class MainAgent:
         except Exception as e:
             logger.error(f"Convergence check failed: {e}")
             return False
-
 
     def _compile_results(
         self, results: List[CycleResult], converged: bool, verbose: bool
@@ -573,17 +574,19 @@ class MainAgent:
         # Create a new CycleResult with additional metadata
         # Store extra data in graph_analysis for backward compatibility
         enhanced_graph_analysis = best_result.graph_analysis.copy()
-        enhanced_graph_analysis.update({
-            "total_cycles": len(results),
-            "converged": converged,
-            "cycle_history": [r.to_dict() for r in results] if verbose else [],
-            "agent_stats": {
-                "memory_episodes": self.l2_memory.get_memory_stats().get(
-                    "total_episodes", 0
-                ),
-                "total_processed": len(self.reasoning_history),
-            },
-        })
+        enhanced_graph_analysis.update(
+            {
+                "total_cycles": len(results),
+                "converged": converged,
+                "cycle_history": [r.to_dict() for r in results] if verbose else [],
+                "agent_stats": {
+                    "memory_episodes": self.l2_memory.get_memory_stats().get(
+                        "total_episodes", 0
+                    ),
+                    "total_processed": len(self.reasoning_history),
+                },
+            }
+        )
 
         return CycleResult(
             question=best_result.question,
@@ -594,7 +597,7 @@ class MainAgent:
             spike_detected=best_result.spike_detected,
             error_state=best_result.error_state,
             cycle_number=best_result.cycle_number,
-            success=best_result.success
+            success=best_result.success,
         )
 
     def _error_result(self, question: str, error: str) -> Dict[str, Any]:
@@ -630,16 +633,14 @@ class MainAgent:
         episode_idx = self.l2_memory.store_episode(text, c_value, metadata)
         return episode_idx >= 0
 
-    def add_knowledge(
-        self, text: str, c_value: float = 0.5
-    ) -> Dict[str, Any]:
+    def add_knowledge(self, text: str, c_value: float = 0.5) -> Dict[str, Any]:
         """
         Add knowledge to the agent's memory.
-        
+
         Args:
             text: The knowledge text to add
             c_value: Confidence value for the knowledge
-            
+
         Returns:
             Dict containing success status and any error messages
         """
@@ -716,14 +717,17 @@ class MainAgent:
         except Exception as e:
             logger.error(f"Failed to add knowledge: {e}")
             return {"episode_idx": -1, "success": False, "error": str(e)}
-    
-    def add_episode_with_graph_update(self, text: str, c_value: float = 0.5) -> Dict[str, Any]:
+
+    def add_episode_with_graph_update(
+        self, text: str, c_value: float = 0.5
+    ) -> Dict[str, Any]:
         """Deprecated: Use add_knowledge() instead."""
         import warnings
+
         warnings.warn(
             "add_episode_with_graph_update is deprecated. Use add_knowledge() instead.",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
         return self.add_knowledge(text, c_value)
 
@@ -764,16 +768,17 @@ class MainAgent:
             if self.reasoning_history
             else 0.0,
         }
-    
+
     def get_insights(self, limit: int = 5) -> Dict[str, Any]:
         """Get recent insights discovered by the agent."""
         try:
             from ...detection.insight_registry import InsightFactRegistry
+
             registry = InsightFactRegistry()
-            
+
             # Get insights from registry
             insights = registry.get_recent_insights(limit=limit)
-            
+
             # Add metadata
             return {
                 "total_insights": registry.total_insights,
@@ -792,21 +797,24 @@ class MainAgent:
         except Exception as e:
             logger.error(f"Failed to get insights: {e}")
             return {"total_insights": 0, "recent_insights": [], "categories": []}
-    
+
     def search_insights(self, concept: str, limit: int = 10) -> List[Dict[str, Any]]:
         """Search for insights related to a concept."""
         try:
             from ...detection.insight_registry import InsightFactRegistry
+
             registry = InsightFactRegistry()
-            
+
             # Search insights
             results = registry.search_insights(concept, limit=limit)
-            
+
             return [
                 {
                     "question": i.question,
                     "answer": i.answer,
-                    "relevance": i.relevance_score if hasattr(i, 'relevance_score') else 1.0,
+                    "relevance": i.relevance_score
+                    if hasattr(i, "relevance_score")
+                    else 1.0,
                     "timestamp": i.timestamp,
                     "importance": i.importance,
                 }
@@ -821,40 +829,46 @@ class MainAgent:
         if not self.datastore:
             logger.warning("No DataStore configured, falling back to legacy save")
             return self._legacy_save_state()
-        
+
         try:
             # Collect episodes from L2 memory
-            if self.l2_memory and hasattr(self.l2_memory, 'episodes'):
+            if self.l2_memory and hasattr(self.l2_memory, "episodes"):
                 episodes_to_save = []
                 for episode in self.l2_memory.episodes:
                     # Convert episode to dict format for DataStore
                     episode_dict = {
-                        'text': episode.text,
-                        'vec': episode.vec,
-                        'c_value': getattr(episode, 'c', 0.5),  # Episode uses 'c' attribute
-                        'timestamp': getattr(episode, 'timestamp', time.time()),
+                        "text": episode.text,
+                        "vec": episode.vec,
+                        "c_value": getattr(
+                            episode, "c", 0.5
+                        ),  # Episode uses 'c' attribute
+                        "timestamp": getattr(episode, "timestamp", time.time()),
                     }
                     episodes_to_save.append(episode_dict)
-                
+
                 # Save episodes via DataStore
                 self.datastore.save_episodes(episodes_to_save, namespace="agent_state")
                 logger.info(f"Saved {len(episodes_to_save)} episodes via DataStore")
-            
+
             # Save graph from L3
-            if self.l3_graph and hasattr(self.l3_graph, 'previous_graph') and self.l3_graph.previous_graph is not None:
+            if (
+                self.l3_graph
+                and hasattr(self.l3_graph, "previous_graph")
+                and self.l3_graph.previous_graph is not None
+            ):
                 self.datastore.save_graph(
-                    self.l3_graph.previous_graph, 
-                    graph_id="main_graph", 
-                    namespace="agent_state"
+                    self.l3_graph.previous_graph,
+                    graph_id="main_graph",
+                    namespace="agent_state",
                 )
                 logger.info("Saved graph via DataStore")
-            
+
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to save agent state via DataStore: {e}")
             return False
-    
+
     def _legacy_save_state(self) -> bool:
         """Legacy save method - to be deprecated."""
         try:
@@ -889,7 +903,7 @@ class MainAgent:
         if not self.datastore:
             logger.warning("No DataStore configured, falling back to legacy load")
             return self._legacy_load_state()
-        
+
         try:
             # Load episodes into L2 memory
             if self.l2_memory:
@@ -900,35 +914,38 @@ class MainAgent:
                     for ep_dict in loaded_episodes:
                         # Create episode object from dict
                         episode = Episode(
-                            text=ep_dict['text'],
-                            vec=ep_dict['vec'],
-                            c=ep_dict.get('c_value', 0.5),  # Note: Episode uses 'c' not 'c_value'
-                            timestamp=ep_dict.get('timestamp', time.time())
+                            text=ep_dict["text"],
+                            vec=ep_dict["vec"],
+                            c=ep_dict.get(
+                                "c_value", 0.5
+                            ),  # Note: Episode uses 'c' not 'c_value'
+                            timestamp=ep_dict.get("timestamp", time.time()),
                         )
                         self.l2_memory.episodes.append(episode)
-                    
+
                     logger.info(f"Loaded {len(loaded_episodes)} episodes via DataStore")
                 else:
                     logger.warning("No episodes found in DataStore")
-            
+
             # Load graph into L3
             if self.l3_graph:
                 loaded_graph = self.datastore.load_graph(
-                    graph_id="main_graph", 
-                    namespace="agent_state"
+                    graph_id="main_graph", namespace="agent_state"
                 )
                 if loaded_graph is not None:
                     self.l3_graph.previous_graph = loaded_graph
-                    logger.info(f"Loaded graph via DataStore: {loaded_graph.num_nodes} nodes")
+                    logger.info(
+                        f"Loaded graph via DataStore: {loaded_graph.num_nodes} nodes"
+                    )
                 else:
                     logger.warning("No graph found in DataStore")
-            
+
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to load agent state via DataStore: {e}")
             return False
-    
+
     def _legacy_load_state(self) -> bool:
         """Legacy load method - to be deprecated."""
         try:
@@ -1007,6 +1024,7 @@ __all__ = ["MainAgent", "CycleResult", "cycle"]
 # Import configurable agent for easy migration
 try:
     from .configurable_agent import AgentConfig, AgentMode, ConfigurableAgent
+
     __all__.extend(["ConfigurableAgent", "AgentConfig", "AgentMode"])
 except ImportError:
     pass  # Configurable agent not available yet

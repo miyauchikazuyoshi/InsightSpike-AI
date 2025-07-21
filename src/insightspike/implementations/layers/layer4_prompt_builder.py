@@ -29,7 +29,7 @@ class L4PromptBuilder(L4Interface):
 
     def __init__(self, config=None):
         """Initialize with configuration object.
-        
+
         Args:
             config: Configuration object (legacy format). If None, a default config will be used.
         """
@@ -37,11 +37,9 @@ class L4PromptBuilder(L4Interface):
             # Create a minimal default config
             logger.warning("No config provided to L4PromptBuilder, using defaults")
             from types import SimpleNamespace
+
             config = SimpleNamespace(
-                llm=SimpleNamespace(
-                    use_direct_generation=True,
-                    max_prompt_length=8000
-                )
+                llm=SimpleNamespace(use_direct_generation=True, max_prompt_length=8000)
             )
         self.config = config
 

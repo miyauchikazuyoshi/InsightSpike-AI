@@ -22,14 +22,12 @@ from .main_agent import CycleResult, MainAgent
 __all__ = [
     # Core agents
     "MainAgent",
-    "ConfigurableAgent", 
+    "ConfigurableAgent",
     "GenericInsightSpikeAgent",
-    
     # Configuration
     "AgentConfig",
     "AgentMode",
     "CycleResult",
-    
     # Factory functions
     "create_qa_agent",
     "create_maze_agent",

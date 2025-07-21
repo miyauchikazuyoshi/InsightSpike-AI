@@ -7,9 +7,9 @@ import warnings
 warnings.filterwarnings("ignore")
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-# Suppress stderr  
+# Suppress stderr
 stderr_backup = sys.stderr
-sys.stderr = open(os.devnull, 'w')
+sys.stderr = open(os.devnull, "w")
 
 try:
     from src.insightspike.config import load_config
@@ -19,7 +19,9 @@ finally:
     sys.stderr = stderr_backup
 
 print("1. Loading config...", flush=True)
-config = load_config(config_path="experiments/english_insight_reproduction/config_experiment.yaml")
+config = load_config(
+    config_path="experiments/english_insight_reproduction/config_experiment.yaml"
+)
 print("   ✓ Config loaded", flush=True)
 
 print("2. Creating MainAgent...", flush=True)

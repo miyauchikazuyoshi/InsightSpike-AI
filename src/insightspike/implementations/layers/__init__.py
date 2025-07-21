@@ -15,6 +15,7 @@ from .layer2_memory_manager import L2MemoryManager, MemoryConfig, MemoryMode
 # Layer 3: Graph Reasoner (Prefrontal Cortex analog)
 try:
     from .layer3_graph_reasoner import L3GraphReasoner
+
     GRAPH_REASONER_AVAILABLE = True
 except ImportError:
     L3GraphReasoner = None
@@ -37,24 +38,20 @@ from .scalable_graph_builder import ScalableGraphBuilder
 __all__ = [
     # Layer 1
     "ErrorMonitor",
-    
     # Layer 2
     "L2MemoryManager",
-    "MemoryConfig", 
+    "MemoryConfig",
     "MemoryMode",
     "CompatibleL2MemoryManager",
-    
     # Layer 3
     "L3GraphReasoner",
     "GRAPH_REASONER_AVAILABLE",
-    
     # Layer 4
     "L4LLMInterface",
     "LLMConfig",
-    "LLMProviderType", 
+    "LLMProviderType",
     "get_llm_provider",
     # "PromptBuilder",  # Temporarily disabled
-    
     # Supporting
     "ScalableGraphBuilder",
 ]
