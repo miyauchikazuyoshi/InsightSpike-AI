@@ -6,7 +6,7 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Poetry](https://img.shields.io/badge/dependency-Poetry-blue)](https://python-poetry.org/)
 
-![InsightSpike Demo](docs/demos/demo.gif)
+![InsightSpike Knowledge Graph Animation](experiments/english_insight_reproduction/results/visualizations/insight_detection_animation_q1.gif)
 
 ## 🎯 What is InsightSpike-AI?
 
