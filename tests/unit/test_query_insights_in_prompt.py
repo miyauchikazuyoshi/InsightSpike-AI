@@ -5,7 +5,6 @@ from unittest.mock import Mock
 import pytest
 
 from insightspike.config.models import LLMConfig
-from insightspike.core.base.dataclasses import QueryState
 from insightspike.implementations.layers.layer4_llm_interface import L4LLMInterface
 
 
