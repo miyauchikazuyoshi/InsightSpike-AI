@@ -5,8 +5,10 @@ Simple SQLiteDataStore Test
 Test core functionality without conflicting with existing event loops.
 """
 
-import numpy as np
 import os
+
+import numpy as np
+
 from src.insightspike.implementations.datastore.sqlite_store import SQLiteDataStore
 
 

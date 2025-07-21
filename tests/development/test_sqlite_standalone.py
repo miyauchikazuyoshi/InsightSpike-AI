@@ -26,14 +26,15 @@ logger = logging.getLogger(__name__)
 # Add the src directory to Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from src.insightspike.core.base.async_datastore import AsyncDataStore
+
 # Import only the minimal dependencies
 from src.insightspike.core.base.datastore import DataStore, VectorIndex
-from src.insightspike.core.base.async_datastore import AsyncDataStore
 
 # Import the SQLiteDataStore
 from src.insightspike.implementations.datastore.sqlite_store import (
-    SQLiteDataStore,
     FAISSVectorIndex,
+    SQLiteDataStore,
 )
 
 

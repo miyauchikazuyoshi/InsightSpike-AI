@@ -6,8 +6,10 @@ Simple test script to verify SQLiteDataStore functionality.
 """
 
 import asyncio
-import numpy as np
 import os
+
+import numpy as np
+
 from src.insightspike.implementations.datastore.sqlite_store import SQLiteDataStore
 
 

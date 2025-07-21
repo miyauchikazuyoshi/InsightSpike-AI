@@ -8,7 +8,7 @@ print("Testing DistilGPT2 loading...", flush=True)
 
 start = time.time()
 print("1. Importing transformers...", flush=True)
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 print(f"   ✓ Import done ({time.time()-start:.2f}s)", flush=True)
 
