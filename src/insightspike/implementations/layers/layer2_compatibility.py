@@ -26,7 +26,7 @@ class CompatibleL2MemoryManager(L2MemoryManager):
         memory_config.embedding_dim = dim
         
         # Initialize parent with new config
-        super().__init__(memory_config, legacy_config=config)
+        super().__init__(memory_config)
         
     def add_episode(self, vec: Union[np.ndarray, str], text: Optional[str] = None, 
                    c_value: float = 0.5, metadata: Optional[Dict] = None) -> int:

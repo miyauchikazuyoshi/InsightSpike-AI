@@ -3,9 +3,9 @@
 
 # LLM Provider Settings
 llm:
-  # Use "clean" provider for fast initialization (no external dependencies)
-  # Options: openai, anthropic, ollama, local, clean, mock
-  provider: clean
+  # Use "mock" provider for fast initialization (no external dependencies)
+  # Options: openai, anthropic, ollama, local, mock
+  provider: mock
   
   # Model name (used only for local provider)
   model: distilgpt2
@@ -22,14 +22,14 @@ memory:
   # Use simple flat index for small datasets
   index_type: flat
 
-# Reasoning Settings
-reasoning:
-  # Maximum cycles for convergence
-  max_cycles: 10
-  
-  # Quality thresholds
-  convergence_threshold: 0.8
-  spike_threshold: 0.7
+# Reasoning Settings (not supported in current config schema)
+# reasoning:
+#   # Maximum cycles for convergence
+#   max_cycles: 10
+#   
+#   # Quality thresholds
+#   convergence_threshold: 0.8
+#   spike_threshold: 0.7
 
 # Advanced Settings
 # Note: These are for future use

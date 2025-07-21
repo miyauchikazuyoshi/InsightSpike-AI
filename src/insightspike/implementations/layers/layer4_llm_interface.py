@@ -12,7 +12,10 @@ import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ...config.models import LLMConfig, InsightSpikeConfig
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +77,7 @@ class LLMProviderRegistry:
         return cls._lock
     
     @classmethod
-    def get_instance(cls, config: Union[LLMConfig, 'InsightSpikeConfig']) -> 'L4LLMInterface':
+    def get_instance(cls, config: Union['LLMConfig', 'InsightSpikeConfig']) -> 'L4LLMInterface':
         """
         Get or create a cached LLM provider instance.
         
@@ -201,7 +204,7 @@ class L4LLMInterface:
     - Caching and performance optimization
     """
     
-    def __init__(self, config: Optional[Union[LLMConfig, 'InsightSpikeConfig']] = None, legacy_config=None):
+    def __init__(self, config: Optional[Union[LLMConfig, 'InsightSpikeConfig', Dict[str, Any]]] = None):
         """Initialize with unified configuration"""
         from ...config.models import InsightSpikeConfig
 
@@ -218,10 +221,15 @@ class L4LLMInterface:
             )
         elif isinstance(config, LLMConfig):
             self.config = config
-        elif legacy_config:
-            # Legacy path - create from legacy config
-            self.config = LLMConfig()
-            self._apply_legacy_config(legacy_config)
+        elif isinstance(config, dict):
+            # Handle dict config (from experiments, etc.)
+            llm_config = config.get('llm', {})
+            self.config = LLMConfig.from_provider(
+                llm_config.get('provider', 'mock'),
+                model_name=llm_config.get('model', 'mock-model'),
+                temperature=llm_config.get('temperature', 0.7),
+                max_tokens=llm_config.get('max_tokens', 1000)
+            )
         else:
             # Default config
             self.config = LLMConfig()
@@ -236,19 +244,6 @@ class L4LLMInterface:
         self.response_cache = {} if self.config.enable_caching else None
         
         logger.info(f"Initialized {self.config.provider.value} LLM provider")
-        
-    def _apply_legacy_config(self, legacy_config):
-        """Apply settings from legacy config objects"""
-        if hasattr(legacy_config, 'llm'):
-            if hasattr(legacy_config.llm, 'model'):
-                self.config.model_name = legacy_config.llm.model
-            if hasattr(legacy_config.llm, 'temperature'):
-                self.config.temperature = legacy_config.llm.temperature
-            if hasattr(legacy_config.llm, 'provider'):
-                try:
-                    self.config.provider = LLMProviderType(legacy_config.llm.provider.lower())
-                except ValueError:
-                    logger.warning(f"Unknown provider: {legacy_config.llm.provider}")
                     
     def initialize(self) -> bool:
         """Initialize the LLM provider"""
@@ -772,7 +767,7 @@ def get_llm_provider(config=None, safe_mode: bool = False, use_cache: bool = Tru
         if use_cache:
             return LLMProviderRegistry.get_instance(llm_config)
         else:
-            provider = L4LLMInterface(llm_config, legacy_config=config)
+            provider = L4LLMInterface(llm_config)
             provider.initialize()
             return provider
 

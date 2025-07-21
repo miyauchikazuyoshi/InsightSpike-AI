@@ -48,6 +48,7 @@ class EurekaDetector:
         self.ged_threshold = ged_threshold
         self.ig_threshold = ig_threshold
         self.eta_spike = eta_spike
+        self.llm = None  # Optional LLM for reasoning
 
         # History for pattern analysis
         self.ged_history: List[float] = []
@@ -139,6 +140,130 @@ class EurekaDetector:
             "ig_trend": "increasing" if recent_ig[-1] > recent_ig[0] else "decreasing",
             "history_length": len(self.ged_history),
         }
+
+    def detect(self, text: str, context: List[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Detect if the given text represents an insight spike.
+
+        This is a simplified interface for DataStoreMainAgent integration.
+
+        Args:
+            text: Input text to analyze
+            context: List of related episodes with similarity scores
+
+        Returns:
+            Dict with 'has_spike', 'confidence', and other metadata
+        """
+        # Simple heuristic based on context similarity
+        if not context:
+            # No context = potentially new insight
+            return {
+                "has_spike": True,
+                "confidence": 0.8,
+                "reason": "Novel input with no similar context",
+            }
+
+        # Check similarity of top result
+        top_similarity = context[0].get("similarity", 0) if context else 0
+
+        if top_similarity > 0.95:
+            # Too similar = not an insight
+            return {
+                "has_spike": False,
+                "confidence": 0.9,
+                "reason": "Very similar to existing knowledge",
+            }
+        elif top_similarity > 0.7:
+            # Moderately similar = potential insight
+            return {
+                "has_spike": True,
+                "confidence": 0.6,
+                "reason": "Related but distinct from existing knowledge",
+            }
+        else:
+            # Low similarity = likely insight
+            return {
+                "has_spike": True,
+                "confidence": 0.85,
+                "reason": "Novel concept with low similarity to existing knowledge",
+            }
+
+    def set_llm(self, llm):
+        """Set LLM for enhanced insight detection."""
+        self.llm = llm
+
+    async def detect_with_llm(
+        self, text: str, context: List[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Enhanced insight detection using LLM reasoning.
+
+        Args:
+            text: Input text to analyze
+            context: List of related episodes
+
+        Returns:
+            Dict with detailed spike analysis
+        """
+        # First use heuristic detection
+        basic_result = self.detect(text, context)
+
+        if not self.llm:
+            return basic_result
+
+        # Prepare context for LLM
+        context_texts = []
+        if context:
+            for ep in context[:5]:  # Top 5 related episodes
+                context_texts.append(
+                    f"- {ep.get('text', '')} (similarity: {ep.get('similarity', 0):.2f})"
+                )
+
+        prompt = f"""Analyze if this represents a genuine insight spike:
+
+Input: {text}
+
+Related knowledge:
+{chr(10).join(context_texts) if context_texts else 'No related knowledge found'}
+
+Initial assessment:
+- Has spike: {basic_result['has_spike']}
+- Confidence: {basic_result['confidence']}
+- Reason: {basic_result['reason']}
+
+Provide enhanced analysis:
+1. Is this a genuine insight that bridges concepts?
+2. What is the novelty score (0-1)?
+3. What concepts does it connect?
+4. Confidence in spike detection (0-1)?
+
+Respond in JSON format.
+"""
+
+        try:
+            # Call LLM for enhanced analysis
+            llm_response = await self.llm.agenerate(prompt)
+
+            # Parse response
+            import json
+
+            analysis = json.loads(llm_response)
+
+            return {
+                "has_spike": analysis.get(
+                    "is_genuine_insight", basic_result["has_spike"]
+                ),
+                "confidence": analysis.get("confidence", basic_result["confidence"]),
+                "novelty_score": analysis.get("novelty_score", 0.5),
+                "connected_concepts": analysis.get("connected_concepts", []),
+                "reason": analysis.get("reasoning", basic_result["reason"]),
+                "basic_result": basic_result,
+                "llm_enhanced": True,
+            }
+
+        except Exception as e:
+            logger.warning(f"LLM enhancement failed: {e}")
+            return basic_result
 
 
 # Convenience function for simple spike detection

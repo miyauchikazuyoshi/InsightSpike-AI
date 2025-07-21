@@ -1,0 +1,25 @@
+{
+  "timestamp": "2025-07-21T12:50:46.249349",
+  "knowledge_items": 10,
+  "graph_edges": 24,
+  "results": [
+    {
+      "question": "How are energy and information fundamentally related?",
+      "has_spike": true,
+      "spike_score": 0.4084265617718196,
+      "visualization": "insight_detection_q1.png"
+    },
+    {
+      "question": "Can consciousness be understood through information theory?",
+      "has_spike": true,
+      "spike_score": 0.4097977282638775,
+      "visualization": "insight_detection_q2.png"
+    },
+    {
+      "question": "How does life organize information against entropy?",
+      "has_spike": false,
+      "spike_score": 0.24919490160051067,
+      "visualization": "insight_detection_q3.png"
+    }
+  ]
+}

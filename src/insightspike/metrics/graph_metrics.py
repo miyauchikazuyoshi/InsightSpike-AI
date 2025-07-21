@@ -3,7 +3,10 @@ import networkx as nx
 import numpy as np
 
 try:
-    from ..algorithms.graph_edit_distance import GraphEditDistance, get_global_ged_calculator
+    from ..algorithms.graph_edit_distance import (
+        GraphEditDistance,
+        get_global_ged_calculator,
+    )
     from ..algorithms.information_gain import InformationGain
 
     _ALGORITHMS_AVAILABLE = True
@@ -28,7 +31,7 @@ def delta_ged(g_old: nx.Graph, g_new: nx.Graph) -> float:
 
     This is a wrapper around the full GED implementation in algorithms.
     For advanced features, use GraphEditDistance directly.
-    
+
     NOTE: This now uses the proper ΔGED calculation that maintains
     a reference graph for correct insight detection.
     """
@@ -47,7 +50,7 @@ def delta_ig(vecs_old: np.ndarray, vecs_new: np.ndarray, k: int = 8) -> float:
 
     This is a wrapper that maintains backward compatibility.
     For advanced features and different entropy methods, use InformationGain directly.
-    
+
     Returns positive value when entropy decreases (information gain).
     """
     if _ALGORITHMS_AVAILABLE:

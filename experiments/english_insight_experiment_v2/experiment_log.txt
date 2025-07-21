@@ -1,0 +1,408 @@
+INFO: InsightSpike logging initialized. Log file: /Users/miyauchikazuyoshi/.insightspike/logs/insightspike_20250721.log
+INFO: OpenAI not available
+INFO: Anthropic not available
+INFO: Ollama not available
+2025-07-21 08:57:27,809 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-07-21 08:57:30,952 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: mps
+2025-07-21 08:57:31,083 - __main__ - INFO - Starting English Insight Experiment V2
+2025-07-21 08:57:31,083 - __main__ - INFO - Preparing datastore with knowledge base...
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  1.77it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  1.77it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  6.85it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  6.84it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 37.52it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  7.02it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  7.01it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 40.24it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 39.80it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  7.10it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  7.09it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  6.13it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  6.12it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 32.91it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 39.96it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  3.25it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  3.25it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  6.15it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  6.14it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  6.77it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  6.76it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 38.87it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 39.33it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 38.54it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  7.28it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  7.27it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 36.47it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  6.76it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  6.74it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 36.79it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 36.51it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  6.32it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  6.31it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 38.73it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 32.98it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 34.12it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 39.85it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 43.81it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 45.74it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 40.59it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 38.25it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 42.39it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 36.82it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 37.84it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 38.95it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 34.23it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 39.34it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 39.46it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 39.64it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 35.65it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 41.11it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 37.68it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 37.35it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 39.67it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 34.94it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 41.84it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 44.55it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 36.21it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 41.85it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 44.74it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 45.46it/s]
+INFO: Saved 50 episodes to /Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/english_insight_experiment_v2/data/core/default.json
+2025-07-21 08:57:34,423 - insightspike.implementations.datastore.filesystem_store - INFO - Saved 50 episodes to /Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/english_insight_experiment_v2/data/core/default.json
+2025-07-21 08:57:34,423 - __main__ - INFO - Stored 50 episodes in datastore
+2025-07-21 08:57:34,424 - __main__ - INFO - 
+============================================================
+2025-07-21 08:57:34,424 - __main__ - INFO - Question 1/6: What is the relationship between energy and information?
+2025-07-21 08:57:34,424 - __main__ - INFO - ============================================================
+2025-07-21 08:57:34,424 - __main__ - INFO - Running baseline LLM for: What is the relationship between energy and information?
+INFO: Using embedding dimension: 384
+2025-07-21 08:57:34,425 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using embedding dimension: 384
+INFO: Using Flat FAISS index
+2025-07-21 08:57:34,425 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using Flat FAISS index
+WARNING: Advanced metrics not available
+2025-07-21 08:57:34,426 - insightspike.algorithms.metrics_selector - WARNING - Advanced metrics not available
+WARNING: Requested GED algorithm 'advanced' not available, using simple
+2025-07-21 08:57:34,426 - insightspike.algorithms.metrics_selector - WARNING - Requested GED algorithm 'advanced' not available, using simple
+WARNING: Requested IG algorithm 'advanced' not available, using simple
+2025-07-21 08:57:34,426 - insightspike.algorithms.metrics_selector - WARNING - Requested IG algorithm 'advanced' not available, using simple
+INFO: Metrics initialized: GED=advanced, IG=advanced
+2025-07-21 08:57:34,427 - insightspike.algorithms.metrics_selector - INFO - Metrics initialized: GED=advanced, IG=advanced
+INFO: Metrics algorithms - GED: unknown, IG: unknown
+2025-07-21 08:57:34,427 - insightspike.implementations.layers.layer3_graph_reasoner - INFO - Metrics algorithms - GED: unknown, IG: unknown
+INFO: Initializing MainAgent components...
+2025-07-21 08:57:35,929 - insightspike.implementations.agents.main_agent - INFO - Initializing MainAgent components...
+INFO: LLM provider already initialized (cached)
+2025-07-21 08:57:35,929 - insightspike.implementations.agents.main_agent - INFO - LLM provider already initialized (cached)
+INFO: No saved memory found at data/layer2_memory.json
+2025-07-21 08:57:35,929 - insightspike.implementations.layers.layer2_memory_manager - INFO - No saved memory found at data/layer2_memory.json
+INFO: No existing memory found, starting fresh
+2025-07-21 08:57:35,929 - insightspike.implementations.agents.main_agent - INFO - No existing memory found, starting fresh
+INFO: MainAgent initialization complete
+2025-07-21 08:57:35,929 - insightspike.implementations.agents.main_agent - INFO - MainAgent initialization complete
+2025-07-21 08:57:50,165 - __main__ - INFO - Running standard RAG for: What is the relationship between energy and information?
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 28.62it/s]
+INFO: Using embedding dimension: 384
+2025-07-21 08:57:50,213 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using embedding dimension: 384
+INFO: Using Flat FAISS index
+2025-07-21 08:57:50,213 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using Flat FAISS index
+WARNING: Requested GED algorithm 'advanced' not available, using simple
+2025-07-21 08:57:50,214 - insightspike.algorithms.metrics_selector - WARNING - Requested GED algorithm 'advanced' not available, using simple
+WARNING: Requested IG algorithm 'advanced' not available, using simple
+2025-07-21 08:57:50,214 - insightspike.algorithms.metrics_selector - WARNING - Requested IG algorithm 'advanced' not available, using simple
+INFO: Metrics initialized: GED=advanced, IG=advanced
+2025-07-21 08:57:50,214 - insightspike.algorithms.metrics_selector - INFO - Metrics initialized: GED=advanced, IG=advanced
+INFO: Metrics algorithms - GED: unknown, IG: unknown
+2025-07-21 08:57:50,214 - insightspike.implementations.layers.layer3_graph_reasoner - INFO - Metrics algorithms - GED: unknown, IG: unknown
+INFO: Initializing MainAgent components...
+2025-07-21 08:57:50,214 - insightspike.implementations.agents.main_agent - INFO - Initializing MainAgent components...
+INFO: LLM provider already initialized (cached)
+2025-07-21 08:57:50,214 - insightspike.implementations.agents.main_agent - INFO - LLM provider already initialized (cached)
+INFO: No saved memory found at data/layer2_memory.json
+2025-07-21 08:57:50,214 - insightspike.implementations.layers.layer2_memory_manager - INFO - No saved memory found at data/layer2_memory.json
+INFO: No existing memory found, starting fresh
+2025-07-21 08:57:50,214 - insightspike.implementations.agents.main_agent - INFO - No existing memory found, starting fresh
+INFO: MainAgent initialization complete
+2025-07-21 08:57:50,214 - insightspike.implementations.agents.main_agent - INFO - MainAgent initialization complete
+2025-07-21 08:58:04,825 - __main__ - INFO - Running InsightSpike for: What is the relationship between energy and information?
+2025-07-21 08:58:04,825 - __main__ - ERROR - InsightSpike failed: cannot import name 'CompatibleL2MemoryManager' from 'insightspike.implementations.layers.layer2_memory_manager' (/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/src/insightspike/implementations/layers/layer2_memory_manager.py)
+2025-07-21 08:58:04,826 - __main__ - INFO - 
+Results Summary:
+2025-07-21 08:58:04,826 - __main__ - INFO - baseline: Quality=0.320, Spike=False, Phases=0
+2025-07-21 08:58:04,826 - __main__ - INFO - rag: Quality=0.200, Spike=False, Phases=2
+2025-07-21 08:58:04,826 - __main__ - INFO - 
+============================================================
+2025-07-21 08:58:04,826 - __main__ - INFO - Question 2/6: Why does consciousness emerge?
+2025-07-21 08:58:04,826 - __main__ - INFO - ============================================================
+2025-07-21 08:58:04,826 - __main__ - INFO - Running baseline LLM for: Why does consciousness emerge?
+INFO: Using embedding dimension: 384
+2025-07-21 08:58:04,826 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using embedding dimension: 384
+INFO: Using Flat FAISS index
+2025-07-21 08:58:04,827 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using Flat FAISS index
+WARNING: Requested GED algorithm 'advanced' not available, using simple
+2025-07-21 08:58:04,827 - insightspike.algorithms.metrics_selector - WARNING - Requested GED algorithm 'advanced' not available, using simple
+WARNING: Requested IG algorithm 'advanced' not available, using simple
+2025-07-21 08:58:04,827 - insightspike.algorithms.metrics_selector - WARNING - Requested IG algorithm 'advanced' not available, using simple
+INFO: Metrics initialized: GED=advanced, IG=advanced
+2025-07-21 08:58:04,828 - insightspike.algorithms.metrics_selector - INFO - Metrics initialized: GED=advanced, IG=advanced
+INFO: Metrics algorithms - GED: unknown, IG: unknown
+2025-07-21 08:58:04,828 - insightspike.implementations.layers.layer3_graph_reasoner - INFO - Metrics algorithms - GED: unknown, IG: unknown
+INFO: Initializing MainAgent components...
+2025-07-21 08:58:04,828 - insightspike.implementations.agents.main_agent - INFO - Initializing MainAgent components...
+INFO: LLM provider already initialized (cached)
+2025-07-21 08:58:04,828 - insightspike.implementations.agents.main_agent - INFO - LLM provider already initialized (cached)
+INFO: No saved memory found at data/layer2_memory.json
+2025-07-21 08:58:04,828 - insightspike.implementations.layers.layer2_memory_manager - INFO - No saved memory found at data/layer2_memory.json
+INFO: No existing memory found, starting fresh
+2025-07-21 08:58:04,828 - insightspike.implementations.agents.main_agent - INFO - No existing memory found, starting fresh
+INFO: MainAgent initialization complete
+2025-07-21 08:58:04,829 - insightspike.implementations.agents.main_agent - INFO - MainAgent initialization complete
+2025-07-21 08:58:18,750 - __main__ - INFO - Running standard RAG for: Why does consciousness emerge?
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  6.76it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  6.75it/s]
+INFO: Using embedding dimension: 384
+2025-07-21 08:58:18,909 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using embedding dimension: 384
+INFO: Using Flat FAISS index
+2025-07-21 08:58:18,910 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using Flat FAISS index
+WARNING: Requested GED algorithm 'advanced' not available, using simple
+2025-07-21 08:58:18,910 - insightspike.algorithms.metrics_selector - WARNING - Requested GED algorithm 'advanced' not available, using simple
+WARNING: Requested IG algorithm 'advanced' not available, using simple
+2025-07-21 08:58:18,910 - insightspike.algorithms.metrics_selector - WARNING - Requested IG algorithm 'advanced' not available, using simple
+INFO: Metrics initialized: GED=advanced, IG=advanced
+2025-07-21 08:58:18,910 - insightspike.algorithms.metrics_selector - INFO - Metrics initialized: GED=advanced, IG=advanced
+INFO: Metrics algorithms - GED: unknown, IG: unknown
+2025-07-21 08:58:18,910 - insightspike.implementations.layers.layer3_graph_reasoner - INFO - Metrics algorithms - GED: unknown, IG: unknown
+INFO: Initializing MainAgent components...
+2025-07-21 08:58:18,910 - insightspike.implementations.agents.main_agent - INFO - Initializing MainAgent components...
+INFO: LLM provider already initialized (cached)
+2025-07-21 08:58:18,910 - insightspike.implementations.agents.main_agent - INFO - LLM provider already initialized (cached)
+INFO: No saved memory found at data/layer2_memory.json
+2025-07-21 08:58:18,910 - insightspike.implementations.layers.layer2_memory_manager - INFO - No saved memory found at data/layer2_memory.json
+INFO: No existing memory found, starting fresh
+2025-07-21 08:58:18,910 - insightspike.implementations.agents.main_agent - INFO - No existing memory found, starting fresh
+INFO: MainAgent initialization complete
+2025-07-21 08:58:18,910 - insightspike.implementations.agents.main_agent - INFO - MainAgent initialization complete
+2025-07-21 08:58:33,376 - __main__ - INFO - Running InsightSpike for: Why does consciousness emerge?
+2025-07-21 08:58:33,376 - __main__ - ERROR - InsightSpike failed: cannot import name 'CompatibleL2MemoryManager' from 'insightspike.implementations.layers.layer2_memory_manager' (/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/src/insightspike/implementations/layers/layer2_memory_manager.py)
+2025-07-21 08:58:33,376 - __main__ - INFO - 
+Results Summary:
+2025-07-21 08:58:33,376 - __main__ - INFO - baseline: Quality=0.200, Spike=False, Phases=0
+2025-07-21 08:58:33,377 - __main__ - INFO - rag: Quality=0.200, Spike=False, Phases=2
+2025-07-21 08:58:33,377 - __main__ - INFO - 
+============================================================
+2025-07-21 08:58:33,377 - __main__ - INFO - Question 3/6: What is the mechanism of creativity at the edge of chaos?
+2025-07-21 08:58:33,377 - __main__ - INFO - ============================================================
+2025-07-21 08:58:33,377 - __main__ - INFO - Running baseline LLM for: What is the mechanism of creativity at the edge of chaos?
+INFO: Using embedding dimension: 384
+2025-07-21 08:58:33,378 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using embedding dimension: 384
+INFO: Using Flat FAISS index
+2025-07-21 08:58:33,378 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using Flat FAISS index
+WARNING: Requested GED algorithm 'advanced' not available, using simple
+2025-07-21 08:58:33,378 - insightspike.algorithms.metrics_selector - WARNING - Requested GED algorithm 'advanced' not available, using simple
+WARNING: Requested IG algorithm 'advanced' not available, using simple
+2025-07-21 08:58:33,379 - insightspike.algorithms.metrics_selector - WARNING - Requested IG algorithm 'advanced' not available, using simple
+INFO: Metrics initialized: GED=advanced, IG=advanced
+2025-07-21 08:58:33,379 - insightspike.algorithms.metrics_selector - INFO - Metrics initialized: GED=advanced, IG=advanced
+INFO: Metrics algorithms - GED: unknown, IG: unknown
+2025-07-21 08:58:33,379 - insightspike.implementations.layers.layer3_graph_reasoner - INFO - Metrics algorithms - GED: unknown, IG: unknown
+INFO: Initializing MainAgent components...
+2025-07-21 08:58:33,379 - insightspike.implementations.agents.main_agent - INFO - Initializing MainAgent components...
+INFO: LLM provider already initialized (cached)
+2025-07-21 08:58:33,379 - insightspike.implementations.agents.main_agent - INFO - LLM provider already initialized (cached)
+INFO: No saved memory found at data/layer2_memory.json
+2025-07-21 08:58:33,380 - insightspike.implementations.layers.layer2_memory_manager - INFO - No saved memory found at data/layer2_memory.json
+INFO: No existing memory found, starting fresh
+2025-07-21 08:58:33,380 - insightspike.implementations.agents.main_agent - INFO - No existing memory found, starting fresh
+INFO: MainAgent initialization complete
+2025-07-21 08:58:33,380 - insightspike.implementations.agents.main_agent - INFO - MainAgent initialization complete
+2025-07-21 08:58:47,415 - __main__ - INFO - Running standard RAG for: What is the mechanism of creativity at the edge of chaos?
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 29.55it/s]
+INFO: Using embedding dimension: 384
+2025-07-21 08:58:47,463 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using embedding dimension: 384
+INFO: Using Flat FAISS index
+2025-07-21 08:58:47,463 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using Flat FAISS index
+WARNING: Requested GED algorithm 'advanced' not available, using simple
+2025-07-21 08:58:47,463 - insightspike.algorithms.metrics_selector - WARNING - Requested GED algorithm 'advanced' not available, using simple
+WARNING: Requested IG algorithm 'advanced' not available, using simple
+2025-07-21 08:58:47,464 - insightspike.algorithms.metrics_selector - WARNING - Requested IG algorithm 'advanced' not available, using simple
+INFO: Metrics initialized: GED=advanced, IG=advanced
+2025-07-21 08:58:47,464 - insightspike.algorithms.metrics_selector - INFO - Metrics initialized: GED=advanced, IG=advanced
+INFO: Metrics algorithms - GED: unknown, IG: unknown
+2025-07-21 08:58:47,464 - insightspike.implementations.layers.layer3_graph_reasoner - INFO - Metrics algorithms - GED: unknown, IG: unknown
+INFO: Initializing MainAgent components...
+2025-07-21 08:58:47,464 - insightspike.implementations.agents.main_agent - INFO - Initializing MainAgent components...
+INFO: LLM provider already initialized (cached)
+2025-07-21 08:58:47,464 - insightspike.implementations.agents.main_agent - INFO - LLM provider already initialized (cached)
+INFO: No saved memory found at data/layer2_memory.json
+2025-07-21 08:58:47,464 - insightspike.implementations.layers.layer2_memory_manager - INFO - No saved memory found at data/layer2_memory.json
+INFO: No existing memory found, starting fresh
+2025-07-21 08:58:47,464 - insightspike.implementations.agents.main_agent - INFO - No existing memory found, starting fresh
+INFO: MainAgent initialization complete
+2025-07-21 08:58:47,464 - insightspike.implementations.agents.main_agent - INFO - MainAgent initialization complete
+2025-07-21 08:59:02,049 - __main__ - INFO - Running InsightSpike for: What is the mechanism of creativity at the edge of chaos?
+2025-07-21 08:59:02,049 - __main__ - ERROR - InsightSpike failed: cannot import name 'CompatibleL2MemoryManager' from 'insightspike.implementations.layers.layer2_memory_manager' (/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/src/insightspike/implementations/layers/layer2_memory_manager.py)
+2025-07-21 08:59:02,049 - __main__ - INFO - 
+Results Summary:
+2025-07-21 08:59:02,050 - __main__ - INFO - baseline: Quality=0.200, Spike=False, Phases=0
+2025-07-21 08:59:02,050 - __main__ - INFO - rag: Quality=0.200, Spike=False, Phases=2
+2025-07-21 08:59:02,050 - __main__ - INFO - 
+============================================================
+2025-07-21 08:59:02,050 - __main__ - INFO - Question 4/6: What is entropy?
+2025-07-21 08:59:02,050 - __main__ - INFO - ============================================================
+2025-07-21 08:59:02,050 - __main__ - INFO - Running baseline LLM for: What is entropy?
+INFO: Using embedding dimension: 384
+2025-07-21 08:59:02,050 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using embedding dimension: 384
+INFO: Using Flat FAISS index
+2025-07-21 08:59:02,051 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using Flat FAISS index
+WARNING: Requested GED algorithm 'advanced' not available, using simple
+2025-07-21 08:59:02,051 - insightspike.algorithms.metrics_selector - WARNING - Requested GED algorithm 'advanced' not available, using simple
+WARNING: Requested IG algorithm 'advanced' not available, using simple
+2025-07-21 08:59:02,051 - insightspike.algorithms.metrics_selector - WARNING - Requested IG algorithm 'advanced' not available, using simple
+INFO: Metrics initialized: GED=advanced, IG=advanced
+2025-07-21 08:59:02,051 - insightspike.algorithms.metrics_selector - INFO - Metrics initialized: GED=advanced, IG=advanced
+INFO: Metrics algorithms - GED: unknown, IG: unknown
+2025-07-21 08:59:02,051 - insightspike.implementations.layers.layer3_graph_reasoner - INFO - Metrics algorithms - GED: unknown, IG: unknown
+INFO: Initializing MainAgent components...
+2025-07-21 08:59:02,051 - insightspike.implementations.agents.main_agent - INFO - Initializing MainAgent components...
+INFO: LLM provider already initialized (cached)
+2025-07-21 08:59:02,051 - insightspike.implementations.agents.main_agent - INFO - LLM provider already initialized (cached)
+INFO: No saved memory found at data/layer2_memory.json
+2025-07-21 08:59:02,051 - insightspike.implementations.layers.layer2_memory_manager - INFO - No saved memory found at data/layer2_memory.json
+INFO: No existing memory found, starting fresh
+2025-07-21 08:59:02,052 - insightspike.implementations.agents.main_agent - INFO - No existing memory found, starting fresh
+INFO: MainAgent initialization complete
+2025-07-21 08:59:02,052 - insightspike.implementations.agents.main_agent - INFO - MainAgent initialization complete
+2025-07-21 08:59:16,089 - __main__ - INFO - Running standard RAG for: What is entropy?
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  6.93it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  6.92it/s]
+INFO: Using embedding dimension: 384
+2025-07-21 08:59:16,248 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using embedding dimension: 384
+INFO: Using Flat FAISS index
+2025-07-21 08:59:16,248 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using Flat FAISS index
+WARNING: Requested GED algorithm 'advanced' not available, using simple
+2025-07-21 08:59:16,248 - insightspike.algorithms.metrics_selector - WARNING - Requested GED algorithm 'advanced' not available, using simple
+WARNING: Requested IG algorithm 'advanced' not available, using simple
+2025-07-21 08:59:16,248 - insightspike.algorithms.metrics_selector - WARNING - Requested IG algorithm 'advanced' not available, using simple
+INFO: Metrics initialized: GED=advanced, IG=advanced
+2025-07-21 08:59:16,249 - insightspike.algorithms.metrics_selector - INFO - Metrics initialized: GED=advanced, IG=advanced
+INFO: Metrics algorithms - GED: unknown, IG: unknown
+2025-07-21 08:59:16,249 - insightspike.implementations.layers.layer3_graph_reasoner - INFO - Metrics algorithms - GED: unknown, IG: unknown
+INFO: Initializing MainAgent components...
+2025-07-21 08:59:16,249 - insightspike.implementations.agents.main_agent - INFO - Initializing MainAgent components...
+INFO: LLM provider already initialized (cached)
+2025-07-21 08:59:16,249 - insightspike.implementations.agents.main_agent - INFO - LLM provider already initialized (cached)
+INFO: No saved memory found at data/layer2_memory.json
+2025-07-21 08:59:16,249 - insightspike.implementations.layers.layer2_memory_manager - INFO - No saved memory found at data/layer2_memory.json
+INFO: No existing memory found, starting fresh
+2025-07-21 08:59:16,249 - insightspike.implementations.agents.main_agent - INFO - No existing memory found, starting fresh
+INFO: MainAgent initialization complete
+2025-07-21 08:59:16,249 - insightspike.implementations.agents.main_agent - INFO - MainAgent initialization complete
+2025-07-21 08:59:30,746 - __main__ - INFO - Running InsightSpike for: What is entropy?
+2025-07-21 08:59:30,746 - __main__ - ERROR - InsightSpike failed: cannot import name 'CompatibleL2MemoryManager' from 'insightspike.implementations.layers.layer2_memory_manager' (/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/src/insightspike/implementations/layers/layer2_memory_manager.py)
+2025-07-21 08:59:30,746 - __main__ - INFO - 
+Results Summary:
+2025-07-21 08:59:30,746 - __main__ - INFO - baseline: Quality=0.200, Spike=False, Phases=0
+2025-07-21 08:59:30,746 - __main__ - INFO - rag: Quality=0.200, Spike=False, Phases=2
+2025-07-21 08:59:30,746 - __main__ - INFO - 
+============================================================
+2025-07-21 08:59:30,746 - __main__ - INFO - Question 5/6: Can you explain quantum entanglement?
+2025-07-21 08:59:30,746 - __main__ - INFO - ============================================================
+2025-07-21 08:59:30,746 - __main__ - INFO - Running baseline LLM for: Can you explain quantum entanglement?
+INFO: Using embedding dimension: 384
+2025-07-21 08:59:30,747 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using embedding dimension: 384
+INFO: Using Flat FAISS index
+2025-07-21 08:59:30,747 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using Flat FAISS index
+WARNING: Requested GED algorithm 'advanced' not available, using simple
+2025-07-21 08:59:30,747 - insightspike.algorithms.metrics_selector - WARNING - Requested GED algorithm 'advanced' not available, using simple
+WARNING: Requested IG algorithm 'advanced' not available, using simple
+2025-07-21 08:59:30,747 - insightspike.algorithms.metrics_selector - WARNING - Requested IG algorithm 'advanced' not available, using simple
+INFO: Metrics initialized: GED=advanced, IG=advanced
+2025-07-21 08:59:30,747 - insightspike.algorithms.metrics_selector - INFO - Metrics initialized: GED=advanced, IG=advanced
+INFO: Metrics algorithms - GED: unknown, IG: unknown
+2025-07-21 08:59:30,747 - insightspike.implementations.layers.layer3_graph_reasoner - INFO - Metrics algorithms - GED: unknown, IG: unknown
+INFO: Initializing MainAgent components...
+2025-07-21 08:59:30,748 - insightspike.implementations.agents.main_agent - INFO - Initializing MainAgent components...
+INFO: LLM provider already initialized (cached)
+2025-07-21 08:59:30,748 - insightspike.implementations.agents.main_agent - INFO - LLM provider already initialized (cached)
+INFO: No saved memory found at data/layer2_memory.json
+2025-07-21 08:59:30,748 - insightspike.implementations.layers.layer2_memory_manager - INFO - No saved memory found at data/layer2_memory.json
+INFO: No existing memory found, starting fresh
+2025-07-21 08:59:30,748 - insightspike.implementations.agents.main_agent - INFO - No existing memory found, starting fresh
+INFO: MainAgent initialization complete
+2025-07-21 08:59:30,748 - insightspike.implementations.agents.main_agent - INFO - MainAgent initialization complete
+2025-07-21 08:59:44,920 - __main__ - INFO - Running standard RAG for: Can you explain quantum entanglement?
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 28.48it/s]
+INFO: Using embedding dimension: 384
+2025-07-21 08:59:44,970 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using embedding dimension: 384
+INFO: Using Flat FAISS index
+2025-07-21 08:59:44,970 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using Flat FAISS index
+WARNING: Requested GED algorithm 'advanced' not available, using simple
+2025-07-21 08:59:44,970 - insightspike.algorithms.metrics_selector - WARNING - Requested GED algorithm 'advanced' not available, using simple
+WARNING: Requested IG algorithm 'advanced' not available, using simple
+2025-07-21 08:59:44,970 - insightspike.algorithms.metrics_selector - WARNING - Requested IG algorithm 'advanced' not available, using simple
+INFO: Metrics initialized: GED=advanced, IG=advanced
+2025-07-21 08:59:44,970 - insightspike.algorithms.metrics_selector - INFO - Metrics initialized: GED=advanced, IG=advanced
+INFO: Metrics algorithms - GED: unknown, IG: unknown
+2025-07-21 08:59:44,971 - insightspike.implementations.layers.layer3_graph_reasoner - INFO - Metrics algorithms - GED: unknown, IG: unknown
+INFO: Initializing MainAgent components...
+2025-07-21 08:59:44,971 - insightspike.implementations.agents.main_agent - INFO - Initializing MainAgent components...
+INFO: LLM provider already initialized (cached)
+2025-07-21 08:59:44,971 - insightspike.implementations.agents.main_agent - INFO - LLM provider already initialized (cached)
+INFO: No saved memory found at data/layer2_memory.json
+2025-07-21 08:59:44,971 - insightspike.implementations.layers.layer2_memory_manager - INFO - No saved memory found at data/layer2_memory.json
+INFO: No existing memory found, starting fresh
+2025-07-21 08:59:44,971 - insightspike.implementations.agents.main_agent - INFO - No existing memory found, starting fresh
+INFO: MainAgent initialization complete
+2025-07-21 08:59:44,971 - insightspike.implementations.agents.main_agent - INFO - MainAgent initialization complete
+2025-07-21 08:59:59,712 - __main__ - INFO - Running InsightSpike for: Can you explain quantum entanglement?
+2025-07-21 08:59:59,713 - __main__ - ERROR - InsightSpike failed: cannot import name 'CompatibleL2MemoryManager' from 'insightspike.implementations.layers.layer2_memory_manager' (/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/src/insightspike/implementations/layers/layer2_memory_manager.py)
+2025-07-21 08:59:59,713 - __main__ - INFO - 
+Results Summary:
+2025-07-21 08:59:59,713 - __main__ - INFO - baseline: Quality=0.240, Spike=False, Phases=0
+2025-07-21 08:59:59,713 - __main__ - INFO - rag: Quality=0.200, Spike=False, Phases=2
+2025-07-21 08:59:59,713 - __main__ - INFO - 
+============================================================
+2025-07-21 08:59:59,713 - __main__ - INFO - Question 6/6: Is there a principle that unifies all phenomena?
+2025-07-21 08:59:59,713 - __main__ - INFO - ============================================================
+2025-07-21 08:59:59,713 - __main__ - INFO - Running baseline LLM for: Is there a principle that unifies all phenomena?
+INFO: Using embedding dimension: 384
+2025-07-21 08:59:59,713 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using embedding dimension: 384
+INFO: Using Flat FAISS index
+2025-07-21 08:59:59,713 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using Flat FAISS index
+WARNING: Requested GED algorithm 'advanced' not available, using simple
+2025-07-21 08:59:59,714 - insightspike.algorithms.metrics_selector - WARNING - Requested GED algorithm 'advanced' not available, using simple
+WARNING: Requested IG algorithm 'advanced' not available, using simple
+2025-07-21 08:59:59,714 - insightspike.algorithms.metrics_selector - WARNING - Requested IG algorithm 'advanced' not available, using simple
+INFO: Metrics initialized: GED=advanced, IG=advanced
+2025-07-21 08:59:59,714 - insightspike.algorithms.metrics_selector - INFO - Metrics initialized: GED=advanced, IG=advanced
+INFO: Metrics algorithms - GED: unknown, IG: unknown
+2025-07-21 08:59:59,714 - insightspike.implementations.layers.layer3_graph_reasoner - INFO - Metrics algorithms - GED: unknown, IG: unknown
+INFO: Initializing MainAgent components...
+2025-07-21 08:59:59,714 - insightspike.implementations.agents.main_agent - INFO - Initializing MainAgent components...
+INFO: LLM provider already initialized (cached)
+2025-07-21 08:59:59,714 - insightspike.implementations.agents.main_agent - INFO - LLM provider already initialized (cached)
+INFO: No saved memory found at data/layer2_memory.json
+2025-07-21 08:59:59,714 - insightspike.implementations.layers.layer2_memory_manager - INFO - No saved memory found at data/layer2_memory.json
+INFO: No existing memory found, starting fresh
+2025-07-21 08:59:59,714 - insightspike.implementations.agents.main_agent - INFO - No existing memory found, starting fresh
+INFO: MainAgent initialization complete
+2025-07-21 08:59:59,714 - insightspike.implementations.agents.main_agent - INFO - MainAgent initialization complete
+2025-07-21 09:00:13,635 - __main__ - INFO - Running standard RAG for: Is there a principle that unifies all phenomena?
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 30.32it/s]
+INFO: Using embedding dimension: 384
+2025-07-21 09:00:13,681 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using embedding dimension: 384
+INFO: Using Flat FAISS index
+2025-07-21 09:00:13,681 - insightspike.implementations.layers.layer2_memory_manager - INFO - Using Flat FAISS index
+WARNING: Requested GED algorithm 'advanced' not available, using simple
+2025-07-21 09:00:13,681 - insightspike.algorithms.metrics_selector - WARNING - Requested GED algorithm 'advanced' not available, using simple
+WARNING: Requested IG algorithm 'advanced' not available, using simple
+2025-07-21 09:00:13,682 - insightspike.algorithms.metrics_selector - WARNING - Requested IG algorithm 'advanced' not available, using simple
+INFO: Metrics initialized: GED=advanced, IG=advanced
+2025-07-21 09:00:13,682 - insightspike.algorithms.metrics_selector - INFO - Metrics initialized: GED=advanced, IG=advanced
+INFO: Metrics algorithms - GED: unknown, IG: unknown
+2025-07-21 09:00:13,682 - insightspike.implementations.layers.layer3_graph_reasoner - INFO - Metrics algorithms - GED: unknown, IG: unknown
+INFO: Initializing MainAgent components...
+2025-07-21 09:00:13,682 - insightspike.implementations.agents.main_agent - INFO - Initializing MainAgent components...
+INFO: LLM provider already initialized (cached)
+2025-07-21 09:00:13,682 - insightspike.implementations.agents.main_agent - INFO - LLM provider already initialized (cached)
+INFO: No saved memory found at data/layer2_memory.json
+2025-07-21 09:00:13,682 - insightspike.implementations.layers.layer2_memory_manager - INFO - No saved memory found at data/layer2_memory.json
+INFO: No existing memory found, starting fresh
+2025-07-21 09:00:13,682 - insightspike.implementations.agents.main_agent - INFO - No existing memory found, starting fresh
+INFO: MainAgent initialization complete
+2025-07-21 09:00:13,682 - insightspike.implementations.agents.main_agent - INFO - MainAgent initialization complete
+2025-07-21 09:00:28,271 - __main__ - INFO - Running InsightSpike for: Is there a principle that unifies all phenomena?
+2025-07-21 09:00:28,271 - __main__ - ERROR - InsightSpike failed: cannot import name 'CompatibleL2MemoryManager' from 'insightspike.implementations.layers.layer2_memory_manager' (/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/src/insightspike/implementations/layers/layer2_memory_manager.py)
+2025-07-21 09:00:28,271 - __main__ - INFO - 
+Results Summary:
+2025-07-21 09:00:28,272 - __main__ - INFO - baseline: Quality=0.200, Spike=False, Phases=0
+2025-07-21 09:00:28,272 - __main__ - INFO - rag: Quality=0.200, Spike=False, Phases=3
+2025-07-21 09:00:28,273 - __main__ - INFO - Saved results to /Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/english_insight_experiment_v2/results/outputs/experiment_results.json
+2025-07-21 09:00:28,293 - __main__ - INFO - Saved summary to /Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/english_insight_experiment_v2/results/outputs/experiment_summary.csv
+2025-07-21 09:00:28,294 - __main__ - INFO - Generated report at /Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/english_insight_experiment_v2/results/experiment_report.md

@@ -123,13 +123,32 @@ class L2MemoryManager:
     - Transitioning from C-values to graph-based importance
     """
     
-    def __init__(self, config: Optional[MemoryConfig] = None, legacy_config=None):
+    def __init__(self, config: Optional[Union[MemoryConfig, Dict[str, Any], Any]] = None):
         """Initialize with unified configuration"""
-        self.config = config or MemoryConfig()
-        
-        # Handle legacy config formats
-        if legacy_config:
-            self._apply_legacy_config(legacy_config)
+        # Handle different config types
+        if isinstance(config, MemoryConfig):
+            self.config = config
+        elif isinstance(config, dict):
+            # Create MemoryConfig from dict
+            memory_config = config.get('memory', {})
+            self.config = MemoryConfig(
+                mode=MemoryMode(memory_config.get('mode', 'scalable')),
+                embedding_dim=memory_config.get('embedding_dim', 384),
+                max_episodes=memory_config.get('max_episodes', 10000),
+                use_c_values=memory_config.get('use_c_values', True),
+                use_graph_integration=memory_config.get('use_graph_integration', False),
+                use_scalable_indexing=memory_config.get('use_scalable_indexing', True),
+                batch_size=memory_config.get('batch_size', 32),
+                cache_embeddings=memory_config.get('cache_embeddings', True)
+            )
+        elif hasattr(config, 'memory'):
+            # Handle InsightSpikeConfig or similar
+            self.config = MemoryConfig(
+                max_episodes=getattr(config.memory, 'max_episodes', 10000),
+                batch_size=getattr(config.memory, 'batch_size', 32)
+            )
+        else:
+            self.config = MemoryConfig()
             
         # Core components
         self.episodes: List[Episode] = []
@@ -165,9 +184,12 @@ class L2MemoryManager:
         if self.config.use_graph_integration:
             # ScalableGraphBuilder uses config object, not individual params
             graph_config = type('Config', (), {
-                'reasoning': type('Reasoning', (), {
-                    'similarity_threshold': self.config.similarity_threshold,
-                    'top_k_neighbors': 10
+                'graph': type('Graph', (), {
+                    'similarity_threshold': self.config.similarity_threshold
+                })(),
+                'scalable_graph': type('ScalableGraph', (), {
+                    'top_k_neighbors': 10,
+                    'batch_size': 1000
                 })()
             })()
             self.graph_builder = ScalableGraphBuilder(config=graph_config)
@@ -203,11 +225,6 @@ class L2MemoryManager:
             )
             logger.info(f"Using IVFPQ FAISS index")
             
-    def _apply_legacy_config(self, legacy_config):
-        """Apply settings from legacy config objects"""
-        if hasattr(legacy_config, 'memory'):
-            if hasattr(legacy_config.memory, 'max_episodes'):
-                self.config.max_episodes = legacy_config.memory.max_episodes
                 
     def add_episode(self, text: str, metadata: Optional[Dict] = None) -> int:
         """Add episode (graph-centric interface)"""
@@ -420,10 +437,10 @@ class L2MemoryManager:
             })
             
         if self.config.use_graph_integration and self.graph_builder:
-            graph = self.graph_builder.get_current_graph()
-            if graph:
-                stats['graph_nodes'] = graph.num_nodes
-                stats['graph_edges'] = graph.edge_index.size(1) if hasattr(graph, 'edge_index') else 0
+            # ScalableGraphBuilder doesn't have get_current_graph, so we skip graph stats
+            # TODO: Implement graph stats retrieval for ScalableGraphBuilder
+            stats['graph_nodes'] = len(self.episodes)  # Approximate with episode count
+            stats['graph_edges'] = 0  # Unknown without building graph
                 
         return stats
         

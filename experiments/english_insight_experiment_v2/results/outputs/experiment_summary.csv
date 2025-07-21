@@ -1,0 +1,13 @@
+question_id,question,method,quality_score,spike_detected,phases_integrated,response_time
+1,What is the relationship between energy and information?,baseline,0.32000000000000006,False,0,14.235463857650757
+1,What is the relationship between energy and information?,rag,0.2,False,2,14.62199091911316
+2,Why does consciousness emerge?,baseline,0.2,False,0,13.921033143997192
+2,Why does consciousness emerge?,rag,0.2,False,2,14.475389003753662
+3,What is the mechanism of creativity at the edge of chaos?,baseline,0.2,False,0,14.034612894058228
+3,What is the mechanism of creativity at the edge of chaos?,rag,0.2,False,2,14.597704887390137
+4,What is entropy?,baseline,0.2,False,0,14.037044286727905
+4,What is entropy?,rag,0.2,False,2,14.509258031845093
+5,Can you explain quantum entanglement?,baseline,0.24000000000000002,False,0,14.171451807022095
+5,Can you explain quantum entanglement?,rag,0.2,False,2,14.754753828048706
+6,Is there a principle that unifies all phenomena?,baseline,0.2,False,0,13.920216083526611
+6,Is there a principle that unifies all phenomena?,rag,0.2,False,3,14.599796056747437

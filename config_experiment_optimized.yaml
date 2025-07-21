@@ -1,0 +1,43 @@
+# 実験用最適化設定
+# ==================
+# 実験の成功率を最大化するための設定
+
+# LLM設定（高性能モデル推奨）
+llm:
+  provider: openai
+  model: gpt-4  # または gpt-3.5-turbo（コスト重視の場合）
+  temperature: 0.3  # 低めで論理的な推論を促進
+  max_tokens: 2000  # 詳細な分析のために十分な長さ
+  timeout: 60  # 複雑な推論のためのタイムアウト延長
+
+# 埋め込みモデル（高品質な類似度検索）
+embedding:
+  model_name: sentence-transformers/all-mpnet-base-v2  # より高性能
+  dimension: 768  # MPNetの次元数
+
+# スパイク検出（感度を上げて洞察を見逃さない）
+spike:
+  spike_ged: 0.3  # より敏感に（デフォルト: 0.5）
+  spike_ig: 0.15  # より敏感に（デフォルト: 0.2）
+  eta_spike: 0.3  # 学習率を上げて素早い適応
+
+# メモリ設定（大規模実験対応）
+memory:
+  max_episodes: 100000  # 大量のエピソード対応
+  search_k: 30  # より多くの関連情報を検索
+  max_working_size: 200  # ワーキングメモリを増加
+
+# グラフ設定（複雑な関係性の捕捉）
+graph:
+  max_nodes: 10000
+  max_edges: 50000
+  pruning_threshold: 0.05  # より多くの接続を保持
+
+# ログ設定（デバッグ用）
+logging:
+  level: INFO  # 実験時はINFOレベルで十分な情報を記録
+  log_to_console: true  # コンソールで進捗確認
+
+# システム設定
+system:
+  safe_mode: false  # 実験時は無効化してパフォーマンス向上

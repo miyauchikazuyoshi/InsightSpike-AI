@@ -100,7 +100,9 @@ class LLMConfig(BaseModel):
     organization: Optional[str] = Field(default=None, exclude=True)
     device: str = Field(default="cpu", description="Device for local models")
     load_in_8bit: bool = Field(default=False, description="8-bit quantization")
-    system_prompt: Optional[str] = Field(default=None, description="System prompt for the model")
+    system_prompt: Optional[str] = Field(
+        default=None, description="System prompt for the model"
+    )
 
 
 class OutputConfig(BaseModel):
@@ -113,16 +115,17 @@ class OutputConfig(BaseModel):
         default=5, ge=1, description="Maximum number of sources to include"
     )
     max_context_length: int = Field(
-        default=2000, ge=100,
-        description="Maximum number of characters to include in context"
+        default=2000,
+        ge=100,
+        description="Maximum number of characters to include in context",
     )
     max_documents: int = Field(
-        default=10, ge=1,
-        description="Maximum number of documents to include in context"
+        default=10,
+        ge=1,
+        description="Maximum number of documents to include in context",
     )
     include_metadata: bool = Field(
-        default=True,
-        description="Include relevance scores and graph analysis"
+        default=True, description="Include relevance scores and graph analysis"
     )
 
 
@@ -168,7 +171,7 @@ class InsightSpikeConfig(BaseModel):
     ] = Field(default="development")
     pre_warm_models: bool = Field(
         default=True,
-        description="Pre-warm LLM models on startup for faster experiment initialization"
+        description="Pre-warm LLM models on startup for faster experiment initialization",
     )
 
     # Component configurations

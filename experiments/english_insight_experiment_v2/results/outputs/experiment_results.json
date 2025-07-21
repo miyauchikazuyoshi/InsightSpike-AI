@@ -1,0 +1,158 @@
+[
+  {
+    "baseline": {
+      "method": "baseline_llm",
+      "question": "What is the relationship between energy and information?",
+      "response": "Question: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship between energy and information?\nAnswer:\n<|assistant|>\nQuestion: What is the relationship",
+      "response_time": 14.235463857650757,
+      "retrieved_docs": 0,
+      "phases_integrated": 0,
+      "spike_detected": false,
+      "quality_score": 0.32000000000000006
+    },
+    "rag": {
+      "method": "standard_rag",
+      "question": "What is the relationship between energy and information?",
+      "response": "<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<",
+      "response_time": 14.62199091911316,
+      "retrieved_docs": 3,
+      "phases_integrated": 2,
+      "spike_detected": false,
+      "context": "Maxwell's demon is a thought experiment showing the relationship between information and energy.\nInformation and entropy have a deep mathematical relationship.\nThe second law of thermodynamics and Shannon's information theory share the same mathematical structure.",
+      "quality_score": 0.2
+    },
+    "insightspike": {
+      "error": "cannot import name 'CompatibleL2MemoryManager' from 'insightspike.implementations.layers.layer2_memory_manager' (/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/src/insightspike/implementations/layers/layer2_memory_manager.py)"
+    }
+  },
+  {
+    "baseline": {
+      "method": "baseline_llm",
+      "question": "Why does consciousness emerge?",
+      "response": "Answer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:\n<|assistant|>\nAnswer:",
+      "response_time": 13.921033143997192,
+      "retrieved_docs": 0,
+      "phases_integrated": 0,
+      "spike_detected": false,
+      "quality_score": 0.2
+    },
+    "rag": {
+      "method": "standard_rag",
+      "question": "Why does consciousness emerge?",
+      "response": "<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<",
+      "response_time": 14.475389003753662,
+      "retrieved_docs": 3,
+      "phases_integrated": 2,
+      "spike_detected": false,
+      "context": "Consciousness is the most sophisticated form of information processing in the universe.\nLife and consciousness are inevitable consequences of the universe recognizing itself.\nDoes artificial consciousness emerge from sufficient information integration?",
+      "quality_score": 0.2
+    },
+    "insightspike": {
+      "error": "cannot import name 'CompatibleL2MemoryManager' from 'insightspike.implementations.layers.layer2_memory_manager' (/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/src/insightspike/implementations/layers/layer2_memory_manager.py)"
+    }
+  },
+  {
+    "baseline": {
+      "method": "baseline_llm",
+      "question": "What is the mechanism of creativity at the edge of chaos?",
+      "response": "<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<",
+      "response_time": 14.034612894058228,
+      "retrieved_docs": 0,
+      "phases_integrated": 0,
+      "spike_detected": false,
+      "quality_score": 0.2
+    },
+    "rag": {
+      "method": "standard_rag",
+      "question": "What is the mechanism of creativity at the edge of chaos?",
+      "response": "<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<",
+      "response_time": 14.597704887390137,
+      "retrieved_docs": 3,
+      "phases_integrated": 2,
+      "spike_detected": false,
+      "context": "Life is a system that maintains order within the flow of entropy.\nCan the origin of life be explained as self-organization of information?\nIs evolution a process for the universe to recognize itself?",
+      "quality_score": 0.2
+    },
+    "insightspike": {
+      "error": "cannot import name 'CompatibleL2MemoryManager' from 'insightspike.implementations.layers.layer2_memory_manager' (/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/src/insightspike/implementations/layers/layer2_memory_manager.py)"
+    }
+  },
+  {
+    "baseline": {
+      "method": "baseline_llm",
+      "question": "What is entropy?",
+      "response": "<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<",
+      "response_time": 14.037044286727905,
+      "retrieved_docs": 0,
+      "phases_integrated": 0,
+      "spike_detected": false,
+      "quality_score": 0.2
+    },
+    "rag": {
+      "method": "standard_rag",
+      "question": "What is entropy?",
+      "response": "<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|object|>\n<|",
+      "response_time": 14.509258031845093,
+      "retrieved_docs": 3,
+      "phases_integrated": 2,
+      "spike_detected": false,
+      "context": "Entropy is a measure of energy degradation.\nInformation and entropy have a deep mathematical relationship.\nLife is a system that maintains order within the flow of entropy.",
+      "quality_score": 0.2
+    },
+    "insightspike": {
+      "error": "cannot import name 'CompatibleL2MemoryManager' from 'insightspike.implementations.layers.layer2_memory_manager' (/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/src/insightspike/implementations/layers/layer2_memory_manager.py)"
+    }
+  },
+  {
+    "baseline": {
+      "method": "baseline_llm",
+      "question": "Can you explain quantum entanglement?",
+      "response": "Question: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entanglement?\nAnswer:\n<|assistant|>\nQuestion: Can you explain quantum entang",
+      "response_time": 14.171451807022095,
+      "retrieved_docs": 0,
+      "phases_integrated": 0,
+      "spike_detected": false,
+      "quality_score": 0.24000000000000002
+    },
+    "rag": {
+      "method": "standard_rag",
+      "question": "Can you explain quantum entanglement?",
+      "response": "<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<",
+      "response_time": 14.754753828048706,
+      "retrieved_docs": 3,
+      "phases_integrated": 2,
+      "spike_detected": false,
+      "context": "Quantum entanglement is a correlation that cannot be explained by classical information theory.\nQuantum entanglement is a state where information is non-locally correlated.\nDecoherence is the process of quantum information leaking into the environment.",
+      "quality_score": 0.2
+    },
+    "insightspike": {
+      "error": "cannot import name 'CompatibleL2MemoryManager' from 'insightspike.implementations.layers.layer2_memory_manager' (/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/src/insightspike/implementations/layers/layer2_memory_manager.py)"
+    }
+  },
+  {
+    "baseline": {
+      "method": "baseline_llm",
+      "question": "Is there a principle that unifies all phenomena?",
+      "response": "<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<",
+      "response_time": 13.920216083526611,
+      "retrieved_docs": 0,
+      "phases_integrated": 0,
+      "spike_detected": false,
+      "quality_score": 0.2
+    },
+    "rag": {
+      "method": "standard_rag",
+      "question": "Is there a principle that unifies all phenomena?",
+      "response": "<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<|assistant|>\n<",
+      "response_time": 14.599796056747437,
+      "retrieved_docs": 3,
+      "phases_integrated": 3,
+      "spike_detected": false,
+      "context": "All physical laws reduce to laws of information conservation and transformation.\nObservation always involves energy exchange.\nMaxwell's demon is a thought experiment showing the relationship between information and energy.",
+      "quality_score": 0.2
+    },
+    "insightspike": {
+      "error": "cannot import name 'CompatibleL2MemoryManager' from 'insightspike.implementations.layers.layer2_memory_manager' (/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/src/insightspike/implementations/layers/layer2_memory_manager.py)"
+    }
+  }
+]

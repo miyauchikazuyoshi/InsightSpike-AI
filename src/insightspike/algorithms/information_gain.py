@@ -153,7 +153,9 @@ class InformationGain:
             f"k_clusters={k_clusters}, min_samples={min_samples}"
         )
 
-    def calculate_from_vectors(self, vectors: np.ndarray, method: str = "clustering", k: int = None) -> float:
+    def calculate_from_vectors(
+        self, vectors: np.ndarray, method: str = "clustering", k: int = None
+    ) -> float:
         """
         Calculate entropy from vector embeddings.
 
@@ -340,12 +342,19 @@ class InformationGain:
 
             # Import and use improved similarity-based entropy with sigmoid normalization
             try:
-                from .improved_similarity_entropy import calculate_similarity_entropy, NormalizationMethod
+                from .improved_similarity_entropy import (
+                    calculate_similarity_entropy,
+                    NormalizationMethod,
+                )
+
                 # Use sigmoid normalization for better sensitivity
-                return calculate_similarity_entropy(vectors, method=NormalizationMethod.SIGMOID, steepness=5.0)
+                return calculate_similarity_entropy(
+                    vectors, method=NormalizationMethod.SIGMOID, steepness=5.0
+                )
             except ImportError:
                 # Fallback to original implementation
                 from .similarity_entropy import calculate_similarity_entropy
+
                 return calculate_similarity_entropy(vectors)
 
         except Exception as e:

@@ -135,26 +135,6 @@ else:
 
 from .config import get_config
 
-# Import the unified config system
-from .config.legacy_config import Config
-
-
-# Create a legacy config module object for backward compatibility
-class LegacyConfigModule:
-    def __init__(self):
-        from .config.legacy_config import get_legacy_config
-
-        legacy = get_legacy_config()
-        for key, value in legacy.items():
-            setattr(self, key, value)
-
-    def timestamp(self):
-        from datetime import datetime
-
-        return datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-
-
-config = LegacyConfigModule()
 
 # Legacy module exports for compatibility - new organized structure
 from . import utils

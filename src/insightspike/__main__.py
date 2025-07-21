@@ -55,40 +55,50 @@ def run_app():
         logger.info(f"Created DataStore: {datastore.__class__.__name__}")
 
         # 3. Pre-warm LLM models based on configuration
-        if getattr(config, 'pre_warm_models', True):  # Default to pre-warming
+        if getattr(config, "pre_warm_models", True):  # Default to pre-warming
             logger.info("Pre-warming LLM models...")
-            from .implementations.layers.layer4_llm_interface import LLMProviderRegistry, LLMConfig, LLMProviderType
-            
+            from .implementations.layers.layer4_llm_interface import (
+                LLMProviderRegistry,
+                LLMConfig,
+                LLMProviderType,
+            )
+
             try:
                 # Pre-warm local model if configured
-                if hasattr(config, 'llm') and config.llm.provider == "local":
+                if hasattr(config, "llm") and config.llm.provider == "local":
                     local_config = LLMConfig(
                         provider=LLMProviderType.LOCAL,
                         model_name=config.llm.model,
                         temperature=config.llm.temperature,
                         max_tokens=config.llm.max_tokens,
-                        device=getattr(config.llm, 'device', 'cpu')
+                        device=getattr(config.llm, "device", "cpu"),
                     )
                     logger.info(f"Pre-warming local model: {config.llm.model}")
                     LLMProviderRegistry.get_instance(local_config)
-                    
+
                 # Always pre-warm clean provider as fallback
                 clean_config = LLMConfig(provider=LLMProviderType.CLEAN)
                 LLMProviderRegistry.get_instance(clean_config)
-                
+
                 # Pre-warm OpenAI if API key is available
-                if hasattr(config, 'llm') and config.llm.provider == "openai" and config.llm.api_key:
+                if (
+                    hasattr(config, "llm")
+                    and config.llm.provider == "openai"
+                    and config.llm.api_key
+                ):
                     openai_config = LLMConfig(
                         provider=LLMProviderType.OPENAI,
                         model_name=config.llm.model,
                         api_key=config.llm.api_key,
                         temperature=config.llm.temperature,
-                        max_tokens=config.llm.max_tokens
+                        max_tokens=config.llm.max_tokens,
                     )
                     logger.info(f"Pre-warming OpenAI model: {config.llm.model}")
                     LLMProviderRegistry.get_instance(openai_config)
-                    
-                logger.info(f"Pre-warmed {len(LLMProviderRegistry.get_cached_providers())} model(s)")
+
+                logger.info(
+                    f"Pre-warmed {len(LLMProviderRegistry.get_cached_providers())} model(s)"
+                )
             except Exception as e:
                 logger.warning(f"Failed to pre-warm some models: {e}")
                 # Continue anyway - models will be loaded on demand

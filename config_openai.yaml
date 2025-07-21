@@ -1,0 +1,28 @@
+# OpenAI Configuration
+# ====================
+# GPT-3.5やGPT-4を使うための設定
+
+# LLM設定
+llm:
+  provider: openai  # または "gpt" でもOK
+  model: gpt-3.5-turbo  # または gpt-4, gpt-4-turbo-preview など
+  temperature: 0.7
+  max_tokens: 1000
+  # APIキーは環境変数で設定することを推奨
+  # api_key: sk-xxxxx  # 直接書くこともできるが非推奨
+
+# 埋め込みモデル設定
+embedding:
+  provider: openai  # OpenAIの埋め込みを使う場合
+  model_name: text-embedding-ada-002
+  dimension: 1536  # OpenAI ada-002の次元数
+
+# その他の設定はデフォルトのまま
+spike:
+  spike_ged: 0.5
+  spike_ig: 0.2
+  eta_spike: 0.2
+
+memory:
+  max_episodes: 10000
+  search_k: 20

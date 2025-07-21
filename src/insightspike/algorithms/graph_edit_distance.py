@@ -133,7 +133,7 @@ class GraphEditDistance:
         self.calculation_count = 0
         self.total_computation_time = 0.0
         self.approximation_count = 0
-        
+
         # State for proper ΔGED calculation
         self.initial_graph = None
         self.previous_graph = None
@@ -228,7 +228,7 @@ class GraphEditDistance:
 
         Mathematical Definition:
             ΔGED = GED(graph_after, initial) - GED(graph_before, initial)
-            
+
         Where initial is either:
             - The provided reference_graph
             - The first graph in the sequence (maintained internally)
@@ -249,24 +249,24 @@ class GraphEditDistance:
             self.initial_graph = graph_before
             self.previous_graph = graph_before
             return 0.0  # No change on first call
-            
+
         # Calculate GED from both states to initial
         ged_before = self.calculate(graph_before, self.initial_graph).ged_value
         ged_after = self.calculate(graph_after, self.initial_graph).ged_value
-        
+
         # ΔGED = GED(current, initial) - GED(previous, initial)
         delta_ged = ged_after - ged_before
-        
+
         logger.debug(
             f"ΔGED calculated: after→initial={ged_after:.3f}, "
             f"before→initial={ged_before:.3f}, ΔGED={delta_ged:.3f}"
         )
-        
+
         # Update state
         self.previous_graph = graph_after
-        
+
         return delta_ged
-    
+
     def reset_state(self):
         """Reset the internal state for ΔGED calculation."""
         self.initial_graph = None

@@ -126,6 +126,10 @@ class EmbeddingManager:
             # Fallback encoding
             return self._fallback_encode(texts)
 
+    def get_embedding(self, text: str) -> np.ndarray:
+        """Get embedding for a single text (alias for encode)."""
+        return self.encode(text)
+
     def _fallback_model(self):
         """Fallback to simple hash-based model."""
         logger.warning("Using fallback hash-based embedding model")
