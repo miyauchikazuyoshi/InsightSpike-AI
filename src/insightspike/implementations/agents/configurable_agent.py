@@ -313,7 +313,7 @@ class ConfigurableAgent:
 
                 # Pass config with use_gnn setting
                 graph_config = self.config.graph_config
-                if hasattr(graph_config, "reasoning"):
+                if hasattr(graph_config, "graph"):
                     # Respect config.yaml setting, but allow override if query transform is enabled
                     if self.config.enable_query_transform and not getattr(
                         graph_config.graph, "use_gnn", False

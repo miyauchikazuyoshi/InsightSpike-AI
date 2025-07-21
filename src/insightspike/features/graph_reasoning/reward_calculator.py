@@ -22,7 +22,7 @@ class RewardCalculator:
         from ...config.constants import Defaults
 
         # Extract weights from config with defaults from constants
-        if hasattr(config, "reasoning"):
+        if hasattr(config, "graph"):
             self.weights = {
                 "ged": getattr(config.graph, "weight_ged", Defaults.REWARD_WEIGHT_GED),
                 "ig": getattr(config.graph, "weight_ig", Defaults.REWARD_WEIGHT_IG),
@@ -36,7 +36,7 @@ class RewardCalculator:
         # Optimal graph size for structure reward
         self.optimal_graph_size = (
             getattr(config.graph, "optimal_graph_size", Defaults.OPTIMAL_GRAPH_SIZE)
-            if hasattr(config, "reasoning")
+            if hasattr(config, "graph")
             else Defaults.OPTIMAL_GRAPH_SIZE
         )
 

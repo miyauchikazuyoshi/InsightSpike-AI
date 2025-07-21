@@ -47,11 +47,7 @@ class ConflictScore:
 
     def __init__(self, config=None):
         self.config = config or get_config()
-        self.conflict_threshold = (
-            getattr(self.config.graph, "conflict_threshold", 0.5)
-            if hasattr(self.config, "reasoning")
-            else 0.5
-        )
+        self.conflict_threshold = getattr(self.config.graph, "conflict_threshold", 0.5)
 
     def calculate_conflict(
         self, graph_old: Data, graph_new: Data, context: Dict[str, Any]
@@ -159,11 +155,7 @@ class GraphBuilder:
 
     def __init__(self, config=None):
         self.config = config or get_config()
-        self.similarity_threshold = (
-            getattr(self.config.graph, "similarity_threshold", 0.3)
-            if hasattr(self.config, "reasoning")
-            else 0.3
-        )
+        self.similarity_threshold = getattr(self.config.graph, "similarity_threshold", 0.3)
 
     def build_graph(
         self, documents: List[Dict[str, Any]], embeddings: Optional[np.ndarray] = None
@@ -287,9 +279,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
 
         # Initialize simple GNN if needed
         self.gnn = None
-        if hasattr(self.config, "reasoning") and getattr(
-            self.config.graph, "use_gnn", False
-        ):
+        if getattr(self.config.graph, "use_gnn", False):
             self._init_gnn()
 
     def initialize(self) -> bool:
@@ -406,205 +396,15 @@ class L3GraphReasoner(L3GraphReasonerInterface):
     def _get_spike_thresholds(self) -> Dict[str, float]:
         """Get spike detection thresholds from config."""
         return {
-            "ged": (
-                getattr(self.config.graph, "spike_ged_threshold", -0.5)
-                if hasattr(self.config, "reasoning")
-                else -0.5
-            ),
-            "ig": (
-                getattr(self.config.graph, "spike_ig_threshold", 0.2)
-                if hasattr(self.config, "reasoning")
-                else 0.2
-            ),
-            "conflict": (
-                getattr(self.config.graph, "conflict_threshold", 0.5)
-                if hasattr(self.config, "reasoning")
-                else 0.5
-            ),
+            "ged": getattr(self.config.graph, "spike_ged_threshold", -0.5),
+            "ig": getattr(self.config.graph, "spike_ig_threshold", 0.2),
+            "conflict": getattr(self.config.graph, "conflict_threshold", 0.5),
         }
-
-    # Deprecated methods - to be removed
-    def _calculate_metrics(
-        self,
-        current_graph: Data,
-        previous_graph: Optional[Data],
-        context: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, float]:
-        """Calculate ΔGED and ΔIG metrics.
-
-        .. deprecated:: 2.0
-           Use GraphAnalyzer.calculate_metrics instead.
-        """
-        warnings.warn(
-            "_calculate_metrics is deprecated. Use GraphAnalyzer.calculate_metrics.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        if previous_graph is None:
-            return {
-                "delta_ged": 0.0,
-                "delta_ig": 0.0,
-                "graph_size_current": current_graph.num_nodes if current_graph else 0,
-                "graph_size_previous": 0,
-            }
-
-        try:
-            # Calculate graph edit distance change using configured method
-            ged = self.delta_ged(previous_graph, current_graph)
-
-            # Calculate information gain change
-            ig = self.delta_ig(previous_graph, current_graph)
-
-            return {
-                "delta_ged": float(ged),
-                "delta_ig": float(ig),
-                "graph_size_current": current_graph.num_nodes,
-                "graph_size_previous": previous_graph.num_nodes,
-            }
-
-        except Exception as e:
-            logger.error(f"Metrics calculation failed: {e}")
-            return {
-                "delta_ged": 0.0,
-                "delta_ig": 0.0,
-                "graph_size_current": current_graph.num_nodes if current_graph else 0,
-                "graph_size_previous": previous_graph.num_nodes
-                if previous_graph
-                else 0,
-            }
-
-    def _calculate_reward(
-        self, metrics: Dict[str, float], conflicts: Dict[str, float]
-    ) -> Dict[str, float]:
-        """Calculate reward signal for memory updates.
-
-        .. deprecated:: 2.0
-           Use RewardCalculator.calculate_reward instead.
-        """
-        warnings.warn(
-            "_calculate_reward is deprecated. Use RewardCalculator.calculate_reward.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        # Get weights from config
-        w1 = (
-            getattr(self.config.graph, "weight_ged", 0.3)
-            if hasattr(self.config, "reasoning")
-            else 0.3
-        )
-        w2 = (
-            getattr(self.config.graph, "weight_ig", 0.5)
-            if hasattr(self.config, "reasoning")
-            else 0.5
-        )
-        w3 = (
-            getattr(self.config.graph, "weight_conflict", 0.2)
-            if hasattr(self.config, "reasoning")
-            else 0.2
-        )
-
-        # Base reward calculation: R = w1*ΔGED + w2*ΔIG - w3*conflict
-        base_reward = (
-            w1 * metrics.get("delta_ged", 0)
-            + w2 * metrics.get("delta_ig", 0)
-            - w3 * conflicts.get("total", 0)
-        )
-
-        # Additional reward components
-        structure_reward = self._structure_reward(metrics)
-        novelty_reward = self._novelty_reward(metrics, conflicts)
-
-        return {
-            "base": float(base_reward),
-            "structure": float(structure_reward),
-            "novelty": float(novelty_reward),
-            "total": float(base_reward + structure_reward + novelty_reward),
-        }
-
-    def _structure_reward(self, metrics: Dict[str, float]) -> float:
-        """Reward for good graph structure."""
-        current_size = metrics.get("graph_size_current", 0)
-        if current_size == 0:
-            return 0.0
-
-        # Reward moderate-sized graphs (not too sparse, not too dense)
-        optimal_size = 10  # Configurable
-        size_penalty = abs(current_size - optimal_size) / optimal_size
-        return max(0.0, 1.0 - size_penalty)
-
-    def _novelty_reward(
-        self, metrics: Dict[str, float], conflicts: Dict[str, float]
-    ) -> float:
-        """Reward for novel insights while penalizing excessive conflict."""
-        novelty = metrics.get("delta_ig", 0)
-        conflict = conflicts.get("total", 0)
-
-        # Balance novelty with stability
-        return max(0.0, novelty - 0.5 * conflict)
-
-    def _detect_spike(
-        self, metrics: Dict[str, float], conflicts: Dict[str, float]
-    ) -> bool:
-        """Detect if current state represents an insight spike.
-
-        .. deprecated:: 2.0
-           Use GraphAnalyzer.detect_spike instead.
-        """
-        warnings.warn(
-            "_detect_spike is deprecated. Use GraphAnalyzer.detect_spike.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        ged_threshold = (
-            getattr(self.config.graph, "spike_ged_threshold", -0.5)
-            if hasattr(self.config, "reasoning")
-            else -0.5
-        )
-        ig_threshold = (
-            getattr(self.config.graph, "spike_ig_threshold", 0.2)
-            if hasattr(self.config, "reasoning")
-            else 0.2
-        )
-        conflict_threshold = (
-            getattr(self.config.graph, "conflict_threshold", 0.5)
-            if hasattr(self.config, "reasoning")
-            else 0.5
-        )
-
-        high_ged = metrics.get("delta_ged", 0) > ged_threshold
-        high_ig = metrics.get("delta_ig", 0) > ig_threshold
-        low_conflict = conflicts.get("total", 1.0) < conflict_threshold
-
-        return high_ged and high_ig and low_conflict
-
-    def _assess_reasoning_quality(
-        self, metrics: Dict[str, float], conflicts: Dict[str, float]
-    ) -> float:
-        """Assess overall quality of reasoning process.
-
-        .. deprecated:: 2.0
-           Use GraphAnalyzer.assess_quality instead.
-        """
-        warnings.warn(
-            "_assess_reasoning_quality is deprecated. Use GraphAnalyzer.assess_quality.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        # Combine multiple factors
-        metric_score = (metrics.get("delta_ged", 0) + metrics.get("delta_ig", 0)) / 2
-        conflict_penalty = conflicts.get("total", 0)
-
-        quality = max(0.0, min(1.0, metric_score - conflict_penalty))
-        return float(quality)
 
     def _init_gnn(self):
         """Initialize a simple GNN for graph processing."""
         try:
-            hidden_dim = (
-                getattr(self.config.graph, "gnn_hidden_dim", 128)
-                if hasattr(self.config, "reasoning")
-                else 128
-            )
+            hidden_dim = getattr(self.config.graph, "gnn_hidden_dim", 128)
             # Handle both Pydantic and legacy config
             if hasattr(self.config, "embedding") and hasattr(
                 self.config.embedding, "dimension"
@@ -661,84 +461,6 @@ class L3GraphReasoner(L3GraphReasonerInterface):
             "reasoning_quality": 0.0,
         }
 
-    def save_graph(self, graph: Data, path: Optional[Path] = None) -> Path:
-        """Save graph to disk.
-
-        .. deprecated:: 2.0
-           This method is deprecated. Graph persistence should be handled
-           by MainAgent using DataStore abstraction.
-        """
-        warnings.warn(
-            "save_graph is deprecated. Use MainAgent with DataStore for persistence.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        if path is None:
-            path = Path(
-                getattr(self.config.graph, "graph_file", "data/graph.pt")
-                if hasattr(self.config, "reasoning")
-                else "data/graph.pt"
-            )
-
-        path.parent.mkdir(parents=True, exist_ok=True)
-
-        try:
-            torch.save(graph, path)
-            logger.info(f"Saved graph to {path}")
-
-        except Exception as e:
-            # Fallback: save as dict
-            save_data = {
-                "x": graph.x.detach().cpu().numpy(),
-                "edge_index": graph.edge_index.detach().cpu().numpy(),
-                "num_nodes": graph.num_nodes,
-            }
-            torch.save(save_data, path)
-            logger.warning(f"Saved graph as dict due to error: {e}")
-
-        return path
-
-    def load_graph(self, path: Optional[Path] = None) -> Optional[Data]:
-        """Load graph from disk.
-
-        .. deprecated:: 2.0
-           This method is deprecated. Graph persistence should be handled
-           by MainAgent using DataStore abstraction.
-        """
-        warnings.warn(
-            "load_graph is deprecated. Use MainAgent with DataStore for persistence.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        if path is None:
-            path = Path(
-                getattr(self.config.graph, "graph_file", "data/graph.pt")
-                if hasattr(self.config, "reasoning")
-                else "data/graph.pt"
-            )
-
-        if not path.exists():
-            logger.warning(f"Graph file not found: {path}")
-            return None
-
-        try:
-            loaded = torch.load(path)
-
-            if isinstance(loaded, Data):
-                return loaded
-            elif isinstance(loaded, dict):
-                # Reconstruct from dict
-                x = torch.tensor(loaded["x"], dtype=torch.float)
-                edge_index = torch.tensor(loaded["edge_index"], dtype=torch.long)
-                graph = Data(x=x, edge_index=edge_index)
-                graph.num_nodes = loaded.get("num_nodes", x.size(0))
-                return graph
-
-        except Exception as e:
-            logger.error(f"Failed to load graph: {e}")
-
-        return None
-
     # Interface methods implementation
     def build_graph(self, vectors: np.ndarray) -> Any:
         """Build similarity graph from vectors"""
@@ -768,6 +490,4 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         """Detect if current state constitutes a eureka spike"""
         metrics = {"delta_ged": delta_ged, "delta_ig": delta_ig}
         conflicts = {"total": 0.0}  # No conflicts for direct call
-        return self._detect_spike(metrics, conflicts)
-
-        return None
+        return self.graph_analyzer.detect_spike(metrics, conflicts, self._get_spike_thresholds())

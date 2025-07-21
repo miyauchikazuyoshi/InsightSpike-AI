@@ -376,9 +376,13 @@ class L2MemoryManager:
             logger.debug(f"Updated episode {episode_idx} C-value to {new_c_value}")
 
     def merge_episodes(self, indices: List[int]) -> int:
-        """Merge multiple episodes into one"""
+        """Merge multiple episodes into one, selecting the most similar pair if indices not specified"""
         if len(indices) < 2:
-            return -1
+            # If indices not properly specified, find most similar pair automatically
+            most_similar_indices = self._find_most_similar_episodes()
+            if most_similar_indices is None:
+                return -1
+            indices = most_similar_indices
 
         # Gather episodes
         episodes_to_merge = [
@@ -387,17 +391,26 @@ class L2MemoryManager:
         if len(episodes_to_merge) < 2:
             return -1
 
-        # Combine texts
-        combined_text = " ".join([ep.text for ep in episodes_to_merge])
+        # Combine texts with separator for clarity
+        combined_text = " [MERGED] ".join([ep.text for ep in episodes_to_merge])
 
-        # Average C-values (if used)
-        avg_c_value = np.mean([ep.c for ep in episodes_to_merge])
+        # Weighted average C-values based on text length
+        text_lengths = [len(ep.text) for ep in episodes_to_merge]
+        total_length = sum(text_lengths)
+        if total_length > 0:
+            weighted_c_value = sum(
+                ep.c * length / total_length 
+                for ep, length in zip(episodes_to_merge, text_lengths)
+            )
+        else:
+            weighted_c_value = np.mean([ep.c for ep in episodes_to_merge])
 
         # Merge metadata
         merged_metadata = {}
         for ep in episodes_to_merge:
             merged_metadata.update(ep.metadata)
         merged_metadata["merged_from"] = indices
+        merged_metadata["merge_timestamp"] = time.time()
 
         # Remove old episodes (in reverse order to maintain indices)
         for idx in sorted(indices, reverse=True):
@@ -405,7 +418,7 @@ class L2MemoryManager:
                 del self.episodes[idx]
 
         # Add merged episode
-        return self.store_episode(combined_text, avg_c_value, merged_metadata)
+        return self.store_episode(combined_text, weighted_c_value, merged_metadata)
 
     def prune_low_value_episodes(self, threshold: float = 0.1) -> int:
         """Remove episodes below threshold"""
@@ -424,6 +437,43 @@ class L2MemoryManager:
         pruned_count = initial_count - len(self.episodes)
         logger.info(f"Pruned {pruned_count} low-value episodes")
         return pruned_count
+
+    def _find_most_similar_episodes(self, num_candidates: int = 10) -> Optional[List[int]]:
+        """Find the most similar pair of episodes based on cosine similarity"""
+        if len(self.episodes) < 2:
+            return None
+
+        # For efficiency, only consider recent episodes
+        candidate_indices = list(range(min(num_candidates, len(self.episodes))))
+        
+        max_similarity = -1.0
+        best_pair = None
+
+        # Compute pairwise similarities
+        for i in range(len(candidate_indices)):
+            for j in range(i + 1, len(candidate_indices)):
+                idx_i = candidate_indices[i]
+                idx_j = candidate_indices[j]
+                
+                # Compute cosine similarity
+                vec_i = self.episodes[idx_i].vec
+                vec_j = self.episodes[idx_j].vec
+                
+                norm_i = np.linalg.norm(vec_i)
+                norm_j = np.linalg.norm(vec_j)
+                
+                if norm_i > 0 and norm_j > 0:
+                    similarity = np.dot(vec_i, vec_j) / (norm_i * norm_j)
+                    
+                    if similarity > max_similarity:
+                        max_similarity = similarity
+                        best_pair = [idx_i, idx_j]
+
+        if best_pair and max_similarity > 0.8:  # Only merge if highly similar
+            logger.info(f"Found similar episodes to merge: {best_pair} (similarity: {max_similarity:.3f})")
+            return best_pair
+        
+        return None
 
     def get_memory_stats(self) -> Dict[str, Any]:
         """Get memory statistics"""
