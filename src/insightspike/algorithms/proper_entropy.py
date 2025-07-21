@@ -7,9 +7,10 @@ High entropy = scattered/disorganized
 Low entropy = clustered/organized
 """
 
-import numpy as np
-from typing import Any
 import logging
+from typing import Any
+
+import numpy as np
 
 logger = logging.getLogger(__name__)
 

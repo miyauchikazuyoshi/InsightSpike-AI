@@ -6,6 +6,7 @@ Tests to ensure the simplified reward calculation works correctly.
 """
 
 import unittest
+
 from insightspike.metrics import compute_fusion_reward
 
 

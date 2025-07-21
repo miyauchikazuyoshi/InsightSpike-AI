@@ -2,8 +2,9 @@
 Simple and reliable entropy calculation based on vector similarity
 """
 
-import numpy as np
 import logging
+
+import numpy as np
 
 logger = logging.getLogger(__name__)
 

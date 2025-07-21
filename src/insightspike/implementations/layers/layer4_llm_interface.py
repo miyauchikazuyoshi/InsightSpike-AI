@@ -12,10 +12,10 @@ import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 if TYPE_CHECKING:
-    from ...config.models import LLMConfig, InsightSpikeConfig
+    from ...config.models import InsightSpikeConfig, LLMConfig
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +88,7 @@ class LLMProviderRegistry:
             L4LLMInterface: Cached or newly created instance
         """
         from ...config.models import InsightSpikeConfig
-        
+
         # Normalize config to LLMConfig
         if isinstance(config, InsightSpikeConfig):
             llm_config = LLMConfig.from_provider(

@@ -7,19 +7,19 @@ End-to-end tests for DataStore-centric architecture.
 """
 
 import asyncio
-import tempfile
-import numpy as np
-from pathlib import Path
 import json
-from typing import List, Dict, Any
-
 import sys
+import tempfile
+from pathlib import Path
+from typing import Any, Dict, List
+
+import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from src.insightspike.implementations.datastore.sqlite_store import SQLiteDataStore
-from src.insightspike.implementations.agents.datastore_agent import DataStoreMainAgent
 from src.insightspike.config.presets import ConfigPresets
+from src.insightspike.implementations.agents.datastore_agent import DataStoreMainAgent
+from src.insightspike.implementations.datastore.sqlite_store import SQLiteDataStore
 
 
 class IntegrationTester:

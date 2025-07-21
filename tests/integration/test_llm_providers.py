@@ -12,8 +12,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from src.insightspike.providers import ProviderFactory, MockProvider
 from src.insightspike.config.models import LLMConfig
+from src.insightspike.providers import MockProvider, ProviderFactory
 
 
 def test_mock_provider():

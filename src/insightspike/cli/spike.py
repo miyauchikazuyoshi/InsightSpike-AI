@@ -47,9 +47,10 @@ app = typer.Typer(
 console = Console()
 logger = get_logger("cli")
 
+from .commands.bridge import bridge_command
+
 # Import command modules
 from .commands.discover import discover_command
-from .commands.bridge import bridge_command
 from .commands.graph import analyze_command, visualize_command
 
 

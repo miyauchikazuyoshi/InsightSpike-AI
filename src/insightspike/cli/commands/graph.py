@@ -3,21 +3,21 @@ spike graph command - Knowledge graph analytics and visualization
 """
 
 import json
-import time
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
 import logging
-from collections import defaultdict, Counter
+import time
+from collections import Counter, defaultdict
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
-import typer
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-from rich.tree import Tree
-from rich.progress import Progress, SpinnerColumn, TextColumn
-from rich.columns import Columns
-from rich.text import Text
 import numpy as np
+import typer
+from rich.columns import Columns
+from rich.console import Console
+from rich.panel import Panel
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.table import Table
+from rich.text import Text
+from rich.tree import Tree
 
 from ...implementations.agents.main_agent import MainAgent as SimpleRAGGraph
 

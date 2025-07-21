@@ -6,9 +6,9 @@ Mock provider for testing and development.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Union
 import random
 import time
+from typing import Any, Dict, List, Optional, Union
 
 from ..config.models import LLMConfig
 
@@ -92,6 +92,7 @@ class MockProvider:
         """Generate mock embeddings"""
         # Simple hash-based embedding
         import hashlib
+
         import numpy as np
 
         # Hash the text

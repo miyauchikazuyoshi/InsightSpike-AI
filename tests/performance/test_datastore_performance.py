@@ -7,23 +7,23 @@ Benchmarks for DataStore implementation performance.
 """
 
 import asyncio
-import time
-import random
-import numpy as np
-from pathlib import Path
-import tempfile
-import shutil
 import json
-from typing import List, Dict, Any
-
+import random
+import shutil
 import sys
+import tempfile
+import time
+from pathlib import Path
+from typing import Any, Dict, List
+
+import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from src.insightspike.implementations.datastore.sqlite_store import SQLiteDataStore
 from src.insightspike.implementations.datastore.filesystem_store import (
     FileSystemDataStore,
 )
+from src.insightspike.implementations.datastore.sqlite_store import SQLiteDataStore
 
 
 class PerformanceTester:

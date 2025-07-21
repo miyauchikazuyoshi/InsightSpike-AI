@@ -11,6 +11,7 @@ Where initial is the first graph in the reasoning sequence.
 
 import logging
 from typing import Any, Optional, Tuple
+
 import networkx as nx
 
 logger = logging.getLogger(__name__)

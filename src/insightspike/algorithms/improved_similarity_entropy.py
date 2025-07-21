@@ -2,10 +2,11 @@
 Improved entropy calculation with better normalization
 """
 
-import numpy as np
 import logging
 from enum import Enum
 from typing import Optional
+
+import numpy as np
 
 logger = logging.getLogger(__name__)
 

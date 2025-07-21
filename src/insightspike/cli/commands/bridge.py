@@ -3,18 +3,18 @@ spike bridge command - Find conceptual bridges between ideas
 """
 
 import json
+import logging
 import time
 from pathlib import Path
-from typing import List, Dict, Optional, Tuple
-import logging
+from typing import Dict, List, Optional, Tuple
 
+import numpy as np
 import typer
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
-from rich.tree import Tree
 from rich.progress import Progress, SpinnerColumn, TextColumn
-import numpy as np
+from rich.table import Table
+from rich.tree import Tree
 
 from ...implementations.agents.main_agent import MainAgent as SimpleRAGGraph
 

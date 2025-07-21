@@ -5,8 +5,8 @@ OpenAI LLM Provider
 Real OpenAI API integration for InsightSpike.
 """
 
-import os
 import logging
+import os
 from typing import Any, Dict, List, Optional, Union
 
 from ..config.models import LLMConfig

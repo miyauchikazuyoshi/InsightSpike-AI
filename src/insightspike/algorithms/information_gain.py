@@ -343,8 +343,8 @@ class InformationGain:
             # Import and use improved similarity-based entropy with sigmoid normalization
             try:
                 from .improved_similarity_entropy import (
-                    calculate_similarity_entropy,
                     NormalizationMethod,
+                    calculate_similarity_entropy,
                 )
 
                 # Use sigmoid normalization for better sensitivity

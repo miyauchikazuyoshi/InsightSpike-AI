@@ -6,9 +6,9 @@ A simplified local provider that uses cached distilgpt2 model.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Union
-import time
 import random
+import time
+from typing import Any, Dict, List, Optional, Union
 
 from ..config.models import LLMConfig
 

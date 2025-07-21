@@ -1,10 +1,12 @@
 """Test that Query Transformation insights are included in prompts"""
 
-import pytest
 from unittest.mock import Mock
-from insightspike.implementations.layers.layer4_llm_interface import L4LLMInterface
-from insightspike.core.base.dataclasses import QueryState
+
+import pytest
+
 from insightspike.config.models import LLMConfig
+from insightspike.core.base.dataclasses import QueryState
+from insightspike.implementations.layers.layer4_llm_interface import L4LLMInterface
 
 
 class TestQueryInsightsInPrompt:

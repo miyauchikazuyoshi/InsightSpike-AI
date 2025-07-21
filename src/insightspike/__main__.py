@@ -58,8 +58,8 @@ def run_app():
         if getattr(config, "pre_warm_models", True):  # Default to pre-warming
             logger.info("Pre-warming LLM models...")
             from .implementations.layers.layer4_llm_interface import (
-                LLMProviderRegistry,
                 LLMConfig,
+                LLMProviderRegistry,
                 LLMProviderType,
             )
 

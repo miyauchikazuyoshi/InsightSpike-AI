@@ -27,10 +27,12 @@ from .layer4_llm_interface import (
     LLMProviderType,
     get_llm_provider,
 )
-# from .layer4_prompt_builder import PromptBuilder  # Temporarily disabled due to missing interfaces module
 
 # Supporting components
 from .scalable_graph_builder import ScalableGraphBuilder
+
+# from .layer4_prompt_builder import PromptBuilder  # Temporarily disabled due to missing interfaces module
+
 
 __all__ = [
     # Layer 1

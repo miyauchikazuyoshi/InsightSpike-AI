@@ -8,24 +8,24 @@ Compare memory usage between in-memory and DataStore approaches.
 
 import asyncio
 import gc
-import psutil
-import time
-import numpy as np
-from pathlib import Path
-import tempfile
 import json
-from typing import List, Dict, Any
-
 import sys
+import tempfile
+import time
+from pathlib import Path
+from typing import Any, Dict, List
+
+import numpy as np
+import psutil
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from src.insightspike.implementations.datastore.sqlite_store import SQLiteDataStore
-from src.insightspike.implementations.layers.layer2_working_memory import (
-    L2WorkingMemoryManager,
-)
 from src.insightspike.implementations.layers.layer2_memory_manager import (
     L2MemoryManager,
+)
+from src.insightspike.implementations.layers.layer2_working_memory import (
+    L2WorkingMemoryManager,
 )
 
 

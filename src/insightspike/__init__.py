@@ -133,11 +133,9 @@ else:
     create_standalone_reasoner = None
     analyze_documents_simple = None
 
-from .config import get_config
-
-
 # Legacy module exports for compatibility - new organized structure
 from . import utils
+from .config import get_config
 from .detection import eureka_spike
 from .metrics import graph_metrics
 
