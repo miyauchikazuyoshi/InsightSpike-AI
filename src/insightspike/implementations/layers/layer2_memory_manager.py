@@ -58,7 +58,7 @@ class MemoryConfig:
     # Core settings
     embedding_dim: int = 384
     max_episodes: int = 10000
-    
+
     # Memory management settings
     enable_aging: bool = True
     aging_factor: float = 0.95  # Decay factor per day
@@ -296,11 +296,11 @@ class L2MemoryManager:
 
             # Update index
             self._update_index(episode, episode_idx)
-            
+
             # Apply aging periodically (every 100 episodes)
             if len(self.episodes) % 100 == 0:
                 self.age_episodes()
-                
+
             # Enforce size limit if needed
             if len(self.episodes) > self.config.max_episodes:
                 self.enforce_size_limit()
@@ -414,7 +414,7 @@ class L2MemoryManager:
         total_length = sum(text_lengths)
         if total_length > 0:
             weighted_c_value = sum(
-                ep.c * length / total_length 
+                ep.c * length / total_length
                 for ep, length in zip(episodes_to_merge, text_lengths)
             )
         else:
@@ -453,14 +453,16 @@ class L2MemoryManager:
         logger.info(f"Pruned {pruned_count} low-value episodes")
         return pruned_count
 
-    def _find_most_similar_episodes(self, num_candidates: int = 10) -> Optional[List[int]]:
+    def _find_most_similar_episodes(
+        self, num_candidates: int = 10
+    ) -> Optional[List[int]]:
         """Find the most similar pair of episodes based on cosine similarity"""
         if len(self.episodes) < 2:
             return None
 
         # For efficiency, only consider recent episodes
         candidate_indices = list(range(min(num_candidates, len(self.episodes))))
-        
+
         max_similarity = -1.0
         best_pair = None
 
@@ -469,94 +471,103 @@ class L2MemoryManager:
             for j in range(i + 1, len(candidate_indices)):
                 idx_i = candidate_indices[i]
                 idx_j = candidate_indices[j]
-                
+
                 # Compute cosine similarity
                 vec_i = self.episodes[idx_i].vec
                 vec_j = self.episodes[idx_j].vec
-                
+
                 norm_i = np.linalg.norm(vec_i)
                 norm_j = np.linalg.norm(vec_j)
-                
+
                 if norm_i > 0 and norm_j > 0:
                     similarity = np.dot(vec_i, vec_j) / (norm_i * norm_j)
-                    
+
                     if similarity > max_similarity:
                         max_similarity = similarity
                         best_pair = [idx_i, idx_j]
 
         if best_pair and max_similarity > 0.8:  # Only merge if highly similar
-            logger.info(f"Found similar episodes to merge: {best_pair} (similarity: {max_similarity:.3f})")
+            logger.info(
+                f"Found similar episodes to merge: {best_pair} (similarity: {max_similarity:.3f})"
+            )
             return best_pair
-        
+
         return None
 
     def age_episodes(self) -> int:
         """Apply time-based aging to episodes and prune old ones"""
         if not self.config.enable_aging:
             return 0
-            
+
         current_time = time.time()
         aged_count = 0
         to_prune = []
-        
+
         for i, episode in enumerate(self.episodes):
             age_days = (current_time - episode.timestamp) / (24 * 3600)
-            
+
             # Skip young episodes
             if age_days < self.config.min_age_days:
                 continue
-                
+
             # Mark very old episodes for pruning
             if age_days > self.config.max_age_days:
                 to_prune.append(i)
                 continue
-                
+
             # Apply aging decay to C-value
             decay = self.config.aging_factor ** (age_days - self.config.min_age_days)
             old_c = episode.c
             episode.c = max(0.01, episode.c * decay)  # Keep minimum C-value
-            
+
             if old_c != episode.c:
                 aged_count += 1
-                
+
         # Prune very old episodes
         for idx in sorted(to_prune, reverse=True):
             del self.episodes[idx]
-            
+
         if to_prune:
             self._rebuild_index()
             logger.info(f"Pruned {len(to_prune)} episodes due to age")
-            
+
         logger.info(f"Aged {aged_count} episodes")
         return aged_count + len(to_prune)
-        
+
     def enforce_size_limit(self) -> int:
         """Enforce maximum episode limit by pruning lowest value episodes"""
-        if not self.config.prune_on_overflow or len(self.episodes) <= self.config.max_episodes:
+        if (
+            not self.config.prune_on_overflow
+            or len(self.episodes) <= self.config.max_episodes
+        ):
             return 0
-            
+
         # Sort by C-value and age
         episode_scores = []
         current_time = time.time()
-        
+
         for i, episode in enumerate(self.episodes):
-            age_factor = min(1.0, (current_time - episode.timestamp) / (30 * 24 * 3600))  # 30 days = 1.0
+            age_factor = min(
+                1.0, (current_time - episode.timestamp) / (30 * 24 * 3600)
+            )  # 30 days = 1.0
             score = episode.c * (1 - 0.3 * age_factor)  # 30% weight on age
             episode_scores.append((i, score))
-            
+
         # Sort by score (lowest first)
         episode_scores.sort(key=lambda x: x[1])
-        
+
         # Prune 10% of lowest scoring episodes
         prune_count = max(1, int(0.1 * len(self.episodes)))
-        prune_count = min(prune_count, len(self.episodes) - self.config.max_episodes + 100)  # Leave some buffer
-        
+        prune_count = min(
+            prune_count, len(self.episodes) - self.config.max_episodes + 100
+        )  # Leave some buffer
+
         to_prune = [idx for idx, _ in episode_scores[:prune_count]]
-        
+
         # Remove in reverse order
         for idx in sorted(to_prune, reverse=True):
             del self.episodes[idx]
-            
+
         self._rebuild_index()
         logger.info(f"Pruned {len(to_prune)} episodes to enforce size limit")
         return len(to_prune)

@@ -20,9 +20,9 @@ This document describes the unique CLI commands that showcase InsightSpike's cor
 9. [spike stats - View Statistics](#spike-stats---view-statistics)
 10. [spike version - Version Information](#spike-version---version-information)
 
-### Coming Soon
-11. [spike bridge - Concept Bridging](#spike-bridge---concept-bridging) (Coming Soon)
-12. [spike graph - Knowledge Graph Analytics](#spike-graph---knowledge-graph-analytics) (Coming Soon)
+### Advanced Features
+11. [spike bridge - Concept Bridging](#spike-bridge---concept-bridging)
+12. [spike graph - Knowledge Graph Analytics](#spike-graph---knowledge-graph-analytics)
 
 ---
 
@@ -42,9 +42,8 @@ The `spike query` command is the main interface for asking questions and getting
 # Basic question
 spike query "How does entropy relate to information theory?"
 
-# Aliases
-spike ask "What is the connection between consciousness and information?"
-spike q "Explain quantum entanglement"
+# Note: 'ask' alias has been removed. Use 'query' instead.
+spike query "What is the connection between consciousness and information?"
 
 # With options
 spike query "Complex question" --verbose --preset experiment
@@ -80,10 +79,10 @@ spike embed document.txt
 # Add a directory of files
 spike embed docs/
 
-# Aliases
-spike learn papers/
-spike l research.md
-spike e data.txt
+# Note: Aliases like 'learn', 'l', 'e' have been removed. Use 'embed' instead.
+spike embed papers/
+spike embed research.md
+spike embed data.txt
 ```
 
 ## Options
@@ -96,7 +95,7 @@ spike e data.txt
 
 - `.txt` - Plain text files
 - `.md` - Markdown files
-- `.pdf` - PDF documents (with optional dependencies)
+- Future: `.pdf` - PDF documents (with optional dependencies)
 - `.json` - Structured data
 
 ---
@@ -113,8 +112,8 @@ The `spike interactive` command (alias: `spike chat`) provides an interactive co
 # Start interactive mode
 spike interactive
 
-# Alias
-spike chat
+# Note: 'chat' alias has been removed. Use 'interactive' instead.
+spike interactive
 
 # With specific preset
 spike chat --preset research
@@ -161,11 +160,7 @@ spike insights --export insights.json
 
 ## Options
 
-- `--limit, -l`: Maximum number of insights to show
-- `--since, -s`: Show insights since date
-- `--min-confidence`: Minimum confidence threshold
-- `--category, -c`: Filter by insight category
-- `--export, -e`: Export to file
+- `--limit`: Maximum number of insights to show (default: 5)
 
 ---
 
@@ -344,8 +339,10 @@ The `spike experiment` command runs predefined experiments to test InsightSpike'
 # Run default experiment
 spike experiment
 
-# Run specific experiment
-spike experiment --name "english_insight"
+# Run specific experiment type
+spike experiment --name simple
+spike experiment --name insight
+spike experiment --name math
 
 # With custom parameters
 spike experiment --cycles 20 --verbose
@@ -353,10 +350,9 @@ spike experiment --cycles 20 --verbose
 
 ## Options
 
-- `--name, -n`: Experiment name
-- `--cycles`: Maximum reasoning cycles
-- `--output, -o`: Output directory for results
-- `--verbose, -v`: Show detailed progress
+- `--name`: Experiment type (simple, insight, math)
+- `--episodes`: Number of episodes to run (default: 5)
+- `--preset`: Config preset to use
 
 ---
 
@@ -393,7 +389,7 @@ spike demo --type insight
 
 ## Overview
 
-The `spike config` command manages InsightSpike configuration settings.
+The `spike config` command manages InsightSpike configuration settings using the Pydantic-based configuration system.
 
 ## Usage
 
@@ -401,26 +397,48 @@ The `spike config` command manages InsightSpike configuration settings.
 # Show current config
 spike config show
 
-# Set a config value
-spike config set llm.model "gpt-4"
+# Set a config value (nested keys supported)
+spike config set core.temperature 0.5
+spike config set memory.episodic_memory_capacity 1000
 
 # Save config to file
 spike config save my_config.yaml
 
-# Load config from file
+# Load config from file  
 spike config load my_config.yaml
 
 # Use a preset
+spike config preset development
 spike config preset production
+spike config preset experiment
+
+# Validate configuration
+spike config validate
+
+# Export full config with defaults
+spike config export
 ```
 
 ## Actions
 
-- `show` - Display current configuration
-- `set <key> <value>` - Set a configuration value
-- `save <file>` - Save configuration to file
-- `load <file>` - Load configuration from file
-- `preset <name>` - Load a configuration preset
+- `show` - Display current configuration as JSON
+- `set <key> <value>` - Set a configuration value (supports nested keys)
+- `save <file>` - Save configuration to YAML file
+- `load <file>` - Load configuration from YAML file
+- `preset <name>` - Load a configuration preset (development, production, experiment, testing, cloud)
+- `validate` - Validate current configuration
+- `export` - Export full configuration including defaults
+
+## Configuration Keys
+
+Common configuration keys:
+- `core.llm_provider`: LLM provider (local, openai, anthropic, mock, clean)
+- `core.temperature`: Response creativity (0.0-1.0)
+- `core.max_tokens`: Maximum response tokens
+- `memory.episodic_memory_capacity`: Number of episodes to retain
+- `memory.enable_aging`: Enable time-based memory decay
+- `graph.spike_ged_threshold`: Threshold for spike detection
+- `retrieval.top_k`: Number of documents to retrieve
 
 ---
 
@@ -471,50 +489,82 @@ spike version --verbose
 
 ---
 
-# spike bridge - Concept Bridging (Coming Soon)
+# spike bridge - Concept Bridging
 
 ## Overview
 
 The `spike bridge` command finds conceptual paths between seemingly unrelated ideas, revealing hidden connections through intermediate concepts.
 
-## Planned Features
+## Features
 
-- Semantic pathfinding between concepts
-- Multiple path discovery
-- Bridge concept identification
-- Path confidence scoring
+- 🌉 **Semantic Pathfinding**: Finds connections between distant concepts
+- 🔗 **Multi-hop Analysis**: Discovers intermediate bridge concepts
+- 📊 **Path Confidence**: Scores connection strength
+- 🎯 **Visualization**: Shows the conceptual path graphically
 
-## Usage (Planned)
+## Usage
 
 ```bash
 # Find bridges between concepts
 spike bridge "machine learning" "biological evolution"
 
-# Multi-hop bridging
-spike bridge "quantum computing" "consciousness" --max-hops 4
+# With visualization
+spike bridge "quantum computing" "consciousness" --visualize
+
+# Limit path length
+spike bridge "concept1" "concept2" --max-hops 3
 ```
+
+## Options
+
+- `--max-hops`: Maximum intermediate concepts (default: 4)
+- `--visualize`: Show visual representation
+- `--min-confidence`: Minimum path confidence
+- `--export`: Export results to file
 
 ---
 
-# spike graph - Knowledge Graph Analytics (Coming Soon)
+# spike graph - Knowledge Graph Analytics
 
 ## Overview
 
 The `spike graph` command provides analytics and visualization of your knowledge structure.
 
-## Planned Features
+## Features
 
-- Graph metrics calculation
-- Centrality analysis
-- Cluster detection
-- Interactive visualization export
+- 📊 **Graph Metrics**: Calculate structural properties
+- 🎯 **Centrality Analysis**: Find key concepts
+- 🔍 **Cluster Detection**: Identify knowledge domains
+- 🎨 **Visualization**: Export interactive graph views
 
-## Usage (Planned)
+## Usage
 
 ```bash
 # Analyze graph structure
-spike graph analyze --metrics all
+spike graph analyze
 
 # Visualize knowledge graph
+spike graph visualize
+
+# Export visualization
 spike graph visualize --output graph.html
+
+# Show specific metrics
+spike graph analyze --metrics centrality,clustering
 ```
+
+## Subcommands
+
+- `analyze`: Compute graph metrics and statistics
+- `visualize`: Create visual representation of knowledge graph
+
+## Options
+
+### For analyze:
+- `--metrics`: Specific metrics to calculate (all, centrality, clustering, density)
+- `--export`: Export results to JSON
+
+### For visualize:
+- `--output`: Output file path (HTML format)
+- `--layout`: Graph layout algorithm
+- `--filter`: Filter nodes by criteria

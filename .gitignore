@@ -10,6 +10,7 @@ __pycache__/
 .mypy_cache/
 .claude/
 .coverage
+.coverage.*
 *.egg-info/
 
 # システム・エディタファイル

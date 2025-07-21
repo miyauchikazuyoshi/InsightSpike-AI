@@ -7,39 +7,45 @@ This document contains comprehensive information about InsightSpike-AI's impleme
 ```text
 InsightSpike-AI/
 ├── src/insightspike/           # Core 4-layer architecture implementation
-│   ├── core/                   # InsightSpikeSystem, Memory Manager, Graph Reasoner
-│   ├── models/                 # geDIG algorithm, neural networks, vector quantization
-│   ├── memory/                 # FAISS-indexed episodic memory with C-value weighting
-│   ├── graph/                  # PyTorch Geometric GNN reasoning
-│   └── utils/                  # Utilities and helper functions
-├── scripts/                    # Production utilities & enterprise tools
-│   ├── debugging/              # System diagnostics
-│   ├── testing/                # Component tests
-│   ├── validation/             # Quality assurance
-│   ├── production/             # Production deployment tools
-│   ├── utilities/              # Data restore
-│   ├── ci/                     # CI support
-│   └── git-hooks/              # Pre-push validation automation
-├── monitoring/                 # Real-time system monitoring
-│   ├── production_monitor.py   # System health metrics
-│   └── performance_dashboard.py # Web dashboard
-├── templates/                  # Production integration templates
-│   ├── production_integration_template.py
-│   └── generated/              # Enterprise, Research, Educational, Content, Real-time
-├── benchmarks/                 # Performance benchmarking suite
-│   ├── performance_suite.py    # Comprehensive testing
-│   └── results/                # Benchmark execution history
-├── data/                       # Core data & enterprise backup system
-│   ├── clean_backup/           # Clean state backup & restore
+│   ├── core/                   # Base interfaces and abstract classes only
+│   │   ├── agents/             # Agent interfaces
+│   │   ├── base/               # Base classes
+│   │   └── interfaces/         # Layer interfaces
+│   ├── implementations/        # Concrete implementations
+│   │   ├── agents/             # MainAgent, ConfigurableAgent
+│   │   ├── datastore/          # Storage implementations
+│   │   └── layers/             # Layer implementations (L1-L4)
+│   ├── features/               # Additional features
+│   │   ├── graph_reasoning/    # Graph analysis tools
+│   │   └── query_transformation/ # Query processing
+│   ├── algorithms/             # Core algorithms (GED, IG, entropy)
+│   ├── config/                 # Pydantic-based configuration
+│   ├── cli/                    # Command line interfaces
+│   │   ├── spike.py            # Main CLI
+│   │   └── commands/           # CLI command modules
+│   └── utils/                  # Utilities and helpers
+├── scripts/                    # Setup and utility scripts
+├── docs/                       # Documentation
+│   ├── architecture/           # System architecture docs
+│   ├── api-reference/          # API documentation
+│   └── development/            # Development guides
+├── data/                       # Core data (READ-ONLY for experiments)
 │   ├── episodes.json           # Episode memory
-│   ├── graph_pyg.pt            # PyTorch graph data
+│   ├── graph.pt                # PyTorch graph data
 │   ├── index.faiss             # FAISS vector index
-│   ├── index.json              # Metadata index
 │   └── *.db                    # SQLite databases
-├── english_insight_experiment/ # Latest experimental results
-├── docs/                       # Documentation & research
-├── experiments/                # Research validation & analysis
-└── tests/                      # Comprehensive test suite
+├── experiments/                # Isolated experiment directories
+│   ├── templates/              # Experiment templates
+│   └── [experiment_name]/      # Individual experiments
+│       ├── src/                # Experiment code
+│       ├── data/               # Experiment-specific data
+│       │   ├── input/          # Copy of source data
+│       │   └── processed/      # Generated data
+│       ├── results/            # Experiment results
+│       └── data_snapshots/     # Data backups
+└── tests/                      # Test suite
+    ├── unit/                   # Unit tests
+    └── integration/            # Integration tests
 ```
 
 ## ⚙️ Configuration & Settings
@@ -73,13 +79,12 @@ InsightSpike-AI uses flexible configuration management:
 ```yaml
 core:
   model_name: "paraphrase-MiniLM-L6-v2"  # Embedding model (384-dim)
-  llm_provider: "local"                   # local, openai, anthropic
+  llm_provider: "local"                   # local, openai, anthropic, mock, clean
   llm_model: "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
   max_tokens: 256                         # LLM response length
   temperature: 0.3                        # Response creativity (0.0-1.0)
   device: "cpu"                          # cpu, cuda, mps
   use_gpu: false                         # Enable GPU acceleration
-  safe_mode: false                       # Use mock providers for testing
 ```
 
 #### **Memory System Configuration**
@@ -91,44 +96,51 @@ memory:
   working_memory_capacity: 20            # Active processing capacity
   episodic_memory_capacity: 60           # Long-term episode storage
   pattern_cache_capacity: 15             # Pattern recognition cache
+  
+  # Memory aging settings (NEW - July 2025)
+  enable_aging: true                     # Enable time-based memory decay
+  aging_factor: 0.95                     # Decay factor per day
+  min_age_days: 7                        # Don't age episodes younger than this
+  max_age_days: 90                       # Maximum age before auto-pruning
+  prune_on_overflow: true                # Auto-prune when reaching max_episodes
 ```
 
 #### **geDIG Algorithm Parameters**
 
 ```yaml
-reasoning:
+# Graph configuration (replaces 'reasoning' section)
+graph:
   # Core geDIG Weights
   weight_ged: 1.0                       # Graph Edit Distance weight
   weight_ig: 1.0                        # Information Gain weight
   weight_conflict: 0.5                  # Conflict detection weight
   
-  # Episode Integration (Smart Memory)
-  episode_integration_similarity_threshold: 0.85  # Vector similarity ≥ 0.85
-  episode_integration_content_threshold: 0.4      # Content overlap ≥ 0.4
-  episode_integration_c_threshold: 0.3            # C-value difference ≤ 0.3
+  # Spike Detection Thresholds
+  spike_ged_threshold: -0.5             # GED threshold for "Aha!" moments
+  spike_ig_threshold: 0.2               # IG threshold for insights
+  conflict_threshold: 0.5               # Conflict detection threshold
   
-  # Episode Management
-  episode_merge_threshold: 0.8          # Merge similar episodes
+  # Episode Management (via similarity)
+  episode_merge_threshold: 0.8          # Merge episodes with cosine similarity > 0.8
   episode_split_threshold: 0.3          # Split conflicting episodes
   episode_prune_threshold: 0.1          # Remove low-value episodes
+  
+  # Graph Neural Network
+  use_gnn: false                        # Enable Graph Neural Networks
+  gnn_hidden_dim: 64                    # GNN layer dimensions
 ```
 
 #### **Graph Processing & Spike Detection**
 
 ```yaml
-graph:
-  spike_ged_threshold: 0.5              # GED threshold for "Aha!" moments
-  spike_ig_threshold: 0.2               # IG threshold for insights
-  use_gnn: false                        # Enable Graph Neural Networks
-  gnn_hidden_dim: 64                    # GNN layer dimensions
 ```
 
 ### 🎛️ Configuration Priority
 
 Settings are applied in the following order (later overrides earlier):
 
-1. **Default Values** (`src/insightspike/core/config.py`)
-2. **YAML File** (`~/.insightspike/config.yaml`)
+1. **Default Values** (in Pydantic models)
+2. **YAML/JSON File** (`./config.yaml` or `~/.insightspike/config.yaml`)
 3. **Environment Variables** (`INSIGHTSPIKE_*`)
 4. **CLI Arguments** (`--option value`)
 
@@ -139,10 +151,11 @@ Settings are applied in the following order (later overrides earlier):
 retrieval:
   top_k: 25
   similarity_threshold: 0.25
-reasoning:
-  episode_integration_similarity_threshold: 0.9
+graph:
   weight_ged: 1.2
   weight_ig: 1.2
+memory:
+  enable_aging: false  # More stable for research
 ```
 
 **Production Mode (Fast Response):**
@@ -150,8 +163,9 @@ reasoning:
 retrieval:
   top_k: 10
   similarity_threshold: 0.4
-reasoning:
-  episode_integration_similarity_threshold: 0.8
+memory:
+  episodic_memory_capacity: 1000
+  prune_on_overflow: true
 processing:
   batch_size: 16
   timeout_seconds: 120
@@ -165,7 +179,7 @@ output:
   save_results: true
 core:
   temperature: 0.5
-reasoning:
+graph:
   weight_conflict: 0.8  # Emphasize conflict detection
 ```
 
@@ -178,56 +192,57 @@ reasoning:
 ```bash
 # Query the knowledge base
 poetry run spike query "What is quantum computing?"
-poetry run spike q "What is quantum computing?"  # alias
 
 # Embed documents into the knowledge base (with graph updates)
 poetry run spike embed path/to/documents.txt
-poetry run spike e path/to/documents.txt  # alias
+poetry run spike embed path/to/directory/      # Process all .txt and .md files
 
 # Interactive chat mode
-poetry run spike chat
-poetry run spike c  # alias
+poetry run spike interactive                   # Start interactive mode
 
 # Configuration management
-poetry run spike config show                    # Show current config
-poetry run spike config set safe_mode false     # Change settings
-poetry run spike config preset experiment       # Use preset
-poetry run spike config save my_config.json    # Save config
-poetry run spike config load my_config.json    # Load config
+poetry run spike config show                   # Show current config
+poetry run spike config set core.temperature 0.5  # Change nested settings
+poetry run spike config preset development     # Use preset configuration
+poetry run spike config save my_config.yaml    # Save current config
+poetry run spike config load my_config.yaml    # Load saved config
+poetry run spike config validate               # Validate configuration
+poetry run spike config export                 # Export full config with defaults
 
 # Show statistics and insights
 poetry run spike stats                         # Agent statistics
-poetry run spike insights                      # Show discovered insights
-poetry run spike insights-search "quantum"     # Search insights by concept
+poetry run spike insights                      # Show discovered insights (top 5)
+poetry run spike insights --limit 10           # Show more insights
 
 # Interactive demo
 poetry run spike demo                          # Run guided demo
 
 # Run experiments
-poetry run spike experiment --name simple --episodes 10
-poetry run spike experiment --name insight --episodes 5
-poetry run spike experiment --name math --episodes 7
+poetry run spike experiment --name simple      # Basic Q&A experiment
+poetry run spike experiment --name insight     # Insight detection experiment
+poetry run spike experiment --name math        # Mathematical reasoning
+
+# Advanced features
+poetry run spike discover "quantum physics"    # Discover insights about a topic
+poetry run spike bridge "quantum" "biology"    # Bridge concepts across domains
+poetry run spike graph visualize               # Visualize knowledge graph
+poetry run spike graph analyze                 # Analyze graph structure
 
 # Show version and help
 poetry run spike version                       # Version info
 poetry run spike --help                        # Show all commands
 ```
 
-#### Legacy CLI (`insightspike`) - Limited Functionality
+#### Legacy CLI (`insightspike`) - Deprecated ⚠️
 
-```bash
-# Basic commands (with deprecation warnings)
-poetry run insightspike legacy-ask "What is quantum computing?"
-poetry run insightspike legacy-stats
+The legacy CLI has been removed as of July 2025. All functionality has been migrated to the new `spike` CLI with improved features:
 
-# Limited functionality commands
-poetry run insightspike load-documents path/to/documents.txt  # No graph update
-poetry run insightspike config-info                           # Show config
-poetry run insightspike deps list                            # Dependency management
+- `insightspike ask` → `spike query`
+- `insightspike load-documents` → `spike embed` (with graph updates)
+- `insightspike stats` → `spike stats`
+- `insightspike config-info` → `spike config show`
 
-# Show help
-poetry run insightspike --help
-```
+Please use the new `spike` CLI for all operations.
 
 ### Python API Reference
 
@@ -236,36 +251,55 @@ poetry run insightspike --help
 ```python
 import shutil
 from datetime import datetime
+from pathlib import Path
 
-# 1. Backup existing data before experiment
+# Following CLAUDE.md guidelines for experiments
+experiment_dir = Path("experiments/my_experiment")
+
+# 1. Copy data to experiment directory (NEVER modify project root data/)
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-shutil.copytree("data", f"data_backup_{timestamp}")
+shutil.copytree("data", experiment_dir / "data/input")
 
-# 2. Initialize fresh agent for clean experiment
-agent = MainAgent()
+# 2. Initialize agent with experiment-specific config
+from insightspike.config import load_config
+from insightspike.implementations.agents import MainAgent
+
+config = load_config(preset="experiment")
+agent = MainAgent(config=config)
 agent.initialize()
 
 # 3. Run your experiment
 # ... experiment code ...
 
-# 4. Save experiment results
+# 4. Save results to experiment directory
 experiment_results = {
     "timestamp": timestamp,
     "metrics": agent.get_stats(),
     # ... other results ...
 }
 
-# 5. Optionally restore original data
-# shutil.rmtree("data")
-# shutil.copytree(f"data_backup_{timestamp}", "data")
+# 5. Create data snapshot for reproducibility
+shutil.copytree(
+    experiment_dir / "data",
+    experiment_dir / f"data_snapshots/snapshot_{timestamp}"
+)
 ```
 
-#### Data Growth Example
+#### Modern Usage Example
 
 ```python
-from insightspike.core.agents.main_agent import MainAgent
+from insightspike.implementations.agents import MainAgent
+from insightspike.config import load_config
+from insightspike.config.presets import ConfigPresets
 
-agent = MainAgent()
+# Option 1: Use preset
+config = load_config(preset="development")
+
+# Option 2: Load from file
+# config = load_config(config_path="./config.yaml")
+
+# Initialize agent
+agent = MainAgent(config=config)
 agent.initialize()
 
 # Load test data
@@ -275,58 +309,88 @@ documents = [
     "Transformers revolutionized natural language processing."
 ]
 
-# Add with graph updates
+# Add knowledge with graph updates
 for doc in documents:
-    result = agent.add_episode_with_graph_update(doc)
-    if result['success']:
+    result = agent.add_knowledge(doc)
+    if result.get('success'):
         print(f"✓ Added: {doc[:50]}...")
+        if result.get('spike_detected'):
+            print("  🚀 Insight spike detected!")
 
-# Check growth
-initial_stats = agent.get_stats()
-print(f"Total episodes: {initial_stats['episodes']}")
-print(f"Graph nodes: {initial_stats['graph_nodes']}")
+# Process a question
+answer = agent.process_question(
+    "How do transformers relate to deep learning?",
+    max_cycles=3
+)
+
+print(f"\nAnswer: {answer.response}")
+print(f"Quality: {answer.reasoning_quality:.3f}")
+print(f"Spike detected: {answer.spike_detected}")
+
+# Check statistics
+stats = agent.get_stats()
+print(f"\nTotal episodes: {stats['episodes']}")
+print(f"Graph nodes: {stats.get('graph_nodes', 0)}")
+
+# Get insights
+insights = agent.get_insights(limit=3)
+for insight in insights.get('insights', []):
+    print(f"\nInsight: {insight['fact']}")
+    print(f"Category: {insight['category']}")
 
 # MUST save to persist
 agent.save_state()
 ```
 
-### Key API Differences
+### Key API Methods
 
-| Feature | CLI | Python API |
-|---------|-----|------------|
-| Add documents | ✓ | ✓ |
-| Update graph | ✗ | ✓ (with `add_episode_with_graph_update`) |
-| Save data | ✗ | ✓ (with `save_state`) |
-| Query processing | ✓ | ✓ |
-| Full control | ✗ | ✓ |
+| Method | Purpose | Returns |
+|--------|---------|----------|
+| `initialize()` | Initialize agent components | `bool` (success) |
+| `add_knowledge(text, source)` | Add document with graph update | `Dict` with success, spike_detected |
+| `process_question(question, max_cycles, verbose)` | Process query through all layers | `CycleResult` object |
+| `get_stats()` | Get agent statistics | `Dict` with metrics |
+| `get_insights(limit)` | Retrieve discovered insights | `Dict` with insights list |
+| `search_insights(concept, limit)` | Search insights by concept | `List[Dict]` |
+| `save_state()` | Persist agent state to disk | `None` |
+| `age_episodes()` | Apply time-based memory decay | `int` (pruned count) |
+| `run_experiment(type, episodes)` | Run built-in experiments | `Dict` with results |
 
 ### Data Storage Structure
 
 InsightSpike-AI uses a structured data directory system:
 
 - `data/episodes.json` - Episode memory (text, embeddings, metadata)
-- `data/graph_pyg.pt` - PyTorch Geometric graph structure
+- `data/graph.pt` - PyTorch graph structure (renamed from graph_pyg.pt)
 - `data/index.faiss` - FAISS vector index for similarity search
 - `data/insight_facts.db` - SQLite database for discovered insights
-- `data/learning/` - Auto-learning system data
+- `data/index.json` - Metadata index for episodes
+
+**Important**: Project root `data/` is READ-ONLY for experiments. Always copy to experiment directories as per CLAUDE.md guidelines.
 
 ## 🔧 Development Setup
 
-### Enable Pre-Push Validation
+### Development Commands
 
 ```bash
-# Enable pre-push validation (recommended for contributors)
-cp scripts/git-hooks/pre-push .git/hooks/
-chmod +x .git/hooks/pre-push
+# Setup models (first time only)
+poetry run python scripts/setup_models.py
 
-# Restore clean data state if needed
-python scripts/utilities/restore_clean_data.py
+# Run tests with coverage
+poetry run pytest tests/unit/ -v --cov=src/insightspike --cov-report=term-missing
 
-# Monitor system health
-python monitoring/production_monitor.py
+# Format code
+poetry run black src/ tests/
+poetry run isort src/ tests/
 
-# Run performance benchmarks
-python benchmarks/performance_suite.py
+# Lint code
+poetry run flake8 src/ tests/
+
+# Type checking
+poetry run mypy src/
+
+# Create new experiment
+poetry run python experiments/templates/create_experiment.py --name "my_experiment" --type "standard"
 ```
 
 ### Environment Troubleshooting
@@ -381,83 +445,86 @@ pip install torch torchvision torchaudio faiss-cpu typer click pydantic
 pip install -e .
 ```
 
-## 📊 Experimental Results Details
+## 📊 Recent Improvements (July 2025)
 
-### 🎯 Latest Production Validation (January 2025)
+### 🎯 Code Quality Enhancements
 
-#### **Integrated Production System**
+#### **Configuration System Overhaul**
+- ✅ **Unified Schema**: Removed dual config.reasoning management
+- ✅ **Pydantic Models**: Type-safe configuration with validation
+- ✅ **Preset System**: Development, experiment, production presets
+- ✅ **Environment Override**: Full support for INSIGHTSPIKE_* variables
 
-- ✅ **Data Integrity**: Clean backup system with 5 core data files validated
-- ✅ **Monitoring Infrastructure**: Production-ready system health monitoring
-- ✅ **Git Integration**: Pre-push validation hooks ensure code quality
-- ✅ **Production Templates**: 5 deployment scenarios validated
-- ✅ **Performance Benchmarking**: CI-compatible testing suite
+#### **Memory Management Improvements**
+- 🔧 **Episode Merging**: Cosine similarity-based intelligent merging
+- 📊 **Time-based Aging**: Exponential decay (0.95/day) for old memories
+- ⚡ **Auto-pruning**: Configurable overflow handling
+- 🎯 **Size Enforcement**: Automatic episode limit management
 
-#### **Core System Validation Results**
+#### **Code Cleanup Results**
+- **Removed**: 300+ lines of deprecated methods
+- **Deleted**: Legacy functions (_detect_spike, save_graph, load_graph)
+- **Fixed**: 18 instances of hasattr(config, "reasoning") checks
+- **Improved**: Test coverage from 17% to 23%
 
-**Architecture Component Testing:**
+### 📊 Algorithm Performance
 
-- 🔧 **Memory Manager**: Episode integration thresholds (0.85 similarity, 0.7 content) validated
-- 📊 **Graph Reasoner**: PyTorch Geometric implementation with 1-node baseline
-- ⚡ **Vector Search**: FAISS-indexed 384-dimensional embeddings optimized
-- 🎯 **System Integration**: All 4 layers functioning in production environment
+**geDIG (Graph Edit Distance + Information Gain):**
+- **Spike Detection**: ΔGED ≤ -0.5, ΔIG ≥ 0.2
+- **Conflict Resolution**: Automatic detection and handling
+- **Scalability**: O(n log n) construction, O(log n) search
 
-#### **Smart Episode Integration**
-
-- **Threshold-based Decision**: Vector similarity ≥ 0.85, Content overlap ≥ 0.7
-- **Integration Score**: 0.5×Similarity + 0.3×Content + 0.2×C-Value
-- **Dynamic Memory**: FAISS-indexed efficient search with C-value weighting
-
-### 📊 Historical Experimental Results
-
-**Proof-of-Concept Validation (2025-06-30):**
-
-- **Performance Improvement**: +133.3% quality increase in controlled experiments
-- **Insight Detection**: Unique capability demonstrated vs baseline systems
-- **Processing Efficiency**: Significant speed improvements observed
-- **Statistical Confidence**: Results significant at p < 0.001 level
+**Memory Performance:**
+- **Episode Capacity**: 10,000+ episodes supported
+- **Search Speed**: < 5ms for 100K episodes
+- **Merge Efficiency**: 80%+ similarity required for auto-merge
 
 ## 🏗️ Technical Architecture Details
 
 ### Core Architecture Layers
 
-1. **Error Monitor** (Cerebellum analog) - Query analysis and validation
-2. **Memory Manager** (Hippocampus analog) - Graph-centric episodic memory (C-value free)
-3. **Graph Reasoner** (Prefrontal cortex analog) - Scalable PyTorch Geometric GNN with geDIG
-4. **Language Interface** (Language area analog) - Natural language synthesis and interaction
+1. **Layer 1: Error Monitor** (`implementations/layers/layer1_error_monitor.py`)
+   - Brain analog: Cerebellum
+   - Query validation and uncertainty detection
+   
+2. **Layer 2: Memory Manager** (`implementations/layers/layer2_memory_manager.py`)
+   - Brain analog: Hippocampus + Locus Coeruleus
+   - FAISS-indexed episodic memory with aging
+   - Intelligent episode merging and pruning
+   
+3. **Layer 3: Graph Reasoner** (`implementations/layers/layer3_graph_reasoner.py`)
+   - Brain analog: Prefrontal Cortex
+   - geDIG algorithm for insight detection
+   - PyTorch-based graph analysis
+   
+4. **Layer 4: Language Interface** (`implementations/layers/layer4_llm_interface.py`)
+   - Brain analog: Broca's + Wernicke's areas
+   - Multi-provider LLM support
+   - Context-aware response generation
 
-### Scalable Graph Implementation
-
-**Hierarchical Architecture for Large-Scale Processing:**
+### Configuration Architecture
 
 ```text
-IntegratedHierarchicalManager
-├── GraphCentricMemoryManager (Episode Management)
-│   ├── Dynamic importance from graph structure
-│   ├── Graph-informed integration/splitting
-│   └── No C-values - pure graph-based
-└── HierarchicalGraphBuilder (Scalable Search)
-    ├── Level 0: Individual episodes
-    ├── Level 1: Topic clusters (√n size)
-    └── Level 2: Super-clusters
+config/
+├── models.py          # Pydantic configuration models
+├── loader.py          # Configuration loading logic
+├── presets.py         # Pre-defined configurations
+└── converter.py       # Legacy format conversion
 ```
 
-**Performance Characteristics:**
+### Key Algorithms
 
-| Dataset Size | Build Time | Search Time | Compression |
-|-------------|------------|-------------|-------------|
-| 1,000       | 150ms      | 0.5ms       | 100x        |
-| 10,000      | 1.5s       | 2ms         | 200x        |
-| 100,000     | 15s        | 5ms         | 500x        |
-
-### Key Technologies
-
-- **geDIG Algorithm**: Graph Edit Distance + Information Gain for insight detection
-- **Scalable Graph Builder**: FAISS-based O(n log n) construction, O(log n) search
-- **Graph-Centric Memory**: Dynamic importance, no C-values, self-attention-like behavior
-- **Hierarchical Management**: 3-layer structure for 100K+ episode handling
-- **Vector Quantization**: FAISS-indexed 384-dimensional embeddings
-- **Dynamic Reasoning**: PyTorch Geometric graph neural networks
+- **geDIG**: Graph Edit Distance + Information Gain
+  - Detects structural changes in knowledge
+  - Identifies "Eureka" moments
+  
+- **Similarity Entropy**: Information-theoretic complexity
+  - Measures knowledge diversity
+  - Guides memory organization
+  
+- **Cosine Similarity**: Episode comparison
+  - 384-dimensional embeddings
+  - Threshold: 0.8 for merging
 
 ## 🙏 Acknowledgments
 

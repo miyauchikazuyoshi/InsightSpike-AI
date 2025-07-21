@@ -155,7 +155,9 @@ class GraphBuilder:
 
     def __init__(self, config=None):
         self.config = config or get_config()
-        self.similarity_threshold = getattr(self.config.graph, "similarity_threshold", 0.3)
+        self.similarity_threshold = getattr(
+            self.config.graph, "similarity_threshold", 0.3
+        )
 
     def build_graph(
         self, documents: List[Dict[str, Any]], embeddings: Optional[np.ndarray] = None
@@ -490,4 +492,6 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         """Detect if current state constitutes a eureka spike"""
         metrics = {"delta_ged": delta_ged, "delta_ig": delta_ig}
         conflicts = {"total": 0.0}  # No conflicts for direct call
-        return self.graph_analyzer.detect_spike(metrics, conflicts, self._get_spike_thresholds())
+        return self.graph_analyzer.detect_spike(
+            metrics, conflicts, self._get_spike_thresholds()
+        )

@@ -29,19 +29,28 @@ class GenericReasoner(ReasonerInterface):
         pass  # No parameters needed
 ```
 
-## 3. L2MemoryManager (from insightspike.core.layers.layer2_memory_manager)
+## 3. L2MemoryManager (from insightspike.implementations.layers.layer2_memory_manager)
 
 ```python
 class L2MemoryManager(L2MemoryInterface):
     def __init__(
         self,
-        dim: int = None,  # Optional, defaults to config.embedding.dimension
-        config=None,      # Optional, defaults to get_config()
-        knowledge_graph: Optional[KnowledgeGraphMemory] = None  # Optional
+        config: Optional[MemoryConfig] = None,
+        embedding_model: Optional[Any] = None
     ):
+    
+    # New memory management methods:
+    def age_episodes(self) -> int:
+        """Apply time-based aging to episodes"""
+        
+    def enforce_size_limit(self) -> int:
+        """Enforce maximum episode limit"""
+        
+    def merge_episodes(self, indices: List[int]) -> int:
+        """Merge episodes, auto-detects similar pairs if indices not specified"""
 ```
 
-## 4. L3GraphReasoner (from insightspike.core.layers.layer3_graph_reasoner)
+## 4. L3GraphReasoner (from insightspike.implementations.layers.layer3_graph_reasoner)
 
 ```python
 class L3GraphReasoner(L3GraphReasonerInterface):
@@ -50,27 +59,22 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         # Sets layer_id = "layer3_graph_reasoner"
 ```
 
-## 5. CLI Commands (from insightspike.cli.main)
+## 5. CLI Commands (from insightspike.cli.spike)
 
-Available commands:
-- `ask` - Ask a question to the AI agent
-- `load_documents` - Load documents into memory
-- `stats` - Show agent statistics
-- `config_info` - Show current configuration
-- `experiment` - Run experimental validation suite
-- `benchmark` - Run performance benchmarks
-- `embed` - Legacy command (deprecated, redirects to load_documents)
-- `query` - Legacy command (deprecated, redirects to ask)
-- `insight_experiment` - Run insight detection experiment
-- `compare_experiments` - Compare different experimental designs
-- `experiment_suite` - Run complete experimental validation suite
-- `demo` - Run interactive demo
-- `insights` - Show registered insight facts
-- `insights_search` - Search for insights by concept
-- `insights_validate` - Validate/invalidate specific insight
-- `insights_cleanup` - Clean up low-quality insights
-- `test_safe` - Test with mock LLM provider
-- `deps` - Dependency management subcommands
+Main commands:
+- `query` - Ask a question to the AI agent (replaces deprecated 'ask')
+- `embed` - Load documents or text into memory
+- `stats` - Show memory and agent statistics
+- `config` - Configuration management (show, export, validate)
+- `chat` - Interactive chat mode
+- `discover` - Discover insights from knowledge base
+- `bridge` - Bridge concepts across domains
+- `graph` - Graph visualization and analysis
+
+Removed/Deprecated commands:
+- `ask` → use `query`
+- 13 legacy experiment commands removed
+- `test_safe` and other debug commands removed
 
 ## Key Differences from Test Assumptions:
 
@@ -80,9 +84,27 @@ Available commands:
 4. **L3GraphReasoner**: Only takes optional config parameter
 5. **CLI**: No `rag` command exists, but there are many insight-related commands
 
+## 6. Memory Configuration (new in July 2025)
+
+```python
+@dataclass
+class MemoryConfig:
+    # Core settings
+    embedding_dim: int = 384
+    max_episodes: int = 10000
+    
+    # Memory aging settings (NEW)
+    enable_aging: bool = True
+    aging_factor: float = 0.95  # Decay per day
+    min_age_days: int = 7
+    max_age_days: int = 90
+    prune_on_overflow: bool = True
+```
+
 ## Notes:
 
-- The codebase uses dependency injection through config objects
-- Most constructors have optional parameters with sensible defaults
-- The layer classes inherit from interface classes that define the contract
-- The CLI is built with Typer and includes both main commands and legacy compatibility
+- Import paths changed: `core.layers.*` → `implementations.layers.*`
+- Configuration now uses Pydantic models, not legacy dict format
+- Memory manager includes automatic aging and size management
+- CLI simplified to essential commands only
+- Deprecated methods removed (save_graph, load_graph, _detect_spike, etc.)
