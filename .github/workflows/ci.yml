@@ -56,7 +56,7 @@ jobs:
         echo "Testing imports directly:"
         poetry run python -c "import insightspike.features; print('features OK')"
         poetry run python -c "import insightspike.implementations; print('implementations OK')"
-        poetry run pytest tests/unit/ -v --cov=src/insightspike --cov-report=xml --cov-fail-under=17 -s
+        poetry run pytest tests/unit/ -v --cov=src/insightspike --cov-report=xml --cov-fail-under=23 -s
         # Run integration tests separately (if needed)
         # poetry run pytest tests/integration/ -v -m integration
         # poetry run pytest tests/e2e/ -v -m e2e

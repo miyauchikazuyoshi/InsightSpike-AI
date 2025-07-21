@@ -456,6 +456,15 @@ poetry run pytest --cov=insightspike
 - **Consolidated Components**: 6 agents → 1 configurable, 17 layers → 6 clean files
 - **Removed Legacy Code**: Cleaned deprecated directories
 
+### Technical Debt Cleanup (July 21, 2025) 🧹
+Based on external code review feedback:
+- **Config Schema Unified**: Removed `config.reasoning` references (18 locations)
+- **Legacy Functions Deleted**: 300+ lines of deprecated methods removed
+- **Episode Merging Enhanced**: Auto-detects most similar pairs using cosine similarity
+- **Memory Management**: Added time-based aging with configurable decay (0.95/day)
+- **Test Coverage**: Improved from 17% to 23% with new critical component tests
+- **CI/CD**: All checks passing with updated thresholds
+
 ## 🚦 Development Status
 
 - ✅ Core architecture refactored

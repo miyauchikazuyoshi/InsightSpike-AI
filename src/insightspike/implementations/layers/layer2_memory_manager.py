@@ -58,6 +58,13 @@ class MemoryConfig:
     # Core settings
     embedding_dim: int = 384
     max_episodes: int = 10000
+    
+    # Memory management settings
+    enable_aging: bool = True
+    aging_factor: float = 0.95  # Decay factor per day
+    min_age_days: int = 7  # Don't age episodes younger than this
+    max_age_days: int = 90  # Maximum age before automatic pruning
+    prune_on_overflow: bool = True  # Auto-prune when reaching max_episodes
 
     # Feature toggles
     use_c_values: bool = True
@@ -289,6 +296,14 @@ class L2MemoryManager:
 
             # Update index
             self._update_index(episode, episode_idx)
+            
+            # Apply aging periodically (every 100 episodes)
+            if len(self.episodes) % 100 == 0:
+                self.age_episodes()
+                
+            # Enforce size limit if needed
+            if len(self.episodes) > self.config.max_episodes:
+                self.enforce_size_limit()
 
             # Update graph if needed
             if self.config.use_graph_integration:
@@ -474,6 +489,77 @@ class L2MemoryManager:
             return best_pair
         
         return None
+
+    def age_episodes(self) -> int:
+        """Apply time-based aging to episodes and prune old ones"""
+        if not self.config.enable_aging:
+            return 0
+            
+        current_time = time.time()
+        aged_count = 0
+        to_prune = []
+        
+        for i, episode in enumerate(self.episodes):
+            age_days = (current_time - episode.timestamp) / (24 * 3600)
+            
+            # Skip young episodes
+            if age_days < self.config.min_age_days:
+                continue
+                
+            # Mark very old episodes for pruning
+            if age_days > self.config.max_age_days:
+                to_prune.append(i)
+                continue
+                
+            # Apply aging decay to C-value
+            decay = self.config.aging_factor ** (age_days - self.config.min_age_days)
+            old_c = episode.c
+            episode.c = max(0.01, episode.c * decay)  # Keep minimum C-value
+            
+            if old_c != episode.c:
+                aged_count += 1
+                
+        # Prune very old episodes
+        for idx in sorted(to_prune, reverse=True):
+            del self.episodes[idx]
+            
+        if to_prune:
+            self._rebuild_index()
+            logger.info(f"Pruned {len(to_prune)} episodes due to age")
+            
+        logger.info(f"Aged {aged_count} episodes")
+        return aged_count + len(to_prune)
+        
+    def enforce_size_limit(self) -> int:
+        """Enforce maximum episode limit by pruning lowest value episodes"""
+        if not self.config.prune_on_overflow or len(self.episodes) <= self.config.max_episodes:
+            return 0
+            
+        # Sort by C-value and age
+        episode_scores = []
+        current_time = time.time()
+        
+        for i, episode in enumerate(self.episodes):
+            age_factor = min(1.0, (current_time - episode.timestamp) / (30 * 24 * 3600))  # 30 days = 1.0
+            score = episode.c * (1 - 0.3 * age_factor)  # 30% weight on age
+            episode_scores.append((i, score))
+            
+        # Sort by score (lowest first)
+        episode_scores.sort(key=lambda x: x[1])
+        
+        # Prune 10% of lowest scoring episodes
+        prune_count = max(1, int(0.1 * len(self.episodes)))
+        prune_count = min(prune_count, len(self.episodes) - self.config.max_episodes + 100)  # Leave some buffer
+        
+        to_prune = [idx for idx, _ in episode_scores[:prune_count]]
+        
+        # Remove in reverse order
+        for idx in sorted(to_prune, reverse=True):
+            del self.episodes[idx]
+            
+        self._rebuild_index()
+        logger.info(f"Pruned {len(to_prune)} episodes to enforce size limit")
+        return len(to_prune)
 
     def get_memory_stats(self) -> Dict[str, Any]:
         """Get memory statistics"""
