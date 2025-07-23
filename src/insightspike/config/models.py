@@ -53,6 +53,20 @@ class GraphConfig(BaseModel):
     )
     hybrid_weights: HybridWeightsConfig = Field(default_factory=HybridWeightsConfig)
 
+    # geDIG formula parameters
+    weight_ged: float = Field(
+        default=0.5, ge=0.0, le=1.0, description="Weight for ΔGED in reward formula"
+    )
+    weight_ig: float = Field(
+        default=0.5, ge=0.0, le=1.0, description="Weight for ΔIG in reward formula"
+    )
+    temperature: float = Field(
+        default=1.0,
+        ge=0.1,
+        le=10.0,
+        description="Temperature parameter for exploration-exploitation balance",
+    )
+
 
 class PathsConfig(BaseModel):
     """File system paths"""

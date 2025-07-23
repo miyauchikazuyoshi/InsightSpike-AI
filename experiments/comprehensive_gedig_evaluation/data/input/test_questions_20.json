@@ -1,0 +1,149 @@
+{
+  "metadata": {
+    "created": "2025-07-23",
+    "total_questions": 20,
+    "description": "Diverse test questions for comprehensive geDIG evaluation"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "question": "How does information theory relate to thermodynamics?",
+      "type": "conceptual_integration",
+      "expected_connections": ["entropy", "maxwell_demon", "landauer"],
+      "difficulty": "medium"
+    },
+    {
+      "id": 2,
+      "question": "Can consciousness emerge from quantum processes?",
+      "type": "speculative_integration",
+      "expected_connections": ["quantum", "consciousness", "emergence"],
+      "difficulty": "hard"
+    },
+    {
+      "id": 3,
+      "question": "How do living systems maintain order against entropy?",
+      "type": "systems_thinking",
+      "expected_connections": ["life", "entropy", "dissipative_structures"],
+      "difficulty": "medium"
+    },
+    {
+      "id": 4,
+      "question": "What is the relationship between evolution and information?",
+      "type": "interdisciplinary",
+      "expected_connections": ["evolution", "information", "optimization"],
+      "difficulty": "medium"
+    },
+    {
+      "id": 5,
+      "question": "How does the brain process and integrate information?",
+      "type": "neuroscience",
+      "expected_connections": ["neural", "information", "integration"],
+      "difficulty": "medium"
+    },
+    {
+      "id": 6,
+      "question": "Can artificial intelligence achieve genuine creativity?",
+      "type": "ai_philosophy",
+      "expected_connections": ["ai", "creativity", "emergence"],
+      "difficulty": "hard"
+    },
+    {
+      "id": 7,
+      "question": "What is the fundamental nature of reality - matter, energy, or information?",
+      "type": "foundational",
+      "expected_connections": ["information", "energy", "fundamental"],
+      "difficulty": "hard"
+    },
+    {
+      "id": 8,
+      "question": "How does complexity emerge from simple rules?",
+      "type": "complexity_science",
+      "expected_connections": ["emergence", "complexity", "self_organization"],
+      "difficulty": "medium"
+    },
+    {
+      "id": 9,
+      "question": "What role does observation play in quantum mechanics?",
+      "type": "quantum_foundations",
+      "expected_connections": ["quantum", "observation", "collapse"],
+      "difficulty": "medium"
+    },
+    {
+      "id": 10,
+      "question": "How does memory consolidation work in biological systems?",
+      "type": "neuroscience",
+      "expected_connections": ["memory", "consolidation", "replay"],
+      "difficulty": "easy"
+    },
+    {
+      "id": 11,
+      "question": "Can the universe be understood as a computational system?",
+      "type": "computational_universe",
+      "expected_connections": ["universe", "computation", "information"],
+      "difficulty": "hard"
+    },
+    {
+      "id": 12,
+      "question": "How do feedback loops influence system behavior?",
+      "type": "systems_dynamics",
+      "expected_connections": ["feedback", "systems", "behavior"],
+      "difficulty": "easy"
+    },
+    {
+      "id": 13,
+      "question": "What is the connection between language and consciousness?",
+      "type": "cognitive_science",
+      "expected_connections": ["language", "consciousness", "symbols"],
+      "difficulty": "medium"
+    },
+    {
+      "id": 14,
+      "question": "How does genetic information translate into biological form?",
+      "type": "biology",
+      "expected_connections": ["dna", "information", "protein"],
+      "difficulty": "easy"
+    },
+    {
+      "id": 15,
+      "question": "Can collective intelligence surpass individual cognition?",
+      "type": "collective_systems",
+      "expected_connections": ["collective", "intelligence", "emergence"],
+      "difficulty": "medium"
+    },
+    {
+      "id": 16,
+      "question": "What is the relationship between chaos and predictability?",
+      "type": "dynamical_systems",
+      "expected_connections": ["chaos", "prediction", "sensitivity"],
+      "difficulty": "medium"
+    },
+    {
+      "id": 17,
+      "question": "How does technology extend human cognitive capabilities?",
+      "type": "human_technology",
+      "expected_connections": ["technology", "cognition", "extension"],
+      "difficulty": "easy"
+    },
+    {
+      "id": 18,
+      "question": "What principles govern self-organizing systems?",
+      "type": "emergence",
+      "expected_connections": ["self_organization", "emergence", "principles"],
+      "difficulty": "medium"
+    },
+    {
+      "id": 19,
+      "question": "How might quantum computing revolutionize information processing?",
+      "type": "quantum_computing",
+      "expected_connections": ["quantum", "computing", "superposition"],
+      "difficulty": "medium"
+    },
+    {
+      "id": 20,
+      "question": "What is the role of information in the arrow of time?",
+      "type": "physics_philosophy",
+      "expected_connections": ["time", "entropy", "information"],
+      "difficulty": "hard"
+    }
+  ]
+}

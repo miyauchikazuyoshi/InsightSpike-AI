@@ -1,5 +1,5 @@
 %% InsightSpike-AI Technical Architecture Flow
-%% 技術的な実装フローの詳細
+%% Details of technical implementation flow
 
 flowchart LR
     %% User Interaction Layer
@@ -28,16 +28,16 @@ flowchart LR
         end
         
         subgraph "Layer 2: Memory (Graph-Centric)"
-            L2_Episode[Episode Management<br/>(No C-values)]
+            L2_Episode[Episode Management<br/>No C-values]
             L2_Integration[Graph-Informed<br/>Integration/Splitting]
-            L2_Vector[FAISS Vector Search<br/>(384-dim)]
+            L2_Vector[FAISS Vector Search<br/>384-dim]
             L2_Context[Context Building]
         end
         
         subgraph "Layer 3: Reasoning (Scalable)"
-            L3_Graph[Hierarchical Graph<br/>(3-Layer Structure)]
-            L3_Scalable[Scalable Builder<br/>(O(n log n) → O(log n))]
-            L3_geDIG[geDIG Analysis<br/>(GED + IG)]
+            L3_Graph[Hierarchical Graph<br/>3-Layer Structure]
+            L3_Scalable[Scalable Builder<br/>O n log n → O log n]
+            L3_geDIG[geDIG Analysis<br/>GED + IG]
             L3_Relation[Relationship Discovery]
         end
         
@@ -69,13 +69,13 @@ flowchart LR
         direction TB
         
         subgraph "SQLite Databases"
-            DB1[(insight_facts.db<br/>洞察データベース)]
-            DB2[(unknown_learning.db<br/>学習データベース)]
-            DB3[(Memory Cache<br/>エピソード)]
+            DB1[insight_facts.db<br/>Insight Database]
+            DB2[unknown_learning.db<br/>Learning Database]
+            DB3[Memory Cache<br/>Episodes]
         end
         
         subgraph "Graph Storage"
-            Graph_Data[(graph_pyg.pt<br/>PyTorchグラフ)]
+            Graph_Data[graph_pyg.pt<br/>PyTorch Graph]
             Graph_Cache[Graph Cache<br/>NetworkX]
         end
         

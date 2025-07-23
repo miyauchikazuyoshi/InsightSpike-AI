@@ -1,0 +1,390 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% geDIG Paper Appendix: Detailed Results and Visualizations
+% 日本語フルテキスト版 付録  (2025/07/23)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[uplatex]{bxjsarticle}
+\usepackage{amsmath,amssymb,graphicx,algorithm,algorithmic,booktabs}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{multirow}
+
+\title{付録：geDIG実験の詳細結果と可視化}
+\author{宮内一義}
+\date{2025年7月23日}
+
+\begin{document}
+\maketitle
+
+%====================================================================
+\section{A. 知識ベース全100項目}
+
+本実験で使用した階層的知識ベースの全100項目を示す。
+各項目は5つのフェーズに分類されている：
+\begin{itemize}
+  \item Phase 1 (基礎): 基本概念の定義（10項目）
+  \item Phase 2 (関係): 概念間の関係性（20項目）
+  \item Phase 3 (統合): 統合的理解（20項目）
+  \item Phase 4 (探索): 探索的問い（10項目）
+  \item Phase 5 (超越): 洞察と推測（40項目）
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{知識ベース全100項目（Phase別）}
+\scriptsize
+\begin{tabular}{|c|c|l|p{9cm}|}
+\hline
+\multicolumn{4}{|c|}{\textbf{Phase 1: Foundational (基礎概念)}} \\
+\hline
+ID & Phase & Category & Knowledge Item \\
+\hline
+1 & 1 & physics & Energy is the capacity to do work and exists in various forms. \\
+2 & 1 & information\_theory & Information is the reduction of uncertainty in a system. \\
+3 & 1 & thermodynamics & Entropy measures the disorder or randomness in a system. \\
+4 & 1 & ai & Neural networks process information through weighted connections. \\
+5 & 1 & biology & DNA encodes genetic information in a four-letter alphabet. \\
+6 & 1 & quantum & Quantum states can exist in superposition until measured. \\
+7 & 1 & neuroscience & Consciousness involves integrated information processing. \\
+8 & 1 & biology & Evolution optimizes organisms through natural selection. \\
+9 & 1 & physics & Black holes have maximum entropy for their size. \\
+10 & 1 & computing & Computation requires minimum energy per bit erased. \\
+\hline
+\multicolumn{4}{|c|}{\textbf{Phase 2: Relational (概念間の関係)}} \\
+\hline
+11 & 2 & interdisciplinary & Shannon entropy and thermodynamic entropy share mathematical structure. \\
+12 & 2 & biology & Living systems decrease local entropy by increasing global entropy. \\
+13 & 2 & quantum & Quantum entanglement creates non-local correlations between particles. \\
+14 & 2 & neuroscience & Neural plasticity allows brains to reorganize and form new connections. \\
+15 & 2 & quantum & Information cannot be destroyed in quantum mechanics. \\
+16 & 2 & ai & Machine learning extracts patterns from high-dimensional data. \\
+17 & 2 & ai & Genetic algorithms mimic evolutionary processes for optimization. \\
+18 & 2 & physics & Thermodynamic arrow of time emerges from entropy increase. \\
+19 & 2 & neuroscience & Synaptic pruning optimizes brain connectivity during development. \\
+20 & 2 & physics & Landauer's principle links information erasure to heat generation. \\
+21 & 2 & physics & Maxwell's demon thought experiment connects information and thermodynamics. \\
+22 & 2 & biology & Protein folding minimizes free energy to find stable configurations. \\
+23 & 2 & physics & Holographic principle suggests information is encoded on boundaries. \\
+24 & 2 & ai & Attention mechanisms in AI focus computational resources selectively. \\
+25 & 2 & biology & Epigenetics shows how environment influences gene expression. \\
+26 & 2 & quantum & Wave function collapse may be an information update process. \\
+27 & 2 & complexity & Emergence occurs when simple rules produce complex behaviors. \\
+28 & 2 & systems & Feedback loops can amplify or dampen system responses. \\
+29 & 2 & physics & Phase transitions mark qualitative changes in system behavior. \\
+30 & 2 & complexity & Self-organization creates order without external control. \\
+\hline
+\end{tabular}
+\end{table}
+
+% Continue table on next page
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{|c|c|l|p{9cm}|}
+\hline
+\multicolumn{4}{|c|}{\textbf{Phase 3: Integrative (統合的理解)}} \\
+\hline
+ID & Phase & Category & Knowledge Item \\
+\hline
+31 & 3 & interdisciplinary & Energy, information, and entropy form a fundamental trinity in physics. \\
+32 & 3 & interdisciplinary & Life can be viewed as a far-from-equilibrium dissipative structure. \\
+33 & 3 & interdisciplinary & Consciousness might emerge from integrated information processing. \\
+34 & 3 & interdisciplinary & Evolution can be understood as an information optimization process. \\
+35 & 3 & interdisciplinary & Quantum computing exploits superposition for parallel processing. \\
+36 & 3 & interdisciplinary & The universe might be fundamentally computational in nature. \\
+37 & 3 & interdisciplinary & Intelligence involves prediction, compression, and pattern recognition. \\
+38 & 3 & cognitive & Creativity emerges from novel connections between existing concepts. \\
+39 & 3 & neuroscience & Memory consolidation involves replay and reorganization of experiences. \\
+40 & 3 & cognitive & Language enables infinite expression from finite components. \\
+41 & 3 & mathematics & Fractals show self-similarity across different scales. \\
+42 & 3 & mathematics & Chaos theory reveals sensitive dependence on initial conditions. \\
+43 & 3 & systems & Network effects create value through increased connectivity. \\
+44 & 3 & physics & Symmetry breaking leads to diversity in physical systems. \\
+45 & 3 & physics & Renormalization reveals universal behaviors across scales. \\
+46 & 3 & biology & Autopoiesis describes self-creating and self-maintaining systems. \\
+47 & 3 & systems & Stigmergy enables indirect coordination through environmental modification. \\
+48 & 3 & ai & Swarm intelligence emerges from simple local interactions. \\
+49 & 3 & cognitive & Metacognition involves thinking about thinking processes. \\
+50 & 3 & cognitive & Embodied cognition suggests mind emerges from body-environment interaction. \\
+\hline
+\multicolumn{4}{|c|}{\textbf{Phase 4: Exploratory (探索的問い)}} \\
+\hline
+51 & 4 & question & Can consciousness be quantified through integrated information theory? \\
+52 & 4 & question & Is the universe a quantum computer processing information? \\
+53 & 4 & question & How does quantum mechanics relate to consciousness? \\
+54 & 4 & question & Can artificial systems achieve genuine understanding? \\
+55 & 4 & question & What is the relationship between computation and physics? \\
+56 & 4 & question & How does complexity emerge from simplicity? \\
+57 & 4 & question & Is information more fundamental than matter and energy? \\
+58 & 4 & question & Can evolution be directed through information design? \\
+59 & 4 & question & What are the limits of predictability in complex systems? \\
+60 & 4 & question & How does meaning emerge from syntax in language and thought? \\
+\hline
+\end{tabular}
+\end{table}
+
+% Final part of table
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{|c|c|l|p{9cm}|}
+\hline
+\multicolumn{4}{|c|}{\textbf{Phase 5: Transcendent (洞察と超越)}} \\
+\hline
+ID & Phase & Category & Knowledge Item \\
+\hline
+61 & 5 & insight & The observer and observed are fundamentally inseparable in quantum mechanics. \\
+62 & 5 & insight & All physical laws might reduce to information conservation principles. \\
+63 & 5 & insight & Consciousness could be the universe's way of observing itself. \\
+64 & 5 & insight & Intelligence is compression - finding minimal descriptions of reality. \\
+65 & 5 & insight & Time might emerge from entanglement and information flow. \\
+66 & 5 & insight & Life accelerates entropy production while creating local order. \\
+67 & 5 & insight & Creativity is the universe exploring its possibility space. \\
+68 & 5 & insight & Memory is time travel through information preservation. \\
+69 & 5 & insight & Language is collective consciousness encoded in symbols. \\
+70 & 5 & insight & Mathematics is the universe's self-description language. \\
+71 & 5 & speculation & Free will might emerge from quantum indeterminacy amplified by chaos. \\
+72 & 5 & speculation & Dark matter could be information structures beyond standard physics. \\
+73 & 5 & speculation & Dreams might be consciousness exploring counterfactual realities. \\
+74 & 5 & cognitive & Intuition accesses implicit patterns below conscious threshold. \\
+75 & 5 & speculation & Synchronicity reveals hidden causal connections in reality. \\
+76 & 5 & systems & Collective intelligence transcends individual cognitive limits. \\
+77 & 5 & interdisciplinary & Technology extends human cognition into the environment. \\
+78 & 5 & interdisciplinary & Culture is distributed cognition across minds and time. \\
+79 & 5 & cognitive & Art explores the space between order and chaos. \\
+80 & 5 & philosophy & Science is systematic curiosity encoded in methodology. \\
+81 & 5 & cognitive & Meditation might access fundamental computational substrates of mind. \\
+82 & 5 & neuroscience & Psychedelics could reveal alternative information processing modes. \\
+83 & 5 & cognitive & Music is emotional information encoded in temporal patterns. \\
+84 & 5 & speculation & Love might be recognition of deep informational resonance. \\
+85 & 5 & philosophy & Death is information pattern dissolution and transformation. \\
+86 & 5 & technology & Virtual reality creates new experiential possibility spaces. \\
+87 & 5 & technology & Blockchain enables trustless information consensus. \\
+88 & 5 & technology & Internet forms a global nervous system for humanity. \\
+89 & 5 & ai & AI might discover alien forms of intelligence and consciousness. \\
+90 & 5 & technology & Biotechnology enables conscious evolution and design. \\
+91 & 5 & technology & Nanotechnology bridges quantum and classical information realms. \\
+92 & 5 & philosophy & Space exploration extends consciousness beyond Earth. \\
+93 & 5 & systems & Sustainability requires balancing information and energy flows. \\
+94 & 5 & systems & Democracy is distributed information processing for governance. \\
+95 & 5 & systems & Economics tracks information about value and scarcity. \\
+96 & 5 & systems & Education is intergenerational information transfer and transformation. \\
+97 & 5 & philosophy & Ethics emerges from recognition of shared information patterns. \\
+98 & 5 & philosophy & Beauty might signal deep informational coherence and harmony. \\
+99 & 5 & cognitive & Wisdom integrates knowledge across multiple domains and timescales. \\
+100 & 5 & philosophy & The future is the universe computing its next state from present information. \\
+\hline
+\end{tabular}
+\label{tab:kb_full}
+\end{table}
+
+%====================================================================
+\section{B. 評価結果の詳細}
+
+\subsection{B.1 質問別パフォーマンス}
+
+20の評価質問すべてに対する詳細な結果を示す。
+
+\begin{table}[H]
+\centering
+\caption{評価質問全20問の結果}
+\scriptsize
+\begin{tabular}{|c|p{7cm}|l|c|c|c|c|}
+\hline
+ID & Question & Type & Diff. & Spike & Conf. & Time(s) \\
+\hline
+1 & How does information theory relate to thermodynamics? & conceptual\_integration & Med & ✓ & 0.845 & 0.051 \\
+2 & Can consciousness emerge from quantum processes? & speculative\_integration & Hard & ✓ & 0.916 & 0.039 \\
+3 & How do living systems maintain order against entropy? & systems\_thinking & Med & ✓ & 0.861 & 0.046 \\
+4 & What is the relationship between evolution and information? & interdisciplinary & Med & ✓ & 0.912 & 0.042 \\
+5 & How does the brain process and integrate information? & neuroscience & Med & ✓ & 0.950 & 0.036 \\
+6 & Can artificial intelligence achieve genuine creativity? & ai\_philosophy & Hard & ✓ & 0.800 & 0.046 \\
+7 & What is the fundamental nature of reality - matter, energy, or information? & foundational & Hard & ✓ & 0.995 & 0.069 \\
+8 & How does complexity emerge from simple rules? & complexity\_science & Med & ✓ & 0.635 & 0.041 \\
+9 & What role does observation play in quantum mechanics? & quantum\_foundations & Med & ✓ & 0.885 & 0.050 \\
+10 & How does memory consolidation work in biological systems? & neuroscience & Easy & ✓ & 0.779 & 0.039 \\
+11 & Can the universe be understood as a computational system? & computational\_universe & Hard & ✓ & 0.686 & 0.039 \\
+12 & How do feedback loops influence system behavior? & systems\_dynamics & Easy & ✗ & 0.408 & 0.035 \\
+13 & What is the connection between language and consciousness? & cognitive\_science & Med & ✓ & 0.865 & 0.041 \\
+14 & How does genetic information translate into biological form? & biology & Easy & ✓ & 0.825 & 0.042 \\
+15 & Can collective intelligence surpass individual cognition? & collective\_systems & Med & ✗ & 0.487 & 0.034 \\
+16 & What is the relationship between chaos and predictability? & dynamical\_systems & Med & ✓ & 0.815 & 0.038 \\
+17 & How does technology extend human cognitive capabilities? & human\_technology & Easy & ✓ & 0.829 & 0.043 \\
+18 & What principles govern self-organizing systems? & emergence & Med & ✗ & 0.487 & 0.036 \\
+19 & How might quantum computing revolutionize information processing? & quantum\_computing & Med & ✓ & 0.885 & 0.042 \\
+20 & What is the role of information in the arrow of time? & physics\_philosophy & Hard & ✓ & 0.836 & 0.100 \\
+\hline
+\multicolumn{4}{|c|}{\textbf{Summary}} & 17/20 & 0.841* & 0.045 \\
+\hline
+\end{tabular}
+\label{tab:questions_all}
+\end{table}
+
+\textit{*平均確信度はスパイク検出された質問のみの平均}
+
+\subsection{B.2 応答比較}
+
+代表的な質問に対する3手法の応答を詳細に比較する。
+
+\subsubsection{質問1: How does information theory relate to thermodynamics?}
+
+\begin{table}[H]
+\centering
+\caption{応答比較 - 情報理論と熱力学の関係}
+\small
+\begin{tabular}{|p{3cm}|p{11cm}|}
+\hline
+\textbf{手法} & \textbf{応答} \\
+\hline
+Baseline LLM & I need more context to answer this question about information theory and thermodynamics. \\
+\hline
+RAG & According to the knowledge base, Shannon entropy and thermodynamic entropy share mathematical structure, and Maxwell's demon connects information and thermodynamics. \\
+\hline
+InsightSpike (geDIG) & This question bridges multiple conceptual levels:\newline
+\textbf{Foundational}: Information is the reduction of uncertainty in a system..., Entropy measures the disorder or randomness in a system...\newline
+\textbf{Relational}: Maxwell's demon thought experiment connects information and thermodynamics..., Shannon entropy and thermodynamic entropy share mathematical structure...\newline
+\textbf{Integrative}: Energy, information, and entropy form a fundamental trinity...\newline
+\textbf{Exploratory}: Is information more fundamental than matter and energy?...\newline
+The high connectivity (ratio: 0.76) and phase diversity (0.80) suggest an emergent insight at the intersection of these concepts. \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{質問7: What is the fundamental nature of reality?}
+
+\begin{table}[H]
+\centering
+\caption{応答比較 - 現実の本質}
+\small
+\begin{tabular}{|p{3cm}|p{11cm}|}
+\hline
+\textbf{手法} & \textbf{応答} \\
+\hline
+Baseline LLM & Reality could be made of matter, energy, or information - this is still debated. \\
+\hline
+RAG & The knowledge base indicates that energy, information, and entropy form a fundamental trinity, with all physical laws potentially reducing to information conservation. \\
+\hline
+InsightSpike (geDIG) & This question bridges multiple conceptual levels:\newline
+\textbf{Foundational}: Information is the reduction of uncertainty...\newline
+\textbf{Relational}: Maxwell's demon thought experiment connects information...\newline
+\textbf{Integrative}: Energy, information, and entropy form a fundamental trinity...\newline
+\textbf{Exploratory}: Is information more fundamental than matter and energy?...\newline
+\textbf{Transcendent}: Intelligence is compression - finding minimal descriptions..., Dark matter could be information structures beyond...\newline
+The high connectivity (ratio: 0.96) and phase diversity (1.00) suggest an emergent insight at the intersection of these concepts. \\
+\hline
+\end{tabular}
+\end{table}
+
+%====================================================================
+\section{C. 知識グラフの可視化}
+
+\subsection{C.1 クエリ注入による知識グラフの進化}
+
+図\ref{fig:knowledge_graph}は、質問クエリが知識グラフに注入された際の構造変化を示す。
+ベースグラフ（左上）から、各質問に対して関連ノードが活性化され（赤色）、
+ノード間の接続パターンが変化する様子が観察できる。
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{knowledge_graph_query_injection.png}
+\caption{知識グラフへのクエリ注入と構造変化。赤いノードは質問に関連する知識項目を示し、
+赤い太線は活性化された接続を表す。SPIKEラベルは洞察検出を示す。}
+\label{fig:knowledge_graph}
+\end{figure}
+
+\subsection{C.2 スパイク検出メカニズム}
+
+図\ref{fig:spike_mechanism}は、geDIGのスパイク検出メカニズムを可視化したものである。
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{spike_detection_mechanism.png}
+\caption{(左) グラフメトリクスの時間発展。接続性比率とフェーズ多様性が閾値を超えた時点でスパイクが検出される。
+(右) geDIG報酬関数の景観。最適な洞察パスは構造変化（ΔGED）と情報利得（ΔIG）のバランスを取る。}
+\label{fig:spike_mechanism}
+\end{figure}
+
+%====================================================================
+\section{D. 統計的分析}
+
+\subsection{D.1 実験サマリー統計}
+
+\begin{table}[H]
+\centering
+\caption{実験統計サマリー}
+\begin{tabular}{|l|r|}
+\hline
+Metric & Value \\
+\hline
+Total Questions & 20 \\
+Spike Detection Rate & 85.0\% \\
+Avg Processing Time & 45ms \\
+Graph Nodes & 100 \\
+Graph Edges & 962 \\
+Avg Confidence (Spikes) & 0.841 \\
+\hline
+\end{tabular}
+\label{tab:summary_stats}
+\end{table}
+
+\subsection{D.2 難易度別分析}
+
+興味深いことに、質問の難易度が上がるほどスパイク検出率が向上する「難易度逆転現象」が観察された：
+
+\begin{itemize}
+  \item Easy: 75.0\% (3/4)
+  \item Medium: 81.8\% (9/11)  
+  \item Hard: 100\% (5/5)
+\end{itemize}
+
+これは、geDIGが単純な事実検索よりも複雑な概念統合に適していることを示唆している。
+
+%====================================================================
+\section{E. 実装の詳細}
+
+\subsection{E.1 ハイパーパラメータ}
+
+\begin{table}[H]
+\centering
+\caption{主要ハイパーパラメータ}
+\begin{tabular}{|l|c|l|}
+\hline
+Parameter & Value & Description \\
+\hline
+Embedding Model & all-MiniLM-L6-v2 & Sentence-BERT model \\
+Similarity Threshold & 0.3-0.4 & Phase-dependent \\
+Max Relevant Nodes & 10 & Per query \\
+Spike Threshold & 0.5 & For detection \\
+Temperature (kT) & 1.0 & Exploration-exploitation \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{E.2 計算複雑性}
+
+- ノード追加: O(n) where n = existing nodes
+- クエリ処理: O(n) for embedding comparison
+- スパイク検出: O(k²) where k = relevant nodes (k << n)
+
+全体として、線形以下のスケーリング特性を実現している。
+
+%====================================================================
+\section{F. 再現性}
+
+実験の完全な再現のため、以下のリソースを提供：
+
+\begin{itemize}
+  \item ソースコード: \url{https://github.com/miyauchikun/InsightSpike-AI}
+  \item 知識ベース: \texttt{experiments/comprehensive\_gedig\_evaluation/data/}
+  \item 事前学習モデル: HuggingFace経由で自動ダウンロード
+  \item 実行環境: Python 3.8+, PyTorch 1.9+
+\end{itemize}
+
+実行コマンド：
+\begin{verbatim}
+cd experiments/comprehensive_gedig_evaluation
+poetry install
+poetry run python src/comprehensive_gedig_experiment.py
+\end{verbatim}
+
+\end{document}

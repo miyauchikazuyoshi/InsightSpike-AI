@@ -27,11 +27,16 @@ class RewardCalculator:
                 "ged": getattr(config.graph, "weight_ged", Defaults.REWARD_WEIGHT_GED),
                 "ig": getattr(config.graph, "weight_ig", Defaults.REWARD_WEIGHT_IG),
             }
+            # Temperature parameter for geDIG formula
+            self.temperature = getattr(
+                config.graph, "temperature", Defaults.REWARD_TEMPERATURE
+            )
         else:
             self.weights = {
                 "ged": Defaults.REWARD_WEIGHT_GED,
                 "ig": Defaults.REWARD_WEIGHT_IG,
             }
+            self.temperature = Defaults.REWARD_TEMPERATURE
 
         # Optimal graph size for structure reward
         self.optimal_graph_size = (
@@ -43,11 +48,19 @@ class RewardCalculator:
     def calculate_reward(
         self, metrics: Dict[str, float], conflicts: Dict[str, float]
     ) -> Dict[str, float]:
-        """Calculate multi-component reward signal."""
-        # Base reward calculation: R = w1*ΔGED + w2*ΔIG
-        base_reward = self.weights["ged"] * metrics.get("delta_ged", 0) + self.weights[
+        """Calculate multi-component reward signal using geDIG formula.
+
+        geDIG formula: F = w1*ΔGED - kT*ΔIG
+
+        This implements the brain-inspired trade-off between structural
+        simplification (ΔGED) and information gain (ΔIG), where temperature
+        controls the exploration-exploitation balance.
+        """
+        # Base reward calculation: F = w1*ΔGED - kT*ΔIG
+        # Note: kT = weight_ig * temperature in our parameterization
+        base_reward = self.weights["ged"] * metrics.get("delta_ged", 0) - self.weights[
             "ig"
-        ] * metrics.get("delta_ig", 0)
+        ] * self.temperature * metrics.get("delta_ig", 0)
 
         # Additional reward components
         structure_reward = self._calculate_structure_reward(metrics)

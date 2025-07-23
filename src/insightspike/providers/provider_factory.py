@@ -32,6 +32,11 @@ try:
 except ImportError:
     SimpleLocalProvider = None
 
+try:
+    from .distilgpt2_provider import DistilGPT2Provider
+except ImportError:
+    DistilGPT2Provider = None
+
 logger = logging.getLogger(__name__)
 
 
@@ -57,6 +62,12 @@ class ProviderFactory:
     elif SimpleLocalProvider:
         # Fallback to simple local if main local provider fails
         PROVIDERS["local"] = SimpleLocalProvider
+    elif DistilGPT2Provider:
+        # Fallback to DistilGPT2 provider
+        PROVIDERS["local"] = DistilGPT2Provider
+
+    if DistilGPT2Provider:
+        PROVIDERS["distilgpt2"] = DistilGPT2Provider
 
     @classmethod
     def create(

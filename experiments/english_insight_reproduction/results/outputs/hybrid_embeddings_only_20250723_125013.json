@@ -1,0 +1,40 @@
+{
+  "experiment": "hybrid_insightspike",
+  "mode": "embeddings_only",
+  "timestamp": "20250723_125013",
+  "results": [
+    {
+      "question": "How are energy and information fundamentally related?",
+      "has_spike": true,
+      "spike_confidence": 0.4084265617718196,
+      "response": "The integration of concepts (Information and entropy have a..., Energy, information, and consc..., Energy, information, and entro...) reveals emergent relationships that suggest a deeper underlying pattern.",
+      "processing_time": 0.06061697006225586,
+      "expected_spike": true,
+      "correct": true
+    },
+    {
+      "question": "Can consciousness be understood through information theory?",
+      "has_spike": true,
+      "spike_confidence": 0.4097977282638775,
+      "response": "The integration of concepts (Consciousness might be quantif..., Energy, information, and consc..., Information and entropy have a...) reveals emergent relationships that suggest a deeper underlying pattern.",
+      "processing_time": 0.031137943267822266,
+      "expected_spike": true,
+      "correct": true
+    },
+    {
+      "question": "How does life organize information against entropy?",
+      "has_spike": false,
+      "spike_confidence": 0.24919490160051067,
+      "response": "This relates to: Information and entropy have a deep mathematical relationship.",
+      "processing_time": 0.026439905166625977,
+      "expected_spike": true,
+      "correct": false
+    }
+  ],
+  "summary": {
+    "accuracy": 0.6666666666666666,
+    "spikes_detected": 2,
+    "avg_confidence": 0.40911214501784854,
+    "avg_processing_time": 0.0393982728322347
+  }
+}

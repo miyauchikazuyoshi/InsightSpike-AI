@@ -1,0 +1,102 @@
+[
+  {
+    "id": "elem_001",
+    "phase": 1,
+    "age": "6-8",
+    "concept": "number",
+    "explanation": "数字は物を数えるためのもの",
+    "examples": ["りんごが3個", "指は10本"],
+    "naive_understanding": true,
+    "timestamp": "day_001"
+  },
+  {
+    "id": "elem_002", 
+    "phase": 1,
+    "age": "7-9",
+    "concept": "addition",
+    "explanation": "足し算は、物を合わせること",
+    "examples": ["3個 + 2個 = 5個", "お金を合わせる"],
+    "naive_understanding": true,
+    "timestamp": "day_010"
+  },
+  {
+    "id": "elem_003",
+    "phase": 1,
+    "age": "8-10", 
+    "concept": "subtraction",
+    "explanation": "引き算は、物を取ること",
+    "examples": ["5個から2個取ると3個", "お金を使う"],
+    "misconception": "マイナスは存在しない",
+    "timestamp": "day_020"
+  },
+  {
+    "id": "elem_004",
+    "phase": 1,
+    "age": "8-10",
+    "concept": "multiplication", 
+    "explanation": "掛け算は、同じ数を何回も足すこと",
+    "examples": ["3×4 = 3+3+3+3", "2×5 = 2+2+2+2+2"],
+    "naive_understanding": true,
+    "timestamp": "day_030"
+  },
+  {
+    "id": "elem_005",
+    "phase": 1,
+    "age": "9-11",
+    "concept": "division",
+    "explanation": "割り算は、同じ数ずつ分けること",
+    "examples": ["12個を3人で分けると4個ずつ", "10÷2=5"],
+    "misconception": "0で割ることはできない（なぜかは不明）",
+    "timestamp": "day_040"
+  },
+  {
+    "id": "elem_006",
+    "phase": 1,
+    "age": "9-11",
+    "concept": "fraction",
+    "explanation": "分数は、1つのものを等しく分けたもの",
+    "examples": ["1/2 はケーキを半分", "1/4 はピザを4等分の1つ"],
+    "visual": "pie_chart",
+    "timestamp": "day_050"
+  },
+  {
+    "id": "elem_007",
+    "phase": 1,
+    "age": "10-12",
+    "concept": "decimal",
+    "explanation": "小数は、1より小さい数",
+    "examples": ["0.5 は半分", "0.1 は10分の1"],
+    "connection": "分数と同じ？",
+    "timestamp": "day_060"
+  },
+  {
+    "id": "elem_008",
+    "phase": 1,
+    "age": "10-12",
+    "concept": "negative_numbers",
+    "explanation": "マイナスは借金みたいなもの",
+    "examples": ["-3円は3円の借金", "温度計のマイナス"],
+    "confusion": "マイナス×マイナスがプラスになる理由は謎",
+    "timestamp": "day_070"
+  },
+  {
+    "id": "elem_009",
+    "phase": 1,
+    "age": "11-12",
+    "concept": "equation",
+    "explanation": "□に入る数を見つける",
+    "examples": ["3 + □ = 7", "□ × 2 = 10"],
+    "method": "逆算",
+    "timestamp": "day_080"
+  },
+  {
+    "id": "elem_010",
+    "phase": 1,
+    "age": "11-12",
+    "concept": "area",
+    "explanation": "面積は、タイルが何枚入るか",
+    "examples": ["3×4の長方形は12枚", "正方形は辺×辺"],
+    "visual": "grid",
+    "timestamp": "day_090"
+  }
+]

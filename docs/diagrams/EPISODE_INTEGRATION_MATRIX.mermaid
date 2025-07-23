@@ -47,14 +47,14 @@ flowchart TD
         direction TB
         
         subgraph "🔗 Graph Integration"
-            WeightedMerge[Graph-Weighted Vector Merge<br/>(1-w)×v1 + w×v2]
+            WeightedMerge[Graph-Weighted Vector Merge<br/>1-w × v1 + w × v2]
             UpdateGraph[Update Graph Structure]
             DynamicImport[Calculate Dynamic Importance]
             HierarchyUpdate[Update Hierarchical Index]
         end
         
         subgraph "⚡ Scalable Operations"
-            FAISSUpdate[FAISS Index Update<br/>O(log n)]
+            FAISSUpdate[FAISS Index Update<br/>O log n]
             ClusterRebalance[Rebalance Clusters<br/>if needed]
             ConflictDetect[Detect Neighbor Conflicts]
         end

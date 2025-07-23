@@ -5,11 +5,15 @@ SQLite Data Store - Graph Operations Extension
 Graph-related operations for SQLiteDataStore.
 """
 
+import asyncio
 import json
+import logging
 from typing import Any, Dict, List, Optional, Tuple
 
 import aiosqlite
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 # This file contains the graph-related methods for SQLiteDataStore
 # To be merged with sqlite_store.py

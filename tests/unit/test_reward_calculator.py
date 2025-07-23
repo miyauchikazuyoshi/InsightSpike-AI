@@ -29,6 +29,7 @@ class TestRewardCalculatorInitialization:
         assert calculator.weights["ged"] == Defaults.REWARD_WEIGHT_GED
         assert calculator.weights["ig"] == Defaults.REWARD_WEIGHT_IG
         assert calculator.optimal_graph_size == Defaults.OPTIMAL_GRAPH_SIZE
+        assert calculator.temperature == Defaults.REWARD_TEMPERATURE
 
     def test_init_with_custom_config(self):
         """Test initialization with custom configuration."""
@@ -37,12 +38,14 @@ class TestRewardCalculatorInitialization:
         config.graph.weight_ged = 0.7
         config.graph.weight_ig = 0.3
         config.graph.optimal_graph_size = 200
+        config.graph.temperature = 2.0
 
         calculator = RewardCalculator(config)
 
         assert calculator.weights["ged"] == 0.7
         assert calculator.weights["ig"] == 0.3
         assert calculator.optimal_graph_size == 200
+        assert calculator.temperature == 2.0
 
     def test_init_with_partial_config(self):
         """Test initialization with partial configuration (missing some values)."""
@@ -79,6 +82,7 @@ class TestRewardCalculatorInitialization:
         assert calculator.weights["ged"] == Defaults.REWARD_WEIGHT_GED
         assert calculator.weights["ig"] == Defaults.REWARD_WEIGHT_IG
         assert calculator.optimal_graph_size == Defaults.OPTIMAL_GRAPH_SIZE
+        assert calculator.temperature == Defaults.REWARD_TEMPERATURE
 
 
 class TestBaseRewardCalculation:
@@ -92,6 +96,7 @@ class TestBaseRewardCalculation:
         config.graph.weight_ged = 0.6
         config.graph.weight_ig = 0.4
         config.graph.optimal_graph_size = 150
+        config.graph.temperature = 1.0
 
         return RewardCalculator(config)
 
@@ -105,8 +110,8 @@ class TestBaseRewardCalculation:
 
         reward = calculator.calculate_reward(metrics, conflicts)
 
-        # Base reward = 0.6 * (-0.5) + 0.4 * 0.3 = -0.3 + 0.12 = -0.18
-        expected_base = 0.6 * (-0.5) + 0.4 * 0.3
+        # Base reward = 0.6 * (-0.5) - 0.4 * 1.0 * 0.3 = -0.3 - 0.12 = -0.42
+        expected_base = 0.6 * (-0.5) - 0.4 * 1.0 * 0.3
         assert abs(reward["base"] - expected_base) < 0.001
 
         assert "structure" in reward
@@ -120,8 +125,8 @@ class TestBaseRewardCalculation:
 
         reward = calculator.calculate_reward(metrics, conflicts)
 
-        # Base reward = 0.6 * (-0.8) + 0.4 * 0.6 = -0.48 + 0.24 = -0.24
-        expected_base = 0.6 * (-0.8) + 0.4 * 0.6
+        # Base reward = 0.6 * (-0.8) - 0.4 * 1.0 * 0.6 = -0.48 - 0.24 = -0.72
+        expected_base = 0.6 * (-0.8) - 0.4 * 1.0 * 0.6
         assert abs(reward["base"] - expected_base) < 0.001
 
     def test_calculate_reward_missing_metrics(self, calculator):
@@ -129,7 +134,9 @@ class TestBaseRewardCalculation:
         # Missing delta_ged
         metrics1 = {"delta_ig": 0.5}
         reward1 = calculator.calculate_reward(metrics1, {})
-        assert reward1["base"] == 0.4 * 0.5  # Only IG component
+        assert (
+            reward1["base"] == -0.4 * 1.0 * 0.5
+        )  # Only IG component (negative due to subtraction)
 
         # Missing delta_ig
         metrics2 = {"delta_ged": -0.3}
@@ -163,6 +170,7 @@ class TestStructureReward:
         config.graph.optimal_graph_size = 100
         config.graph.weight_ged = 0.5
         config.graph.weight_ig = 0.5
+        config.graph.temperature = 1.0
 
         return RewardCalculator(config)
 
@@ -286,6 +294,7 @@ class TestTotalRewardCalculation:
         config.graph.weight_ged = 0.5
         config.graph.weight_ig = 0.5
         config.graph.optimal_graph_size = 100
+        config.graph.temperature = 1.0
 
         return RewardCalculator(config)
 
@@ -301,7 +310,7 @@ class TestTotalRewardCalculation:
         reward = calculator.calculate_reward(metrics, conflicts)
 
         # Calculate expected values
-        expected_base = 0.5 * (-0.6) + 0.5 * 0.8  # = 0.1
+        expected_base = 0.5 * (-0.6) - 0.5 * 1.0 * 0.8  # = -0.3 - 0.4 = -0.7
         expected_structure = 1.0  # Optimal size
         expected_novelty = 0.8  # = delta_ig
         expected_total = expected_base + expected_structure + expected_novelty
@@ -322,7 +331,7 @@ class TestTotalRewardCalculation:
 
         reward = calculator.calculate_reward(metrics, conflicts)
 
-        expected_base = 0.5 * 0.2 + 0.5 * 0.3  # = 0.25
+        expected_base = 0.5 * 0.2 - 0.5 * 1.0 * 0.3  # = 0.1 - 0.15 = -0.05
         expected_structure = 0.5  # 50% deviation
         expected_novelty = 0.3
         expected_total = expected_base + expected_structure + expected_novelty
@@ -370,9 +379,8 @@ class TestEdgeCases:
 
         reward = calculator.calculate_reward(metrics, {})
 
-        # Should produce NaN when mixing inf values
-        # The calculation -inf * weight + inf * weight = NaN
-        assert np.isnan(reward["base"])
+        # The calculation -inf * weight - inf * weight * temp = -inf
+        assert reward["base"] == -np.inf
 
     def test_reward_with_very_large_values(self, calculator):
         """Test reward calculation with very large values."""
@@ -416,9 +424,10 @@ class TestIntegrationScenarios:
 
         # Should produce positive total reward
         # The exact value depends on the optimal graph size
-        assert reward["total"] > 0.5
+        assert reward["total"] > 0.0  # Positive reward for insight spike
         assert reward["novelty"] == 0.8
-        assert reward["base"] < 0  # GED component dominates
+        # Base reward = 0.5 * (-0.7) - 0.5 * 1.0 * 0.8 = -0.35 - 0.4 = -0.75
+        assert reward["base"] < -0.5  # Both components contribute to negative reward
 
     def test_poor_performance_scenario(self):
         """Test reward calculation for poor performance."""
@@ -435,7 +444,8 @@ class TestIntegrationScenarios:
         reward = calculator.calculate_reward(metrics, conflicts)
 
         # Should produce low or negative total reward
-        assert reward["base"] > 0  # Positive due to positive GED
+        # Base reward = 0.5 * 0.5 - 0.5 * 1.0 * (-0.2) = 0.25 + 0.1 = 0.35
+        assert reward["base"] > 0  # Positive due to positive GED and negative IG
         assert reward["novelty"] == 0.0  # Clamped
         assert reward["structure"] == 0.0  # Far from optimal
 

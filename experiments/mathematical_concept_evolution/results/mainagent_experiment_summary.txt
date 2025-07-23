@@ -1,0 +1,31 @@
+
+=== MainAgent Mathematical Concept Evolution Experiment Summary ===
+
+Experiment: mathematical_concept_evolution_fixed
+Timestamp: 2025-07-23T16:10:03.228150
+
+Key Results:
+- Total episodes evolved from 0 to 14
+- 12 unique concepts tracked
+- 4 memory operations detected
+
+Split Operations Detected:
+  • negative_numbers_extended: Episode count 5 → 6 at day_100
+  • multiplication: Episode count 11 → 12 at day_210
+  • function: Episode count 12 → 13 at day_300
+  • number: Episode count 13 → 14 at day_310
+
+Concepts that Split:
+  • number: 2 episodes
+    - Episode 1: [number] 数字は物を数えるためのもの Examples: りんごが3個, 指は10本...
+    - Episode 2: [number] 数は抽象的な量の概念で、様々な数体系が存在 Examples: 自然数⊂整数⊂有理数⊂実数⊂複素数...
+  • multiplication: 2 episodes
+    - Episode 1: [multiplication] 掛け算は、同じ数を何回も足すこと Examples: 3×4 = 3+3+3+3, 2...
+    - Episode 2: [multiplication] 掛け算はスケーリング（拡大・縮小）操作 Examples: 2倍は×2, 半分は×0....
+
+Conclusion:
+The MainAgent successfully demonstrated episodic memory split operations when
+conflicting mathematical concepts were introduced. Advanced concepts that
+conflicted with elementary understanding triggered automatic splits, preserving
+both basic and advanced interpretations of concepts like 'multiplication',
+'function', and 'number'.

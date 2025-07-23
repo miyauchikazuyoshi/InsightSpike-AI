@@ -18,12 +18,12 @@ class TestCompleteWorkflow:
     """Test complete workflows from start to finish."""
 
     @pytest.fixture
-    def temp_data_dir(self):
+    def test_data_dir(self):
         """Create a temporary directory for test data."""
         with tempfile.TemporaryDirectory() as temp_dir:
             yield Path(temp_dir)
 
-    def test_knowledge_building_workflow(self, temp_data_dir):
+    def test_knowledge_building_workflow(self, test_data_dir):
         """Test building knowledge base and querying it."""
         # Step 1: Create configuration
         config = ConfigPresets.development()
@@ -31,7 +31,7 @@ class TestCompleteWorkflow:
         # Step 2: Create datastore
         datastore_config = {
             "type": "filesystem",
-            "params": {"base_path": str(temp_data_dir)},
+            "params": {"base_path": str(test_data_dir)},
         }
         datastore = DataStoreFactory.create(datastore_config)
 
@@ -88,11 +88,11 @@ class TestCompleteWorkflow:
         assert result.success
         assert "InsightSpike" in result.response or "AI system" in result.response
 
-    def test_insight_discovery_workflow(self, temp_data_dir):
+    def test_insight_discovery_workflow(self, test_data_dir):
         """Test discovering insights through incremental learning."""
         config = ConfigPresets.experiment()
         datastore = DataStoreFactory.create(
-            {"type": "filesystem", "params": {"base_path": str(temp_data_dir)}}
+            {"type": "filesystem", "params": {"base_path": str(test_data_dir)}}
         )
 
         agent = MainAgent(config=config, datastore=datastore)
@@ -156,10 +156,10 @@ class TestCompleteWorkflow:
 class TestCLIWorkflow:
     """Test complete workflows using the CLI."""
 
-    def test_cli_basic_workflow(self, temp_data_dir):
+    def test_cli_basic_workflow(self, test_data_dir):
         """Test basic CLI workflow: embed -> query -> stats."""
         # Create test knowledge file
-        knowledge_file = temp_data_dir / "knowledge.txt"
+        knowledge_file = test_data_dir / "knowledge.txt"
         knowledge_file.write_text(
             """
 InsightSpike is an advanced AI system.
@@ -180,7 +180,7 @@ Multiple layers work together for intelligence.
             ],
             capture_output=True,
             text=True,
-            env={**os.environ, "INSIGHTSPIKE_DATA_DIR": str(temp_data_dir)},
+            env={**os.environ, "INSIGHTSPIKE_DATA_DIR": str(test_data_dir)},
         )
 
         assert result.returncode == 0
@@ -197,7 +197,7 @@ Multiple layers work together for intelligence.
             ],
             capture_output=True,
             text=True,
-            env={**os.environ, "INSIGHTSPIKE_DATA_DIR": str(temp_data_dir)},
+            env={**os.environ, "INSIGHTSPIKE_DATA_DIR": str(test_data_dir)},
         )
 
         assert result.returncode == 0
@@ -208,16 +208,16 @@ Multiple layers work together for intelligence.
             [sys.executable, "-m", "insightspike.cli.spike", "stats"],
             capture_output=True,
             text=True,
-            env={**os.environ, "INSIGHTSPIKE_DATA_DIR": str(temp_data_dir)},
+            env={**os.environ, "INSIGHTSPIKE_DATA_DIR": str(test_data_dir)},
         )
 
         assert result.returncode == 0
         assert "Agent Statistics" in result.stdout
         assert "Total episodes:" in result.stdout
 
-    def test_cli_config_workflow(self, temp_data_dir):
+    def test_cli_config_workflow(self, test_data_dir):
         """Test CLI configuration management workflow."""
-        config_file = temp_data_dir / "custom_config.json"
+        config_file = test_data_dir / "custom_config.json"
 
         # Export default config
         result = subprocess.run(
@@ -267,11 +267,11 @@ Multiple layers work together for intelligence.
 class TestMultiModalWorkflow:
     """Test workflows with different types of content."""
 
-    def test_structured_data_workflow(self, temp_data_dir):
+    def test_structured_data_workflow(self, test_data_dir):
         """Test processing structured data."""
         config = ConfigPresets.development()
         datastore = DataStoreFactory.create(
-            {"type": "filesystem", "params": {"base_path": str(temp_data_dir)}}
+            {"type": "filesystem", "params": {"base_path": str(test_data_dir)}}
         )
 
         agent = MainAgent(config=config, datastore=datastore)
@@ -322,11 +322,11 @@ class TestMultiModalWorkflow:
             for term in ["neural", "deep", "layer", "multiple"]
         )
 
-    def test_incremental_learning_workflow(self, temp_data_dir):
+    def test_incremental_learning_workflow(self, test_data_dir):
         """Test incremental learning with feedback."""
         config = ConfigPresets.experiment()
         datastore = DataStoreFactory.create(
-            {"type": "filesystem", "params": {"base_path": str(temp_data_dir)}}
+            {"type": "filesystem", "params": {"base_path": str(test_data_dir)}}
         )
 
         agent = MainAgent(config=config, datastore=datastore)
@@ -372,11 +372,11 @@ class TestMultiModalWorkflow:
 class TestErrorRecoveryWorkflow:
     """Test system behavior under error conditions."""
 
-    def test_recovery_from_corrupted_state(self, temp_data_dir):
+    def test_recovery_from_corrupted_state(self, test_data_dir):
         """Test recovery when saved state is corrupted."""
         config = ConfigPresets.development()
         datastore = DataStoreFactory.create(
-            {"type": "filesystem", "params": {"base_path": str(temp_data_dir)}}
+            {"type": "filesystem", "params": {"base_path": str(test_data_dir)}}
         )
 
         agent = MainAgent(config=config, datastore=datastore)
@@ -387,7 +387,7 @@ class TestErrorRecoveryWorkflow:
         agent.save_state()
 
         # Corrupt the saved episodes file
-        episodes_file = temp_data_dir / "episodes.json"
+        episodes_file = test_data_dir / "episodes.json"
         if episodes_file.exists():
             episodes_file.write_text("corrupted data")
 
@@ -403,7 +403,7 @@ class TestErrorRecoveryWorkflow:
         query_result = agent2.process_question("Test question", max_cycles=1)
         assert query_result.success
 
-    def test_resource_constraints_workflow(self, temp_data_dir):
+    def test_resource_constraints_workflow(self, test_data_dir):
         """Test system behavior under resource constraints."""
         # Create config with limited resources
         config = InsightSpikeConfig(
@@ -414,7 +414,7 @@ class TestErrorRecoveryWorkflow:
         )
 
         datastore = DataStoreFactory.create(
-            {"type": "filesystem", "params": {"base_path": str(temp_data_dir)}}
+            {"type": "filesystem", "params": {"base_path": str(test_data_dir)}}
         )
 
         agent = MainAgent(config=config, datastore=datastore)

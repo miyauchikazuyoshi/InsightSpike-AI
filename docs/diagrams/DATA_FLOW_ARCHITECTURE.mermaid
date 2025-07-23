@@ -1,5 +1,5 @@
 %% InsightSpike-AI Data Flow Architecture
-%% データの流れと管理構造
+%% Data flow and management structure
 
 flowchart TB
     %% Data Sources
@@ -60,7 +60,7 @@ flowchart TB
             B1[1. Backup Main Data]
             B2[2. Run Experiment]
             B3[3. Save Results]
-            B4[4. Restore (Optional)]
+            B4[4. Restore Optional]
         end
     end
     
@@ -70,7 +70,7 @@ flowchart TB
         
         P1[Data Ingestion<br/>spike embed]
         P2[Text Processing<br/>& Embedding]
-        P3[Episode Creation<br/>store_episode()]
+        P3[Episode Creation<br/>store_episode]
         P4[Graph Update<br/>ScalableGraphManager]
         P5[Index Update<br/>FAISS]
         P6[Conflict Detection<br/>& Splitting]
@@ -83,13 +83,13 @@ flowchart TB
         Read[Read Operations]
         Write[Write Operations]
         
-        Read --> ReadEp[load_state()<br/>Read episodes.json]
-        Read --> ReadIdx[search_episodes()<br/>Query FAISS]
-        Read --> ReadGraph[get_current_graph()<br/>Load PyG]
+        Read --> ReadEp[load_state<br/>Read episodes.json]
+        Read --> ReadIdx[search_episodes<br/>Query FAISS]
+        Read --> ReadGraph[get_current_graph<br/>Load PyG]
         
-        Write --> WriteEp[save_state()<br/>Write episodes.json]
-        Write --> WriteIdx[add_to_index()<br/>Update FAISS]
-        Write --> WriteGraph[save_graph()<br/>Save PyG]
+        Write --> WriteEp[save_state<br/>Write episodes.json]
+        Write --> WriteIdx[add_to_index<br/>Update FAISS]
+        Write --> WriteGraph[save_graph<br/>Save PyG]
     end
     
     %% Data Flow Connections

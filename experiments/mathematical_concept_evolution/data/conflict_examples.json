@@ -1,0 +1,38 @@
+[
+  {
+    "id": "conf_001",
+    "phase": 2,
+    "concept": "fraction",
+    "explanation": "分数は比率を表す一般的な数の表現方法",
+    "examples": ["速さ = 距離/時間", "確率 = 成功数/全体数"],
+    "extends": "elem_006",
+    "timestamp": "day_200"
+  },
+  {
+    "id": "conf_002",
+    "phase": 2,
+    "concept": "multiplication",
+    "explanation": "掛け算はスケーリング（拡大・縮小）操作",
+    "examples": ["2倍は×2", "半分は×0.5", "逆向きは×(-1)"],
+    "conflicts_with": ["multiplication"],
+    "timestamp": "day_210"
+  },
+  {
+    "id": "conf_003",
+    "phase": 3,
+    "concept": "function",
+    "explanation": "関数は集合から集合への対応関係",
+    "examples": ["f: R → R", "多対一も可", "全射・単射"],
+    "conflicts_with": ["function_basic"],
+    "timestamp": "day_300"
+  },
+  {
+    "id": "conf_004",
+    "phase": 3,
+    "concept": "number",
+    "explanation": "数は抽象的な量の概念で、様々な数体系が存在",
+    "examples": ["自然数⊂整数⊂有理数⊂実数⊂複素数"],
+    "conflicts_with": ["number"],
+    "timestamp": "day_310"
+  }
+]

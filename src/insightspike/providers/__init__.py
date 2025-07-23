@@ -26,3 +26,11 @@ try:
         __all__.append("LocalProvider")
 except ImportError:
     pass
+
+try:
+    from .distilgpt2_provider import DistilGPT2Provider
+
+    if "DistilGPT2Provider" not in __all__:
+        __all__.append("DistilGPT2Provider")
+except ImportError:
+    pass

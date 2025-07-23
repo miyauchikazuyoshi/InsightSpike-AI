@@ -1,0 +1,377 @@
+{
+  "experiment": "comprehensive_gedig_evaluation",
+  "timestamp": "20250723_131614",
+  "configuration": {
+    "knowledge_items": 100,
+    "test_questions": 20,
+    "embedding_model": "all-MiniLM-L6-v2"
+  },
+  "summary": {
+    "spike_rate": 0.85,
+    "avg_processing_time": 0.04549744129180908,
+    "graph_nodes": 100,
+    "graph_edges": 962
+  },
+  "detailed_results": [
+    {
+      "question_id": 1,
+      "question": "How does information theory relate to thermodynamics?",
+      "type": "conceptual_integration",
+      "difficulty": "medium",
+      "has_spike": true,
+      "spike_confidence": 0.8448018326645805,
+      "response": "This question bridges multiple conceptual levels:\n\nFoundational: Information is the reduction of uncertainty in a s..., Entropy measures the disorder or randomness in a s...\nRelational: Maxwell's demon thought experiment connects inform..., Shannon entropy and thermodynamic entropy share ma...\nIntegrative: Energy, information, and entropy form a fundamenta...\nExploratory: Is information more fundamental than matter and en...\n\nThe high connectivity (ratio: 0.76) and phase diversity (0.80) suggest an emergent insight at the intersection of these concepts.",
+      "metrics": {
+        "connectivity_ratio": 0.7555555555555555,
+        "phase_diversity": 0.8,
+        "category_diversity": 0.5,
+        "avg_similarity": 0.5734730809926987,
+        "cross_connections": 34.0,
+        "node_count": 10.0
+      },
+      "processing_time": 0.05135202407836914
+    },
+    {
+      "question_id": 2,
+      "question": "Can consciousness emerge from quantum processes?",
+      "type": "speculative_integration",
+      "difficulty": "hard",
+      "has_spike": true,
+      "spike_confidence": 0.9161735375722249,
+      "response": "This question bridges multiple conceptual levels:\n\nFoundational: Consciousness involves integrated information proc...\nIntegrative: Consciousness might emerge from integrated informa...\nExploratory: How does quantum mechanics relate to consciousness..., Can consciousness be quantified through integrated...\nTranscendent: Consciousness could be the universe's way of obser..., Free will might emerge from quantum indeterminacy ...\n\nThe high connectivity (ratio: 0.84) and phase diversity (0.80) suggest an emergent insight at the intersection of these concepts.",
+      "metrics": {
+        "connectivity_ratio": 0.8444444444444444,
+        "phase_diversity": 0.8,
+        "category_diversity": 0.7,
+        "avg_similarity": 0.5899407148361206,
+        "cross_connections": 38.0,
+        "node_count": 10.0
+      },
+      "processing_time": 0.03896188735961914
+    },
+    {
+      "question_id": 3,
+      "question": "How do living systems maintain order against entropy?",
+      "type": "systems_thinking",
+      "difficulty": "medium",
+      "has_spike": true,
+      "spike_confidence": 0.8606703796840851,
+      "response": "This question bridges multiple conceptual levels:\n\nFoundational: Entropy measures the disorder or randomness in a s...\nRelational: Living systems decrease local entropy by increasin..., Shannon entropy and thermodynamic entropy share ma...\nTranscendent: Life accelerates entropy production while creating...\n\nThe high connectivity (ratio: 0.71) and phase diversity (0.80) suggest an emergent insight at the intersection of these concepts.",
+      "metrics": {
+        "connectivity_ratio": 0.7111111111111111,
+        "phase_diversity": 0.8,
+        "category_diversity": 0.7,
+        "avg_similarity": 0.5356796622276306,
+        "cross_connections": 32.0,
+        "node_count": 10.0
+      },
+      "processing_time": 0.046196937561035156
+    },
+    {
+      "question_id": 4,
+      "question": "What is the relationship between evolution and information?",
+      "type": "interdisciplinary",
+      "difficulty": "medium",
+      "has_spike": true,
+      "spike_confidence": 0.9121489612261453,
+      "response": "This question bridges multiple conceptual levels:\n\nFoundational: Information is the reduction of uncertainty in a s...\nRelational: Maxwell's demon thought experiment connects inform...\nIntegrative: Evolution can be understood as an information opti..., Energy, information, and entropy form a fundamenta...\nExploratory: Can evolution be directed through information desi..., Is information more fundamental than matter and en...\n\nThe high connectivity (ratio: 0.69) and phase diversity (1.00) suggest an emergent insight at the intersection of these concepts.",
+      "metrics": {
+        "connectivity_ratio": 0.6888888888888889,
+        "phase_diversity": 1.0,
+        "category_diversity": 0.7,
+        "avg_similarity": 0.5291880309581757,
+        "cross_connections": 31.0,
+        "node_count": 10.0
+      },
+      "processing_time": 0.04201793670654297
+    },
+    {
+      "question_id": 5,
+      "question": "How does the brain process and integrate information?",
+      "type": "neuroscience",
+      "difficulty": "medium",
+      "has_spike": true,
+      "spike_confidence": 0.9504477007616134,
+      "response": "This question bridges multiple conceptual levels:\n\nFoundational: Consciousness involves integrated information proc..., Information is the reduction of uncertainty in a s...\nRelational: Maxwell's demon thought experiment connects inform...\nIntegrative: Consciousness might emerge from integrated informa...\nExploratory: Can consciousness be quantified through integrated..., Is information more fundamental than matter and en...\n\nThe high connectivity (ratio: 0.82) and phase diversity (1.00) suggest an emergent insight at the intersection of these concepts.",
+      "metrics": {
+        "connectivity_ratio": 0.8222222222222222,
+        "phase_diversity": 1.0,
+        "category_diversity": 0.7,
+        "avg_similarity": 0.5232336193323135,
+        "cross_connections": 37.0,
+        "node_count": 10.0
+      },
+      "processing_time": 0.035721778869628906
+    },
+    {
+      "question_id": 6,
+      "question": "Can artificial intelligence achieve genuine creativity?",
+      "type": "ai_philosophy",
+      "difficulty": "hard",
+      "has_spike": true,
+      "spike_confidence": 0.8002635625998178,
+      "response": "This question bridges multiple conceptual levels:\n\nIntegrative: Creativity emerges from novel connections between ..., Intelligence involves prediction, compression, and...\nExploratory: Can artificial systems achieve genuine understandi..., Can evolution be directed through information desi...\nTranscendent: Creativity is the universe exploring its possibili..., AI might discover alien forms of intelligence and ...\n\nThe high connectivity (ratio: 0.62) and phase diversity (0.80) suggest an emergent insight at the intersection of these concepts.",
+      "metrics": {
+        "connectivity_ratio": 0.6222222222222222,
+        "phase_diversity": 0.8,
+        "category_diversity": 0.6,
+        "avg_similarity": 0.48758913576602936,
+        "cross_connections": 28.0,
+        "node_count": 10.0
+      },
+      "processing_time": 0.04571080207824707
+    },
+    {
+      "question_id": 7,
+      "question": "What is the fundamental nature of reality - matter, energy, or information?",
+      "type": "foundational",
+      "difficulty": "hard",
+      "has_spike": true,
+      "spike_confidence": 0.9953493789831798,
+      "response": "This question bridges multiple conceptual levels:\n\nFoundational: Information is the reduction of uncertainty in a s...\nRelational: Maxwell's demon thought experiment connects inform...\nIntegrative: Energy, information, and entropy form a fundamenta...\nExploratory: Is information more fundamental than matter and en...\nTranscendent: Intelligence is compression - finding minimal desc..., Dark matter could be information structures beyond...\n\nThe high connectivity (ratio: 0.96) and phase diversity (1.00) suggest an emergent insight at the intersection of these concepts.",
+      "metrics": {
+        "connectivity_ratio": 0.9555555555555556,
+        "phase_diversity": 1.0,
+        "category_diversity": 0.7,
+        "avg_similarity": 0.5403894931077957,
+        "cross_connections": 43.0,
+        "node_count": 10.0
+      },
+      "processing_time": 0.06890535354614258
+    },
+    {
+      "question_id": 8,
+      "question": "How does complexity emerge from simple rules?",
+      "type": "complexity_science",
+      "difficulty": "medium",
+      "has_spike": true,
+      "spike_confidence": 0.6349431493736449,
+      "response": "This question bridges multiple conceptual levels:\n\nRelational: Emergence occurs when simple rules produce complex...\nIntegrative: The universe might be fundamentally computational ...\nExploratory: How does complexity emerge from simplicity?..., What are the limits of predictability in complex s...\n\nThe high connectivity (ratio: 0.44) and phase diversity (0.60) suggest an emergent insight at the intersection of these concepts.",
+      "metrics": {
+        "connectivity_ratio": 0.4444444444444444,
+        "phase_diversity": 0.6,
+        "category_diversity": 0.4,
+        "avg_similarity": 0.44563435614109037,
+        "cross_connections": 20.0,
+        "node_count": 10.0
+      },
+      "processing_time": 0.04139971733093262
+    },
+    {
+      "question_id": 9,
+      "question": "What role does observation play in quantum mechanics?",
+      "type": "quantum_foundations",
+      "difficulty": "medium",
+      "has_spike": true,
+      "spike_confidence": 0.8845411716188702,
+      "response": "This question bridges multiple conceptual levels:\n\nFoundational: Quantum states can exist in superposition until me...\nRelational: Quantum entanglement creates non-local correlation...\nExploratory: How does quantum mechanics relate to consciousness...\nTranscendent: The observer and observed are fundamentally insepa..., Synchronicity reveals hidden causal connections in...\n\nThe high connectivity (ratio: 0.73) and phase diversity (1.00) suggest an emergent insight at the intersection of these concepts.",
+      "metrics": {
+        "connectivity_ratio": 0.7333333333333333,
+        "phase_diversity": 1.0,
+        "category_diversity": 0.6,
+        "avg_similarity": 0.45589410066604613,
+        "cross_connections": 33.0,
+        "node_count": 10.0
+      },
+      "processing_time": 0.050253868103027344
+    },
+    {
+      "question_id": 10,
+      "question": "How does memory consolidation work in biological systems?",
+      "type": "neuroscience",
+      "difficulty": "easy",
+      "has_spike": true,
+      "spike_confidence": 0.7787956742445628,
+      "response": "This question bridges multiple conceptual levels:\n\nFoundational: Consciousness involves integrated information proc...\nRelational: Neural plasticity allows brains to reorganize and ..., Feedback loops can amplify or dampen system respon...\nIntegrative: Memory consolidation involves replay and reorganiz...\nTranscendent: Memory is time travel through information preserva...\n\nThe high connectivity (ratio: 0.42) and phase diversity (1.00) suggest an emergent insight at the intersection of these concepts.",
+      "metrics": {
+        "connectivity_ratio": 0.4222222222222222,
+        "phase_diversity": 1.0,
+        "category_diversity": 0.6,
+        "avg_similarity": 0.4124515265226364,
+        "cross_connections": 19.0,
+        "node_count": 10.0
+      },
+      "processing_time": 0.03869891166687012
+    },
+    {
+      "question_id": 11,
+      "question": "Can the universe be understood as a computational system?",
+      "type": "computational_universe",
+      "difficulty": "hard",
+      "has_spike": true,
+      "spike_confidence": 0.686435695546014,
+      "response": "This question bridges multiple conceptual levels:\n\nIntegrative: The universe might be fundamentally computational ...\nExploratory: Is the universe a quantum computer processing info..., What is the relationship between computation and p...\nTranscendent: The future is the universe computing its next stat..., Mathematics is the universe's self-description lan...\n\nThe high connectivity (ratio: 0.40) and phase diversity (0.60) suggest an emergent insight at the intersection of these concepts.",
+      "metrics": {
+        "connectivity_ratio": 0.4,
+        "phase_diversity": 0.6,
+        "category_diversity": 0.6,
+        "avg_similarity": 0.5325249344110489,
+        "cross_connections": 18.0,
+        "node_count": 10.0
+      },
+      "processing_time": 0.03922891616821289
+    },
+    {
+      "question_id": 12,
+      "question": "How do feedback loops influence system behavior?",
+      "type": "systems_dynamics",
+      "difficulty": "easy",
+      "has_spike": false,
+      "spike_confidence": 0.40838651842000534,
+      "response": "Based on the knowledge base: Feedback loops can amplify or dampen system responses.",
+      "metrics": {
+        "connectivity_ratio": 0.19047619047619047,
+        "phase_diversity": 0.6,
+        "category_diversity": 0.7142857142857143,
+        "avg_similarity": 0.39935281447001864,
+        "cross_connections": 4.0,
+        "node_count": 7.0
+      },
+      "processing_time": 0.03548312187194824
+    },
+    {
+      "question_id": 13,
+      "question": "What is the connection between language and consciousness?",
+      "type": "cognitive_science",
+      "difficulty": "medium",
+      "has_spike": true,
+      "spike_confidence": 0.8645779933248248,
+      "response": "This question bridges multiple conceptual levels:\n\nFoundational: Consciousness involves integrated information proc...\nIntegrative: Consciousness might emerge from integrated informa...\nExploratory: How does quantum mechanics relate to consciousness..., How does meaning emerge from syntax in language an...\nTranscendent: Language is collective consciousness encoded in sy..., Consciousness could be the universe's way of obser...\n\nThe high connectivity (ratio: 0.80) and phase diversity (0.80) suggest an emergent insight at the intersection of these concepts.",
+      "metrics": {
+        "connectivity_ratio": 0.8,
+        "phase_diversity": 0.8,
+        "category_diversity": 0.6,
+        "avg_similarity": 0.5260229766368866,
+        "cross_connections": 36.0,
+        "node_count": 10.0
+      },
+      "processing_time": 0.04097104072570801
+    },
+    {
+      "question_id": 14,
+      "question": "How does genetic information translate into biological form?",
+      "type": "biology",
+      "difficulty": "easy",
+      "has_spike": true,
+      "spike_confidence": 0.8250595719473703,
+      "response": "This question bridges multiple conceptual levels:\n\nFoundational: DNA encodes genetic information in a four-letter a...\nRelational: Epigenetics shows how environment influences gene ..., Genetic algorithms mimic evolutionary processes fo...\nIntegrative: Evolution can be understood as an information opti...\nExploratory: Can evolution be directed through information desi...\nTranscendent: Biotechnology enables conscious evolution and desi...\n\nThe high connectivity (ratio: 0.53) and phase diversity (1.00) suggest an emergent insight at the intersection of these concepts.",
+      "metrics": {
+        "connectivity_ratio": 0.5333333333333333,
+        "phase_diversity": 1.0,
+        "category_diversity": 0.6,
+        "avg_similarity": 0.4577085018157959,
+        "cross_connections": 24.0,
+        "node_count": 10.0
+      },
+      "processing_time": 0.04215407371520996
+    },
+    {
+      "question_id": 15,
+      "question": "Can collective intelligence surpass individual cognition?",
+      "type": "collective_systems",
+      "difficulty": "medium",
+      "has_spike": false,
+      "spike_confidence": 0.48748303169295903,
+      "response": "Based on the knowledge base: Collective intelligence transcends individual cognitive limits.",
+      "metrics": {
+        "connectivity_ratio": 0.7111111111111111,
+        "phase_diversity": 0.4,
+        "category_diversity": 0.5,
+        "avg_similarity": 0.4895239442586899,
+        "cross_connections": 32.0,
+        "node_count": 10.0
+      },
+      "processing_time": 0.03416776657104492
+    },
+    {
+      "question_id": 16,
+      "question": "What is the relationship between chaos and predictability?",
+      "type": "dynamical_systems",
+      "difficulty": "medium",
+      "has_spike": true,
+      "spike_confidence": 0.815003795396714,
+      "response": "This question bridges multiple conceptual levels:\n\nFoundational: Entropy measures the disorder or randomness in a s...\nIntegrative: Chaos theory reveals sensitive dependence on initi...\nExploratory: What are the limits of predictability in complex s...\nTranscendent: Free will might emerge from quantum indeterminacy ..., Art explores the space between order and chaos....\n\nThe high connectivity (ratio: 0.44) and phase diversity (1.00) suggest an emergent insight at the intersection of these concepts.",
+      "metrics": {
+        "connectivity_ratio": 0.4444444444444444,
+        "phase_diversity": 1.0,
+        "category_diversity": 0.7,
+        "avg_similarity": 0.4458466172218323,
+        "cross_connections": 20.0,
+        "node_count": 10.0
+      },
+      "processing_time": 0.037622928619384766
+    },
+    {
+      "question_id": 17,
+      "question": "How does technology extend human cognitive capabilities?",
+      "type": "human_technology",
+      "difficulty": "easy",
+      "has_spike": true,
+      "spike_confidence": 0.8287448164394924,
+      "response": "This question bridges multiple conceptual levels:\n\nFoundational: Consciousness involves integrated information proc...\nRelational: Attention mechanisms in AI focus computational res...\nIntegrative: Intelligence involves prediction, compression, and...\nTranscendent: Technology extends human cognition into the enviro..., Collective intelligence transcends individual cogn...\n\nThe high connectivity (ratio: 0.80) and phase diversity (0.80) suggest an emergent insight at the intersection of these concepts.",
+      "metrics": {
+        "connectivity_ratio": 0.8,
+        "phase_diversity": 0.8,
+        "category_diversity": 0.5,
+        "avg_similarity": 0.4706068575382233,
+        "cross_connections": 36.0,
+        "node_count": 10.0
+      },
+      "processing_time": 0.04285001754760742
+    },
+    {
+      "question_id": 18,
+      "question": "What principles govern self-organizing systems?",
+      "type": "emergence",
+      "difficulty": "medium",
+      "has_spike": false,
+      "spike_confidence": 0.486665321020853,
+      "response": "Based on the knowledge base: Self-organization creates order without external control.",
+      "metrics": {
+        "connectivity_ratio": 0.24444444444444444,
+        "phase_diversity": 0.8,
+        "category_diversity": 0.7,
+        "avg_similarity": 0.4166619569063187,
+        "cross_connections": 11.0,
+        "node_count": 10.0
+      },
+      "processing_time": 0.03647780418395996
+    },
+    {
+      "question_id": 19,
+      "question": "How might quantum computing revolutionize information processing?",
+      "type": "quantum_computing",
+      "difficulty": "medium",
+      "has_spike": true,
+      "spike_confidence": 0.8852433582146961,
+      "response": "This question bridges multiple conceptual levels:\n\nIntegrative: Quantum computing exploits superposition for paral..., The universe might be fundamentally computational ...\nExploratory: Is the universe a quantum computer processing info...\nTranscendent: Nanotechnology bridges quantum and classical infor..., Time might emerge from entanglement and informatio...\n\nThe high connectivity (ratio: 0.71) and phase diversity (1.00) suggest an emergent insight at the intersection of these concepts.",
+      "metrics": {
+        "connectivity_ratio": 0.7111111111111111,
+        "phase_diversity": 1.0,
+        "category_diversity": 0.6,
+        "avg_similarity": 0.4816850870847702,
+        "cross_connections": 32.0,
+        "node_count": 10.0
+      },
+      "processing_time": 0.041745901107788086
+    },
+    {
+      "question_id": 20,
+      "question": "What is the role of information in the arrow of time?",
+      "type": "physics_philosophy",
+      "difficulty": "hard",
+      "has_spike": true,
+      "spike_confidence": 0.8360606156076704,
+      "response": "This question bridges multiple conceptual levels:\n\nFoundational: Information is the reduction of uncertainty in a s...\nRelational: Thermodynamic arrow of time emerges from entropy i...\nExploratory: Is information more fundamental than matter and en...\nTranscendent: Time might emerge from entanglement and informatio..., Memory is time travel through information preserva...\n\nThe high connectivity (ratio: 0.67) and phase diversity (0.80) suggest an emergent insight at the intersection of these concepts.",
+      "metrics": {
+        "connectivity_ratio": 0.6666666666666666,
+        "phase_diversity": 0.8,
+        "category_diversity": 0.7,
+        "avg_similarity": 0.4962121546268463,
+        "cross_connections": 30.0,
+        "node_count": 10.0
+      },
+      "processing_time": 0.10002803802490234
+    }
+  ]
+}

@@ -59,6 +59,9 @@ class Defaults:
         0.0  # Deprecated, conflicts are no longer used in reward calculation
     )
 
+    # Temperature parameter for geDIG formula
+    REWARD_TEMPERATURE = 1.0  # Default temperature (kT = k * T)
+
     # Spike detection thresholds
     SPIKE_GED_THRESHOLD = -0.5
     SPIKE_IG_THRESHOLD = 0.2

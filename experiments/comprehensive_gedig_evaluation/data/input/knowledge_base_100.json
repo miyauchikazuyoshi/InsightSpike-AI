@@ -1,0 +1,609 @@
+{
+  "metadata": {
+    "created": "2025-07-23",
+    "total_items": 100,
+    "description": "Comprehensive knowledge base for geDIG evaluation covering multiple domains"
+  },
+  "knowledge_items": [
+    {
+      "id": 1,
+      "text": "Energy is the capacity to do work and exists in various forms.",
+      "category": "physics",
+      "phase": 1
+    },
+    {
+      "id": 2,
+      "text": "Information is the reduction of uncertainty in a system.",
+      "category": "information_theory",
+      "phase": 1
+    },
+    {
+      "id": 3,
+      "text": "Entropy measures the disorder or randomness in a system.",
+      "category": "thermodynamics",
+      "phase": 1
+    },
+    {
+      "id": 4,
+      "text": "Neural networks process information through weighted connections.",
+      "category": "ai",
+      "phase": 1
+    },
+    {
+      "id": 5,
+      "text": "DNA encodes genetic information in a four-letter alphabet.",
+      "category": "biology",
+      "phase": 1
+    },
+    {
+      "id": 6,
+      "text": "Quantum states can exist in superposition until measured.",
+      "category": "quantum",
+      "phase": 1
+    },
+    {
+      "id": 7,
+      "text": "Consciousness involves integrated information processing.",
+      "category": "neuroscience",
+      "phase": 1
+    },
+    {
+      "id": 8,
+      "text": "Evolution optimizes organisms through natural selection.",
+      "category": "biology",
+      "phase": 1
+    },
+    {
+      "id": 9,
+      "text": "Black holes have maximum entropy for their size.",
+      "category": "physics",
+      "phase": 1
+    },
+    {
+      "id": 10,
+      "text": "Computation requires minimum energy per bit erased.",
+      "category": "computing",
+      "phase": 1
+    },
+    {
+      "id": 11,
+      "text": "Shannon entropy and thermodynamic entropy share mathematical structure.",
+      "category": "interdisciplinary",
+      "phase": 2
+    },
+    {
+      "id": 12,
+      "text": "Living systems decrease local entropy by increasing global entropy.",
+      "category": "biology",
+      "phase": 2
+    },
+    {
+      "id": 13,
+      "text": "Quantum entanglement creates non-local correlations between particles.",
+      "category": "quantum",
+      "phase": 2
+    },
+    {
+      "id": 14,
+      "text": "Neural plasticity allows brains to reorganize and form new connections.",
+      "category": "neuroscience",
+      "phase": 2
+    },
+    {
+      "id": 15,
+      "text": "Information cannot be destroyed in quantum mechanics.",
+      "category": "quantum",
+      "phase": 2
+    },
+    {
+      "id": 16,
+      "text": "Machine learning extracts patterns from high-dimensional data.",
+      "category": "ai",
+      "phase": 2
+    },
+    {
+      "id": 17,
+      "text": "Genetic algorithms mimic evolutionary processes for optimization.",
+      "category": "ai",
+      "phase": 2
+    },
+    {
+      "id": 18,
+      "text": "Thermodynamic arrow of time emerges from entropy increase.",
+      "category": "physics",
+      "phase": 2
+    },
+    {
+      "id": 19,
+      "text": "Synaptic pruning optimizes brain connectivity during development.",
+      "category": "neuroscience",
+      "phase": 2
+    },
+    {
+      "id": 20,
+      "text": "Landauer's principle links information erasure to heat generation.",
+      "category": "physics",
+      "phase": 2
+    },
+    {
+      "id": 21,
+      "text": "Maxwell's demon thought experiment connects information and thermodynamics.",
+      "category": "physics",
+      "phase": 2
+    },
+    {
+      "id": 22,
+      "text": "Protein folding minimizes free energy to find stable configurations.",
+      "category": "biology",
+      "phase": 2
+    },
+    {
+      "id": 23,
+      "text": "Holographic principle suggests information is encoded on boundaries.",
+      "category": "physics",
+      "phase": 2
+    },
+    {
+      "id": 24,
+      "text": "Attention mechanisms in AI focus computational resources selectively.",
+      "category": "ai",
+      "phase": 2
+    },
+    {
+      "id": 25,
+      "text": "Epigenetics shows how environment influences gene expression.",
+      "category": "biology",
+      "phase": 2
+    },
+    {
+      "id": 26,
+      "text": "Wave function collapse may be an information update process.",
+      "category": "quantum",
+      "phase": 2
+    },
+    {
+      "id": 27,
+      "text": "Emergence occurs when simple rules produce complex behaviors.",
+      "category": "complexity",
+      "phase": 2
+    },
+    {
+      "id": 28,
+      "text": "Feedback loops can amplify or dampen system responses.",
+      "category": "systems",
+      "phase": 2
+    },
+    {
+      "id": 29,
+      "text": "Phase transitions mark qualitative changes in system behavior.",
+      "category": "physics",
+      "phase": 2
+    },
+    {
+      "id": 30,
+      "text": "Self-organization creates order without external control.",
+      "category": "complexity",
+      "phase": 2
+    },
+    {
+      "id": 31,
+      "text": "Energy, information, and entropy form a fundamental trinity in physics.",
+      "category": "interdisciplinary",
+      "phase": 3
+    },
+    {
+      "id": 32,
+      "text": "Life can be viewed as a far-from-equilibrium dissipative structure.",
+      "category": "interdisciplinary",
+      "phase": 3
+    },
+    {
+      "id": 33,
+      "text": "Consciousness might emerge from integrated information processing.",
+      "category": "interdisciplinary",
+      "phase": 3
+    },
+    {
+      "id": 34,
+      "text": "Evolution can be understood as an information optimization process.",
+      "category": "interdisciplinary",
+      "phase": 3
+    },
+    {
+      "id": 35,
+      "text": "Quantum computing exploits superposition for parallel processing.",
+      "category": "interdisciplinary",
+      "phase": 3
+    },
+    {
+      "id": 36,
+      "text": "The universe might be fundamentally computational in nature.",
+      "category": "interdisciplinary",
+      "phase": 3
+    },
+    {
+      "id": 37,
+      "text": "Intelligence involves prediction, compression, and pattern recognition.",
+      "category": "interdisciplinary",
+      "phase": 3
+    },
+    {
+      "id": 38,
+      "text": "Creativity emerges from novel connections between existing concepts.",
+      "category": "cognitive",
+      "phase": 3
+    },
+    {
+      "id": 39,
+      "text": "Memory consolidation involves replay and reorganization of experiences.",
+      "category": "neuroscience",
+      "phase": 3
+    },
+    {
+      "id": 40,
+      "text": "Language enables infinite expression from finite components.",
+      "category": "cognitive",
+      "phase": 3
+    },
+    {
+      "id": 41,
+      "text": "Fractals show self-similarity across different scales.",
+      "category": "mathematics",
+      "phase": 3
+    },
+    {
+      "id": 42,
+      "text": "Chaos theory reveals sensitive dependence on initial conditions.",
+      "category": "mathematics",
+      "phase": 3
+    },
+    {
+      "id": 43,
+      "text": "Network effects create value through increased connectivity.",
+      "category": "systems",
+      "phase": 3
+    },
+    {
+      "id": 44,
+      "text": "Symmetry breaking leads to diversity in physical systems.",
+      "category": "physics",
+      "phase": 3
+    },
+    {
+      "id": 45,
+      "text": "Renormalization reveals universal behaviors across scales.",
+      "category": "physics",
+      "phase": 3
+    },
+    {
+      "id": 46,
+      "text": "Autopoiesis describes self-creating and self-maintaining systems.",
+      "category": "biology",
+      "phase": 3
+    },
+    {
+      "id": 47,
+      "text": "Stigmergy enables indirect coordination through environmental modification.",
+      "category": "systems",
+      "phase": 3
+    },
+    {
+      "id": 48,
+      "text": "Swarm intelligence emerges from simple local interactions.",
+      "category": "ai",
+      "phase": 3
+    },
+    {
+      "id": 49,
+      "text": "Metacognition involves thinking about thinking processes.",
+      "category": "cognitive",
+      "phase": 3
+    },
+    {
+      "id": 50,
+      "text": "Embodied cognition suggests mind emerges from body-environment interaction.",
+      "category": "cognitive",
+      "phase": 3
+    },
+    {
+      "id": 51,
+      "text": "Can consciousness be quantified through integrated information theory?",
+      "category": "question",
+      "phase": 4
+    },
+    {
+      "id": 52,
+      "text": "Is the universe a quantum computer processing information?",
+      "category": "question",
+      "phase": 4
+    },
+    {
+      "id": 53,
+      "text": "How does quantum mechanics relate to consciousness?",
+      "category": "question",
+      "phase": 4
+    },
+    {
+      "id": 54,
+      "text": "Can artificial systems achieve genuine understanding?",
+      "category": "question",
+      "phase": 4
+    },
+    {
+      "id": 55,
+      "text": "What is the relationship between computation and physics?",
+      "category": "question",
+      "phase": 4
+    },
+    {
+      "id": 56,
+      "text": "How does complexity emerge from simplicity?",
+      "category": "question",
+      "phase": 4
+    },
+    {
+      "id": 57,
+      "text": "Is information more fundamental than matter and energy?",
+      "category": "question",
+      "phase": 4
+    },
+    {
+      "id": 58,
+      "text": "Can evolution be directed through information design?",
+      "category": "question",
+      "phase": 4
+    },
+    {
+      "id": 59,
+      "text": "What are the limits of predictability in complex systems?",
+      "category": "question",
+      "phase": 4
+    },
+    {
+      "id": 60,
+      "text": "How does meaning emerge from syntax in language and thought?",
+      "category": "question",
+      "phase": 4
+    },
+    {
+      "id": 61,
+      "text": "The observer and observed are fundamentally inseparable in quantum mechanics.",
+      "category": "insight",
+      "phase": 5
+    },
+    {
+      "id": 62,
+      "text": "All physical laws might reduce to information conservation principles.",
+      "category": "insight",
+      "phase": 5
+    },
+    {
+      "id": 63,
+      "text": "Consciousness could be the universe's way of observing itself.",
+      "category": "insight",
+      "phase": 5
+    },
+    {
+      "id": 64,
+      "text": "Intelligence is compression - finding minimal descriptions of reality.",
+      "category": "insight",
+      "phase": 5
+    },
+    {
+      "id": 65,
+      "text": "Time might emerge from entanglement and information flow.",
+      "category": "insight",
+      "phase": 5
+    },
+    {
+      "id": 66,
+      "text": "Life accelerates entropy production while creating local order.",
+      "category": "insight",
+      "phase": 5
+    },
+    {
+      "id": 67,
+      "text": "Creativity is the universe exploring its possibility space.",
+      "category": "insight",
+      "phase": 5
+    },
+    {
+      "id": 68,
+      "text": "Memory is time travel through information preservation.",
+      "category": "insight",
+      "phase": 5
+    },
+    {
+      "id": 69,
+      "text": "Language is collective consciousness encoded in symbols.",
+      "category": "insight",
+      "phase": 5
+    },
+    {
+      "id": 70,
+      "text": "Mathematics is the universe's self-description language.",
+      "category": "insight",
+      "phase": 5
+    },
+    {
+      "id": 71,
+      "text": "Free will might emerge from quantum indeterminacy amplified by chaos.",
+      "category": "speculation",
+      "phase": 5
+    },
+    {
+      "id": 72,
+      "text": "Dark matter could be information structures beyond standard physics.",
+      "category": "speculation",
+      "phase": 5
+    },
+    {
+      "id": 73,
+      "text": "Dreams might be consciousness exploring counterfactual realities.",
+      "category": "speculation",
+      "phase": 5
+    },
+    {
+      "id": 74,
+      "text": "Intuition accesses implicit patterns below conscious threshold.",
+      "category": "cognitive",
+      "phase": 5
+    },
+    {
+      "id": 75,
+      "text": "Synchronicity reveals hidden causal connections in reality.",
+      "category": "speculation",
+      "phase": 5
+    },
+    {
+      "id": 76,
+      "text": "Collective intelligence transcends individual cognitive limits.",
+      "category": "systems",
+      "phase": 5
+    },
+    {
+      "id": 77,
+      "text": "Technology extends human cognition into the environment.",
+      "category": "interdisciplinary",
+      "phase": 5
+    },
+    {
+      "id": 78,
+      "text": "Culture is distributed cognition across minds and time.",
+      "category": "interdisciplinary",
+      "phase": 5
+    },
+    {
+      "id": 79,
+      "text": "Art explores the space between order and chaos.",
+      "category": "cognitive",
+      "phase": 5
+    },
+    {
+      "id": 80,
+      "text": "Science is systematic curiosity encoded in methodology.",
+      "category": "philosophy",
+      "phase": 5
+    },
+    {
+      "id": 81,
+      "text": "Meditation might access fundamental computational substrates of mind.",
+      "category": "cognitive",
+      "phase": 5
+    },
+    {
+      "id": 82,
+      "text": "Psychedelics could reveal alternative information processing modes.",
+      "category": "neuroscience",
+      "phase": 5
+    },
+    {
+      "id": 83,
+      "text": "Music is emotional information encoded in temporal patterns.",
+      "category": "cognitive",
+      "phase": 5
+    },
+    {
+      "id": 84,
+      "text": "Love might be recognition of deep informational resonance.",
+      "category": "speculation",
+      "phase": 5
+    },
+    {
+      "id": 85,
+      "text": "Death is information pattern dissolution and transformation.",
+      "category": "philosophy",
+      "phase": 5
+    },
+    {
+      "id": 86,
+      "text": "Virtual reality creates new experiential possibility spaces.",
+      "category": "technology",
+      "phase": 5
+    },
+    {
+      "id": 87,
+      "text": "Blockchain enables trustless information consensus.",
+      "category": "technology",
+      "phase": 5
+    },
+    {
+      "id": 88,
+      "text": "Internet forms a global nervous system for humanity.",
+      "category": "technology",
+      "phase": 5
+    },
+    {
+      "id": 89,
+      "text": "AI might discover alien forms of intelligence and consciousness.",
+      "category": "ai",
+      "phase": 5
+    },
+    {
+      "id": 90,
+      "text": "Biotechnology enables conscious evolution and design.",
+      "category": "technology",
+      "phase": 5
+    },
+    {
+      "id": 91,
+      "text": "Nanotechnology bridges quantum and classical information realms.",
+      "category": "technology",
+      "phase": 5
+    },
+    {
+      "id": 92,
+      "text": "Space exploration extends consciousness beyond Earth.",
+      "category": "philosophy",
+      "phase": 5
+    },
+    {
+      "id": 93,
+      "text": "Sustainability requires balancing information and energy flows.",
+      "category": "systems",
+      "phase": 5
+    },
+    {
+      "id": 94,
+      "text": "Democracy is distributed information processing for governance.",
+      "category": "systems",
+      "phase": 5
+    },
+    {
+      "id": 95,
+      "text": "Economics tracks information about value and scarcity.",
+      "category": "systems",
+      "phase": 5
+    },
+    {
+      "id": 96,
+      "text": "Education is intergenerational information transfer and transformation.",
+      "category": "systems",
+      "phase": 5
+    },
+    {
+      "id": 97,
+      "text": "Ethics emerges from recognition of shared information patterns.",
+      "category": "philosophy",
+      "phase": 5
+    },
+    {
+      "id": 98,
+      "text": "Beauty might signal deep informational coherence and harmony.",
+      "category": "philosophy",
+      "phase": 5
+    },
+    {
+      "id": 99,
+      "text": "Wisdom integrates knowledge across multiple domains and timescales.",
+      "category": "cognitive",
+      "phase": 5
+    },
+    {
+      "id": 100,
+      "text": "The future is the universe computing its next state from present information.",
+      "category": "philosophy",
+      "phase": 5
+    }
+  ]
+}

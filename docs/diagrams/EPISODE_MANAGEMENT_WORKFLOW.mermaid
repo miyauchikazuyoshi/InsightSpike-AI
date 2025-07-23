@@ -24,13 +24,13 @@ flowchart TD
     N --> O[Update Hierarchical Graph<br/>3-Layer Structure]
     
     %% Scalable Graph Analysis
-    O --> P[Hierarchical Graph Analysis<br/>O(log n) Search]
+    O --> P[Hierarchical Graph Analysis<br/>O log n Search]
     L --> P
     P --> Q[Calculate geDIG Metrics<br/>ΔGED/ΔIG with FAISS]
     Q --> R{High Insight Signal?<br/>GED+IG > Threshold}
     
     %% Dynamic Importance Calculation
-    R -->|Yes| S[Update Dynamic Importance<br/>(No C-values)]
+    R -->|Yes| S[Update Dynamic Importance<br/>No C-values]
     S --> SA[Calculate from:<br/>• Graph Degree<br/>• Access Frequency<br/>• Time Decay]
     SA --> T[Check Splitting Triggers]
     T --> U{High Neighbor Conflict?<br/>Incompatible Connections}
@@ -49,8 +49,8 @@ flowchart TD
     %% Decision Matrix Box
     subgraph "Graph-Centric Integration"
         direction TB
-        DM1["🔄 High Sim + Graph Connection → INTEGRATE (weight=graph)"]
-        DM2["🔄 Medium Sim + Strong Graph → INTEGRATE (threshold -0.1)"]
+        DM1["🔄 High Sim + Graph Connection → INTEGRATE weight=graph"]
+        DM2["🔄 Medium Sim + Strong Graph → INTEGRATE threshold -0.1"]
         DM3["🆕 High Sim + No Graph → NEW NODE"]
         DM4["⚖️ Conflict Detection → SPLIT if needed"]
     end
@@ -58,8 +58,8 @@ flowchart TD
     %% Scalability Features
     subgraph "Scalable Implementation"
         direction TB
-        SC1["FAISS Approximate NN: O(n log n) build"]
-        SC2["Hierarchical Search: O(log n) query"]
+        SC1["FAISS Approximate NN: O n log n build"]
+        SC2["Hierarchical Search: O log n query"]
         SC3["3-Layer Structure: Episodes→Clusters→Super"]
         SC4["Dynamic Rebalancing: Add without rebuild"]
         SC5["100K+ Episodes: <5ms search time"]

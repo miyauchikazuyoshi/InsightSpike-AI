@@ -1,6 +1,15 @@
 # Complete SQLiteDataStore implementation
 # This shows the remaining methods to be added to sqlite_store.py
 
+import asyncio
+import json
+import logging
+from typing import Any, Dict, Optional
+
+import aiosqlite
+
+logger = logging.getLogger(__name__)
+
 
 def save_metadata(
     self, metadata: Dict[str, Any], key: str, namespace: str = "metadata"

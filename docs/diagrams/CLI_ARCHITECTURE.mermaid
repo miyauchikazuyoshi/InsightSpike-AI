@@ -14,7 +14,7 @@ flowchart LR
         direction TB
         
         subgraph "Typer App"
-            CLI[spike.py<br/>run_cli()]
+            CLI[spike.py<br/>run_cli]
             Context[Typer Context<br/>Dependency Container]
             Commands[Command Functions]
         end
@@ -22,7 +22,7 @@ flowchart LR
         subgraph "Dependency Factory"
             Factory[DependencyFactory]
             AgentCache[Agent Cache<br/>Per-preset Instances]
-            CreateAgent[get_agent()]
+            CreateAgent[get_agent]
         end
     end
     
@@ -51,7 +51,7 @@ flowchart LR
     subgraph "🤖 Core System"
         MainAgent[MainAgent<br/>Stateful Processing]
         Layers[4-Layer Architecture]
-        DataStorage[(DataStore<br/>Episodes & Graph)]
+        DataStorage[DataStore<br/>Episodes & Graph]
     end
     
     %% Flow

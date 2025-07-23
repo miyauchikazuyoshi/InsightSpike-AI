@@ -1,14 +1,14 @@
 %% InsightSpike-AI Workflow Tree
-%% 洞察発見・登録・活用の完全ワークフロー
+%% Complete workflow for insight discovery, registration, and utilization
 
 flowchart TD
     %% Entry Points
-    User[👤 ユーザー] --> CLI{🖥️ CLI Interface}
+    User[👤 User] --> CLI{🖥️ CLI Interface}
     User --> API{🔌 API Interface}
     
     %% CLI Commands (New spike commands)
-    CLI --> Query[❓ spike query 質問]
-    CLI --> Embed[📄 spike embed ドキュメント埋め込み]
+    CLI --> Query[❓ spike query Question]
+    CLI --> Embed[📄 spike embed Document Embedding]
     CLI --> Insights[🧠 spike insights]
     CLI --> Search[🔍 spike insights-search]
     CLI --> Validate[✅ spike insights-validate]
@@ -27,58 +27,58 @@ flowchart TD
     Layer3 --> Layer4[🤖 Layer 4: LLM Provider]
     
     %% Layer Details
-    Layer1 --> InputValidation[入力検証]
-    Layer1 --> ContextFormatting[コンテキスト整形]
+    Layer1 --> InputValidation[Input Validation]
+    Layer1 --> ContextFormatting[Context Formatting]
     
-    Layer2 --> EpisodeSearch[エピソード検索]
-    Layer2 --> VectorRetrieval[ベクトル検索]
-    Layer2 --> MemoryDB[(🗃️ Memory Database)]
+    Layer2 --> EpisodeSearch[Episode Search]
+    Layer2 --> VectorRetrieval[Vector Retrieval]
+    Layer2 --> MemoryDB[🗃️ Memory Database]
     
-    Layer3 --> GraphAnalysis[グラフ解析]
-    Layer3 --> ConceptMapping[概念マッピング]
-    Layer3 --> GraphDB[(🕸️ Graph Database)]
+    Layer3 --> GraphAnalysis[Graph Analysis]
+    Layer3 --> ConceptMapping[Concept Mapping]
+    Layer3 --> GraphDB[🕸️ Graph Database]
     
     Layer4 --> UnifiedLLM[🏠 UnifiedLLMProvider]
     UnifiedLLM --> LocalLLM[Local LLM]
-    UnifiedLLM --> MockLLM[Mock LLM (safe_mode)]
-    UnifiedLLM --> ModelProcessing[モデル処理]
+    UnifiedLLM --> MockLLM[Mock LLM safe_mode]
+    UnifiedLLM --> ModelProcessing[Model Processing]
     
     %% Response Processing
-    Layer4 --> ResponseGeneration[📝 応答生成]
-    ResponseGeneration --> InsightExtraction[💡 洞察抽出]
+    Layer4 --> ResponseGeneration[📝 Response Generation]
+    ResponseGeneration --> InsightExtraction[💡 Insight Extraction]
     
     %% Insight Registration System
-    InsightExtraction --> QualityAssessment[📋 品質評価]
+    InsightExtraction --> QualityAssessment[📋 Quality Assessment]
     QualityAssessment --> InsightRegistry[🧠 InsightFactRegistry]
     
     %% Quality Criteria
-    QualityAssessment --> Confidence[信頼度]
-    QualityAssessment --> Novelty[新規性]
-    QualityAssessment --> Coherence[一貫性]
-    QualityAssessment --> Specificity[具体性]
+    QualityAssessment --> Confidence[Confidence]
+    QualityAssessment --> Novelty[Novelty]
+    QualityAssessment --> Coherence[Coherence]
+    QualityAssessment --> Specificity[Specificity]
     
     %% Insight Storage
-    InsightRegistry --> InsightDB[(💾 Insight Database)]
-    InsightDB --> SQLiteStorage[SQLite ストレージ]
+    InsightRegistry --> InsightDB[💾 Insight Database]
+    InsightDB --> SQLiteStorage[SQLite Storage]
     
     %% Insight Management
-    Insights --> ShowStats[統計表示]
-    Search --> ConceptSearch[概念検索]
-    Validate --> ManualValidation[手動検証]
-    Cleanup --> QualityFiltering[品質フィルタリング]
+    Insights --> ShowStats[Display Statistics]
+    Search --> ConceptSearch[Concept Search]
+    Validate --> ManualValidation[Manual Validation]
+    Cleanup --> QualityFiltering[Quality Filtering]
     
     %% Document Loading Flow
-    DocumentLoader --> LoadDocuments[ドキュメント読み込み]
-    LoadDocuments --> Embedder[埋め込み生成]
+    DocumentLoader --> LoadDocuments[Load Documents]
+    LoadDocuments --> Embedder[Generate Embeddings]
     Embedder --> Layer2
     
     %% Feedback Loop
-    InsightRegistry --> FeedbackLoop[🔄 フィードバックループ]
+    InsightRegistry --> FeedbackLoop[🔄 Feedback Loop]
     FeedbackLoop --> Layer2
     FeedbackLoop --> Layer3
     
     %% Output to User
-    ResponseGeneration --> UserResponse[📤 ユーザーへの応答]
+    ResponseGeneration --> UserResponse[📤 Response to User]
     ShowStats --> UserResponse
     ConceptSearch --> UserResponse
     ManualValidation --> UserResponse

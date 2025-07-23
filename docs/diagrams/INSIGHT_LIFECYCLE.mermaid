@@ -1,30 +1,30 @@
 %% Insight Lifecycle Flow
-%% 洞察の発見から活用までのライフサイクル
+%% Lifecycle from insight discovery to utilization
 
 flowchart TD
     %% Input Stage
     subgraph "📥 Input Stage"
-        Question[❓ ユーザーの質問]
-        Context[📋 既存コンテキスト]
+        Question[❓ User Question]
+        Context[📋 Existing Context]
     end
     
     %% Processing Stage
     subgraph "⚙️ Processing Stage"
-        Agent[🤖 MainAgent処理]
-        Layers[🧠 4層アーキテクチャ]
-        Response[📝 応答生成]
+        Agent[🤖 MainAgent Processing]
+        Layers[🧠 4-Layer Architecture]
+        Response[📝 Response Generation]
     end
     
     %% Insight Discovery
     subgraph "💡 Insight Discovery"
         direction TB
-        Extract[🔍 洞察抽出]
+        Extract[🔍 Insight Extraction]
         
-        subgraph "抽出パターン"
-            Pattern1[因果関係<br/>A causes B]
-            Pattern2[類推関係<br/>A is like B]
-            Pattern3[統合関係<br/>A + B = C]
-            Pattern4[構造関係<br/>A contains B]
+        subgraph "Extraction Patterns"
+            Pattern1[Causal Relationship<br/>A causes B]
+            Pattern2[Analogical Relationship<br/>A is like B]
+            Pattern3[Integration Relationship<br/>A + B = C]
+            Pattern4[Structural Relationship<br/>A contains B]
         end
         
         Extract --> Pattern1
@@ -36,13 +36,13 @@ flowchart TD
     %% Quality Assessment
     subgraph "📊 Quality Assessment"
         direction TB
-        Evaluate[品質評価エンジン]
+        Evaluate[Quality Assessment Engine]
         
-        subgraph "評価基準"
-            Conf[信頼度<br/>0.0-1.0]
-            Novel[新規性<br/>0.0-1.0]
-            Coher[一貫性<br/>0.0-1.0]
-            Spec[具体性<br/>0.0-1.0]
+        subgraph "Evaluation Criteria"
+            Conf[Confidence<br/>0.0-1.0]
+            Novel[Novelty<br/>0.0-1.0]
+            Coher[Coherence<br/>0.0-1.0]
+            Spec[Specificity<br/>0.0-1.0]
         end
         
         Evaluate --> Conf
@@ -50,7 +50,7 @@ flowchart TD
         Evaluate --> Coher
         Evaluate --> Spec
         
-        Score[総合スコア計算]
+        Score[Total Score Calculation]
         Conf --> Score
         Novel --> Score
         Coher --> Score
@@ -59,23 +59,23 @@ flowchart TD
     
     %% Registration Decision
     subgraph "✅ Registration Decision"
-        Filter{品質フィルタ<br/>スコア >= 0.6}
-        Accept[✅ 登録承認]
-        Reject[❌ 登録拒否]
+        Filter{Quality Filter<br/>Score >= 0.6}
+        Accept[✅ Registration Approved]
+        Reject[❌ Registration Rejected]
     end
     
     %% Storage & Indexing
     subgraph "💾 Storage & Indexing"
         direction TB
-        Store[データベース保存]
-        Index[インデックス作成]
+        Store[Database Storage]
+        Index[Index Creation]
         
-        subgraph "保存項目"
+        subgraph "Storage Items"
             ID[Insight ID]
-            Text[洞察テキスト]
-            Concepts[関連概念]
-            Meta[メタデータ]
-            Timestamp[タイムスタンプ]
+            Text[Insight Text]
+            Concepts[Related Concepts]
+            Meta[Metadata]
+            Timestamp[Timestamp]
         end
         
         Store --> ID
@@ -89,24 +89,24 @@ flowchart TD
     subgraph "🔄 Insight Utilization"
         direction TB
         
-        subgraph "検索・活用"
-            Search[概念検索]
-            Context_Build[コンテキスト構築]
-            Reasoning[推論支援]
+        subgraph "Search & Utilization"
+            Search[Concept Search]
+            Context_Build[Context Building]
+            Reasoning[Reasoning Support]
         end
         
-        subgraph "管理・最適化"
-            Validate[手動検証]
-            Update[品質更新]
-            Cleanup[低品質除去]
+        subgraph "Management & Optimization"
+            Validate[Manual Validation]
+            Update[Quality Update]
+            Cleanup[Low Quality Removal]
         end
     end
     
     %% Feedback Loop
     subgraph "🔄 Feedback Loop"
-        Learn[継続学習]
-        Improve[品質向上]
-        Adapt[適応的調整]
+        Learn[Continuous Learning]
+        Improve[Quality Improvement]
+        Adapt[Adaptive Adjustment]
     end
     
     %% Flow Connections
@@ -122,8 +122,8 @@ flowchart TD
     Pattern4 --> Evaluate
     
     Score --> Filter
-    Filter -->|スコア >= 0.6| Accept
-    Filter -->|スコア < 0.6| Reject
+    Filter -->|Score >= 0.6| Accept
+    Filter -->|Score < 0.6| Reject
     
     Accept --> Store
     Store --> Index
@@ -143,10 +143,10 @@ flowchart TD
     
     %% CLI Commands Integration
     subgraph "🖥️ CLI Commands"
-        CMD1[insights<br/>統計表示]
-        CMD2[insights-search<br/>概念検索]
-        CMD3[insights-validate<br/>手動検証]
-        CMD4[insights-cleanup<br/>品質管理]
+        CMD1[insights<br/>Display Statistics]
+        CMD2[insights-search<br/>Concept Search]
+        CMD3[insights-validate<br/>Manual Validation]
+        CMD4[insights-cleanup<br/>Quality Management]
     end
     
     Index --> CMD1
