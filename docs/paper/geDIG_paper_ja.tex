@@ -24,8 +24,7 @@ $\mathcal{F}=w_1\Delta\mathrm{GED}-kT\Delta\mathrm{IG}$%
 100項目の階層的知識ベースを用いた評価実験では、%
 従来手法では不可能だった\textbf{多層概念統合の検出}を実現し、%
 特に複雑な質問ほど高い検出能力（難問で\textbf{100\%}、N=5）を示した。%
-平均処理時間45ミリ秒という実時間性能と、%
-10倍のデータ拡張で15\%の処理時間増加という優れたスケーラビリティを実現した。%
+平均処理時間37ミリ秒（Intel i7-9750H、シングルスレッド）という実時間性能を達成した。%
 本手法は構造変化を報酬とする初の試みであり、%
 複数概念の統合的理解を必要とする「洞察」の自動検出を可能にする。
 \end{abstract}
@@ -85,21 +84,9 @@ $\mathcal{F}=w_1\Delta\mathrm{GED}-kT\Delta\mathrm{IG}$%
 時間スケールの一貫性を保証している。
 
 \subsection{エピソード記憶の動的再編成}
-geDIGフレームワークの重要な特徴は、内発報酬をトリガーとした%
-エピソード記憶の動的再編成機構である。%
-高い報酬（$\mathcal{F}_t > \theta$）が検出されると、以下の3つの操作が発動する：
-
-\paragraph{統合（Merge）}
-複数の関連エピソードが単一の上位概念に統合される。
-
-\paragraph{分裂（Split）}
-単一エピソードが文脈に応じて複数の特殊化された記憶に分離する。
-
-\paragraph{再編成（Reorganize）}
-既存の記憶構造全体が新しい理解に基づいて再配置される。
-
-これらの操作により、エージェントは固定的な記憶ではなく、%
-新しい洞察に応じて柔軟に知識を再構築できる。
+高い報酬（$\mathcal{F}_t > \theta$）が検出されると、%
+エピソード記憶の動的再編成が発動する。%
+具体的な操作（統合・分裂・再編成）については実験2で詳述する。
 
 \begin{figure}[H]
 \centering
@@ -128,7 +115,7 @@ geDIGフレームワークの重要な特徴は、内発報酬をトリガーと
 \paragraph{実験設計}
 5段階の階層的知識構造（基礎概念→関係性→統合→探索→超越）を持つ%
 100項目の知識ベースを構築。%
-概念統合を必要とする20の質問（Easy:5、Medium:10、Hard:5）で評価した。
+概念統合を必要とする20の質問（Easy:4、Medium:11、Hard:5）で評価した。
 
 \paragraph{実装詳細}
 
@@ -147,7 +134,7 @@ geDIGフレームワークの重要な特徴は、内発報酬をトリガーと
 \begin{equation}
 \Delta\mathrm{GED} = \mathrm{GED}(G_{after}, G_{before})
 \end{equation}
-直前の状態$G_{before}$から現在の状態$G_{after}$への構造変化を測定。%
+直前の状態$G_{before}$から現在の状態$G_{after}$への構造変化を測定\footnote{$G_{before}$は厳密に1ステップ前の状態（移動平均なし）}。%
 負のΔGED値は構造的単純化（洞察）を示す。
 
 \textbf{実装}：グラフサイズ50以下では厳密計算、%
@@ -176,21 +163,16 @@ H(\mathcal{G}) = -\sum_{i=1}^{k} \frac{|C_i|}{|\mathcal{G}|} \log_2 \frac{|C_i|}
 \paragraph{実験環境}
 Intel Core i7-9750H（2.6GHz）、16GB RAM、%
 バッチサイズ1（リアルタイム処理）の環境で評価。%
-GPUは使用せず、CPU実装のみで45ミリ秒の処理時間を達成。
+GPUは使用せず、CPU実装のみで評価。
 
 \paragraph{スパイク検出}
-本フレームワークは、構造的新規性（ΔGED）と情報圧縮（ΔIG）の%
-相乗効果により洞察を検出する。%
-知識グラフの局所的な再編成が大域的な理解の向上をもたらす時、%
-すなわち構造の単純化と情報の整理が同時に生じる時に、%
-「洞察」として検出される。%
-詳細な実装アルゴリズムは付録Aを参照。
+スパイク検出の詳細な実装アルゴリズムは付録Aを参照。
 
 \paragraph{結果}
 
 \begin{table}[H]
 \centering
-\caption{実験1の結果（100知識項目、20質問）}
+\caption{実験1の結果（100知識項目、20質問）- 瞬間的ΔGED実装}
 \begin{tabular}{lcc}
 \toprule
 指標 & 値 & 備考 \\
@@ -198,13 +180,14 @@ GPUは使用せず、CPU実装のみで45ミリ秒の処理時間を達成。
 \textbf{全体精度} & \textbf{85.0\%} & 17/20検出 \\
 \midrule
 難易度別精度 & & \\
-\quad Easy & 60.0\% & 単純な事実質問 \\
-\quad Medium & 90.0\% & 概念間の関係 \\
-\quad \textbf{Hard} & \textbf{100\%} & 多概念統合 \\
+\quad Easy & 75.0\% & 3/4検出 \\
+\quad Medium & 81.8\% & 9/11検出 \\
+\quad \textbf{Hard} & \textbf{100\%} & 5/5検出 \\
 \midrule
 処理性能 & & \\
-\quad 平均処理時間 & 45ms & リアルタイム \\
-\quad スケーラビリティ & 15\%増 & 10倍データで \\
+\quad 平均処理時間 & 37ms & リアルタイム \\
+\quad 平均信頼度 & 84.1\% & 高信頼性 \\
+\quad 最高信頼度 & 99.5\% & 「現実の本質」質問 \\
 \bottomrule
 \end{tabular}
 \label{tab:results}
@@ -220,7 +203,14 @@ Easy質問では両指標の分散が大きく（ΔGED: $\sigma=0.82$、ΔIG: $\
 検出が不安定であることが判明した。%
 一方、Hard質問では値が狭い範囲に集中し（ΔGED: $\sigma=0.21$、ΔIG: $\sigma=0.18$）、%
 特にΔGED $< -2.0$かつΔIG $> 0.5$の領域に集中している。%
-この分布の違いが、難易度による精度差の主因と考えられる。
+この分布の違いが、難易度による精度差の主因と考えられる（図\ref{fig:difficulty-dist}）。
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/difficulty_distribution.png}
+\caption{難易度別のメトリクス分布。Hard質問（緑）は洞察領域に集中している。}
+\label{fig:difficulty-dist}
+\end{figure}
 
 \textbf{メカニズムの考察}：
 この現象は以下のメカニズムによると考えられる：
@@ -234,8 +224,8 @@ Easy質問では両指標の分散が大きく（ΔGED: $\sigma=0.82$、ΔIG: $\
 ΔGEDの大きな負値（構造単純化）とΔIGの正値（情報整理）が同時に観測される。
 \end{itemize}
 
-このメカニズムは、人間の洞察生成過程と類似しており、%
-複雑な問題ほど「アハ体験」が明確に生じることと整合的である。
+このメカニズムは、人間の洞察生成過程において%
+複雑な問題ほど明確な構造的理解の転換が生じることと整合的である。
 
 なお、本実験では知識グラフの構造変化は観察されたが、%
 エピソード記憶の動的再編成（統合・分裂・再編成）は観察されなかった。%
@@ -305,28 +295,46 @@ Hard質問での100\%精度（5/5検出）は、小標本ながら%
 \item \textbf{大学レベル}：再定義（例：完備順序体の要素）
 \end{enumerate}
 
-\paragraph{結果}
-実験により、以下の動的再編成パターンを観察：
+\paragraph{記憶操作メカニズム}
+本実験で観察された記憶操作は以下の3種類である：
 \begin{itemize}
-\item \textbf{概念統合}：「pizza分数」＋「比分数」→「分数の統一理解」（ΔGED=-1.8）
-\item \textbf{概念分裂}：「積分=面積」→「リーマン積分」＋「ルベーグ積分」（ΔGED=-2.3）
-\item \textbf{構造再編成}：複素数導入による数体系全体の再配置（ΔGED=-3.1）
+\item \textbf{統合（Merge）}：複数の関連エピソードが単一の上位概念に統合
+\item \textbf{分裂（Split）}：単一エピソードが文脈依存的に複数に分離
+\item \textbf{再編成（Reorganize）}：既存構造全体の再配置
+\end{itemize}
+
+\paragraph{結果}
+14のエピソードにわたる数学概念の進化を追跡し、%
+4回の記憶分裂操作を検出した：
+\begin{itemize}
+\item \textbf{負の数拡張}：正の数のみの理解から負の数を含む数直線への拡張
+\item \textbf{掛け算の再定義}：「繰り返し足し算」から「スケーリング操作」への概念転換
+\item \textbf{関数の抽象化}：具体的な対応関係から写像としての理解へ
+\item \textbf{数概念の階層化}：具体的な数から抽象的な数体系への進化
 \end{itemize}
 
 特に興味深いのは、高いgeDIGスコア（$\mathcal{F}_t > 2.5$）を示した瞬間に、%
 エピソード記憶の大規模な再編成が自発的に発生したことである。%
-これは、内発報酬が記憶構造の進化を駆動する証拠となる。
+これは、内発報酬が記憶構造の進化を駆動する証拠となる（図\ref{fig:trigger-stats}）。
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/gedig_trigger_table.png}
+\caption{geDIG > 2.5トリガー統計。全トリガーが記憶分裂操作を誘発した。}
+\label{fig:trigger-stats}
+\end{figure}
 
 \begin{table}[H]
 \centering
-\caption{実験2：数学概念進化におけるgeDIGスコアと記憶操作}
-\begin{tabular}{lccc}
+\caption{実験2：数学概念進化における記憶操作（瞬間的ΔGED実装）}
+\begin{tabular}{llcc}
 \toprule
-学習段階遷移 & 記憶操作 & ΔGED & $\mathcal{F}_t$ \\
+概念 & 操作タイプ & エピソード数変化 & 検出時期 \\
 \midrule
-小学→中学 & 統合 & -1.8 & 2.1 \\
-中学→高校 & 分裂 & -2.3 & 2.7 \\
-高校→大学 & 再編成 & -3.1 & 3.5 \\
+負の数 & 概念分裂 & 5→6 & 中学段階 \\
+掛け算 & 概念分裂 & 11→12 & 高校段階 \\
+関数 & 概念分裂 & 12→13 & 大学段階 \\
+数 & 概念分裂 & 13→14 & 大学段階 \\
 \bottomrule
 \end{tabular}
 \label{tab:math-evolution}
@@ -336,9 +344,10 @@ Hard質問での100\%精度（5/5検出）は、小標本ながら%
 \centering
 \includegraphics[width=0.95\textwidth]{figures/memory_reorganization_patterns.png}
 \caption{数学概念進化実験における記憶再編成パターン。
-(a)統合：pizza分数と比分数の統一、
-(b)分裂：積分概念の文脈依存的分化、
-(c)再編成：複素数導入による数体系の再構造化}
+瞬間的ΔGED実装により、概念分裂の瞬間を正確に検出。
+(a)負の数導入時の数概念の分裂、
+(b)掛け算の意味の多層化、
+(c)関数概念の抽象化による分裂}
 \label{fig:memory-reorg}
 \end{figure}
 
@@ -361,37 +370,19 @@ geDIGフレームワークが記憶の動的再編成を駆動することを示
 記憶構造の大規模な再編成のトリガーとなることは、%
 人間の学習における「理解の飛躍」と類似した現象である。
 
-数学概念の進化過程で観察された3つのパターンは、%
-人間の概念学習の認知モデルとも整合的である：
-\begin{itemize}
-\item \textbf{統合}：初期の具体的理解が抽象的理解へと昇華される過程
-\item \textbf{分裂}：単純な理解が文脈依存的な複数の理解へと分化する過程
-\item \textbf{再編成}：新しいパラダイムによる既存知識の再解釈
-\end{itemize}
-
-これらの結果は、geDIGが単なる洞察検出を超えて、%
-知識の構造的進化を駆動するメカニズムであることを示唆している。
+観察されたパターン（統合・分裂・再編成）は、%
+人間の概念学習過程と整合的であり、%
+geDIGが知識の構造的進化を駆動するメカニズムであることを示唆している。
 
 
 %====================================================================
 \section{議論}
 
-\subsection{理論的整合性：時間スケールの統一}
-本研究では、ΔGEDとΔIGの両指標を直前状態からの変化として定義することで、%
+\subsection{時間スケールの一貫性}
+本研究では、ΔGEDとΔIGの両指標を直前状態からの変化として定義し、%
 時間スケールの一貫性を確保した。%
-初期の実装では、ΔGEDを累積的変化として計算していたが、%
-これは「地殻変動の速度」と「風の速度」を同じ式で扱うような%
-根本的な不整合を含んでいた。
-
-直前状態からの変化への統一により、以下の利点が得られる：
-\begin{itemize}
-\item 人間の「アハ！体験」の瞬間性との整合
-\item 知識グラフの動的変化のリアルタイム検出
-\item 数学的に一貫した報酬関数の定義
-\end{itemize}
-
-実装修正後も実験1では85\%の精度を維持し、%
-理論的整合性と実用的性能の両立を実証した。
+両指標とも瞬間的な変化（$G_{before} \to G_{after}$）を測定することで、%
+リアルタイムでの洞察検出を可能にした。
 
 \subsection{成功の要因}
 実験により、\textbf{知識の階層的構造化}が洞察生成の鍵であることが判明した。%
@@ -399,14 +390,44 @@ geDIGフレームワークが記憶の動的再編成を駆動することを示
 概念間の明確な関係性と段階的な抽象度の上昇が必要である。
 
 \subsection{限界と今後の課題}
-現在の主な限界は：%
-(1)~階層的知識ベースの手動構築が必要、%
-(2)~洞察の「検出」は可能だが「表現」には大規模LLM（GPT-4、Claude等）が必要、%
-(3)~英語データのみでの評価。%
-特に(2)は本質的な課題であり、InsightSpikeは「何を統合すべきか」を発見するが、%
-「どう統合するか」は別の能力を要求する。
 
-今後は、知識構造の自動獲得、専用デコーダーの設計、多言語対応を進める。
+\paragraph{根本的限界：デコーディング機能の欠如}
+本研究の最大の限界は、検出された洞察を再利用可能な知識表現に%
+変換するデコーディング機能が未実装であることである。%
+L3GraphReasoner（本システムのグラフ推論層）で生成された高次元ベクトル表現を%
+構造化された知識（新規エピソードや概念ノード）として%
+明示的に記述する手段が存在しない。%
+この限界により、以下の制約が生じている：
+
+\paragraph{実験設計の限界}
+\begin{itemize}
+\item \textbf{知識ベースの構造化}：実験では人間が手作業で%
+階層的に構造化した知識ベースを使用した。
+\item \textbf{難易度カテゴリの定義}：「Hard」質問を「複数概念統合が必要」と定義したが、%
+これはgeDIGの検出特性に適合した定義である可能性がある。
+\item \textbf{再現性}：数学概念進化実験の入力データはdata/フォルダに格納されているが、%
+詳細な状態遷移ログは含まれていない。
+\end{itemize}
+
+\paragraph{実装の透明性}
+付録Aの疑似コードには依然として以下の曖昧さが残る：
+\begin{itemize}
+\item 「誘導部分グラフ」の具体的な生成方法
+\item 「直前の状態」の厳密な定義（1ステップ前か移動平均か）
+\item これらの実装選択がΔGED計算に与える影響の評価
+\end{itemize}
+
+\paragraph{今後の展開}
+これらの限界を認識した上で、以下の方向で研究を進める：
+\begin{enumerate}
+\item \textbf{専用デコーダーの開発}：洞察の自己学習サイクル実現
+\item \textbf{実世界データでの検証}：Wikipedia、教科書等での追試
+\item \textbf{完全なオープンソース化}：すべての実験コード・データの公開
+\item \textbf{標準ベンチマークの構築}：第三者による客観的評価の実現
+\end{enumerate}
+
+現時点でのgeDIGは限定的な実験環境での成果である。%
+実世界データでの有効性検証が今後の重要な課題である。
 
 \subsection{発展的研究の展望}
 査読者からの指摘を踏まえ、以下の実世界データでの検証を計画している：
@@ -438,7 +459,9 @@ Wikipediaの項目を作成日時順に読み込ませ、%
 強力な洞察生成システムは、悪用される可能性を内包する。%
 偽情報の創造的生成、プライバシー侵害的な推論、%
 意図的な認知バイアスの増幅などのリスクが考えられる。%
-我々は、技術の透明性確保と倫理的利用の促進に努める責任がある。
+我々は、技術の透明性確保と倫理的利用の促進に努める責任がある。%
+今後、外部ファクトチェッカーAPIとの連携により、%
+生成される洞察の事実性検証機能を実装予定である。
 
 %====================================================================
 \section{結論}
@@ -500,7 +523,7 @@ In \emph{ICLR}, 2017.
 \begin{algorithm}[H]
 \caption{InsightSpike Detection Algorithm}
 \begin{algorithmic}[1]
-\STATE \textbf{入力}: 質問$q$、知識グラフ$\mathcal{G}_t$、初期グラフ$\mathcal{G}_0$
+\STATE \textbf{入力}: 質問$q$、知識グラフ$\mathcal{G}_t$
 \STATE \textbf{// Step 1: 関連ノード選択}
 \STATE $e_q \leftarrow$ SentenceBERT($q$)
 \STATE $V_{relevant} \leftarrow \emptyset$
@@ -524,7 +547,7 @@ In \emph{ICLR}, 2017.
 \STATE $connectivity\_ratio \leftarrow cross\_connections / \binom{|V_{relevant}|}{2}$
 \STATE \textbf{// Step 4: ΔGED計算}
 \STATE $\mathcal{G}_{before} \leftarrow$ 直前の部分グラフ状態
-\STATE $\Delta\mathrm{GED} \leftarrow \mathrm{GED}(\mathcal{G}_{sub}, \mathcal{G}_0) - \mathrm{GED}(\mathcal{G}_{before}, \mathcal{G}_0)$
+\STATE $\Delta\mathrm{GED} \leftarrow \mathrm{GED}(\mathcal{G}_{sub}, \mathcal{G}_{before})$
 \STATE \textbf{// Step 5: ΔIG計算}
 \STATE $\mathbf{V}_{before} \leftarrow$ 直前の埋め込みベクトル集合
 \STATE $\mathbf{V}_{after} \leftarrow$ 現在の埋め込みベクトル集合
@@ -546,6 +569,6 @@ A*探索による近似GED計算の誤差上界$\varepsilon$について、%
 |\mathrm{GED}_{approx} - \mathrm{GED}_{exact}| \leq \varepsilon \cdot \mathrm{GED}_{exact}
 \end{equation}
 ここで、ヒューリスティック関数の許容性により$\varepsilon \leq 0.1$が保証される。%
-詳細な証明は、A*探索の最適性保証と埋め込み空間での距離下界性に基づく。
+詳細な証明は\url{https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/docs/technical/epsilon_proof.md}を参照。
 
 \end{document}

@@ -84,7 +84,15 @@ class ComprehensiveGEDIG:
         return float(np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2)))
     
     def detect_spike(self, question: str) -> Dict[str, Any]:
-        """Detect insight spike based on graph structure analysis"""
+        """Detect insight spike based on graph structure analysis
+        
+        TRANSPARENCY NOTE - Algorithm Implementation Details:
+        1. Node Selection: cosine similarity > 0.3 (empirically chosen)
+        2. Top-N Selection: exactly 10 nodes (not adaptive)
+        3. Induced Subgraph: includes ALL existing edges between selected nodes
+        4. No filtering or pruning of edges is performed
+        5. This implementation may favor densely connected regions
+        """
         # Get question embedding
         q_embedding = self.model.encode(question, convert_to_numpy=True)
         

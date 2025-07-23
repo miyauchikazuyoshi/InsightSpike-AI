@@ -232,6 +232,12 @@ class GraphEditDistance:
         This measures the direct structural change from the previous state,
         maintaining temporal consistency with ΔIG calculation.
 
+        TRANSPARENCY NOTE:
+        - "Previous state" means exactly 1 step before (no moving average)
+        - GED calculation uses NetworkX's graph_edit_distance with timeout=1.0s
+        - For graphs > 50 nodes, we use structural features approximation
+        - Negative values indicate structural simplification (fewer nodes/edges)
+
         Args:
             graph_before: Previous graph state
             graph_after: Current graph state

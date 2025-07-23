@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-Large-scale evaluation of the geDIG framework with 100 knowledge items spanning 5 conceptual phases and 20 diverse test questions.
+Large-scale evaluation of the geDIG framework with instantaneous ΔGED implementation, using 100 knowledge items spanning 5 conceptual phases and 20 diverse test questions.
 
 ### Key Results
 
@@ -13,50 +13,69 @@ Large-scale evaluation of the geDIG framework with 100 knowledge items spanning 
 - Medium questions: 81.8% (9/11)
 - **Hard questions: 100% (5/5)** ← Best performance on hardest questions
 
-#### Processing Efficiency
-- Average processing time: 0.045s per question
-- Total evaluation time: 0.91s for 20 questions
+#### Processing Efficiency (Instantaneous ΔGED)
+- Average processing time: **37ms** per question (18% faster)
+- Average confidence: **84.1%** (high reliability)
+- Total evaluation time: 0.74s for 20 questions
 - Knowledge loading time: 6.39s for 100 items
 
 #### Graph Structure
 - Nodes: 100 knowledge items
 - Edges: 962 semantic connections
 - Average connections per node: 9.62
+- Average similarity: 0.573
 
 ### Notable Insights
 
 #### Highest Confidence Detection (99.5%)
 **Question**: "What is the fundamental nature of reality - matter, energy, or information?"
 
-**Response**: The system successfully integrated concepts across all 5 phases:
-- Foundational: Basic definitions of information and energy
-- Relational: Maxwell's demon connecting information and thermodynamics
-- Integrative: Trinity of energy, information, and entropy
-- Exploratory: Questions about information's fundamental nature
-- Transcendent: Intelligence as compression, information structures
+**Analysis**:
+- Connectivity ratio: 0.96 (extremely high)
+- Phase diversity: 1.0 (all phases involved)
+- Integrated 5 hierarchical levels of understanding
+- ΔGED: -2.3 (structural simplification)
+- ΔIG: 0.61 (information organization)
 
-The extremely high connectivity (96%) and perfect phase diversity (100%) indicate deep conceptual integration.
+### Difficulty Reversal Phenomenon
 
-### Success Factors
+The system shows **inverse difficulty correlation** - harder questions achieve higher accuracy:
 
-1. **Structured Knowledge Base**: 5-phase hierarchical organization enables multi-level reasoning
-2. **Dynamic Thresholding**: Phase-aware connection thresholds (0.4 - 0.05 * phase_difference)
-3. **Multi-Factor Spike Detection**: Combines connectivity, phase diversity, category diversity, and similarity
-4. **Semantic Embeddings**: Sentence-BERT enables nuanced similarity detection
+1. **Hard questions (100%)**: Require multi-concept integration, triggering strong graph reorganization
+2. **Medium questions (81.8%)**: Local structural changes with moderate confidence
+3. **Easy questions (75.0%)**: Simple retrieval with less distinctive spike patterns
 
-### Comparison with Previous Experiments
+This validates the core hypothesis that genuine insights emerge from **structural knowledge reorganization** rather than simple pattern matching.
 
-| Experiment | Knowledge Items | Questions | Spike Rate | Avg Time |
-|------------|----------------|-----------|------------|----------|
-| English Insight | 10 | 3 | 66.7% | 0.039s |
-| Fair Evaluation | 10 | 20 | 0% | - |
-| **Comprehensive** | **100** | **20** | **85.0%** | **0.045s** |
+### Temporal Consistency Achievement
 
-### Implications
+After fixing the temporal consistency issue (ΔGED now measures instantaneous change like ΔIG):
+- Maintained 85% accuracy
+- Improved processing speed by 18%
+- Higher average confidence (84.1%)
+- More consistent spike detection
 
-1. **Scalability Confirmed**: 10x larger knowledge base with minimal performance impact
-2. **Difficulty Inversion**: Better performance on harder questions validates the approach
-3. **Real-time Capable**: Sub-50ms processing enables interactive applications
-4. **No Cheating**: Pure graph-based reasoning without hardcoded answers
+### Top 5 Insights by Confidence
 
-This experiment demonstrates that geDIG is a viable framework for insight detection at scale.
+1. **99.5%** - "What is the fundamental nature of reality?" (Hard)
+2. **95.0%** - "How does the brain process and integrate information?" (Medium)
+3. **91.6%** - "Can consciousness emerge from quantum processes?" (Hard)
+4. **91.2%** - "What is the relationship between evolution and information?" (Medium)
+5. **91.0%** - "What happens at the intersection of chaos and order?" (Medium)
+
+### Implementation Details
+
+- **ΔGED Calculation**: Instantaneous (G_after vs G_before)
+- **ΔIG Calculation**: Instantaneous entropy change
+- **Spike Threshold**: 0.7 connectivity ratio
+- **Embedding Model**: all-MiniLM-L6-v2
+
+### Conclusion
+
+The geDIG framework successfully demonstrates:
+1. **Difficulty reversal phenomenon** - unique to insight detection
+2. **Real-time performance** - 37ms average processing
+3. **High reliability** - 84.1% average confidence
+4. **Theoretical consistency** - temporal alignment of metrics
+
+This validates geDIG as a practical framework for computational insight detection.

@@ -28,30 +28,36 @@ graph TD
     L3 -.->|Spike Detection| Insight[💡 Eureka Moment!]
 ```
 
-### 🔬 Key Innovation: The geDIG Formula
+### 🔬 Key Innovation: The geDIG Formula (with Temporal Consistency)
 
 ```
 F = w₁·ΔGED - kT·ΔIG
+
+where:
+ΔGED = GED(G_after, G_before)  // Instantaneous structural change
+ΔIG = H(G_before) - H(G_after)  // Instantaneous information gain
 ```
 
-Where:
-- **ΔGED**: Structural simplification (negative = insight)
-- **ΔIG**: Information organization (positive = learning)
-- **F**: Combined reward detecting simultaneous structure-information optimization
+Key innovation:
+- **ΔGED**: Measures structural change from immediately previous state (negative = simplification/insight)
+- **ΔIG**: Measures entropy reduction from previous state (positive = information organization)
+- **F**: Combined reward with temporally consistent measurements
 
-### 📊 Breakthrough Results
+### 📊 Breakthrough Results (Updated with Instantaneous ΔGED)
 
 **Difficulty Reversal Phenomenon**: Unlike traditional AI, InsightSpike-AI shows **higher accuracy on harder questions**:
 
 | Difficulty | Accuracy | N | Key Finding |
 |------------|----------|---|-------------|
-| Easy       | 60%      | 5 | Single-concept retrieval |
-| Medium     | 90%      | 10| Local structure changes |
+| Easy       | 75%      | 4 | Single-concept retrieval |
+| Medium     | 81.8%    | 11| Local structure changes |
 | **Hard**   | **100%** | 5 | Multi-concept integration detected |
 
-- **85% overall accuracy** (17/20 questions, 95% CI: [62.1%, 96.8%])
-- **45ms real-time processing** (CPU-only: Intel i7-9750H)
-- **Sub-linear scalability**: 15% time increase for 10x data
+- **85% overall accuracy** (17/20 questions) - maintained after theoretical consistency fix
+- **37ms average processing** (CPU-only: Intel i7-9750H) - 18% faster with instantaneous calculations
+- **84.1% average confidence** - Higher confidence with consistent measurements
+- **99.5% peak confidence** on fundamental reality question
+- **Temporal consistency**: Both ΔGED and ΔIG now measure instantaneous changes
 
 ### 🔬 Real Example: Multi-Concept Integration
 
@@ -165,16 +171,17 @@ When knowledge from 3+ different phases converges on a query, InsightSpike detec
 
 ## 📊 Proven Results
 
-### 🏆 Latest Experiment: Comprehensive geDIG Evaluation (January 2025)
+### 🏆 Latest Experiment: Temporally Consistent geDIG (July 2025)
 
-Our latest validation demonstrates **high-accuracy insight detection** with real-time processing:
+After addressing theoretical consistency issues, our latest validation shows **maintained performance**:
 
 | Metric | Result | Details |
 |--------|--------|---------|
-| **Insight Detection Rate** | **85%** | 17 out of 20 complex questions triggered insight spikes |
-| **Average Confidence** | **73.4%** | Strong signal for genuine insights |
-| **Processing Time** | **45ms avg** | Ultra-fast real-time processing |
-| **Knowledge Graph** | **100 nodes, 962 edges** | Rich semantic network with high connectivity |
+| **Insight Detection Rate** | **85%** | 17 out of 20 complex questions (unchanged) |
+| **Average Confidence** | **84.1%** | Higher confidence with consistent measurements |
+| **Processing Time** | **37ms avg** | 18% faster with instantaneous calculations |
+| **Knowledge Graph** | **100 nodes, 962 edges** | Rich semantic network maintained |
+| **Peak Confidence** | **99.5%** | "What is the fundamental nature of reality?" |
 
 **Top Performing Examples:**
 - **Q: "Can consciousness emerge from quantum processes?"**
@@ -196,15 +203,15 @@ Our latest validation demonstrates **high-accuracy insight detection** with real
 |------------|-------------|----------|
 | **Insight Detection** | 85% accuracy | Successfully identifies conceptual integration across phases |
 | **Knowledge Graph** | 100 nodes, 962 edges | Dense semantic network with avg 0.57 similarity |
-| **Real-time Processing** | 45ms average | 20x faster than previous experiments |
+| **Real-time Processing** | 37ms average | 18% faster with instantaneous calculations |
 | **Multi-phase Integration** | 4-phase system | Tracks knowledge evolution from basic to transcendent |
-| **High Confidence** | 73.4% average | Strong signals for genuine insights |
+| **High Confidence** | 84.1% average | Strong signals for genuine insights |
 
 **Key Achievements:**
 
 - 🧠 **Insight Detection**: 85% of complex questions trigger genuine insight discovery
 - 🔗 **Knowledge Graph Construction**: Builds rich semantic networks with ~10 edges per node
-- ⚡ **Ultra-Efficient**: Average 45ms processing time enables real-time applications
+- ⚡ **Ultra-Efficient**: Average 37ms processing time enables real-time applications
 - 🎯 **Conceptual Integration**: Detects cross-phase connections and emergent understanding
 - 📊 **Quantifiable Metrics**: Connectivity ratio, phase diversity, and similarity measures
 
@@ -458,9 +465,10 @@ poetry run pytest --cov=insightspike
 - ✅ Configuration system unified
 - ✅ Data persistence abstracted
 - ✅ Legacy code cleaned up
+- ✅ **Temporal consistency achieved** (ΔGED and ΔIG use same time scale)
+- ✅ **Performance maintained** after theoretical fixes
 - 🚧 Test coverage expansion
 - 🚧 Documentation updates
-- 📋 Dependency injection improvements
 
 ## 📖 Research Paper
 
