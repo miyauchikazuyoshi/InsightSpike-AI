@@ -138,25 +138,16 @@ class TestEpisodeStorage:
             mock_instance.model = mock_model
             mock_embedder.return_value = mock_instance
 
-            # Also mock FAISS
-            with patch(
-                "insightspike.implementations.layers.layer2_memory_manager.faiss"
-            ) as mock_faiss:
-                # Mock FAISS index
-                mock_index = Mock()
-                mock_index.d = 384
-                mock_index.ntotal = 0
-                mock_index.add = Mock()
-                mock_index.search = Mock(return_value=(np.array([[0.9]]), np.array([[0]])))
-                mock_faiss.IndexFlatL2.return_value = mock_index
-                mock_faiss.IndexIDMap.return_value = mock_index
+            # Don't mock FAISS - let it use real implementation
+            # The issue is that mocking faiss.IndexFlatL2 causes problems
+            # when the actual code tries to create an index with the dimension
 
-                manager = L2MemoryManager(config)
-                # Mock embedding method
-                manager._get_embedding = Mock(
-                    side_effect=lambda text: np.random.randn(384).astype(np.float32)
-                )
-                return manager
+            manager = L2MemoryManager(config)
+            # Mock embedding method
+            manager._get_embedding = Mock(
+                side_effect=lambda text: np.random.randn(384).astype(np.float32)
+            )
+            return manager
 
     def test_store_episode_basic(self, memory_manager):
         """Test basic episode storage."""
@@ -222,20 +213,7 @@ class TestEpisodeSearch:
             mock_instance.model = mock_model
             mock_embedder.return_value = mock_instance
 
-            # Also mock FAISS
-            with patch(
-                "insightspike.implementations.layers.layer2_memory_manager.faiss"
-            ) as mock_faiss:
-                # Mock FAISS index
-                mock_index = Mock()
-                mock_index.d = 384
-                mock_index.ntotal = 0
-                mock_index.add = Mock()
-                mock_index.search = Mock(return_value=(np.array([[0.9]]), np.array([[0]])))
-                mock_faiss.IndexFlatL2.return_value = mock_index
-                mock_faiss.IndexIDMap.return_value = mock_index
-
-                manager = L2MemoryManager(config)
+            manager = L2MemoryManager(config)
 
             # Add test episodes
             test_episodes = [
@@ -305,40 +283,26 @@ class TestEpisodeSearch:
             mock_instance.model = mock_model
             mock_embedder.return_value = mock_instance
 
-            # Also mock FAISS
-            with patch(
-                "insightspike.implementations.layers.layer2_memory_manager.faiss"
-            ) as mock_faiss:
-                # Mock FAISS index
-                mock_index = Mock()
-                mock_index.d = 384
-                mock_index.ntotal = 0
-                mock_index.add = Mock()
-                mock_index.search = Mock(return_value=(np.array([[0.9]]), np.array([[0]])))
-                mock_faiss.IndexFlatL2.return_value = mock_index
-                mock_faiss.IndexIDMap.return_value = mock_index
+            manager = L2MemoryManager(config)
 
-                manager = L2MemoryManager(config)
+            # Add episode with importance metadata
+            vec = np.random.randn(384).astype(np.float32)
+            episode = Episode(
+                text="Test episode",
+                vec=vec,
+                c=1.0,  # C-value ignored in graph-centric mode
+                metadata={"importance": 0.8},
+            )
+            manager.episodes.append(episode)
+            manager._rebuild_index()
 
-                # Add episode with importance metadata
-                vec = np.random.randn(384).astype(np.float32)
-                episode = Episode(
-                    text="Test episode",
-                    vec=vec,
-                    c=1.0,  # C-value ignored in graph-centric mode
-                    metadata={"importance": 0.8},
-                )
-                manager.episodes.append(episode)
-                manager._rebuild_index()
+            # Mock embedding for search
+            manager._get_embedding = Mock(return_value=vec)
 
-                # Mock search
-                manager._get_embedding = Mock(return_value=vec)
-                manager._search_index = Mock(return_value=(np.array([0.1]), np.array([0])))
-
-                results = manager.search_episodes("test", k=1)
-                assert len(results) == 1
-                # Relevance should use importance, not c-value
-                assert results[0]["relevance"] > 0
+            results = manager.search_episodes("test", k=1)
+            assert len(results) == 1
+            # Relevance should use importance, not c-value
+            assert results[0]["relevance"] > 0
 
 
 class TestEpisodeAging:
@@ -618,33 +582,20 @@ class TestSizeLimitEnforcement:
             mock_instance.model = mock_model
             mock_embedder.return_value = mock_instance
 
-            # Also mock FAISS
-            with patch(
-                "insightspike.implementations.layers.layer2_memory_manager.faiss"
-            ) as mock_faiss:
-                # Mock FAISS index
-                mock_index = Mock()
-                mock_index.d = 384
-                mock_index.ntotal = 0
-                mock_index.add = Mock()
-                mock_index.search = Mock(return_value=(np.array([[0.9]]), np.array([[0]])))
-                mock_faiss.IndexFlatL2.return_value = mock_index
-                mock_faiss.IndexIDMap.return_value = mock_index
+            manager = L2MemoryManager(config)
+            manager._get_embedding = Mock(
+                side_effect=lambda text: np.random.randn(384).astype(np.float32)
+            )
 
-                manager = L2MemoryManager(config)
-                manager._get_embedding = Mock(
-                    side_effect=lambda text: np.random.randn(384).astype(np.float32)
-                )
+            # Mock age_episodes to track calls
+            manager.age_episodes = Mock(return_value=0)
 
-                # Mock age_episodes to track calls
-                manager.age_episodes = Mock(return_value=0)
+            # Add 150 episodes (should trigger aging at 100)
+            for i in range(150):
+                manager.store_episode(f"Episode {i}")
 
-                # Add 150 episodes (should trigger aging at 100)
-                for i in range(150):
-                    manager.store_episode(f"Episode {i}")
-
-                # Check that aging was called
-                assert manager.age_episodes.called
+            # Check that aging was called
+            assert manager.age_episodes.called
 
 
 class TestMemoryStats:
