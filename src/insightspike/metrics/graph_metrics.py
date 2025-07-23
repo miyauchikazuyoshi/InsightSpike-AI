@@ -32,15 +32,19 @@ def delta_ged(g_old: nx.Graph, g_new: nx.Graph) -> float:
     This is a wrapper around the full GED implementation in algorithms.
     For advanced features, use GraphEditDistance directly.
 
-    NOTE: This now uses the proper ΔGED calculation that maintains
-    a reference graph for correct insight detection.
+    NOTE: This now uses instantaneous ΔGED calculation (new - old)
+    for temporal consistency with ΔIG.
     """
     if not _ALGORITHMS_AVAILABLE:
         # Fallback to simple NetworkX implementation
         ged = nx.graph_edit_distance(g_old, g_new, timeout=1.0)
+        # Make negative if graph simplified (fewer nodes/edges)
+        if g_new.number_of_nodes() < g_old.number_of_nodes() or \
+           g_new.number_of_edges() < g_old.number_of_edges():
+            return -float(ged) if ged is not None else 0.0
         return float(ged) if ged is not None else 0.0
 
-    # Use the global GED calculator with state tracking
+    # Use the global GED calculator with instantaneous calculation
     calculator = get_global_ged_calculator()
     return calculator.compute_delta_ged(g_old, g_new)
 

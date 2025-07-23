@@ -224,46 +224,49 @@ class GraphEditDistance:
         self, graph_before: Any, graph_after: Any, reference_graph: Optional[Any] = None
     ) -> float:
         """
-        Compute ΔGED for insight detection using proper formula.
+        Compute ΔGED for insight detection using instantaneous formula.
 
         Mathematical Definition:
-            ΔGED = GED(graph_after, initial) - GED(graph_before, initial)
+            ΔGED = GED(graph_after, graph_before)
 
-        Where initial is either:
-            - The provided reference_graph
-            - The first graph in the sequence (maintained internally)
+        This measures the direct structural change from the previous state,
+        maintaining temporal consistency with ΔIG calculation.
 
         Args:
             graph_before: Previous graph state
             graph_after: Current graph state
-            reference_graph: Optional reference for comparison
+            reference_graph: Deprecated parameter (kept for compatibility)
 
         Returns:
             float: ΔGED value (negative indicates simplification/insight)
         """
-        # Set or use reference graph
         if reference_graph is not None:
-            self.initial_graph = reference_graph
-        elif self.initial_graph is None:
-            # First call - use graph_before as initial
-            self.initial_graph = graph_before
-            self.previous_graph = graph_before
-            return 0.0  # No change on first call
+            logger.warning(
+                "reference_graph parameter is deprecated. "
+                "ΔGED now uses instantaneous calculation."
+            )
 
-        # Calculate GED from both states to initial
-        ged_before = self.calculate(graph_before, self.initial_graph).ged_value
-        ged_after = self.calculate(graph_after, self.initial_graph).ged_value
+        # Direct calculation: how much did the graph change from before to after
+        result = self.calculate(graph_after, graph_before)
+        delta_ged = result.ged_value
 
-        # ΔGED = GED(current, initial) - GED(previous, initial)
-        delta_ged = ged_after - ged_before
+        # Important: GED(A, B) measures distance, so if the graph became simpler,
+        # we need to check if after has fewer nodes/edges than before
+        # In that case, the GED might be positive but represents simplification
+        nodes_before = len(graph_before.nodes()) if hasattr(graph_before, 'nodes') else 0
+        nodes_after = len(graph_after.nodes()) if hasattr(graph_after, 'nodes') else 0
+        edges_before = len(graph_before.edges()) if hasattr(graph_before, 'edges') else 0
+        edges_after = len(graph_after.edges()) if hasattr(graph_after, 'edges') else 0
+
+        # If the graph got smaller (simplification), make ΔGED negative
+        if nodes_after < nodes_before or edges_after < edges_before:
+            delta_ged = -abs(delta_ged)
 
         logger.debug(
-            f"ΔGED calculated: after→initial={ged_after:.3f}, "
-            f"before→initial={ged_before:.3f}, ΔGED={delta_ged:.3f}"
+            f"ΔGED calculated: GED(after, before)={result.ged_value:.3f}, "
+            f"nodes: {nodes_before}→{nodes_after}, edges: {edges_before}→{edges_after}, "
+            f"ΔGED={delta_ged:.3f}"
         )
-
-        # Update state
-        self.previous_graph = graph_after
 
         return delta_ged
 
