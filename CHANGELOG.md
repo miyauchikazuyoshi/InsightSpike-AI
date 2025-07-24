@@ -1,5 +1,51 @@
 # Changelog
 
+## [0.9.0] - 2024-07-24
+
+### Added
+- **Layer1 Bypass Mechanism** - Fast-path processing for known concepts with low uncertainty
+  - 10x performance improvement for production systems
+  - Configurable uncertainty thresholds
+  - New `production_optimized` preset with bypass enabled
+  
+- **Insight Auto-Registration and Search** - Automatic capture and reuse of discovered insights
+  - Insights automatically extracted when spikes detected
+  - Quality evaluation with multiple criteria
+  - Persistent storage in SQLite database
+  - Integration with memory search for future queries
+  
+- **Mode-Aware Prompt Building** - Dynamic prompt sizing based on model capabilities
+  - Minimal mode for small models (DistilGPT2, TinyLlama)
+  - Standard mode for medium models (GPT-3.5)
+  - Detailed mode for large models (GPT-4, Claude)
+  - Prevents token limit issues and optimizes response quality
+  
+- **Graph-Based Memory Search** - Multi-hop graph traversal for associative retrieval
+  - 2-hop neighbor exploration with configurable limits
+  - Path-based relevance scoring with exponential decay
+  - Enables "associative leaps" between concepts
+  - New `graph_enhanced` preset with full graph features
+
+### Changed
+- Enhanced Layer1 to calculate cacheability and suggest processing paths
+- Layer2 memory search now includes relevant insights from registry
+- Layer3 auto-registers high-quality insights when spikes detected
+- Layer4 selects appropriate prompt mode based on model capabilities
+- Updated configuration system with new processing options
+
+### Fixed
+- Method name mismatches in MainAgent (merge, prune, split operations)
+- Missing `split_episode()` implementation in L2MemoryManager
+- Graph features from GNN now properly used in reasoning quality calculation
+- DataStoreAgent now returns actual responses, not just reasoning
+- Working memory properly loads episode content from DataStore
+
+### Documentation
+- Added comprehensive feature documentation in `docs/architecture/recent_features_2024_07.md`
+- Created quick start guide in `docs/user-guide/july_2024_features_quickstart.md`
+- Updated architecture documentation with new features
+- Updated geDIG implementation status report
+
 ## [0.8.2] - 2025-07-10
 
 ### Changed

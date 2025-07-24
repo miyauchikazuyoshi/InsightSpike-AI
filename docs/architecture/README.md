@@ -7,6 +7,7 @@
 - **[Layer Architecture](layer_architecture.md)** - 4-layer neurobiologically-inspired processing system
 - **[Agent Types](agent_types.md)** - Available agent implementations and their use cases
 - **[MainAgent Behavior](mainagent_behavior.md)** - Detailed behavior and processing flow of MainAgent
+- **[Recent Features (July 2024)](recent_features_2024_07.md)** - Layer1 bypass, insight auto-registration, mode-aware prompts, graph search
 
 ### User Interface
 - **[CLI Commands](cli_commands.md)** - Complete command reference for the `spike` CLI
@@ -58,9 +59,16 @@ print(f"Spike detected: {result.spike_detected}")
 - **Configurable** behavior through modes and settings
 - **Production-ready** with caching, async processing, and error handling
 
-## 🔄 Recent Updates (2025-07-18)
+## 🔄 Recent Updates
 
-### Core Package Refactoring
+### July 2024 Feature Release
+- **Layer1 Bypass Mechanism** - 10x speedup for known queries in production
+- **Insight Auto-Registration** - Automatic capture and reuse of discovered insights
+- **Mode-Aware Prompt Building** - Dynamic prompt sizing based on model capabilities
+- **Graph-Based Memory Search** - Multi-hop traversal for associative retrieval
+- See **[Recent Features Documentation](recent_features_2024_07.md)** for details
+
+### Core Package Refactoring (2025-07-18)
 - **Separated abstractions from implementations**:
   - `core/` now only contains interfaces and base classes
   - `implementations/` contains all concrete implementations

@@ -85,7 +85,19 @@ class ErrorMonitor(L1ErrorMonitorInterface):
                 state_uncertainty = self._analyze_state_uncertainty(previous_state)
                 uncertainty_score = (uncertainty_score + state_uncertainty) / 2
 
+            # Calculate if this query is cacheable (low uncertainty, mostly known)
+            known_ratio = len(analysis.known_elements) / max(
+                1, len(analysis.known_elements) + len(analysis.unknown_elements)
+            )
+            is_cacheable = (
+                uncertainty_score < 0.2 
+                and known_ratio > 0.9 
+                and not analysis.requires_synthesis
+                and not self._contains_complex_operators(question)
+            )
+            
             return {
+                "uncertainty": uncertainty_score,  # Renamed for compatibility
                 "uncertainty_score": uncertainty_score,
                 "error_threshold": analysis.error_threshold,
                 "analysis_confidence": analysis.analysis_confidence,
@@ -93,11 +105,15 @@ class ErrorMonitor(L1ErrorMonitorInterface):
                 "known_elements": analysis.known_elements,
                 "unknown_elements": analysis.unknown_elements,
                 "certainty_scores": analysis.certainty_scores,
+                "is_cacheable": is_cacheable,
+                "known_ratio": known_ratio,
+                "suggested_path": "bypass" if is_cacheable else "full",
             }
 
         except Exception as e:
             # Fallback to simple uncertainty calculation
             return {
+                "uncertainty": 0.5,  # Renamed for compatibility
                 "uncertainty_score": 0.5,
                 "error_threshold": 0.3,
                 "analysis_confidence": 0.6,
@@ -105,8 +121,25 @@ class ErrorMonitor(L1ErrorMonitorInterface):
                 "known_elements": [],
                 "unknown_elements": [question],
                 "certainty_scores": {},
+                "is_cacheable": False,
+                "known_ratio": 0.0,
+                "suggested_path": "full",
             }
 
+    def _contains_complex_operators(self, question: str) -> bool:
+        """Check if the question contains complex logical operators"""
+        complex_patterns = [
+            r"\b(and|or|not|if|then|unless|except|but)\b",
+            r"\b(compare|contrast|analyze|evaluate|synthesize)\b",
+            r"\b(relationship|correlation|causation|impact)\b",
+        ]
+        
+        question_lower = question.lower()
+        for pattern in complex_patterns:
+            if re.search(pattern, question_lower):
+                return True
+        return False
+    
     def _analyze_state_uncertainty(self, previous_state: Dict[str, Any]) -> float:
         """Analyze uncertainty based on previous reasoning state"""
         try:

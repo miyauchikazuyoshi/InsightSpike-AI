@@ -14,6 +14,9 @@ import numpy as np
 
 from ...core.base.datastore import DataStore
 from ...core.episode import Episode
+from ...detection.insight_registry import get_insight_registry
+from ...learning.pattern_logger import PatternLogger
+from ...learning.strategy_optimizer import StrategyOptimizer
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +26,7 @@ from ..layers.layer2_compatibility import (
     CompatibleL2MemoryManager as Memory,  # Layer 2: Memory Manager with compatibility
 )
 from ..layers.layer4_llm_interface import get_llm_provider
+from ..memory.graph_memory_search import GraphMemorySearch
 
 try:
     from ..layers.layer3_graph_reasoner import L3GraphReasoner
@@ -122,6 +126,28 @@ class MainAgent:
         self.cycle_count = 0
         self.previous_state = {}
         self.reasoning_history = []
+        
+        # Initialize insight registry
+        self.insight_registry = get_insight_registry()
+        
+        # Initialize graph memory search
+        self.graph_memory_search = GraphMemorySearch(self.config)
+        
+        # Track current graph for multi-hop search
+        self.current_graph = None
+        
+        # Initialize learning components
+        self.pattern_logger = PatternLogger(self.config)
+        self.strategy_optimizer = StrategyOptimizer(self.config, self.pattern_logger)
+        
+        # Enable learning based on config
+        self.enable_learning = False
+        if self.is_pydantic_config:
+            self.enable_learning = getattr(self.config.processing, "enable_learning", False)
+        else:
+            self.enable_learning = getattr(
+                getattr(self.config, "processing", {}), "enable_learning", False
+            )
 
         self._initialized = False
 
@@ -235,6 +261,69 @@ class MainAgent:
                 question, self.previous_state
             )
 
+            # Check for Layer1 bypass condition
+            bypass_enabled = False
+            if self.is_pydantic_config:
+                bypass_enabled = self.config.processing.enable_layer1_bypass
+                uncertainty_threshold = self.config.processing.bypass_uncertainty_threshold
+                known_ratio_threshold = self.config.processing.bypass_known_ratio_threshold
+            else:
+                bypass_enabled = getattr(self.config.processing, "enable_layer1_bypass", False)
+                uncertainty_threshold = getattr(self.config.processing, "bypass_uncertainty_threshold", 0.2)
+                known_ratio_threshold = getattr(self.config.processing, "bypass_known_ratio_threshold", 0.9)
+                
+            if (
+                bypass_enabled
+                and error_state.get("uncertainty", 1.0) < uncertainty_threshold
+                and error_state.get("known_ratio", 0.0) > known_ratio_threshold
+                and len(error_state.get("known_elements", [])) > 0
+            ):
+                # Bypass activated - skip to L4 with minimal context
+                if verbose:
+                    logger.info(
+                        f"Layer1 bypass activated - low uncertainty ({error_state['uncertainty']:.3f}) "
+                        f"with {len(error_state['known_elements'])} known elements"
+                    )
+                
+                # Create minimal context for LLM
+                bypass_context = {
+                    "retrieved_documents": [
+                        {
+                            "text": element,
+                            "similarity": 0.9,  # High confidence
+                            "c_value": 0.8,
+                            "index": idx,
+                        }
+                        for idx, element in enumerate(error_state["known_elements"])
+                    ],
+                    "graph_analysis": {
+                        "reasoning_quality": 0.8,  # High confidence
+                        "spike_detected": False,
+                        "reward": {"total": 0.0, "insight_reward": 0.0, "quality_bonus": 0.0},
+                        "metrics": {"delta_ged": 0.0, "delta_ig": 0.0},
+                        "conflicts": {"total_conflicts": 0, "conflict_types": {}},
+                    },
+                    "error_state": error_state,
+                }
+                
+                # Direct to LLM
+                llm_result = self.l4_llm.generate_response_detailed(bypass_context, question)
+                
+                # Calculate quality based on error state
+                reasoning_quality = 1.0 - error_state.get("uncertainty", 0.5)
+                
+                return CycleResult(
+                    question=question,
+                    retrieved_documents=bypass_context["retrieved_documents"],
+                    graph_analysis=bypass_context["graph_analysis"],
+                    response=llm_result.get("response", ""),
+                    reasoning_quality=reasoning_quality,
+                    spike_detected=False,
+                    error_state=error_state,
+                    cycle_number=self.cycle_count,
+                    success=llm_result.get("success", True),
+                )
+
             # L2: Memory search and retrieval
             memory_results = self._search_memory(question)
             retrieved_docs = memory_results["documents"]
@@ -259,6 +348,9 @@ class MainAgent:
                 graph_analysis = self.l3_graph.analyze_documents(
                     retrieved_docs, graph_context
                 )
+                # Store current graph for multi-hop search
+                if graph_analysis and "graph" in graph_analysis:
+                    self.current_graph = graph_analysis["graph"]
                 logger.debug(
                     f"Graph analysis result: {graph_analysis.keys() if graph_analysis else 'None'}"
                 )
@@ -274,12 +366,52 @@ class MainAgent:
                     "spike_detected": False,
                 }
 
+            # Extract subgraph context if graph search was used
+            subgraph_context = None
+            if hasattr(self, 'enable_graph_search'):
+                graph_search_enabled = self.enable_graph_search
+            else:
+                graph_search_enabled = False
+                if self.is_pydantic_config:
+                    graph_search_enabled = getattr(self.config.graph, "enable_graph_search", False)
+                else:
+                    graph_search_enabled = getattr(
+                        getattr(self.config, "graph", {}), "enable_graph_search", False
+                    )
+            
+            if graph_search_enabled and self.current_graph is not None and retrieved_docs:
+                # Get center nodes from top retrieved documents
+                center_nodes = []
+                for doc in retrieved_docs[:3]:  # Top 3 docs as centers
+                    if "index" in doc:
+                        center_nodes.append(doc["index"])
+                
+                if center_nodes:
+                    subgraph_context = self.graph_memory_search.extract_subgraph(
+                        center_nodes, self.current_graph, radius=1
+                    )
+                    
+                    # Add concept descriptions for the subgraph nodes
+                    if subgraph_context and "nodes" in subgraph_context:
+                        concept_map = []
+                        edges = subgraph_context.get("edges", [])
+                        
+                        # Create readable relationship descriptions
+                        for src, dst in edges[:10]:  # Limit to 10 relationships
+                            if src < len(self.l2_memory.episodes) and dst < len(self.l2_memory.episodes):
+                                src_text = self.l2_memory.episodes[src].text[:50]
+                                dst_text = self.l2_memory.episodes[dst].text[:50]
+                                concept_map.append(f"{src_text}... → {dst_text}...")
+                        
+                        subgraph_context["concept_map"] = concept_map
+            
             # L4: Language generation
             llm_context = {
                 "retrieved_documents": retrieved_docs,
                 "graph_analysis": graph_analysis,
                 "previous_state": self.previous_state,
                 "reasoning_quality": graph_analysis.get("reasoning_quality", 0.0),
+                "subgraph_context": subgraph_context,
             }
 
             # Call generate_response_detailed to get full result dict
@@ -313,6 +445,37 @@ class MainAgent:
             # Update memory with reward signal if spike detected
             if cycle_result.spike_detected:
                 self._update_memory_rewards(retrieved_docs, graph_analysis)
+                
+                # Auto-register insight when spike is detected (if enabled)
+                insight_registration_enabled = False
+                if self.is_pydantic_config:
+                    insight_registration_enabled = self.config.processing.enable_insight_registration
+                else:
+                    insight_registration_enabled = getattr(
+                        self.config.processing, "enable_insight_registration", True
+                    )
+                
+                if insight_registration_enabled:
+                    try:
+                        # Get graph before/after if available
+                        graph_before = self.previous_state.get("graph_state") if self.previous_state else None
+                        graph_after = graph_analysis.get("graph")
+                        
+                        # Extract and register insights
+                        insights = self.insight_registry.extract_insights_from_response(
+                            question=question,
+                            response=cycle_result.response,
+                            l1_analysis=error_state,  # Pass the error_state as L1 analysis
+                            reasoning_quality=reasoning_quality,
+                            graph_before=graph_before,
+                            graph_after=graph_after
+                        )
+                        
+                        if insights:
+                            logger.info(f"Auto-registered {len(insights)} insights from spike detection")
+                            
+                    except Exception as e:
+                        logger.warning(f"Failed to auto-register insights: {e}")
 
             # Store question and response in memory for future retrieval
             memory_text = f"Q: {question}\nA: {cycle_result.response}"
@@ -349,16 +512,67 @@ class MainAgent:
     def _search_memory(self, question: str) -> Dict[str, Any]:
         """Search episodic memory for relevant documents"""
         try:
-            # Use L2MemoryManager's search_episodes method which properly uses SentenceTransformer
+            # Check if we need to adjust document count for insights
+            dynamic_adjustment = False
+            max_docs_with_insights = 5
+            insight_relevance_boost = 0.2
+            
             if self.is_pydantic_config:
                 max_docs = self.config.memory.max_retrieved_docs
+                dynamic_adjustment = self.config.processing.dynamic_doc_adjustment
+                max_docs_with_insights = self.config.processing.max_docs_with_insights
+                insight_relevance_boost = self.config.processing.insight_relevance_boost
             else:
                 max_docs = getattr(self.config.memory, "max_retrieved_docs", 10)
+                dynamic_adjustment = getattr(self.config.processing, "dynamic_doc_adjustment", True)
+                max_docs_with_insights = getattr(self.config.processing, "max_docs_with_insights", 5)
+                insight_relevance_boost = getattr(self.config.processing, "insight_relevance_boost", 0.2)
 
-            results = self.l2_memory.search_episodes(
-                question,
-                k=max_docs,
-            )
+            # Get adaptive configuration if learning is enabled
+            if self.enable_learning:
+                adaptive_config = self.strategy_optimizer.get_adaptive_config(
+                    question, self._get_config_snapshot()
+                )
+                # Apply adaptive thresholds
+                if self.is_pydantic_config:
+                    self.config.graph.similarity_threshold = adaptive_config.get(
+                        "similarity_threshold", self.config.graph.similarity_threshold
+                    )
+                    self.config.graph.hop_limit = adaptive_config.get(
+                        "hop_limit", self.config.graph.hop_limit
+                    )
+                    self.config.graph.path_decay = adaptive_config.get(
+                        "path_decay", self.config.graph.path_decay
+                    )
+            
+            # Check if graph-based search is enabled
+            enable_graph_search = False
+            if self.is_pydantic_config:
+                enable_graph_search = getattr(self.config.graph, "enable_graph_search", False)
+            else:
+                enable_graph_search = getattr(
+                    getattr(self.config, "graph", {}), "enable_graph_search", False
+                )
+            
+            # Get query embedding
+            query_embedding = self.l2_memory._encode_text(question)
+            
+            if enable_graph_search and self.current_graph is not None:
+                # Use graph-based search
+                results = self.graph_memory_search.search_with_graph(
+                    query_embedding=query_embedding,
+                    episodes=self.l2_memory.episodes,
+                    graph_data=self.current_graph,
+                    k=max_docs,
+                    enable_multi_hop=True
+                )
+                logger.debug(f"Graph-based search returned {len(results)} results")
+            else:
+                # Fallback to standard search
+                results = self.l2_memory.search_episodes(
+                    question,
+                    k=max_docs,
+                )
 
             # Convert search_episodes results to documents format
             documents = []
@@ -390,6 +604,59 @@ class MainAgent:
                     )
 
             stats = self.l2_memory.get_memory_stats()
+            
+            # Also search for relevant insights (if enabled)
+            insight_search_enabled = False
+            max_insights = 5
+            
+            if self.is_pydantic_config:
+                insight_search_enabled = self.config.processing.enable_insight_search
+                max_insights = self.config.processing.max_insights_per_query
+            else:
+                insight_search_enabled = getattr(
+                    self.config.processing, "enable_insight_search", True
+                )
+                max_insights = getattr(
+                    self.config.processing, "max_insights_per_query", 5
+                )
+            
+            if insight_search_enabled:
+                try:
+                    # Extract key concepts from the question for insight search
+                    concepts = question.split()[:5]  # Simple concept extraction
+                    relevant_insights = self.insight_registry.find_relevant_insights(
+                        concepts, limit=max_insights
+                    )
+                    
+                    # Add insights as special documents
+                    for idx, insight in enumerate(relevant_insights):
+                        documents.append({
+                            "text": f"[INSIGHT] {insight.text}",
+                            "similarity": 0.8 + (insight.quality_score * insight_relevance_boost),  # High relevance for insights
+                            "index": -1000 - idx,  # Special negative index for insights
+                            "c_value": insight.quality_score,
+                            "timestamp": insight.generated_at,
+                            "is_insight": True,
+                            "insight_id": insight.id
+                        })
+                        
+                    if relevant_insights:
+                        logger.debug(f"Found {len(relevant_insights)} relevant insights for query")
+                        
+                        # Apply dynamic document adjustment if enabled
+                        if dynamic_adjustment and len(relevant_insights) > 0:
+                            # Sort all documents by similarity
+                            documents.sort(key=lambda x: x.get("similarity", 0), reverse=True)
+                            
+                            # Keep only top documents to make room for insights
+                            total_limit = max_docs_with_insights + len(relevant_insights)
+                            if len(documents) > total_limit:
+                                # Ensure we keep all insights (they have high similarity scores)
+                                documents = documents[:total_limit]
+                                logger.debug(f"Adjusted document count to {len(documents)} (including {len(relevant_insights)} insights)")
+                        
+                except Exception as e:
+                    logger.warning(f"Failed to search insights: {e}")
 
             return {"documents": documents, "stats": stats, "success": True}
 
@@ -587,6 +854,37 @@ class MainAgent:
                 },
             }
         )
+        
+        # Log pattern and optimize strategy if learning is enabled
+        if self.enable_learning:
+            try:
+                # Log the successful pattern
+                config_snapshot = self._get_config_snapshot()
+                self.pattern_logger.log_pattern(
+                    question=question,
+                    context={
+                        "retrieved_documents": best_result.retrieved_documents,
+                        "graph_analysis": enhanced_graph_analysis,
+                        "reasoning_quality": best_result.reasoning_quality,
+                    },
+                    result=best_result,
+                    config_snapshot=config_snapshot
+                )
+                
+                # Decay exploration over time
+                self.strategy_optimizer.decay_exploration()
+                
+                # Log learning progress periodically
+                if len(self.pattern_logger.patterns) % 10 == 0:
+                    report = self.strategy_optimizer.report_performance()
+                    logger.info(
+                        f"Learning progress: performance={report['current_performance']:.3f}, "
+                        f"patterns={report['total_patterns']}, "
+                        f"exploration={report['exploration_rate']:.3f}"
+                    )
+                
+            except Exception as e:
+                logger.error(f"Learning update failed: {e}")
 
         return CycleResult(
             question=best_result.question,
@@ -612,6 +910,40 @@ class MainAgent:
             "total_cycles": 0,
         }
 
+    def _get_config_snapshot(self) -> Dict[str, Any]:
+        """Get current configuration parameters for learning"""
+        snapshot = {}
+        
+        if self.is_pydantic_config:
+            snapshot.update({
+                "similarity_threshold": self.config.graph.similarity_threshold,
+                "hop_limit": self.config.graph.hop_limit,
+                "path_decay": self.config.graph.path_decay,
+                "max_retrieved_docs": self.config.memory.max_retrieved_docs,
+                "spike_ged_threshold": self.config.graph.spike_ged_threshold,
+                "spike_ig_threshold": self.config.graph.spike_ig_threshold,
+            })
+        else:
+            # Legacy config
+            snapshot.update({
+                "similarity_threshold": getattr(
+                    self.config.graph, "similarity_threshold", 0.3
+                ),
+                "hop_limit": getattr(self.config.graph, "hop_limit", 2),
+                "path_decay": getattr(self.config.graph, "path_decay", 0.7),
+                "max_retrieved_docs": getattr(
+                    self.config.memory, "max_retrieved_docs", 10
+                ),
+                "spike_ged_threshold": getattr(
+                    self.config.graph, "spike_ged_threshold", -0.5
+                ),
+                "spike_ig_threshold": getattr(
+                    self.config.graph, "spike_ig_threshold", 0.2
+                ),
+            })
+        
+        return snapshot
+    
     def _error_cycle_result(self, question: str, cycle: int, error: str) -> CycleResult:
         """Generate error cycle result"""
         return CycleResult(

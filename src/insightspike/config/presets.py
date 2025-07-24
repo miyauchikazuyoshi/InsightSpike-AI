@@ -31,6 +31,8 @@ class ConfigPresets:
                 model="mock",
                 temperature=0.3,
                 max_tokens=256,
+                prompt_style="standard",
+                max_context_docs=5,
             ),
             memory=MemoryConfig(
                 episodic_memory_capacity=60,
@@ -67,6 +69,9 @@ class ConfigPresets:
                 model="distilgpt2",
                 temperature=0.7,
                 max_tokens=512,
+                prompt_style="minimal",
+                use_simple_prompt=True,
+                max_context_docs=3,
             ),
             memory=MemoryConfig(
                 episodic_memory_capacity=100,
@@ -104,6 +109,8 @@ class ConfigPresets:
                 temperature=0.3,
                 max_tokens=1024,
                 api_key=None,  # Should be set via environment variable
+                prompt_style="standard",
+                max_context_docs=7,
             ),
             memory=MemoryConfig(
                 episodic_memory_capacity=200,
@@ -144,6 +151,9 @@ class ConfigPresets:
                 temperature=0.5,
                 max_tokens=2048,
                 api_key=None,  # Should be set via environment variable
+                prompt_style="detailed",
+                max_context_docs=10,
+                include_metadata=True,
             ),
             memory=MemoryConfig(
                 episodic_memory_capacity=500,
@@ -171,6 +181,58 @@ class ConfigPresets:
                 log_to_console=True,
             ),
         )
+    
+    @staticmethod
+    def production_optimized() -> InsightSpikeConfig:
+        """Production preset with Layer1 bypass enabled for high performance"""
+        config = ConfigPresets.production()
+        # Enable Layer1 bypass for production optimization
+        config.processing.enable_layer1_bypass = True
+        config.processing.bypass_uncertainty_threshold = 0.2
+        config.processing.bypass_known_ratio_threshold = 0.9
+        return config
+    
+    @staticmethod
+    def minimal() -> InsightSpikeConfig:
+        """Minimal preset with advanced features disabled"""
+        config = ConfigPresets.development()
+        # Disable advanced features
+        config.processing.enable_layer1_bypass = False
+        config.processing.enable_insight_registration = False
+        config.processing.enable_insight_search = False
+        config.graph.use_gnn = False
+        config.graph.enable_graph_search = False
+        return config
+    
+    @staticmethod
+    def graph_enhanced() -> InsightSpikeConfig:
+        """Preset with graph-based features enabled"""
+        config = ConfigPresets.experiment()
+        # Enable graph features
+        config.graph.use_gnn = True
+        config.graph.enable_graph_search = True
+        config.graph.hop_limit = 2
+        config.graph.neighbor_threshold = 0.35
+        config.graph.path_decay = 0.7
+        # Also enable insights for better reasoning
+        config.processing.enable_insight_registration = True
+        config.processing.enable_insight_search = True
+        return config
+    
+    @staticmethod
+    def adaptive_learning() -> InsightSpikeConfig:
+        """Preset with adaptive learning enabled"""
+        config = ConfigPresets.graph_enhanced()
+        # Enable learning
+        config.processing.enable_learning = True
+        config.processing.learning_rate = 0.1
+        config.processing.exploration_rate = 0.15
+        # Enable all advanced features for maximum learning
+        config.processing.enable_layer1_bypass = True
+        config.processing.enable_insight_registration = True
+        config.processing.enable_insight_search = True
+        config.graph.enable_graph_search = True
+        return config
 
     @staticmethod
     def get_preset(name: str) -> Dict[str, Any]:
@@ -180,6 +242,10 @@ class ConfigPresets:
             "experiment": ConfigPresets.experiment(),
             "production": ConfigPresets.production(),
             "research": ConfigPresets.research(),
+            "production_optimized": ConfigPresets.production_optimized(),
+            "minimal": ConfigPresets.minimal(),
+            "graph_enhanced": ConfigPresets.graph_enhanced(),
+            "adaptive_learning": ConfigPresets.adaptive_learning(),
         }
 
         if name not in presets:

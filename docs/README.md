@@ -12,6 +12,7 @@ New to InsightSpike? Start here!
 
 ### 📖 [User Guide](./user-guide/)
 Learn how to use InsightSpike effectively
+- [July 2024 Features Quick Start](./user-guide/july_2024_features_quickstart.md) - Get started with the latest features
 - [Configuration Guide](./user-guide/configuration_guide.md) - Configure InsightSpike for your needs
 - [CLI Commands](./user-guide/cli_commands.md) - Complete command reference
 - [Spike Commands Summary](./user-guide/spike_commands_summary.md) - Quick reference for spike commands

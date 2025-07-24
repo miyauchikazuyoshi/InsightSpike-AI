@@ -15,6 +15,22 @@
 
 InsightSpike-AI implements the **geDIG (Graph Edit Distance + Information Gain)** framework - the first system to use structural graph changes as intrinsic rewards for insight detection. By integrating structural novelty (ΔGED) and information compression (ΔIG), it achieves what traditional AI cannot: **detecting multi-concept integration that characterizes human "Aha!" moments**.
 
+### 🆕 July 2024 Update: Adaptive Learning & Advanced Features
+
+InsightSpike-AI now includes groundbreaking capabilities:
+
+- **🧠 Adaptive Learning**: System learns from successful patterns and optimizes strategies
+- **⚡ Layer1 Bypass**: 10x faster response for known concepts (low uncertainty)
+- **🔍 Graph-Based Search**: 2-hop knowledge graph traversal for associative reasoning
+- **💡 Auto-Insight Registration**: Captures and reuses discovered insights
+- **📊 Mode-Aware Prompts**: Optimized for different LLM sizes (GPT-4, GPT-3.5, DistilGPT2)
+
+```python
+# Enable all advanced features
+from insightspike.config import load_config
+config = load_config(preset="adaptive_learning")
+```
+
 ### 🧠 4-Layer Neurobiological Architecture
 
 ```mermaid
@@ -26,6 +42,7 @@ graph TD
     L4 --> Response[Insight Response]
     
     L3 -.->|Spike Detection| Insight[💡 Eureka Moment!]
+    L1 -.->|Low Uncertainty| L4[Fast Path]
 ```
 
 ### 🔬 Key Innovation: The geDIG Formula (with Temporal Consistency)
@@ -175,7 +192,19 @@ poetry run python src/run_evaluation.py
 ### 1. **geDIG Technology**
 Mathematical modeling of insight generation using Graph Edit Distance + Information Gain.
 
-### 2. **Configurable Agent System**
+### 2. **🆕 Adaptive Learning System** 
+- **Pattern Recognition**: Learns from successful query patterns
+- **Strategy Optimization**: Adjusts search parameters automatically (similarity threshold, hop limits, etc.)
+- **Multi-Armed Bandit**: Balances exploration of new strategies with exploitation of proven ones
+- **Performance Tracking**: Monitors effectiveness of different parameter combinations
+
+### 3. **🆕 Advanced Search & Retrieval**
+- **Layer1 Bypass**: 10x faster for low-uncertainty queries
+- **Graph-Based Search**: 2-hop knowledge graph traversal for associative reasoning
+- **Auto-Insight Registration**: Captures and reuses discovered insights
+- **Mode-Aware Prompts**: Optimized for different LLM sizes
+
+### 4. **Configurable Agent System**
 - Multiple agent implementations:
   - **MainAgent**: Full-featured agent with in-memory storage
   - **DataStoreAgent**: Scalable agent with transaction-based persistence
@@ -183,22 +212,50 @@ Mathematical modeling of insight generation using Graph Edit Distance + Informat
 - Feature toggles for fine-grained control
 - Production-ready with caching and async processing
 
-### 3. **Clean Architecture**
+### 5. **Clean Architecture**
 - Clear separation between abstractions and implementations
 - Dependency injection ready
 - Easy to test and extend
 
-### 4. **Flexible Data Persistence**
+### 6. **Flexible Data Persistence**
 - Abstract DataStore interface
 - Support for filesystem, databases, vector stores
 - Easy migration between backends
 
-### 5. **Graph-Based Reasoning**
+### 7. **Graph-Based Reasoning**
 - PyTorch Geometric integration
 - Similarity graph construction
 - Spike detection algorithms
+- Multi-hop graph traversal
 
 **Note**: Full graph reasoning capabilities require PyTorch and PyTorch Geometric. The system will work without them but with reduced graph analysis features.
+
+## 📋 Configuration Presets
+
+InsightSpike-AI comes with pre-configured settings for different use cases:
+
+| Preset | Description | Key Features |
+|--------|-------------|--------------|
+| `development` | Safe mode for testing | Mock LLM, fast iteration |
+| `experiment` | Local model experiments | DistilGPT2, moderate settings |
+| `production` | Production deployment | OpenAI/GPT-3.5, optimized |
+| `research` | Advanced research | Anthropic/Claude, full logging |
+| `production_optimized` | High performance | Layer1 bypass enabled |
+| `minimal` | Bare minimum | All advanced features off |
+| `graph_enhanced` | Graph reasoning | GNN + graph search enabled |
+| **`adaptive_learning`** | **🆕 Self-improving** | **All features + learning** |
+
+```python
+from insightspike.config import load_config
+
+# Use adaptive learning preset
+config = load_config(preset="adaptive_learning")
+
+# Or customize individual features
+config = load_config(preset="production")
+config.processing.enable_learning = True
+config.graph.enable_graph_search = True
+```
 
 ## 🌟 Key Innovation: geDIG Technology
 

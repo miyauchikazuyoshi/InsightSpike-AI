@@ -52,6 +52,30 @@ class GraphConfig(BaseModel):
         default="hybrid"
     )
     hybrid_weights: HybridWeightsConfig = Field(default_factory=HybridWeightsConfig)
+    
+    # Graph-based search configuration
+    enable_graph_search: bool = Field(
+        default=False,
+        description="Enable multi-hop graph traversal for memory search"
+    )
+    hop_limit: int = Field(
+        default=2,
+        ge=1,
+        le=3,
+        description="Maximum hops for graph traversal"
+    )
+    neighbor_threshold: float = Field(
+        default=0.4,
+        ge=0.0,
+        le=1.0,
+        description="Minimum similarity for neighbor inclusion"
+    )
+    path_decay: float = Field(
+        default=0.7,
+        ge=0.0,
+        le=1.0,
+        description="Relevance decay per hop in graph traversal"
+    )
 
     # geDIG formula parameters
     weight_ged: float = Field(
@@ -94,6 +118,76 @@ class ProcessingConfig(BaseModel):
     chunk_size: int = Field(default=500, ge=50)
     overlap: int = Field(default=50, ge=0)
     min_chunk_size: int = Field(default=100, ge=10)
+    
+    # Layer1 bypass configuration
+    enable_layer1_bypass: bool = Field(
+        default=False,
+        description="Enable fast path for known concepts with low uncertainty"
+    )
+    bypass_uncertainty_threshold: float = Field(
+        default=0.2,
+        ge=0.0,
+        le=1.0,
+        description="Uncertainty threshold below which bypass is triggered"
+    )
+    bypass_known_ratio_threshold: float = Field(
+        default=0.9,
+        ge=0.0,
+        le=1.0,
+        description="Ratio of known elements required for bypass"
+    )
+    
+    # Insight auto-registration configuration
+    enable_insight_registration: bool = Field(
+        default=True,
+        description="Enable automatic insight registration when spikes are detected"
+    )
+    enable_insight_search: bool = Field(
+        default=True,
+        description="Enable searching and using insights in memory retrieval"
+    )
+    max_insights_per_query: int = Field(
+        default=5,
+        ge=0,
+        le=20,
+        description="Maximum number of insights to retrieve per query"
+    )
+    
+    # Prompt length optimization
+    dynamic_doc_adjustment: bool = Field(
+        default=True,
+        description="Reduce document count when insights are present"
+    )
+    max_docs_with_insights: int = Field(
+        default=5,
+        ge=1,
+        le=20,
+        description="Maximum documents when insights are included"
+    )
+    insight_relevance_boost: float = Field(
+        default=0.2,
+        ge=0.0,
+        le=0.5,
+        description="Relevance score boost for insights"
+    )
+    
+    # Learning mechanism configuration
+    enable_learning: bool = Field(
+        default=False,
+        description="Enable adaptive learning from patterns and rewards"
+    )
+    learning_rate: float = Field(
+        default=0.1,
+        ge=0.01,
+        le=0.5,
+        description="Learning rate for strategy optimization"
+    )
+    exploration_rate: float = Field(
+        default=0.1,
+        ge=0.01,
+        le=0.3,
+        description="Initial exploration rate for strategy discovery"
+    )
 
 
 class LLMConfig(BaseModel):
@@ -116,6 +210,26 @@ class LLMConfig(BaseModel):
     load_in_8bit: bool = Field(default=False, description="8-bit quantization")
     system_prompt: Optional[str] = Field(
         default=None, description="System prompt for the model"
+    )
+    
+    # Prompt building configuration
+    prompt_style: Literal["standard", "detailed", "minimal"] = Field(
+        default="standard",
+        description="Prompt style: detailed for large models, standard for medium, minimal for small"
+    )
+    max_context_docs: int = Field(
+        default=5,
+        ge=1,
+        le=20,
+        description="Maximum documents in context (adjusted by prompt style)"
+    )
+    use_simple_prompt: bool = Field(
+        default=False,
+        description="Use simplified prompt format for lightweight models"
+    )
+    include_metadata: bool = Field(
+        default=False,
+        description="Include relevance scores and metadata in detailed mode"
     )
 
 

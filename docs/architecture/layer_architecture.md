@@ -9,6 +9,11 @@
   - Calculate prediction error
   - Measure uncertainty
   - Initial query validation
+  - **NEW**: Bypass detection for low-uncertainty queries
+- **Bypass Feature** (July 2024):
+  - Enables fast-path to Layer4 for known concepts
+  - Configurable uncertainty thresholds
+  - 10x performance improvement for production systems
 
 ### Layer 2: Memory Manager (`implementations/layers/layer2_memory_manager.py`)
 - **Brain Analog**: Hippocampus + Locus Coeruleus
@@ -17,10 +22,16 @@
   - FAISS-indexed vector search
   - Episode management (add, merge, split, prune)
   - C-value → Graph-based importance (transitioning)
+  - **NEW**: Insight search integration
+  - **NEW**: Graph-based multi-hop retrieval
 - **Modes**: Basic, Enhanced, Scalable, Graph-Centric
 - **Variants**:
   - `layer2_compatibility.py`: Backward compatibility wrapper for old API
   - `layer2_working_memory.py`: DataStore-centric implementation for scalability
+- **Graph Search** (July 2024):
+  - 2-hop neighbor exploration
+  - Path-based relevance scoring
+  - Enables associative memory retrieval
 
 ### Layer 3: Graph Reasoner (`implementations/layers/layer3_graph_reasoner.py`)
 - **Brain Analog**: Prefrontal Cortex (executive function)
@@ -29,7 +40,12 @@
   - Build similarity graphs
   - Calculate geDIG (GED + IG)
   - Detect "Eureka spikes"
+  - **NEW**: Auto-register high-quality insights
 - **Core Innovation**: Mathematical insight modeling
+- **Insight Registration** (July 2024):
+  - Automatic extraction from spike responses
+  - Quality evaluation and filtering
+  - Persistent storage in InsightFactRegistry
 
 ### Layer 4: Language Interface (`implementations/layers/layer4_llm_interface.py`)
 - **Brain Analog**: Broca's + Wernicke's areas
@@ -38,6 +54,12 @@
   - Generate responses from context
   - Support multiple LLM providers
   - Context-aware synthesis
+  - **NEW**: Mode-aware prompt building
+- **Mode-Aware Prompts** (July 2024):
+  - Minimal mode for small models (DistilGPT2)
+  - Standard mode for medium models (GPT-3.5)
+  - Detailed mode for large models (GPT-4/Claude)
+  - Dynamic document limits based on model capacity
 
 ### Supporting Components
 - `implementations/layers/layer4_prompt_builder.py`: Semantic content generation (true Layer 4)

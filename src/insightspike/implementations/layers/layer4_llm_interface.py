@@ -380,26 +380,63 @@ class L4LLMInterface:
         graph_analysis = context.get("graph_analysis", {})
         reasoning_quality = context.get("reasoning_quality", 0.0)
 
-        # Limit documents based on config
+        # Separate insights from regular documents
+        insights = [doc for doc in retrieved_docs if doc.get("is_insight", False)]
+        regular_docs = [doc for doc in retrieved_docs if not doc.get("is_insight", False)]
+
+        # Mode-aware document limits
+        # Default max_docs is for standard mode
         max_docs = getattr(self.config, "max_context_docs", 5)
-        retrieved_docs = retrieved_docs[:max_docs]
+        
+        # Adjust limits based on prompt style
+        if prompt_style == "detailed":
+            # Large models can handle more
+            max_docs = min(max_docs * 2, 10)  # Double or max 10
+            max_insights = min(len(insights), 5)  # Up to 5 insights
+        elif prompt_style == "standard":
+            # Standard limits
+            max_insights = min(len(insights), 3)  # Up to 3 insights
+        else:
+            # For any other mode, use conservative limits
+            max_docs = min(max_docs, 5)
+            max_insights = min(len(insights), 2)
+        
+        # Apply document limits
+        regular_docs = regular_docs[:max_docs]
+        insights = insights[:max_insights]
 
         # Build context section based on prompt style
         context_parts = []
 
-        if retrieved_docs:
+        if regular_docs or insights:
             if prompt_style == "detailed" and getattr(
                 self.config, "include_metadata", True
             ):
-                context_parts.append("Retrieved Information:")
-                for i, doc in enumerate(retrieved_docs, 1):
-                    text = doc.get("text", "")
-                    relevance = doc.get("relevance", 0.0)
-                    context_parts.append(f"{i}. {text} (relevance: {relevance:.2f})")
+                if regular_docs:
+                    context_parts.append("Retrieved Information:")
+                    for i, doc in enumerate(regular_docs, 1):
+                        text = doc.get("text", "")
+                        relevance = doc.get("relevance", 0.0)
+                        context_parts.append(f"{i}. {text} (relevance: {relevance:.2f})")
+                
+                if insights:
+                    context_parts.append("\nPreviously Discovered Insights:")
+                    for i, doc in enumerate(insights, 1):
+                        # Remove [INSIGHT] prefix for cleaner prompt
+                        text = doc.get("text", "").replace("[INSIGHT] ", "")
+                        quality = doc.get("c_value", 0.0)
+                        context_parts.append(f"- {text} (quality: {quality:.2f})")
             else:
                 # Standard style - just the text
-                for doc in retrieved_docs:
+                for doc in regular_docs:
                     context_parts.append(doc.get("text", ""))
+                
+                # Add insights with special formatting
+                if insights:
+                    context_parts.append("\nKey Insights:")
+                    for doc in insights:
+                        text = doc.get("text", "").replace("[INSIGHT] ", "")
+                        context_parts.append(f"- {text}")
 
         # Include Query Transformation insights if available
         query_state = context.get("query_state")
@@ -430,6 +467,26 @@ class L4LLMInterface:
             and graph_analysis.get("spike_detected", False)
         ):
             context_parts.append("\nInsight Detection: Significant pattern identified")
+        
+        # Include subgraph context if available
+        if context.get("subgraph_context"):
+            subgraph = context["subgraph_context"]
+            if prompt_style == "detailed":
+                context_parts.append("\n[Knowledge Graph Context]")
+                context_parts.append(f"Central concepts: {len(subgraph.get('center_nodes', []))}")
+                context_parts.append(f"Related concepts within {subgraph.get('radius', 1)} hops: {len(subgraph.get('nodes', []))}")
+                context_parts.append(f"Connections: {len(subgraph.get('edges', []))}")
+                
+                # Show concept relationships
+                if subgraph.get('concept_map'):
+                    context_parts.append("Key relationships:")
+                    for rel in subgraph['concept_map'][:5]:  # Limit to 5
+                        context_parts.append(f"  - {rel}")
+            elif prompt_style == "standard":
+                # Simpler format for standard mode
+                node_count = len(subgraph.get('nodes', []))
+                if node_count > 0:
+                    context_parts.append(f"\n[Graph Context: {node_count} related concepts]")
 
         # Use custom template if provided
         prompt_template = getattr(self.config, "prompt_template", None)
@@ -459,7 +516,17 @@ class L4LLMInterface:
         prompt_template = getattr(self.config, "prompt_template", None)
         if prompt_template:
             docs = context.get("retrieved_documents", [])
-            simple_context = " ".join([doc.get("text", "")[:100] for doc in docs[:2]])
+            # Filter out insights for simple context
+            regular_docs = [doc for doc in docs if not doc.get("is_insight", False)]
+            insights = [doc for doc in docs if doc.get("is_insight", False)]
+            
+            # Build simple context from regular docs
+            simple_context = " ".join([doc.get("text", "")[:100] for doc in regular_docs[:2]])
+            
+            # Add one key insight if available
+            if insights:
+                insight_text = insights[0].get("text", "").replace("[INSIGHT] ", "")[:50]
+                simple_context += f" Key insight: {insight_text}"
 
             # Add first insight if available
             query_state = context.get("query_state")

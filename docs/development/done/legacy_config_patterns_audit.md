@@ -150,3 +150,17 @@ Total files with legacy patterns: 46 files (excluding converter.py and backups)
 - The migration script (`scripts/migrate_config_advanced.py`) already contains mapping rules for most patterns
 - Some patterns in comments (lines 174-176 in run_comparison_experiment.py) indicate attempted usage of non-existent properties
 - Test files extensively use legacy patterns but many are testing the config system itself
+
+## Status Update (2024-07-24)
+
+### Current State
+- Core source files still maintain dual support for both Pydantic and legacy configs
+- Files use `is_pydantic_config` flag or `isinstance(config, InsightSpikeConfig)` checks
+- Legacy patterns are kept for backward compatibility
+- All core files properly handle both config types
+
+### Decision
+- Legacy config support is intentionally maintained for backward compatibility
+- Complete removal would break existing experiments and integrations
+- This audit document serves as a reference for future cleanup when legacy support is deprecated
+- Moving to done folder as the audit is complete and accurate

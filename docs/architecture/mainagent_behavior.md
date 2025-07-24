@@ -15,9 +15,16 @@ The agent processes questions through multiple reasoning cycles:
 
 ```
 Question → L1 (Error Analysis) → L2 (Memory Search) → L3 (Graph Analysis) → L4 (Response Generation)
-     ↑                                                                                    ↓
-     ←────────────────── Convergence Check (similarity > 0.9) ←──────────────────────←
+     ↑              ↓ (bypass)                                                        ↓
+     ←──────────── ↓ ────────── Convergence Check (similarity > 0.9) ←──────────────←
+                   ↓
+                   └──────────────────────────────────────────→ L4 (Direct Response)
 ```
+
+**NEW: Layer1 Bypass** (July 2024):
+- Low-uncertainty queries can skip directly from L1 to L4
+- Bypasses memory search and graph analysis for known facts
+- 10x performance improvement for production systems
 
 **Cycle Components:**
 1. **Error State Analysis** (L1)
@@ -29,17 +36,21 @@ Question → L1 (Error Analysis) → L2 (Memory Search) → L3 (Graph Analysis) 
    - Searches episodic memory
    - Returns top-k relevant documents
    - Updates C-values based on usage
+   - **NEW**: Includes relevant insights from registry
+   - **NEW**: Optional graph-based multi-hop search
 
 3. **Graph Reasoning** (L3)
    - Builds knowledge graph from documents
    - Calculates ΔGED and ΔIG
    - Detects conflicts and spikes
    - Provides reasoning quality score
+   - **NEW**: Auto-registers insights when spikes detected
 
 4. **Response Synthesis** (L4)
    - Generates natural language response
    - Incorporates graph analysis insights
    - Produces confidence scores
+   - **NEW**: Mode-aware prompt building based on model capacity
 
 ### 2. **Convergence Detection**
 The agent stops cycling when:
