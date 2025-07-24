@@ -1,4 +1,4 @@
-# geDIG Implementation Status Report
+# geDIG Implementation Status Report (Excluding Decoding Features)
 
 **Date**: 2025-01-24  
 **Author**: Development Team
@@ -6,6 +6,8 @@
 ## Overview
 
 This document tracks the current implementation status of geDIG (Graph Edit Distance + Information Gain) features in InsightSpike-AI, based on comprehensive code review findings.
+
+**Note**: This report excludes the geDIG Generative Grammar Decoder functionality, which is tracked separately in `docs/development/decoder_design/`. The decoder represents a distinct research direction for linguistic generation from graph structures and has its own implementation roadmap.
 
 ## ✅ Fixed Issues (Completed)
 
