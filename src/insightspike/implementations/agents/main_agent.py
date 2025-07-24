@@ -482,7 +482,7 @@ class MainAgent:
                         logger.info(
                             f"Graph analysis suggests merging episodes {episode_indices[:2]}"
                         )
-                        merged_idx = self.l2_memory.merge(episode_indices[:2])
+                        merged_idx = self.l2_memory.merge_episodes(episode_indices[:2])
                         if merged_idx >= 0:
                             logger.info(f"Auto-merged episodes to index {merged_idx}")
 
@@ -498,7 +498,7 @@ class MainAgent:
                         episode and len(episode.text.split(".")) > 2
                     ):  # Has multiple sentences
                         logger.info(f"Graph analysis suggests splitting episode {idx}")
-                        split_indices = self.l2_memory.split(idx)
+                        split_indices = self.l2_memory.split_episode(idx)
                         if split_indices:
                             logger.info(
                                 f"Auto-split episode {idx} into {split_indices}"
@@ -509,7 +509,7 @@ class MainAgent:
             memory_stats = self.l2_memory.get_memory_stats()
             if memory_stats.get("c_value_min", 1.0) < prune_threshold:
                 logger.info("Graph analysis suggests pruning low-value episodes")
-                pruned_count = self.l2_memory.prune(
+                pruned_count = self.l2_memory.prune_low_value_episodes(
                     prune_threshold * 2
                 )  # Conservative pruning
                 if pruned_count > 0:

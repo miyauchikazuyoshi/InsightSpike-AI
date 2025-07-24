@@ -437,6 +437,78 @@ class L2MemoryManager:
         # Add merged episode
         return self.store_episode(combined_text, weighted_c_value, merged_metadata)
 
+    def split_episode(self, episode_idx: int, split_points: Optional[List[int]] = None) -> List[int]:
+        """Split an episode into multiple smaller episodes
+        
+        Args:
+            episode_idx: Index of episode to split
+            split_points: Optional list of character positions to split at.
+                         If None, splits on sentence boundaries.
+                         
+        Returns:
+            List of indices of the new episodes created from the split
+        """
+        if not 0 <= episode_idx < len(self.episodes):
+            logger.warning(f"Invalid episode index {episode_idx}")
+            return []
+            
+        episode = self.episodes[episode_idx]
+        text = episode.text
+        
+        # Determine split points
+        if split_points is None:
+            # Split on sentence boundaries
+            import re
+            # Simple sentence splitting - looks for period, exclamation, or question mark followed by space
+            sentences = re.split(r'(?<=[.!?])\s+', text)
+            
+            # Filter out very short sentences
+            sentences = [s.strip() for s in sentences if len(s.strip()) > 10]
+            
+            if len(sentences) <= 1:
+                logger.warning(f"Episode {episode_idx} cannot be split (only one sentence)")
+                return []
+        else:
+            # Split at specified character positions
+            parts = []
+            last_pos = 0
+            for pos in sorted(split_points):
+                if 0 < pos < len(text):
+                    parts.append(text[last_pos:pos].strip())
+                    last_pos = pos
+            parts.append(text[last_pos:].strip())
+            sentences = [p for p in parts if len(p) > 10]
+        
+        if len(sentences) <= 1:
+            logger.warning(f"Episode {episode_idx} cannot be split into meaningful parts")
+            return []
+            
+        # Remove the original episode
+        original_c = episode.c
+        original_metadata = episode.metadata.copy()
+        del self.episodes[episode_idx]
+        
+        # Create new episodes from sentences
+        new_indices = []
+        for i, sentence in enumerate(sentences):
+            # Slightly reduce C-value for split episodes to indicate uncertainty
+            split_c = original_c * 0.9
+            
+            # Update metadata
+            split_metadata = original_metadata.copy()
+            split_metadata["split_from_idx"] = episode_idx
+            split_metadata["split_part"] = i + 1
+            split_metadata["split_total"] = len(sentences)
+            split_metadata["split_timestamp"] = time.time()
+            
+            # Store the new episode
+            new_idx = self.store_episode(sentence, split_c, split_metadata)
+            if new_idx >= 0:
+                new_indices.append(new_idx)
+                
+        logger.info(f"Split episode {episode_idx} into {len(new_indices)} parts")
+        return new_indices
+
     def prune_low_value_episodes(self, threshold: float = 0.1) -> int:
         """Remove episodes below threshold"""
         if not self.config.use_c_values:

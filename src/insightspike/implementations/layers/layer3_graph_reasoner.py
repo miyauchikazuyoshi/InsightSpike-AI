@@ -374,6 +374,19 @@ class L3GraphReasoner(L3GraphReasonerInterface):
             # Note: Graph saving is now handled by MainAgent via DataStore
             # self.save_graph(current_graph)  # Deprecated - removed
 
+            # Calculate reasoning quality
+            base_quality = self.graph_analyzer.assess_quality(metrics, conflicts)
+            
+            # Enhance quality assessment with graph features if available
+            if graph_features is not None and hasattr(graph_features, 'mean'):
+                # Use mean graph feature activation as a signal
+                feature_signal = float(graph_features.mean().item())
+                # Combine base quality with feature signal (weighted average)
+                enhanced_quality = 0.8 * base_quality + 0.2 * min(1.0, abs(feature_signal))
+                logger.debug(f"Enhanced reasoning quality from {base_quality:.3f} to {enhanced_quality:.3f} using graph features")
+            else:
+                enhanced_quality = base_quality
+
             result = {
                 "graph": current_graph,
                 "metrics": metrics,
@@ -383,9 +396,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
                     metrics, conflicts, self._get_spike_thresholds()
                 ),
                 "graph_features": graph_features,
-                "reasoning_quality": self.graph_analyzer.assess_quality(
-                    metrics, conflicts
-                ),
+                "reasoning_quality": enhanced_quality,
             }
 
             logger.debug(f"Graph analysis complete: {metrics}")
