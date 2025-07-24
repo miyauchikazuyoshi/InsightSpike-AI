@@ -56,16 +56,38 @@
 - **Purpose**: Scalable agent using DataStore backend for persistence
 - **Use Case**: Production deployments with large knowledge bases
 - **Architecture**: Similar to MainAgent but with DataStore integration
-- **Key Differences**:
+- **Core Methods**:
+  - `process()`: Main processing pipeline with 5 phases:
+    1. Store episode in DataStore
+    2. Search for related episodes
+    3. Detect insights/spikes
+    4. Generate reasoning (if spike detected)
+    5. Generate response (always provided)
+  - `search()`: Search for relevant episodes
+  - `get_stats()`: Get agent and DataStore statistics
+  - `save_checkpoint()` / `load_checkpoint()`: State persistence
+- **Key Differences from MainAgent**:
   - Uses DataStore for all persistence (not in-memory)
-  - Working memory approach for active data
+  - Working memory approach for active data (L2WorkingMemoryManager)
   - Lazy loading of data on demand
   - Better scalability for large datasets
+  - Async-ready architecture with sync fallbacks
+  - Separate embedding management
 - **Features**:
   - Transaction-based persistence
   - Multi-user support with data isolation
   - Reduced memory footprint
   - Compatible with various DataStore backends (SQLite, PostgreSQL, etc.)
+  - Vector similarity search via FAISS integration
+  - Automatic response generation with LLM fallback
+- **Configuration**:
+  ```python
+  from insightspike.config.models import InsightSpikeConfig
+  
+  config = InsightSpikeConfig(
+      memory={'max_retrieved_docs': 15},  # Not 'search_k'
+      llm={'provider': 'openai', 'model_name': 'gpt-3.5-turbo'}
+  )
 
 ## 📊 Quick Comparison
 
@@ -99,15 +121,59 @@ from insightspike.implementations.agents import GenericInsightSpikeAgent
 agent = GenericInsightSpikeAgent(...)
 
 # For scalable production deployments with DataStore
-from insightspike.implementations.agents import DataStoreMainAgent
-from insightspike.implementations.datastore import DataStoreFactory
-datastore = DataStoreFactory.create("sqlite")  # or "postgresql", etc.
-agent = DataStoreMainAgent(datastore)
+from insightspike.implementations.agents.datastore_agent import DataStoreMainAgent
+from insightspike.implementations.datastore.sqlite_store import SQLiteDataStore
+
+# Create DataStore backend
+datastore = SQLiteDataStore("knowledge.db")  # or use PostgreSQL, etc.
+
+# Initialize agent with configuration
+from insightspike.config.models import InsightSpikeConfig
+config = InsightSpikeConfig(
+    memory={'max_retrieved_docs': 20},
+    llm={'provider': 'openai'}  # or 'mock' for testing
+)
+agent = DataStoreMainAgent(datastore=datastore, config=config)
 ```
 
 ## 🔄 Migration Path
 
+### Deprecated Agents
 If you were using deprecated agents:
 - `main_agent_enhanced.py` → Use `ConfigurableAgent` with `ENHANCED` mode
 - `main_agent_optimized.py` → Use `ConfigurableAgent` with `OPTIMIZED` mode
 - `main_agent_with_query_transform.py` → Use `ConfigurableAgent` with `QUERY_TRANSFORM` mode
+
+### Migrating from MainAgent to DataStoreMainAgent
+
+When to migrate:
+- Your knowledge base exceeds 10,000 episodes
+- You need multi-user support
+- Memory usage is a concern
+- You need transaction-based persistence
+
+Migration steps:
+```python
+# Before (MainAgent)
+from insightspike.implementations.agents import MainAgent
+agent = MainAgent()
+result = agent.process_question("What is consciousness?")
+
+# After (DataStoreMainAgent)
+from insightspike.implementations.agents.datastore_agent import DataStoreMainAgent
+from insightspike.implementations.datastore.sqlite_store import SQLiteDataStore
+
+datastore = SQLiteDataStore("knowledge.db")
+agent = DataStoreMainAgent(datastore=datastore)
+result = agent.process("What is consciousness?")  # Note: method name is 'process', not 'process_question'
+
+# Access results
+print(result['response'])  # DataStoreMainAgent returns dict, not object
+print(result.get('has_spike', False))
+```
+
+Key differences:
+- DataStoreMainAgent returns dictionaries, not objects
+- Method names may differ (`process` vs `process_question`)
+- Requires explicit DataStore initialization
+- Better performance for large datasets

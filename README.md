@@ -93,14 +93,17 @@ print(result.response)
 ### Different LLM Providers
 
 ```python
+from insightspike import create_agent
+
 # Use OpenAI (requires OPENAI_API_KEY environment variable)
 agent = create_agent(provider="openai")
 
-# Use small local model (CPU-friendly, ~77MB)
-agent = create_agent(provider="local", model="google/flan-t5-small")
-
 # Use mock provider for testing
 agent = create_agent(provider="mock")
+
+# Use small local model (CPU-friendly, ~77MB)
+# ⚠️ Note: Local provider is currently not implemented. Use mock or external APIs.
+# agent = create_agent(provider="local", model="google/flan-t5-small")
 ```
 
 ### Interactive Demo
@@ -173,6 +176,9 @@ poetry run python src/run_evaluation.py
 Mathematical modeling of insight generation using Graph Edit Distance + Information Gain.
 
 ### 2. **Configurable Agent System**
+- Multiple agent implementations:
+  - **MainAgent**: Full-featured agent with in-memory storage
+  - **DataStoreAgent**: Scalable agent with transaction-based persistence
 - 6 operation modes: Basic, Enhanced, Query Transform, Advanced, Optimized, Graph-Centric
 - Feature toggles for fine-grained control
 - Production-ready with caching and async processing
@@ -399,6 +405,24 @@ config = InsightSpikeConfig(
     datastore={"type": "postgresql", "params": {...}}
 )
 agent = ConfigurableAgent(config=config)
+```
+
+### Using DataStoreAgent for Scalable Deployments
+
+```python
+from insightspike.implementations.agents.datastore_agent import DataStoreMainAgent
+from insightspike.implementations.datastore.sqlite_store import SQLiteDataStore
+
+# Create a persistent datastore
+datastore = SQLiteDataStore("knowledge.db")
+
+# Initialize DataStoreAgent for scalable, transaction-based processing
+agent = DataStoreMainAgent(datastore=datastore)
+
+# Process questions with automatic persistence
+result = agent.process("What is consciousness?")
+print(f"Response: {result['response']}")
+print(f"Spike detected: {result.get('has_spike', False)}")
 ```
 
 ### 📚 Full Documentation

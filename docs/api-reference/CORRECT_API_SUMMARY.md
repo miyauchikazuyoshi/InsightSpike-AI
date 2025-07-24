@@ -2,6 +2,18 @@
 
 Based on the actual implementation, here are the correct constructors and methods:
 
+## Quick Start Functions
+
+```python
+from insightspike import create_agent, quick_demo
+
+# Create agent with minimal configuration
+agent = create_agent(provider="openai")  # or "mock", "anthropic"
+
+# Run interactive demo
+quick_demo()
+```
+
 ## 1. EnvironmentState (from insightspike.core.interfaces.generic_interfaces)
 
 ```python
