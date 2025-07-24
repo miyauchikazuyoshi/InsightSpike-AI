@@ -57,16 +57,23 @@ if not LITE_MODE:
         from .implementations.layers.layer1_error_monitor import ErrorMonitor
         from .implementations.layers.layer2_memory_manager import L2MemoryManager
         from .implementations.layers.layer4_llm_interface import get_llm_provider
+        
+        # Quick start helpers for easy usage
+        from .quick_start import create_agent, quick_demo
     except ImportError:
         # Fallback if core layers are not available
         ErrorMonitor = None
         L2MemoryManager = None
         get_llm_provider = None
+        create_agent = None
+        quick_demo = None
 else:
     # In lite mode, skip heavy dependencies
     ErrorMonitor = None
     L2MemoryManager = None
     get_llm_provider = None
+    create_agent = None
+    quick_demo = None
 
 # Optional Layer3 with PyTorch dependency - skip in LITE_MODE
 if not LITE_MODE:

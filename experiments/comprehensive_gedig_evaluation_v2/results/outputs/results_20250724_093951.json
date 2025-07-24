@@ -1,0 +1,2436 @@
+{
+  "experiment_metadata": {
+    "timestamp": "2025-07-24T09:39:41.173342",
+    "seed": 42,
+    "config": {
+      "environment": "experiment",
+      "pre_warm_models": true,
+      "llm": {
+        "provider": "local",
+        "model": "distilgpt2",
+        "max_tokens": 512,
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "timeout": 30,
+        "api_base": null,
+        "device": "cpu",
+        "load_in_8bit": false,
+        "system_prompt": null
+      },
+      "embedding": {
+        "model_name": "sentence-transformers/all-MiniLM-L6-v2",
+        "dimension": 384,
+        "device": "cpu"
+      },
+      "memory": {
+        "max_retrieved_docs": 15,
+        "short_term_capacity": 10,
+        "working_memory_capacity": 20,
+        "episodic_memory_capacity": 100,
+        "pattern_cache_capacity": 15
+      },
+      "graph": {
+        "spike_ged_threshold": -0.4,
+        "spike_ig_threshold": 0.25,
+        "similarity_threshold": 0.35,
+        "use_gnn": false,
+        "gnn_hidden_dim": 64,
+        "ged_algorithm": "hybrid",
+        "ig_algorithm": "hybrid",
+        "hybrid_weights": {
+          "structure": 0.4,
+          "semantic": 0.4,
+          "quality": 0.2
+        },
+        "weight_ged": 0.5,
+        "weight_ig": 0.5,
+        "temperature": 1.0
+      },
+      "monitoring": {
+        "enabled": true,
+        "performance_tracking": false,
+        "detailed_tracing": false,
+        "metrics_port": 9090
+      },
+      "logging": {
+        "level": "INFO",
+        "file_path": "/Users/miyauchikazuyoshi/.insightspike/logs",
+        "log_to_console": false,
+        "max_size_mb": 50,
+        "backup_count": 3
+      },
+      "paths": {
+        "data_dir": "data",
+        "raw_dir": "data/raw",
+        "processed_dir": "data/processed",
+        "embeddings_dir": "data/embeddings",
+        "cache_dir": "data/cache",
+        "models_dir": "data/models",
+        "logs_dir": "/Users/miyauchikazuyoshi/.insightspike/logs"
+      },
+      "processing": {
+        "batch_size": 32,
+        "max_workers": 4,
+        "chunk_size": 500,
+        "overlap": 50,
+        "min_chunk_size": 100
+      },
+      "output": {
+        "format": "json",
+        "include_reasoning": true,
+        "include_sources": true,
+        "max_sources": 5,
+        "max_context_length": 2000,
+        "max_documents": 10,
+        "include_metadata": true
+      }
+    }
+  },
+  "questions": [],
+  "raw_results": [
+    {
+      "question_id": "medium_038",
+      "question_text": "How does density change when water is compressed?",
+      "difficulty": "medium",
+      "category": "scientific",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": -1,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.12458610534667969,
+      "graph_stats": {
+        "nodes_before": 0,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_024",
+      "question_text": "What state of matter is oxygen at room temperature?",
+      "difficulty": "easy",
+      "category": "scientific",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.0596621036529541,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_012",
+      "question_text": "What is 1/5 + 5/2?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04732489585876465,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_016",
+      "question_text": "If it rains and the ground is dry, then what?",
+      "difficulty": "medium",
+      "category": "logical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04772210121154785,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_008",
+      "question_text": "What color is a apple?",
+      "difficulty": "easy",
+      "category": "conceptual",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04116511344909668,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_009",
+      "question_text": "Resolve the apparent contradiction: the more you learn, the more you realize you don't know yet knowledge is power",
+      "difficulty": "hard",
+      "category": "logical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.055062055587768555,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_005",
+      "question_text": "Explain the relationship between entropy, information, and complexity",
+      "difficulty": "hard",
+      "category": "scientific",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04718327522277832,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_010",
+      "question_text": "Explain the relationship between entropy, information, and complexity",
+      "difficulty": "hard",
+      "category": "scientific",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.0195770263671875,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_004",
+      "question_text": "If operation \u2605 is defined as a\u2605b = 2a + b - 1, what is 3\u26054?",
+      "difficulty": "hard",
+      "category": "mathematical",
+      "response": "This is a mock response for testing purposes.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.060801029205322266,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_021",
+      "question_text": "If operation \u2605 is defined as a\u2605b = 2a + b - 1, what is 3\u26054?",
+      "difficulty": "hard",
+      "category": "mathematical",
+      "response": "This is a mock response for testing purposes.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.026083946228027344,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_004",
+      "question_text": "seed is to tree as egg is to what?",
+      "difficulty": "medium",
+      "category": "analogical",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.12630677223205566,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_022",
+      "question_text": "If operation \u2605 is defined as a\u2605b = 2a + b - 1, what is 3\u26054?",
+      "difficulty": "hard",
+      "category": "mathematical",
+      "response": "This is a mock response for testing purposes.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.032926082611083984,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_012",
+      "question_text": "Why might 'understand' and 'stand under' be considered etymologically related?",
+      "difficulty": "hard",
+      "category": "linguistic",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.18249797821044922,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_011",
+      "question_text": "What is 4/3 + 3/5?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.055074214935302734,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_014",
+      "question_text": "What is 4 \u00d7 0.2?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.0453341007232666,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_001",
+      "question_text": "If operation \u2605 is defined as a\u2605b = 2a + b - 1, what is 3\u26054?",
+      "difficulty": "hard",
+      "category": "mathematical",
+      "response": "This is a mock response for testing purposes.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.018706321716308594,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_049",
+      "question_text": "What does 'spill the beans' mean?",
+      "difficulty": "medium",
+      "category": "linguistic",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04843497276306152,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_019",
+      "question_text": "How does density change when metal is cooled?",
+      "difficulty": "medium",
+      "category": "scientific",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.05931591987609863,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_004",
+      "question_text": "What is 3 + 7?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "response": "This is a mock response for testing purposes.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.06330990791320801,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_025",
+      "question_text": "If operation \u2605 is defined as a\u2605b = 2a + b - 1, what is 3\u26054?",
+      "difficulty": "hard",
+      "category": "mathematical",
+      "response": "This is a mock response for testing purposes.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.029439210891723633,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_024",
+      "question_text": "What is 2/4 + 2/2?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.08930015563964844,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_006",
+      "question_text": "Why might 'understand' and 'stand under' be considered etymologically related?",
+      "difficulty": "hard",
+      "category": "linguistic",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.037467241287231445,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_008",
+      "question_text": "If it rains and the ground is dry, then what?",
+      "difficulty": "medium",
+      "category": "logical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04332113265991211,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_010",
+      "question_text": "What does 'piece of cake' mean?",
+      "difficulty": "medium",
+      "category": "linguistic",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04636096954345703,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_003",
+      "question_text": "Why might 'understand' and 'stand under' be considered etymologically related?",
+      "difficulty": "hard",
+      "category": "linguistic",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.018275022506713867,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_040",
+      "question_text": "What is 3/5 + 2/7?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04639482498168945,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_035",
+      "question_text": "What is 10 \u00d7 0.2?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "response": "This is a mock response for testing purposes.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.045510053634643555,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_009",
+      "question_text": "What is the chemical symbol for silver?",
+      "difficulty": "easy",
+      "category": "scientific",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.043272972106933594,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_044",
+      "question_text": "What does 'break the ice' mean?",
+      "difficulty": "medium",
+      "category": "linguistic",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.044608116149902344,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_043",
+      "question_text": "What is 8 \u00d7 0.6?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.05245614051818848,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_003",
+      "question_text": "teacher is to student as doctor is to what?",
+      "difficulty": "medium",
+      "category": "analogical",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.13634729385375977,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_025",
+      "question_text": "What does 'spill the beans' mean?",
+      "difficulty": "medium",
+      "category": "linguistic",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.037301063537597656,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_033",
+      "question_text": "What is 4/2 + 5/3?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.046679019927978516,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_001",
+      "question_text": "How does density change when metal is cooled?",
+      "difficulty": "medium",
+      "category": "scientific",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.018475770950317383,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_017",
+      "question_text": "What happens to cactus in desert?",
+      "difficulty": "medium",
+      "category": "scientific",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04976010322570801,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_036",
+      "question_text": "seed is to tree as egg is to what?",
+      "difficulty": "medium",
+      "category": "analogical",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.01766204833984375,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_013",
+      "question_text": "What is 9 \u00d7 0.8?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04449105262756348,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_029",
+      "question_text": "What does 'spill the beans' mean?",
+      "difficulty": "medium",
+      "category": "linguistic",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.017981767654418945,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_042",
+      "question_text": "What happens to penguin in desert?",
+      "difficulty": "medium",
+      "category": "scientific",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04261493682861328,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_039",
+      "question_text": "painter is to canvas as writer is to what?",
+      "difficulty": "medium",
+      "category": "analogical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.0500798225402832,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_005",
+      "question_text": "teacher is to student as doctor is to what?",
+      "difficulty": "medium",
+      "category": "analogical",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.025506019592285156,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_013",
+      "question_text": "If all dogs are animals, and X is a dogs, what is X?",
+      "difficulty": "easy",
+      "category": "logical",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.06569814682006836,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_013",
+      "question_text": "Resolve the apparent contradiction: the more you learn, the more you realize you don't know yet knowledge is power",
+      "difficulty": "hard",
+      "category": "logical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.018388986587524414,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_041",
+      "question_text": "painter is to canvas as writer is to what?",
+      "difficulty": "medium",
+      "category": "analogical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.01883220672607422,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_003",
+      "question_text": "What is 9 + 4?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "response": "This is a mock response for testing purposes.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04584002494812012,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_025",
+      "question_text": "What color is a grass?",
+      "difficulty": "easy",
+      "category": "conceptual",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04263567924499512,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_007",
+      "question_text": "What is 1 \u00d7 4?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "response": "This is a mock response for testing purposes.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.1307389736175537,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_020",
+      "question_text": "seed is to tree as egg is to what?",
+      "difficulty": "medium",
+      "category": "analogical",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.020865917205810547,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_011",
+      "question_text": "What state of matter is iron at room temperature?",
+      "difficulty": "easy",
+      "category": "scientific",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04650235176086426,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_018",
+      "question_text": "What is 10 + 6?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.0471649169921875,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_016",
+      "question_text": "What is the plural of 'happy'?",
+      "difficulty": "easy",
+      "category": "linguistic",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.0468900203704834,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_017",
+      "question_text": "Why might 'understand' and 'stand under' be considered etymologically related?",
+      "difficulty": "hard",
+      "category": "linguistic",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.018776893615722656,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_034",
+      "question_text": "What does 'spill the beans' mean?",
+      "difficulty": "medium",
+      "category": "linguistic",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.01782083511352539,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_024",
+      "question_text": "Why might 'understand' and 'stand under' be considered etymologically related?",
+      "difficulty": "hard",
+      "category": "linguistic",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.01920008659362793,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_027",
+      "question_text": "painter is to canvas as writer is to what?",
+      "difficulty": "medium",
+      "category": "analogical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.019284963607788086,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_037",
+      "question_text": "What does 'spill the beans' mean?",
+      "difficulty": "medium",
+      "category": "linguistic",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.018603086471557617,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_026",
+      "question_text": "What does 'break the ice' mean?",
+      "difficulty": "medium",
+      "category": "linguistic",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.01725316047668457,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_022",
+      "question_text": "What state of matter is oxygen at room temperature?",
+      "difficulty": "easy",
+      "category": "scientific",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.01811981201171875,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_008",
+      "question_text": "If operation \u2605 is defined as a\u2605b = 2a + b - 1, what is 3\u26054?",
+      "difficulty": "hard",
+      "category": "mathematical",
+      "response": "This is a mock response for testing purposes.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.018119335174560547,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_012",
+      "question_text": "What is the plural of 'happy'?",
+      "difficulty": "easy",
+      "category": "linguistic",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.018162012100219727,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_014",
+      "question_text": "Explain the relationship between entropy, information, and complexity",
+      "difficulty": "hard",
+      "category": "scientific",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.018775224685668945,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_015",
+      "question_text": "Why might 'understand' and 'stand under' be considered etymologically related?",
+      "difficulty": "hard",
+      "category": "linguistic",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.018841028213500977,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_019",
+      "question_text": "Create an analogy between democracy and a garden",
+      "difficulty": "hard",
+      "category": "analogical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04501199722290039,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_023",
+      "question_text": "What is 2 + 1?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "response": "This is a mock response for testing purposes.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.1117100715637207,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_020",
+      "question_text": "Why might 'understand' and 'stand under' be considered etymologically related?",
+      "difficulty": "hard",
+      "category": "linguistic",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.026980161666870117,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_006",
+      "question_text": "What is 7 \u00d7 0.7?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04796624183654785,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_011",
+      "question_text": "Why might 'understand' and 'stand under' be considered etymologically related?",
+      "difficulty": "hard",
+      "category": "linguistic",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.019948720932006836,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_028",
+      "question_text": "What is 1 \u00d7 0.6?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.043534040451049805,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_048",
+      "question_text": "If it rains and the ground is dry, then what?",
+      "difficulty": "medium",
+      "category": "logical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.019585847854614258,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_014",
+      "question_text": "What is the chemical symbol for carbon?",
+      "difficulty": "easy",
+      "category": "scientific",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.0453639030456543,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_007",
+      "question_text": "If it rains and the ground is dry, then what?",
+      "difficulty": "medium",
+      "category": "logical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.019238948822021484,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_002",
+      "question_text": "If it rains and the ground is dry, then what?",
+      "difficulty": "medium",
+      "category": "logical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.019253015518188477,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_021",
+      "question_text": "If it rains and the ground is dry, then what?",
+      "difficulty": "medium",
+      "category": "logical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.0199129581451416,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_002",
+      "question_text": "Resolve the apparent contradiction: the more you learn, the more you realize you don't know yet knowledge is power",
+      "difficulty": "hard",
+      "category": "logical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.01963210105895996,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_022",
+      "question_text": "What does 'spill the beans' mean?",
+      "difficulty": "medium",
+      "category": "linguistic",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.01829075813293457,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_015",
+      "question_text": "What happens to penguin in desert?",
+      "difficulty": "medium",
+      "category": "scientific",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.01854395866394043,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_006",
+      "question_text": "What is 7 \u00d7 2?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "response": "This is a mock response for testing purposes.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.042337894439697266,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_023",
+      "question_text": "Create an analogy between democracy and a garden",
+      "difficulty": "hard",
+      "category": "analogical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.01918506622314453,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_031",
+      "question_text": "What is 1/6 + 1/7?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.13497090339660645,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_019",
+      "question_text": "What is 4 + 10?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04389476776123047,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_018",
+      "question_text": "Resolve the apparent contradiction: the more you learn, the more you realize you don't know yet knowledge is power",
+      "difficulty": "hard",
+      "category": "logical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.020292043685913086,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_050",
+      "question_text": "How does temperature change when gas is compressed?",
+      "difficulty": "medium",
+      "category": "scientific",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04645490646362305,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_023",
+      "question_text": "painter is to canvas as writer is to what?",
+      "difficulty": "medium",
+      "category": "analogical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.019880294799804688,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_005",
+      "question_text": "What is 7 \u00d7 2?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "response": "This is a mock response for testing purposes.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.01782083511352539,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_045",
+      "question_text": "What is 9 \u00d7 0.3?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04142117500305176,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_020",
+      "question_text": "What is the chemical symbol for silver?",
+      "difficulty": "easy",
+      "category": "scientific",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.01949000358581543,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_010",
+      "question_text": "What state of matter is water at room temperature?",
+      "difficulty": "easy",
+      "category": "scientific",
+      "response": "This is a mock response for testing purposes.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04612994194030762,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_015",
+      "question_text": "What is the plural of 'happy'?",
+      "difficulty": "easy",
+      "category": "linguistic",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.01858997344970703,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_002",
+      "question_text": "What is 10 \u00d7 7?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04471611976623535,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_047",
+      "question_text": "What is 3/4 + 2/5?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.1407639980316162,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_030",
+      "question_text": "What is 1/6 + 1/8?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.050527334213256836,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_016",
+      "question_text": "Explain the relationship between entropy, information, and complexity",
+      "difficulty": "hard",
+      "category": "scientific",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.018074989318847656,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_046",
+      "question_text": "How does volume change when metal is heated?",
+      "difficulty": "medium",
+      "category": "scientific",
+      "response": "This is a mock response for testing purposes.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.0440821647644043,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_032",
+      "question_text": "If it rains and the ground is dry, then what?",
+      "difficulty": "medium",
+      "category": "logical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.01861095428466797,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_021",
+      "question_text": "What state of matter is iron at room temperature?",
+      "difficulty": "easy",
+      "category": "scientific",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.01691889762878418,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_009",
+      "question_text": "What is 4 \u00d7 0.3?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04111003875732422,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "hard_007",
+      "question_text": "If operation \u2605 is defined as a\u2605b = 2a + b - 1, what is 3\u26054?",
+      "difficulty": "hard",
+      "category": "mathematical",
+      "response": "This is a mock response for testing purposes.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.017910003662109375,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_017",
+      "question_text": "What is 5 \u00d7 9?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "response": "This is a mock response for testing purposes.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04397296905517578,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "medium_018",
+      "question_text": "What happens to cactus in arctic?",
+      "difficulty": "medium",
+      "category": "scientific",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04268813133239746,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    },
+    {
+      "question_id": "easy_001",
+      "question_text": "What is 1 \u00d7 5?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "response": "This is a mock response for testing purposes.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2,
+        "has_insight": false
+      },
+      "processing_time": 0.04383206367492676,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 0
+      }
+    }
+  ],
+  "summary": {
+    "total_questions": 100,
+    "valid_results": 100,
+    "overall_accuracy": 1.0,
+    "difficulty_stats": {
+      "easy": {
+        "total": 25,
+        "correct": 25,
+        "accuracy": 1.0,
+        "avg_delta_ged": 0.0,
+        "avg_delta_ig": 0.0
+      },
+      "medium": {
+        "total": 50,
+        "correct": 50,
+        "accuracy": 1.0,
+        "avg_delta_ged": -0.02,
+        "avg_delta_ig": 0.0
+      },
+      "hard": {
+        "total": 25,
+        "correct": 25,
+        "accuracy": 1.0,
+        "avg_delta_ged": 0.0,
+        "avg_delta_ig": 0.0
+      }
+    },
+    "metrics_summary": {
+      "total_calculations": 200,
+      "delta_ged": {
+        "mean": -0.01,
+        "std": 0.09949874371066199,
+        "min": "-1",
+        "max": "0"
+      },
+      "delta_ig": {
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "avg_processing_time": 0.04299540519714355
+  }
+}

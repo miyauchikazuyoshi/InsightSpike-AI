@@ -73,7 +73,44 @@ The system detected deep connections across 5 hierarchical knowledge layers, dem
 
 ## 🚀 Quick Start
 
-### Google Colab (Recommended)
+### Python Code (Simplest)
+
+```python
+from insightspike import create_agent
+
+# Create agent with zero configuration
+agent = create_agent()
+
+# Add knowledge
+agent.add_knowledge("The Earth orbits around the Sun")
+agent.add_knowledge("Gravity causes objects to attract each other")
+
+# Ask questions
+result = agent.process_question("Why do planets move?")
+print(result.response)
+```
+
+### Different LLM Providers
+
+```python
+# Use OpenAI (requires OPENAI_API_KEY environment variable)
+agent = create_agent(provider="openai")
+
+# Use small local model (CPU-friendly, ~77MB)
+agent = create_agent(provider="local", model="google/flan-t5-small")
+
+# Use mock provider for testing
+agent = create_agent(provider="mock")
+```
+
+### Interactive Demo
+
+```python
+from insightspike import quick_demo
+quick_demo()  # Runs an interactive demonstration
+```
+
+### Google Colab (Full Features)
 
 **⚡ One-Step Setup:**
 
@@ -94,17 +131,28 @@ The system detected deep connections across 5 hierarchical knowledge layers, dem
 !python scripts/validation/complete_system_validation.py
 ```
 
-### Local Installation
+### Local Installation (Advanced)
 
 ```bash
 # Clone and install
 git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
 cd InsightSpike-AI
+
+# Basic installation
+pip install insightspike-ai
+
+# With specific provider support
+pip install insightspike-ai[openai]     # For OpenAI
+pip install insightspike-ai[local]      # For local models
+pip install insightspike-ai[all]        # Everything
+
+# Using Poetry (for development)
 poetry install
 poetry run python scripts/setup_models.py
 
-# Quick test
-poetry run spike demo
+# CLI usage
+spike demo
+spike query "What is consciousness?"
 ```
 
 ### 🚀 Try the Comprehensive geDIG Experiment

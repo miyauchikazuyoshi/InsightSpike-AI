@@ -1,0 +1,485 @@
+{
+  "experiment_metadata": {
+    "timestamp": "2025-07-24T12:57:03.944860",
+    "seed": 42,
+    "config": {
+      "environment": "experiment",
+      "pre_warm_models": true,
+      "llm": {
+        "provider": "local",
+        "model": "distilgpt2",
+        "max_tokens": 512,
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "timeout": 30,
+        "api_base": null,
+        "device": "cpu",
+        "load_in_8bit": false,
+        "system_prompt": null
+      },
+      "embedding": {
+        "model_name": "sentence-transformers/all-MiniLM-L6-v2",
+        "dimension": 384,
+        "device": "cpu"
+      },
+      "memory": {
+        "max_retrieved_docs": 15,
+        "short_term_capacity": 10,
+        "working_memory_capacity": 20,
+        "episodic_memory_capacity": 100,
+        "pattern_cache_capacity": 15
+      },
+      "graph": {
+        "spike_ged_threshold": -0.4,
+        "spike_ig_threshold": 0.25,
+        "similarity_threshold": 0.35,
+        "use_gnn": false,
+        "gnn_hidden_dim": 64,
+        "ged_algorithm": "hybrid",
+        "ig_algorithm": "hybrid",
+        "hybrid_weights": {
+          "structure": 0.4,
+          "semantic": 0.4,
+          "quality": 0.2
+        },
+        "weight_ged": 0.5,
+        "weight_ig": 0.5,
+        "temperature": 1.0
+      },
+      "monitoring": {
+        "enabled": true,
+        "performance_tracking": false,
+        "detailed_tracing": false,
+        "metrics_port": 9090
+      },
+      "logging": {
+        "level": "INFO",
+        "file_path": "/Users/miyauchikazuyoshi/.insightspike/logs",
+        "log_to_console": false,
+        "max_size_mb": 50,
+        "backup_count": 3
+      },
+      "paths": {
+        "data_dir": "data",
+        "raw_dir": "data/raw",
+        "processed_dir": "data/processed",
+        "embeddings_dir": "data/embeddings",
+        "cache_dir": "data/cache",
+        "models_dir": "data/models",
+        "logs_dir": "/Users/miyauchikazuyoshi/.insightspike/logs"
+      },
+      "processing": {
+        "batch_size": 32,
+        "max_workers": 4,
+        "chunk_size": 500,
+        "overlap": 50,
+        "min_chunk_size": 100
+      },
+      "output": {
+        "format": "json",
+        "include_reasoning": true,
+        "include_sources": true,
+        "max_sources": 5,
+        "max_context_length": 2000,
+        "max_documents": 10,
+        "include_metadata": true
+      }
+    }
+  },
+  "questions": [],
+  "raw_results": [
+    {
+      "question_id": "medium_001",
+      "question_text": "If it rains and the ground is dry, then what?",
+      "difficulty": "medium",
+      "category": "logical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 1.0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.4,
+        "ig_threshold": 0.25,
+        "has_insight": false,
+        "ged_stats": {
+          "total_calculations": 1,
+          "total_computation_time": 0.0007870197296142578,
+          "average_computation_time": 0.0007870197296142578,
+          "approximation_count": 0,
+          "approximation_rate": 0.0,
+          "optimization_level": "standard",
+          "node_cost": 1.0,
+          "edge_cost": 1.0
+        }
+      },
+      "processing_time": 0.06503701210021973,
+      "graph_stats": {
+        "nodes_before": 0,
+        "edges_before": 0,
+        "nodes_after": 1,
+        "edges_after": 1
+      }
+    },
+    {
+      "question_id": "medium_005",
+      "question_text": "If it rains and the ground is dry, then what?",
+      "difficulty": "medium",
+      "category": "logical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0.0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.4,
+        "ig_threshold": 0.25,
+        "has_insight": false,
+        "ged_stats": {
+          "total_calculations": 2,
+          "total_computation_time": 0.0015659332275390625,
+          "average_computation_time": 0.0007829666137695312,
+          "approximation_count": 0,
+          "approximation_rate": 0.0,
+          "optimization_level": "standard",
+          "node_cost": 1.0,
+          "edge_cost": 1.0
+        }
+      },
+      "processing_time": 0.018043041229248047,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 1,
+        "nodes_after": 1,
+        "edges_after": 1
+      }
+    },
+    {
+      "question_id": "easy_001",
+      "question_text": "What is 1 \u00d7 5?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "response": "This is a mock response for testing purposes.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0.0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.4,
+        "ig_threshold": 0.25,
+        "has_insight": false,
+        "ged_stats": {
+          "total_calculations": 3,
+          "total_computation_time": 0.002415180206298828,
+          "average_computation_time": 0.000805060068766276,
+          "approximation_count": 0,
+          "approximation_rate": 0.0,
+          "optimization_level": "standard",
+          "node_cost": 1.0,
+          "edge_cost": 1.0
+        }
+      },
+      "processing_time": 0.045805931091308594,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 1,
+        "nodes_after": 1,
+        "edges_after": 1
+      }
+    },
+    {
+      "question_id": "medium_003",
+      "question_text": "What is 3 \u00d7 0.7?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "response": "Testing response: All systems operational.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0.0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.4,
+        "ig_threshold": 0.25,
+        "has_insight": false,
+        "ged_stats": {
+          "total_calculations": 4,
+          "total_computation_time": 0.0031502246856689453,
+          "average_computation_time": 0.0007875561714172363,
+          "approximation_count": 0,
+          "approximation_rate": 0.0,
+          "optimization_level": "standard",
+          "node_cost": 1.0,
+          "edge_cost": 1.0
+        }
+      },
+      "processing_time": 0.04196882247924805,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 1,
+        "nodes_after": 1,
+        "edges_after": 1
+      }
+    },
+    {
+      "question_id": "medium_002",
+      "question_text": "If it rains and the ground is dry, then what?",
+      "difficulty": "medium",
+      "category": "logical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0.0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.4,
+        "ig_threshold": 0.25,
+        "has_insight": false,
+        "ged_stats": {
+          "total_calculations": 5,
+          "total_computation_time": 0.0039031505584716797,
+          "average_computation_time": 0.0007806301116943359,
+          "approximation_count": 0,
+          "approximation_rate": 0.0,
+          "optimization_level": "standard",
+          "node_cost": 1.0,
+          "edge_cost": 1.0
+        }
+      },
+      "processing_time": 0.01766180992126465,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 1,
+        "nodes_after": 1,
+        "edges_after": 1
+      }
+    },
+    {
+      "question_id": "hard_001",
+      "question_text": "Why might 'understand' and 'stand under' be considered etymologically related?",
+      "difficulty": "hard",
+      "category": "linguistic",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0.0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.4,
+        "ig_threshold": 0.25,
+        "has_insight": false,
+        "ged_stats": {
+          "total_calculations": 6,
+          "total_computation_time": 0.004641294479370117,
+          "average_computation_time": 0.0007735490798950195,
+          "approximation_count": 0,
+          "approximation_rate": 0.0,
+          "optimization_level": "standard",
+          "node_cost": 1.0,
+          "edge_cost": 1.0
+        }
+      },
+      "processing_time": 0.053225040435791016,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 1,
+        "nodes_after": 1,
+        "edges_after": 1
+      }
+    },
+    {
+      "question_id": "easy_003",
+      "question_text": "What is 9 + 4?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "response": "This is a mock response for testing purposes.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0.0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.4,
+        "ig_threshold": 0.25,
+        "has_insight": false,
+        "ged_stats": {
+          "total_calculations": 7,
+          "total_computation_time": 0.005417346954345703,
+          "average_computation_time": 0.0007739067077636719,
+          "approximation_count": 0,
+          "approximation_rate": 0.0,
+          "optimization_level": "standard",
+          "node_cost": 1.0,
+          "edge_cost": 1.0
+        }
+      },
+      "processing_time": 0.04048514366149902,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 1,
+        "nodes_after": 1,
+        "edges_after": 1
+      }
+    },
+    {
+      "question_id": "hard_002",
+      "question_text": "If operation \u2605 is defined as a\u2605b = 2a + b - 1, what is 3\u26054?",
+      "difficulty": "hard",
+      "category": "mathematical",
+      "response": "This is a mock response for testing purposes.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0.0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.4,
+        "ig_threshold": 0.25,
+        "has_insight": false,
+        "ged_stats": {
+          "total_calculations": 8,
+          "total_computation_time": 0.006185293197631836,
+          "average_computation_time": 0.0007731616497039795,
+          "approximation_count": 0,
+          "approximation_rate": 0.0,
+          "optimization_level": "standard",
+          "node_cost": 1.0,
+          "edge_cost": 1.0
+        }
+      },
+      "processing_time": 0.05302071571350098,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 1,
+        "nodes_after": 1,
+        "edges_after": 1
+      }
+    },
+    {
+      "question_id": "medium_004",
+      "question_text": "How does density change when water is heated?",
+      "difficulty": "medium",
+      "category": "scientific",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0.0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.4,
+        "ig_threshold": 0.25,
+        "has_insight": false,
+        "ged_stats": {
+          "total_calculations": 9,
+          "total_computation_time": 0.006945371627807617,
+          "average_computation_time": 0.0007717079586452908,
+          "approximation_count": 0,
+          "approximation_rate": 0.0,
+          "optimization_level": "standard",
+          "node_cost": 1.0,
+          "edge_cost": 1.0
+        }
+      },
+      "processing_time": 0.04755401611328125,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 1,
+        "nodes_after": 1,
+        "edges_after": 1
+      }
+    },
+    {
+      "question_id": "easy_002",
+      "question_text": "What is 10 \u00d7 7?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "response": "The mock provider returns predetermined responses.",
+      "has_spike_detected": false,
+      "has_insight_metrics": false,
+      "metrics": {
+        "delta_ged": 0.0,
+        "delta_ig": 0.0,
+        "ged_threshold": -0.4,
+        "ig_threshold": 0.25,
+        "has_insight": false,
+        "ged_stats": {
+          "total_calculations": 10,
+          "total_computation_time": 0.0076961517333984375,
+          "average_computation_time": 0.0007696151733398438,
+          "approximation_count": 0,
+          "approximation_rate": 0.0,
+          "optimization_level": "standard",
+          "node_cost": 1.0,
+          "edge_cost": 1.0
+        }
+      },
+      "processing_time": 0.043766021728515625,
+      "graph_stats": {
+        "nodes_before": 1,
+        "edges_before": 1,
+        "nodes_after": 1,
+        "edges_after": 1
+      }
+    }
+  ],
+  "summary": {
+    "total_questions": 10,
+    "valid_results": 10,
+    "overall_accuracy": 1.0,
+    "difficulty_stats": {
+      "easy": {
+        "total": 3,
+        "correct": 3,
+        "accuracy": 1.0,
+        "avg_delta_ged": 0.0,
+        "avg_delta_ig": 0.0
+      },
+      "medium": {
+        "total": 5,
+        "correct": 5,
+        "accuracy": 1.0,
+        "avg_delta_ged": 0.2,
+        "avg_delta_ig": 0.0
+      },
+      "hard": {
+        "total": 2,
+        "correct": 2,
+        "accuracy": 1.0,
+        "avg_delta_ged": 0.0,
+        "avg_delta_ig": 0.0
+      }
+    },
+    "metrics_summary": {
+      "ged_calculator": {
+        "total_calculations": 10,
+        "total_computation_time": 0.0076961517333984375,
+        "average_computation_time": 0.0007696151733398438,
+        "approximation_count": 0,
+        "approximation_rate": 0.0,
+        "optimization_level": "standard",
+        "node_cost": 1.0,
+        "edge_cost": 1.0
+      },
+      "ig_calculator": {
+        "total_calculations": 10,
+        "total_computation_time": 5.340576171875e-05,
+        "average_computation_time": 5.340576171875e-06,
+        "approximation_count": 0,
+        "approximation_rate": 0.0,
+        "method": "clustering",
+        "k_clusters": 8,
+        "min_samples": 2
+      },
+      "delta_ged": {
+        "mean": 0.1,
+        "std": 0.30000000000000004,
+        "min": 0.0,
+        "max": 1.0
+      },
+      "delta_ig": {
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "avg_processing_time": 0.042656755447387694
+  }
+}

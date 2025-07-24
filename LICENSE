@@ -33,15 +33,23 @@ e) Military and Weapons: Development of weapons, military applications, or dual-
 f) Political Manipulation: Election interference, voter suppression, or manipulation of democratic processes
 g) Financial Crimes: Market manipulation, fraud schemes, or illegal financial activities
 h) Harm to Minors: Any application that could endanger, exploit, or negatively impact children
+i) Attention Economy Exploitation: Using the Software to maximize user engagement, create addictive behaviors, or exploit human attention for profit
+j) Thought Manipulation: Using insight detection to manipulate human thinking or decision-making without explicit consent
+k) Emotional Exploitation: Using the Software to exploit human emotions for commercial gain or to create dependency
 
 4. TECHNICAL REQUIREMENTS
-Users must implement the following safeguards:
+For commercial use, enterprise deployments, or public-facing applications, users MUST implement the following safeguards:
 a) Human Oversight: Maintain meaningful human supervision over the system's outputs
 b) Usage Logging: Record usage patterns, inputs, and outputs for accountability
 c) Bias Monitoring: Implement systems to detect and mitigate algorithmic bias
 d) Transparency Reporting: Publish regular reports on system usage and safeguards (for significant deployments)
 e) Misuse Detection: Deploy automated systems to detect potential misuse patterns
 f) Data Protection: Implement appropriate data security and privacy protection measures
+
+For personal, educational, or non-commercial research use:
+- The above requirements are RECOMMENDED best practices but not mandatory
+- However, users must still comply with all prohibited uses (Section 3)
+- We encourage responsible experimentation and learning
 
 5. ATTRIBUTION REQUIREMENTS
 Any use of the Software must include:

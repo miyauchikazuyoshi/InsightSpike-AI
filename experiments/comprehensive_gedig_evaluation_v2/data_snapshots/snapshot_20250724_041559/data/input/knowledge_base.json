@@ -1,0 +1,44 @@
+{
+  "associations": [
+    {
+      "id": "math_1",
+      "text": "Addition is combining numbers to get a sum"
+    },
+    {
+      "id": "math_2",
+      "text": "Multiplication is repeated addition"
+    },
+    {
+      "id": "math_3",
+      "text": "Division is splitting into equal parts"
+    },
+    {
+      "id": "math_4",
+      "text": "Fractions represent parts of a whole"
+    },
+    {
+      "id": "math_5",
+      "text": "Decimals are another way to write fractions"
+    },
+    {
+      "id": "sci_1",
+      "text": "Water freezes at 0 degrees Celsius"
+    },
+    {
+      "id": "sci_2",
+      "text": "Plants need sunlight for photosynthesis"
+    },
+    {
+      "id": "sci_3",
+      "text": "Gravity pulls objects toward Earth"
+    },
+    {
+      "id": "ling_1",
+      "text": "Nouns name people, places, or things"
+    },
+    {
+      "id": "ling_2",
+      "text": "Verbs describe actions or states"
+    }
+  ]
+}

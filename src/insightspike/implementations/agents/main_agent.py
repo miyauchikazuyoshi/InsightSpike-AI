@@ -647,11 +647,41 @@ class MainAgent:
         try:
             # Use L2MemoryManager's store_episode (which already handles graph updates)
             episode_idx = self.l2_memory.store_episode(text, c_value)
-            if episode_idx < 0:
-                raise Exception("Failed to store episode")
+            
+            # Handle different return types from store_episode
+            if episode_idx is None or (isinstance(episode_idx, int) and episode_idx < 0):
+                # Try alternative approach - create episode directly
+                logger.warning("store_episode failed, creating episode manually")
+                from insightspike.core.episode import Episode
+                
+                # Get embedding
+                embedding = None
+                if hasattr(self.l2_memory, 'embedding_model') and self.l2_memory.embedding_model:
+                    embeddings = self.l2_memory.embedding_model.encode(text)
+                    # encode returns 2D array, get first element
+                    if isinstance(embeddings, np.ndarray) and len(embeddings.shape) == 2:
+                        embedding = embeddings[0]
+                    else:
+                        embedding = embeddings
+                elif hasattr(self.l2_memory, '_get_embedding'):
+                    embedding = self.l2_memory._get_embedding(text)
+                
+                if embedding is not None:
+                    episode = Episode(
+                        text=text,
+                        vec=embedding,
+                        c=c_value,
+                        timestamp=time.time(),
+                        metadata={"c_value": c_value}
+                    )
+                    self.l2_memory.episodes.append(episode)
+                    episode_idx = len(self.l2_memory.episodes) - 1
+                else:
+                    raise Exception("Failed to create embedding for episode")
 
             # Get the last added episode
-            episode_idx = len(self.l2_memory.episodes) - 1
+            if episode_idx is None:
+                episode_idx = len(self.l2_memory.episodes) - 1
             episode = self.l2_memory.episodes[episode_idx]
             vector = episode.vec
 

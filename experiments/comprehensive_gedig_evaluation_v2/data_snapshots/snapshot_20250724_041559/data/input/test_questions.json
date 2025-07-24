@@ -1,0 +1,1674 @@
+{
+  "metadata": {
+    "total_questions": 100,
+    "difficulty_distribution": {
+      "easy": 25,
+      "medium": 50,
+      "hard": 25
+    },
+    "categories": [
+      "linguistic",
+      "conceptual",
+      "analogical",
+      "scientific",
+      "mathematical",
+      "logical"
+    ]
+  },
+  "questions": [
+    {
+      "id": "medium_038",
+      "text": "How does density change when water is compressed?",
+      "difficulty": "medium",
+      "category": "scientific",
+      "expected_associations": [
+        "density",
+        "water",
+        "compressed",
+        "relationship"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "easy_024",
+      "text": "What state of matter is oxygen at room temperature?",
+      "difficulty": "easy",
+      "category": "scientific",
+      "expected_associations": [
+        "oxygen",
+        "state",
+        "gas"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "medium_012",
+      "text": "What is 1/5 + 5/2?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "expected_associations": [
+        "fraction",
+        "addition",
+        "common denominator"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_016",
+      "text": "If it rains and the ground is dry, then what?",
+      "difficulty": "medium",
+      "category": "logical",
+      "expected_associations": [
+        "conditional",
+        "logic",
+        "the rain will wet the ground"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "easy_008",
+      "text": "What color is a apple?",
+      "difficulty": "easy",
+      "category": "conceptual",
+      "expected_associations": [
+        "apple",
+        "color",
+        "red"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "hard_009",
+      "text": "Resolve the apparent contradiction: the more you learn, the more you realize you don't know yet knowledge is power",
+      "difficulty": "hard",
+      "category": "logical",
+      "expected_associations": [
+        "paradox",
+        "resolution",
+        "perspective"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "hard_005",
+      "text": "Explain the relationship between entropy, information, and complexity",
+      "difficulty": "hard",
+      "category": "scientific",
+      "expected_associations": [
+        "entropy",
+        "information",
+        "complexity",
+        "systems thinking"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "hard_010",
+      "text": "Explain the relationship between entropy, information, and complexity",
+      "difficulty": "hard",
+      "category": "scientific",
+      "expected_associations": [
+        "entropy",
+        "information",
+        "complexity",
+        "systems thinking"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "hard_004",
+      "text": "If operation ★ is defined as a★b = 2a + b - 1, what is 3★4?",
+      "difficulty": "hard",
+      "category": "mathematical",
+      "expected_associations": [
+        "custom operation",
+        "abstract",
+        "pattern"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "hard_021",
+      "text": "If operation ★ is defined as a★b = 2a + b - 1, what is 3★4?",
+      "difficulty": "hard",
+      "category": "mathematical",
+      "expected_associations": [
+        "custom operation",
+        "abstract",
+        "pattern"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "medium_004",
+      "text": "seed is to tree as egg is to what?",
+      "difficulty": "medium",
+      "category": "analogical",
+      "expected_associations": [
+        "analogy",
+        "seed",
+        "tree",
+        "egg",
+        "bird"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "hard_022",
+      "text": "If operation ★ is defined as a★b = 2a + b - 1, what is 3★4?",
+      "difficulty": "hard",
+      "category": "mathematical",
+      "expected_associations": [
+        "custom operation",
+        "abstract",
+        "pattern"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "hard_012",
+      "text": "Why might 'understand' and 'stand under' be considered etymologically related?",
+      "difficulty": "hard",
+      "category": "linguistic",
+      "expected_associations": [
+        "etymology",
+        "semantics",
+        "etymologically related"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "medium_011",
+      "text": "What is 4/3 + 3/5?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "expected_associations": [
+        "fraction",
+        "addition",
+        "common denominator"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_014",
+      "text": "What is 4 × 0.2?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "expected_associations": [
+        "multiplication",
+        "decimal",
+        "0.8"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "hard_001",
+      "text": "If operation ★ is defined as a★b = 2a + b - 1, what is 3★4?",
+      "difficulty": "hard",
+      "category": "mathematical",
+      "expected_associations": [
+        "custom operation",
+        "abstract",
+        "pattern"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "medium_049",
+      "text": "What does 'spill the beans' mean?",
+      "difficulty": "medium",
+      "category": "linguistic",
+      "expected_associations": [
+        "spill the beans",
+        "figurative",
+        "reveal a secret"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_019",
+      "text": "How does density change when metal is cooled?",
+      "difficulty": "medium",
+      "category": "scientific",
+      "expected_associations": [
+        "density",
+        "metal",
+        "cooled",
+        "relationship"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "easy_004",
+      "text": "What is 3 + 7?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "expected_associations": [
+        "addition",
+        "sum",
+        "10"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "hard_025",
+      "text": "If operation ★ is defined as a★b = 2a + b - 1, what is 3★4?",
+      "difficulty": "hard",
+      "category": "mathematical",
+      "expected_associations": [
+        "custom operation",
+        "abstract",
+        "pattern"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "medium_024",
+      "text": "What is 2/4 + 2/2?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "expected_associations": [
+        "fraction",
+        "addition",
+        "common denominator"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "hard_006",
+      "text": "Why might 'understand' and 'stand under' be considered etymologically related?",
+      "difficulty": "hard",
+      "category": "linguistic",
+      "expected_associations": [
+        "etymology",
+        "semantics",
+        "etymologically related"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "medium_008",
+      "text": "If it rains and the ground is dry, then what?",
+      "difficulty": "medium",
+      "category": "logical",
+      "expected_associations": [
+        "conditional",
+        "logic",
+        "the rain will wet the ground"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_010",
+      "text": "What does 'piece of cake' mean?",
+      "difficulty": "medium",
+      "category": "linguistic",
+      "expected_associations": [
+        "piece of cake",
+        "figurative",
+        "very easy"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "hard_003",
+      "text": "Why might 'understand' and 'stand under' be considered etymologically related?",
+      "difficulty": "hard",
+      "category": "linguistic",
+      "expected_associations": [
+        "etymology",
+        "semantics",
+        "etymologically related"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "medium_040",
+      "text": "What is 3/5 + 2/7?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "expected_associations": [
+        "fraction",
+        "addition",
+        "common denominator"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_035",
+      "text": "What is 10 × 0.2?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "expected_associations": [
+        "multiplication",
+        "decimal",
+        "2.0"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "easy_009",
+      "text": "What is the chemical symbol for silver?",
+      "difficulty": "easy",
+      "category": "scientific",
+      "expected_associations": [
+        "silver",
+        "chemistry",
+        "Ag"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "medium_044",
+      "text": "What does 'break the ice' mean?",
+      "difficulty": "medium",
+      "category": "linguistic",
+      "expected_associations": [
+        "break the ice",
+        "figurative",
+        "start a conversation"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_043",
+      "text": "What is 8 × 0.6?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "expected_associations": [
+        "multiplication",
+        "decimal",
+        "4.8"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_003",
+      "text": "teacher is to student as doctor is to what?",
+      "difficulty": "medium",
+      "category": "analogical",
+      "expected_associations": [
+        "analogy",
+        "teacher",
+        "student",
+        "doctor",
+        "patient"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_025",
+      "text": "What does 'spill the beans' mean?",
+      "difficulty": "medium",
+      "category": "linguistic",
+      "expected_associations": [
+        "spill the beans",
+        "figurative",
+        "reveal a secret"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_033",
+      "text": "What is 4/2 + 5/3?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "expected_associations": [
+        "fraction",
+        "addition",
+        "common denominator"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_001",
+      "text": "How does density change when metal is cooled?",
+      "difficulty": "medium",
+      "category": "scientific",
+      "expected_associations": [
+        "density",
+        "metal",
+        "cooled",
+        "relationship"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_017",
+      "text": "What happens to cactus in desert?",
+      "difficulty": "medium",
+      "category": "scientific",
+      "expected_associations": [
+        "cactus",
+        "desert",
+        "adaptation"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_036",
+      "text": "seed is to tree as egg is to what?",
+      "difficulty": "medium",
+      "category": "analogical",
+      "expected_associations": [
+        "analogy",
+        "seed",
+        "tree",
+        "egg",
+        "bird"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_013",
+      "text": "What is 9 × 0.8?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "expected_associations": [
+        "multiplication",
+        "decimal",
+        "7.2"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_029",
+      "text": "What does 'spill the beans' mean?",
+      "difficulty": "medium",
+      "category": "linguistic",
+      "expected_associations": [
+        "spill the beans",
+        "figurative",
+        "reveal a secret"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_042",
+      "text": "What happens to penguin in desert?",
+      "difficulty": "medium",
+      "category": "scientific",
+      "expected_associations": [
+        "penguin",
+        "desert",
+        "adaptation"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_039",
+      "text": "painter is to canvas as writer is to what?",
+      "difficulty": "medium",
+      "category": "analogical",
+      "expected_associations": [
+        "analogy",
+        "painter",
+        "canvas",
+        "writer",
+        "paper"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_005",
+      "text": "teacher is to student as doctor is to what?",
+      "difficulty": "medium",
+      "category": "analogical",
+      "expected_associations": [
+        "analogy",
+        "teacher",
+        "student",
+        "doctor",
+        "patient"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "easy_013",
+      "text": "If all dogs are animals, and X is a dogs, what is X?",
+      "difficulty": "easy",
+      "category": "logical",
+      "expected_associations": [
+        "dogs",
+        "animals",
+        "syllogism"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "hard_013",
+      "text": "Resolve the apparent contradiction: the more you learn, the more you realize you don't know yet knowledge is power",
+      "difficulty": "hard",
+      "category": "logical",
+      "expected_associations": [
+        "paradox",
+        "resolution",
+        "perspective"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "medium_041",
+      "text": "painter is to canvas as writer is to what?",
+      "difficulty": "medium",
+      "category": "analogical",
+      "expected_associations": [
+        "analogy",
+        "painter",
+        "canvas",
+        "writer",
+        "paper"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "easy_003",
+      "text": "What is 9 + 4?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "expected_associations": [
+        "addition",
+        "sum",
+        "13"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "easy_025",
+      "text": "What color is a grass?",
+      "difficulty": "easy",
+      "category": "conceptual",
+      "expected_associations": [
+        "grass",
+        "color",
+        "green"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "easy_007",
+      "text": "What is 1 × 4?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "expected_associations": [
+        "multiplication",
+        "product",
+        "4"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "medium_020",
+      "text": "seed is to tree as egg is to what?",
+      "difficulty": "medium",
+      "category": "analogical",
+      "expected_associations": [
+        "analogy",
+        "seed",
+        "tree",
+        "egg",
+        "bird"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "easy_011",
+      "text": "What state of matter is iron at room temperature?",
+      "difficulty": "easy",
+      "category": "scientific",
+      "expected_associations": [
+        "iron",
+        "state",
+        "solid"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "easy_018",
+      "text": "What is 10 + 6?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "expected_associations": [
+        "addition",
+        "sum",
+        "16"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "easy_016",
+      "text": "What is the plural of 'happy'?",
+      "difficulty": "easy",
+      "category": "linguistic",
+      "expected_associations": [
+        "happy",
+        "plural",
+        "happies"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "hard_017",
+      "text": "Why might 'understand' and 'stand under' be considered etymologically related?",
+      "difficulty": "hard",
+      "category": "linguistic",
+      "expected_associations": [
+        "etymology",
+        "semantics",
+        "etymologically related"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "medium_034",
+      "text": "What does 'spill the beans' mean?",
+      "difficulty": "medium",
+      "category": "linguistic",
+      "expected_associations": [
+        "spill the beans",
+        "figurative",
+        "reveal a secret"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "hard_024",
+      "text": "Why might 'understand' and 'stand under' be considered etymologically related?",
+      "difficulty": "hard",
+      "category": "linguistic",
+      "expected_associations": [
+        "etymology",
+        "semantics",
+        "etymologically related"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "medium_027",
+      "text": "painter is to canvas as writer is to what?",
+      "difficulty": "medium",
+      "category": "analogical",
+      "expected_associations": [
+        "analogy",
+        "painter",
+        "canvas",
+        "writer",
+        "paper"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_037",
+      "text": "What does 'spill the beans' mean?",
+      "difficulty": "medium",
+      "category": "linguistic",
+      "expected_associations": [
+        "spill the beans",
+        "figurative",
+        "reveal a secret"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_026",
+      "text": "What does 'break the ice' mean?",
+      "difficulty": "medium",
+      "category": "linguistic",
+      "expected_associations": [
+        "break the ice",
+        "figurative",
+        "start a conversation"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "easy_022",
+      "text": "What state of matter is oxygen at room temperature?",
+      "difficulty": "easy",
+      "category": "scientific",
+      "expected_associations": [
+        "oxygen",
+        "state",
+        "gas"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "hard_008",
+      "text": "If operation ★ is defined as a★b = 2a + b - 1, what is 3★4?",
+      "difficulty": "hard",
+      "category": "mathematical",
+      "expected_associations": [
+        "custom operation",
+        "abstract",
+        "pattern"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "easy_012",
+      "text": "What is the plural of 'happy'?",
+      "difficulty": "easy",
+      "category": "linguistic",
+      "expected_associations": [
+        "happy",
+        "plural",
+        "happies"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "hard_014",
+      "text": "Explain the relationship between entropy, information, and complexity",
+      "difficulty": "hard",
+      "category": "scientific",
+      "expected_associations": [
+        "entropy",
+        "information",
+        "complexity",
+        "systems thinking"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "hard_015",
+      "text": "Why might 'understand' and 'stand under' be considered etymologically related?",
+      "difficulty": "hard",
+      "category": "linguistic",
+      "expected_associations": [
+        "etymology",
+        "semantics",
+        "etymologically related"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "hard_019",
+      "text": "Create an analogy between democracy and a garden",
+      "difficulty": "hard",
+      "category": "analogical",
+      "expected_associations": [
+        "creativity",
+        "democracy",
+        "a garden",
+        "mapping"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "easy_023",
+      "text": "What is 2 + 1?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "expected_associations": [
+        "addition",
+        "sum",
+        "3"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "hard_020",
+      "text": "Why might 'understand' and 'stand under' be considered etymologically related?",
+      "difficulty": "hard",
+      "category": "linguistic",
+      "expected_associations": [
+        "etymology",
+        "semantics",
+        "etymologically related"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "medium_006",
+      "text": "What is 7 × 0.7?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "expected_associations": [
+        "multiplication",
+        "decimal",
+        "4.8999999999999995"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "hard_011",
+      "text": "Why might 'understand' and 'stand under' be considered etymologically related?",
+      "difficulty": "hard",
+      "category": "linguistic",
+      "expected_associations": [
+        "etymology",
+        "semantics",
+        "etymologically related"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "medium_028",
+      "text": "What is 1 × 0.6?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "expected_associations": [
+        "multiplication",
+        "decimal",
+        "0.6"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_048",
+      "text": "If it rains and the ground is dry, then what?",
+      "difficulty": "medium",
+      "category": "logical",
+      "expected_associations": [
+        "conditional",
+        "logic",
+        "the rain will wet the ground"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "easy_014",
+      "text": "What is the chemical symbol for carbon?",
+      "difficulty": "easy",
+      "category": "scientific",
+      "expected_associations": [
+        "carbon",
+        "chemistry",
+        "C"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "medium_007",
+      "text": "If it rains and the ground is dry, then what?",
+      "difficulty": "medium",
+      "category": "logical",
+      "expected_associations": [
+        "conditional",
+        "logic",
+        "the rain will wet the ground"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_002",
+      "text": "If it rains and the ground is dry, then what?",
+      "difficulty": "medium",
+      "category": "logical",
+      "expected_associations": [
+        "conditional",
+        "logic",
+        "the rain will wet the ground"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_021",
+      "text": "If it rains and the ground is dry, then what?",
+      "difficulty": "medium",
+      "category": "logical",
+      "expected_associations": [
+        "conditional",
+        "logic",
+        "the rain will wet the ground"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "hard_002",
+      "text": "Resolve the apparent contradiction: the more you learn, the more you realize you don't know yet knowledge is power",
+      "difficulty": "hard",
+      "category": "logical",
+      "expected_associations": [
+        "paradox",
+        "resolution",
+        "perspective"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "medium_022",
+      "text": "What does 'spill the beans' mean?",
+      "difficulty": "medium",
+      "category": "linguistic",
+      "expected_associations": [
+        "spill the beans",
+        "figurative",
+        "reveal a secret"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_015",
+      "text": "What happens to penguin in desert?",
+      "difficulty": "medium",
+      "category": "scientific",
+      "expected_associations": [
+        "penguin",
+        "desert",
+        "adaptation"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "easy_006",
+      "text": "What is 7 × 2?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "expected_associations": [
+        "multiplication",
+        "product",
+        "14"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "hard_023",
+      "text": "Create an analogy between democracy and a garden",
+      "difficulty": "hard",
+      "category": "analogical",
+      "expected_associations": [
+        "creativity",
+        "democracy",
+        "a garden",
+        "mapping"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "medium_031",
+      "text": "What is 1/6 + 1/7?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "expected_associations": [
+        "fraction",
+        "addition",
+        "common denominator"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "easy_019",
+      "text": "What is 4 + 10?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "expected_associations": [
+        "addition",
+        "sum",
+        "14"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "hard_018",
+      "text": "Resolve the apparent contradiction: the more you learn, the more you realize you don't know yet knowledge is power",
+      "difficulty": "hard",
+      "category": "logical",
+      "expected_associations": [
+        "paradox",
+        "resolution",
+        "perspective"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "medium_050",
+      "text": "How does temperature change when gas is compressed?",
+      "difficulty": "medium",
+      "category": "scientific",
+      "expected_associations": [
+        "temperature",
+        "gas",
+        "compressed",
+        "relationship"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_023",
+      "text": "painter is to canvas as writer is to what?",
+      "difficulty": "medium",
+      "category": "analogical",
+      "expected_associations": [
+        "analogy",
+        "painter",
+        "canvas",
+        "writer",
+        "paper"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "easy_005",
+      "text": "What is 7 × 2?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "expected_associations": [
+        "multiplication",
+        "product",
+        "14"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "medium_045",
+      "text": "What is 9 × 0.3?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "expected_associations": [
+        "multiplication",
+        "decimal",
+        "2.6999999999999997"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "easy_020",
+      "text": "What is the chemical symbol for silver?",
+      "difficulty": "easy",
+      "category": "scientific",
+      "expected_associations": [
+        "silver",
+        "chemistry",
+        "Ag"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "easy_010",
+      "text": "What state of matter is water at room temperature?",
+      "difficulty": "easy",
+      "category": "scientific",
+      "expected_associations": [
+        "water",
+        "state",
+        "liquid"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "easy_015",
+      "text": "What is the plural of 'happy'?",
+      "difficulty": "easy",
+      "category": "linguistic",
+      "expected_associations": [
+        "happy",
+        "plural",
+        "happies"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "easy_002",
+      "text": "What is 10 × 7?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "expected_associations": [
+        "multiplication",
+        "product",
+        "70"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "medium_047",
+      "text": "What is 3/4 + 2/5?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "expected_associations": [
+        "fraction",
+        "addition",
+        "common denominator"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_030",
+      "text": "What is 1/6 + 1/8?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "expected_associations": [
+        "fraction",
+        "addition",
+        "common denominator"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "hard_016",
+      "text": "Explain the relationship between entropy, information, and complexity",
+      "difficulty": "hard",
+      "category": "scientific",
+      "expected_associations": [
+        "entropy",
+        "information",
+        "complexity",
+        "systems thinking"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "medium_046",
+      "text": "How does volume change when metal is heated?",
+      "difficulty": "medium",
+      "category": "scientific",
+      "expected_associations": [
+        "volume",
+        "metal",
+        "heated",
+        "relationship"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "medium_032",
+      "text": "If it rains and the ground is dry, then what?",
+      "difficulty": "medium",
+      "category": "logical",
+      "expected_associations": [
+        "conditional",
+        "logic",
+        "the rain will wet the ground"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "easy_021",
+      "text": "What state of matter is iron at room temperature?",
+      "difficulty": "easy",
+      "category": "scientific",
+      "expected_associations": [
+        "iron",
+        "state",
+        "solid"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "medium_009",
+      "text": "What is 4 × 0.3?",
+      "difficulty": "medium",
+      "category": "mathematical",
+      "expected_associations": [
+        "multiplication",
+        "decimal",
+        "1.2"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "hard_007",
+      "text": "If operation ★ is defined as a★b = 2a + b - 1, what is 3★4?",
+      "difficulty": "hard",
+      "category": "mathematical",
+      "expected_associations": [
+        "custom operation",
+        "abstract",
+        "pattern"
+      ],
+      "complexity_features": {
+        "hops": 3,
+        "abstract": true,
+        "requires_combination": true,
+        "requires_creativity": true
+      }
+    },
+    {
+      "id": "easy_017",
+      "text": "What is 5 × 9?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "expected_associations": [
+        "multiplication",
+        "product",
+        "45"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    },
+    {
+      "id": "medium_018",
+      "text": "What happens to cactus in arctic?",
+      "difficulty": "medium",
+      "category": "scientific",
+      "expected_associations": [
+        "cactus",
+        "arctic",
+        "adaptation"
+      ],
+      "complexity_features": {
+        "hops": 2,
+        "abstract": true,
+        "requires_combination": true
+      }
+    },
+    {
+      "id": "easy_001",
+      "text": "What is 1 × 5?",
+      "difficulty": "easy",
+      "category": "mathematical",
+      "expected_associations": [
+        "multiplication",
+        "product",
+        "5"
+      ],
+      "complexity_features": {
+        "hops": 1,
+        "abstract": false,
+        "requires_combination": false
+      }
+    }
+  ]
+}

@@ -83,7 +83,14 @@ class DataStoreMainAgent:
             )
 
             # Initialize LLM interface
-            self.llm = L4LLMInterface(config=self.config)
+            try:
+                self.llm = L4LLMInterface(config=self.config)
+                if not self.llm.initialize():
+                    logger.warning("LLM interface initialization failed, using None")
+                    self.llm = None
+            except Exception as e:
+                logger.warning(f"Failed to initialize LLM: {e}")
+                self.llm = None
 
             # Initialize spike detector
             # EurekaDetector doesn't take config directly
@@ -132,14 +139,19 @@ class DataStoreMainAgent:
                 return {"error": "Failed to store episode"}
 
             # Phase 2: Search for related episodes
+            # Use max_retrieved_docs from config, or fallback to 10
+            search_k = getattr(self.config.memory, 'search_k', None)
+            if search_k is None:
+                search_k = getattr(self.config.memory, 'max_retrieved_docs', 10)
+            
             related_episodes = self.memory_manager.search_episodes(
-                query=text, k=self.config.memory.search_k
+                query=text, k=search_k
             )
 
             # Phase 3: Detect insights/spikes
             spike_result = self._detect_spike(text, related_episodes)
 
-            # Phase 4: Generate reasoning (if spike detected)
+            # Phase 4: Generate reasoning (if spike detected) and response
             reasoning = None
             if spike_result.get("has_spike", False):
                 reasoning = self._generate_reasoning(
@@ -147,6 +159,13 @@ class DataStoreMainAgent:
                     spike_info=spike_result,
                     related_episodes=related_episodes,
                 )
+            
+            # Always generate a response to the question
+            response = self._generate_response(
+                text=text,
+                related_episodes=related_episodes,
+                spike_info=spike_result if spike_result.get("has_spike") else None
+            )
 
             # Phase 5: Update episode with results
             if spike_result.get("has_spike", False):
@@ -159,6 +178,7 @@ class DataStoreMainAgent:
             result = {
                 "episode_id": episode_id,
                 "text": text,
+                "response": response,  # Add the actual answer
                 "has_spike": spike_result.get("has_spike", False),
                 "spike_info": spike_result,
                 "reasoning": reasoning,
@@ -237,6 +257,45 @@ class DataStoreMainAgent:
         prompt_parts.append("\nExplain the insight in 2-3 sentences.")
 
         return "\n".join(prompt_parts)
+
+    def _generate_response(
+        self, text: str, related_episodes: List[Dict], spike_info: Optional[Dict] = None
+    ) -> str:
+        """Generate LLM response to the question"""
+        try:
+            # Build context from related episodes
+            context_parts = []
+            for ep in related_episodes[:3]:  # Use top 3 most relevant
+                ep_text = ep.get("text", "")
+                if ep_text:
+                    context_parts.append(ep_text)
+            
+            context_text = "\n".join(context_parts) if context_parts else "No relevant context found."
+            
+            # Create prompt
+            prompt = f"""Based on the following context, answer the question.
+
+Context:
+{context_text}
+
+Question: {text}
+
+Answer:"""
+            
+            # Generate response using LLM
+            if self.llm:
+                response = self.llm.generate(prompt, max_tokens=200)
+                return response
+            else:
+                # Fallback response
+                if context_parts:
+                    return f"Based on the available information: {context_parts[0][:100]}..."
+                else:
+                    return "I don't have enough information to answer this question."
+        
+        except Exception as e:
+            logger.error(f"Response generation failed: {e}")
+            return f"Error generating response: {str(e)}"
 
     def search(self, query: str, k: int = 10) -> List[Dict[str, Any]]:
         """

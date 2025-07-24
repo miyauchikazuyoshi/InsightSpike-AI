@@ -194,6 +194,9 @@ class LLMConfig:
 
         elif provider_type == LLMProviderType.LOCAL:
             config.model_name = kwargs.get("model_name", "distilgpt2")
+            # Support for TinyLlama
+            if config.model_name.lower() == "tinyllama":
+                config.model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
             if torch.cuda.is_available():
                 config.device = "cuda"
 
@@ -639,8 +642,24 @@ class L4LLMInterface:
             return False
 
         try:
+            # Set cache directory for HuggingFace models
+            import os
+            cache_dir = os.path.expanduser("~/.cache/huggingface")
+            os.makedirs(cache_dir, exist_ok=True)
+            
+            # Enable progress bars and detailed logging
+            from transformers import logging as transformers_logging
+            transformers_logging.set_verbosity_info()
+            
             # Load tokenizer and model
-            self.tokenizer = AutoTokenizer.from_pretrained(self.config.model_name)
+            logger.info(f"Loading tokenizer for {self.config.model_name}...")
+            logger.info(f"Cache directory: {cache_dir}")
+            
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                self.config.model_name,
+                cache_dir=cache_dir,
+                trust_remote_code=True  # Required for some models like TinyLlama
+            )
 
             # Set padding token if not present
             if self.tokenizer.pad_token is None:
@@ -648,12 +667,19 @@ class L4LLMInterface:
 
             # Load model with appropriate settings
             model_kwargs = {
-                "device_map": "auto" if self.config.device == "cuda" else None
+                "cache_dir": cache_dir,
+                "device_map": "auto" if self.config.device == "cuda" else None,
+                "low_cpu_mem_usage": True,  # Add this for better memory efficiency
+                "trust_remote_code": True,
             }
 
             if self.config.load_in_8bit and self.config.device == "cuda":
                 model_kwargs["load_in_8bit"] = True
 
+            logger.info(f"Loading model {self.config.model_name}...")
+            logger.info("This may take several minutes for first-time download.")
+            logger.info("Model will be cached for future use.")
+            
             self.model = AutoModelForCausalLM.from_pretrained(
                 self.config.model_name, **model_kwargs
             )
@@ -664,19 +690,31 @@ class L4LLMInterface:
 
             self.initialized = True
             logger.info(
-                f"Local model {self.config.model_name} loaded on {self.config.device}"
+                f"Local model {self.config.model_name} loaded successfully on {self.config.device}"
             )
             return True
 
         except Exception as e:
             logger.error(f"Failed to load local model: {e}")
+            logger.error(f"Full error details: {str(e)}")
+            logger.info("Tips:")
+            logger.info("1. For TinyLlama, first-time download may take 10-20 minutes")
+            logger.info("2. Consider using distilgpt2 for faster testing")
+            logger.info("3. Ensure you have enough disk space (~2GB for TinyLlama)")
             return False
 
     def _generate_local(self, prompt: str) -> Dict[str, Any]:
         """Generate using local transformers model"""
+        # Check if TinyLlama and format prompt accordingly
+        if "tinyllama" in self.config.model_name.lower():
+            # TinyLlama uses a specific chat format
+            formatted_prompt = f"<|system|>\nYou are a helpful AI assistant.\n</s>\n<|user|>\n{prompt}\n</s>\n<|assistant|>"
+        else:
+            formatted_prompt = prompt
+        
         # Tokenize
         inputs = self.tokenizer(
-            prompt, return_tensors="pt", max_length=512, truncation=True, padding=True
+            formatted_prompt, return_tensors="pt", max_length=512, truncation=True, padding=True
         )
 
         # Move to device
@@ -697,9 +735,11 @@ class L4LLMInterface:
         # Decode
         response = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-        # Remove prompt from response
-        if response.startswith(prompt):
-            response = response[len(prompt) :].strip()
+        # Extract assistant response for TinyLlama
+        if "tinyllama" in self.config.model_name.lower() and "<|assistant|>" in response:
+            response = response.split("<|assistant|>")[-1].strip()
+        elif response.startswith(formatted_prompt):
+            response = response[len(formatted_prompt) :].strip()
 
         return {
             "response": response,

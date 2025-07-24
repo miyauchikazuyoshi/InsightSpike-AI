@@ -313,7 +313,9 @@ class L2MemoryManager:
             return episode_idx
 
         except Exception as e:
+            import traceback
             logger.error(f"Failed to store episode: {e}")
+            logger.error(f"Traceback: {traceback.format_exc()}")
             return -1
 
     def search_episodes(
@@ -725,7 +727,12 @@ class L2MemoryManager:
                 return self.embedding_cache[text]
 
             # Generate embedding
-            embedding = self.embedding_model.encode(text)[0]
+            # EmbeddingManager returns a 2D array from encode, we need 1D
+            embeddings = self.embedding_model.encode(text)
+            if isinstance(embeddings, np.ndarray) and len(embeddings.shape) == 2:
+                embedding = embeddings[0]  # Get first (and only) embedding
+            else:
+                embedding = embeddings
 
             # Ensure it's a numpy array with float32 dtype
             if not isinstance(embedding, np.ndarray):

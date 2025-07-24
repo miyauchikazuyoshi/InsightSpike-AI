@@ -1,0 +1,63 @@
+{
+  "total_questions": 100,
+  "valid_results": 100,
+  "overall_accuracy": 1.0,
+  "difficulty_stats": {
+    "easy": {
+      "total": 25,
+      "correct": 25,
+      "accuracy": 1.0,
+      "avg_delta_ged": 0.0,
+      "avg_delta_ig": 0.0
+    },
+    "medium": {
+      "total": 50,
+      "correct": 50,
+      "accuracy": 1.0,
+      "avg_delta_ged": 0.02,
+      "avg_delta_ig": 0.0
+    },
+    "hard": {
+      "total": 25,
+      "correct": 25,
+      "accuracy": 1.0,
+      "avg_delta_ged": 0.0,
+      "avg_delta_ig": 0.0
+    }
+  },
+  "metrics_summary": {
+    "ged_calculator": {
+      "total_calculations": 100,
+      "total_computation_time": 0.08064961433410645,
+      "average_computation_time": 0.0008064961433410645,
+      "approximation_count": 0,
+      "approximation_rate": 0.0,
+      "optimization_level": "standard",
+      "node_cost": 1.0,
+      "edge_cost": 1.0
+    },
+    "ig_calculator": {
+      "total_calculations": 100,
+      "total_computation_time": 0.0006113052368164062,
+      "average_computation_time": 6.113052368164063e-06,
+      "approximation_count": 0,
+      "approximation_rate": 0.0,
+      "method": "clustering",
+      "k_clusters": 8,
+      "min_samples": 2
+    },
+    "delta_ged": {
+      "mean": 0.01,
+      "std": 0.09949874371066199,
+      "min": 0.0,
+      "max": 1.0
+    },
+    "delta_ig": {
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0.0,
+      "max": 0.0
+    }
+  },
+  "avg_processing_time": 0.03676287412643433
+}

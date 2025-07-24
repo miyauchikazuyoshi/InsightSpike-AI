@@ -1,0 +1,33 @@
+{
+  "total_questions": 100,
+  "valid_results": 100,
+  "overall_accuracy": 1.0,
+  "difficulty_stats": {
+    "easy": {
+      "total": 25,
+      "correct": 25,
+      "accuracy": 1.0,
+      "avg_delta_ged": 0.0,
+      "avg_delta_ig": 0.0
+    },
+    "medium": {
+      "total": 50,
+      "correct": 50,
+      "accuracy": 1.0,
+      "avg_delta_ged": -0.02,
+      "avg_delta_ig": 0.0
+    },
+    "hard": {
+      "total": 25,
+      "correct": 25,
+      "accuracy": 1.0,
+      "avg_delta_ged": 0.0,
+      "avg_delta_ig": 0.0
+    }
+  },
+  "metrics_summary": {
+    "total_calculations": 200,
+    "delta_ged": {
+      "mean": -0.01,
+      "std": 0.09949874371066199,
+      "min": 

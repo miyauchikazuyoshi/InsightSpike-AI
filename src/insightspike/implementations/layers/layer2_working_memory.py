@@ -202,22 +202,37 @@ class L2WorkingMemoryManager:
                 return self._search_working_memory(query_embedding, k)
 
             # Load episodes from DataStore
-            # This is where we avoid loading everything
             episodes = []
+            
+            # Try to load all episodes to find the actual content
+            # This is a temporary solution until we have get_episode_by_id
+            all_episodes = self.datastore.load_episodes(namespace=self.config.datastore_namespace)
+            
             for idx, dist in zip(indices[:k], distances[:k]):
-                # DataStore should provide a way to get episodes by ID
-                # For now, we'll use a simple approach
                 similarity = 1.0 - (dist / 2.0)  # Convert distance to similarity
 
                 if similarity >= self.config.similarity_threshold:
-                    # In a real implementation, we'd fetch the episode from DataStore
-                    # For now, create a placeholder
-                    episode = {
-                        "text": f"Episode {idx}",  # Would be fetched from DataStore
-                        "similarity": similarity,
-                        "c": 0.5,
-                        "metadata": {},
-                    }
+                    # Try to find the actual episode
+                    actual_episode = None
+                    if idx < len(all_episodes):
+                        actual_episode = all_episodes[idx]
+                    
+                    if actual_episode:
+                        episode = {
+                            "text": actual_episode.get("text", f"Episode {idx}"),
+                            "similarity": similarity,
+                            "c": actual_episode.get("c", 0.5),
+                            "metadata": actual_episode.get("metadata", {}),
+                        }
+                    else:
+                        # Fallback to placeholder if we can't find the episode
+                        logger.warning(f"Could not find episode at index {idx}, using placeholder")
+                        episode = {
+                            "text": f"Episode {idx} (placeholder - actual content not found)",
+                            "similarity": similarity,
+                            "c": 0.5,
+                            "metadata": {},
+                        }
 
                     if filter_fn is None or filter_fn(episode):
                         episodes.append(episode)
