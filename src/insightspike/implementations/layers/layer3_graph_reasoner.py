@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
+from ...core.episode import Episode
 import torch
 import torch.nn.functional as F
 from sklearn.metrics.pairwise import cosine_similarity
@@ -24,6 +25,10 @@ from ...features.graph_reasoning import GraphAnalyzer, RewardCalculator
 from ...metrics.graph_metrics import delta_ged as simple_delta_ged
 from ...metrics.graph_metrics import delta_ig as simple_delta_ig
 
+# Import message passing components
+from ...graph.message_passing import MessagePassing
+from ...graph.edge_reevaluator import EdgeReevaluator
+
 try:
     from ...metrics.advanced_graph_metrics import delta_ged as advanced_delta_ged
     from ...metrics.advanced_graph_metrics import delta_ig as advanced_delta_ig
@@ -34,6 +39,7 @@ except ImportError:
     advanced_delta_ged = simple_delta_ged
     advanced_delta_ig = simple_delta_ig
 from ...config import get_config
+from ...config.legacy_adapter import LegacyConfigAdapter
 from ...core.base import L3GraphReasonerInterface, LayerInput, LayerOutput
 from .scalable_graph_builder import ScalableGraphBuilder
 
@@ -46,8 +52,8 @@ class ConflictScore:
     """Conflict detection and scoring for graph reasoning."""
 
     def __init__(self, config=None):
-        self.config = config or get_config()
-        self.conflict_threshold = getattr(self.config.graph, "conflict_threshold", 0.5)
+        self.config = LegacyConfigAdapter.ensure_pydantic(config or get_config())
+        self.conflict_threshold = self.config.graph.conflict_threshold
 
     def calculate_conflict(
         self, graph_old: Data, graph_new: Data, context: Dict[str, Any]
@@ -154,10 +160,8 @@ class GraphBuilder:
     """Build and manage PyTorch Geometric graphs from documents."""
 
     def __init__(self, config=None):
-        self.config = config or get_config()
-        self.similarity_threshold = getattr(
-            self.config.graph, "similarity_threshold", 0.3
-        )
+        self.config = LegacyConfigAdapter.ensure_pydantic(config or get_config())
+        self.similarity_threshold = self.config.graph.similarity_threshold
 
     def build_graph(
         self, documents: List[Dict[str, Any]], embeddings: Optional[np.ndarray] = None
@@ -254,15 +258,17 @@ class L3GraphReasoner(L3GraphReasonerInterface):
     def __init__(self, config=None):
         # Set layer_id for LayerInterface
         super().__init__("layer3_graph_reasoner", config)
-        self.config = config or get_config()
+        # Store original config for message passing settings
+        self._original_config = config
+        self.config = LegacyConfigAdapter.ensure_pydantic(config or get_config())
         # Use ScalableGraphBuilder for better performance
-        self.graph_builder = ScalableGraphBuilder(config)
-        self.conflict_scorer = ConflictScore(config)
+        self.graph_builder = ScalableGraphBuilder(self.config)
+        self.conflict_scorer = ConflictScore(self.config)
         self.previous_graph = None
 
         # Initialize refactored components
-        self.graph_analyzer = GraphAnalyzer(config)
-        self.reward_calculator = RewardCalculator(config)
+        self.graph_analyzer = GraphAnalyzer(self.config)
+        self.reward_calculator = RewardCalculator(self.config)
 
         # Initialize metrics selector with configuration
         from ...algorithms.metrics_selector import MetricsSelector
@@ -281,8 +287,11 @@ class L3GraphReasoner(L3GraphReasonerInterface):
 
         # Initialize simple GNN if needed
         self.gnn = None
-        if getattr(self.config.graph, "use_gnn", False):
+        if self.config.graph.use_gnn:
             self._init_gnn()
+        
+        # Initialize message passing components
+        self._init_message_passing()
 
     def initialize(self) -> bool:
         """Initialize the layer"""
@@ -347,8 +356,46 @@ class L3GraphReasoner(L3GraphReasonerInterface):
                 logger.debug("Created synthetic graph for empty documents")
             else:
                 # Build current graph from documents
-                current_graph = self.graph_builder.build_graph(documents)
+                if self.previous_graph is not None and documents:
+                    # Preserve existing graph structure when processing new documents
+                    logger.debug(f"Building incremental graph with {len(documents)} new documents")
+                    # First, try incremental build
+                    current_graph = self.graph_builder.build_graph(
+                        documents, 
+                        incremental=True
+                    )
+                    # Verify that incremental build preserved existing nodes
+                    if current_graph.num_nodes < self.previous_graph.num_nodes:
+                        logger.warning("Incremental build resulted in smaller graph, preserving existing structure")
+                        # Incremental mode might not be working properly, manually preserve
+                        current_graph = self.previous_graph
+                else:
+                    # No previous graph or no documents - build new
+                    current_graph = self.graph_builder.build_graph(documents)
 
+            # Get query vector from context
+            query_vector = context.get("query_vector")
+            
+            # Apply message passing if enabled and query vector is available
+            if self.message_passing_enabled and query_vector is not None:
+                logger.info("Applying question-aware message passing")
+                
+                # Perform message passing
+                updated_representations = self.message_passing.forward(
+                    current_graph, query_vector
+                )
+                
+                # Re-evaluate edges after message passing
+                current_graph = self.edge_reevaluator.reevaluate(
+                    current_graph, updated_representations, query_vector,
+                    return_edge_scores=True
+                )
+                
+                # Log edge statistics
+                if hasattr(current_graph, 'edge_info') and current_graph.edge_info:
+                    new_edges = sum(1 for e in current_graph.edge_info if e['type'] == 'new')
+                    logger.info(f"Edge re-evaluation: {new_edges} new edges discovered")
+            
             # Get previous graph from context or instance variable
             previous_graph = context.get("previous_graph", self.previous_graph)
 
@@ -356,6 +403,11 @@ class L3GraphReasoner(L3GraphReasonerInterface):
             metrics = self.graph_analyzer.calculate_metrics(
                 current_graph, previous_graph, self.delta_ged, self.delta_ig
             )
+            
+            # Log metrics values
+            logger.info(f"Metrics calculated - GED: {metrics.get('delta_ged', 'N/A')}, IG: {metrics.get('delta_ig', 'N/A')}")
+            if previous_graph is not None:
+                logger.info(f"Graph comparison - Previous: {previous_graph.num_nodes} nodes, Current: {current_graph.num_nodes} nodes")
 
             # Detect conflicts
             conflicts = self.conflict_scorer.calculate_conflict(
@@ -387,14 +439,26 @@ class L3GraphReasoner(L3GraphReasonerInterface):
             else:
                 enhanced_quality = base_quality
 
+            # Log spike detection details
+            spike_thresholds = self._get_spike_thresholds()
+            logger.info(f"Spike detection thresholds - GED: {spike_thresholds['ged']}, IG: {spike_thresholds['ig']}, Conflict: {spike_thresholds['conflict']}")
+            
+            spike_detected = self.graph_analyzer.detect_spike(
+                metrics, conflicts, spike_thresholds
+            )
+            
+            # Log spike detection result
+            if spike_detected:
+                logger.warning(f"🎯 SPIKE DETECTED! GED: {metrics.get('delta_ged', 'N/A')}, IG: {metrics.get('delta_ig', 'N/A')}")
+            else:
+                logger.debug(f"No spike. GED: {metrics.get('delta_ged', 'N/A')} >= {spike_thresholds['ged']} (need <), IG: {metrics.get('delta_ig', 'N/A')} <= {spike_thresholds['ig']} (need >)")
+            
             result = {
                 "graph": current_graph,
                 "metrics": metrics,
                 "conflicts": conflicts,
                 "reward": reward,
-                "spike_detected": self.graph_analyzer.detect_spike(
-                    metrics, conflicts, self._get_spike_thresholds()
-                ),
+                "spike_detected": spike_detected,
                 "graph_features": graph_features,
                 "reasoning_quality": enhanced_quality,
             }
@@ -409,22 +473,92 @@ class L3GraphReasoner(L3GraphReasonerInterface):
     def _get_spike_thresholds(self) -> Dict[str, float]:
         """Get spike detection thresholds from config."""
         return {
-            "ged": getattr(self.config.graph, "spike_ged_threshold", -0.5),
-            "ig": getattr(self.config.graph, "spike_ig_threshold", 0.2),
-            "conflict": getattr(self.config.graph, "conflict_threshold", 0.5),
+            "ged": self.config.graph.spike_ged_threshold,
+            "ig": self.config.graph.spike_ig_threshold,
+            "conflict": self.config.graph.conflict_threshold,
         }
+
+    def _init_message_passing(self):
+        """Initialize message passing components."""
+        try:
+            # Check if message passing is enabled in config
+            # First check original config (dict format)
+            if isinstance(self._original_config, dict):
+                self.message_passing_enabled = self._original_config.get('graph', {}).get(
+                    'enable_message_passing', False
+                )
+                logger.info(f"Message passing from original config: {self.message_passing_enabled}")
+            # Then check Pydantic config
+            elif hasattr(self.config, 'graph'):
+                self.message_passing_enabled = getattr(
+                    self.config.graph, 'enable_message_passing', False
+                )
+            else:
+                self.message_passing_enabled = False
+            
+            if self.message_passing_enabled:
+                # Get message passing config from original config
+                if isinstance(self._original_config, dict):
+                    mp_config = self._original_config.get('graph', {}).get('message_passing', {})
+                else:
+                    mp_config = getattr(self.config.graph, 'message_passing', {})
+                
+                # Check if we should use optimized version
+                use_optimized = mp_config.get('enable_batch_computation', True)
+                max_hops = mp_config.get('max_hops', 1)
+                
+                if use_optimized:
+                    from ...graph.message_passing_optimized import OptimizedMessagePassing
+                    self.message_passing = OptimizedMessagePassing(
+                        alpha=mp_config.get('alpha', 0.3),
+                        iterations=mp_config.get('iterations', 2),
+                        max_hops=max_hops,
+                        aggregation=mp_config.get('aggregation', 'weighted_mean'),
+                        self_loop_weight=mp_config.get('self_loop_weight', 0.5),
+                        decay_factor=mp_config.get('decay_factor', 0.8),
+                        convergence_threshold=mp_config.get('convergence_threshold', 1e-4),
+                        similarity_threshold=mp_config.get('similarity_threshold', 0.3)
+                    )
+                    logger.info(f"Using OptimizedMessagePassing with max_hops={max_hops}")
+                else:
+                    self.message_passing = MessagePassing(
+                        alpha=mp_config.get('alpha', 0.3),
+                        iterations=mp_config.get('iterations', 2),
+                        aggregation=mp_config.get('aggregation', 'weighted_mean'),
+                        self_loop_weight=mp_config.get('self_loop_weight', 0.5),
+                        decay_factor=mp_config.get('decay_factor', 0.8)
+                    )
+                
+                # Get edge re-evaluation config from original config
+                if isinstance(self._original_config, dict):
+                    er_config = self._original_config.get('graph', {}).get('edge_reevaluation', {})
+                else:
+                    er_config = getattr(self.config.graph, 'edge_reevaluation', {})
+                
+                self.edge_reevaluator = EdgeReevaluator(
+                    similarity_threshold=er_config.get('similarity_threshold', 0.7),
+                    new_edge_threshold=er_config.get('new_edge_threshold', 0.8),
+                    max_new_edges_per_node=er_config.get('max_new_edges_per_node', 5),
+                    edge_decay_factor=er_config.get('edge_decay_factor', 0.9)
+                )
+                
+                logger.info("Message passing components initialized")
+            else:
+                self.message_passing = None
+                self.edge_reevaluator = None
+                logger.info("Message passing disabled in config")
+                
+        except Exception as e:
+            logger.warning(f"Message passing initialization failed: {e}")
+            self.message_passing_enabled = False
+            self.message_passing = None
+            self.edge_reevaluator = None
 
     def _init_gnn(self):
         """Initialize a simple GNN for graph processing."""
         try:
-            hidden_dim = getattr(self.config.graph, "gnn_hidden_dim", 128)
-            # Handle both Pydantic and legacy config
-            if hasattr(self.config, "embedding") and hasattr(
-                self.config.embedding, "dimension"
-            ):
-                input_dim = self.config.embedding.dimension
-            else:
-                input_dim = 384  # Default dimension
+            hidden_dim = self.config.graph.gnn_hidden_dim
+            input_dim = self.config.embedding.dimension
 
             self.gnn = torch.nn.Sequential(
                 GCNConv(input_dim, hidden_dim),
@@ -506,3 +640,25 @@ class L3GraphReasoner(L3GraphReasonerInterface):
         return self.graph_analyzer.detect_spike(
             metrics, conflicts, self._get_spike_thresholds()
         )
+    
+    def update_graph(self, episodes: List[Episode]):
+        """
+        Update graph with new episodes.
+        
+        This method is called by MainAgent but was missing from the implementation.
+        For now, we store the reference to episodes for future graph building.
+        
+        Args:
+            episodes: List of new episodes to incorporate into the graph
+        """
+        # Log the update request
+        logger.debug(f"Graph update requested with {len(episodes)} episodes")
+        
+        # In a full implementation, this would:
+        # 1. Extract vectors from episodes
+        # 2. Update the existing graph structure
+        # 3. Recalculate graph metrics
+        
+        # For now, we just acknowledge the request
+        # The actual graph update happens in build_graph when needed
+        pass

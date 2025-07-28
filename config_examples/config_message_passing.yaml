@@ -1,0 +1,70 @@
+# Configuration for question-aware message passing and query integration
+# This enables the new edge evaluation timing and insight vector generation features
+
+# Model configuration
+model:
+  name: "InsightSpike-MessagePassing"
+  version: "1.0.0"
+
+# Embedding configuration
+embedding:
+  model: "sentence-transformers/all-MiniLM-L6-v2"
+  dimension: 384
+  cache_enabled: true
+
+# Processing configuration  
+processing:
+  enable_insight_search: true
+  max_insights_per_query: 5
+
+# Graph configuration with message passing
+graph:
+  # Enable message passing for question-aware graph enhancement
+  enable_message_passing: true
+  
+  # Message passing configuration
+  message_passing:
+    alpha: 0.3  # Weight for question influence (0-1)
+    iterations: 3  # Number of message passing iterations
+    aggregation: "weighted_mean"  # Aggregation method: weighted_mean, max, attention
+    self_loop_weight: 0.5  # Weight for self-loop in propagation
+    decay_factor: 0.8  # Decay factor for question relevance over distance
+  
+  # Edge re-evaluation configuration (after message passing)
+  edge_reevaluation:
+    similarity_threshold: 0.7  # Minimum similarity for edge retention
+    new_edge_threshold: 0.8  # Minimum similarity for new edge creation
+    max_new_edges_per_node: 5  # Maximum new edges to add per node
+    edge_decay_factor: 0.9  # Factor to decay original edge weights
+  
+  # Standard graph settings
+  similarity_threshold: 0.6
+  spike_ged_threshold: 0.3
+  spike_ig_threshold: 0.7
+  conflict_threshold: 0.5
+  enable_graph_search: true
+  use_gnn: false  # Can be combined with GNN if needed
+
+# Algorithm configuration
+algorithms:
+  # Use advanced algorithms that work well with message passing
+  use_advanced_ged: true
+  use_advanced_ig: true
+  advanced_ged_algorithm: "hungarian"  # Better for dynamic graphs
+  advanced_ig_algorithm: "normalized"
+
+# LLM configuration
+llm:
+  provider: "mock"  # Change to "openai", "anthropic" etc as needed
+  max_context_docs: 5
+  use_simple_prompt: false
+
+# Memory configuration
+memory:
+  max_episodes: 5000
+  consolidation_threshold: 100
+  
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

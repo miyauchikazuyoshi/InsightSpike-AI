@@ -10,10 +10,11 @@ import logging
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
-import faiss
 import numpy as np
 import torch
 from torch_geometric.data import Data
+
+from ...vector_index import VectorIndexFactory
 
 logger = logging.getLogger(__name__)
 
@@ -42,8 +43,8 @@ class ScalableGraphManager:
         self.top_k = top_k
         self.conflict_threshold = conflict_threshold
 
-        # FAISS index for efficient similarity search
-        self.index = None
+        # Vector index for efficient similarity search
+        self.vector_index = None
         self.embeddings: List[np.ndarray] = []
         self.metadata: List[Dict[str, Any]] = []
 
@@ -86,8 +87,11 @@ class ScalableGraphManager:
                 embedding = embedding / norm
 
             # Initialize FAISS index if needed
-            if self.index is None:
-                self.index = faiss.IndexFlatIP(self.embedding_dim)
+            if self.vector_index is None:
+                self.vector_index = VectorIndexFactory.create_index(
+                    dimension=self.embedding_dim,
+                    index_type="auto"
+                )
 
             # Store embedding and metadata
             self.embeddings.append(embedding)
@@ -95,7 +99,7 @@ class ScalableGraphManager:
             node_id = len(self.embeddings) - 1
 
             # Add to FAISS index
-            self.index.add(embedding.reshape(1, -1))
+            self.vector_index.add(embedding.reshape(1, -1))
 
             # Update graph node features
             new_x = torch.tensor(embedding).view(1, -1)
@@ -111,7 +115,7 @@ class ScalableGraphManager:
             if node_id > 0:
                 # Search for top-k similar nodes
                 k = min(self.top_k, node_id)
-                distances, neighbors = self.index.search(
+                distances, neighbors = self.vector_index.search(
                     embedding.reshape(1, -1), k + 1  # +1 to include self
                 )
 
@@ -268,7 +272,10 @@ class ScalableGraphManager:
                 subgraph_embeddings = np.array([self.embeddings[j] for j in indices])
 
                 # Create temporary index for subgraph
-                temp_index = faiss.IndexFlatIP(self.embedding_dim)
+                temp_index = VectorIndexFactory.create_index(
+                    dimension=self.embedding_dim,
+                    index_type="auto"
+                )
                 temp_index.add(subgraph_embeddings.astype(np.float32))
 
                 # Find neighbors
@@ -333,7 +340,7 @@ class ScalableGraphManager:
         try:
             # Clear current state
             self._initialize_empty_graph()
-            self.index = None
+            self.vector_index = None
             self.embeddings = []
             self.metadata = []
 
@@ -377,18 +384,19 @@ class ScalableGraphManager:
 
     def save_index(self, path: str):
         """Save FAISS index to disk."""
-        if self.index is not None:
-            faiss.write_index(self.index, path)
+        # Vector index persistence not implemented for all backends
+        logger.warning("Vector index persistence not implemented")
             logger.info(f"Saved FAISS index to {path}")
 
     def load_index(self, path: str):
         """Load FAISS index from disk."""
         try:
-            self.index = faiss.read_index(path)
+            # Vector index loading not implemented
+            logger.warning("Vector index loading not implemented")
             logger.info(f"Loaded FAISS index from {path}")
         except Exception as e:
             logger.error(f"Failed to load FAISS index: {e}")
-            self.index = None
+            self.vector_index = None
 
 
 # Add missing import

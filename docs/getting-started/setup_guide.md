@@ -7,46 +7,63 @@
 git clone https://github.com/yourusername/InsightSpike-AI.git
 cd InsightSpike-AI
 
-# Install with automatic model setup
-make quickstart
-```
+# Install with Poetry (recommended)
+poetry install
 
-This will:
-1. Install InsightSpike-AI and dependencies
-2. Download and cache required models:
-   - Sentence Transformer (all-MiniLM-L6-v2) for embeddings
-   - TinyLlama-1.1B-Chat for text generation
-
-## Manual Model Setup
-
-If you prefer to set up models separately:
-
-```bash
-# Install package first
+# OR install with pip
 pip install -e .
-
-# Then download models
-python scripts/setup_models.py
 ```
 
-## Why Pre-download Models?
+## Key Features
 
-1. **First-run Experience**: Avoid long delays when first using InsightSpike
-2. **Offline Usage**: Models are cached locally for offline use
-3. **Consistent Performance**: Ensures the tested models are available
-4. **Network Issues**: Prevents timeout issues during experiments
+1. **NumPy-based Vector Search**: Fast and stable vector similarity search
+2. **Flexible LLM Support**: Mock provider for testing, OpenAI/Anthropic for production
+3. **DataStore Abstraction**: File-based or in-memory storage
+4. **Performance Optimizations**: Message passing with configurable hop limits
 
-## Model Details
+## Configuration
 
-### Sentence Transformer (all-MiniLM-L6-v2)
-- **Size**: ~90MB
-- **Purpose**: Creating embeddings for semantic search
-- **Performance**: Fast and accurate for general text
+### Basic Configuration (config.yaml)
 
-### TinyLlama-1.1B-Chat
-- **Size**: ~1.1GB  
-- **Purpose**: Text generation and question answering
-- **Performance**: Lightweight but capable for RAG tasks
+```yaml
+# LLM Provider (mock for testing)
+llm:
+  provider: mock  # Options: mock, openai, anthropic
+  model: distilgpt2
+
+# Vector Search
+vector_search:
+  backend: numpy  # Fast NumPy-based implementation
+  optimize: true
+  
+# Message Passing (optimized)
+graph:
+  enable_message_passing: false  # Enable for advanced features
+  message_passing:
+    max_hops: 1  # Limited to 1-hop for performance
+```
+
+## Performance Considerations
+
+### Message Passing Optimization (July 2025)
+
+**Problem**: O(N²) complexity causing exponential slowdown
+**Solution**: Hop limitation (default 1-hop)
+
+```yaml
+# Enable with caution
+graph:
+  enable_message_passing: true
+  message_passing:
+    max_hops: 1      # Limit to 1-hop neighbors
+    iterations: 2    # Reduced from 3
+    alpha: 0.3       # Question influence weight
+```
+
+**Performance Impact**:
+- Baseline (no message passing): ~0.5s/question
+- With 1-hop message passing: ~0.8s/question
+- With 2-hop message passing: ~2s/question (grows exponentially)
 
 ## Troubleshooting
 
@@ -60,24 +77,28 @@ python -c "import sentence_transformers; print(sentence_transformers.__version__
 pip install transformers sentence-transformers torch
 ```
 
-### Using Different Models
+### Using Different LLM Providers
 
-Edit `src/insightspike/core/config.py`:
+```yaml
+# For actual LLM responses (requires API key)
+llm:
+  provider: openai
+  model: gpt-3.5-turbo
+  api_key: ${OPENAI_API_KEY}  # From environment
 
-```python
-@dataclass
-class LLMConfig:
-    model_name: str = "microsoft/phi-2"  # Alternative model
-    # or
-    model_name: str = "google/flan-t5-base"  # Even smaller
+# OR use Anthropic
+llm:
+  provider: anthropic
+  model: claude-3-haiku-20240307
+  api_key: ${ANTHROPIC_API_KEY}
 ```
 
-### GPU Support
+### Embedding Models
 
-For GPU acceleration:
-```python
-@dataclass
-class LLMConfig:
-    device: str = "cuda"  # or "mps" for Mac M1/M2
-    use_gpu: bool = True
+The system uses Sentence Transformers for embeddings:
+```yaml
+embedding:
+  model_name: sentence-transformers/all-MiniLM-L6-v2
+  dimension: 384
+  device: cpu  # or "cuda" for GPU
 ```

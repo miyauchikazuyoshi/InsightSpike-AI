@@ -299,8 +299,32 @@ class InformationGain:
                 data = [data]
 
             # Calculate probabilities
-            counter = Counter(data)
-            total_count = len(data)
+            # Ensure data is hashable for Counter
+            hashable_data = []
+            for item in data:
+                if isinstance(item, (list, tuple, np.ndarray)):
+                    # Convert unhashable types to tuples
+                    try:
+                        # Try to flatten if possible
+                        arr = np.asarray(item, dtype=object)
+                        if arr.dtype == object:
+                            # Skip items that can't be properly converted to numeric arrays
+                            logger.debug(f"Skipping non-numeric item in Shannon entropy: {type(item)}")
+                            continue
+                        hashable_data.append(tuple(arr.flatten()))
+                    except (ValueError, TypeError) as e:
+                        # Skip items that can't be processed
+                        logger.debug(f"Skipping item in Shannon entropy: {e}")
+                        continue
+                else:
+                    hashable_data.append(item)
+            
+            # If we couldn't process any data, return 0
+            if not hashable_data:
+                return 0.0
+            
+            counter = Counter(hashable_data)
+            total_count = len(hashable_data)
 
             if total_count <= 1:
                 return 0.0
@@ -327,7 +351,24 @@ class InformationGain:
             elif isinstance(data, np.ndarray):
                 vectors = data
             elif hasattr(data, "__iter__"):
-                vectors = np.array(list(data))
+                try:
+                    # Try to convert to numpy array
+                    vectors = np.array(list(data))
+                except (ValueError, TypeError) as e:
+                    # Handle inhomogeneous shapes by flattening or falling back
+                    logger.debug(f"Failed to convert data to numpy array: {e}")
+                    # Try to extract numerical values if possible
+                    try:
+                        flat_data = []
+                        for item in data:
+                            if isinstance(item, (list, tuple)):
+                                flat_data.extend(item)
+                            else:
+                                flat_data.append(item)
+                        vectors = np.array(flat_data).reshape(-1, 1)
+                    except:
+                        # Fallback to Shannon entropy
+                        return self._shannon_entropy(data)
             else:
                 return 0.0
 

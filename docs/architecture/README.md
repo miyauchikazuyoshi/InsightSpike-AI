@@ -7,10 +7,18 @@
 - **[Layer Architecture](layer_architecture.md)** - 4-layer neurobiologically-inspired processing system
 - **[Agent Types](agent_types.md)** - Available agent implementations and their use cases
 - **[MainAgent Behavior](mainagent_behavior.md)** - Detailed behavior and processing flow of MainAgent
-- **[Recent Features (July 2024)](recent_features_2024_07.md)** - Layer1 bypass, insight auto-registration, mode-aware prompts, graph search
+- **[Configuration System](configuration.md)** - YAML-based configuration and settings management
+- **[Data Management](data_management_strategy.md)** - DataStore abstraction and data handling
 
-### User Interface
-- **[CLI Commands](cli_commands.md)** - Complete command reference for the `spike` CLI
+### Advanced Features
+- **[Message Passing & Edge Re-evaluation](recent_features_2024_07.md)** - Question-aware graph enhancement
+- **[Spectral GED Enhancement](spectral_ged_feature.md)** - Laplacian eigenvalue analysis for structural quality
+- **[Advanced Metrics](advanced_metrics_2025_01.md)** - GeDIG, multi-hop reasoning, and quantum metrics
+- **[Why InsightSpike is Advanced](why_insightspike_is_advanced.md)** - Key innovations and differentiators
+
+### System Design
+- **[Multi-User Design](multi_user_design.md)** - Architecture for multi-user scenarios
+- **[Vector Search Backend](vector_search.md)** - High-performance NumPy-based vector similarity search
 
 ## 🧠 Quick Overview
 
@@ -42,56 +50,122 @@ spike insights
 ```python
 from insightspike.implementations.agents import MainAgent
 
-agent = MainAgent()
+# Configuration-based initialization
+config = {
+    'llm': {'provider': 'mock'},  # or 'openai', 'anthropic'
+    'graph': {
+        'enable_message_passing': True,
+        'message_passing': {
+            'alpha': 0.3,
+            'iterations': 3
+        },
+        'enable_graph_search': True
+    }
+}
+
+agent = MainAgent(config)
 agent.initialize()
 
 # Process question
 result = agent.process_question("Your question here")
 print(f"Answer: {result.response}")
-print(f"Spike detected: {result.spike_detected}")
+print(f"Spike detected: {result.has_spike}")
 ```
 
 ## 📊 Architecture Highlights
 
 - **Neurobiologically-inspired** design based on brain structures
-- **Multi-agent** system with specialized components
-- **Graph-based** reasoning for insight detection
-- **Configurable** behavior through modes and settings
-- **Production-ready** with caching, async processing, and error handling
+- **Graph-based reasoning** with PyTorch Geometric for insight detection
+- **Flexible vector search** - FAISS optional, NumPy backend available
+- **DataStore abstraction** - Filesystem, SQLite, or custom backends
+- **Message passing** - Question-aware graph enhancement
+- **Production-ready** with caching, error handling, and monitoring
 
-## 🔄 Recent Updates
+## 🔄 Recent Updates (July 2025)
 
-### July 2024 Feature Release
-- **Layer1 Bypass Mechanism** - 10x speedup for known queries in production
-- **Insight Auto-Registration** - Automatic capture and reuse of discovered insights
-- **Mode-Aware Prompt Building** - Dynamic prompt sizing based on model capabilities
-- **Graph-Based Memory Search** - Multi-hop traversal for associative retrieval
-- See **[Recent Features Documentation](recent_features_2024_07.md)** for details
+### Message Passing & Edge Re-evaluation
+- **Question-aware message passing** - Propagates query relevance through graph
+- **Dynamic edge re-evaluation** - Discovers new connections based on context
+- **Configurable via YAML** - Enable/disable features independently
+- Performance optimizations needed for large graphs (>20 nodes)
 
-### Core Package Refactoring (2025-07-18)
-- **Separated abstractions from implementations**:
-  - `core/` now only contains interfaces and base classes
-  - `implementations/` contains all concrete implementations
-  - `features/` contains feature modules (query transformation, etc.)
-  - `tools/` contains standalone tools and experiments
-- **Cleaner architecture** following SOLID principles
-- **Better separation of concerns**
+### FAISS Removal & Vector Index Abstraction
+- **Removed hard dependency on FAISS** - Resolved segmentation fault issues
+- **NumPy backend implementation** - Pure Python alternative
+- **VectorIndexFactory** - Automatic backend selection
+- See migration guide in [faiss_removal_complete.md](../development/done/faiss_removal_complete.md)
 
-### Previous Updates (2025-07-17)
-- Consolidated 6 agent variants → 1 ConfigurableAgent
-- Unified 4 Layer2 variants → 1 L2MemoryManager
-- Merged 8 LLM files → 1 L4LLMInterface
-- Clear layer-based naming convention
-- Full backward compatibility maintained
+### DataStore Abstraction
+- **Unified data access layer** - Consistent API for all data operations
+- **Multiple backends** - Filesystem (default), SQLite, in-memory
+- **Namespace support** - Isolate data by experiment or component
+- Configuration: `datastore.root_path` in config.yaml
 
-### CLI Improvements
-- Separated business logic from presentation
-- MainAgent now handles all core functionality
-- CLI focuses purely on user interaction
-- Better testability and maintainability
+### Configuration System Updates
+- **YAML-based configuration** - Central config.yaml file
+- **Pydantic models** - Type-safe configuration validation
+- **Environment-specific settings** - Development, testing, production modes
+- **Backward compatibility** - Supports legacy dict-based configs
+
+## 📈 Performance Considerations
+
+### Current Bottlenecks
+1. **Message Passing** - O(N²) complexity, exponential slowdown with graph size
+2. **Graph Building** - Incremental updates can be expensive
+3. **Memory Usage** - Graph state accumulates over time
+
+### Optimizations
+- Use `enable_message_passing: false` for better performance
+- Limit `message_passing.iterations` to 1-2
+- Consider `use_faiss: false` to avoid segmentation faults
+- Regular cleanup of temporary files and caches
+
+## 🛠️ Development Status
+
+### Stable Features
+- ✅ Core 4-layer architecture
+- ✅ Basic graph reasoning and spike detection
+- ✅ DataStore abstraction
+- ✅ Vector search with NumPy backend
+- ✅ Configuration system
+
+### Experimental Features
+- ⚠️ Message passing (performance issues)
+- ⚠️ GNN integration (use_gnn flag)
+- ⚠️ Advanced GED/IG algorithms
+- ⚠️ Multi-hop graph search
+
+### Known Issues
+- Message passing performance degrades with graph size
+- Some advanced metrics not fully implemented
+- Circular import warnings in embedder module
 
 ## 📖 Further Reading
 
-- Project README for installation and setup
-- API documentation for detailed usage
-- Example notebooks for practical demonstrations
+- **[Configuration Guide](configuration.md)** - Detailed configuration options
+- **[Layer Architecture](layer_architecture.md)** - Deep dive into each layer
+- **[Development Docs](../development/)** - Implementation plans and technical details
+- **[Research Notes](../research/)** - Theoretical foundations and future directions
+
+## 🔧 Maintenance
+
+### Regular Tasks
+```bash
+# Clean up caches and temporary files
+./cleanup_disk_space.sh
+
+# Run regression tests
+poetry run pytest tests/regression/
+
+# Check configuration
+poetry run python -m insightspike.config validate
+```
+
+### Monitoring
+- Check `.mypy_cache` size (can grow to 200MB+)
+- Monitor `~/Library/Caches/claude-cli-nodejs` (can exceed 1GB)
+- Review data/ directory for accumulated experiments
+
+---
+
+*Last updated: July 2025*

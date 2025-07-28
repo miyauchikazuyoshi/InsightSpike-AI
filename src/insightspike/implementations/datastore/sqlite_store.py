@@ -17,33 +17,30 @@ from typing import Any, Dict, List, Optional, Tuple
 from uuid import uuid4
 
 import aiosqlite
-import faiss
 import numpy as np
 
 from ...core.base.async_datastore import AsyncDataStore
 from ...core.base.datastore import VectorIndex
+from ...vector_index import VectorIndexFactory
 
 logger = logging.getLogger(__name__)
 
 
-class FAISSVectorIndex(VectorIndex):
-    """FAISS-based vector index implementation"""
+class ConfigurableVectorIndex(VectorIndex):
+    """Vector index implementation using VectorIndexFactory"""
 
     def __init__(self, dimension: int, index_type: str = "Flat"):
         self.dimension = dimension
         self.index_type = index_type
 
-        if index_type == "Flat":
-            self.index = faiss.IndexFlatL2(dimension)
-        elif index_type == "IVF":
-            # IVF index for larger datasets
-            quantizer = faiss.IndexFlatL2(dimension)
-            self.index = faiss.IndexIVFFlat(quantizer, dimension, 100)  # 100 clusters
-        else:
-            raise ValueError(f"Unknown index type: {index_type}")
+        # Use VectorIndexFactory to create backend-agnostic index
+        self.index = VectorIndexFactory.create_index(
+            dimension=dimension,
+            index_type="auto"  # Let factory decide based on availability
+        )
 
-        self.id_map = {}  # Map from FAISS internal ID to our IDs
-        self.reverse_id_map = {}  # Map from our IDs to FAISS internal IDs
+        self.id_map = {}  # Map from internal ID to our IDs
+        self.reverse_id_map = {}  # Map from our IDs to internal IDs
 
     def add_vectors(self, vectors: np.ndarray, ids: Optional[List[int]] = None) -> bool:
         """Add vectors to FAISS index"""
@@ -542,21 +539,21 @@ class SQLiteDataStore(AsyncDataStore):
 
     # ========== Vector Index Management ==========
 
-    async def _get_vector_index(self, namespace: str) -> Optional[FAISSVectorIndex]:
+    async def _get_vector_index(self, namespace: str) -> Optional[ConfigurableVectorIndex]:
         """Get or create vector index for namespace"""
         if namespace not in self.vector_indices:
             # Try to load from disk
             index_path = f"{self.db_path}.{namespace}.faiss"
             if os.path.exists(index_path):
-                index = FAISSVectorIndex(self.vector_dim)
+                index = ConfigurableVectorIndex(self.vector_dim)
                 if index.load_index(index_path):
                     self.vector_indices[namespace] = index
                 else:
                     # Create new index
-                    self.vector_indices[namespace] = FAISSVectorIndex(self.vector_dim)
+                    self.vector_indices[namespace] = ConfigurableVectorIndex(self.vector_dim)
             else:
                 # Create new index
-                self.vector_indices[namespace] = FAISSVectorIndex(self.vector_dim)
+                self.vector_indices[namespace] = ConfigurableVectorIndex(self.vector_dim)
 
         return self.vector_indices.get(namespace)
 

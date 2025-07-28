@@ -155,6 +155,8 @@ class MetricsSelector:
                     else graph2.x.numpy()
                 )
 
+                # Log shapes for debugging
+                logger.debug(f"IG calculation - emb1 shape: {emb1.shape}, emb2 shape: {emb2.shape}")
                 result = self._ig_calc.calculate(emb1, emb2)
                 return result.ig_value if hasattr(result, "ig_value") else result
             else:

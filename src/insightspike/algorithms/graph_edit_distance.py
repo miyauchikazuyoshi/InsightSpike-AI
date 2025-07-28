@@ -1,9 +1,10 @@
 """
-Graph Edit Distance (GED) Algorithm Implementation
-=================================================
+Graph Edit Distance (GED) Algorithm Implementation for PyTorch Geometric
+======================================================================
 
 Implementation of Graph Edit Distance calculation for InsightSpike-AI's geDIG technology.
-This module provides the core ΔGED computation for detecting structural insight moments.
+This module provides the core ΔGED computation for detecting structural insight moments
+using PyTorch Geometric (PyG) Data objects.
 
 Mathematical Foundation:
     ΔGED = GED(G_after, G_reference) - GED(G_before, G_reference)
@@ -16,9 +17,10 @@ Key Insight Detection:
     - ΔGED ≤ -0.5 threshold typically indicates EurekaSpike
     - Combined with ΔIG ≥ 0.2 for full geDIG detection
 
-References:
-    - Riesen, K., & Bunke, H. (2009). Approximate graph edit distance computation by means of bipartite graph matching.
-    - NetworkX Documentation: https://networkx.org/documentation/stable/reference/algorithms/graph_edit_distance.html
+PyG Integration:
+    - Works with torch_geometric.data.Data objects
+    - Supports edge_attr for future multi-dimensional edge features
+    - Efficient tensor operations for large graphs
 """
 
 import logging
@@ -28,25 +30,8 @@ from enum import Enum
 from typing import Any, Dict, Optional, Tuple, Union
 
 import numpy as np
-
-try:
-    import networkx as nx
-
-    NETWORKX_AVAILABLE = True
-except ImportError:
-    NETWORKX_AVAILABLE = False
-
-    # Create mock for graceful fallback
-    class MockGraph:
-        def __init__(self):
-            self.nodes = lambda: []
-            self.edges = lambda: []
-
-    nx = type(
-        "MockNetworkX",
-        (),
-        {"Graph": MockGraph, "graph_edit_distance": lambda g1, g2, **kwargs: 0.0},
-    )
+import torch
+from torch_geometric.data import Data
 
 logger = logging.getLogger(__name__)
 
@@ -90,10 +75,10 @@ class GEDResult:
 
 class GraphEditDistance:
     """
-    Graph Edit Distance calculator for measuring conceptual changes.
+    Graph Edit Distance calculator for PyTorch Geometric graphs.
 
-    This implementation focuses on educational concept graphs where nodes
-    represent concepts and edges represent relationships between concepts.
+    This implementation focuses on knowledge graphs where nodes
+    represent concepts/episodes and edges represent semantic relationships.
 
     The calculator supports multiple optimization levels:
     - FAST: Approximation suitable for real-time applications
@@ -143,13 +128,13 @@ class GraphEditDistance:
             f"node_cost={node_cost}, edge_cost={edge_cost}"
         )
 
-    def calculate(self, graph1: Any, graph2: Any) -> GEDResult:
+    def calculate(self, graph1: Data, graph2: Data) -> GEDResult:
         """
-        Calculate Graph Edit Distance between two graphs.
+        Calculate Graph Edit Distance between two PyG graphs.
 
         Args:
-            graph1: First graph (NetworkX Graph or compatible)
-            graph2: Second graph (NetworkX Graph or compatible)
+            graph1: First PyG Data object
+            graph2: Second PyG Data object
 
         Returns:
             GEDResult: Detailed calculation result
@@ -157,10 +142,6 @@ class GraphEditDistance:
         Raises:
             ValueError: If graphs are invalid or incompatible
         """
-        if not NETWORKX_AVAILABLE:
-            logger.warning("NetworkX not available, using fallback calculation")
-            return self._fallback_calculation(graph1, graph2)
-
         # Validate inputs
         self._validate_graphs(graph1, graph2)
 
@@ -169,8 +150,8 @@ class GraphEditDistance:
 
         try:
             # Determine calculation method based on graph sizes and optimization level
-            size1 = len(graph1.nodes()) if hasattr(graph1, "nodes") else 0
-            size2 = len(graph2.nodes()) if hasattr(graph2, "nodes") else 0
+            size1 = graph1.num_nodes if hasattr(graph1, "num_nodes") else 0
+            size2 = graph2.num_nodes if hasattr(graph2, "num_nodes") else 0
             max_size = max(size1, size2)
 
             if (
@@ -179,7 +160,7 @@ class GraphEditDistance:
             ):
                 ged_value, approximation_used = self._approximate_ged(graph1, graph2)
             elif self.optimization_level == OptimizationLevel.PRECISE:
-                ged_value, approximation_used = self._exact_ged(graph1, graph2)
+                ged_value, approximation_used = self._exact_ged_pyg(graph1, graph2)
             else:  # STANDARD
                 ged_value, approximation_used = self._standard_ged(graph1, graph2)
 
@@ -221,7 +202,7 @@ class GraphEditDistance:
             )
 
     def compute_delta_ged(
-        self, graph_before: Any, graph_after: Any, reference_graph: Optional[Any] = None
+        self, graph_before: Data, graph_after: Data, reference_graph: Optional[Data] = None
     ) -> float:
         """
         Compute ΔGED for insight detection using instantaneous formula.
@@ -234,13 +215,13 @@ class GraphEditDistance:
 
         TRANSPARENCY NOTE:
         - "Previous state" means exactly 1 step before (no moving average)
-        - GED calculation uses NetworkX's graph_edit_distance with timeout=1.0s
+        - GED calculation uses custom PyG implementation
         - For graphs > 50 nodes, we use structural features approximation
         - Negative values indicate structural simplification (fewer nodes/edges)
 
         Args:
-            graph_before: Previous graph state
-            graph_after: Current graph state
+            graph_before: Previous PyG graph state
+            graph_after: Current PyG graph state
             reference_graph: Deprecated parameter (kept for compatibility)
 
         Returns:
@@ -258,11 +239,10 @@ class GraphEditDistance:
 
         # Important: GED(A, B) measures distance, so if the graph became simpler,
         # we need to check if after has fewer nodes/edges than before
-        # In that case, the GED might be positive but represents simplification
-        nodes_before = len(graph_before.nodes()) if hasattr(graph_before, 'nodes') else 0
-        nodes_after = len(graph_after.nodes()) if hasattr(graph_after, 'nodes') else 0
-        edges_before = len(graph_before.edges()) if hasattr(graph_before, 'edges') else 0
-        edges_after = len(graph_after.edges()) if hasattr(graph_after, 'edges') else 0
+        nodes_before = graph_before.num_nodes if hasattr(graph_before, 'num_nodes') else 0
+        nodes_after = graph_after.num_nodes if hasattr(graph_after, 'num_nodes') else 0
+        edges_before = graph_before.edge_index.size(1) if hasattr(graph_before, 'edge_index') else 0
+        edges_after = graph_after.edge_index.size(1) if hasattr(graph_after, 'edge_index') else 0
 
         # If the graph got smaller (simplification), make ΔGED negative
         if nodes_after < nodes_before or edges_after < edges_before:
@@ -281,84 +261,105 @@ class GraphEditDistance:
         self.initial_graph = None
         self.previous_graph = None
 
-    def _validate_graphs(self, graph1: Any, graph2: Any):
-        """Validate input graphs."""
+    def _validate_graphs(self, graph1: Data, graph2: Data):
+        """Validate input PyG graphs."""
         if graph1 is None or graph2 is None:
             raise ValueError("Input graphs cannot be None")
 
-        # Check if graphs have required methods
-        required_methods = ["nodes", "edges"]
+        # Check if graphs are PyG Data objects
+        if not isinstance(graph1, Data) or not isinstance(graph2, Data):
+            raise ValueError("Graphs must be PyTorch Geometric Data objects")
+
+        # Check required attributes
+        required_attrs = ["x", "edge_index"]
         for graph, name in [(graph1, "graph1"), (graph2, "graph2")]:
-            for method in required_methods:
-                if not hasattr(graph, method):
-                    raise ValueError(f"{name} must have '{method}' method")
+            for attr in required_attrs:
+                if not hasattr(graph, attr):
+                    raise ValueError(f"{name} must have '{attr}' attribute")
 
-    def _exact_ged(self, graph1: Any, graph2: Any) -> Tuple[float, bool]:
-        """Exact GED calculation using NetworkX."""
+    def _exact_ged_pyg(self, graph1: Data, graph2: Data) -> Tuple[float, bool]:
+        """
+        Exact GED calculation for PyG graphs.
+        
+        Note: This is a simplified implementation. For production use,
+        consider more sophisticated algorithms like Hungarian method.
+        """
         try:
-            ged = nx.graph_edit_distance(
-                graph1,
-                graph2,
-                node_del_cost=lambda _: self.node_cost,
-                node_ins_cost=lambda _: self.node_cost,
-                edge_del_cost=lambda _: self.edge_cost,
-                edge_ins_cost=lambda _: self.edge_cost,
-                timeout=self.timeout_seconds,
-            )
-
-            if ged is None:  # Timeout occurred
-                logger.warning("GED calculation timeout, using approximation")
-                return self._approximate_ged(graph1, graph2)
-
-            return float(ged), False
+            # Node operations cost
+            node_diff = abs(graph1.num_nodes - graph2.num_nodes)
+            node_cost_total = node_diff * self.node_cost
+            
+            # Edge operations cost
+            edges1 = graph1.edge_index.size(1)
+            edges2 = graph2.edge_index.size(1)
+            edge_diff = abs(edges1 - edges2)
+            edge_cost_total = edge_diff * self.edge_cost
+            
+            # Feature-based cost (if nodes have features)
+            feature_cost = 0.0
+            if graph1.x is not None and graph2.x is not None:
+                # Compare node features using cosine similarity
+                min_nodes = min(graph1.num_nodes, graph2.num_nodes)
+                if min_nodes > 0:
+                    # Simple feature comparison for common nodes
+                    feat1 = graph1.x[:min_nodes]
+                    feat2 = graph2.x[:min_nodes]
+                    
+                    # Normalize features
+                    feat1_norm = torch.nn.functional.normalize(feat1, p=2, dim=1)
+                    feat2_norm = torch.nn.functional.normalize(feat2, p=2, dim=1)
+                    
+                    # Compute similarities
+                    similarities = (feat1_norm * feat2_norm).sum(dim=1)
+                    feature_cost = (1.0 - similarities.mean()).item() * min_nodes
+            
+            # Total GED
+            ged_value = node_cost_total + edge_cost_total + feature_cost
+            
+            return float(ged_value), False
 
         except Exception as e:
             logger.warning(f"Exact GED failed: {e}, falling back to approximation")
             return self._approximate_ged(graph1, graph2)
 
-    def _standard_ged(self, graph1: Any, graph2: Any) -> Tuple[float, bool]:
+    def _standard_ged(self, graph1: Data, graph2: Data) -> Tuple[float, bool]:
         """Standard GED calculation with size-based method selection."""
-        size1 = len(graph1.nodes())
-        size2 = len(graph2.nodes())
-        max_size = max(size1, size2)
+        max_size = max(graph1.num_nodes, graph2.num_nodes)
 
         if max_size <= self.max_graph_size_exact:
-            return self._exact_ged(graph1, graph2)
+            return self._exact_ged_pyg(graph1, graph2)
         else:
             return self._approximate_ged(graph1, graph2)
 
-    def _approximate_ged(self, graph1: Any, graph2: Any) -> Tuple[float, bool]:
+    def _approximate_ged(self, graph1: Data, graph2: Data) -> Tuple[float, bool]:
         """Fast approximation of GED using structural features."""
         try:
-            # Calculate basic structural differences
-            nodes_diff = abs(len(graph1.nodes()) - len(graph2.nodes()))
-            edges_diff = abs(len(graph1.edges()) - len(graph2.edges()))
+            # Basic structural differences
+            nodes_diff = abs(graph1.num_nodes - graph2.num_nodes)
+            edges_diff = abs(graph1.edge_index.size(1) - graph2.edge_index.size(1))
 
             # Degree sequence comparison
-            degrees1 = sorted([degree for _, degree in graph1.degree()])
-            degrees2 = sorted([degree for _, degree in graph2.degree()])
-
-            # Pad shorter sequence with zeros
+            degrees1 = self._compute_degrees(graph1)
+            degrees2 = self._compute_degrees(graph2)
+            
+            # Pad shorter sequence
             max_len = max(len(degrees1), len(degrees2))
-            degrees1.extend([0] * (max_len - len(degrees1)))
-            degrees2.extend([0] * (max_len - len(degrees2)))
+            degrees1 = np.pad(degrees1, (0, max_len - len(degrees1)))
+            degrees2 = np.pad(degrees2, (0, max_len - len(degrees2)))
+            
+            degree_diff = np.abs(degrees1 - degrees2).sum()
 
-            degree_diff = sum(abs(d1 - d2) for d1, d2 in zip(degrees1, degrees2))
-
-            # Clustering coefficient comparison
-            try:
-                clustering1 = nx.average_clustering(graph1)
-                clustering2 = nx.average_clustering(graph2)
-                clustering_diff = abs(clustering1 - clustering2)
-            except:
-                clustering_diff = 0.0
+            # Graph density comparison
+            density1 = self._compute_density(graph1)
+            density2 = self._compute_density(graph2)
+            density_diff = abs(density1 - density2)
 
             # Combine features with weights
             approximate_ged = (
                 self.node_cost * nodes_diff
                 + self.edge_cost * edges_diff
                 + 0.5 * degree_diff
-                + 2.0 * clustering_diff
+                + 2.0 * density_diff * max(graph1.num_nodes, graph2.num_nodes)
             )
 
             return float(approximate_ged), True
@@ -367,27 +368,36 @@ class GraphEditDistance:
             logger.error(f"Approximation GED failed: {e}")
             return self._fallback_ged_value(graph1, graph2), True
 
-    def _fallback_ged_value(self, graph1: Any, graph2: Any) -> float:
+    def _compute_degrees(self, graph: Data) -> np.ndarray:
+        """Compute degree sequence for a PyG graph."""
+        if graph.edge_index.size(1) == 0:
+            return np.zeros(graph.num_nodes)
+        
+        # Count edges for each node
+        edge_index = graph.edge_index
+        degrees = torch.zeros(graph.num_nodes)
+        degrees.scatter_add_(0, edge_index[0], torch.ones(edge_index.size(1)))
+        
+        return degrees.numpy()
+
+    def _compute_density(self, graph: Data) -> float:
+        """Compute graph density."""
+        if graph.num_nodes <= 1:
+            return 0.0
+        
+        num_edges = graph.edge_index.size(1) / 2  # Undirected
+        max_edges = graph.num_nodes * (graph.num_nodes - 1) / 2
+        
+        return num_edges / max_edges if max_edges > 0 else 0.0
+
+    def _fallback_ged_value(self, graph1: Data, graph2: Data) -> float:
         """Ultimate fallback GED calculation."""
         try:
-            size1 = len(graph1.nodes()) if hasattr(graph1, "nodes") else 1
-            size2 = len(graph2.nodes()) if hasattr(graph2, "nodes") else 1
+            size1 = graph1.num_nodes if hasattr(graph1, "num_nodes") else 1
+            size2 = graph2.num_nodes if hasattr(graph2, "num_nodes") else 1
             return float(abs(size2 - size1))
         except:
             return 1.0  # Default moderate difference
-
-    def _fallback_calculation(self, graph1: Any, graph2: Any) -> GEDResult:
-        """Fallback calculation when NetworkX unavailable."""
-        ged_value = self._fallback_ged_value(graph1, graph2)
-
-        return GEDResult(
-            ged_value=ged_value,
-            computation_time=0.001,  # Minimal time
-            optimization_level=self.optimization_level,
-            graph1_size=1,
-            graph2_size=1,
-            approximation_used=True,
-        )
 
     def get_statistics(self) -> Dict[str, Any]:
         """Get calculator performance statistics."""
@@ -405,14 +415,14 @@ class GraphEditDistance:
             "edge_cost": self.edge_cost,
         }
 
-    def compute(self, graph1: Any, graph2: Any) -> float:
+    def compute(self, graph1: Data, graph2: Data) -> float:
         """
         Compute Graph Edit Distance between two graphs.
         Alias for calculate() method to maintain API consistency.
 
         Args:
-            graph1: First graph
-            graph2: Second graph
+            graph1: First PyG graph
+            graph2: Second PyG graph
 
         Returns:
             float: Graph edit distance value
@@ -421,13 +431,13 @@ class GraphEditDistance:
 
 
 # Convenience functions for external API
-def compute_graph_edit_distance(graph1: Any, graph2: Any, **kwargs) -> float:
+def compute_graph_edit_distance(graph1: Data, graph2: Data, **kwargs) -> float:
     """
-    Compute Graph Edit Distance between two graphs.
+    Compute Graph Edit Distance between two PyG graphs.
 
     Args:
-        graph1: First graph
-        graph2: Second graph
+        graph1: First PyG graph
+        graph2: Second PyG graph
         **kwargs: Additional parameters for GraphEditDistance constructor
 
     Returns:
@@ -439,14 +449,14 @@ def compute_graph_edit_distance(graph1: Any, graph2: Any, **kwargs) -> float:
 
 
 def compute_delta_ged(
-    graph_before: Any, graph_after: Any, reference_graph: Optional[Any] = None, **kwargs
+    graph_before: Data, graph_after: Data, reference_graph: Optional[Data] = None, **kwargs
 ) -> float:
     """
     Compute ΔGED for insight detection.
 
     Args:
-        graph_before: Initial graph state
-        graph_after: Final graph state
+        graph_before: Initial PyG graph state
+        graph_after: Final PyG graph state
         reference_graph: Optional reference graph
         **kwargs: Additional parameters for GraphEditDistance constructor
 

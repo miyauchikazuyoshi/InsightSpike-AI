@@ -10,6 +10,7 @@ import os
 from typing import List, Optional, Union
 
 import numpy as np
+from ..utils.embedding_utils import normalize_embedding_shape, normalize_batch_embeddings
 
 logger = logging.getLogger(__name__)
 
@@ -107,28 +108,38 @@ class EmbeddingManager:
         convert_to_numpy: bool = True,
         normalize_embeddings: bool = True,
     ) -> np.ndarray:
-        """Encode texts to embeddings."""
-        if isinstance(texts, str):
+        """Encode texts to embeddings with shape normalization."""
+        single_text = isinstance(texts, str)
+        if single_text:
             texts = [texts]
 
         model = self.get_model()
 
         if hasattr(model, "encode"):
             # Standard sentence-transformers interface
-            return model.encode(
+            # Force disable progress bar to avoid multiprocessing issues
+            embeddings = model.encode(
                 texts,
                 batch_size=batch_size,
-                show_progress_bar=show_progress_bar,
+                show_progress_bar=False,  # Always disable to prevent issues
                 convert_to_numpy=convert_to_numpy,
                 normalize_embeddings=normalize_embeddings,
             )
         else:
             # Fallback encoding
-            return self._fallback_encode(texts)
+            embeddings = self._fallback_encode(texts)
+        
+        # Normalize shape
+        if single_text:
+            # Return shape (dim,) for single text
+            return normalize_embedding_shape(embeddings[0] if len(embeddings) > 0 else embeddings)
+        else:
+            # Return shape (batch_size, dim) for multiple texts
+            return normalize_batch_embeddings(embeddings)
 
     def get_embedding(self, text: str) -> np.ndarray:
-        """Get embedding for a single text (alias for encode)."""
-        return self.encode(text)
+        """Get embedding for a single text with shape (dim,)."""
+        return self.encode(text)  # encode now handles shape normalization
 
     def _fallback_model(self):
         """Fallback to simple hash-based model."""

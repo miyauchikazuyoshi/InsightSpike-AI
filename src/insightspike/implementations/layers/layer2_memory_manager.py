@@ -15,8 +15,10 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import faiss
 import numpy as np
+
+# Import vector index factory for backend-agnostic implementation
+from ...vector_index import VectorIndexFactory
 
 # Optional import with fallback
 try:
@@ -75,9 +77,7 @@ class MemoryConfig:
     use_hierarchical_graph: bool = False
 
     # Index settings
-    faiss_index_type: str = "Flat"  # Flat, IVF, IVFPQ
-    ivf_nlist: int = 100
-    ivfpq_m: int = 8
+    vector_search_backend: str = "auto"  # auto, numpy, faiss
 
     # Graph settings
     similarity_threshold: float = 0.7
@@ -107,7 +107,7 @@ class MemoryConfig:
         elif mode == MemoryMode.SCALABLE:
             # Optimized for performance
             config.use_scalable_indexing = True
-            config.faiss_index_type = "IVF"
+            config.vector_search_backend = "auto"
             config.cache_embeddings = True
 
         elif mode == MemoryMode.GRAPH_CENTRIC:
@@ -126,7 +126,7 @@ class L2MemoryManager:
     Brain analog: Hippocampus (memory formation) + Locus Coeruleus (attention/importance)
 
     Features:
-    - FAISS-indexed vector search for efficient retrieval
+    - Backend-agnostic vector search for efficient retrieval
     - Configurable modes: Basic, Enhanced, Scalable, Graph-Centric
     - Episode management: merge, split, prune operations
     - Transitioning from C-values to graph-based importance
@@ -164,7 +164,7 @@ class L2MemoryManager:
         # Core components
         self.episodes: List[Episode] = []
         self.embedding_model = None
-        self.faiss_index = None
+        self.vector_index = None
         self.graph_builder = None
         self.importance_scorer = None
 
@@ -192,8 +192,8 @@ class L2MemoryManager:
             logger.warning(f"Failed to load embedding model: {e}")
             self.embedding_model = None
 
-        # FAISS index
-        self._setup_faiss_index()
+        # Vector index
+        self._setup_vector_index()
 
         # Graph builder (if needed)
         if self.config.use_graph_integration:
@@ -223,27 +223,23 @@ class L2MemoryManager:
 
         self.initialized = True
 
-    def _setup_faiss_index(self):
-        """Setup FAISS index based on configuration"""
+    def _setup_vector_index(self):
+        """Setup vector index based on configuration"""
         dim = self.config.embedding_dim
 
-        # Always use Flat index initially, will be upgraded if needed
-        self.faiss_index = faiss.IndexFlatL2(dim)
-        logger.info("Using Flat FAISS index")
-        self._index_type = "Flat"
-
-        # We'll upgrade to IVF when we have enough data
-        if False and self.config.faiss_index_type == "IVF":
-            quantizer = faiss.IndexFlatL2(dim)
-            self.faiss_index = faiss.IndexIVFFlat(quantizer, dim, self.config.ivf_nlist)
-            logger.info(f"Using IVF FAISS index with {self.config.ivf_nlist} cells")
-
-        elif self.config.faiss_index_type == "IVFPQ":
-            quantizer = faiss.IndexFlatL2(dim)
-            self.faiss_index = faiss.IndexIVFPQ(
-                quantizer, dim, self.config.ivf_nlist, self.config.ivfpq_m, 8
-            )
-            logger.info(f"Using IVFPQ FAISS index")
+        # Get vector search backend from config
+        backend = "auto"
+        if hasattr(self.config, "vector_search_backend"):
+            backend = self.config.vector_search_backend
+        elif hasattr(self.config, "use_faiss") and not self.config.use_faiss:
+            backend = "numpy"
+        
+        # Initialize vector index using factory
+        self.vector_index = VectorIndexFactory.create_index(
+            dimension=dim,
+            index_type=backend
+        )
+        logger.info(f"Using {type(self.vector_index).__name__} for vector search")
 
     def add_episode(self, text: str, metadata: Optional[Dict] = None) -> int:
         """Add episode (graph-centric interface)"""
@@ -335,7 +331,7 @@ class L2MemoryManager:
             if query_embedding is None:
                 return []
 
-            # Search using FAISS
+            # Search using vector index
             distances, indices = self._search_index(query_embedding, k * 2)
 
             # Build results
@@ -661,7 +657,7 @@ class L2MemoryManager:
             "total_episodes": len(self.episodes),
             "mode": self.config.mode.value,
             "features_enabled": self._get_enabled_features(),
-            "index_type": self.config.faiss_index_type,
+            "index_type": getattr(self.vector_index, '__class__', type(self.vector_index)).__name__ if self.vector_index else "None",
             "embedding_dim": self.config.embedding_dim,
         }
 
@@ -823,41 +819,34 @@ class L2MemoryManager:
             return None
 
     def _update_index(self, episode: Episode, idx: int):
-        """Update FAISS index with new episode"""
-        if self.faiss_index is None:
+        """Update vector index with new episode"""
+        if self.vector_index is None:
             return
 
-        # For IVF indices, train if needed
-        if hasattr(self.faiss_index, "is_trained") and not self.faiss_index.is_trained:
-            if len(self.episodes) >= self.config.ivf_nlist:
-                vectors = np.array([ep.vec for ep in self.episodes])
-                self.faiss_index.train(vectors)
-                logger.info("FAISS index trained")
-
-        # Add vector
-        if hasattr(self.faiss_index, "is_trained") and self.faiss_index.is_trained:
-            self.faiss_index.add(np.array([episode.vec]))
-        elif not hasattr(self.faiss_index, "is_trained"):
-            # Flat index, always ready
-            self.faiss_index.add(np.array([episode.vec]))
+        # Add vector to index
+        try:
+            self.vector_index.add(np.array([episode.vec]))
+        except Exception as e:
+            logger.error(f"Failed to add vector to index: {e}")
 
     def _search_index(
         self, query_vec: np.ndarray, k: int
     ) -> Tuple[np.ndarray, np.ndarray]:
-        """Search FAISS index"""
-        if self.faiss_index is None or self.faiss_index.ntotal == 0:
+        """Search vector index"""
+        if self.vector_index is None:
             return np.array([]), np.array([])
 
-        # Ensure k doesn't exceed index size
-        k = min(k, self.faiss_index.ntotal)
-
-        # Search
-        distances, indices = self.faiss_index.search(np.array([query_vec]), k)
-        return distances[0], indices[0]
+        try:
+            # Search
+            distances, indices = self.vector_index.search(np.array([query_vec]), k)
+            return distances[0], indices[0]
+        except Exception as e:
+            logger.error(f"Vector search failed: {e}")
+            return np.array([]), np.array([])
 
     def _rebuild_index(self):
-        """Rebuild FAISS index from scratch"""
-        self._setup_faiss_index()
+        """Rebuild vector index from scratch"""
+        self._setup_vector_index()
 
         if not self.episodes:
             return
@@ -865,13 +854,12 @@ class L2MemoryManager:
         # Add all vectors
         vectors = np.array([ep.vec for ep in self.episodes])
 
-        # Train if needed
-        if hasattr(self.faiss_index, "is_trained") and not self.faiss_index.is_trained:
-            self.faiss_index.train(vectors)
-
-        # Add vectors
-        self.faiss_index.add(vectors)
-        logger.info(f"Rebuilt index with {len(self.episodes)} episodes")
+        # Add vectors to new index
+        try:
+            self.vector_index.add(vectors)
+            logger.info(f"Rebuilt index with {len(self.episodes)} episodes")
+        except Exception as e:
+            logger.error(f"Failed to rebuild index: {e}")
 
     def _update_graph(self, episode: Episode, idx: int):
         """Update graph with new episode"""

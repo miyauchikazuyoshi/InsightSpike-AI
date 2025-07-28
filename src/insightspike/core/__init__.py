@@ -1,72 +1,56 @@
-"""Core InsightSpike-AI modules"""
+"""
+Core Components
+==============
 
-# Configuration and management - removed to avoid circular import
+Core business logic components following clean architecture.
+"""
 
-# Data structures and framework - removed after refactoring
+# Import core data structures
+from .episode import Episode
+from .structures import CycleResult, GraphMetrics
+
+# Import core components (lazy loading to avoid circular imports)
+try:
+    from .reasoning_engine import ReasoningEngine
+    REASONING_ENGINE_AVAILABLE = True
+except ImportError:
+    ReasoningEngine = None
+    REASONING_ENGINE_AVAILABLE = False
+
+try:
+    from .memory_controller import MemoryController
+    MEMORY_CONTROLLER_AVAILABLE = True
+except ImportError:
+    MemoryController = None
+    MEMORY_CONTROLLER_AVAILABLE = False
+
+try:
+    from .response_generator import ResponseGenerator
+    RESPONSE_GENERATOR_AVAILABLE = True
+except ImportError:
+    ResponseGenerator = None
+    RESPONSE_GENERATOR_AVAILABLE = False
+
+# Legacy compatibility flags
 EXPERIMENT_FRAMEWORK_AVAILABLE = False
-
-# Layer implementations - moved to implementations.layers
 LAYERS_AVAILABLE = False
-
-# Import agents - moved to implementations.agents
 MAIN_AGENT_AVAILABLE = False
-
-# Import generic agents and factory - removed after refactoring
 GENERIC_AGENTS_AVAILABLE = False
-
-# Import standalone reasoner - skip in LITE_MODE
-import os
-
-LITE_MODE = os.getenv("INSIGHTSPIKE_LITE_MODE", "0") == "1"
-
-# Standalone reasoner - moved to tools.standalone
-StandaloneL3GraphReasoner = None
-create_standalone_reasoner = None
-analyze_documents_simple = None
 STANDALONE_REASONER_AVAILABLE = False
-
-# Import interfaces - moved to core.base
 INTERFACES_AVAILABLE = False
 
 # Export list
-base_exports = []
+__all__ = [
+    "Episode",
+    "CycleResult",
+    "GraphMetrics",
+]
 
-if EXPERIMENT_FRAMEWORK_AVAILABLE:
-    base_exports.extend(
-        [
-            "BaseExperiment",
-            "ExperimentConfig",
-            "ExperimentResult",
-            "PerformanceMetrics",
-            "ExperimentSuite",
-            "create_simple_experiment_config",
-            "create_performance_metrics",
-        ]
-    )
+if REASONING_ENGINE_AVAILABLE:
+    __all__.append("ReasoningEngine")
 
-if MAIN_AGENT_AVAILABLE:
-    base_exports.append("MainAgent")
+if MEMORY_CONTROLLER_AVAILABLE:
+    __all__.append("MemoryController")
 
-if GENERIC_AGENTS_AVAILABLE:
-    base_exports.extend(
-        [
-            "GenericInsightSpikeAgent",
-            "GenericMemoryManager",
-            "GenericReasoner",
-            "InsightSpikeAgentFactory",
-            "AgentConfigBuilder",
-            "create_maze_agent",
-            "create_configured_maze_agent",
-        ]
-    )
-
-if STANDALONE_REASONER_AVAILABLE:
-    base_exports.extend(
-        [
-            "StandaloneL3GraphReasoner",
-            "create_standalone_reasoner",
-            "analyze_documents_simple",
-        ]
-    )
-
-__all__ = base_exports
+if RESPONSE_GENERATOR_AVAILABLE:
+    __all__.append("ResponseGenerator")

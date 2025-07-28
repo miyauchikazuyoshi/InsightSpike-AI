@@ -2,206 +2,201 @@
 
 ## Overview
 
-This directory follows a structured organization for all InsightSpike data files:
+This directory contains all data files for InsightSpike-AI. The structure is organized based on the DataStore abstraction layer.
+
+## Current Directory Structure
 
 ```
 data/
-├── core/                    # Core system files (persistent)
-│   ├── index.faiss         # FAISS vector index
-│   ├── episodes.json       # Episode metadata  
-│   ├── graph_pyg.pt        # PyTorch graph
-│   └── graph_pyg_clean.pt  # Clean backup graph
+├── insight_store/          # Default DataStore location (when using filesystem)
+│   ├── core/              # Core system files
+│   ├── episodes/          # Episode data
+│   ├── graphs/            # Graph structures
+│   └── vectors/           # Vector indices
 │
-├── db/                      # Databases (persistent)
-│   ├── insight_facts.db    # Insight registry (40KB)
-│   └── unknown_learning.db # Auto-learning system (108KB)
+├── knowledge_base/         # Static knowledge files
+│   ├── initial/           # Initial datasets
+│   │   ├── indirect_knowledge.txt
+│   │   ├── insight_dataset.txt
+│   │   ├── simple_dataset.txt
+│   │   └── test_sentences.txt
+│   └── samples/           # Sample knowledge
+│       ├── consciousness.txt
+│       ├── entropy_info.txt
+│       └── quantum_bio.txt
 │
-├── experiments/             # Experiment results (archivable)
-│   ├── integrated_rag_memory/  # RAG experiments
-│   └── processed_results/      # Analysis results
-│       ├── comprehensive_rag_analysis.json
-│       ├── experiment_results.json
-│       ├── graph_visualization_results.json
-│       ├── simple_metadata.json
-│       └── test_questions.json
+├── sqlite/                 # SQLite databases
+│   ├── benchmark.db       # Benchmark results
+│   ├── insightspike.db    # Main database
+│   └── simple_benchmark.db
 │
-├── raw/                     # Input data (read-only)
-│   ├── indirect_knowledge.txt
-│   ├── insight_dataset.txt
-│   ├── simple_dataset.txt
-│   └── test_sentences.txt
+├── experiments/            # Experiment data and results
+├── cache/                  # Temporary cache files
+├── temp/                   # Temporary working files
+├── logs/                   # Log files
+│   ├── system/            # System logs
+│   └── graph_operations/  # Graph operation logs
 │
-├── clean_backup/            # Clean reference files
-│   ├── episodes_clean.json
-│   ├── graph_pyg_clean.pt
-│   ├── index_clean.faiss
-│   ├── insight_facts_clean.db
-│   ├── unknown_learning_clean.db
-│   └── README.md
+├── core/                   # Legacy core files (being migrated)
+├── db/                     # Legacy databases (being migrated)
+├── learning/               # Learning/training data
+├── models/                 # Model files
 │
-├── logs/                   # Log files (rotatable)
-│   ├── system/            # System logs (empty)
-│   └── graph_operations/  # Graph ops logs (empty)
-│
-├── learning/               # Auto-learning data (empty)
-├── cache/                  # Temporary cache (empty)
-├── temp/                   # Temporary files (empty)
-├── backup/                 # Backups (contains timestamps)
-├── processed/              # Now empty (moved to experiments)
-└── samples/                # Sample data
-    └── benchmark_data.json
+├── MIGRATION_REPORT.md     # Data migration documentation
+└── README.md              # This file
 ```
 
-## Key Files
+## DataStore Configuration
 
-- `config.yaml` - Central configuration for data paths
-- `validate.py` - Data validation script
-- `cleanup.py` - Cleanup utility
+The DataStore location is configured in `config.yaml`:
 
-## Core System Files
-
-| File | Component | Description | Location |
-|------|-----------|-------------|----------|
-| `index.faiss` | Layer2 Memory Manager | Vector search index | `core/` |
-| `episodes.json` | Layer2 Memory Manager | Episode metadata | `core/` |
-| `graph_pyg.pt` | Layer3 Graph Reasoner | Knowledge graph | `core/` |
-| `scalable_index.faiss` | Scalable Graph Manager | Scalable vectors | `core/` |
-| `insight_facts.db` | Insight Registry | Insights database | `db/` |
-| `unknown_learning.db` | Auto Learning System | Learning database | `db/` |
-
-Component implementations are now in:
-- `src/insightspike/implementations/layers/layer2_memory_manager.py`
-- `src/insightspike/implementations/layers/layer3_graph_reasoner.py`
-- `src/insightspike/implementations/memory/scalable_graph_manager.py`
-
-## Usage
-
-### Validate Data
-```bash
-python validate.py
+```yaml
+datastore:
+  type: filesystem          # Options: filesystem, in_memory, sqlite
+  root_path: ./data/insight_store
 ```
 
-### Clean Up
-```bash
-# Dry run to see what would be deleted
-python cleanup.py --dry-run
+## Using DataStore
 
-# Actually clean up
-python cleanup.py
-```
-
-### Data Store Integration
-
-With the new DataStore abstraction:
+### Python API
 
 ```python
 from insightspike.implementations.datastore import DataStoreFactory
 
-# Create datastore (uses config.json settings)
-datastore = DataStoreFactory.create("filesystem", base_path="data")
+# Create datastore (uses config.yaml settings)
+datastore = DataStoreFactory.create("filesystem", base_path="data/insight_store")
 
 # Save episodes
-datastore.save_episodes(episodes, namespace="l2_memory")
+episodes = [
+    {
+        "text": "Example episode",
+        "vec": embedding_vector,  # numpy array
+        "c_value": 0.5,
+        "timestamp": 1234567890,
+        "metadata": {}
+    }
+]
+datastore.save_episodes(episodes, namespace="my_experiment")
 
 # Load episodes
-episodes = datastore.load_episodes(namespace="l2_memory")
+loaded_episodes = datastore.load_episodes(namespace="my_experiment")
 
 # Search vectors
-indices, distances = datastore.search_vectors(query_vec, k=10)
+results = datastore.search_vectors(
+    query_vector=query_embedding,
+    k=10,
+    namespace="my_experiment"
+)
+
+# Save graph
+datastore.save_graph(graph_data, namespace="my_experiment")
+
+# Load graph
+graph = datastore.load_graph(namespace="my_experiment")
 ```
+
+### Namespace Organization
+
+DataStore uses namespaces to organize data:
+
+- `default`: Default namespace for MainAgent
+- `l2_memory`: Layer 2 Memory Manager data
+- `l3_graph`: Layer 3 Graph Reasoner data
+- `experiments/[name]`: Experiment-specific data
 
 ## File Formats
 
-### episodes.json
+### Episodes (JSON)
 ```json
 [
   {
-    "text": "Episode text content",
-    "vec": [0.1, 0.2, ...],  // 384-dimensional vector
-    "c": 0.5,                // C-value
+    "text": "Episode content",
+    "vec": [0.1, 0.2, ...],      // 384-dimensional vector
+    "c_value": 0.5,               // Confidence value
     "timestamp": 1234567890,
-    "metadata": {}
+    "metadata": {
+      "source": "user_input",
+      "tags": ["example"]
+    }
   }
 ]
 ```
 
-### graph_pyg.pt
-PyTorch tensor containing:
-- `x`: Node features (embeddings)
-- `edge_index`: Edge connectivity
-- `num_nodes`: Total nodes
+### Graphs (PyTorch)
+- Saved as `.pt` files using torch.save()
+- Contains PyTorch Geometric Data objects
 
-## Cleanup Policies
-
-Based on `config.yaml`:
-
-- **temp/**: Max 7 days, cleaned on startup
-- **cache/**: Max 10GB, files older than 30 days
-- **logs/**: Rotated at 100MB, kept for 90 days
-- **experiments/**: Keep latest 10, archive older
-
-## Migration from Old Structure
-
-The data directory has been reorganized for better maintainability:
-
-1. **Files moved to `core/`**:
-   - `index.faiss`
-   - `episodes.json`
-   - `graph_pyg.pt`
-
-2. **Files moved to `db/`**:
-   - `insight_facts.db`
-   - `unknown_learning.db`
-
-3. **Experiment data moved to `experiments/`**
-
-The old structure is preserved in `backup/` for reference.
+### Vector Indices
+- NumPy arrays saved as `.npy` files
+- Compatible with the VectorIndex abstraction
 
 ## Best Practices
 
-1. **Always use DataStore API** - Don't directly access files
-2. **Regular validation** - Run `validate.py` weekly
-3. **Cleanup before experiments** - Use `cleanup.py`
-4. **Backup critical data** - Core and DB directories
-5. **Monitor disk usage** - Especially cache and experiments
+1. **Use DataStore API**: Always use the DataStore API instead of direct file access
+2. **Namespace isolation**: Use unique namespaces for experiments
+3. **Clean up**: Remove experiment data after analysis
+4. **Backup**: Regular backups of `insight_store/` directory
+
+## Maintenance
+
+### Clean temporary files
+```bash
+# Remove old cache files
+find data/cache -type f -mtime +7 -delete
+
+# Clear temp directory
+rm -rf data/temp/*
+```
+
+### Check disk usage
+```bash
+du -sh data/*
+```
+
+## Migration Notes
+
+The system is transitioning from direct file access to DataStore abstraction:
+
+- **Old**: Direct file operations in `core/`, `db/`
+- **New**: DataStore API with `insight_store/`
+
+Legacy directories (`core/`, `db/`) are maintained for backward compatibility but will be phased out.
+
+## Environment-Specific Configurations
+
+Different environments can use different DataStore configurations:
+
+```yaml
+# Development
+datastore:
+  type: filesystem
+  root_path: ./data/insight_store
+
+# Testing  
+datastore:
+  type: in_memory
+  
+# Production
+datastore:
+  type: sqlite
+  connection_string: "sqlite:///data/production.db"
+```
 
 ## Troubleshooting
 
-**Missing files**: Run validation to check structure
+### Permission errors
 ```bash
-python validate.py
+# Fix permissions
+chmod -R 755 data/
 ```
 
-**Disk space issues**: Run cleanup
+### Disk space issues
 ```bash
-python cleanup.py
+# Check large files
+find data -type f -size +100M
 ```
 
-**Corrupt files**: Restore from clean backup
-```bash
-cp clean_backup/episodes_clean.json core/episodes.json
-cp clean_backup/index_clean.faiss core/index.faiss
-cp clean_backup/graph_pyg_clean.pt core/graph_pyg.pt
-cp clean_backup/insight_facts_clean.db db/insight_facts.db
-cp clean_backup/unknown_learning_clean.db db/unknown_learning.db
-```
-
-## Future Extensions
-
-The DataStore abstraction supports:
-- PostgreSQL backend
-- Vector databases (Pinecone, Weaviate)
-- S3/Cloud storage
-- Redis cache
-
-Simply change the config:
-```json
-{
-  "datastore": {
-    "type": "postgresql",
-    "params": {
-      "connection_string": "..."
-    }
-  }
-}
-```
+### Data corruption
+- Check logs in `data/logs/`
+- Restore from backups if available
+- Re-run experiments if needed

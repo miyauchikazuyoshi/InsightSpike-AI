@@ -23,12 +23,12 @@ class GraphAnalyzer:
 
     def calculate_metrics(
         self,
-        current_graph: Data,
+        current_graph: Data,  # PyTorch Geometric Data only
         previous_graph: Optional[Data],
         delta_ged_func,
         delta_ig_func,
     ) -> Dict[str, float]:
-        """Calculate ΔGED and ΔIG metrics between graphs."""
+        """Calculate ΔGED and ΔIG metrics between PyG graphs."""
         if previous_graph is None:
             return {
                 "delta_ged": 0.0,
@@ -38,51 +38,12 @@ class GraphAnalyzer:
             }
 
         try:
-            # Calculate graph edit distance change
-            # Convert PyTorch Geometric graphs to NetworkX for GED calculation
-            import networkx as nx
-
-            # Create NetworkX graphs from PyTorch Geometric data
-            g_prev = nx.Graph()
-            g_curr = nx.Graph()
-
-            # Add nodes
-            for i in range(previous_graph.num_nodes):
-                g_prev.add_node(i)
-            for i in range(current_graph.num_nodes):
-                g_curr.add_node(i)
-
-            # Add edges if available
-            if (
-                hasattr(previous_graph, "edge_index")
-                and previous_graph.edge_index is not None
-            ):
-                edges = previous_graph.edge_index.t().tolist()
-                g_prev.add_edges_from(edges)
-            if (
-                hasattr(current_graph, "edge_index")
-                and current_graph.edge_index is not None
-            ):
-                edges = current_graph.edge_index.t().tolist()
-                g_curr.add_edges_from(edges)
-
-            ged = delta_ged_func(g_prev, g_curr)
-
-            # Calculate information gain change
-            # Extract feature vectors for IG calculation
-            prev_vecs = (
-                previous_graph.x.numpy()
-                if hasattr(previous_graph, "x") and previous_graph.x is not None
-                else None
-            )
-            curr_vecs = (
-                current_graph.x.numpy()
-                if hasattr(current_graph, "x") and current_graph.x is not None
-                else None
-            )
-
-            if prev_vecs is not None and curr_vecs is not None:
-                ig = delta_ig_func(prev_vecs, curr_vecs)
+            # Calculate metrics directly on PyG Data objects
+            ged = delta_ged_func(previous_graph, current_graph)
+            
+            # Calculate information gain using node features
+            if hasattr(previous_graph, "x") and hasattr(current_graph, "x"):
+                ig = delta_ig_func(previous_graph, current_graph)
             else:
                 ig = 0.0
 

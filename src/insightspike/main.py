@@ -18,7 +18,7 @@ import typer
 
 from .cli.spike import app as cli_app
 from .config.loader import load_config
-from .config.models import Config
+from .config.models import InsightSpikeConfig
 from .core.base.datastore import DataStore
 from .implementations.agents.main_agent import MainAgent
 from .implementations.datastore.factory import DataStoreFactory
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 class Application:
     """Main application container with all dependencies."""
 
-    def __init__(self, config: Config, agent: MainAgent):
+    def __init__(self, config: InsightSpikeConfig, agent: MainAgent):
         self.config = config
         self.agent = agent
         self._running = False
@@ -82,7 +82,7 @@ def create_application(config_path: Optional[Path] = None) -> Application:
     datastore_config = {
         "type": config.datastore.type if hasattr(config, "datastore") else "filesystem",
         "params": {
-            "root_path": config.paths.data_dir
+            "base_path": str(config.paths.data_dir)
             if hasattr(config, "paths")
             else "./data",
         },

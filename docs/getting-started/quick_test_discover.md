@@ -1,10 +1,21 @@
-# Quick Test Guide for spike discover
+# Quick Test Guide for InsightSpike CLI
 
-## Testing the discover command
+## Testing InsightSpike Commands
 
-Due to initialization timing, the discover command works best with pre-loaded knowledge. Here's how to test it:
+### Basic Usage Test
 
-### 1. First, load some sample documents
+```bash
+# Test basic functionality
+poetry run spike ask "What is entropy?"
+
+# Add knowledge
+poetry run spike add "Entropy measures disorder in a system"
+
+# Test with mock provider (fast)
+poetry run spike ask "Explain entropy" --provider mock
+```
+
+### 1. Testing Document Processing
 
 ```bash
 # Create sample documents
@@ -17,50 +28,62 @@ echo "Consciousness may involve information integration in the brain." > data/te
 poetry run spike embed data/test_discover/
 ```
 
-### 2. Run discover on existing knowledge base
+### 2. Testing Spike Detection
 
 ```bash
-# Basic discovery
-poetry run spike discover
+# Add related knowledge to trigger spike detection
+poetry run spike add "Information theory relates entropy to uncertainty"
+poetry run spike add "Thermodynamic entropy increases in isolated systems"
 
-# With options
-poetry run spike discover --min-spike 0.5 --verbose
-
-# Export results
-poetry run spike discover --export insights.json
+# Ask a question that should trigger spike detection
+poetry run spike ask "How does entropy connect physics and information?"
 ```
 
-### 3. Expected Output
+### 3. Expected Spike Detection Output
 
+When a spike is detected, you'll see:
 ```
-🔍 Discovering insights...
+🎯 SPIKE DETECTED!
+├─ ΔGED: 0.35 (< 0.5) ✓
+├─ ΔIG: 0.45 (> 0.2) ✓
+└─ Confidence: High
 
-⚡ Discovered 3 insights
-
-💡 Insight #1 [Spike: 0.72]
-┌─────────────────────────────────────────────────────┐
-│ Question: What is the relationship between entropy   │
-│           and information?                          │
-│ Confidence: 72%                                     │
-└─────────────────────────────────────────────────────┘
-
-🌉 Bridge Concepts:
-┌─────────────┬───────────┬──────────────┐
-│ Concept     │ Frequency │ Bridge Score │
-├─────────────┼───────────┼──────────────┤
-│ information │ 3         │ 0.60         │
-│ quantum     │ 2         │ 0.40         │
-└─────────────┴───────────┴──────────────┘
+💡 Insight: Connection between thermodynamic and information entropy discovered
 ```
 
-## Known Limitations
+## Performance Tips
 
-1. **Initialization delay**: The first command might take 10-20 seconds to initialize all components
-2. **PyTorch dependency**: Full graph reasoning requires PyTorch (optional)
-3. **Insight quality**: Better results with more documents in knowledge base
+1. **Use Mock Provider**: For testing, use `--provider mock` to avoid API calls
+2. **Disable Message Passing**: Keep `enable_message_passing: false` for better performance
+3. **Batch Operations**: Process multiple documents at once with `spike embed`
 
-## Tips
+## Configuration Options
 
-- Start with a lower spike threshold (0.5) for initial testing
-- The more documents you add, the better the insights
-- Use `--verbose` to see detailed processing information
+```yaml
+# Spike detection thresholds
+graph:
+  spike_ged_threshold: 0.5  # Lower = more sensitive
+  spike_ig_threshold: 0.2   # Higher = more sensitive
+
+# Performance settings
+processing:
+  max_cycles: 10           # Reasoning cycles
+  convergence_threshold: 0.8
+```
+
+## Troubleshooting
+
+### "No spike detected"
+- Add more related knowledge before asking
+- Adjust thresholds in config.yaml
+- Use `--verbose` to see metric values
+
+### Slow Performance
+- Ensure message passing is disabled
+- Use mock provider for testing
+- Check if PyTorch operations are CPU-bound
+
+### API Errors
+- Set API keys: `export OPENAI_API_KEY=...`
+- Use mock provider: `--provider mock`
+- Check network connectivity

@@ -20,37 +20,17 @@ except ImportError:
     Data = None
 
 # Removed get_config import - now passed via constructor
+from ...config.legacy_adapter import LegacyConfigAdapter
 from ...monitoring import GraphOperationMonitor, MonitoredOperation
 
 logger = logging.getLogger(__name__)
 
-# Try to import FAISS, fall back to mock if needed
-import os
-
-try:
-    import faiss
-
-    # Test FAISS to catch segfault issues early
-    test_index = faiss.IndexFlatIP(10)
-    test_index.add(np.random.randn(5, 10).astype(np.float32))
-    del test_index
-    FAISS_AVAILABLE = True
-except Exception as e:
-    logger.warning(f"FAISS not available: {e}")
-    FAISS_AVAILABLE = False
-
-    # Create a minimal mock to avoid import errors
-    class MockFaiss:
-        def IndexFlatIP(self, d):
-            return None
-
-        def IndexIVFFlat(self, *args):
-            return None
-
-    faiss = MockFaiss()
+# Import vector index factory for backend-agnostic implementation
+from ...vector_index import VectorIndexFactory
 
 
 class ScalableGraphBuilder:
+    # Added to store previous graph edges for incremental updates
     """
     Build graphs efficiently using FAISS for nearest neighbor search.
 
@@ -65,44 +45,28 @@ class ScalableGraphBuilder:
         """Initialize with configuration object.
 
         Args:
-            config: Configuration object (legacy format). If None, defaults will be used.
+            config: Configuration object. If None, defaults will be used.
             monitor: Optional GraphOperationMonitor for tracking operations.
         """
         if config is None:
             # Create minimal default config
             logger.warning("No config provided to ScalableGraphBuilder, using defaults")
-            from types import SimpleNamespace
-
-            config = SimpleNamespace(
-                reasoning=SimpleNamespace(similarity_threshold=0.7),
-                scalable_graph=SimpleNamespace(top_k_neighbors=50, batch_size=1000),
-                embedding=SimpleNamespace(dimension=384),
-            )
-
-        self.config = config
-        self.similarity_threshold = getattr(
-            self.config.graph, "similarity_threshold", 0.7
-        )
-        self.top_k = (
-            self.config.scalable_graph.top_k_neighbors
-            if hasattr(self.config, "scalable_graph")
-            else 50
-        )
-        self.batch_size = (
-            self.config.scalable_graph.batch_size
-            if hasattr(self.config, "scalable_graph")
-            else 1000
-        )
+            from ...config import InsightSpikeConfig
+            config = InsightSpikeConfig()
+        
+        self.config = LegacyConfigAdapter.ensure_pydantic(config)
+        
+        # Use Pydantic config attributes
+        self.similarity_threshold = self.config.graph.similarity_threshold
+        # Note: scalable_graph settings might need to be added to GraphConfig
+        # For now, use defaults
+        self.top_k = 50  # TODO: Add to GraphConfig
+        self.batch_size = 1000  # TODO: Add to GraphConfig
 
         # FAISS index for efficient similarity search
         self.index = None
-        # Handle both Pydantic and legacy config
-        if hasattr(self.config, "embedding") and hasattr(
-            self.config.embedding, "dimension"
-        ):
-            self.dimension = self.config.embedding.dimension
-        else:
-            self.dimension = 384
+        # Use Pydantic config
+        self.dimension = self.config.embedding.dimension
 
         # Track document metadata
         self.documents = []
@@ -110,6 +74,9 @@ class ScalableGraphBuilder:
 
         # Monitoring
         self.monitor = monitor
+        
+        # Store previous edges for incremental updates
+        self.previous_edge_index = None
 
     def build_graph(
         self,
@@ -169,7 +136,15 @@ class ScalableGraphBuilder:
 
             if incremental and self.index is not None:
                 # Add new embeddings to existing index
-                edge_index = self._incremental_update(embeddings, len(self.documents))
+                new_edges = self._incremental_update(embeddings, len(self.documents))
+                
+                # Preserve existing edges
+                if self.previous_edge_index is not None:
+                    edge_index = self.previous_edge_index + new_edges
+                    logger.info(f"Incremental update: {len(self.previous_edge_index)} existing + {len(new_edges)} new = {len(edge_index)} total edges")
+                else:
+                    edge_index = new_edges
+                
                 self.documents.extend(documents)
                 self.embeddings = np.vstack([self.embeddings, embeddings])
             else:
@@ -199,6 +174,10 @@ class ScalableGraphBuilder:
                 f"Built graph with {graph.num_nodes} nodes, "
                 f"{graph.edge_index.size(1)} edges"
             )
+            
+            # Store edge index for next incremental update
+            if edge_index:
+                self.previous_edge_index = edge_index
 
             return graph
 
@@ -207,11 +186,21 @@ class ScalableGraphBuilder:
             return self._empty_graph()
 
     def _build_from_scratch(self, embeddings: np.ndarray) -> List[List[int]]:
-        """Build graph from scratch using FAISS."""
+        """Build graph from scratch using vector index."""
         n_samples = embeddings.shape[0]
 
-        # Initialize FAISS index for inner product (cosine similarity on normalized vectors)
-        self.index = faiss.IndexFlatIP(self.dimension)
+        # Get vector search backend from config
+        backend = "auto"
+        if hasattr(self.config, "vector_search") and hasattr(self.config.vector_search, "backend"):
+            backend = self.config.vector_search.backend
+        elif hasattr(self.config, "graph") and hasattr(self.config.graph, "use_faiss"):
+            backend = "faiss" if self.config.graph.use_faiss else "numpy"
+        
+        # Initialize vector index using factory
+        self.index = VectorIndexFactory.create_index(
+            dimension=self.dimension,
+            index_type=backend
+        )
         self.index.add(embeddings.astype(np.float32))
 
         # Find k nearest neighbors for each node
@@ -233,6 +222,7 @@ class ScalableGraphBuilder:
                 # Process all neighbors
                 for j, (dist, neigh) in enumerate(zip(dists, neighs)):
                     # Skip self-connections and apply similarity threshold
+                    # Note: FAISS IndexFlatIP returns inner product (higher = more similar)
                     if (
                         neigh != -1
                         and neigh != node_idx
@@ -262,6 +252,7 @@ class ScalableGraphBuilder:
             new_node_idx = offset + i
 
             for dist, neigh in zip(dists, neighs):
+                # Note: FAISS IndexFlatIP returns inner product (higher = more similar)
                 if (
                     neigh != -1
                     and neigh != new_node_idx

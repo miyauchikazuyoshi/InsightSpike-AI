@@ -18,10 +18,7 @@ conda create -n insightspike_env python=3.11  # Use Python 3.11
 conda activate insightspike_env
 
 # 3. Install core ML dependencies via Conda (recommended channels)
-#    FAISS (from conda-forge for better compatibility)
-conda install -c conda-forge faiss-cpu
-
-#    PyTorch Geometric (from pyg channel)
+#    PyTorch Geometric (from pyg channel) - Optional for advanced features
 conda install pyg -c pyg
 
 #    PyTorch (ensure compatibility with PyTorch Geometric)
@@ -51,21 +48,22 @@ python scripts/pre_push_validation.py
 
 ## 🔧 Common Issues & Quick Fixes
 
-### Segmentation Faults with FAISS/PyTorch Geometric (macOS Intel)
+### Vector Search Backend
 
-**Problem**: Encountering `Segmentation fault` errors, especially during graph building or similarity search operations involving FAISS and PyTorch Geometric. This is often due to low-level library conflicts (e.g., OpenMP runtimes) or subtle version incompatibilities between these highly optimized C/C++-backed libraries on macOS Intel.
+**InsightSpike uses a NumPy-based vector search backend** that provides:
+- Excellent stability and compatibility
+- Good performance for most use cases
+- Simple installation with no complex dependencies
+- Cross-platform support
 
-**Solution**:
-1.  **Prioritize Conda Installation**: As detailed in the "Recommended Setup" above, installing FAISS and PyTorch Geometric via Conda (specifically from `conda-forge` and `pyg` channels) is crucial. Conda provides a more controlled environment, ensuring compatible binaries and managing underlying C/C++ dependencies.
-2.  **Strict Version Alignment**: Ensure the following versions are used, as they have shown better compatibility:
-    *   `torch`: `2.2.2`
-    *   `torchvision`: `0.17.2`
-    *   `torchaudio`: `2.2.2`
-    *   `faiss-cpu`: `1.8.0` (from `conda-forge`)
-    *   `torch-geometric`: `2.5.2` (from `pyg` channel, which installs `pyg`)
-    *   `numpy`: `1.26.4`
-3.  **Import Order**: While less common with Conda-managed environments, if issues persist, ensure `import faiss` occurs *before* `import torch` in your Python scripts where both are used. (Note: This is often handled by the package manager, but can be a manual workaround).
-4.  **Debugging**: If a segfault occurs, try to isolate the problematic code section. You can temporarily add `import sys; sys.exit(1)` before the suspected line to see if the code reaches that point. Inspect input data for `NaN` or `Inf` values (`np.isnan().any()`, `np.isinf().any()`).
+**Configuration**:
+The vector search is configured in `config.yaml`:
+```yaml
+vector_search:
+  backend: numpy       # Default backend
+  optimize: true       # Use optimized implementations
+  batch_size: 1000    # Batch size for operations
+```
 
 ---
 
@@ -172,7 +170,7 @@ source ~/.zshrc # or ~/.bash_profile
 - Python: 3.11
 - PyTorch: 2.2.2
 - NumPy: 1.26.4
-- FAISS-CPU: 1.8.0 (installed via `conda install -c conda-forge faiss-cpu`)
+- Vector Search: NumPy-based backend
 - PyTorch Geometric: 2.5.2 (installed via `conda install pyg -c pyg`)
 - sentence-transformers: 2.7.0
 

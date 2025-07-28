@@ -27,6 +27,9 @@ class CompatibleL2MemoryManager(L2MemoryManager):
 
         # Initialize parent with new config
         super().__init__(memory_config)
+        
+        # Initialize embedder attribute
+        self.embedder = None
 
     def add_episode(
         self,
@@ -62,6 +65,25 @@ class CompatibleL2MemoryManager(L2MemoryManager):
 
         # Fallback
         return -1
+    
+    def _encode_text(self, text: str) -> np.ndarray:
+        """
+        Encode text to embedding vector.
+        
+        Args:
+            text: Text to encode
+            
+        Returns:
+            Embedding vector as numpy array with shape (embedding_dim,)
+        """
+        # Use the embedder from parent class
+        if self.embedder is None:
+            from insightspike.processing.embedder import EmbeddingManager
+            self.embedder = EmbeddingManager()
+        
+        embedding = self.embedder.encode(text)
+        # Shape is now normalized by EmbeddingManager
+        return embedding
 
 
 # Convenience function for tests

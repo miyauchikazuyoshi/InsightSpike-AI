@@ -47,6 +47,16 @@ app = typer.Typer(
 console = Console()
 logger = get_logger("cli")
 
+# State for sharing between main.py and CLI commands
+class CLIState:
+    """Container for CLI state shared across commands."""
+    def __init__(self):
+        self.agent: Optional[MainAgent] = None
+        self.config: Optional[InsightSpikeConfig] = None
+        self.initialized_from_main: bool = False
+
+state = CLIState()
+
 from .commands.bridge import bridge_command
 
 # Import command modules

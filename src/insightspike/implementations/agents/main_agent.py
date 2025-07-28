@@ -95,6 +95,10 @@ class MainAgent:
         if isinstance(config, InsightSpikeConfig):
             self.config = config
             self.is_pydantic_config = True
+        elif isinstance(config, dict):
+            # Dict config support - not Pydantic
+            self.config = config
+            self.is_pydantic_config = False
         else:
             # Legacy config support
             self.config = config
@@ -105,6 +109,18 @@ class MainAgent:
 
         # Initialize layers
         self.l1_error_monitor = ErrorMonitor(self.config)
+        
+        # Initialize L1 embedder (needed for add_knowledge)
+        from insightspike.processing.embedder import EmbeddingManager
+        embedding_model = None
+        if self.is_pydantic_config:
+            embedding_model = self.config.embedding.model_name
+        else:
+            if hasattr(self.config, "embedding") and hasattr(
+                self.config.embedding, "model_name"
+            ):
+                embedding_model = self.config.embedding.model_name
+        self.l1_embedder = EmbeddingManager(model_name=embedding_model, config=self.config)
 
         # Initialize Layer 2 Memory Manager with backward compatibility
         if self.is_pydantic_config:
@@ -267,6 +283,11 @@ class MainAgent:
                 bypass_enabled = self.config.processing.enable_layer1_bypass
                 uncertainty_threshold = self.config.processing.bypass_uncertainty_threshold
                 known_ratio_threshold = self.config.processing.bypass_known_ratio_threshold
+            elif isinstance(self.config, dict):
+                processing = self.config.get("processing", {})
+                bypass_enabled = processing.get("enable_layer1_bypass", False)
+                uncertainty_threshold = processing.get("bypass_uncertainty_threshold", 0.2)
+                known_ratio_threshold = processing.get("bypass_known_ratio_threshold", 0.9)
             else:
                 bypass_enabled = getattr(self.config.processing, "enable_layer1_bypass", False)
                 uncertainty_threshold = getattr(self.config.processing, "bypass_uncertainty_threshold", 0.2)
@@ -338,6 +359,7 @@ class MainAgent:
                 "previous_graph": self.previous_state.get("graph_state")
                 if self.previous_state
                 else None,
+                "query_vector": memory_results.get("query_embedding", None),
             }
 
             # L3: Graph analysis (optional)
@@ -412,6 +434,7 @@ class MainAgent:
                 "previous_state": self.previous_state,
                 "reasoning_quality": graph_analysis.get("reasoning_quality", 0.0),
                 "subgraph_context": subgraph_context,
+                "query_vector": memory_results.get("query_embedding", None),
             }
 
             # Call generate_response_detailed to get full result dict
@@ -450,6 +473,8 @@ class MainAgent:
                 insight_registration_enabled = False
                 if self.is_pydantic_config:
                     insight_registration_enabled = self.config.processing.enable_insight_registration
+                elif isinstance(self.config, dict):
+                    insight_registration_enabled = self.config.get("processing", {}).get("enable_insight_registration", True)
                 else:
                     insight_registration_enabled = getattr(
                         self.config.processing, "enable_insight_registration", True
@@ -482,10 +507,10 @@ class MainAgent:
 
             # Use L2MemoryManager's store_episode method which properly uses SentenceTransformer
             try:
-                success = self.l2_memory.store_episode(
+                episode_idx = self.l2_memory.store_episode(
                     memory_text, c_value=reasoning_quality
                 )
-                if success:
+                if episode_idx >= 0:
                     logger.debug(
                         f"Stored episode in memory: {len(memory_text)} chars with quality {reasoning_quality:.3f}"
                     )
@@ -522,6 +547,13 @@ class MainAgent:
                 dynamic_adjustment = self.config.processing.dynamic_doc_adjustment
                 max_docs_with_insights = self.config.processing.max_docs_with_insights
                 insight_relevance_boost = self.config.processing.insight_relevance_boost
+            elif isinstance(self.config, dict):
+                memory_config = self.config.get("memory", {})
+                processing_config = self.config.get("processing", {})
+                max_docs = memory_config.get("max_retrieved_docs", 10)
+                dynamic_adjustment = processing_config.get("dynamic_doc_adjustment", True)
+                max_docs_with_insights = processing_config.get("max_docs_with_insights", 5)
+                insight_relevance_boost = processing_config.get("insight_relevance_boost", 0.2)
             else:
                 max_docs = getattr(self.config.memory, "max_retrieved_docs", 10)
                 dynamic_adjustment = getattr(self.config.processing, "dynamic_doc_adjustment", True)
@@ -612,6 +644,10 @@ class MainAgent:
             if self.is_pydantic_config:
                 insight_search_enabled = self.config.processing.enable_insight_search
                 max_insights = self.config.processing.max_insights_per_query
+            elif isinstance(self.config, dict):
+                processing_config = self.config.get("processing", {})
+                insight_search_enabled = processing_config.get("enable_insight_search", True)
+                max_insights = processing_config.get("max_insights_per_query", 5)
             else:
                 insight_search_enabled = getattr(
                     self.config.processing, "enable_insight_search", True
@@ -658,11 +694,22 @@ class MainAgent:
                 except Exception as e:
                     logger.warning(f"Failed to search insights: {e}")
 
-            return {"documents": documents, "stats": stats, "success": True}
+            return {
+                "documents": documents, 
+                "stats": stats, 
+                "success": True,
+                "query_embedding": query_embedding
+            }
 
         except Exception as e:
             logger.error(f"Memory search failed: {e}")
-            return {"documents": [], "stats": {}, "success": False, "error": str(e)}
+            return {
+                "documents": [], 
+                "stats": {}, 
+                "success": False, 
+                "error": str(e),
+                "query_embedding": None
+            }
 
     def _calculate_reasoning_quality(
         self,
@@ -976,8 +1023,45 @@ class MainAgent:
         Returns:
             Dict containing success status and any error messages
         """
+        if not self._initialized:
+            return {"success": False, "error": "Agent not initialized"}
+            
         try:
-            # Use L2MemoryManager's store_episode (which already handles graph updates)
+            # Get embedding using l1_embedder
+            embedding = self.l1_embedder.get_embedding(text)
+            
+            # Shape is now normalized by EmbeddingManager
+            
+            # Create episode with correct parameter name 'c' not 'confidence'
+            from insightspike.core.episode import Episode
+            episode = Episode(
+                text=text,
+                vec=embedding,
+                c=c_value,  # Use 'c' parameter
+                timestamp=time.time(),
+                metadata={"c_value": c_value}
+            )
+            
+            # Add to memory
+            episode_idx = self.l2_memory.add_episode(episode)
+            
+            # Update graph if available
+            if hasattr(self, 'l3_graph') and self.l3_graph:
+                try:
+                    self.l3_graph.update_graph([episode])
+                except Exception as e:
+                    logger.warning(f"Graph update failed: {e}")
+            
+            return {
+                "success": True,
+                "episode_idx": episode_idx,
+                "text": text,
+                "c_value": c_value
+            }
+            
+        except AttributeError:
+            # Fallback to original method if l1_embedder not available
+            logger.warning("l1_embedder not available, using store_episode")
             episode_idx = self.l2_memory.store_episode(text, c_value)
             
             # Handle different return types from store_episode

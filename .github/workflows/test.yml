@@ -1,0 +1,130 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+        installer-parallel: true
+        
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+        
+    - name: Install dependencies
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      run: poetry install --no-interaction --no-root
+      
+    - name: Install project
+      run: poetry install --no-interaction
+      
+    - name: Run unit tests
+      run: |
+        poetry run pytest tests/unit -v --cov=insightspike --cov-report=xml
+        
+    - name: Run integration tests (fast)
+      run: |
+        poetry run pytest tests/integration -v -m "not slow"
+        
+    - name: Test CLI
+      run: |
+        poetry run spike --help
+        poetry run spike version
+        poetry run spike test
+        
+    - name: Upload coverage
+      if: matrix.python-version == '3.11'
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+
+  cli-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      
+    - name: Install dependencies
+      run: poetry install --no-interaction
+      
+    - name: Test CLI commands
+      run: |
+        # Test help
+        poetry run spike --help
+        
+        # Test version
+        poetry run spike version
+        
+        # Test command functionality
+        poetry run spike test
+        
+        # Create test file and test embed/query
+        echo "Test content for InsightSpike" > test.txt
+        poetry run spike embed test.txt
+        poetry run spike query "What is the test content?"
+        
+        # Test stats
+        poetry run spike stats
+        
+    - name: Run CLI pipeline tests
+      run: |
+        poetry run pytest tests/integration/test_cli_pipeline.py -v
+
+  config-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      
+    - name: Install dependencies
+      run: poetry install --no-interaction
+      
+    - name: Test configuration patterns
+      run: |
+        poetry run pytest tests/integration/test_config_patterns.py -v
+        
+    - name: Test bug fixes
+      run: |
+        poetry run pytest tests/integration/test_bug_fixes_july2025.py -v

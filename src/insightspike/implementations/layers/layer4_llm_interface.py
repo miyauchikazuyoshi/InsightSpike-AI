@@ -14,6 +14,10 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+from ...core.vector_integrator import VectorIntegrator
+
 if TYPE_CHECKING:
     from ...config.models import InsightSpikeConfig, LLMConfig
 
@@ -112,7 +116,7 @@ class LLMProviderRegistry:
             llm_config = config
 
         # Create cache key from provider and model name
-        cache_key = (llm_config.provider.value, llm_config.model_name)
+        cache_key = (((((((((((((((((((((((((((((((((llm_config.provider.value if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider) if hasattr(llm_config.provider, "value") else llm_config.provider), llm_config.model_name)
 
         # Thread-safe instance retrieval/creation
         with cls._get_lock():
@@ -257,8 +261,12 @@ class L4LLMInterface:
         # State
         self.initialized = False
         self.response_cache = {} if self.config.enable_caching else None
+        
+        # Initialize vector integrator
+        self.vector_integrator = VectorIntegrator()
 
-        logger.info(f"Initialized {self.config.provider.value} LLM provider")
+        provider_name = ((((((((((((((((((((((((((((((self.config.provider.value if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider
+        logger.info(f"Initialized {provider_name} LLM provider")
 
     def initialize(self) -> bool:
         """Initialize the LLM provider"""
@@ -288,7 +296,8 @@ class L4LLMInterface:
                 return True
 
         except Exception as e:
-            logger.error(f"Failed to initialize {self.config.provider.value}: {e}")
+            provider_name = ((((((((((((((((((((((((((((((self.config.provider.value if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider
+            logger.error(f"Failed to initialize {provider_name}: {e}")
             return False
 
     def generate_response(self, context: Dict[str, Any], question: str) -> str:
@@ -308,7 +317,7 @@ class L4LLMInterface:
             return {
                 "response": "LLM provider not initialized",
                 "success": False,
-                "provider": self.config.provider.value,
+                "provider": ((((((((((((((((((((((((((((((((self.config.provider.value if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider),
             }
 
         try:
@@ -348,7 +357,7 @@ class L4LLMInterface:
                 }
 
             # Add metadata
-            result["provider"] = self.config.provider.value
+            result["provider"] = ((((((((((((((((((((((((((((((((self.config.provider.value if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider)
             result["model"] = self.config.model_name
 
             # Cache if enabled
@@ -363,9 +372,45 @@ class L4LLMInterface:
             return {
                 "response": f"Error: {str(e)}",
                 "success": False,
-                "provider": self.config.provider.value,
+                "provider": ((((((((((((((((((((((((((((((((self.config.provider.value if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider),
                 "error": str(e),
             }
+
+    def _create_insight_vector(self, documents: List[Dict[str, Any]], 
+                              query_vector: Optional[np.ndarray] = None) -> Optional[np.ndarray]:
+        """
+        Create an insight vector by integrating document embeddings with query vector.
+        
+        Args:
+            documents: List of documents with embeddings
+            query_vector: Query embedding vector (optional)
+            
+        Returns:
+            Integrated insight vector or None
+        """
+        if not documents:
+            return None
+            
+        # Extract embeddings from documents
+        embeddings = []
+        for doc in documents:
+            if "embedding" in doc and doc["embedding"] is not None:
+                embeddings.append(doc["embedding"])
+        
+        if not embeddings:
+            return None
+        
+        # Use VectorIntegrator for consistent processing
+        if query_vector is not None:
+            # Use the convenience method for insight vector creation
+            return self.vector_integrator.create_insight_vector(embeddings, query_vector)
+        else:
+            # No query vector, use simple integration
+            return self.vector_integrator.integrate_vectors(
+                embeddings,
+                integration_type="insight",
+                config_overrides={"primary_weight": None}  # No primary vector
+            )
 
     def _build_prompt(self, context: Dict[str, Any], question: str) -> str:
         """Build prompt from context and question"""
@@ -379,6 +424,14 @@ class L4LLMInterface:
         retrieved_docs = context.get("retrieved_documents", [])
         graph_analysis = context.get("graph_analysis", {})
         reasoning_quality = context.get("reasoning_quality", 0.0)
+        query_vector = context.get("query_vector", None)
+
+        # Create insight vector if query vector is available
+        insight_vector = None
+        if query_vector is not None and retrieved_docs:
+            insight_vector = self._create_insight_vector(retrieved_docs, query_vector)
+            if insight_vector is not None:
+                logger.debug("Created insight vector with query integration")
 
         # Separate insights from regular documents
         insights = [doc for doc in retrieved_docs if doc.get("is_insight", False)]
@@ -396,6 +449,14 @@ class L4LLMInterface:
         elif prompt_style == "standard":
             # Standard limits
             max_insights = min(len(insights), 3)  # Up to 3 insights
+        elif prompt_style == "association":
+            # Association style can use 3-5 documents for richer context
+            max_docs = min(5, max_docs)  # Up to 5 documents
+            max_insights = 0  # Don't include insights in association mode
+        elif prompt_style == "association_extended":
+            # Extended association style uses more documents for complex reasoning
+            max_docs = min(10, max_docs)  # Up to 10 documents
+            max_insights = 2  # Include top insights for deeper connections
         else:
             # For any other mode, use conservative limits
             max_docs = min(max_docs, 5)
@@ -496,7 +557,68 @@ class L4LLMInterface:
             )
         else:
             # Default template based on style
-            if context_parts:
+            if prompt_style == "association":
+                # Build association game prompt
+                if regular_docs and len(regular_docs) >= 1:
+                    prompt_parts = [f"{question}\n\nAccording to my research, the answer to this question has:"]
+                    
+                    # Add each document with its relevance score
+                    doc_labels = ['A', 'B', 'C', 'D', 'E']
+                    for i, doc in enumerate(regular_docs[:5]):  # Up to 5 documents
+                        text = doc.get("text", "")
+                        relevance = doc.get("relevance", 0.0)
+                        label = doc_labels[i] if i < len(doc_labels) else f"Doc{i+1}"
+                        prompt_parts.append(f"\n- Relevance {relevance:.3f} with document {label}: \"{text}\"")
+                    
+                    prompt_parts.append("\n\nWhat statement can be inferred from these associations?\nPlease first express the answer in one concise statement, then explain your reasoning.")
+                    prompt = "".join(prompt_parts)
+                else:
+                    # Fallback if not enough documents
+                    prompt = f"Question: {question}\n\nAnswer:"
+            elif prompt_style == "association_extended":
+                # Extended association game with more documents and insights
+                if regular_docs and len(regular_docs) >= 1:
+                    prompt_parts = [f"{question}\n\nMy comprehensive research reveals the following associations:"]
+                    
+                    # Group by relevance levels
+                    high_relevance = [doc for doc in regular_docs if doc.get("relevance", 0) >= 0.8]
+                    medium_relevance = [doc for doc in regular_docs if 0.5 <= doc.get("relevance", 0) < 0.8]
+                    low_relevance = [doc for doc in regular_docs if doc.get("relevance", 0) < 0.5]
+                    
+                    if high_relevance:
+                        prompt_parts.append("\n\n[High Relevance (>0.8)]")
+                        for i, doc in enumerate(high_relevance[:4]):
+                            text = doc.get("text", "")
+                            relevance = doc.get("relevance", 0.0)
+                            prompt_parts.append(f"\n- {relevance:.3f}: \"{text}\"")
+                    
+                    if medium_relevance:
+                        prompt_parts.append("\n\n[Medium Relevance (0.5-0.8)]")
+                        for i, doc in enumerate(medium_relevance[:3]):
+                            text = doc.get("text", "")
+                            relevance = doc.get("relevance", 0.0)
+                            prompt_parts.append(f"\n- {relevance:.3f}: \"{text}\"")
+                    
+                    if low_relevance and len(regular_docs) < 7:
+                        prompt_parts.append("\n\n[Peripheral Connections (<0.5)]")
+                        for i, doc in enumerate(low_relevance[:3]):
+                            text = doc.get("text", "")
+                            relevance = doc.get("relevance", 0.0)
+                            prompt_parts.append(f"\n- {relevance:.3f}: \"{text}\"")
+                    
+                    # Add insights if available
+                    if insights:
+                        prompt_parts.append("\n\n[Previous Insights]")
+                        for insight in insights[:2]:
+                            text = insight.get("text", "").replace("[INSIGHT] ", "")
+                            prompt_parts.append(f"\n- \"{text}\"")
+                    
+                    prompt_parts.append("\n\nBased on these multi-level associations, what is the unified insight that emerges?")
+                    prompt_parts.append("\nProvide: 1) A concise insight statement, 2) Explanation of how the associations connect, 3) Any novel implications.")
+                    prompt = "".join(prompt_parts)
+                else:
+                    prompt = f"Question: {question}\n\nAnswer:"
+            elif context_parts:
                 prompt = f"Context:\n{chr(10).join(context_parts)}\n\nQuestion: {question}\n\nAnswer:"
             else:
                 prompt = f"Question: {question}\n\nAnswer:"
@@ -647,13 +769,20 @@ class L4LLMInterface:
             else None
         )
 
-        response = self.client.messages.create(
-            model=self.config.model_name,
-            max_tokens=self.config.max_tokens,
-            temperature=self.config.temperature,
-            system=system_prompt,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        # Build message request with optional system prompt
+        kwargs = {
+            "model": self.config.model_name,
+            "max_tokens": self.config.max_tokens,
+            "temperature": self.config.temperature,
+            "messages": [{"role": "user", "content": prompt}],
+        }
+        
+        # Only add system if it's not None
+        if system_prompt:
+            # Anthropic expects system as a string
+            kwargs["system"] = system_prompt
+            
+        response = self.client.messages.create(**kwargs)
 
         return {
             "response": response.content[0].text,
@@ -868,7 +997,8 @@ class L4LLMInterface:
             self.model.cpu()
 
         self.initialized = False
-        logger.info(f"Cleaned up {self.config.provider.value} provider")
+        provider_name = ((((((((((((((((((((((((((((((self.config.provider.value if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider
+        logger.info(f"Cleaned up {provider_name} provider")
 
 
 # Factory function for backward compatibility

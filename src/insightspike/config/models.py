@@ -43,6 +43,7 @@ class GraphConfig(BaseModel):
     spike_ged_threshold: float = Field(default=0.5, ge=-1.0, le=1.0)
     spike_ig_threshold: float = Field(default=0.2, ge=0.0, le=1.0)
     similarity_threshold: float = Field(default=0.3, ge=0.0, le=1.0)
+    conflict_threshold: float = Field(default=0.5, ge=0.0, le=1.0)
     use_gnn: bool = Field(default=False)
     gnn_hidden_dim: int = Field(default=64, ge=1)
     ged_algorithm: Literal["simple", "advanced", "networkx", "hybrid"] = Field(
@@ -77,6 +78,16 @@ class GraphConfig(BaseModel):
         description="Relevance decay per hop in graph traversal"
     )
 
+    # Message passing configuration
+    enable_message_passing: bool = Field(
+        default=False,
+        description="Enable question-aware message passing"
+    )
+    message_passing: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Message passing configuration"
+    )
+    
     # geDIG formula parameters
     weight_ged: float = Field(
         default=0.5, ge=0.0, le=1.0, description="Weight for ΔGED in reward formula"
@@ -118,6 +129,12 @@ class ProcessingConfig(BaseModel):
     chunk_size: int = Field(default=500, ge=50)
     overlap: int = Field(default=50, ge=0)
     min_chunk_size: int = Field(default=100, ge=10)
+    
+    # Processing cycle settings
+    max_cycles: int = Field(default=10, ge=1)
+    convergence_threshold: float = Field(default=0.8, ge=0.0, le=1.0)
+    min_quality_threshold: float = Field(default=0.7, ge=0.0, le=1.0)
+    use_advanced_metrics: bool = Field(default=True)
     
     # Layer1 bypass configuration
     enable_layer1_bypass: bool = Field(
@@ -284,6 +301,60 @@ class LoggingConfig(BaseModel):
     backup_count: int = Field(default=3)
 
 
+class DataStoreConfig(BaseModel):
+    """DataStore configuration"""
+    
+    type: Literal["filesystem", "in_memory"] = Field(default="filesystem")
+    root_path: str = Field(default="./data/insight_store")
+
+
+class SpectralEvaluationConfig(BaseModel):
+    """Spectral evaluation configuration"""
+    
+    enabled: bool = Field(default=False)
+    weight: float = Field(default=0.3, ge=0.0, le=1.0)
+
+
+class MultihopConfig(BaseModel):
+    """Multi-hop analysis configuration"""
+    
+    max_hops: int = Field(default=3, ge=1, le=10)
+    decay_factor: float = Field(default=0.5, ge=0.0, le=1.0)
+
+
+class MetricsConfig(BaseModel):
+    """Advanced metrics configuration"""
+    
+    use_normalized_ged: bool = Field(default=True)
+    use_entropy_variance_ig: bool = Field(default=False)
+    use_multihop_gedig: bool = Field(default=False)
+    spectral_evaluation: SpectralEvaluationConfig = Field(default_factory=SpectralEvaluationConfig)
+    multihop_config: MultihopConfig = Field(default_factory=MultihopConfig)
+
+
+class ReasoningConfig(BaseModel):
+    """Reasoning engine configuration"""
+    
+    max_cycles: int = Field(default=10, ge=1, le=100)
+    convergence_threshold: float = Field(default=0.8, ge=0.0, le=1.0)
+    spike_threshold: float = Field(default=0.7, ge=0.0, le=1.0)
+
+
+class PerformanceConfig(BaseModel):
+    """Performance optimization configuration"""
+    
+    enable_cache: bool = Field(default=True)
+    parallel_workers: int = Field(default=4, ge=1, le=32)
+
+
+class VectorSearchConfig(BaseModel):
+    """Vector search backend configuration"""
+    
+    backend: Literal["auto", "numpy", "faiss"] = Field(default="auto", description="Vector search backend")
+    optimize: bool = Field(default=True, description="Use optimized implementations")
+    batch_size: int = Field(default=1000, ge=1, description="Batch size for operations")
+
+
 class InsightSpikeConfig(BaseModel):
     """Complete InsightSpike configuration - clean structure without backward compatibility"""
 
@@ -312,6 +383,13 @@ class InsightSpikeConfig(BaseModel):
     paths: PathsConfig = Field(default_factory=PathsConfig)
     processing: ProcessingConfig = Field(default_factory=ProcessingConfig)
     output: OutputConfig = Field(default_factory=OutputConfig)
+    
+    # New configurations
+    datastore: DataStoreConfig = Field(default_factory=DataStoreConfig)
+    metrics: MetricsConfig = Field(default_factory=MetricsConfig)
+    reasoning: ReasoningConfig = Field(default_factory=ReasoningConfig)
+    performance: PerformanceConfig = Field(default_factory=PerformanceConfig)
+    vector_search: VectorSearchConfig = Field(default_factory=VectorSearchConfig)
 
     class Config:
         """Pydantic configuration"""
