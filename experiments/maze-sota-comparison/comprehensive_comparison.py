@@ -15,9 +15,9 @@ from tqdm import tqdm
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from insightspike.environments.maze import SimpleMaze
-from insightspike.navigators.blind_experience_navigator import BlindExperienceNavigator
-from insightspike.navigators.experience_memory_navigator import ExperienceMemoryNavigator
-from insightspike.config.maze_config import MazeNavigatorConfig
+from insightspike.maze_experimental.navigators.blind_experience_navigator import BlindExperienceNavigator
+from insightspike.maze_experimental.navigators.experience_memory_navigator import ExperienceMemoryNavigator
+from insightspike.maze_experimental.maze_config import MazeNavigatorConfig
 
 
 class ComprehensiveComparison:

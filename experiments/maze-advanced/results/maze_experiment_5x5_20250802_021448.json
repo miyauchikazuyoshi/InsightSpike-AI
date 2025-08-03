@@ -1,0 +1,786 @@
+{
+  "initial_episodes": [
+    {
+      "episode_id": "GOAL_EPISODE",
+      "type": "goal",
+      "position": [
+        4,
+        4
+      ],
+      "vector": [
+        1.0,
+        1.0,
+        0.5,
+        1.0,
+        0.1
+      ],
+      "description": "Goal position at (4, 4)"
+    },
+    {
+      "episode_id": "INITIAL_UP",
+      "type": "initial_direction",
+      "position": [
+        0,
+        0
+      ],
+      "action": 0,
+      "action_name": "up",
+      "target_position": [
+        0,
+        -1
+      ],
+      "result": "wall",
+      "vector": [
+        0.0,
+        0.0,
+        0.0,
+        -1.0,
+        0.1
+      ],
+      "description": "Initial move up from start -> wall"
+    },
+    {
+      "episode_id": "INITIAL_RIGHT",
+      "type": "initial_direction",
+      "position": [
+        0,
+        0
+      ],
+      "action": 1,
+      "action_name": "right",
+      "target_position": [
+        1,
+        0
+      ],
+      "result": "empty",
+      "vector": [
+        0.0,
+        0.0,
+        0.25,
+        0.0,
+        0.1
+      ],
+      "description": "Initial move right from start -> empty"
+    },
+    {
+      "episode_id": "INITIAL_DOWN",
+      "type": "initial_direction",
+      "position": [
+        0,
+        0
+      ],
+      "action": 2,
+      "action_name": "down",
+      "target_position": [
+        0,
+        1
+      ],
+      "result": "empty",
+      "vector": [
+        0.0,
+        0.0,
+        0.5,
+        0.0,
+        0.1
+      ],
+      "description": "Initial move down from start -> empty"
+    },
+    {
+      "episode_id": "INITIAL_LEFT",
+      "type": "initial_direction",
+      "position": [
+        0,
+        0
+      ],
+      "action": 3,
+      "action_name": "left",
+      "target_position": [
+        -1,
+        0
+      ],
+      "result": "wall",
+      "vector": [
+        0.0,
+        0.0,
+        0.75,
+        -1.0,
+        0.1
+      ],
+      "description": "Initial move left from start -> wall"
+    }
+  ],
+  "steps": [
+    {
+      "step": 0,
+      "position": [
+        0,
+        1
+      ],
+      "previous_position": [
+        0,
+        0
+      ],
+      "action": 2,
+      "action_name": "↓",
+      "result": "empty",
+      "processing": {
+        "current_vector": [
+          0.0,
+          0.0,
+          0.5,
+          0.0,
+          0.1
+        ],
+        "goal_distance": 1.7320508075688772,
+        "donut_search": {
+          "inner_radius": 0.1,
+          "outer_radius": 1.9320508075688771,
+          "inner_count": 2,
+          "candidate_count": 4,
+          "outer_count": 0
+        },
+        "possible_actions": [
+          1,
+          2
+        ],
+        "action_evaluations": [
+          {
+            "action": 1,
+            "action_name": "right",
+            "target_position": [
+              1,
+              0
+            ],
+            "predicted_vector": [
+              0.25,
+              0.0,
+              0.25,
+              0.0,
+              0.0
+            ],
+            "goal_distance": 1.6232683080747925,
+            "visit_penalty": 0.0,
+            "total_score": -1.6232683080747925
+          },
+          {
+            "action": 2,
+            "action_name": "down",
+            "target_position": [
+              0,
+              1
+            ],
+            "predicted_vector": [
+              0.0,
+              0.25,
+              0.5,
+              0.0,
+              0.0
+            ],
+            "goal_distance": 1.603901493234544,
+            "visit_penalty": 0.0,
+            "total_score": -1.603901493234544
+          }
+        ],
+        "selected_action": 2,
+        "selected_action_name": "down"
+      }
+    },
+    {
+      "step": 1,
+      "position": [
+        0,
+        2
+      ],
+      "previous_position": [
+        0,
+        1
+      ],
+      "action": 2,
+      "action_name": "↓",
+      "result": "empty",
+      "processing": {
+        "current_vector": [
+          0.0,
+          0.25,
+          0.5,
+          0.0,
+          0.1
+        ],
+        "goal_distance": 1.6007810593582121,
+        "donut_search": {
+          "inner_radius": 0.1,
+          "outer_radius": 1.800781059358212,
+          "inner_count": 1,
+          "candidate_count": 6,
+          "outer_count": 0
+        },
+        "possible_actions": [
+          2
+        ],
+        "action_evaluations": [
+          {
+            "action": 2,
+            "action_name": "down",
+            "target_position": [
+              0,
+              2
+            ],
+            "predicted_vector": [
+              0.0,
+              0.5,
+              0.5,
+              0.0,
+              0.0
+            ],
+            "goal_distance": 1.5033296378372907,
+            "visit_penalty": 0.0,
+            "total_score": -1.5033296378372907
+          }
+        ],
+        "selected_action": 2,
+        "selected_action_name": "down"
+      }
+    },
+    {
+      "step": 2,
+      "position": [
+        1,
+        2
+      ],
+      "previous_position": [
+        0,
+        2
+      ],
+      "action": 1,
+      "action_name": "→",
+      "result": "empty",
+      "processing": {
+        "current_vector": [
+          0.0,
+          0.5,
+          0.5,
+          0.0,
+          0.1
+        ],
+        "goal_distance": 1.5,
+        "donut_search": {
+          "inner_radius": 0.1,
+          "outer_radius": 1.7,
+          "inner_count": 1,
+          "candidate_count": 7,
+          "outer_count": 0
+        },
+        "possible_actions": [
+          0,
+          1
+        ],
+        "action_evaluations": [
+          {
+            "action": 0,
+            "action_name": "up",
+            "target_position": [
+              0,
+              1
+            ],
+            "predicted_vector": [
+              0.0,
+              0.25,
+              0.0,
+              0.0,
+              0.1
+            ],
+            "goal_distance": 1.6770509831248424,
+            "visit_penalty": 0.1,
+            "total_score": -1.7770509831248424
+          },
+          {
+            "action": 1,
+            "action_name": "right",
+            "target_position": [
+              1,
+              2
+            ],
+            "predicted_vector": [
+              0.25,
+              0.5,
+              0.25,
+              0.0,
+              0.0
+            ],
+            "goal_distance": 1.372953021774598,
+            "visit_penalty": 0.0,
+            "total_score": -1.372953021774598
+          }
+        ],
+        "selected_action": 1,
+        "selected_action_name": "right"
+      }
+    },
+    {
+      "step": 3,
+      "position": [
+        2,
+        2
+      ],
+      "previous_position": [
+        1,
+        2
+      ],
+      "action": 1,
+      "action_name": "→",
+      "result": "empty",
+      "processing": {
+        "current_vector": [
+          0.25,
+          0.5,
+          0.25,
+          0.0,
+          0.1
+        ],
+        "goal_distance": 1.3693063937629153,
+        "donut_search": {
+          "inner_radius": 0.1,
+          "outer_radius": 1.5693063937629153,
+          "inner_count": 1,
+          "candidate_count": 8,
+          "outer_count": 0
+        },
+        "possible_actions": [
+          1,
+          2,
+          3
+        ],
+        "action_evaluations": [
+          {
+            "action": 1,
+            "action_name": "right",
+            "target_position": [
+              2,
+              2
+            ],
+            "predicted_vector": [
+              0.5,
+              0.5,
+              0.25,
+              0.0,
+              0.0
+            ],
+            "goal_distance": 1.2539936203984452,
+            "visit_penalty": 0.0,
+            "total_score": -1.2539936203984452
+          },
+          {
+            "action": 2,
+            "action_name": "down",
+            "target_position": [
+              1,
+              3
+            ],
+            "predicted_vector": [
+              0.25,
+              0.75,
+              0.5,
+              0.0,
+              0.0
+            ],
+            "goal_distance": 1.2786711852544421,
+            "visit_penalty": 0.0,
+            "total_score": -1.2786711852544421
+          },
+          {
+            "action": 3,
+            "action_name": "left",
+            "target_position": [
+              0,
+              2
+            ],
+            "predicted_vector": [
+              0.0,
+              0.5,
+              0.75,
+              0.0,
+              0.1
+            ],
+            "goal_distance": 1.5206906325745548,
+            "visit_penalty": 0.1,
+            "total_score": -1.620690632574555
+          }
+        ],
+        "selected_action": 1,
+        "selected_action_name": "right"
+      }
+    },
+    {
+      "step": 4,
+      "position": [
+        3,
+        2
+      ],
+      "previous_position": [
+        2,
+        2
+      ],
+      "action": 1,
+      "action_name": "→",
+      "result": "empty",
+      "processing": {
+        "current_vector": [
+          0.5,
+          0.5,
+          0.25,
+          0.0,
+          0.1
+        ],
+        "goal_distance": 1.25,
+        "donut_search": {
+          "inner_radius": 0.1,
+          "outer_radius": 1.45,
+          "inner_count": 1,
+          "candidate_count": 9,
+          "outer_count": 0
+        },
+        "possible_actions": [
+          1,
+          3
+        ],
+        "action_evaluations": [
+          {
+            "action": 1,
+            "action_name": "right",
+            "target_position": [
+              3,
+              2
+            ],
+            "predicted_vector": [
+              0.75,
+              0.5,
+              0.25,
+              0.0,
+              0.0
+            ],
+            "goal_distance": 1.176860229593982,
+            "visit_penalty": 0.0,
+            "total_score": -1.176860229593982
+          },
+          {
+            "action": 3,
+            "action_name": "left",
+            "target_position": [
+              1,
+              2
+            ],
+            "predicted_vector": [
+              0.25,
+              0.5,
+              0.75,
+              0.0,
+              0.1
+            ],
+            "goal_distance": 1.3693063937629153,
+            "visit_penalty": 0.1,
+            "total_score": -1.4693063937629154
+          }
+        ],
+        "selected_action": 1,
+        "selected_action_name": "right"
+      }
+    },
+    {
+      "step": 5,
+      "position": [
+        3,
+        3
+      ],
+      "previous_position": [
+        3,
+        2
+      ],
+      "action": 2,
+      "action_name": "↓",
+      "result": "empty",
+      "processing": {
+        "current_vector": [
+          0.75,
+          0.5,
+          0.25,
+          0.0,
+          0.1
+        ],
+        "goal_distance": 1.1726039399558574,
+        "donut_search": {
+          "inner_radius": 0.1,
+          "outer_radius": 1.3726039399558574,
+          "inner_count": 1,
+          "candidate_count": 9,
+          "outer_count": 1
+        },
+        "possible_actions": [
+          0,
+          2,
+          3
+        ],
+        "action_evaluations": [
+          {
+            "action": 0,
+            "action_name": "up",
+            "target_position": [
+              3,
+              1
+            ],
+            "predicted_vector": [
+              0.75,
+              0.25,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "goal_distance": 1.372953021774598,
+            "visit_penalty": 0.0,
+            "total_score": -1.372953021774598
+          },
+          {
+            "action": 2,
+            "action_name": "down",
+            "target_position": [
+              3,
+              3
+            ],
+            "predicted_vector": [
+              0.75,
+              0.75,
+              0.5,
+              0.0,
+              0.0
+            ],
+            "goal_distance": 1.065363787633126,
+            "visit_penalty": 0.0,
+            "total_score": -1.065363787633126
+          },
+          {
+            "action": 3,
+            "action_name": "left",
+            "target_position": [
+              2,
+              2
+            ],
+            "predicted_vector": [
+              0.5,
+              0.5,
+              0.75,
+              0.0,
+              0.1
+            ],
+            "goal_distance": 1.25,
+            "visit_penalty": 0.1,
+            "total_score": -1.35
+          }
+        ],
+        "selected_action": 2,
+        "selected_action_name": "down"
+      }
+    },
+    {
+      "step": 6,
+      "position": [
+        3,
+        4
+      ],
+      "previous_position": [
+        3,
+        3
+      ],
+      "action": 2,
+      "action_name": "↓",
+      "result": "empty",
+      "processing": {
+        "current_vector": [
+          0.75,
+          0.75,
+          0.5,
+          0.0,
+          0.1
+        ],
+        "goal_distance": 1.0606601717798212,
+        "donut_search": {
+          "inner_radius": 0.1,
+          "outer_radius": 1.2606601717798211,
+          "inner_count": 1,
+          "candidate_count": 9,
+          "outer_count": 2
+        },
+        "possible_actions": [
+          0,
+          1,
+          2
+        ],
+        "action_evaluations": [
+          {
+            "action": 0,
+            "action_name": "up",
+            "target_position": [
+              3,
+              2
+            ],
+            "predicted_vector": [
+              0.75,
+              0.5,
+              0.0,
+              0.0,
+              0.1
+            ],
+            "goal_distance": 1.25,
+            "visit_penalty": 0.1,
+            "total_score": -1.35
+          },
+          {
+            "action": 1,
+            "action_name": "right",
+            "target_position": [
+              4,
+              3
+            ],
+            "predicted_vector": [
+              1.0,
+              0.75,
+              0.25,
+              0.0,
+              0.0
+            ],
+            "goal_distance": 1.065363787633126,
+            "visit_penalty": 0.0,
+            "total_score": -1.065363787633126
+          },
+          {
+            "action": 2,
+            "action_name": "down",
+            "target_position": [
+              3,
+              4
+            ],
+            "predicted_vector": [
+              0.75,
+              1.0,
+              0.5,
+              0.0,
+              0.0
+            ],
+            "goal_distance": 1.035615758860399,
+            "visit_penalty": 0.0,
+            "total_score": -1.035615758860399
+          }
+        ],
+        "selected_action": 2,
+        "selected_action_name": "down"
+      }
+    },
+    {
+      "step": 7,
+      "position": [
+        4,
+        4
+      ],
+      "previous_position": [
+        3,
+        4
+      ],
+      "action": 1,
+      "action_name": "→",
+      "result": "goal",
+      "processing": {
+        "current_vector": [
+          0.75,
+          1.0,
+          0.5,
+          0.0,
+          0.1
+        ],
+        "goal_distance": 1.0307764064044151,
+        "donut_search": {
+          "inner_radius": 0.1,
+          "outer_radius": 1.230776406404415,
+          "inner_count": 1,
+          "candidate_count": 7,
+          "outer_count": 5
+        },
+        "possible_actions": [
+          0,
+          1,
+          3
+        ],
+        "action_evaluations": [
+          {
+            "action": 0,
+            "action_name": "up",
+            "target_position": [
+              3,
+              3
+            ],
+            "predicted_vector": [
+              0.75,
+              0.75,
+              0.0,
+              0.0,
+              0.1
+            ],
+            "goal_distance": 1.1726039399558574,
+            "visit_penalty": 0.1,
+            "total_score": -1.2726039399558575
+          },
+          {
+            "action": 1,
+            "action_name": "right",
+            "target_position": [
+              4,
+              4
+            ],
+            "predicted_vector": [
+              1.0,
+              1.0,
+              0.25,
+              0.0,
+              0.0
+            ],
+            "goal_distance": 1.035615758860399,
+            "visit_penalty": 0.0,
+            "total_score": -1.035615758860399
+          },
+          {
+            "action": 3,
+            "action_name": "left",
+            "target_position": [
+              2,
+              4
+            ],
+            "predicted_vector": [
+              0.5,
+              1.0,
+              0.75,
+              0.0,
+              0.0
+            ],
+            "goal_distance": 1.15,
+            "visit_penalty": 0.0,
+            "total_score": -1.15
+          }
+        ],
+        "selected_action": 1,
+        "selected_action_name": "right"
+      }
+    }
+  ],
+  "metadata": {
+    "maze_size": [
+      5,
+      5
+    ],
+    "start_pos": [
+      0,
+      0
+    ],
+    "goal_pos": [
+      4,
+      4
+    ],
+    "timestamp": "2025-08-02T02:14:48.833569"
+  }
+}

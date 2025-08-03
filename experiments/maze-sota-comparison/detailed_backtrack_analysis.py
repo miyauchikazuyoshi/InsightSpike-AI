@@ -11,8 +11,8 @@ from matplotlib.colors import LinearSegmentedColormap
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from insightspike.environments.maze import SimpleMaze
-from insightspike.navigators.experience_memory_navigator import ExperienceMemoryNavigator, ExperienceType
-from insightspike.config.maze_config import MazeNavigatorConfig
+from insightspike.maze_experimental.navigators.experience_memory_navigator import ExperienceMemoryNavigator, ExperienceType
+from insightspike.maze_experimental.maze_config import MazeNavigatorConfig
 
 
 def create_backtrack_test_maze():

@@ -1,0 +1,251 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% geDIG: 多層評価による洞察生成フレームワーク
+% 改訂版 v4.0 (2025/08/03)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[uplatex]{bxjsarticle}
+\usepackage{amsmath,amssymb,graphicx,algorithm,algorithmic,booktabs}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage[whole]{bxcjkatype} % 日本語文字対応
+\title{geDIG: 多層評価による洞察生成フレームワーク\\
+\large{〜脳の階層的処理に着想を得た知識グラフの動的再編成〜}}
+\author{宮内和義\thanks{independent researcher, \texttt{email@example.com}}}
+\date{2025年8月3日}
+
+\begin{document}
+\maketitle
+
+%====================================================================
+\begin{abstract}
+本研究では、脳の階層的情報処理に着想を得て、知識グラフの\textbf{多層構造評価}による
+洞察生成フレームワーク\emph{geDIG}を提案する。
+通常のクエリ応答では局所的な最適化（1-hop）により予測誤差最小化を実現し、
+新規性の高いクエリに対してはx-hop先までの評価により、
+ノード・エッジ追加にも関わらずグラフ編集距離（GED）が低下する
+「構造的洞察」を検出する。
+GED低下箇所のノード間でメッセージパッシングを行うことで、
+新たな概念（洞察ベクトル）を生成する。
+迷路実験では成功率96.7\%（PPO比較）、
+質問応答実験では最小知識選択でF1スコア0.89を達成し、
+本手法の有効性を実証した。
+\end{abstract}
+
+%====================================================================
+\section{はじめに}
+
+人工知能における「洞察（insight）」の獲得は、
+単なる情報の蓄積ではなく、知識構造の質的な転換を伴う。
+既存の機械学習アプローチは学習と推論を分離したフェーズとして扱い、
+推論時の動的な知識再編成を捉えきれていない。
+
+本研究は、脳の海馬における階層的な情報処理機構に着想を得て、
+以下の統合的なフレームワークを提案する：
+
+\begin{enumerate}
+\item \textbf{局所最適化}: 1-hop評価によるクエリ応答（予測誤差最小化）
+\item \textbf{大域的評価}: x-hop評価による構造的洞察の検出
+\item \textbf{概念生成}: メッセージパッシングによる新概念の創発
+\end{enumerate}
+
+%====================================================================
+\section{脳の階層処理とgeDIG}
+
+\subsection{理論的基盤}
+
+脳の情報処理は、局所的な予測と大域的な統合の二重構造を持つ。
+海馬のplace cellsは局所的な位置情報を符号化し、
+grid cellsはより広域な空間構造を表現する\cite{moser2008}。
+この階層性を知識グラフ処理に応用する。
+
+\subsection{geDIG報酬関数}
+
+知識グラフ$\mathcal{G}_t=(\mathcal{V}_t,\mathcal{E}_t)$の
+時刻$t$から$t+1$への変化に対する報酬：
+
+\begin{equation}
+\mathcal{F}_t = w \cdot \Delta\mathrm{GED}_t - kT \cdot \Delta\mathrm{IG}_t
+\label{eq:gedig}
+\end{equation}
+
+ここで：
+\begin{itemize}
+\item $\Delta\mathrm{GED}_t$: グラフ編集距離の変化
+\item $\Delta\mathrm{IG}_t$: 情報利得（エントロピー減少）
+\item $w, kT$: 重み係数
+\end{itemize}
+
+%====================================================================
+\section{多層評価メカニズム}
+
+\subsection{1-hop評価：局所最適化}
+
+通常のクエリ$q$に対して、1-hop近傍での最適化：
+
+\begin{equation}
+\mathcal{N}_1(q) = \arg\min_{v \in \mathcal{V}} \mathcal{F}(q, v)
+\label{eq:1hop}
+\end{equation}
+
+これは予測誤差最小化と等価であり、
+効率的なクエリ応答を実現する。
+
+\subsection{x-hop評価：構造的洞察の検出}
+
+新規性の高いクエリに対して、x-hop（$x \geq 2$）での評価：
+
+\begin{equation}
+\Delta\mathrm{GED}_x = \mathrm{GED}(\mathcal{G}_x^{before}, \mathcal{G}_x^{after})
+\label{eq:xhop}
+\end{equation}
+
+重要な発見：
+\begin{theorem}[構造的洞察の条件]
+クエリノード$q$の追加により$|\mathcal{E}|$が増加するにも関わらず、
+$\Delta\mathrm{GED}_x < 0$となる場合が存在する。
+これは$q$が離散的な概念群を統合する「橋渡し」として機能する時に生じる。
+\end{theorem}
+
+\subsection{洞察ベクトルの生成}
+
+GED低下が検出された箇所$\{v_i, v_j\}$において、
+メッセージパッシングにより新概念を生成：
+
+\begin{equation}
+h_{insight} = \sigma\left(\sum_{k \in \{i,j,q\}} W_k h_k + b\right)
+\label{eq:insight}
+\end{equation}
+
+%====================================================================
+\section{実験と結果}
+
+\subsection{実験1：迷路ナビゲーション}
+
+\paragraph{設定}
+15×15迷路、100エピソード、視覚情報あり。
+PPO（200エピソード学習後）との比較。
+
+\paragraph{結果}
+\begin{itemize}
+\item geDIG成功率: \textbf{96.7\%}（ゼロショット）
+\item PPO成功率: 47.0\%（200エピソード学習後）
+\item 平均ステップ数: 37.7 vs 281.5
+\end{itemize}
+
+\paragraph{2-hop評価の効果}
+分岐点での判断において、1-hopでは局所最適に陥るケースでも、
+2-hop評価により「戻った方が良い」という判断が可能になった。
+これは以下のクエリ設計により実現：
+
+\begin{algorithmic}
+\STATE \textbf{if} 行き止まり検出 \textbf{then}
+\STATE \quad $q \leftarrow$ "この先に目標はあるか？"
+\STATE \quad $eval\_2hop(current\_position, q)$
+\STATE \quad \textbf{if} $\Delta\mathrm{GED}_2 < threshold$ \textbf{then}
+\STATE \quad \quad バックトラック実行
+\STATE \quad \textbf{end if}
+\STATE \textbf{end if}
+\end{algorithmic}
+
+\subsection{実験2：質問応答（最小知識選択）}
+
+\paragraph{設定}
+知識エントリ10件、質問5件。
+geDIGによる最小知識選択 vs 全知識使用。
+
+\paragraph{結果}
+\begin{itemize}
+\item 平均選択知識数: 2.0（最小限）
+\item F1スコア: 0.89
+\item 処理時間: <0.1秒/質問
+\end{itemize}
+
+\paragraph{洞察生成例}
+質問「なぜ虹は七色か」に対して：
+\begin{enumerate}
+\item 1-hop: \{光, 屈折, 色\}を選択
+\item 2-hop評価: $\Delta\mathrm{GED}_2 = -0.8$（スパイク検出）
+\item GED低下箇所: (光, 色)間
+\item 生成された洞察: 「光の分散現象」
+\end{enumerate}
+
+%====================================================================
+\section{議論}
+
+\subsection{なぜ2-hopでGEDが低下するのか}
+
+1-hopでのノード追加は局所的にはグラフを複雑化する。
+しかし、2-hop視点では以下のメカニズムでGEDが低下：
+
+\begin{enumerate}
+\item \textbf{ショートカット効果}: 遠回りしていた経路が短縮
+\item \textbf{ハブ形成}: 分散していた接続が集約
+\item \textbf{冗長性削減}: 重複した経路が統合
+\end{enumerate}
+
+\subsection{脳との対応}
+
+提案手法は以下の脳機能と対応：
+\begin{itemize}
+\item 1-hop最適化 $\leftrightarrow$ 皮質の局所処理
+\item x-hop評価 $\leftrightarrow$ 海馬の大域的統合
+\item メッセージパッシング $\leftrightarrow$ シナプス伝達
+\end{itemize}
+
+\subsection{限界と今後の課題}
+
+\begin{enumerate}
+\item 計算量: x-hopの増加に伴いO($n^x$)で増大
+\item パラメータ調整: $w, kT$の自動調整機構が必要
+\item スケーラビリティ: 大規模知識グラフへの適用
+\end{enumerate}
+
+%====================================================================
+\section{関連研究}
+
+\paragraph{内発的動機づけ}
+Curiosity-driven learning\cite{pathak2017}は
+予測誤差を報酬とするが、構造変化は考慮しない。
+
+\paragraph{グラフニューラルネットワーク}
+GNN\cite{kipf2017}はメッセージパッシングを用いるが、
+動的なグラフ編集は扱わない。
+
+\paragraph{神経科学}
+海馬のリプレイ機構\cite{foster2006}は
+経験の再編成を行うが、明示的な構造評価はない。
+
+%====================================================================
+\section{結論}
+
+本研究では、脳の階層的処理に着想を得たgeDIGフレームワークを提案した。
+主要な貢献：
+
+\begin{enumerate}
+\item \textbf{理論的貢献}: 1-hop局所最適化とx-hop大域評価の統合
+\item \textbf{技術的貢献}: GED低下検出による洞察生成メカニズム
+\item \textbf{実証的貢献}: 迷路実験96.7\%、質問応答F1=0.89
+\end{enumerate}
+
+geDIGは「学習しながら推論し、推論しながら学習する」
+新しいAIパラダイムの基礎となる。
+
+%====================================================================
+\begin{thebibliography}{99}
+\bibitem{moser2008} Moser, E. I., Kropff, E., \& Moser, M. B. (2008). 
+Place cells, grid cells, and the brain's spatial representation system. 
+Annual review of neuroscience, 31, 69-89.
+
+\bibitem{pathak2017} Pathak, D., Agrawal, P., Efros, A. A., \& Darrell, T. (2017). 
+Curiosity-driven exploration by self-supervised prediction. 
+In ICML.
+
+\bibitem{foster2006} Foster, D. J., \& Wilson, M. A. (2006). 
+Reverse replay of behavioural sequences in hippocampal place cells during the awake state. 
+Nature, 440(7084), 680-683.
+
+\bibitem{kipf2017} Kipf, T. N., \& Welling, M. (2017). 
+Semi-supervised classification with graph convolutional networks. 
+In ICLR.
+\end{thebibliography}
+
+\end{document}

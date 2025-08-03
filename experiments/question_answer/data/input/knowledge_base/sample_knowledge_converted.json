@@ -1,0 +1,52 @@
+[
+  {
+    "id": "kb_001",
+    "content": "Energy cannot be created or destroyed, only transformed from one form to another. This is known as the law of conservation of energy.",
+    "category": "science"
+  },
+  {
+    "id": "kb_002",
+    "content": "Photosynthesis is the process by which plants convert light energy into chemical energy, producing glucose and oxygen from carbon dioxide and water.",
+    "category": "science"
+  },
+  {
+    "id": "kb_003",
+    "content": "Water molecules consist of two hydrogen atoms bonded to one oxygen atom. The bent shape of water molecules gives water its unique properties.",
+    "category": "science"
+  },
+  {
+    "id": "kb_004",
+    "content": "When baking bread, yeast ferments sugars to produce carbon dioxide gas, which creates bubbles that make the dough rise.",
+    "category": "daily_life"
+  },
+  {
+    "id": "kb_005",
+    "content": "In basketball, the optimal shooting angle for free throws is approximately 45 degrees, balancing arc height and distance.",
+    "category": "daily_life"
+  },
+  {
+    "id": "kb_006",
+    "content": "Cognitive dissonance occurs when a person holds contradictory beliefs, ideas, or values, leading to psychological discomfort.",
+    "category": "abstract"
+  },
+  {
+    "id": "kb_007",
+    "content": "The Ship of Theseus paradox questions whether an object that has had all its components replaced remains fundamentally the same object.",
+    "category": "abstract"
+  },
+  {
+    "id": "kb_008",
+    "content": "In ecosystems, energy flows in one direction from producers to consumers, while nutrients cycle through the system.",
+    "category": "science"
+  },
+  {
+    "id": "kb_009",
+    "content": "Machine learning models learn patterns from data through iterative optimization of parameters to minimize prediction errors.",
+    "category": "technology"
+  },
+  {
+    "id": "kb_010",
+    "content": "The printing press revolutionized information dissemination by making books affordable and widely available, accelerating the spread of knowledge.",
+    "category": "history"
+  }
+]

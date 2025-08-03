@@ -1,0 +1,63 @@
+{
+  "timestamp": "20250802_235839",
+  "maze_size": 30,
+  "algorithm": "sleep_cycle_navigator",
+  "success": false,
+  "total_steps": 3000,
+  "unique_positions": 276,
+  "total_episodes": 3584,
+  "sleep_cycles": 5,
+  "sleep_history": [
+    {
+      "step": 500,
+      "initial_episodes": 1,
+      "final_episodes": 1,
+      "removed_episodes": 0,
+      "initial_connections": 0,
+      "final_connections": 0,
+      "pruned_edges": 0,
+      "removed_nodes": 0
+    },
+    {
+      "step": 1000,
+      "initial_episodes": 1,
+      "final_episodes": 1,
+      "removed_episodes": 0,
+      "initial_connections": 0,
+      "final_connections": 0,
+      "pruned_edges": 0,
+      "removed_nodes": 0
+    },
+    {
+      "step": 1500,
+      "initial_episodes": 1,
+      "final_episodes": 1,
+      "removed_episodes": 0,
+      "initial_connections": 0,
+      "final_connections": 0,
+      "pruned_edges": 0,
+      "removed_nodes": 0
+    },
+    {
+      "step": 2000,
+      "initial_episodes": 1,
+      "final_episodes": 1,
+      "removed_episodes": 0,
+      "initial_connections": 0,
+      "final_connections": 0,
+      "pruned_edges": 0,
+      "removed_nodes": 0
+    },
+    {
+      "step": 2500,
+      "initial_episodes": 1,
+      "final_episodes": 1,
+      "removed_episodes": 0,
+      "initial_connections": 0,
+      "final_connections": 0,
+      "pruned_edges": 0,
+      "removed_nodes": 0
+    }
+  ],
+  "efficiency": 9.2
+}

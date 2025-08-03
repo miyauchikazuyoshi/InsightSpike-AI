@@ -10,8 +10,8 @@ from matplotlib.patches import Rectangle, Circle, FancyBboxPatch
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from insightspike.environments.maze import SimpleMaze, MazeObservation
-from insightspike.navigators.experience_memory_navigator import ExperienceMemoryNavigator
-from insightspike.config.maze_config import MazeNavigatorConfig
+from insightspike.maze_experimental.navigators.experience_memory_navigator import ExperienceMemoryNavigator
+from insightspike.maze_experimental.maze_config import MazeNavigatorConfig
 
 
 def visualize_visual_range():

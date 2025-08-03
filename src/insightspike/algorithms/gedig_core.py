@@ -7,6 +7,7 @@ that combines all the latest improvements:
 - Scale-invariant normalized GED
 - Entropy variance-based information gain  
 - Multi-hop analysis for different abstraction levels
+- Wake/Sleep mode support
 
 This module unifies and replaces:
 - normalized_ged.py
@@ -18,12 +19,19 @@ This module unifies and replaces:
 import logging
 import time
 from dataclasses import dataclass
+from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import networkx as nx
 import numpy as np
 
 logger = logging.getLogger(__name__)
+
+
+class ProcessingMode(Enum):
+    """Processing modes for geDIG calculation."""
+    WAKE = "wake"    # Query-driven, minimize geDIG
+    SLEEP = "sleep"  # Exploration mode, maximize geDIG
 
 
 @dataclass
@@ -191,7 +199,8 @@ class GeDIGCore:
                 g2, features_before, features_after
             )
             
-            gedig = ged_result['structural_improvement'] + ig_result['ig_value']
+            # geDIG = GED - IG (理論的定義)
+            gedig = ged_result['structural_improvement'] - ig_result['ig_value']
             
             result = GeDIGResult(
                 gedig_value=gedig,
@@ -244,7 +253,8 @@ class GeDIGCore:
             
             # Combine with decay
             weight = self.decay_factor ** hop
-            hop_gedig = ged_result['structural_improvement'] + ig_result['ig_value']
+            # geDIG = GED - IG
+            hop_gedig = ged_result['structural_improvement'] - ig_result['ig_value']
             weighted_gedig = weight * hop_gedig
             
             hop_results[hop] = HopResult(
@@ -274,7 +284,8 @@ class GeDIGCore:
             ig_result = self._calculate_entropy_variance_ig(
                 g2, features_before, features_after
             )
-            total_gedig = ged_result['structural_improvement'] + ig_result['ig_value']
+            # geDIG = GED - IG
+            total_gedig = ged_result['structural_improvement'] - ig_result['ig_value']
             
             # Add as 0-hop result
             hop_results[0] = HopResult(

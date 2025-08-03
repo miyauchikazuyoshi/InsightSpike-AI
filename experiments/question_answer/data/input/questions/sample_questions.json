@@ -1,0 +1,32 @@
+[
+  {
+    "id": "q_sample_001",
+    "question": "What happens to energy according to the laws of physics?",
+    "difficulty": "easy",
+    "expected_knowledge_ids": ["kb_001"]
+  },
+  {
+    "id": "q_sample_002",
+    "question": "How do plants produce food and what role does light play?",
+    "difficulty": "medium",
+    "expected_knowledge_ids": ["kb_002", "kb_001"]
+  },
+  {
+    "id": "q_sample_003",
+    "question": "Why does bread rise when baking?",
+    "difficulty": "easy",
+    "expected_knowledge_ids": ["kb_004"]
+  },
+  {
+    "id": "q_sample_004",
+    "question": "What gives water its unique properties?",
+    "difficulty": "easy",
+    "expected_knowledge_ids": ["kb_003"]
+  },
+  {
+    "id": "q_sample_005",
+    "question": "How do energy transformations occur in both photosynthesis and bread making?",
+    "difficulty": "hard",
+    "expected_knowledge_ids": ["kb_001", "kb_002", "kb_004"]
+  }
+]

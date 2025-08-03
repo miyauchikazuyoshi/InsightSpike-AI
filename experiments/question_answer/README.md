@@ -1,16 +1,16 @@
-# Question-Answer Experiment
+# Question-Answer Experiment (Minimal Solution Selection)
 
 ## Overview
 
-This experiment validates InsightSpike-AI's insight generation capabilities through a question-answering task designed based on research papers. Using 500 knowledge entries and 100 difficulty-graded questions, we analyze in detail how the system combines knowledge to generate new insights.
+This experiment compares geDIG's minimal knowledge selection capabilities with direct LLM answers. Using 500 knowledge entries and 100 difficulty-graded questions, we demonstrate how graph-based optimization can efficiently select the most relevant knowledge for answering questions.
 
 ## Experiment Objectives
 
-1. **Primary Objective**: Evaluate InsightSpike's insight generation capability in question answering
+1. **Primary Objective**: Compare geDIG minimal knowledge selection vs LLM direct answers
 2. **Secondary Objectives**: 
-   - Verify query storage functionality
-   - Analyze the relationship between knowledge graph growth and insights
-   - Investigate correlation between spike occurrence rate and answer quality
+   - Demonstrate efficiency of graph-based knowledge selection
+   - Evaluate precision/recall of knowledge selection
+   - Show practical application for RAG systems
 
 ## Experiment Design
 
@@ -34,15 +34,15 @@ This experiment validates InsightSpike-AI's insight generation capabilities thro
 ### Evaluation Metrics
 
 1. **Quantitative Metrics**:
-   - Answer accuracy
-   - Spike occurrence rate
+   - Precision/Recall/F1 of knowledge selection
+   - Number of selected knowledge items
    - Processing time
-   - Memory usage
+   - Answer quality comparison
 
 2. **Qualitative Metrics**:
-   - Novelty of insights
-   - Logical consistency of answers
-   - Degree of knowledge integration
+   - Relevance of selected knowledge
+   - Efficiency vs completeness trade-off
+   - Unexpected but valuable knowledge combinations
 
 ### Experimental Conditions
 
@@ -58,10 +58,10 @@ This experiment validates InsightSpike-AI's insight generation capabilities thro
 ```
 question_answer/
 ├── src/
-│   ├── run_experiment.py      # Main experiment script
-│   ├── data_preparation.py    # Data preparation
-│   ├── evaluation.py          # Evaluation metrics
-│   └── analysis.py            # Result analysis
+│   ├── run_minimal_solution_experiment.py  # InsightSpike integration
+│   ├── minimal_solution_experiment.py      # Demo implementation
+│   ├── test_minimal_solution.py           # Test script
+│   └── visualize_results.py               # Result visualization
 ├── data/
 │   ├── input/
 │   │   ├── knowledge_base/    # Knowledge base files
@@ -87,28 +87,31 @@ question_answer/
 
 ## Experiment Procedure
 
-### 1. Data Preparation
+### 1. Quick Test
 ```bash
-# Prepare knowledge base (500 entries) and questions (100)
-poetry run python src/data_preparation.py --prepare-all
+# Test with minimal dataset
+poetry run python src/test_minimal_solution.py
 ```
 
-### 2. Knowledge Base Construction
+### 2. Full Experiment
 ```bash
-# Add 500 knowledge entries using add_knowledge
-poetry run python src/run_experiment.py --phase knowledge-loading
+# Run full experiment with all questions
+poetry run python src/run_minimal_solution_experiment.py \
+    --config experiment_config_minimal.yaml
 ```
 
-### 3. Question-Answer Experiment
+### 3. Custom Dataset
 ```bash
-# Process 100 questions using adaptive_loop
-poetry run python src/run_experiment.py --phase question-answering
+# Run with custom knowledge and questions
+poetry run python src/run_minimal_solution_experiment.py \
+    --knowledge data/input/knowledge_base/custom_knowledge.json \
+    --questions data/input/questions/custom_questions.json
 ```
 
-### 4. Result Analysis and Visualization
+### 4. Easy Script
 ```bash
-# Data analysis and visualization
-poetry run python src/analysis.py --generate-all
+# Use the convenience script
+./run_experiment.sh
 ```
 
 ## Data Collection Format
@@ -139,19 +142,21 @@ poetry run python src/analysis.py --generate-all
 
 ## Expected Outcomes
 
-1. **Insight Patterns by Difficulty**:
-   - Easy: Insight rate < 10%
-   - Medium: Insight rate 20-40%
-   - Hard: Insight rate 50-70%
-   - Very Hard: Insight rate > 70%
+1. **Knowledge Selection Efficiency**:
+   - Easy: 1-2 knowledge items selected
+   - Medium: 2-3 knowledge items selected
+   - Hard: 3-4 knowledge items selected
+   - Very Hard: 4-5 knowledge items selected
 
-2. **Cross-Genre Knowledge Combination**:
-   - Identify genre combinations most likely to generate insights
-   - Knowledge graph growth patterns
+2. **Performance Comparison**:
+   - geDIG+LLM outperforms LLM-only on Medium+ questions
+   - F1 score > 0.7 for knowledge selection
+   - Average selection time < 1 second
 
-3. **Practical Insights**:
-   - Characteristics of questions optimal for insight generation
-   - Trade-off between processing time and insight quality
+3. **Practical Applications**:
+   - Efficient RAG system knowledge selection
+   - Reduced context window usage
+   - Better answer quality with minimal knowledge
 
 ## Visualization Plan
 
@@ -175,4 +180,5 @@ poetry run python src/analysis.py --generate-all
 
 ---
 
-*Last updated: 2025-07-29*
+*Last updated: 2025-08-03*
+*Redesigned from spike detection to minimal solution selection*

@@ -1,0 +1,37 @@
+# Minimal Solution Experiment Configuration
+
+# Algorithm settings
+algorithms:
+  gedig:
+    w_ged: 2.0
+    k_temperature: 0.1
+    use_pyg_metrics: false
+    optimization_threshold: 0.01
+    min_threshold: 0.1
+    max_threshold: 0.8
+    
+  metrics:
+    type: scipy  # scipy or pyg
+    
+# LLM settings
+llm:
+  provider: mock  # Use mock for testing
+  mock:
+    response_template: "Based on the provided knowledge, the answer is: [generated response]"
+    spike_probability: 0.0  # No spikes for this experiment
+    
+# Data store settings
+datastore:
+  type: filesystem
+  base_path: data/experiment_temp
+  
+# Experiment specific settings
+experiment:
+  selection_threshold: 0.8  # Coverage threshold for knowledge selection
+  min_relevance: 0.3  # Minimum relevance score to include knowledge
+  max_knowledge_items: 5  # Maximum number of knowledge items to select
+  
+# Logging
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

@@ -11,7 +11,17 @@ from typing import Any, Dict, Literal, Optional
 from pydantic import BaseModel, Field, validator
 
 from .wake_sleep_config import WakeSleepConfig
-from .maze_config import MazeConfig, MazeNavigatorConfig, MazeExperimentConfig
+# Maze config moved to maze_experimental
+try:
+    from ..maze_experimental.maze_config import MazeConfig, MazeNavigatorConfig, MazeExperimentConfig
+except ImportError:
+    # Provide dummy classes if maze_experimental is not available
+    class MazeConfig(BaseModel):
+        pass
+    class MazeNavigatorConfig(BaseModel):
+        pass
+    class MazeExperimentConfig(BaseModel):
+        pass
 
 
 class MemoryConfig(BaseModel):

@@ -1,0 +1,68 @@
+{
+  "summary": {
+    "experiment_date": "2025-08-03T16:06:04.677851",
+    "total_questions": 3,
+    "avg_selected_knowledge": 1.0,
+    "avg_f1": 0.8888888888888888,
+    "avg_selection_time": 2.757708231608073e-05
+  },
+  "results": [
+    {
+      "question_id": "q001",
+      "question": "What is the speed of light?",
+      "difficulty": "easy",
+      "selected_knowledge_count": 1,
+      "selected_knowledge_ids": [
+        "k001"
+      ],
+      "selection_time": 3.1948089599609375e-05,
+      "evaluation": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "selected_count": 1,
+        "expected_count": 1
+      },
+      "knowledge_answer": "Based on the available knowledge: The speed of light in vacuum is approximately 299,792,458 meters per second",
+      "direct_answer": "Direct answer attempt: This question requires specific knowledge that I don't have access to."
+    },
+    {
+      "question_id": "q002",
+      "question": "Who developed the theory of relativity and what impact did it have?",
+      "difficulty": "medium",
+      "selected_knowledge_count": 1,
+      "selected_knowledge_ids": [
+        "k002"
+      ],
+      "selection_time": 2.9802322387695312e-05,
+      "evaluation": {
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1": 0.6666666666666666,
+        "selected_count": 1,
+        "expected_count": 2
+      },
+      "knowledge_answer": "Based on the available knowledge: Albert Einstein developed the theory of relativity which revolutionized our understanding of space and time",
+      "direct_answer": "Direct answer attempt: This question requires specific knowledge that I don't have access to."
+    },
+    {
+      "question_id": "q003",
+      "question": "How do plants produce energy?",
+      "difficulty": "easy",
+      "selected_knowledge_count": 1,
+      "selected_knowledge_ids": [
+        "k004"
+      ],
+      "selection_time": 2.09808349609375e-05,
+      "evaluation": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "selected_count": 1,
+        "expected_count": 1
+      },
+      "knowledge_answer": "Based on the available knowledge: Photosynthesis is the process by which plants convert light energy into chemical energy",
+      "direct_answer": "Direct answer attempt: This question requires specific knowledge that I don't have access to."
+    }
+  ]
+}

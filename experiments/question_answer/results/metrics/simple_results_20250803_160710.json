@@ -1,0 +1,110 @@
+{
+  "summary": {
+    "experiment_date": "2025-08-03T16:07:10.932942",
+    "total_questions": 5,
+    "avg_selected_knowledge": 2.0,
+    "avg_f1": 0.4666666666666666,
+    "avg_selection_time": 5.1021575927734375e-05
+  },
+  "results": [
+    {
+      "question_id": "q_sample_001",
+      "question": "What happens to energy according to the laws of physics?",
+      "difficulty": "easy",
+      "selected_knowledge_count": 3,
+      "selected_knowledge_ids": [
+        "kb_001",
+        "kb_002",
+        "kb_008"
+      ],
+      "selection_time": 6.318092346191406e-05,
+      "evaluation": {
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "f1": 0.5,
+        "selected_count": 3,
+        "expected_count": 1
+      },
+      "knowledge_answer": "Based on the available knowledge: Energy cannot be created or destroyed, only transformed from one form to another. This is known as the law of conservation of energy. Photosynthesis is the process by which plants convert light energy into chemical energy, producing glucose and oxygen from carbon dioxide and water.",
+      "direct_answer": "Direct answer attempt: This question requires specific knowledge that I don't have access to."
+    },
+    {
+      "question_id": "q_sample_002",
+      "question": "How do plants produce food and what role does light play?",
+      "difficulty": "medium",
+      "selected_knowledge_count": 2,
+      "selected_knowledge_ids": [
+        "kb_002",
+        "kb_004"
+      ],
+      "selection_time": 4.887580871582031e-05,
+      "evaluation": {
+        "precision": 0.5,
+        "recall": 0.5,
+        "f1": 0.5,
+        "selected_count": 2,
+        "expected_count": 2
+      },
+      "knowledge_answer": "Based on the available knowledge: Photosynthesis is the process by which plants convert light energy into chemical energy, producing glucose and oxygen from carbon dioxide and water. When baking bread, yeast ferments sugars to produce carbon dioxide gas, which creates bubbles that make the dough rise.",
+      "direct_answer": "Direct answer attempt: This question requires specific knowledge that I don't have access to."
+    },
+    {
+      "question_id": "q_sample_003",
+      "question": "Why does bread rise when baking?",
+      "difficulty": "easy",
+      "selected_knowledge_count": 0,
+      "selected_knowledge_ids": [],
+      "selection_time": 4.410743713378906e-05,
+      "evaluation": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "selected_count": 0,
+        "expected_count": 1
+      },
+      "knowledge_answer": "No relevant knowledge found to answer this question.",
+      "direct_answer": "Direct answer attempt: This question requires specific knowledge that I don't have access to."
+    },
+    {
+      "question_id": "q_sample_004",
+      "question": "What gives water its unique properties?",
+      "difficulty": "easy",
+      "selected_knowledge_count": 2,
+      "selected_knowledge_ids": [
+        "kb_003",
+        "kb_007"
+      ],
+      "selection_time": 4.38690185546875e-05,
+      "evaluation": {
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6666666666666666,
+        "selected_count": 2,
+        "expected_count": 1
+      },
+      "knowledge_answer": "Based on the available knowledge: Water molecules consist of two hydrogen atoms bonded to one oxygen atom. The bent shape of water molecules gives water its unique properties. The Ship of Theseus paradox questions whether an object that has had all its components replaced remains fundamentally the same object.",
+      "direct_answer": "Direct answer attempt: This question requires specific knowledge that I don't have access to."
+    },
+    {
+      "question_id": "q_sample_005",
+      "question": "How do energy transformations occur in both photosynthesis and bread making?",
+      "difficulty": "hard",
+      "selected_knowledge_count": 3,
+      "selected_knowledge_ids": [
+        "kb_002",
+        "kb_001",
+        "kb_008"
+      ],
+      "selection_time": 5.507469177246094e-05,
+      "evaluation": {
+        "precision": 0.6666666666666666,
+        "recall": 0.6666666666666666,
+        "f1": 0.6666666666666666,
+        "selected_count": 3,
+        "expected_count": 3
+      },
+      "knowledge_answer": "Based on the available knowledge: Photosynthesis is the process by which plants convert light energy into chemical energy, producing glucose and oxygen from carbon dioxide and water. Energy cannot be created or destroyed, only transformed from one form to another. This is known as the law of conservation of energy.",
+      "direct_answer": "Direct answer attempt: This question requires specific knowledge that I don't have access to."
+    }
+  ]
+}
