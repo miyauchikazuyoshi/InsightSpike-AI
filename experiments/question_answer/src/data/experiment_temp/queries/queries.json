@@ -1,0 +1,262 @@
+[
+  {
+    "id": "query_1753736952813_19c2a7f1",
+    "text": "What is the law of conservation of energy?",
+    "vec": null,
+    "has_spike": false,
+    "spike_episode_id": null,
+    "response": "The law of conservation of energy states that energy cannot be created or destroyed; it can only be transformed from one form to another, with the total energy in an isolated system remaining constant.\n\nKey points about the law of conservation of energy:\n\n1. Energy Transformation\n- Energy can change forms (e.g., kinetic to potential, chemical to electrical)\n- The total amount of energy remains the same\n- Common transformations include:\n  * Mechanical to thermal\n  * Chemical to electrical\n  * Light to chemical (photosynthesis)\n  * Nuclear to thermal\n\n2. Closed Systems\n- Applies to isolated/closed systems\n- No energy enters or leaves the system\n- Total energy before = Total energy after\n\n3. Examples\n- A falling object: potential energy converts to kinetic energy\n- Battery powering a device: chemical energy converts to electrical energy\n- Car braking: kinetic energy converts to thermal energy\n\n4. Mathematical Expression\nE(initial) = E(final)\nwhere E represents the total energy in all forms\n\n5. Practical Applications\n- Power generation\n- Energy efficiency calculations\n- Understanding natural processes\n- Engineering design\n\nThis fundamental principle is one of the most important laws in physics and forms the basis for understanding energy interactions in the universe.",
+    "timestamp": 1753736952.813853,
+    "metadata": {
+      "processing_time": 0.04109811782836914,
+      "llm_provider": "L4LLMInterface",
+      "total_attempts": 3,
+      "reasoning_quality": 0.0,
+      "retrieved_doc_count": 0,
+      "exploration_path": [
+        {
+          "radius": 0.3,
+          "topk_l1": 37,
+          "topk_l2": 28,
+          "topk_l3": 21,
+          "temperature": 1.0,
+          "attempt_number": 1
+        },
+        {
+          "radius": 0.39,
+          "topk_l1": 55,
+          "topk_l2": 33,
+          "topk_l3": 27,
+          "temperature": 0.95,
+          "attempt_number": 2
+        },
+        {
+          "radius": 0.507,
+          "topk_l1": 60,
+          "topk_l2": 36,
+          "topk_l3": 30,
+          "temperature": 0.9025,
+          "attempt_number": 3
+        }
+      ],
+      "final_metrics": {
+        "l1_uncertainty": 0.76,
+        "l1_known_ratio": 0.0,
+        "l2_retrieval_count": 0,
+        "l3_delta_ged": 0,
+        "l3_delta_ig": 0,
+        "l3_confidence": 0.0
+      },
+      "strategy": "ExpandingStrategy",
+      "api_calls": 1
+    }
+  },
+  {
+    "id": "query_1753736958190_55388ebd",
+    "text": "Define photosynthesis and its main products.",
+    "vec": null,
+    "has_spike": false,
+    "spike_episode_id": null,
+    "response": "Photosynthesis is the process by which plants, algae, and some bacteria convert light energy into chemical energy. Here's a comprehensive explanation of photosynthesis and its main products:\n\nDefinition:\nPhotosynthesis is a biological process that uses sunlight, carbon dioxide (CO2), and water (H2O) to produce glucose (sugar) and oxygen (O2).\n\nMain Products:\n\n1. Glucose (C6H12O6)\n- Primary energy source for plants\n- Used for plant growth and development\n- Can be converted into other carbohydrates\n- Stored as starch for later use\n\n2. Oxygen (O2)\n- Released as a byproduct\n- Essential for most living organisms\n- Released into the atmosphere\n- Supports aerobic respiration\n\nBasic Chemical Equation:\n6CO2 + 6H2O + Light Energy \u2192 C6H12O6 + 6O2\n\nAdditional Products:\n- ATP (energy carrier)\n- NADPH (reducing agent)\n- Other carbohydrates\n- Various organic compounds\n\nThese products are essential for:\n- Plant survival and growth\n- Supporting life on Earth\n- Maintaining atmospheric oxygen levels\n- Providing food for other organisms",
+    "timestamp": 1753736958.190839,
+    "metadata": {
+      "processing_time": 0.037213802337646484,
+      "llm_provider": "L4LLMInterface",
+      "total_attempts": 3,
+      "reasoning_quality": 0.0,
+      "retrieved_doc_count": 0,
+      "exploration_path": [
+        {
+          "radius": 0.3,
+          "topk_l1": 37,
+          "topk_l2": 28,
+          "topk_l3": 21,
+          "temperature": 1.0,
+          "attempt_number": 1
+        },
+        {
+          "radius": 0.39,
+          "topk_l1": 55,
+          "topk_l2": 33,
+          "topk_l3": 27,
+          "temperature": 0.95,
+          "attempt_number": 2
+        },
+        {
+          "radius": 0.507,
+          "topk_l1": 60,
+          "topk_l2": 36,
+          "topk_l3": 30,
+          "temperature": 0.9025,
+          "attempt_number": 3
+        }
+      ],
+      "final_metrics": {
+        "l1_uncertainty": 0.62,
+        "l1_known_ratio": 0.0,
+        "l2_retrieval_count": 0,
+        "l3_delta_ged": 0,
+        "l3_delta_ig": 0,
+        "l3_confidence": 0.0
+      },
+      "strategy": "ExpandingStrategy",
+      "api_calls": 1
+    }
+  },
+  {
+    "id": "query_1753736962510_10bf193c",
+    "text": "What is the Pythagorean theorem?",
+    "vec": null,
+    "has_spike": false,
+    "spike_episode_id": null,
+    "response": "The Pythagorean theorem is a fundamental principle in geometry that states: In a right triangle (a triangle with one 90-degree angle), the square of the length of the hypotenuse (the longest side, opposite the right angle) equals the sum of squares of the lengths of the other two sides.\n\nIt can be written as the equation:\na\u00b2 + b\u00b2 = c\u00b2\n\nWhere:\n- c is the length of the hypotenuse\n- a and b are the lengths of the other two sides (called the legs)\n\nFor example:\n- If one leg is 3 units and the other is 4 units\n- Then 3\u00b2 + 4\u00b2 = c\u00b2\n- 9 + 16 = c\u00b2\n- 25 = c\u00b2\n- Therefore, c = 5 units\n\nThe theorem is named after the ancient Greek mathematician Pythagoras, though it was known to other civilizations before him. It's one of the most useful and widely applied theorems in mathematics, used in:\n- Architecture\n- Engineering\n- Construction\n- Navigation\n- And many other practical applications",
+    "timestamp": 1753736962.510777,
+    "metadata": {
+      "processing_time": 0.03895711898803711,
+      "llm_provider": "L4LLMInterface",
+      "total_attempts": 3,
+      "reasoning_quality": 0.0,
+      "retrieved_doc_count": 0,
+      "exploration_path": [
+        {
+          "radius": 0.3,
+          "topk_l1": 37,
+          "topk_l2": 28,
+          "topk_l3": 21,
+          "temperature": 1.0,
+          "attempt_number": 1
+        },
+        {
+          "radius": 0.39,
+          "topk_l1": 55,
+          "topk_l2": 33,
+          "topk_l3": 27,
+          "temperature": 0.95,
+          "attempt_number": 2
+        },
+        {
+          "radius": 0.507,
+          "topk_l1": 60,
+          "topk_l2": 36,
+          "topk_l3": 30,
+          "temperature": 0.9025,
+          "attempt_number": 3
+        }
+      ],
+      "final_metrics": {
+        "l1_uncertainty": 0.7,
+        "l1_known_ratio": 0.0,
+        "l2_retrieval_count": 0,
+        "l3_delta_ged": 0,
+        "l3_delta_ig": 0,
+        "l3_confidence": 0.0
+      },
+      "strategy": "ExpandingStrategy",
+      "api_calls": 1
+    }
+  },
+  {
+    "id": "query_1753736967060_4807ab07",
+    "text": "Explain the basic principle of supply and demand.",
+    "vec": null,
+    "has_spike": false,
+    "spike_episode_id": null,
+    "response": "The principle of supply and demand is a fundamental economic concept that explains how prices are determined in a market economy. Here's a breakdown of the key elements:\n\nBasic Definition:\n- Supply refers to how much of a product/service sellers are willing to offer\n- Demand refers to how much of a product/service buyers want to purchase\n\nKey Relationships:\n1. Law of Demand\n- As prices increase, demand typically decreases\n- As prices decrease, demand typically increases\n\n2. Law of Supply\n- As prices increase, supply typically increases\n- As prices decrease, supply typically decreases\n\n3. Equilibrium\n- The point where supply and demand meet\n- Determines the market price and quantity\n- Market naturally tends toward equilibrium\n\nFactors Affecting Supply:\n- Production costs\n- Technology\n- Number of sellers\n- Future expectations\n- Government policies\n\nFactors Affecting Demand:\n- Consumer income\n- Preferences\n- Prices of related goods\n- Population/demographics\n- Future expectations\n\nThis interaction between supply and demand helps explain why prices change and how markets function efficiently.",
+    "timestamp": 1753736967.0604339,
+    "metadata": {
+      "processing_time": 0.03132510185241699,
+      "llm_provider": "L4LLMInterface",
+      "total_attempts": 3,
+      "reasoning_quality": 0.0,
+      "retrieved_doc_count": 0,
+      "exploration_path": [
+        {
+          "radius": 0.3,
+          "topk_l1": 37,
+          "topk_l2": 28,
+          "topk_l3": 21,
+          "temperature": 1.0,
+          "attempt_number": 1
+        },
+        {
+          "radius": 0.39,
+          "topk_l1": 55,
+          "topk_l2": 33,
+          "topk_l3": 27,
+          "temperature": 0.95,
+          "attempt_number": 2
+        },
+        {
+          "radius": 0.507,
+          "topk_l1": 60,
+          "topk_l2": 36,
+          "topk_l3": 30,
+          "temperature": 0.9025,
+          "attempt_number": 3
+        }
+      ],
+      "final_metrics": {
+        "l1_uncertainty": 0.76,
+        "l1_known_ratio": 0.0,
+        "l2_retrieval_count": 0,
+        "l3_delta_ged": 0,
+        "l3_delta_ig": 0,
+        "l3_confidence": 0.0
+      },
+      "strategy": "ExpandingStrategy",
+      "api_calls": 1
+    }
+  },
+  {
+    "id": "query_1753736971574_8b43d84b",
+    "text": "What is cognitive dissonance?",
+    "vec": null,
+    "has_spike": false,
+    "spike_episode_id": null,
+    "response": "Cognitive dissonance is a psychological phenomenon that occurs when a person experiences mental discomfort due to conflicting beliefs, attitudes, or behaviors. Here are the key aspects of cognitive dissonance:\n\nKey Components:\n1. Mental conflict between contradictory thoughts, beliefs, or behaviors\n2. Psychological discomfort or tension\n3. Motivation to reduce this discomfort\n\nCommon Examples:\n- Continuing to smoke while knowing it's harmful\n- Purchasing expensive items while trying to save money\n- Eating unhealthy food while wanting to be healthy\n\nWays People Reduce Cognitive Dissonance:\n1. Changing beliefs or attitudes\n2. Acquiring new information to justify behavior\n3. Reducing the importance of conflicting beliefs\n4. Changing behavior to match beliefs\n\nImpact:\n- Influences decision-making\n- Affects behavior changes\n- Shapes attitude formation\n- Can lead to rationalization of actions\n\nUnderstanding cognitive dissonance is important because it helps explain human behavior and decision-making processes, and can be useful in personal growth and behavioral change.",
+    "timestamp": 1753736971.5744169,
+    "metadata": {
+      "processing_time": 0.036454200744628906,
+      "llm_provider": "L4LLMInterface",
+      "total_attempts": 3,
+      "reasoning_quality": 0.0,
+      "retrieved_doc_count": 0,
+      "exploration_path": [
+        {
+          "radius": 0.3,
+          "topk_l1": 37,
+          "topk_l2": 28,
+          "topk_l3": 21,
+          "temperature": 1.0,
+          "attempt_number": 1
+        },
+        {
+          "radius": 0.39,
+          "topk_l1": 55,
+          "topk_l2": 33,
+          "topk_l3": 27,
+          "temperature": 0.95,
+          "attempt_number": 2
+        },
+        {
+          "radius": 0.507,
+          "topk_l1": 60,
+          "topk_l2": 36,
+          "topk_l3": 30,
+          "temperature": 0.9025,
+          "attempt_number": 3
+        }
+      ],
+      "final_metrics": {
+        "l1_uncertainty": 0.6799999999999999,
+        "l1_known_ratio": 0.0,
+        "l2_retrieval_count": 0,
+        "l3_delta_ged": 0,
+        "l3_delta_ig": 0,
+        "l3_confidence": 0.0
+      },
+      "strategy": "ExpandingStrategy",
+      "api_calls": 1
+    }
+  }
+]

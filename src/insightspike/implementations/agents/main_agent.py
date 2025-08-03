@@ -50,6 +50,12 @@ class CycleResult:
     error_state: Dict[str, Any]
     cycle_number: int
     success: bool = True
+    query_id: Optional[str] = None
+
+    @property
+    def has_spike(self) -> bool:
+        """Backward compatibility property"""
+        return self.spike_detected
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for backward compatibility"""
@@ -65,6 +71,7 @@ class CycleResult:
             "reasoning_quality": self.reasoning_quality,
             "cycle": self.cycle_number,
             "success": self.success,
+            "query_id": self.query_id,
         }
 
 
@@ -215,6 +222,9 @@ class MainAgent:
         Returns:
             CycleResult containing complete results and reasoning trace
         """
+        # Track query start time for metrics
+        self._query_start_time = time.time()
+        
         if not self._initialized:
             if not self.initialize():
                 return self._error_cycle_result(
@@ -264,6 +274,93 @@ class MainAgent:
                 "converged": convergence_reached,
             }
         )
+        
+        # Save query if datastore is available
+        try:
+            if self.datastore and hasattr(self.datastore, 'save_queries'):
+                # Calculate processing time
+                start_time = getattr(self, '_query_start_time', time.time())
+                processing_time = time.time() - start_time
+                
+                # Determine spike episode ID if spike was detected
+                spike_episode_id = None
+                if result.spike_detected:
+                    # Get the last stored episode ID (if available)
+                    # For L2MemoryManager, we can use the last episode index
+                    if hasattr(self.l2_memory, 'episodes') and self.l2_memory.episodes:
+                        # Use the index of the last episode
+                        spike_episode_id = f"episode_{len(self.l2_memory.episodes) - 1}"
+                
+                # Get query embedding
+                query_vec = None
+                # First try to get from search results  
+                for res in results:
+                    if hasattr(res, 'graph_analysis') and res.graph_analysis.get('query_vector') is not None:
+                        query_vec = res.graph_analysis['query_vector']
+                        break
+                
+                # If not found, generate it
+                if query_vec is None and hasattr(self, 'l1_embedder'):
+                    query_vec = self.l1_embedder.get_embedding(question)
+                
+                # Prepare metadata
+                metadata = {
+                    'processing_time': processing_time,
+                    'llm_provider': self.l4_llm.__class__.__name__ if self.l4_llm else 'unknown',
+                    'total_cycles': len(results),
+                    'converged': convergence_reached,
+                    'reasoning_quality': result.reasoning_quality,
+                    'retrieved_doc_count': len(result.retrieved_documents)
+                }
+                
+                # Generate query ID
+                import uuid
+                query_id = f"query_{int(time.time() * 1000)}_{str(uuid.uuid4())[:8]}"
+                
+                # Prepare query record
+                query_record = {
+                    "id": query_id,
+                    "text": question,
+                    "vec": query_vec,
+                    "has_spike": result.spike_detected,
+                    "spike_episode_id": spike_episode_id,
+                    "response": result.response,
+                    "timestamp": time.time(),
+                    "metadata": metadata
+                }
+                
+                # Save query to DataStore
+                success = self.datastore.save_queries([query_record], namespace="queries")
+                if success:
+                    logger.debug(f"Saved query {query_id} (has_spike={result.spike_detected})")
+                    
+                    # Add query_id to result
+                    result.query_id = query_id
+                    
+                    # Add query to graph if available and we're using CachedMemoryManager
+                    if (hasattr(self.l2_memory, 'add_query_to_graph') and 
+                        result.graph_analysis.get('graph') is not None):
+                        # Get retrieved episode IDs
+                        retrieved_episode_ids = []
+                        for doc in result.retrieved_documents:
+                            if 'index' in doc:
+                                retrieved_episode_ids.append(str(doc['index']))
+                        
+                        self.l2_memory.add_query_to_graph(
+                            graph=result.graph_analysis['graph'],
+                            query_id=query_id,
+                            query_text=question,
+                            query_vec=query_vec,
+                            has_spike=result.spike_detected,
+                            spike_episode_id=spike_episode_id,
+                            retrieved_episode_ids=retrieved_episode_ids,
+                            metadata=metadata
+                        )
+                else:
+                    logger.warning("Failed to save query to DataStore")
+                
+        except Exception as e:
+            logger.warning(f"Failed to save query: {e}")
 
         return result
 

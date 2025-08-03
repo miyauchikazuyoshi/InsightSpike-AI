@@ -27,6 +27,15 @@ flowchart TB
             Core --> Core_Scale
         end
         
+        subgraph "Query Storage"
+            Queries[data/queries/]
+            Queries_Json[queries.json<br/>Query History]
+            Queries_Meta[Query Metadata<br/>Processing Info]
+            
+            Queries --> Queries_Json
+            Queries --> Queries_Meta
+        end
+        
         subgraph "Databases"
             DB[data/db/]
             DB_Insights[insight_facts.db<br/>Discovered Insights]
@@ -68,12 +77,21 @@ flowchart TB
     subgraph "⚙️ Processing Pipeline"
         direction TB
         
-        P1[Data Ingestion<br/>spike embed]
+        P1[Query Processing<br/>MainAgent/AdaptiveProcessor]
         P2[Text Processing<br/>& Embedding]
         P3[Episode Creation<br/>store_episode]
-        P4[Graph Update<br/>ScalableGraphManager]
-        P5[Index Update<br/>FAISS]
-        P6[Conflict Detection<br/>& Splitting]
+        P4[Query Storage<br/>save_queries]
+        P5[Graph Update<br/>Nodes & Edges]
+        P6[Index Update<br/>FAISS]
+        P7[Conflict Detection<br/>& Splitting]
+        
+        P1 --> P2
+        P2 --> P3
+        P1 --> P4
+        P3 --> P5
+        P4 --> P5
+        P5 --> P6
+        P6 --> P7
     end
     
     %% Data Access Patterns
@@ -83,13 +101,15 @@ flowchart TB
         Read[Read Operations]
         Write[Write Operations]
         
-        Read --> ReadEp[load_state<br/>Read episodes.json]
-        Read --> ReadIdx[search_episodes<br/>Query FAISS]
-        Read --> ReadGraph[get_current_graph<br/>Load PyG]
+        Read --> ReadEp[load_episodes<br/>Read episodes.json]
+        Read --> ReadIdx[search_vectors<br/>Query FAISS]
+        Read --> ReadGraph[load_graph<br/>Load NetworkX/PyG]
+        Read --> ReadQueries[load_queries<br/>Read queries.json]
         
-        Write --> WriteEp[save_state<br/>Write episodes.json]
-        Write --> WriteIdx[add_to_index<br/>Update FAISS]
-        Write --> WriteGraph[save_graph<br/>Save PyG]
+        Write --> WriteEp[save_episodes<br/>Write episodes.json]
+        Write --> WriteIdx[save_vectors<br/>Update FAISS]
+        Write --> WriteGraph[save_graph<br/>Save NetworkX/PyG]
+        Write --> WriteQueries[save_queries<br/>Write queries.json]
     end
     
     %% Data Flow Connections

@@ -1,0 +1,142 @@
+%% Query Storage Architecture
+%% How queries are stored and analyzed in InsightSpike-AI
+
+flowchart TB
+    %% User Query Entry Points
+    subgraph "🔍 Query Entry Points"
+        User[User Query]
+        CLI[CLI Command]
+        API[Python API]
+        Adaptive[Adaptive Loop]
+    end
+    
+    %% Processing Layer
+    subgraph "⚙️ Query Processing"
+        MainAgent[MainAgent<br/>process_question()]
+        AdaptiveProc[AdaptiveProcessor<br/>process()]
+        
+        subgraph "Processing Metadata"
+            StartTime[Start Time Tracking]
+            Embedding[Query Embedding]
+            CycleTracking[Cycle Count]
+            QualityScore[Reasoning Quality]
+        end
+    end
+    
+    %% Query Storage
+    subgraph "💾 Query Storage Layer"
+        direction TB
+        
+        subgraph "Query Record Structure"
+            QueryID[ID: query_timestamp_uuid]
+            QueryText[Text: Original Query]
+            QueryVec[Vector: Query Embedding]
+            HasSpike[Has Spike: Boolean]
+            SpikeEpisodeID[Spike Episode ID]
+            Response[Response Text]
+            Metadata[Metadata Dict]
+        end
+        
+        subgraph "Metadata Contents"
+            ProcessingTime[processing_time]
+            LLMProvider[llm_provider]
+            TotalCycles[total_cycles]
+            ReasoningQuality[reasoning_quality]
+            DocCount[retrieved_doc_count]
+            ExplorationPath[exploration_path<br/>(Adaptive only)]
+        end
+    end
+    
+    %% Storage Backends
+    subgraph "🗄️ Storage Backends"
+        direction LR
+        
+        FileSystem[FileSystemDataStore<br/>queries.json]
+        SQLite[SQLiteDataStore<br/>queries table]
+        Memory[InMemoryDataStore<br/>RAM only]
+    end
+    
+    %% Graph Integration
+    subgraph "🕸️ Graph Integration"
+        direction TB
+        
+        QueryNode[Query Node<br/>type="query"]
+        
+        subgraph "Edge Types"
+            QuerySpike[query_spike<br/>Query → Generated Episode]
+            QueryRetrieval[query_retrieval<br/>Query → Retrieved Episodes]
+        end
+        
+        KnowledgeGraph[NetworkX Graph]
+    end
+    
+    %% Analysis Layer
+    subgraph "📊 Query Analysis"
+        direction LR
+        
+        Statistics[get_query_statistics()]
+        RecentQueries[get_recent_queries()]
+        
+        subgraph "Analysis Metrics"
+            SpikeRate[Spike Generation Rate]
+            AvgProcessTime[Avg Processing Time]
+            ProviderPerf[Provider Performance]
+            ComplexityAnalysis[Query Complexity]
+        end
+    end
+    
+    %% Flow Connections
+    User --> CLI
+    User --> API
+    User --> Adaptive
+    
+    CLI --> MainAgent
+    API --> MainAgent
+    Adaptive --> AdaptiveProc
+    
+    MainAgent --> StartTime
+    MainAgent --> Embedding
+    MainAgent --> CycleTracking
+    MainAgent --> QualityScore
+    
+    AdaptiveProc --> StartTime
+    AdaptiveProc --> Embedding
+    AdaptiveProc --> ExplorationPath
+    
+    MainAgent --> QueryID
+    AdaptiveProc --> QueryID
+    
+    QueryID --> FileSystem
+    QueryID --> SQLite
+    QueryID --> Memory
+    
+    QueryID --> QueryNode
+    QueryNode --> QuerySpike
+    QueryNode --> QueryRetrieval
+    QuerySpike --> KnowledgeGraph
+    QueryRetrieval --> KnowledgeGraph
+    
+    FileSystem --> Statistics
+    SQLite --> Statistics
+    Memory --> Statistics
+    
+    Statistics --> SpikeRate
+    Statistics --> AvgProcessTime
+    Statistics --> ProviderPerf
+    
+    RecentQueries --> ComplexityAnalysis
+    
+    %% Styling
+    classDef entry fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef process fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef storage fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    classDef backend fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef graph fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    classDef analysis fill:#e0f2f1,stroke:#00897b,stroke-width:2px
+    
+    class User,CLI,API,Adaptive entry
+    class MainAgent,AdaptiveProc,StartTime,Embedding,CycleTracking,QualityScore process
+    class QueryID,QueryText,QueryVec,HasSpike,SpikeEpisodeID,Response,Metadata storage
+    class FileSystem,SQLite,Memory backend
+    class QueryNode,QuerySpike,QueryRetrieval,KnowledgeGraph graph
+    class Statistics,RecentQueries,SpikeRate,AvgProcessTime,ProviderPerf,ComplexityAnalysis analysis

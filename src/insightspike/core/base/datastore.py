@@ -184,6 +184,40 @@ class DataStore(ABC):
         """
         pass
 
+    @abstractmethod
+    def save_queries(
+        self, queries: List[Dict[str, Any]], namespace: str = "queries"
+    ) -> bool:
+        """Save query records to storage
+
+        Args:
+            queries: List of query dictionaries with 'text', 'vec', 'has_spike', 'metadata'
+            namespace: Namespace/collection for organizing queries
+
+        Returns:
+            Success status
+        """
+        pass
+
+    @abstractmethod
+    def load_queries(
+        self, 
+        namespace: str = "queries",
+        has_spike: Optional[bool] = None,
+        limit: Optional[int] = None
+    ) -> List[Dict[str, Any]]:
+        """Load query records from storage
+
+        Args:
+            namespace: Namespace/collection to load from
+            has_spike: Filter by spike generation status (None = all)
+            limit: Maximum number of queries to return
+
+        Returns:
+            List of query dictionaries
+        """
+        pass
+
 
 class VectorIndex(ABC):
     """Abstract interface for vector indexing"""

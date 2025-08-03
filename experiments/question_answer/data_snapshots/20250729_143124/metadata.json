@@ -1,0 +1,135 @@
+{
+  "timestamp": "20250729_143124",
+  "config": {
+    "experiment": {
+      "name": "question_answer",
+      "description": "Evaluate InsightSpike's ability to generate insights with 500 knowledge entries and 100 questions",
+      "seed": 42
+    },
+    "data": {
+      "knowledge_base_path": "data/input/knowledge_base/knowledge_500.json",
+      "questions_path": "data/input/questions/questions_100.json",
+      "output_dir": "results/outputs",
+      "snapshot_dir": "data_snapshots"
+    },
+    "model": {
+      "provider": "mock",
+      "model": "mock-model",
+      "temperature": 0.7,
+      "max_tokens": 1000
+    },
+    "insightspike": {
+      "datastore": {
+        "type": "filesystem",
+        "base_path": "data/experiment_temp"
+      },
+      "memory": {
+        "max_episodes": 1000,
+        "vector_dim": 384
+      },
+      "graph": {
+        "enable_message_passing": true,
+        "message_passing": {
+          "alpha": 0.3,
+          "iterations": 2,
+          "max_hops": 2
+        },
+        "enable_graph_search": true,
+        "algorithms": {
+          "metrics": {
+            "ged": "advanced",
+            "ig": "advanced"
+          }
+        },
+        "metrics": {
+          "use_multihop_gedig": true,
+          "max_hops": 2,
+          "decay_factor": 0.5
+        }
+      },
+      "spike_detection": {
+        "ged_threshold": -0.5,
+        "ig_threshold": 0.2
+      },
+      "algorithms": {
+        "gedig": {
+          "w1": 0.5,
+          "kT": 1.0,
+          "normalization": {
+            "enabled": true,
+            "mode": "conservation",
+            "size_normalization": {
+              "beta": 0.5
+            },
+            "reward": {
+              "lambda_ig": 1.0,
+              "mu_ged": 0.5
+            },
+            "spike_detection": {
+              "mode": "threshold",
+              "threshold": 0.0
+            },
+            "z_transform": {
+              "use_running_stats": true,
+              "window_size": 100
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "total_knowledge": 500,
+      "total_questions": 100,
+      "question_distribution": {
+        "easy": 30,
+        "medium": 40,
+        "hard": 20,
+        "very_hard": 10
+      }
+    },
+    "evaluation": {
+      "metrics": [
+        "accuracy",
+        "spike_rate",
+        "processing_time",
+        "memory_usage",
+        "insight_quality"
+      ],
+      "human_evaluation": {
+        "enabled": false,
+        "criteria": [
+          "correctness",
+          "creativity",
+          "coherence"
+        ]
+      }
+    },
+    "output": {
+      "formats": [
+        "json",
+        "csv"
+      ],
+      "save_vectors": true,
+      "save_prompts": true,
+      "save_intermediate": true
+    },
+    "branching": {
+      "enabled": true,
+      "threshold": 0.8,
+      "min_branches": 2,
+      "max_gap": 0.15
+    },
+    "logging": {
+      "level": "INFO",
+      "save_conversations": true,
+      "save_graphs": true,
+      "save_metrics": true
+    }
+  },
+  "summary": {
+    "total_knowledge": 10,
+    "total_questions": 5,
+    "insight_rate": 0.0,
+    "branching_rate": 0.0
+  }
+}

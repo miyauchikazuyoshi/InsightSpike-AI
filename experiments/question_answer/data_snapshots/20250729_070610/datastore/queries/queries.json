@@ -1,0 +1,198 @@
+[
+  {
+    "id": "query_1753740370191_d9d986ef",
+    "text": "What is the law of conservation of energy?",
+    "vec": null,
+    "has_spike": false,
+    "spike_episode_id": null,
+    "response": "Error: 'str' object has no attribute 'get'",
+    "timestamp": 1753740370.1919081,
+    "metadata": {
+      "processing_time": 0.15825724601745605,
+      "llm_provider": "L4LLMInterface",
+      "total_attempts": 3,
+      "reasoning_quality": 0.8325008893142635,
+      "retrieved_doc_count": 11,
+      "exploration_path": [
+        {
+          "radius": 0.3,
+          "topk_l1": 37,
+          "topk_l2": 28,
+          "topk_l3": 21,
+          "temperature": 1.0,
+          "attempt_number": 1
+        },
+        {
+          "radius": 0.39,
+          "topk_l1": 55,
+          "topk_l2": 33,
+          "topk_l3": 27,
+          "temperature": 0.95,
+          "attempt_number": 2
+        },
+        {
+          "radius": 0.507,
+          "topk_l1": 60,
+          "topk_l2": 36,
+          "topk_l3": 30,
+          "temperature": 0.9025,
+          "attempt_number": 3
+        }
+      ],
+      "final_metrics": {
+        "l1_uncertainty": 0.76,
+        "l1_known_ratio": 0.0,
+        "l2_retrieval_count": 11,
+        "l3_delta_ged": 2.0,
+        "l3_delta_ig": 0.00015257679035135145,
+        "l3_confidence": 0.8325008893142635
+      },
+      "strategy": "ExpandingStrategy",
+      "api_calls": 1
+    }
+  },
+  {
+    "id": "query_1753740370334_2a357645",
+    "text": "Define photosynthesis and its main products.",
+    "vec": null,
+    "has_spike": false,
+    "spike_episode_id": null,
+    "response": "Error: 'str' object has no attribute 'get'",
+    "timestamp": 1753740370.334164,
+    "metadata": {
+      "processing_time": 0.10309195518493652,
+      "llm_provider": "L4LLMInterface",
+      "total_attempts": 1,
+      "reasoning_quality": 1.0,
+      "retrieved_doc_count": 13,
+      "exploration_path": [
+        {
+          "radius": 0.3,
+          "topk_l1": 37,
+          "topk_l2": 28,
+          "topk_l3": 21,
+          "temperature": 1.0,
+          "attempt_number": 1
+        }
+      ],
+      "final_metrics": {
+        "l1_uncertainty": 0.62,
+        "l1_known_ratio": 0.0,
+        "l2_retrieval_count": 13,
+        "l3_delta_ged": 2.5,
+        "l3_delta_ig": 0.00013220569094513562,
+        "l3_confidence": 1.0
+      },
+      "strategy": "ExpandingStrategy",
+      "api_calls": 1
+    }
+  },
+  {
+    "id": "query_1753740370454_cf026612",
+    "text": "What is the Pythagorean theorem?",
+    "vec": null,
+    "has_spike": false,
+    "spike_episode_id": null,
+    "response": "Error: 'str' object has no attribute 'get'",
+    "timestamp": 1753740370.454782,
+    "metadata": {
+      "processing_time": 0.09656405448913574,
+      "llm_provider": "L4LLMInterface",
+      "total_attempts": 1,
+      "reasoning_quality": 1.0,
+      "retrieved_doc_count": 7,
+      "exploration_path": [
+        {
+          "radius": 0.3,
+          "topk_l1": 37,
+          "topk_l2": 28,
+          "topk_l3": 21,
+          "temperature": 1.0,
+          "attempt_number": 1
+        }
+      ],
+      "final_metrics": {
+        "l1_uncertainty": 0.7,
+        "l1_known_ratio": 0.0,
+        "l2_retrieval_count": 7,
+        "l3_delta_ged": 3.0,
+        "l3_delta_ig": 9.312876971348634e-05,
+        "l3_confidence": 1.0
+      },
+      "strategy": "ExpandingStrategy",
+      "api_calls": 1
+    }
+  },
+  {
+    "id": "query_1753740370582_8dfaa9d7",
+    "text": "Explain the basic principle of supply and demand.",
+    "vec": null,
+    "has_spike": false,
+    "spike_episode_id": null,
+    "response": "Error: 'str' object has no attribute 'get'",
+    "timestamp": 1753740370.582846,
+    "metadata": {
+      "processing_time": 0.09640812873840332,
+      "llm_provider": "L4LLMInterface",
+      "total_attempts": 1,
+      "reasoning_quality": 1.0,
+      "retrieved_doc_count": 13,
+      "exploration_path": [
+        {
+          "radius": 0.3,
+          "topk_l1": 37,
+          "topk_l2": 28,
+          "topk_l3": 21,
+          "temperature": 1.0,
+          "attempt_number": 1
+        }
+      ],
+      "final_metrics": {
+        "l1_uncertainty": 0.76,
+        "l1_known_ratio": 0.0,
+        "l2_retrieval_count": 13,
+        "l3_delta_ged": 3.5,
+        "l3_delta_ig": 2.4782970073445272e-05,
+        "l3_confidence": 1.0
+      },
+      "strategy": "ExpandingStrategy",
+      "api_calls": 1
+    }
+  },
+  {
+    "id": "query_1753740370698_a2af345d",
+    "text": "What is cognitive dissonance?",
+    "vec": null,
+    "has_spike": false,
+    "spike_episode_id": null,
+    "response": "Error: 'str' object has no attribute 'get'",
+    "timestamp": 1753740370.6986601,
+    "metadata": {
+      "processing_time": 0.09242892265319824,
+      "llm_provider": "L4LLMInterface",
+      "total_attempts": 1,
+      "reasoning_quality": 1.0,
+      "retrieved_doc_count": 8,
+      "exploration_path": [
+        {
+          "radius": 0.3,
+          "topk_l1": 37,
+          "topk_l2": 28,
+          "topk_l3": 21,
+          "temperature": 1.0,
+          "attempt_number": 1
+        }
+      ],
+      "final_metrics": {
+        "l1_uncertainty": 0.6799999999999999,
+        "l1_known_ratio": 0.0,
+        "l2_retrieval_count": 8,
+        "l3_delta_ged": 4.0,
+        "l3_delta_ig": 5.77090680987582e-05,
+        "l3_confidence": 1.0
+      },
+      "strategy": "ExpandingStrategy",
+      "api_calls": 1
+    }
+  }
+]

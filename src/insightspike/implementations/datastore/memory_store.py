@@ -183,3 +183,63 @@ class InMemoryDataStore(DataStore):
         import sys
 
         return sys.getsizeof(obj)
+
+    def save_queries(
+        self, queries: List[Dict[str, Any]], namespace: str = "queries"
+    ) -> bool:
+        """Save query records to memory"""
+        try:
+            if namespace not in self.data:
+                self.data[namespace] = {}
+            
+            # Get existing queries list
+            if "queries" not in self.data[namespace]:
+                self.data[namespace]["queries"] = []
+            
+            # Append new queries
+            self.data[namespace]["queries"].extend(queries)
+            
+            logger.info(f"Saved {len(queries)} queries to memory")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to save queries: {e}")
+            return False
+
+    def load_queries(
+        self, 
+        namespace: str = "queries",
+        has_spike: Optional[bool] = None,
+        limit: Optional[int] = None
+    ) -> List[Dict[str, Any]]:
+        """Load query records from memory"""
+        try:
+            if namespace not in self.data or "queries" not in self.data[namespace]:
+                return []
+            
+            all_queries = self.data[namespace]["queries"]
+            
+            # Filter by has_spike if specified
+            if has_spike is not None:
+                filtered_queries = [
+                    q for q in all_queries 
+                    if q.get("has_spike", False) == has_spike
+                ]
+            else:
+                filtered_queries = list(all_queries)
+            
+            # Sort by timestamp (newest first)
+            filtered_queries.sort(
+                key=lambda x: x.get("timestamp", 0), 
+                reverse=True
+            )
+            
+            # Apply limit if specified
+            if limit is not None:
+                filtered_queries = filtered_queries[:limit]
+            
+            return filtered_queries
+            
+        except Exception as e:
+            logger.error(f"Failed to load queries: {e}")
+            return []

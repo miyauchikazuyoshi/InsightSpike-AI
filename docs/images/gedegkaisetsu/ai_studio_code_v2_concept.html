@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InsightSpike-AI v2: Base-200 & Wake-Sleep Architecture</title>
+    <style>
+        /* 既存のスタイルを継承 */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Hiragino Kaku Gothic ProN', 'メイリオ', Meiryo, sans-serif;
+            background-color: #f4f6f8;
+            color: #212529;
+            overflow: hidden;
+        }
+        .slideshow-container {
+            width: 100vw;
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+        }
+        .slide {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 4vw;
+            box-sizing: border-box;
+            text-align: center;
+            scroll-snap-align: start;
+            position: relative;
+        }
+        .slide:nth-child(odd) { background-color: #ffffff; }
+        .slide:nth-child(even) { background-color: #f4f6f8; }
+        
+        /* 新規追加スタイル */
+        .magic-circle {
+            width: 200px;
+            height: 200px;
+            border: 3px dashed #3a7bd5;
+            border-radius: 50%;
+            position: relative;
+            margin: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+        .atomic-concept {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #e63946;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .wake-sleep-diagram {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 900px;
+            margin: 20px 0;
+        }
+        .phase-card {
+            background: white;
+            border: 2px solid;
+            padding: 20px;
+            border-radius: 12px;
+            width: 45%;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .wake-card { border-color: #fca311; }
+        .sleep-card { border-color: #2a9d8f; }
+        
+        /* 既存スタイルの継承 */
+        h1 { font-size: 2.8rem; color: #1d3557; margin-bottom: 1rem; }
+        h2 { font-size: 2rem; color: #2a4b7c; margin-top: 0; margin-bottom: 2.5rem; border-bottom: 3px solid #66ccff; padding-bottom: 10px; display: inline-block; }
+        .slide-number { position: absolute; bottom: 20px; right: 20px; font-size: 1rem; color: #adb5bd; }
+        .emphasis { color: #3a7bd5; font-weight: bold; }
+        .strong { color: #e63946; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="slideshow-container">
+
+        <!-- 新規スライド: 人間の認知は200進数？ -->
+        <section class="slide">
+            <h2>【新発見】人間の認知は"200進数"で動く？</h2>
+            <p>最新の研究で、人間の思考は約<strong class="strong">200個の原子概念</strong>の組み合わせで成り立っている可能性が見えてきました。</p>
+            
+            <div style="display: flex; justify-content: center; align-items: center; margin: 30px 0;">
+                <div style="text-align: center;">
+                    <p class="emphasis">コンピュータ</p>
+                    <div style="font-size: 3rem;">0, 1</div>
+                    <p>2進数</p>
+                </div>
+                <div style="font-size: 2rem; margin: 0 40px;">VS</div>
+                <div style="text-align: center;">
+                    <p class="emphasis">人間の脳</p>
+                    <div style="font-size: 2rem;">IN, OUT, BEFORE, AFTER...</div>
+                    <p><strong class="strong">~200進数！</strong></p>
+                </div>
+            </div>
+            
+            <p>これらの原子概念が「魔法陣」のように組み合わさることで、無限の思考が生まれます。</p>
+            <div class="slide-number">新1 / 25</div>
+        </section>
+
+        <!-- 新規スライド: 魔法陣としての概念形成 -->
+        <section class="slide">
+            <h2>概念形成は「魔法陣を描く」こと</h2>
+            <p>名詞化などの概念形成は、認知ベクトル空間で<strong class="strong">魔法陣を描いて収束させる</strong>プロセスです。</p>
+            
+            <div style="display: flex; justify-content: center; align-items: center; margin: 30px 0;">
+                <div>
+                    <div class="magic-circle">
+                        <div class="atomic-concept" style="top: 20px; left: 85px;">動く</div>
+                        <div class="atomic-concept" style="top: 60px; left: 140px;">物</div>
+                        <div class="atomic-concept" style="bottom: 60px; left: 140px;">場所</div>
+                        <div class="atomic-concept" style="bottom: 20px; left: 85px;">変化</div>
+                        <div class="atomic-concept" style="top: 60px; left: 30px;">から</div>
+                        <div class="atomic-concept" style="bottom: 60px; left: 30px;">へ</div>
+                    </div>
+                    <p>複雑な動作パターン</p>
+                </div>
+                <div style="font-size: 3rem; margin: 0 30px;">→</div>
+                <div>
+                    <div style="width: 100px; height: 100px; background: #3a7bd5; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                        移動
+                    </div>
+                    <p>単一の概念に収束</p>
+                </div>
+            </div>
+            
+            <p><small>Transformerのアテンション機構も、同様に動的な魔法陣形成として理解できます。</small></p>
+            <div class="slide-number">新2 / 25</div>
+        </section>
+
+        <!-- 新規スライド: Wake-Sleep Cycle -->
+        <section class="slide">
+            <h2>【核心】Wake-Sleepサイクル：思考の二重構造</h2>
+            <p>InsightSpikeの最も重要な発見：<strong class="strong">同じgeDIG式が、覚醒時と睡眠時で逆の役割</strong>を果たします。</p>
+            
+            <div class="wake-sleep-diagram">
+                <div class="phase-card wake-card">
+                    <h3 style="color: #fca311;">覚醒フェーズ (Wake)</h3>
+                    <p class="emphasis">コスト最小化</p>
+                    <p>外部からの質問に対して、最も効率的な答えを探す</p>
+                    <div style="background: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px;">
+                        <code>minimize f(G₁, G₂)</code>
+                    </div>
+                    <p><small>素早い問題解決</small></p>
+                </div>
+                
+                <div class="phase-card sleep-card">
+                    <h3 style="color: #2a9d8f;">睡眠フェーズ (Sleep)</h3>
+                    <p class="emphasis">報酬最大化</p>
+                    <p>内部の矛盾を解消し、知識を整理・統合する</p>
+                    <div style="background: #d1ecf1; padding: 10px; margin: 10px 0; border-radius: 5px;">
+                        <code>maximize f(G₁, G₂)</code>
+                    </div>
+                    <p><small>深い理解の形成</small></p>
+                </div>
+            </div>
+            
+            <p style="margin-top: 20px;"><strong>これは生物学的にも理にかなっています：</strong><br>
+            昼は素早く行動し、夜は記憶を整理する。AIも同じ原理で動くのです。</p>
+            <div class="slide-number">新3 / 25</div>
+        </section>
+
+        <!-- 新規スライド: ドーナツサーチ -->
+        <section class="slide">
+            <h2>ドーナツ型検索：既知と未知の絶妙なバランス</h2>
+            <p>効率的な思考には、<strong class="strong">「知りすぎ」も「知らなさすぎ」も邪魔</strong>になります。</p>
+            
+            <div style="position: relative; width: 400px; height: 400px; margin: 20px auto;">
+                <!-- 外側の円（無関係） -->
+                <div style="position: absolute; width: 400px; height: 400px; border: 3px solid #dee2e6; border-radius: 50%; background: #f8f9fa;">
+                    <p style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); margin: 0;">無関係領域</p>
+                </div>
+                <!-- ドーナツ領域（処理対象） -->
+                <div style="position: absolute; top: 50px; left: 50px; width: 300px; height: 300px; border: 3px solid #3a7bd5; border-radius: 50%; background: #e3f2fd;">
+                    <p style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); margin: 0; font-weight: bold; color: #3a7bd5;">最適な処理領域</p>
+                </div>
+                <!-- 内側の円（既知） -->
+                <div style="position: absolute; top: 150px; left: 150px; width: 100px; height: 100px; border: 3px solid #e63946; border-radius: 50%; background: #ffebee;">
+                    <p style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0; color: #e63946;">既知</p>
+                </div>
+                <!-- クエリ点 -->
+                <div style="position: absolute; top: 195px; left: 195px; width: 10px; height: 10px; background: #000; border-radius: 50%;"></div>
+            </div>
+            
+            <p>クエリを中心に、<strong class="emphasis">既知すぎず、遠すぎない「ドーナツ型」の領域</strong>だけを処理することで、<br>
+            最も効率的に新しい洞察を得ることができます。</p>
+            <div class="slide-number">新4 / 25</div>
+        </section>
+
+        <!-- 新規スライド: 障害物＝クエリ -->
+        <section class="slide">
+            <h2>【革新】迷路実験：障害物は「質問」だった！</h2>
+            <p>空間ナビゲーションも言語理解も、実は<strong class="strong">同じ原理</strong>で動いています。</p>
+            
+            <div style="display: flex; justify-content: space-around; align-items: center; margin: 30px 0;">
+                <div style="text-align: center;">
+                    <h3 class="emphasis">言語タスク</h3>
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                        <p>「量子力学とは？」</p>
+                        <p>↓</p>
+                        <p><strong>クエリ処理</strong></p>
+                        <p>↓</p>
+                        <p>「粒子と波の二重性...」</p>
+                    </div>
+                </div>
+                
+                <div style="font-size: 2rem;">=</div>
+                
+                <div style="text-align: center;">
+                    <h3 class="emphasis">迷路タスク</h3>
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                        <p>「壁にぶつかった」</p>
+                        <p>↓</p>
+                        <p><strong>クエリ処理</strong></p>
+                        <p>↓</p>
+                        <p>「左に迂回する」</p>
+                    </div>
+                </div>
+            </div>
+            
+            <p>障害物に遭遇することは、システムに対する<strong class="strong">暗黙的なクエリ投入</strong>なのです。<br>
+            これにより、言語AIと空間AIを統一的に扱えます。</p>
+            <div class="slide-number">新5 / 25</div>
+        </section>
+
+        <!-- 既存スライドの間に挿入（脳着想の後） -->
+        <section class="slide">
+            <h2>【アップデート】4層アーキテクチャ＋Wake-Sleep</h2>
+            <p>脳の4層構造に、Wake-Sleepサイクルを統合した新アーキテクチャ：</p>
+            
+            <div style="background: linear-gradient(to right, #fff3cd 50%, #d1ecf1 50%); padding: 20px; border-radius: 12px; margin: 20px 0;">
+                <div style="display: flex; justify-content: space-between;">
+                    <div style="width: 48%;">
+                        <h3 style="color: #fca311;">覚醒時の動作</h3>
+                        <p><strong>L1:</strong> クエリ受信 → 予測誤差計算</p>
+                        <p><strong>L2:</strong> 関連記憶を<span class="emphasis">ドーナツ検索</span></p>
+                        <p><strong>L3:</strong> <span class="strong">コスト最小</span>の組み合わせ発見</p>
+                        <p><strong>L4:</strong> 素早い言語化</p>
+                    </div>
+                    <div style="width: 48%;">
+                        <h3 style="color: #2a9d8f;">睡眠時の動作</h3>
+                        <p><strong>L1:</strong> 内部矛盾の検出</p>
+                        <p><strong>L2:</strong> 全記憶を走査</p>
+                        <p><strong>L3:</strong> <span class="strong">報酬最大</span>の再編成</p>
+                        <p><strong>L4:</strong> （休止）</p>
+                    </div>
+                </div>
+            </div>
+            
+            <p>同じハードウェアが、モードによって全く異なる最適化を行います。</p>
+            <div class="slide-number">新6 / 25</div>
+        </section>
+
+        <!-- geDIG式の更新 -->
+        <section class="slide">
+            <h2>geDIG：目的関数としての再定義</h2>
+            <p>geDIGは単なる評価指標ではなく、<strong class="strong">状況に応じて最適化方向が変わる目的関数</strong>です。</p>
+            
+            <div style="background: #f8f9fa; padding: 30px; border-radius: 12px; margin: 20px 0;">
+                <h3>f(G₁, G₂) = λ·ΔIG - μ·ΔGED</h3>
+                
+                <div style="display: flex; justify-content: space-around; margin-top: 30px;">
+                    <div style="text-align: center;">
+                        <p class="emphasis">覚醒時</p>
+                        <p style="font-size: 1.5rem;"><strong>minimize</strong> f</p>
+                        <p>効率重視</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <p class="emphasis">睡眠時</p>
+                        <p style="font-size: 1.5rem;"><strong>maximize</strong> f</p>
+                        <p>品質重視</p>
+                    </div>
+                </div>
+            </div>
+            
+            <p>この二重最適化により、<strong>素早い応答</strong>と<strong>深い理解</strong>の両立が可能になります。</p>
+            <div class="slide-number">更新7 / 25</div>
+        </section>
+
+    </div>
+</body>
+</html>

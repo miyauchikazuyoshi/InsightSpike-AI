@@ -14,12 +14,13 @@ logger = logging.getLogger(__name__)
 # Import different implementations
 from ..metrics.graph_metrics import delta_ged as simple_delta_ged
 from ..metrics.graph_metrics import delta_ig as simple_delta_ig
+from ..metrics.pyg_compatible_metrics import delta_ged_pyg, delta_ig_pyg
 
 try:
     from ..algorithms.graph_edit_distance import GraphEditDistance
     from ..algorithms.information_gain import InformationGain
-    from ..metrics.advanced_graph_metrics import delta_ged as advanced_delta_ged
-    from ..metrics.advanced_graph_metrics import delta_ig as advanced_delta_ig
+    from .gedig_core import delta_ged as advanced_delta_ged
+    from .gedig_core import delta_ig as advanced_delta_ig
 
     ADVANCED_AVAILABLE = True
 except ImportError:
@@ -46,12 +47,21 @@ class MetricsSelector:
     def _initialize_methods(self):
         """Initialize calculation methods based on config"""
         # Get algorithm selection from config
-        ged_algo = "simple"
-        ig_algo = "simple"
+        ged_algo = "pyg"  # Default to PyG-compatible
+        ig_algo = "pyg"   # Default to PyG-compatible
 
         if self.config:
-            ged_algo = getattr(self.config, "ged_algorithm", "advanced")
-            ig_algo = getattr(self.config, "ig_algorithm", "advanced")
+            # Handle both dict and object-style configs
+            if isinstance(self.config, dict):
+                # First check graph.algorithms section
+                graph_config = self.config.get("graph", {})
+                algorithms = graph_config.get("algorithms", {})
+                ged_algo = algorithms.get("ged", graph_config.get("ged_algorithm", "pyg"))
+                ig_algo = algorithms.get("ig", graph_config.get("ig_algorithm", "pyg"))
+            else:
+                # Object-style config
+                ged_algo = getattr(self.config, "ged_algorithm", "pyg")
+                ig_algo = getattr(self.config, "ig_algorithm", "pyg")
 
         # Select GED method
         self._ged_method = self._select_ged_method(ged_algo)
@@ -63,7 +73,10 @@ class MetricsSelector:
 
     def _select_ged_method(self, algorithm: str) -> Callable:
         """Select GED calculation method"""
-        if algorithm == "hybrid":
+        if algorithm == "pyg":
+            logger.info("Using PyG-compatible GED calculation")
+            return delta_ged_pyg
+        elif algorithm == "hybrid":
             logger.info("Using hybrid GED calculation")
             return self._hybrid_ged
         elif algorithm == "networkx" and NETWORKX_AVAILABLE and ADVANCED_AVAILABLE:
@@ -75,13 +88,16 @@ class MetricsSelector:
         else:
             if algorithm != "simple":
                 logger.warning(
-                    f"Requested GED algorithm '{algorithm}' not available, using simple"
+                    f"Requested GED algorithm '{algorithm}' not available, using PyG-compatible"
                 )
-            return simple_delta_ged
+            return delta_ged_pyg  # Use PyG-compatible as fallback
 
     def _select_ig_method(self, algorithm: str) -> Callable:
         """Select IG calculation method"""
-        if algorithm == "hybrid":
+        if algorithm == "pyg":
+            logger.info("Using PyG-compatible IG calculation")
+            return delta_ig_pyg
+        elif algorithm == "hybrid":
             logger.info("Using hybrid IG calculation")
             return self._hybrid_ig
         elif algorithm == "entropy" and ADVANCED_AVAILABLE:
@@ -93,9 +109,9 @@ class MetricsSelector:
         else:
             if algorithm != "simple":
                 logger.warning(
-                    f"Requested IG algorithm '{algorithm}' not available, using simple"
+                    f"Requested IG algorithm '{algorithm}' not available, using PyG-compatible"
                 )
-            return simple_delta_ig
+            return delta_ig_pyg  # Use PyG-compatible as fallback
 
     def _networkx_ged(self, graph1: Any, graph2: Any) -> float:
         """NetworkX-based GED calculation with PyG conversion"""
@@ -166,19 +182,39 @@ class MetricsSelector:
             logger.error(f"Entropy IG calculation failed: {e}")
             return simple_delta_ig(graph1, graph2)
 
-    def delta_ged(self, graph1: Any, graph2: Any) -> float:
+    def delta_ged(self, graph1: Any, graph2: Any, **kwargs) -> float:
         """Calculate ΔGED using configured method"""
-        return self._ged_method(graph1, graph2)
+        # For advanced methods, pass config for multihop
+        if self._ged_method == advanced_delta_ged and self.config:
+            kwargs['config'] = {'metrics': self.config.get('graph', {}).get('metrics', {})} if isinstance(self.config, dict) else {}
+        return self._ged_method(graph1, graph2, **kwargs)
 
-    def delta_ig(self, graph1: Any, graph2: Any) -> float:
+    def delta_ig(self, graph1: Any, graph2: Any, **kwargs) -> float:
         """Calculate ΔIG using configured method"""
-        return self._ig_method(graph1, graph2)
+        # For advanced methods, pass config for multihop
+        if self._ig_method == advanced_delta_ig and self.config:
+            kwargs['config'] = {'metrics': self.config.get('graph', {}).get('metrics', {})} if isinstance(self.config, dict) else {}
+        return self._ig_method(graph1, graph2, **kwargs)
 
     def get_algorithm_info(self) -> Dict[str, str]:
         """Get information about current algorithms"""
+        # Extract algorithm names from config
+        ged_algo = "unknown"
+        ig_algo = "unknown"
+        
+        if self.config:
+            if isinstance(self.config, dict):
+                graph_config = self.config.get("graph", {})
+                algorithms = graph_config.get("algorithms", {})
+                ged_algo = algorithms.get("ged", graph_config.get("ged_algorithm", "unknown"))
+                ig_algo = algorithms.get("ig", graph_config.get("ig_algorithm", "unknown"))
+            else:
+                ged_algo = getattr(self.config, "ged_algorithm", "unknown")
+                ig_algo = getattr(self.config, "ig_algorithm", "unknown")
+                
         return {
-            "ged_algorithm": getattr(self.config, "ged_algorithm", "unknown"),
-            "ig_algorithm": getattr(self.config, "ig_algorithm", "unknown"),
+            "ged_algorithm": ged_algo,
+            "ig_algorithm": ig_algo,
             "advanced_available": ADVANCED_AVAILABLE,
             "networkx_available": NETWORKX_AVAILABLE,
         }

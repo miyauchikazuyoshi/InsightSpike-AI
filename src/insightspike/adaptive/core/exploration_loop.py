@@ -220,9 +220,17 @@ class ExplorationLoop:
                     formatted_results = []
                     for r in results:
                         if isinstance(r, tuple) and len(r) >= 2:
-                            # (index, score, episode) format from search_episodes
-                            if len(r) >= 3 and hasattr(r[2], 'text'):
-                                # Extract text and embedding from episode object
+                            # Check if first element is Episode object
+                            if hasattr(r[0], 'text'):
+                                # (Episode, score) format from CachedMemoryManager
+                                formatted_results.append({
+                                    "text": r[0].text,
+                                    "score": r[1],
+                                    "episode": r[0],
+                                    "embedding": r[0].vec if hasattr(r[0], 'vec') else None
+                                })
+                            elif len(r) >= 3 and hasattr(r[2], 'text'):
+                                # (index, score, episode) format from search_episodes
                                 formatted_results.append({
                                     "text": r[2].text,
                                     "score": r[1],
@@ -236,7 +244,7 @@ class ExplorationLoop:
                                     "score": r[1],
                                     "episode": r[2] if len(r) > 2 else None
                                 })
-                            else:
+                            elif isinstance(r[0], int):
                                 # Try to get episode from memory by index
                                 if hasattr(self.l2_memory, 'episodes') and 0 <= r[0] < len(self.l2_memory.episodes):
                                     ep = self.l2_memory.episodes[r[0]]

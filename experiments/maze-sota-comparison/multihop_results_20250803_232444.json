@@ -1,0 +1,36 @@
+{
+  "timestamp": "20250803_232444",
+  "maze_size": 50,
+  "results": {
+    "1-hop": {
+      "success": false,
+      "steps": 5000,
+      "visited_count": 421,
+      "coverage": 33.07148468185389,
+      "efficiency": 8.42,
+      "backtrack_count": 0,
+      "elapsed_time": 0.2585279941558838,
+      "exploration_ratio": 1.0
+    },
+    "2-hop": {
+      "success": false,
+      "steps": 5000,
+      "visited_count": 628,
+      "coverage": 49.332285938727416,
+      "efficiency": 12.559999999999999,
+      "backtrack_count": 0,
+      "elapsed_time": 0.25372886657714844,
+      "exploration_ratio": 1.0
+    },
+    "3-hop": {
+      "success": true,
+      "steps": 328,
+      "visited_count": 313,
+      "coverage": 24.587588373919875,
+      "efficiency": 95.42682926829268,
+      "backtrack_count": 0,
+      "elapsed_time": 0.0216829776763916,
+      "exploration_ratio": 1.0
+    }
+  }
+}

@@ -1,0 +1,1 @@
+# Navigators module for InsightSpike

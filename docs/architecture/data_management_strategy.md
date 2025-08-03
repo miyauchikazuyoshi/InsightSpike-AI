@@ -95,6 +95,26 @@ CREATE TABLE graph_edges (
 );
 ```
 
+#### queries テーブル ⚡ **NEW**
+```sql
+CREATE TABLE queries (
+    id TEXT PRIMARY KEY,
+    namespace TEXT NOT NULL,
+    text TEXT NOT NULL,
+    vector BLOB,                    -- 384次元の埋め込みベクトル
+    has_spike BOOLEAN DEFAULT FALSE,
+    spike_episode_id TEXT,
+    response TEXT,
+    metadata TEXT,                  -- JSON形式のメタデータ
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- パフォーマンス用インデックス
+CREATE INDEX idx_queries_timestamp ON queries(created_at);
+CREATE INDEX idx_queries_has_spike ON queries(has_spike);
+CREATE INDEX idx_queries_namespace ON queries(namespace);
+```
+
 ## コンポーネント責務
 
 ### 1. DataStore層
@@ -105,6 +125,7 @@ CREATE TABLE graph_edges (
   - グラフの保存・読み込み
   - ベクトル検索（FAISSインデックス連携）
   - トランザクション管理
+  - **クエリの保存・検索** ⚡ **NEW**
 
 ### 2. ワーキングメモリ層
 **L2WorkingMemoryManager**
@@ -148,6 +169,8 @@ CREATE TABLE graph_edges (
 4. ワーキングメモリで推論
     ↓
 5. 結果返却（新しいインサイトは即座に保存）
+    ↓
+6. DataStore.save_queries() ← クエリと結果を保存 ⚡ NEW
 ```
 
 ## パフォーマンス特性
@@ -218,6 +241,8 @@ python scripts/migrate_data_structure.py --auto-delete
 ```python
 stats = datastore.get_stats()
 print(f"Total episodes: {stats['episodes']['total']}")
+print(f"Total queries: {stats['queries']['total']}")  # ⚡ NEW
+print(f"Spike rate: {stats['queries']['spike_rate'] * 100:.1f}%")  # ⚡ NEW
 print(f"DB size: {stats['db_size_bytes'] / 1024 / 1024:.1f} MB")
 ```
 

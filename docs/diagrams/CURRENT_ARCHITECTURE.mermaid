@@ -35,8 +35,9 @@ flowchart TB
         end
         
         subgraph "Layer 2: Memory Manager"
-            L2_Memory[CompatibleL2MemoryManager]
+            L2_Memory[CompatibleL2MemoryManager/<br/>CachedMemoryManager]
             L2_Episodes[Episode Storage/Retrieval]
+            L2_Queries[Query Storage/Analysis]
             L2_Rewards[C-value Reward System]
         end
         
@@ -55,8 +56,9 @@ flowchart TB
     subgraph "💾 Data Storage"
         direction LR
         ConfigFiles[config.yaml<br/>Presets]
-        Database[Database<br/>Episodes/Graph]
+        Database[Database<br/>Episodes/Graph/Queries]
         Embeddings[Embeddings<br/>FAISS Index]
+        QueryStore[Query History<br/>queries.json/SQLite]
     end
     
     %% Flow
@@ -80,7 +82,9 @@ flowchart TB
     
     MainAgent <--> DataStore
     DataStore <--> Database
+    DataStore <--> QueryStore
     L2_Memory <--> Embeddings
+    L2_Memory <--> QueryStore
     Config --> ConfigFiles
     
     %% Styling
@@ -93,5 +97,5 @@ flowchart TB
     class CLI,API,Notebook interface
     class CompositionRoot,CLIApp,Config,DependencyFactory app
     class MainAgent,DataStore,CycleResult agent
-    class L1_Error,L1_Uncertainty,L2_Memory,L2_Episodes,L2_Rewards,L3_Graph,L3_Spike,L4_LLM,L4_Prompt layer
-    class ConfigFiles,Database,Embeddings storage
+    class L1_Error,L1_Uncertainty,L2_Memory,L2_Episodes,L2_Queries,L2_Rewards,L3_Graph,L3_Spike,L4_LLM,L4_Prompt layer
+    class ConfigFiles,Database,Embeddings,QueryStore storage

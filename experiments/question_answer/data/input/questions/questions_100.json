@@ -1,0 +1,1592 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "total_questions": 100,
+    "creation_date": "2025-07-29",
+    "language": "en",
+    "distribution": {
+      "easy": 30,
+      "medium": 40,
+      "hard": 20,
+      "very_hard": 10
+    }
+  },
+  "questions": [
+    {
+      "id": "question_001",
+      "question": "What is the law of conservation of energy?",
+      "difficulty": "easy",
+      "expected_tags": [
+        "science",
+        "physics"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_002",
+      "question": "Define photosynthesis and its main products.",
+      "difficulty": "easy",
+      "expected_tags": [
+        "science",
+        "biology"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_003",
+      "question": "What is the Pythagorean theorem?",
+      "difficulty": "easy",
+      "expected_tags": [
+        "mathematics",
+        "geometry"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_004",
+      "question": "Explain the basic principle of supply and demand.",
+      "difficulty": "easy",
+      "expected_tags": [
+        "economics"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_005",
+      "question": "What is cognitive dissonance?",
+      "difficulty": "easy",
+      "expected_tags": [
+        "psychology"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_006",
+      "question": "Describe the water cycle.",
+      "difficulty": "easy",
+      "expected_tags": [
+        "science",
+        "ecology"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_007",
+      "question": "What is binary code used for?",
+      "difficulty": "easy",
+      "expected_tags": [
+        "technology",
+        "computer science"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_008",
+      "question": "Define fermentation and give examples.",
+      "difficulty": "easy",
+      "expected_tags": [
+        "science",
+        "chemistry"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_009",
+      "question": "What was the Renaissance?",
+      "difficulty": "easy",
+      "expected_tags": [
+        "history",
+        "culture"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_010",
+      "question": "Explain the golden ratio.",
+      "difficulty": "easy",
+      "expected_tags": [
+        "mathematics",
+        "art"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_011",
+      "question": "What are the main characteristics of neuroplasticity?",
+      "difficulty": "easy",
+      "expected_tags": [
+        "science",
+        "psychology"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_012",
+      "question": "What is the purpose of quantum entanglement?",
+      "difficulty": "easy",
+      "expected_tags": [
+        "science",
+        "physics"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_013",
+      "question": "What is the definition of compound interest?",
+      "difficulty": "easy",
+      "expected_tags": [
+        "economics",
+        "mathematics"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_014",
+      "question": "What are the main characteristics of the greenhouse effect?",
+      "difficulty": "easy",
+      "expected_tags": [
+        "science",
+        "ecology"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_015",
+      "question": "What is machine learning?",
+      "difficulty": "easy",
+      "expected_tags": [
+        "technology",
+        "AI"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_016",
+      "question": "What is the immune system?",
+      "difficulty": "easy",
+      "expected_tags": [
+        "science",
+        "biology"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_017",
+      "question": "How does game theory work?",
+      "difficulty": "easy",
+      "expected_tags": [
+        "mathematics",
+        "economics"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_018",
+      "question": "Give an overview of the Silk Road.",
+      "difficulty": "easy",
+      "expected_tags": [
+        "history",
+        "economics"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_019",
+      "question": "How does blockchain technology work?",
+      "difficulty": "easy",
+      "expected_tags": [
+        "technology",
+        "economics"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_020",
+      "question": "Define ecosystems in simple terms.",
+      "difficulty": "easy",
+      "expected_tags": [
+        "science",
+        "ecology"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_021",
+      "question": "What are the main characteristics of the Doppler effect?",
+      "difficulty": "easy",
+      "expected_tags": [
+        "science",
+        "physics"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_022",
+      "question": "Explain the basic concept of impressionism.",
+      "difficulty": "easy",
+      "expected_tags": [
+        "art",
+        "history"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_023",
+      "question": "Explain the basic concept of the scientific method.",
+      "difficulty": "easy",
+      "expected_tags": [
+        "science",
+        "methodology"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_024",
+      "question": "What is the purpose of fractals?",
+      "difficulty": "easy",
+      "expected_tags": [
+        "mathematics",
+        "nature"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_025",
+      "question": "Explain the basic concept of the placebo effect.",
+      "difficulty": "easy",
+      "expected_tags": [
+        "psychology",
+        "medicine"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_026",
+      "question": "Explain the basic concept of jazz music.",
+      "difficulty": "easy",
+      "expected_tags": [
+        "music",
+        "culture"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_027",
+      "question": "What are the main characteristics of the hero's journey?",
+      "difficulty": "easy",
+      "expected_tags": [
+        "literature",
+        "psychology"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_028",
+      "question": "What is the definition of mindfulness meditation?",
+      "difficulty": "easy",
+      "expected_tags": [
+        "psychology",
+        "health"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_029",
+      "question": "What are the main characteristics of DNA replication?",
+      "difficulty": "easy",
+      "expected_tags": [
+        "science",
+        "biology"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_030",
+      "question": "Give an overview of the printing press.",
+      "difficulty": "easy",
+      "expected_tags": [
+        "history",
+        "technology"
+      ],
+      "insight_potential": "low",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": false
+      }
+    },
+    {
+      "id": "question_031",
+      "question": "How does the law of conservation of energy apply to photosynthesis?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "science",
+        "physics",
+        "biology"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_032",
+      "question": "Compare and contrast fermentation and cellular respiration.",
+      "difficulty": "medium",
+      "expected_tags": [
+        "science",
+        "chemistry",
+        "biology"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_033",
+      "question": "How might machine learning algorithms help optimize investment strategies?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "technology",
+        "economics",
+        "finance"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_034",
+      "question": "What role did the printing press play in the Renaissance?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "history",
+        "technology",
+        "culture"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_035",
+      "question": "How does neuroplasticity relate to learning and memory?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "science",
+        "psychology",
+        "biology"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": false,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_036",
+      "question": "How do quantum mechanics and consciousness complement each other?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "science",
+        "physics",
+        "philosophy"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_037",
+      "question": "What are the similarities and differences between game theory and business strategy?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "mathematics",
+        "economics",
+        "business"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_038",
+      "question": "How can fractals principles be applied to natural patterns?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "mathematics",
+        "nature",
+        "science"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_039",
+      "question": "How can cognitive dissonance principles be applied to decision making?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "psychology",
+        "behavior"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_040",
+      "question": "How does understanding blockchain help us understand trust in society?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "technology",
+        "economics",
+        "society"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_041",
+      "question": "What happens when ecosystem balance interacts with economic systems?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "ecology",
+        "economics"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_042",
+      "question": "How does understanding impressionism help us understand perception of reality?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "art",
+        "psychology",
+        "philosophy"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_043",
+      "question": "What are the similarities and differences between DNA replication and information theory?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "biology",
+        "technology",
+        "science"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_044",
+      "question": "In what ways does the Silk Road influence cultural exchange?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "history",
+        "culture",
+        "economics"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_045",
+      "question": "Explain the relationship between mindfulness and neuroplasticity.",
+      "difficulty": "medium",
+      "expected_tags": [
+        "psychology",
+        "health",
+        "science"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_046",
+      "question": "How does understanding compound interest help us understand exponential growth?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "mathematics",
+        "economics",
+        "finance"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_047",
+      "question": "How can the greenhouse effect principles be applied to industrial revolution?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "science",
+        "history",
+        "ecology"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_048",
+      "question": "Explain the relationship between jazz improvisation and creativity.",
+      "difficulty": "medium",
+      "expected_tags": [
+        "music",
+        "art",
+        "psychology"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_049",
+      "question": "How can the hero's journey principles be applied to personal development?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "literature",
+        "psychology",
+        "culture"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_050",
+      "question": "In what ways does supply and demand influence ecosystem resources?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "economics",
+        "ecology",
+        "science"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_051",
+      "question": "What are the connections between binary code and human language?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "technology",
+        "linguistics",
+        "communication"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_052",
+      "question": "What are the connections between the scientific method and philosophical inquiry?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "science",
+        "philosophy",
+        "methodology"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_053",
+      "question": "How does placebo effect relate to belief systems?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "psychology",
+        "medicine",
+        "cognition"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_054",
+      "question": "How does understanding Renaissance art help us understand mathematical principles?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "art",
+        "mathematics",
+        "history"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_055",
+      "question": "What are the connections between immune system and computer security?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "biology",
+        "technology",
+        "systems"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_056",
+      "question": "What are the connections between water cycle and economic cycles?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "science",
+        "economics",
+        "systems"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_057",
+      "question": "What are the connections between Pythagorean theorem and music theory?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "mathematics",
+        "music",
+        "patterns"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_058",
+      "question": "How do fermentation and cultural traditions complement each other?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "science",
+        "culture",
+        "daily_life"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_059",
+      "question": "What happens when Doppler effect interacts with astronomical observations?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "physics",
+        "astronomy",
+        "science"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_060",
+      "question": "What happens when golden ratio interacts with architectural design?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "mathematics",
+        "art",
+        "architecture"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_061",
+      "question": "Explain the relationship between neuroplasticity and education methods.",
+      "difficulty": "medium",
+      "expected_tags": [
+        "psychology",
+        "education",
+        "learning"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_062",
+      "question": "Explain the relationship between quantum entanglement and information transfer.",
+      "difficulty": "medium",
+      "expected_tags": [
+        "physics",
+        "technology",
+        "science"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_063",
+      "question": "What are the similarities and differences between machine learning and pattern recognition in nature?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "technology",
+        "nature",
+        "patterns"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_064",
+      "question": "How do game theory and evolutionary biology complement each other?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "mathematics",
+        "biology",
+        "strategy"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_065",
+      "question": "What are the similarities and differences between blockchain and historical record keeping?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "technology",
+        "history",
+        "information"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_066",
+      "question": "How does understanding ecosystems help us understand business ecosystems?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "ecology",
+        "business",
+        "systems"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_067",
+      "question": "How does understanding mindfulness help us understand performance optimization?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "psychology",
+        "performance",
+        "health"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_068",
+      "question": "What are the connections between fractals and financial markets?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "mathematics",
+        "economics",
+        "patterns"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_069",
+      "question": "How does understanding DNA help us understand digital storage?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "biology",
+        "technology",
+        "information"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_070",
+      "question": "How do jazz and mathematical improvisation complement each other?",
+      "difficulty": "medium",
+      "expected_tags": [
+        "music",
+        "mathematics",
+        "creativity"
+      ],
+      "insight_potential": "medium",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_071",
+      "question": "Could cognitive dissonance be considered a form of psychological energy that drives behavioral change, similar to physical energy driving motion?",
+      "difficulty": "hard",
+      "expected_tags": [
+        "psychology",
+        "physics",
+        "philosophy"
+      ],
+      "insight_potential": "high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_072",
+      "question": "How might the principles of ecosystem balance inform the design of sustainable economic systems?",
+      "difficulty": "hard",
+      "expected_tags": [
+        "ecology",
+        "economics",
+        "systems"
+      ],
+      "insight_potential": "high",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_073",
+      "question": "In what ways is the spread of information through social networks similar to energy flow in biological ecosystems?",
+      "difficulty": "hard",
+      "expected_tags": [
+        "technology",
+        "ecology",
+        "information"
+      ],
+      "insight_potential": "high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_074",
+      "question": "Can the concept of neuroplasticity be applied to organizational learning and adaptation?",
+      "difficulty": "hard",
+      "expected_tags": [
+        "psychology",
+        "business",
+        "systems"
+      ],
+      "insight_potential": "high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_075",
+      "question": "How do fractals in nature reflect fundamental principles of information compression and efficiency?",
+      "difficulty": "hard",
+      "expected_tags": [
+        "mathematics",
+        "nature",
+        "information"
+      ],
+      "insight_potential": "high",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_076",
+      "question": "What emergent properties arise when quantum entanglement meets human relationships?",
+      "difficulty": "hard",
+      "expected_tags": [
+        "physics",
+        "psychology",
+        "philosophy"
+      ],
+      "insight_potential": "high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_077",
+      "question": "What universal principles connect machine learning, evolutionary processes, and creativity?",
+      "difficulty": "hard",
+      "expected_tags": [
+        "technology",
+        "biology",
+        "innovation"
+      ],
+      "insight_potential": "high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_078",
+      "question": "What universal principles connect musical harmony, mathematical ratios, and cosmic order?",
+      "difficulty": "hard",
+      "expected_tags": [
+        "music",
+        "mathematics",
+        "philosophy"
+      ],
+      "insight_potential": "high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_079",
+      "question": "How could insights from blockchain trust transform our approach to social contracts?",
+      "difficulty": "hard",
+      "expected_tags": [
+        "technology",
+        "philosophy",
+        "society"
+      ],
+      "insight_potential": "high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_080",
+      "question": "If we consider placebo effect as a form of quantum observation, what new insights emerge about consciousness?",
+      "difficulty": "hard",
+      "expected_tags": [
+        "psychology",
+        "physics",
+        "philosophy"
+      ],
+      "insight_potential": "high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_081",
+      "question": "Could economic cycles be the key to solving problems in natural rhythms?",
+      "difficulty": "hard",
+      "expected_tags": [
+        "economics",
+        "nature",
+        "philosophy"
+      ],
+      "insight_potential": "high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_082",
+      "question": "What would happen if we applied artistic expression thinking to scientific discovery?",
+      "difficulty": "hard",
+      "expected_tags": [
+        "art",
+        "science",
+        "philosophy"
+      ],
+      "insight_potential": "high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_083",
+      "question": "What would happen if we applied game theory thinking to moral philosophy?",
+      "difficulty": "hard",
+      "expected_tags": [
+        "mathematics",
+        "ethics",
+        "society"
+      ],
+      "insight_potential": "high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_084",
+      "question": "How might combining fractals with consciousness revolutionize our understanding of infinite complexity?",
+      "difficulty": "hard",
+      "expected_tags": [
+        "mathematics",
+        "psychology",
+        "philosophy"
+      ],
+      "insight_potential": "high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_085",
+      "question": "In what ways might storytelling and memory formation be manifestations of the same underlying principle?",
+      "difficulty": "hard",
+      "expected_tags": [
+        "literature",
+        "psychology",
+        "culture"
+      ],
+      "insight_potential": "high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_086",
+      "question": "How do patterns in thermodynamics mirror those in information theory, and what does this tell us?",
+      "difficulty": "hard",
+      "expected_tags": [
+        "physics",
+        "technology",
+        "biology"
+      ],
+      "insight_potential": "high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_087",
+      "question": "Could the paradox of Renaissance thinking be resolved through understanding modern innovation?",
+      "difficulty": "hard",
+      "expected_tags": [
+        "history",
+        "technology",
+        "progress"
+      ],
+      "insight_potential": "high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_088",
+      "question": "How could insights from ecosystem resilience transform our approach to psychological resilience?",
+      "difficulty": "hard",
+      "expected_tags": [
+        "ecology",
+        "psychology",
+        "systems"
+      ],
+      "insight_potential": "high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_089",
+      "question": "Could jazz improvisation be the key to solving problems in quantum uncertainty?",
+      "difficulty": "hard",
+      "expected_tags": [
+        "music",
+        "physics",
+        "emergence"
+      ],
+      "insight_potential": "high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_090",
+      "question": "How could insights from golden ratio transform our approach to aesthetic perception?",
+      "difficulty": "hard",
+      "expected_tags": [
+        "mathematics",
+        "art",
+        "evolution"
+      ],
+      "insight_potential": "high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_091",
+      "question": "If consciousness emerges from neural complexity similar to how temperature emerges from molecular motion, what does this imply about the nature of subjective experience and its measurement?",
+      "difficulty": "very_hard",
+      "expected_tags": [
+        "philosophy",
+        "physics",
+        "psychology",
+        "emergence"
+      ],
+      "insight_potential": "very_high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_092",
+      "question": "Could the principles of quantum superposition help us understand how humans hold contradictory beliefs simultaneously, and what would this mean for theories of decision-making?",
+      "difficulty": "very_hard",
+      "expected_tags": [
+        "physics",
+        "psychology",
+        "philosophy",
+        "cognition"
+      ],
+      "insight_potential": "very_high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_093",
+      "question": "If we view cultural evolution as an information processing system analogous to biological evolution, what new strategies for societal adaptation and innovation might we discover?",
+      "difficulty": "very_hard",
+      "expected_tags": [
+        "culture",
+        "biology",
+        "information",
+        "evolution"
+      ],
+      "insight_potential": "very_high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_094",
+      "question": "How might the mathematical concept of infinity help us understand the paradox of continuous identity despite constant physical and mental change?",
+      "difficulty": "very_hard",
+      "expected_tags": [
+        "mathematics",
+        "philosophy",
+        "identity",
+        "paradox"
+      ],
+      "insight_potential": "very_high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_095",
+      "question": "Could economic value creation be understood as a form of entropy reduction, and if so, what would this mean for sustainable development?",
+      "difficulty": "very_hard",
+      "expected_tags": [
+        "economics",
+        "physics",
+        "sustainability",
+        "systems"
+      ],
+      "insight_potential": "very_high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_096",
+      "question": "If artistic creativity and scientific discovery both involve pattern recognition and breaking, are they fundamentally the same cognitive process expressed in different domains?",
+      "difficulty": "very_hard",
+      "expected_tags": [
+        "art",
+        "science",
+        "cognition",
+        "creativity"
+      ],
+      "insight_potential": "very_high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_097",
+      "question": "How might understanding the collapse of ancient civilizations through the lens of complex systems theory inform our approach to modern global challenges?",
+      "difficulty": "very_hard",
+      "expected_tags": [
+        "history",
+        "systems",
+        "complexity",
+        "civilization"
+      ],
+      "insight_potential": "very_high",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_098",
+      "question": "Could the principle of least action in physics be a universal organizing principle that explains efficiency in biological evolution, economic markets, and even artistic expression?",
+      "difficulty": "very_hard",
+      "expected_tags": [
+        "physics",
+        "biology",
+        "economics",
+        "art"
+      ],
+      "insight_potential": "very_high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_099",
+      "question": "If information is neither created nor destroyed but only transformed, does this suggest a new conservation law analogous to energy conservation, and what would be its implications?",
+      "difficulty": "very_hard",
+      "expected_tags": [
+        "information",
+        "physics",
+        "philosophy",
+        "conservation"
+      ],
+      "insight_potential": "very_high",
+      "evaluation_criteria": {
+        "accuracy": false,
+        "creativity": true,
+        "depth": true
+      }
+    },
+    {
+      "id": "question_100",
+      "question": "How might the interplay between order and chaos in natural systems provide a blueprint for balancing innovation and stability in human institutions?",
+      "difficulty": "very_hard",
+      "expected_tags": [
+        "systems",
+        "chaos",
+        "innovation",
+        "institutions"
+      ],
+      "insight_potential": "very_high",
+      "evaluation_criteria": {
+        "accuracy": true,
+        "creativity": true,
+        "depth": true
+      }
+    }
+  ]
+}

@@ -248,7 +248,12 @@ class L4LLMInterface:
                 model_name=llm_config.get("model", "mock-model"),
                 temperature=llm_config.get("temperature", 0.7),
                 max_tokens=llm_config.get("max_tokens", 1000),
+                api_key=llm_config.get("api_key", None),
             )
+            # Copy additional config attributes
+            for attr in ["prompt_style", "branching_threshold", "branching_min_branches", "branching_max_gap"]:
+                if attr in llm_config:
+                    setattr(self.config, attr, llm_config[attr])
         else:
             # Default config
             self.config = LLMConfig()
@@ -317,7 +322,7 @@ class L4LLMInterface:
             return {
                 "response": "LLM provider not initialized",
                 "success": False,
-                "provider": ((((((((((((((((((((((((((((((((self.config.provider.value if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider),
+                "provider": self.config.provider.value if hasattr(self.config.provider, "value") else self.config.provider,
             }
 
         try:
@@ -357,8 +362,12 @@ class L4LLMInterface:
                 }
 
             # Add metadata
-            result["provider"] = ((((((((((((((((((((((((((((((((self.config.provider.value if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider)
+            result["provider"] = self.config.provider.value if hasattr(self.config.provider, "value") else self.config.provider
             result["model"] = self.config.model_name
+            
+            # Add branching info if available
+            if "branching_info" in context:
+                result["branching_info"] = context["branching_info"]
 
             # Cache if enabled
             if self.response_cache is not None and result.get("success", False):
@@ -372,9 +381,52 @@ class L4LLMInterface:
             return {
                 "response": f"Error: {str(e)}",
                 "success": False,
-                "provider": ((((((((((((((((((((((((((((((((self.config.provider.value if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider) if hasattr(self.config.provider, "value") else self.config.provider),
+                "provider": self.config.provider.value if hasattr(self.config.provider, "value") else self.config.provider,
                 "error": str(e),
             }
+
+    def _detect_branching(self, documents: List[Dict[str, Any]], 
+                          branching_threshold: float = 0.8,
+                          min_branches: int = 2,
+                          max_gap: float = 0.15) -> Dict[str, Any]:
+        """
+        Detect if the query has branching paths based on document relevance.
+        
+        Args:
+            documents: Retrieved documents with relevance scores
+            branching_threshold: Minimum relevance to be considered high
+            min_branches: Minimum number of high-relevance docs for branching
+            max_gap: Maximum gap between top relevances for branching
+            
+        Returns:
+            Dict with branching indicators
+        """
+        if not documents:
+            return {"has_branching": False}
+            
+        # Get relevance scores
+        relevances = [doc.get("relevance", 0.0) for doc in documents]
+        high_relevance_docs = [doc for doc in documents if doc.get("relevance", 0) >= branching_threshold]
+        
+        # Calculate branching indicators
+        high_count = len(high_relevance_docs)
+        
+        # Check relevance gap between top documents
+        if len(relevances) >= 2:
+            sorted_relevances = sorted(relevances, reverse=True)
+            top_gap = sorted_relevances[0] - sorted_relevances[1]
+        else:
+            top_gap = 1.0
+            
+        # Determine if branching exists
+        has_branching = high_count >= min_branches and top_gap < max_gap
+        
+        return {
+            "has_branching": has_branching,
+            "high_relevance_count": high_count,
+            "top_relevance_gap": top_gap,
+            "branching_docs": high_relevance_docs[:3] if has_branching else []
+        }
 
     def _create_insight_vector(self, documents: List[Dict[str, Any]], 
                               query_vector: Optional[np.ndarray] = None) -> Optional[np.ndarray]:
@@ -477,8 +529,19 @@ class L4LLMInterface:
                     context_parts.append("Retrieved Information:")
                     for i, doc in enumerate(regular_docs, 1):
                         text = doc.get("text", "")
-                        relevance = doc.get("relevance", 0.0)
-                        context_parts.append(f"{i}. {text} (relevance: {relevance:.2f})")
+                        
+                        # Handle both distance and cosine similarity metrics
+                        distance = doc.get("distance", None)
+                        cosine_sim = doc.get("similarity", doc.get("relevance", 0.0))
+                        
+                        if distance is not None:
+                            # Format both metrics for LLM
+                            from insightspike.utils.similarity_converter import SimilarityConverter
+                            metrics_str = SimilarityConverter.format_for_llm(distance, cosine_sim)
+                            context_parts.append(f"{i}. {text} ({metrics_str})")
+                        else:
+                            # Use cosine similarity only
+                            context_parts.append(f"{i}. {text} (cos={cosine_sim:.3f})")
                 
                 if insights:
                     context_parts.append("\nPreviously Discovered Insights:")
@@ -576,46 +639,102 @@ class L4LLMInterface:
                     # Fallback if not enough documents
                     prompt = f"Question: {question}\n\nAnswer:"
             elif prompt_style == "association_extended":
-                # Extended association game with more documents and insights
+                # Extended association game with branching detection
                 if regular_docs and len(regular_docs) >= 1:
-                    prompt_parts = [f"{question}\n\nMy comprehensive research reveals the following associations:"]
+                    # Detect branching using config parameters
+                    branching_threshold = getattr(self.config, "branching_threshold", 0.8)
+                    min_branches = getattr(self.config, "branching_min_branches", 2)
+                    max_gap = getattr(self.config, "branching_max_gap", 0.15)
+                        
+                    branching_info = self._detect_branching(
+                        regular_docs, 
+                        branching_threshold=branching_threshold,
+                        min_branches=min_branches,
+                        max_gap=max_gap
+                    )
                     
-                    # Group by relevance levels
-                    high_relevance = [doc for doc in regular_docs if doc.get("relevance", 0) >= 0.8]
-                    medium_relevance = [doc for doc in regular_docs if 0.5 <= doc.get("relevance", 0) < 0.8]
-                    low_relevance = [doc for doc in regular_docs if doc.get("relevance", 0) < 0.5]
+                    # Store branching info in context for later use
+                    context["branching_info"] = branching_info
                     
-                    if high_relevance:
-                        prompt_parts.append("\n\n[High Relevance (>0.8)]")
-                        for i, doc in enumerate(high_relevance[:4]):
+                    if branching_info["has_branching"]:
+                        # Use special branching prompt
+                        prompt_parts = []
+                        
+                        # Add source episode if this is a branching query
+                        source_episode = context.get("source_episode")
+                        if source_episode:
+                            prompt_parts.append("Source Episode:")
+                            prompt_parts.append(f"- {source_episode.get('text', '')}")
+                            prompt_parts.append(f"  (Base relevance: {source_episode.get('relevance', 0.0):.3f})")
+                            prompt_parts.append("")
+                        
+                        prompt_parts.append("Related Facts (by relevance):")
+                        
+                        # Sort docs by relevance
+                        sorted_docs = sorted(regular_docs, key=lambda x: x.get("relevance", 0), reverse=True)
+                        
+                        for i, doc in enumerate(sorted_docs[:6]):
                             text = doc.get("text", "")
                             relevance = doc.get("relevance", 0.0)
-                            prompt_parts.append(f"\n- {relevance:.3f}: \"{text}\"")
-                    
-                    if medium_relevance:
-                        prompt_parts.append("\n\n[Medium Relevance (0.5-0.8)]")
-                        for i, doc in enumerate(medium_relevance[:3]):
-                            text = doc.get("text", "")
-                            relevance = doc.get("relevance", 0.0)
-                            prompt_parts.append(f"\n- {relevance:.3f}: \"{text}\"")
-                    
-                    if low_relevance and len(regular_docs) < 7:
-                        prompt_parts.append("\n\n[Peripheral Connections (<0.5)]")
-                        for i, doc in enumerate(low_relevance[:3]):
-                            text = doc.get("text", "")
-                            relevance = doc.get("relevance", 0.0)
-                            prompt_parts.append(f"\n- {relevance:.3f}: \"{text}\"")
-                    
-                    # Add insights if available
-                    if insights:
-                        prompt_parts.append("\n\n[Previous Insights]")
-                        for insight in insights[:2]:
-                            text = insight.get("text", "").replace("[INSIGHT] ", "")
-                            prompt_parts.append(f"\n- \"{text}\"")
-                    
-                    prompt_parts.append("\n\nBased on these multi-level associations, what is the unified insight that emerges?")
-                    prompt_parts.append("\nProvide: 1) A concise insight statement, 2) Explanation of how the associations connect, 3) Any novel implications.")
-                    prompt = "".join(prompt_parts)
+                            
+                            # Mark high relevance branches
+                            if relevance >= branching_threshold:
+                                prompt_parts.append(f"\n[High Relevance Branch {i+1}]")
+                                prompt_parts.append(f"- {relevance:.3f}: \"{text}\"")
+                            else:
+                                prompt_parts.append(f"- {relevance:.3f}: \"{text}\"")
+                        
+                        # Add the association question
+                        prompt_parts.append("\n" + "="*50)
+                        prompt_parts.append("\nBased on these facts and their relevance relationships, what fact can be inferred through association?")
+                        prompt_parts.append("\nConsider:")
+                        prompt_parts.append("1. The connections between high-relevance branches")
+                        prompt_parts.append("2. Patterns that emerge from the relevance distribution")
+                        prompt_parts.append("3. Novel insights that bridge multiple branches")
+                        prompt_parts.append(f"\nOriginal question: {question}")
+                        prompt_parts.append("\nYour inference:")
+                        
+                        prompt = "\n".join(prompt_parts)
+                    else:
+                        # Use standard association extended prompt (non-branching)
+                        prompt_parts = [f"{question}\n\nMy comprehensive research reveals the following associations:"]
+                        
+                        # Group by relevance levels
+                        high_relevance = [doc for doc in regular_docs if doc.get("relevance", 0) >= 0.8]
+                        medium_relevance = [doc for doc in regular_docs if 0.5 <= doc.get("relevance", 0) < 0.8]
+                        low_relevance = [doc for doc in regular_docs if doc.get("relevance", 0) < 0.5]
+                        
+                        if high_relevance:
+                            prompt_parts.append("\n\n[High Relevance (>0.8)]")
+                            for i, doc in enumerate(high_relevance[:4]):
+                                text = doc.get("text", "")
+                                relevance = doc.get("relevance", 0.0)
+                                prompt_parts.append(f"\n- {relevance:.3f}: \"{text}\"")
+                        
+                        if medium_relevance:
+                            prompt_parts.append("\n\n[Medium Relevance (0.5-0.8)]")
+                            for i, doc in enumerate(medium_relevance[:3]):
+                                text = doc.get("text", "")
+                                relevance = doc.get("relevance", 0.0)
+                                prompt_parts.append(f"\n- {relevance:.3f}: \"{text}\"")
+                        
+                        if low_relevance and len(regular_docs) < 7:
+                            prompt_parts.append("\n\n[Peripheral Connections (<0.5)]")
+                            for i, doc in enumerate(low_relevance[:3]):
+                                text = doc.get("text", "")
+                                relevance = doc.get("relevance", 0.0)
+                                prompt_parts.append(f"\n- {relevance:.3f}: \"{text}\"")
+                        
+                        # Add insights if available
+                        if insights:
+                            prompt_parts.append("\n\n[Previous Insights]")
+                            for insight in insights[:2]:
+                                text = insight.get("text", "").replace("[INSIGHT] ", "")
+                                prompt_parts.append(f"\n- \"{text}\"")
+                        
+                        prompt_parts.append("\n\nBased on these multi-level associations, what is the unified insight that emerges?")
+                        prompt_parts.append("\nProvide: 1) A concise insight statement, 2) Explanation of how the associations connect, 3) Any novel implications.")
+                        prompt = "".join(prompt_parts)
                 else:
                     prompt = f"Question: {question}\n\nAnswer:"
             elif context_parts:
@@ -1039,7 +1158,19 @@ def get_llm_provider(
     else:
         # Legacy config support
         llm_config = LLMConfig()
-        if hasattr(config, "llm"):
+        
+        # Handle dict config
+        if isinstance(config, dict) and "llm" in config:
+            llm_dict = config["llm"]
+            llm_config = LLMConfig.from_provider(
+                llm_dict.get("provider", "clean"),
+                model_name=llm_dict.get("model", llm_dict.get("model_name", "gpt-3.5-turbo")),
+                temperature=llm_dict.get("temperature", 0.7),
+                max_tokens=llm_dict.get("max_tokens", 500),
+                api_key=llm_dict.get("api_key", None)
+            )
+        elif hasattr(config, "llm"):
+            # Object config
             llm_config = LLMConfig.from_provider(
                 getattr(config.llm, "provider", "clean"),
                 model_name=getattr(config.llm, "model_name", "gpt-3.5-turbo"),

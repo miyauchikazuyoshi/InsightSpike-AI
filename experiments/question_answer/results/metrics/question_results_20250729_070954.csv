@@ -1,0 +1,101 @@
+question_id,question,difficulty,has_insight,has_branching,processing_time,insight_similarity,high_relevance_count,top_relevance_gap
+question_001,What is the law of conservation of energy?,easy,False,False,0.19231104850769043,0.0,0,1.0
+question_002,Define photosynthesis and its main products.,easy,False,False,0.13714313507080078,0.0,0,1.0
+question_003,What is the Pythagorean theorem?,easy,False,False,0.1947340965270996,0.0,0,1.0
+question_004,Explain the basic principle of supply and demand.,easy,False,False,0.07779812812805176,0.0,0,1.0
+question_005,What is cognitive dissonance?,easy,False,False,0.18651795387268066,0.0,0,1.0
+question_006,Describe the water cycle.,easy,False,False,0.14352798461914062,0.0,0,1.0
+question_007,What is binary code used for?,easy,False,False,0.20456814765930176,0.0,0,1.0
+question_008,Define fermentation and give examples.,easy,False,False,0.14222502708435059,0.0,0,1.0
+question_009,What was the Renaissance?,easy,False,False,0.08095312118530273,0.0,0,1.0
+question_010,Explain the golden ratio.,easy,False,False,0.13574600219726562,0.0,0,1.0
+question_011,What are the main characteristics of neuroplasticity?,easy,False,False,0.08446907997131348,0.0,0,1.0
+question_012,What is the purpose of quantum entanglement?,easy,False,False,0.08683896064758301,0.0,0,1.0
+question_013,What is the definition of compound interest?,easy,False,False,0.18991398811340332,0.0,0,1.0
+question_014,What are the main characteristics of the greenhouse effect?,easy,False,False,0.14467501640319824,0.0,0,1.0
+question_015,What is machine learning?,easy,False,False,0.07891488075256348,0.0,0,1.0
+question_016,What is the immune system?,easy,False,False,0.07835984230041504,0.0,0,1.0
+question_017,How does game theory work?,easy,False,False,0.07923507690429688,0.0,0,1.0
+question_018,Give an overview of the Silk Road.,easy,False,False,0.12391090393066406,0.0,0,1.0
+question_019,How does blockchain technology work?,easy,False,False,0.09693789482116699,0.0,0,1.0
+question_020,Define ecosystems in simple terms.,easy,False,False,0.14659523963928223,0.0,0,1.0
+question_021,What are the main characteristics of the Doppler effect?,easy,False,False,0.08020877838134766,0.0,0,1.0
+question_022,Explain the basic concept of impressionism.,easy,False,False,0.0809478759765625,0.0,0,1.0
+question_023,Explain the basic concept of the scientific method.,easy,False,False,0.09137511253356934,0.0,0,1.0
+question_024,What is the purpose of fractals?,easy,False,False,0.1602320671081543,0.0,0,1.0
+question_025,Explain the basic concept of the placebo effect.,easy,False,False,0.12327098846435547,0.0,0,1.0
+question_026,Explain the basic concept of jazz music.,easy,False,False,0.14207100868225098,0.0,0,1.0
+question_027,What are the main characteristics of the hero's journey?,easy,False,False,0.10767173767089844,0.0,0,1.0
+question_028,What is the definition of mindfulness meditation?,easy,False,False,0.08575677871704102,0.0,0,1.0
+question_029,What are the main characteristics of DNA replication?,easy,False,False,0.12133097648620605,0.0,0,1.0
+question_030,Give an overview of the printing press.,easy,False,False,0.08042502403259277,0.0,0,1.0
+question_031,How does the law of conservation of energy apply to photosynthesis?,medium,False,False,0.1440410614013672,0.0,0,1.0
+question_032,Compare and contrast fermentation and cellular respiration.,medium,False,False,0.1446819305419922,0.0,0,1.0
+question_033,How might machine learning algorithms help optimize investment strategies?,medium,False,False,0.09409189224243164,0.0,0,1.0
+question_034,What role did the printing press play in the Renaissance?,medium,False,False,0.13724112510681152,0.0,0,1.0
+question_035,How does neuroplasticity relate to learning and memory?,medium,False,False,0.14351892471313477,0.0,0,1.0
+question_036,How do quantum mechanics and consciousness complement each other?,medium,False,False,0.10333108901977539,0.0,0,1.0
+question_037,What are the similarities and differences between game theory and business strategy?,medium,False,False,0.09412097930908203,0.0,0,1.0
+question_038,How can fractals principles be applied to natural patterns?,medium,False,False,0.14648199081420898,0.0,0,1.0
+question_039,How can cognitive dissonance principles be applied to decision making?,medium,False,False,0.14612603187561035,0.0,0,1.0
+question_040,How does understanding blockchain help us understand trust in society?,medium,False,False,0.14502763748168945,0.0,0,1.0
+question_041,What happens when ecosystem balance interacts with economic systems?,medium,False,False,0.08516287803649902,0.0,0,1.0
+question_042,How does understanding impressionism help us understand perception of reality?,medium,False,False,0.14465713500976562,0.0,0,1.0
+question_043,What are the similarities and differences between DNA replication and information theory?,medium,False,False,0.14614582061767578,0.0,0,1.0
+question_044,In what ways does the Silk Road influence cultural exchange?,medium,False,False,0.14710712432861328,0.0,0,1.0
+question_045,Explain the relationship between mindfulness and neuroplasticity.,medium,False,False,0.14415693283081055,0.0,0,1.0
+question_046,How does understanding compound interest help us understand exponential growth?,medium,False,False,0.14261674880981445,0.0,0,1.0
+question_047,How can the greenhouse effect principles be applied to industrial revolution?,medium,False,False,0.15664291381835938,0.0,0,1.0
+question_048,Explain the relationship between jazz improvisation and creativity.,medium,False,False,0.15311408042907715,0.0,0,1.0
+question_049,How can the hero's journey principles be applied to personal development?,medium,False,False,0.1478252410888672,0.0,0,1.0
+question_050,In what ways does supply and demand influence ecosystem resources?,medium,False,False,0.152174711227417,0.0,0,1.0
+question_051,What are the connections between binary code and human language?,medium,False,False,0.14495205879211426,0.0,0,1.0
+question_052,What are the connections between the scientific method and philosophical inquiry?,medium,False,False,0.15192031860351562,0.0,0,1.0
+question_053,How does placebo effect relate to belief systems?,medium,False,False,0.1544339656829834,0.0,0,1.0
+question_054,How does understanding Renaissance art help us understand mathematical principles?,medium,False,False,0.14670801162719727,0.0,0,1.0
+question_055,What are the connections between immune system and computer security?,medium,False,False,0.14534521102905273,0.0,0,1.0
+question_056,What are the connections between water cycle and economic cycles?,medium,False,False,0.3423430919647217,0.0,0,1.0
+question_057,What are the connections between Pythagorean theorem and music theory?,medium,False,False,0.15539312362670898,0.0,0,1.0
+question_058,How do fermentation and cultural traditions complement each other?,medium,False,False,0.16289615631103516,0.0,0,1.0
+question_059,What happens when Doppler effect interacts with astronomical observations?,medium,False,False,0.10345816612243652,0.0,0,1.0
+question_060,What happens when golden ratio interacts with architectural design?,medium,False,False,0.1524977684020996,0.0,0,1.0
+question_061,Explain the relationship between neuroplasticity and education methods.,medium,False,False,0.15029096603393555,0.0,0,1.0
+question_062,Explain the relationship between quantum entanglement and information transfer.,medium,False,False,0.15195202827453613,0.0,0,1.0
+question_063,What are the similarities and differences between machine learning and pattern recognition in nature,medium,False,False,0.15145277976989746,0.0,0,1.0
+question_064,How do game theory and evolutionary biology complement each other?,medium,False,False,0.1594398021697998,0.0,0,1.0
+question_065,What are the similarities and differences between blockchain and historical record keeping?,medium,False,False,0.16429805755615234,0.0,0,1.0
+question_066,How does understanding ecosystems help us understand business ecosystems?,medium,False,False,0.16727709770202637,0.0,0,1.0
+question_067,How does understanding mindfulness help us understand performance optimization?,medium,False,False,0.15385818481445312,0.0,0,1.0
+question_068,What are the connections between fractals and financial markets?,medium,False,False,0.1577751636505127,0.0,0,1.0
+question_069,How does understanding DNA help us understand digital storage?,medium,False,False,0.16275691986083984,0.0,0,1.0
+question_070,How do jazz and mathematical improvisation complement each other?,medium,False,False,0.19809317588806152,0.0,0,1.0
+question_071,Could cognitive dissonance be considered a form of psychological energy that drives behavioral chang,hard,False,False,0.1568150520324707,0.0,0,1.0
+question_072,How might the principles of ecosystem balance inform the design of sustainable economic systems?,hard,False,False,0.1801280975341797,0.0,0,1.0
+question_073,In what ways is the spread of information through social networks similar to energy flow in biologic,hard,False,False,0.18556785583496094,0.0,0,1.0
+question_074,Can the concept of neuroplasticity be applied to organizational learning and adaptation?,hard,False,False,0.15680527687072754,0.0,0,1.0
+question_075,How do fractals in nature reflect fundamental principles of information compression and efficiency?,hard,False,False,0.16295313835144043,0.0,0,1.0
+question_076,What emergent properties arise when quantum entanglement meets human relationships?,hard,False,False,0.16966009140014648,0.0,0,1.0
+question_077,"What universal principles connect machine learning, evolutionary processes, and creativity?",hard,False,False,0.15609407424926758,0.0,0,1.0
+question_078,"What universal principles connect musical harmony, mathematical ratios, and cosmic order?",hard,False,False,0.17275595664978027,0.0,0,1.0
+question_079,How could insights from blockchain trust transform our approach to social contracts?,hard,False,False,0.17805218696594238,0.0,0,1.0
+question_080,"If we consider placebo effect as a form of quantum observation, what new insights emerge about consc",hard,False,False,0.17603278160095215,0.0,0,1.0
+question_081,Could economic cycles be the key to solving problems in natural rhythms?,hard,False,False,0.20242810249328613,0.0,0,1.0
+question_082,What would happen if we applied artistic expression thinking to scientific discovery?,hard,False,False,0.16972899436950684,0.0,0,1.0
+question_083,What would happen if we applied game theory thinking to moral philosophy?,hard,False,False,0.1860818862915039,0.0,0,1.0
+question_084,How might combining fractals with consciousness revolutionize our understanding of infinite complexi,hard,False,False,0.17679286003112793,0.0,0,1.0
+question_085,In what ways might storytelling and memory formation be manifestations of the same underlying princi,hard,False,False,0.1769847869873047,0.0,0,1.0
+question_086,"How do patterns in thermodynamics mirror those in information theory, and what does this tell us?",hard,False,False,0.192244291305542,0.0,0,1.0
+question_087,Could the paradox of Renaissance thinking be resolved through understanding modern innovation?,hard,False,False,0.17243695259094238,0.0,0,1.0
+question_088,How could insights from ecosystem resilience transform our approach to psychological resilience?,hard,False,False,0.20232391357421875,0.0,0,1.0
+question_089,Could jazz improvisation be the key to solving problems in quantum uncertainty?,hard,False,False,0.19879508018493652,0.0,0,1.0
+question_090,How could insights from golden ratio transform our approach to aesthetic perception?,hard,False,False,0.1659529209136963,0.0,0,1.0
+question_091,If consciousness emerges from neural complexity similar to how temperature emerges from molecular mo,very_hard,False,False,0.17126083374023438,0.0,0,1.0
+question_092,Could the principles of quantum superposition help us understand how humans hold contradictory belie,very_hard,False,False,0.17026209831237793,0.0,0,1.0
+question_093,"If we view cultural evolution as an information processing system analogous to biological evolution,",very_hard,False,False,0.18568706512451172,0.0,0,1.0
+question_094,How might the mathematical concept of infinity help us understand the paradox of continuous identity,very_hard,False,False,0.17058730125427246,0.0,0,1.0
+question_095,"Could economic value creation be understood as a form of entropy reduction, and if so, what would th",very_hard,False,False,0.22729992866516113,0.0,0,1.0
+question_096,"If artistic creativity and scientific discovery both involve pattern recognition and breaking, are t",very_hard,False,False,0.18071293830871582,0.0,0,1.0
+question_097,How might understanding the collapse of ancient civilizations through the lens of complex systems th,very_hard,False,False,0.19439291954040527,0.0,0,1.0
+question_098,Could the principle of least action in physics be a universal organizing principle that explains eff,very_hard,False,False,0.19531607627868652,0.0,0,1.0
+question_099,"If information is neither created nor destroyed but only transformed, does this suggest a new conser",very_hard,False,False,0.18860483169555664,0.0,0,1.0
+question_100,How might the interplay between order and chaos in natural systems provide a blueprint for balancing,very_hard,False,False,0.2606239318847656,0.0,0,1.0

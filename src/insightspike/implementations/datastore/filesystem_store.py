@@ -399,6 +399,78 @@ class FileSystemDataStore(DataStore):
 
         return stats
 
+    def save_queries(
+        self, queries: List[Dict[str, Any]], namespace: str = "queries"
+    ) -> bool:
+        """Save query records to storage"""
+        try:
+            namespace_path = self._get_namespace_path(namespace)
+            
+            # Load existing queries
+            existing_queries = []
+            queries_file = namespace_path / "queries.json"
+            if queries_file.exists():
+                with open(queries_file, "r") as f:
+                    existing_queries = json.load(f)
+            
+            # Append new queries
+            existing_queries.extend(queries)
+            
+            # Save back to file
+            with open(queries_file, "w") as f:
+                json.dump(existing_queries, f, indent=2, default=str)
+            
+            logger.info(f"Saved {len(queries)} queries to {namespace}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to save queries: {e}")
+            return False
+
+    def load_queries(
+        self, 
+        namespace: str = "queries",
+        has_spike: Optional[bool] = None,
+        limit: Optional[int] = None
+    ) -> List[Dict[str, Any]]:
+        """Load query records from storage"""
+        try:
+            namespace_path = self._get_namespace_path(namespace)
+            queries_file = namespace_path / "queries.json"
+            
+            if not queries_file.exists():
+                logger.info(f"No queries found in {namespace}")
+                return []
+            
+            with open(queries_file, "r") as f:
+                all_queries = json.load(f)
+            
+            # Filter by has_spike if specified
+            if has_spike is not None:
+                filtered_queries = [
+                    q for q in all_queries 
+                    if q.get("has_spike", False) == has_spike
+                ]
+            else:
+                filtered_queries = all_queries
+            
+            # Sort by timestamp (newest first)
+            filtered_queries.sort(
+                key=lambda x: x.get("timestamp", 0), 
+                reverse=True
+            )
+            
+            # Apply limit if specified
+            if limit is not None:
+                filtered_queries = filtered_queries[:limit]
+            
+            logger.info(f"Loaded {len(filtered_queries)} queries from {namespace}")
+            return filtered_queries
+            
+        except Exception as e:
+            logger.error(f"Failed to load queries: {e}")
+            return []
+
 
 class FAISSVectorIndex(VectorIndex):
     """FAISS-based vector index implementation"""

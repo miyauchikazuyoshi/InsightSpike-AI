@@ -5,12 +5,13 @@ This directory contains Mermaid diagrams illustrating the InsightSpike-AI archit
 ## 🧠 Architecture Diagrams
 
 ### Core System Architecture
-- **CURRENT_ARCHITECTURE.mermaid** - ⚡ **LATEST** Current simplified architecture (2025-01)
+- **CURRENT_ARCHITECTURE.mermaid** - ⚡ **LATEST** Current simplified architecture with query storage (2025-01)
+- **QUERY_STORAGE_ARCHITECTURE.mermaid** - ⚡ **NEW** Query storage and analysis system
 - **CONFIG_SYSTEM.mermaid** - ⚡ **NEW** Pydantic-based configuration system
 - **CLI_ARCHITECTURE.mermaid** - ⚡ **NEW** CLI dependency injection with Typer Context
 - **TECHNICAL_ARCHITECTURE.mermaid** - System architecture with scalable graph implementation
-- **DATA_FLOW_ARCHITECTURE.mermaid** - Data flow and directory structure (data/, experiments/)
-- **WORKFLOW_TREE.mermaid** - Processing workflow and decision trees
+- **DATA_FLOW_ARCHITECTURE.mermaid** - Data flow with query storage (updated)
+- **WORKFLOW_TREE.mermaid** - Processing workflow with query persistence
 - **SYSTEM_DASHBOARD.mermaid** - Real-time system metrics with hierarchical graph performance
 
 ### Memory Management
@@ -21,7 +22,26 @@ This directory contains Mermaid diagrams illustrating the InsightSpike-AI archit
 ### Insight Processing
 - **INSIGHT_LIFECYCLE.mermaid** - Insight discovery and quality assessment lifecycle
 
-## 🚀 Latest Updates (2025-01-18)
+## 🚀 Latest Updates (2025-07-28)
+
+### Query Storage Feature Implementation
+1. **QUERY_STORAGE_ARCHITECTURE.mermaid** ⚡ **NEW**
+   - Complete query persistence system
+   - Automatic saving in MainAgent and AdaptiveProcessor
+   - Rich metadata tracking (processing time, cycles, quality)
+   - Graph integration with query nodes and edges
+
+2. **Updated Diagrams**
+   - CURRENT_ARCHITECTURE.mermaid - Added query storage layer
+   - DATA_FLOW_ARCHITECTURE.mermaid - Added query storage flow
+   - WORKFLOW_TREE.mermaid - Added query persistence steps
+
+3. **Removed Outdated Files**
+   - THEORETICAL_DESIGN_FLAWS_ANALYSIS.md (old issues, now fixed)
+   - PIPELINE_ISSUES_SUMMARY.md (old analysis)
+   - Interface analysis CSV files (outdated)
+
+## 🚀 Previous Updates (2025-01-18)
 
 ### Major Refactoring Complete
 1. **CURRENT_ARCHITECTURE.mermaid** ⚡ **NEW**
@@ -111,6 +131,10 @@ The diagrams now show the **C-value free** implementation:
 - ✅ **Dynamic Importance from Graph Structure**
 - ✅ **100K+ Episode Handling (<5ms search)**
 - ✅ **geDIG Algorithm with Scalable Implementation**
+- ✅ **Query Storage and Analysis System**
+- ✅ **Query-Episode Graph Relationships**
+- ✅ **Spike Success Rate Tracking**
+- ✅ **Provider Performance Analytics**
 
 ## 🔄 Performance at Scale
 

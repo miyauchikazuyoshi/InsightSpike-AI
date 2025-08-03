@@ -10,6 +10,9 @@ from typing import Any, Dict, Literal, Optional
 
 from pydantic import BaseModel, Field, validator
 
+from .wake_sleep_config import WakeSleepConfig
+from .maze_config import MazeConfig, MazeNavigatorConfig, MazeExperimentConfig
+
 
 class MemoryConfig(BaseModel):
     """Memory system configuration"""
@@ -230,9 +233,9 @@ class LLMConfig(BaseModel):
     )
     
     # Prompt building configuration
-    prompt_style: Literal["standard", "detailed", "minimal"] = Field(
+    prompt_style: Literal["standard", "detailed", "minimal", "association", "association_extended"] = Field(
         default="standard",
-        description="Prompt style: detailed for large models, standard for medium, minimal for small"
+        description="Prompt style: detailed for large models, standard for medium, minimal for small, association/association_extended for reasoning tasks"
     )
     max_context_docs: int = Field(
         default=5,
@@ -247,6 +250,26 @@ class LLMConfig(BaseModel):
     include_metadata: bool = Field(
         default=False,
         description="Include relevance scores and metadata in detailed mode"
+    )
+    
+    # Branching detection configuration (for association_extended)
+    branching_threshold: float = Field(
+        default=0.8,
+        ge=0.0,
+        le=1.0,
+        description="Minimum relevance to be considered high for branching"
+    )
+    branching_min_branches: int = Field(
+        default=2,
+        ge=2,
+        le=10,
+        description="Minimum number of high-relevance docs for branching"
+    )
+    branching_max_gap: float = Field(
+        default=0.15,
+        ge=0.0,
+        le=0.5,
+        description="Maximum gap between top relevances for branching"
     )
 
 
@@ -390,6 +413,7 @@ class InsightSpikeConfig(BaseModel):
     reasoning: ReasoningConfig = Field(default_factory=ReasoningConfig)
     performance: PerformanceConfig = Field(default_factory=PerformanceConfig)
     vector_search: VectorSearchConfig = Field(default_factory=VectorSearchConfig)
+    wake_sleep: WakeSleepConfig = Field(default_factory=WakeSleepConfig)
 
     class Config:
         """Pydantic configuration"""

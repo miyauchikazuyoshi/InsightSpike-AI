@@ -74,6 +74,12 @@ flowchart LR
             DB3[Memory Cache<br/>Episodes]
         end
         
+        subgraph "Query Storage"
+            QS1[queries.json<br/>FileSystem Store]
+            QS2[queries table<br/>SQLite Store]
+            QS3[Query Nodes<br/>Graph Integration]
+        end
+        
         subgraph "Graph Storage"
             Graph_Data[graph_pyg.pt<br/>PyTorch Graph]
             Graph_Cache[Graph Cache<br/>NetworkX]
@@ -125,6 +131,12 @@ flowchart LR
     Registry --> DB1
     Main_Agent -.-> DB2
     Main_Agent -.-> Config_Local
+    
+    %% Query Storage Connections
+    Main_Agent --> QS1
+    Main_Agent --> QS2
+    L2_Context --> QS3
+    L3_Graph -.-> QS3
     
     %% Feedback Loops
     Registry -.-> L2_Context

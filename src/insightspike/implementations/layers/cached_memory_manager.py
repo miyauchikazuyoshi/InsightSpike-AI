@@ -91,7 +91,7 @@ class CachedMemoryManager:
         episode = Episode(
             text=text,
             vec=embedding,
-            confidence=c_value,
+            c=c_value,
             metadata=metadata or {}
         )
         
@@ -104,7 +104,6 @@ class CachedMemoryManager:
             "id": episode_id,
             "text": text,
             "vec": embedding,
-            "confidence": c_value,
             "c_value": c_value,  # Backward compatibility
             "timestamp": time.time(),
             "metadata": metadata or {}
@@ -219,7 +218,7 @@ class CachedMemoryManager:
                 episode = Episode(
                     text=ep_dict["text"],
                     vec=ep_dict["vec"],
-                    confidence=ep_dict.get("confidence", ep_dict.get("c_value", ep_dict.get("c", 0.5))),
+                    c=ep_dict.get("c_value", ep_dict.get("c", 0.5)),
                     metadata=ep_dict.get("metadata", {})
                 )
                 # Convert distance to similarity
@@ -237,7 +236,7 @@ class CachedMemoryManager:
         cache_items = list(self.cache.items())
         if 0 <= episode_idx < len(cache_items):
             episode_id, episode = cache_items[episode_idx]
-            episode.confidence = new_c_value
+            episode.c = new_c_value
             
             # Also update in DataStore (would need to reload and save all)
             # This is inefficient but maintains compatibility
@@ -255,7 +254,7 @@ class CachedMemoryManager:
                 episode = Episode(
                     text=ep_dict["text"],
                     vec=ep_dict["vec"],
-                    confidence=ep_dict.get("confidence", ep_dict.get("c_value", ep_dict.get("c", 0.5))),
+                    c=ep_dict.get("c_value", ep_dict.get("c", 0.5)),
                     metadata=ep_dict.get("metadata", {})
                 )
                 episodes.append(episode)
@@ -372,7 +371,7 @@ class CachedMemoryManager:
                 episode = Episode(
                     text=ep_dict["text"],
                     vec=np.array(ep_dict.get("vec", ep_dict.get("embedding", [])), dtype=np.float32),
-                    confidence=ep_dict.get("confidence", ep_dict.get("c_value", ep_dict.get("c", 0.5))),
+                    c=ep_dict.get("c_value", ep_dict.get("c", 0.5)),
                     timestamp=ep_dict.get("timestamp", 0),
                     metadata=ep_dict.get("metadata", {})
                 )
@@ -417,7 +416,7 @@ class CachedMemoryManager:
                 episode = Episode(
                     text=ep_dict["text"],
                     vec=ep_dict["vec"],
-                    confidence=ep_dict.get("confidence", ep_dict.get("c_value", ep_dict.get("c", 0.5))),
+                    c=ep_dict.get("c_value", ep_dict.get("c", 0.5)),
                     metadata=ep_dict.get("metadata", {})
                 )
                 self.cache[episode_id] = episode
@@ -523,20 +522,25 @@ class CachedMemoryManager:
                 branch_id = f"{episode_id}_branch_{cluster['type']}_{i}"
                 
                 # Store in DataStore
-                self.datastore.store_episode(
-                    id=branch_id,
-                    text=branch_text,  # Contextual text (e.g., "apple(fruit)")
-                    vec=branch_vec,    # Context-specific vector
-                    metadata={
+                branch_episode_dict = {
+                    "id": branch_id,
+                    "text": branch_text,  # Contextual text (e.g., "apple(fruit)")
+                    "vec": branch_vec,    # Context-specific vector
+                    "c_value": episode.c * 0.8,  # Slightly reduced
+                    "timestamp": time.time(),
+                    "metadata": {
                         **episode.metadata,
-                        'c_value': episode.c * 0.8,  # Slightly reduced
                         'parent_id': episode_id,
                         'parent_text': episode.text,  # Original text
                         'branch_type': cluster['type'],
                         'context_neighbors': cluster['neighbor_ids'],
                         'is_branch': True
                     }
-                )
+                }
+                # Get existing episodes and append the new one
+                existing_episodes = self.datastore.load_episodes(namespace="episodes")
+                existing_episodes.append(branch_episode_dict)
+                self.datastore.save_episodes(existing_episodes, namespace="episodes")
                 
                 # Cache if parent was cached
                 if episode_id in self.cache:
@@ -844,16 +848,21 @@ class CachedMemoryManager:
             merged_id = new_id or f"merged_{int(time.time() * 1000)}"
             
             # Store in DataStore
-            self.datastore.store_episode(
-                id=merged_id,
-                text=merged_text,
-                vec=merged_vec,
-                metadata={
-                    'c_value': merged_c,
+            merged_episode_dict = {
+                "id": merged_id,
+                "text": merged_text,
+                "vec": merged_vec,
+                "c_value": merged_c,
+                "timestamp": time.time(),
+                "metadata": {
                     'merged_from': episode_ids,
                     'merge_timestamp': time.time()
                 }
-            )
+            }
+            # Get existing episodes and append the new one
+            existing_episodes = self.datastore.load_episodes(namespace="episodes")
+            existing_episodes.append(merged_episode_dict)
+            self.datastore.save_episodes(existing_episodes, namespace="episodes")
             
             # Cache if any source was cached
             if any(ep_id in self.cache for ep_id in episode_ids):
@@ -866,8 +875,13 @@ class CachedMemoryManager:
                 self._add_to_cache(merged_id, merged_episode)
                 
             # Remove original episodes
+            # Need to reload episodes and filter out the ones to delete
+            all_episodes = self.datastore.load_episodes(namespace="episodes")
+            filtered_episodes = [ep for ep in all_episodes if ep.get("id") not in episode_ids]
+            self.datastore.save_episodes(filtered_episodes, namespace="episodes")
+            
+            # Remove from cache
             for ep_id in episode_ids:
-                self.datastore.delete_episode(ep_id)
                 if ep_id in self.cache:
                     del self.cache[ep_id]
                     
@@ -880,3 +894,216 @@ class CachedMemoryManager:
         except Exception as e:
             logger.error(f"Failed to merge episodes: {e}")
             return None
+    
+    def save_query(
+        self,
+        query_text: str,
+        query_vec: Optional[np.ndarray] = None,
+        has_spike: bool = False,
+        spike_episode_id: Optional[str] = None,
+        response: str = "",
+        metadata: Optional[Dict[str, Any]] = None
+    ) -> str:
+        """
+        Save a query record to storage and optionally add to graph.
+        
+        Args:
+            query_text: The original query text
+            query_vec: Query embedding vector (will be generated if None)
+            has_spike: Whether the query generated a spike
+            spike_episode_id: ID of generated episode if spike occurred
+            response: The response given to the query
+            metadata: Additional metadata (processing_time, llm_provider, etc.)
+            
+        Returns:
+            Query ID
+        """
+        try:
+            # Generate query ID
+            import uuid
+            query_id = f"query_{int(time.time() * 1000)}_{str(uuid.uuid4())[:8]}"
+            
+            # Generate embedding if not provided
+            if query_vec is None:
+                query_vec = self.embedder.get_embedding(query_text)
+            
+            # Prepare query record
+            query_record = {
+                "id": query_id,
+                "text": query_text,
+                "vec": query_vec,
+                "has_spike": has_spike,
+                "spike_episode_id": spike_episode_id,
+                "response": response,
+                "timestamp": time.time(),
+                "metadata": metadata or {}
+            }
+            
+            # Save to DataStore
+            success = self.datastore.save_queries([query_record], namespace="queries")
+            if not success:
+                logger.error("Failed to save query to DataStore")
+                return ""
+            
+            logger.info(f"Saved query {query_id} (has_spike={has_spike})")
+            return query_id
+            
+        except Exception as e:
+            logger.error(f"Failed to save query: {e}")
+            return ""
+    
+    def add_query_to_graph(
+        self,
+        graph: nx.Graph,
+        query_id: str,
+        query_text: str,
+        query_vec: np.ndarray,
+        has_spike: bool,
+        spike_episode_id: Optional[str] = None,
+        retrieved_episode_ids: Optional[List[str]] = None,
+        metadata: Optional[Dict[str, Any]] = None
+    ) -> bool:
+        """
+        Add query node to graph and create edges to related episodes.
+        
+        Args:
+            graph: NetworkX graph to update
+            query_id: Query identifier
+            query_text: Query text
+            query_vec: Query embedding vector
+            has_spike: Whether query generated a spike
+            spike_episode_id: ID of spike episode if generated
+            retrieved_episode_ids: IDs of episodes retrieved for context
+            metadata: Additional metadata
+            
+        Returns:
+            Success status
+        """
+        try:
+            # Add query node to graph
+            graph.add_node(
+                query_id,
+                text=query_text,
+                vec=query_vec,
+                type="query",
+                has_spike=has_spike,
+                metadata=metadata or {}
+            )
+            
+            # Add edges based on query type
+            if has_spike and spike_episode_id:
+                # Add edge to spike episode
+                graph.add_edge(
+                    query_id,
+                    spike_episode_id,
+                    weight=1.0,
+                    relation="query_spike",
+                    metadata={
+                        "timestamp": time.time(),
+                        "edge_type": "generative"
+                    }
+                )
+                logger.debug(f"Added query_spike edge: {query_id} -> {spike_episode_id}")
+            
+            # Add edges to retrieved episodes (for analysis/tracing)
+            if retrieved_episode_ids:
+                for ep_id in retrieved_episode_ids:
+                    if ep_id in graph:
+                        # Calculate similarity if possible
+                        similarity = 0.5  # Default
+                        if "vec" in graph.nodes[ep_id]:
+                            ep_vec = graph.nodes[ep_id]["vec"]
+                            if ep_vec is not None:
+                                # Compute cosine similarity
+                                similarity = float(np.dot(query_vec.flatten(), ep_vec.flatten()))
+                        
+                        graph.add_edge(
+                            query_id,
+                            ep_id,
+                            weight=similarity,
+                            relation="query_retrieval",
+                            metadata={
+                                "timestamp": time.time(),
+                                "edge_type": "retrieval",
+                                "similarity": similarity
+                            }
+                        )
+                        logger.debug(f"Added query_retrieval edge: {query_id} -> {ep_id}")
+            
+            logger.info(f"Added query {query_id} to graph with {len(retrieved_episode_ids or [])} retrieval edges")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to add query to graph: {e}")
+            return False
+    
+    def get_recent_queries(
+        self,
+        limit: int = 100,
+        has_spike: Optional[bool] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Get recent queries from storage.
+        
+        Args:
+            limit: Maximum number of queries to return
+            has_spike: Filter by spike generation status (None = all)
+            
+        Returns:
+            List of query records
+        """
+        try:
+            return self.datastore.load_queries(
+                namespace="queries",
+                has_spike=has_spike,
+                limit=limit
+            )
+        except Exception as e:
+            logger.error(f"Failed to get recent queries: {e}")
+            return []
+    
+    def get_query_statistics(self) -> Dict[str, Any]:
+        """
+        Get statistics about saved queries.
+        
+        Returns:
+            Dictionary with query statistics
+        """
+        try:
+            all_queries = self.datastore.load_queries(namespace="queries")
+            spike_queries = [q for q in all_queries if q.get("has_spike", False)]
+            
+            stats = {
+                "total_queries": len(all_queries),
+                "spike_queries": len(spike_queries),
+                "non_spike_queries": len(all_queries) - len(spike_queries),
+                "spike_rate": len(spike_queries) / len(all_queries) if all_queries else 0,
+                "avg_processing_time": 0.0,
+                "llm_providers": {}
+            }
+            
+            # Calculate average processing time
+            processing_times = [
+                q.get("metadata", {}).get("processing_time", 0)
+                for q in all_queries
+                if q.get("metadata", {}).get("processing_time")
+            ]
+            if processing_times:
+                stats["avg_processing_time"] = sum(processing_times) / len(processing_times)
+            
+            # Count by LLM provider
+            for q in all_queries:
+                provider = q.get("metadata", {}).get("llm_provider", "unknown")
+                stats["llm_providers"][provider] = stats["llm_providers"].get(provider, 0) + 1
+            
+            return stats
+            
+        except Exception as e:
+            logger.error(f"Failed to get query statistics: {e}")
+            return {
+                "error": str(e),
+                "total_queries": 0,
+                "spike_queries": 0,
+                "non_spike_queries": 0,
+                "spike_rate": 0
+            }

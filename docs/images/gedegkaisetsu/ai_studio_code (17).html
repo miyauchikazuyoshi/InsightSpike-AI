@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InsightSpike-AI: geDIG Framework Presentation</title>
+    <style>
+        /* 基本設定 */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Hiragino Kaku Gothic ProN', 'メイリオ', Meiryo, sans-serif;
+            background-color: #f4f6f8;
+            color: #212529;
+            overflow: hidden;
+        }
+
+        /* スライドショー全体のコンテナ */
+        .slideshow-container {
+            width: 100vw;
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+        }
+
+        /* 各スライドの基本スタイル */
+        .slide {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 4vw;
+            box-sizing: border-box;
+            text-align: center;
+            scroll-snap-align: start;
+            position: relative;
+        }
+        .slide:nth-child(odd) { background-color: #ffffff; }
+        .slide:nth-child(even) { background-color: #f4f6f8; }
+        
+        /* タイトルスライド専用スタイル */
+        .title-slide {
+            background: linear-gradient(135deg, #3a7bd5, #3a6073);
+            color: white;
+        }
+        .title-slide h1 { font-size: 3.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+        .title-slide h2 { font-size: 1.5rem; opacity: 0.9; font-weight: 400; }
+        .author-info { margin-top: 40px; font-size: 1rem; opacity: 0.7; }
+
+        /* スライド内の要素のスタイル */
+        h1 { font-size: 2.8rem; color: #1d3557; margin-bottom: 1rem; }
+        h2 { font-size: 2rem; color: #2a4b7c; margin-top: 0; margin-bottom: 2.5rem; border-bottom: 3px solid #66ccff; padding-bottom: 10px; display: inline-block; }
+        p { font-size: 1.3rem; line-height: 1.8; max-width: 800px; }
+        ul { list-style: none; padding: 0; max-width: 800px; }
+        li { background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%233a7bd5" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>') no-repeat left center; padding-left: 35px; font-size: 1.25rem; margin-bottom: 1.2rem; text-align: left; }
+        .summary-list li { font-size: 1.1rem; margin-bottom: 0.8rem; line-height: 1.6; }
+        strong, .strong { color: #e63946; font-weight: bold; }
+        .emphasis { color: #3a7bd5; font-weight: bold; }
+        small { font-size: 1rem; color: #555; line-height: 1.5; }
+        .formula-display { font-family: 'Times New Roman', serif; font-size: 1.6rem; font-style: italic; color: #343a40; margin: 20px 0; background-color: #f8f9fa; padding: 10px 20px; border-radius: 4px; display: inline-block; border: 1px solid #dee2e6; }
+        .figure-caption { font-size: 1rem; color: #495057; margin-top: 15px; max-width: 800px; line-height: 1.6; }
+
+        /* フッター（スライド番号） */
+        .slide-number { position: absolute; bottom: 20px; right: 20px; font-size: 1rem; color: #adb5bd; }
+        
+        /* イラストや図のためのコンテナ */
+        .illustration-container { margin-top: 20px; padding: 10px; display: flex; justify-content: center; align-items: center; gap: 20px; width: 100%; max-width: 950px; }
+        .impl-flow-item { text-align: center; display: flex; flex-direction: column; align-items: center; }
+        .impl-arrow { font-size: 2.5rem; color: #888; align-self: center; margin: 0 15px; }
+
+        /* 実装解説スライドのスタイル */
+        .episode-card { width: 150px; height: 100px; background-color: #fff; border: 2px solid #3a7bd5; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: flex; justify-content: center; align-items: center; font-weight: bold; }
+        .compressed-vec { width: 150px; height: 100px; background-color: #e9ecef; border: 2px dashed #66ccff; border-radius: 8px; display: flex; justify-content: center; align-items: center; font-family: monospace; color: #495057; }
+        
+        /* GNNアニメーション */
+        @keyframes fadeInScale { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+        @keyframes drawLine { from { width: 0; } to { width: var(--edge-length); } }
+        .graph-network-viz { position: relative; width: 220px; height: 120px; }
+        .node { position: absolute; width: 24px; height: 24px; background-color: #e9ecef; border-radius: 50%; border: 2px dashed #66ccff; animation: fadeInScale 0.5s ease-out forwards; opacity: 0; }
+        .node1 { top: 0px; left: 50px; animation-delay: 0s; } .node2 { top: 80px; left: 20px; animation-delay: 0.1s; } .node3 { top: 20px; left: 150px; animation-delay: 0.2s; } .node4 { top: 90px; left: 160px; animation-delay: 0.3s; } .node5 { top: 50px; left: 80px; animation-delay: 0.4s; }
+        .edge { position: absolute; background-color: #ced4da; height: 2px; transform-origin: left; animation: drawLine 0.4s ease-out forwards; animation-delay: 0.6s; width: 0; }
+        
+        /* 脳アーキテクチャ図のスタイル */
+        .arch-container { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 750px; }
+        .arch-layer { background-color: #fff; border-left: 5px solid; padding: 10px 20px; border-radius: 8px; text-align: left; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+        .arch-layer h3 { margin: 0 0 5px 0; font-size: 1.2rem; } .arch-layer p { margin: 0; font-size: 1rem; line-height: 1.5; color: #495057; }
+        .layer1 { border-color: #fca311; } .layer2 { border-color: #2a9d8f; } .layer3 { border-color: #e63946; } .layer4 { border-color: #3a7bd5; }
+        .arch-arrow { text-align: center; font-size: 1.5rem; color: #888; margin: 0; }
+        .process-annotation { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
+
+        .role-card { background-color: white; border: 2px solid; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 45%; }
+        
+        .reorg-container { display: flex; justify-content: space-around; width: 100%; max-width: 900px; margin-top:20px; }
+        .reorg-item { text-align: center; } .reorg-item h3 { font-size: 1.2rem; color: #333; } .reorg-icon { font-size: 2.5rem; }
+
+        .results-table { border-collapse: collapse; margin-top: 20px; width: 100%; max-width: 800px; }
+        .results-table td, .results-table th { border: 1px solid #dee2e6; padding: 12px; font-size: 1.1rem; text-align: left; vertical-align: middle; }
+        .results-table th { background-color: #3a7bd5; color: white; font-weight: 500;}
+        .results-table tr:nth-child(even){background-color: #f8f9fa;}
+        
+        .hierarchy-diagram { font-size: 1.2rem; font-weight: bold; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="slideshow-container">
+
+        <!-- スライド 1: タイトル -->
+        <section class="slide title-slide">
+            <h1>InsightSpike-AI</h1><h2>グラフ構造変化に基づく「ひらめき」生成フレームワーク</h2>
+            <p style="opacity: 0.9;">論文「geDIG: Graph Structure-Based Insight Generation Framework」をやさしく解説</p>
+            <div class="author-info">Kazuyoshi Miyauchi, 2025-07-24</div>
+            <div class="slide-number">1 / 20</div>
+        </section>
+
+        <!-- スライド 2: AIの課題 -->
+        <section class="slide">
+            <h2>AIの課題：物知りだけど、ひらめかない</h2>
+            <p>現在のAIは膨大な知識を持っています。<br>しかし、複数のバラバラな知識を結びつけ、<strong class="strong">本質を掴む「洞察」</strong>は非常に苦手です。<br><small>例えば、バラバラの物理法則から「E=mc²」というシンプルな本質を見抜くような、あの瞬間です。</small></p>
+            <p class="emphasis"><br>どうすれば、AIに「ひらめき」を教えられるでしょうか？</p>
+            <div class="slide-number">2 / 20</div>
+        </section>
+
+        <!--【★★更新スライド★★】-->
+        <!-- スライド 3: 脳に着想を得た4層アーキテクチャ -->
+        <section class="slide">
+            <h2>ヒントは脳に：好奇心を生む「探索回路」</h2>
+            <p>私たちのAIは、脳が「知りたい！」と思う<strong class="strong">探索回路（Seeking System）</strong>を模倣しています。<br>それは、こんな流れで「ひらめき」を生み出します。</p>
+            <div class="arch-container">
+                <div class="process-annotation">🤔 もやもや… (予測とのズレ)</div>
+                <div class="arch-layer layer1"><h3>L1 - Query Transformer (VTA入力部)</h3><p>質問を受け取り、予測との誤差を計算。ズレが大きいと探索回路が起動！</p></div>
+                <div class="arch-arrow">▼</div>
+                <div class="process-annotation">🧠 記憶をたどる (探索)</div>
+                <div class="arch-layer layer2"><h3>L2 - Memory Manager (海馬)</h3><p>誤差を埋めるため、関連する記憶(エピソード)を探し出す。</p></div>
+                <div class="arch-arrow">▼</div>
+                <div class="process-annotation">💡 わかった！ (ひらめき)</div>
+                <div class="arch-layer layer3"><h3>L3 - Graph Reasoner (前頭前野)</h3><p>記憶同士を繋ぎ変え、最もスッキリする構造を発見！（スパイク検出）</p></div>
+                <div class="arch-arrow">▼</div>
+                <div class="process-annotation">🗣️ 言葉にする (表現)</div>
+                <div class="arch-layer layer4"><h3>L4 - Language Interface (言語野)</h3><p>「わかった！」という洞察の瞬間を、人間がわかる言葉に翻訳する。</p></div>
+            </div>
+            <p style="font-size:1.1rem; margin-top:15px;">この<strong class="strong">ノルアドレナリン(NA)</strong>と<strong class="strong">ドーパミン(DA)</strong>のループが、好奇心駆動型の学習を実現します。</p>
+            <div class="slide-number">3 / 20</div>
+        </section>
+
+        <!-- スライド 4: ひらめきのエンジン「geDIG」 -->
+        <section class="slide">
+            <h2>ひらめきのエンジン：geDIGフレームワーク</h2>
+            <p>「わかった！」の瞬間（L3）は、2つのモノサシで定量的に評価されます。</p>
+            <div class="illustration-container">
+                <div class="role-card" style="border-color:#e63946;"><p class="emphasis">① 構造のシンプル化 (ΔGED)</p><p style="font-size:1.1rem;">知識のつながりがスッキリ単純になるほど高評価。<strong class="strong">「情報の断捨離」</strong>です。</p></div><div style="font-size: 3rem; color: #888;">+</div>
+                <div class="role-card" style="border-color:#2a9d8f;"><p class="emphasis">② 情報の整理整頓 (ΔIG)</p><p style="font-size:1.1rem;">知識が綺麗にグループ分けされるほど高評価。<strong class="strong">「概念の結晶化」</strong>です。</p></div>
+            </div>
+            <div class="formula-display">ℱ = w₁ΔGED − kTΔIG</div>
+            <p style="margin-top:0px; font-size:1.1rem;">この2つのバランスを取るスコア(ℱ)が「ひらめき度」になります。</p>
+            <div class="slide-number">4 / 20</div>
+        </section>
+
+        <!-- スライド 5: 実装解説 -->
+        <section class="slide">
+            <h2>【実装解説】ひらめきの土台：記憶の作り方</h2>
+            <p>「ひらめき」を生むためには、まず脳のような<strong class="strong">記憶のネットワーク</strong>が必要です。</p>
+            <div class="illustration-container"><div class="impl-flow-item"><div class="episode-card">エピソード</div><p style="margin-top:10px;"><strong class="emphasis">① 生の体験</strong><br><small>出来事を丸ごと記憶</small></p></div><div class="impl-arrow">⇒</div><div class="impl-flow-item"><div class="compressed-vec">[0.1, 0.8, …]</div><p style="margin-top:10px;"><strong class="emphasis">② 階層VQメモリで圧縮</strong><br><small>記憶を効率的なベクトルに</small></p></div><div class="impl-arrow">⇒</div><div class="impl-flow-item"><div class="graph-network-viz"><div class="node node1"></div><div class="node node2"></div><div class="node node3"></div><div class="node node4"></div><div class="node node5"></div><div class="edge" style="top: 13px; left: 75px; --edge-length: 75px; transform: rotate(8deg);"></div><div class="edge" style="top: 62px; left: 52px; --edge-length: 28px; transform: rotate(0deg);"></div><div class="edge" style="top: 41px; left: 32px; --edge-length: 45px; transform: rotate(-55deg);"></div><div class="edge" style="top: 62px; left: 92px; --edge-length: 68px; transform: rotate(20deg);"></div></div><p style="margin-top:10px;"><strong class="emphasis">③ GNNで関係性を学習</strong><br><small>圧縮された記憶同士を繋ぐ</small></p></div></div>
+            <p style="margin-top:20px;">この<strong class="strong">「エピソード単位の圧縮」</strong>と<strong class="strong">「GNNによる結合」</strong>が、効率的で柔軟な記憶ネットワークを実現します。</p>
+            <div class="slide-number">5 / 20</div>
+        </section>
+
+        <!-- スライド 6: 記憶の動的進化 -->
+        <section class="slide">
+            <h2>ひらめきが駆動する「記憶の進化」</h2>
+            <p>高い「ひらめき度」が検出されると、それをトリガーに、AIは自らの<strong class="strong">記憶ネットワークを能動的に再編成</strong>します。</p>
+            <div class="reorg-container"><div class="reorg-item"><div class="reorg-icon">💡</div><h3>統合 (Merge)</h3><p>バラバラの知識が一つになる</p></div><div class="reorg-item"><div class="reorg-icon">💥</div><h3>分裂 (Split)</h3><p>一つの知識が文脈に応じて分化する</p></div><div class="reorg-item"><div class="reorg-icon">🕸️</div><h3>再編成 (Reorganize)</h3><p>知識体系全体が新しい視点で見直される</p></div></div>
+            <p style="margin-top:20px;" class="emphasis">これにより、AIは単に記憶するだけでなく、経験から学び、概念を成長させることができます。</p>
+            <div class="slide-number">6 / 20</div>
+        </section>
+        
+        <!-- スライド 7: 数学概念の進化で証明 -->
+        <section class="slide">
+            <h2>【実証】数学概念の進化</h2>
+            <p>この「記憶の進化」は、AIに数学を学習させる実験で実際に観測されました。<br>例えば「分数」の学習過程では…</p>
+            <div class="illustration-container"><div class="impl-flow-item"><p class="emphasis">小学レベル</p><p>「ピザを分けたもの」</p></div><div class="impl-arrow">+</div><div class="impl-flow-item"><p class="emphasis">中学レベル</p><p>「2つの数の比」</p></div><div class="impl-arrow">⇒</div><div class="impl-flow-item"><div style="border: 2px solid #e63946; padding:10px 20px; border-radius: 8px;"><p class="strong">ひらめき発生！</p><p class="emphasis">概念の「統合」 (ΔGED: -1.8)</p></div></div></div>
+            <p style="margin-top:15px;">AIは、2つの異なるエピソード記憶を<strong class="strong">「有理数」という一つの上位概念に自発的に統合</strong>しました。<br><small>（注: この時、geDIGスコア(ℱ)が閾値を超え、記憶の再編成が実行されました）</small></p>
+            <div class="slide-number">7 / 20</div>
+        </section>
+        
+        <!-- スライド 8: 短期的なひらめきの検出 -->
+        <section class="slide">
+            <h2>短期的な「ひらめき」の検出</h2>
+            <p>長期的な記憶進化だけでなく、geDIGはリアルタイムの「ひらめき」も検出します。<br>これは、<strong class="strong">構造変化と情報整理が同時に起こる瞬間</strong>を捉えることで実現します。</p>
+            <p class="emphasis">「アハ！体験」の瞬間を捉える実験を見てみましょう。</p>
+            <div class="slide-number">8 / 20</div>
+        </section>
+
+        <!-- スライド 9: 驚きの結果 -->
+        <section class="slide">
+            <h2>【実験結果】最新の評価データ</h2>
+            <img src="images/difficulty_analysis.png" alt="難易度分析グラフ" style="max-width: 85%; max-height: 65vh; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <p class="figure-caption">このグラフは、難問（緑の▲）ほどΔGEDが負に大きく、ΔIGが正になる<strong class="strong">「洞察領域」</strong>に集中することを示しており、<strong class="strong">「難易度逆転現象」</strong>を裏付けています。</p>
+            <div class="slide-number">9 / 20</div>
+        </section>
+        
+        <!-- スライド 10: なぜ難しい問題が得意？ -->
+        <section class="slide">
+            <h2>なぜ「難しい問題」が得意なのか？</h2>
+            <ul><li><strong>簡単な質問：</strong><br>答えは既存の知識をたどるだけ。グラフの構造はあまり変わりません。</li><li><strong>難しい質問：</strong><br>「量子力学」「情報理論」「エントロピー」など、普段は離れている知識を結びつける必要があります。これにより…<br><strong class="strong">知識グラフ全体の大規模な再編成が起きる！</strong></li></ul>
+            <p><br><strong>劇的な構造変化が起きるからこそ、geDIGのモノサシが鋭敏に反応するのです。</strong></p>
+            <div class="slide-number">10 / 20</div>
+        </section>
+
+        <!-- スライド 11: 可視化 -->
+        <section class="slide">
+            <h2>【可視化】ひらめきの瞬間</h2>
+            <img src="images/knowledge_graph_evolution.png" alt="知識グラフの進化" style="max-width: 90%; max-height: 70vh; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <p class="figure-caption">質問（Query）に応じて、関連する記憶ノードが瞬時に活性化・再配線され、<strong class="strong">「ひらめき（SPIKE!）」</strong>が生まれる様子です。<br>複雑な問いほど、より広範囲の知識が結合しているのが分かります。</p>
+            <div class="slide-number">11 / 20</div>
+        </section>
+
+        <!-- スライド 12: 具体的な洞察の例 -->
+        <section class="slide">
+            <h2>具体的な洞察の例（内部処理）</h2>
+            <p>ひらめきの瞬間の内部では、何が起きているのでしょうか？</p>
+            <table class="results-table">
+              <tr><th style="width: 25%;">質問</th><td><strong class="strong">「情報理論は熱力学とどう関係するのか？」</strong></td></tr>
+              <tr><th>検出結果</th><td>✅ <strong class="strong">スパイク検出 (確信度: 84.5%)</strong><br><small>処理時間: 37.0ms</small></td></tr>
+              <tr><th>洞察の理由</th><td>物理学と情報科学という、異なる分野の概念群を<strong class="strong">一つの統一された理論として再編成</strong>する必要があったため。</td></tr>
+              <tr><th>再配線された記憶 (エピソード)</th><td class="tag-cloud"><span class="tag">マクスウェルの悪魔</span> <span class="tag">シャノンエントロピー</span><span class="tag">物理的実在</span> <span class="tag">エネルギー</span></td></tr>
+            </table>
+            <p style="margin-top:15px; font-size:1.1rem;">このAIは、両者が「エントロピー」を介して本質的に繋がっていることを「発見」しました。</p>
+            <div class="slide-number">12 / 20</div>
+        </section>
+        
+        <!-- スライド 13: 役割分担の再確認 -->
+        <section class="slide">
+            <h2>役割分担：「発見」と「説明」の最強タッグ</h2>
+            <p>ここで、4層アーキテクチャの役割分担が重要になります。</p>
+            <div class="illustration-container"><div class="role-card" style="border-color:#e63946;"><p class="emphasis">geDIG (発見のプロ)</p><p style="font-size:1.1rem;">Layer 3 (前頭前野)が「どの知識を繋げばひらめきになるか」という<strong class="strong">『材料』を発見</strong>します。</p></div><div style="font-size: 3rem; color: #888;">⇒</div><div class="role-card" style="border-color:#3a7bd5;"><p class="emphasis">LLM (説明のプロ)</p><p style="font-size:1.1rem;">Layer 4 (言語野)がその材料を受け取り、人間が読んで分かる<strong class="strong">『文章』を生成</strong>します。</p></div></div>
+            <p><br><strong class="strong">InsightSpike-AIは、ひらめきを「発見」し、LLMに「何を話すべきか」を教える司令塔なのです。</strong></p>
+            <div class="slide-number">13 / 20</div>
+        </section>
+        
+        <!-- スライド 14: この研究のすごいところ -->
+        <section class="slide">
+            <h2>この研究のすごいところ</h2>
+            <ul><li><strong>世界初の試み</strong><br>知識の「構造の変化」そのものをAIの報酬にした、全く新しいアプローチ。</li><li><strong>脳に着想を得た実用的な設計</strong><br>「ひらめき検出」と「記憶の進化」の両方を、単一のgeDIGフレームワークで実現。</li><li><strong>難問に強いAIの誕生</strong><br>複雑な問題ほど性能が上がる「難易度逆転現象」を発見し、真の洞察への道を開いた。</li></ul>
+            <div class="slide-number">14 / 20</div>
+        </section>
+
+        <!-- スライド 15: 応用分野 -->
+        <section class="slide">
+            <h2>応用できる分野</h2>
+            <p>この技術は、様々な分野で「発見」を加速させる可能性を秘めています。</p>
+            <ul><li><strong>科学研究</strong><br>膨大な論文から、人間が見過ごした「隠れた関連性」を発見する。</li><li><strong>教育</strong><br>生徒が「なるほど！」と本当に理解した瞬間を検出し、個別指導に活かす。</li><li><strong>ビジネス</strong><br>市場データや社内文書など、無関係に見える情報から新たな事業戦略を創出する。</li></ul>
+            <div class="slide-number">15 / 20</div>
+        </section>
+        
+        <!-- スライド 16: 課題と未来の夢 -->
+        <section class="slide">
+            <h2>今後のチャレンジと未来の夢</h2>
+            <ul>
+                <li><strong>知識グラフの自動構築</strong><br><small>現在は手作業の部分を自動化し、あらゆる分野の知識を扱えるようにする。</small></li>
+                <li><strong>洞察の自己言語化（専用デコーダ開発）</strong><br><small>LLMに頼る「表現」を、構造変化から直接言語化し、真に自律的な思考の完結を目指す。</small></li>
+                <li><strong>マルチモーダル化への挑戦</strong><br><small>テキストだけでなく、音声や映像からもエピソード記憶を形成し、真に人間のような統合的理解を目指す。</small></li>
+            </ul>
+            <p><br><span class="emphasis">未来の夢：</span>AIに数学や物理の教科書をゼロから学習させ、<strong class="strong">人類の歴史的な大発見（例：相対性理論）を自力で再発見</strong>させたい。</p>
+            <div class="slide-number">16 / 20</div>
+        </section>
+        
+        <!-- スライド 17: まとめ -->
+        <section class="slide">
+            <h2>まとめ</h2>
+            <ul><li><strong>InsightSpike-AIとは…</strong><br>脳の4層構造にヒントを得た、<strong class="strong">AIに「ひらめき」を教える</strong>新しいフレームワークです。</li><li><strong>核心技術はgeDIG</strong><br>知識の<strong class="strong">「構造変化」</strong>と<strong class="strong">「情報整理」</strong>で洞察の瞬間を検出するだけでなく、<strong class="strong">記憶の動的な進化</strong>を駆動します。</li><li><strong>最強の司令塔</strong><br><strong class="strong">geDIGが「発見」し、LLMが「説明」する</strong>ことで、AIはより深く賢くなります。</li></ul>
+            <div class="slide-number">17 / 20</div>
+        </section>
+
+        <!-- スライド 18: ライセンスと技術の信頼性 -->
+        <section class="slide">
+            <h2>ライセンスと技術の信頼性</h2>
+            <p>本技術は、責任あるAIの利用を促進するためのライセンスの下で公開されています。</p>
+            <p style="font-size: 1.2rem; margin-top:20px;"><a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/LICENSE" target="_blank">
+                <img src="https://img.shields.io/badge/License-InsightSpike--Responsible--AI--1.0-blue" alt="License Badge"></a></p>
+            <p style="margin-top:20px;">また、本研究の核心技術は信頼性を担保するため、<br>日本国において<strong class="strong">特許出願中</strong>です。<br><small>(特願2025-082988, 特願2025-082989)</small></p>
+            <div class="slide-number">18 / 20</div>
+        </section>
+        
+        <!-- Appendixスライド -->
+        <section class="slide">
+            <h2>Appendix: Transformerの”魂”はgeDIGだった？</h2>
+            <p>Transformerの成功は、実はgeDIG理論の<strong class="strong">マイクロスケール実装</strong>と解釈できます。</p>
+            <table class="results-table" style="max-width: 800px;">
+                <thead><tr><th>Transformerの要素</th><th>geDIG理論での「正体」</th></tr></thead>
+                <tbody>
+                    <tr><td><strong class="emphasis">トークン</strong> (Token)</td><td><strong class="strong">構造(GED)</strong> + <strong class="strong">情報(IG)</strong>を持つ、エネルギーの最小単位。</td></tr>
+                    <tr><td><strong class="emphasis">自己注意</strong> (Self-Attention)</td><td>エネルギーが最小になる安定経路を探すプロセス。<br><small>（softmaxは統計力学のボルツマン分布と完全に同型）</small></td></tr>
+                    <tr><td><strong class="emphasis">マルチヘッド</strong> (Multi-head)</td><td>異なるスケール（温度）で同時にエネルギー地形を観測する仕組み。</td></tr>
+                </tbody>
+            </table>
+            <div class="hierarchy-diagram"><span class="emphasis">geDIG (普遍理論)</span> → InsightSpike (マクロ実装) → <span style="color: #555;">Transformer (マイクロ実装/制約付き)</span></div>
+            <p style="margin-top:20px; font-size: 1.1rem;">この統一的視点は、Transformerの限界を超え、より柔軟で強力な次世代AIへの道筋を示しています。</p>
+            <div class="slide-number">19 / 20</div>
+        </section>
+
+        <!-- 最後のスライド -->
+        <section class="slide">
+            <h1>ご清聴ありがとうございました</h1>
+            <p>ご質問はこちらへどうぞ。</p>
+            <p style="margin-top: 40px; font-size: 1.2rem;">
+                <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI" target="_blank" style="color: #3a7bd5; text-decoration: none;">コードと論文はGitHubで公開予定です</a>
+            </p>
+            <div class="slide-number">20 / 20</div>
+        </section>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,92 @@
+# Configuration for normalized geDIG experiment
+insightspike:
+  llm:
+    provider: "mock"
+    mock_responses:
+      default: "This is a mock response for testing purposes."
+  
+  layers:
+    l1:
+      initial_radius: 0.1
+      max_radius: 0.5
+      growth_rate: 1.5
+    
+    l2:
+      topk_min: 5
+      topk_max: 20
+      confidence_threshold: 0.7
+    
+    l3:
+      delta_ged_threshold: 0.5
+      delta_ig_threshold: 0.5
+      conflict_threshold: 0.3
+  
+  graph:
+    builder:
+      batch_size: 32
+      parallel: false
+    
+    message_passing:
+      enabled: true
+      num_iterations: 2
+      max_hops: 2
+    
+    metrics:
+      use_multihop_gedig: true
+      max_hops: 2
+      decay_factor: 0.7
+  
+  memory:
+    cache_size: 10000
+    persistence_enabled: true
+  
+  datastore:
+    type: "filesystem"
+    base_path: "data/experiment_temp"
+  
+  embedder:
+    model_name: "all-MiniLM-L6-v2"
+    cache_size: 10000
+  
+  # NEW: Normalized geDIG configuration
+  algorithms:
+    gedig:
+      # Legacy settings
+      w1: 0.5
+      kT: 1.0
+      
+      # Enable normalization
+      normalization:
+        enabled: true
+        mode: "conservation"
+        
+        # Three main parameters
+        size_normalization:
+          beta: 0.5  # Node weight coefficient
+          
+        reward:
+          lambda_ig: 1.0  # IG coefficient
+          mu_ged: 0.5     # GED coefficient
+          
+        # Sign consistency check
+        spike_detection:
+          mode: "threshold"
+          threshold: 0.0  # Check sign only (R < 0 = spike)
+          
+        # Z-transform settings
+        z_transform:
+          use_running_stats: true
+          window_size: 100
+
+# Adaptive exploration settings
+adaptive_exploration:
+  enabled: true
+  max_attempts: 3
+  initial_radius: 0.1
+  initial_topk: 5
+  radius_growth: 1.5
+  topk_growth: 2.0
+  
+# Learning settings
+learning:
+  enabled: false  # Disable for consistent testing

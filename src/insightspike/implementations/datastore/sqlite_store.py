@@ -11,6 +11,7 @@ import json
 import logging
 import os
 import sqlite3
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -1368,3 +1369,146 @@ class SQLiteDataStore(AsyncDataStore):
         """Close datastore and save indices"""
         self.save_indices()
         logger.info("SQLiteDataStore closed")
+
+    # ========== Query Operations ==========
+
+    def save_queries(
+        self, queries: List[Dict[str, Any]], namespace: str = "queries"
+    ) -> bool:
+        """Save query records to storage"""
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            return loop.run_until_complete(self._save_queries(queries, namespace))
+        finally:
+            loop.close()
+
+    async def _save_queries(
+        self, queries: List[Dict[str, Any]], namespace: str
+    ) -> bool:
+        """Internal async save queries"""
+        try:
+            async with aiosqlite.connect(self.db_path) as db:
+                # Create queries table if it doesn't exist
+                await db.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS queries (
+                        id TEXT PRIMARY KEY,
+                        namespace TEXT NOT NULL,
+                        text TEXT NOT NULL,
+                        vector BLOB,
+                        has_spike INTEGER DEFAULT 0,
+                        spike_episode_id TEXT,
+                        response TEXT,
+                        metadata TEXT DEFAULT '{}',
+                        timestamp REAL,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """
+                )
+                
+                # Create index on namespace and has_spike
+                await db.execute(
+                    "CREATE INDEX IF NOT EXISTS idx_queries_namespace ON queries(namespace)"
+                )
+                await db.execute(
+                    "CREATE INDEX IF NOT EXISTS idx_queries_spike ON queries(has_spike)"
+                )
+                
+                # Insert queries
+                for query in queries:
+                    await db.execute(
+                        """
+                        INSERT OR REPLACE INTO queries 
+                        (id, namespace, text, vector, has_spike, spike_episode_id, response, metadata, timestamp)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                        (
+                            query.get("id", str(uuid4())),
+                            namespace,
+                            query["text"],
+                            query.get("vec", np.array([])).tobytes() if "vec" in query else None,
+                            1 if query.get("has_spike", False) else 0,
+                            query.get("spike_episode_id"),
+                            query.get("response", ""),
+                            json.dumps(query.get("metadata", {})),
+                            query.get("timestamp", time.time())
+                        ),
+                    )
+                
+                await db.commit()
+                logger.info(f"Saved {len(queries)} queries to {namespace}")
+                return True
+                
+        except Exception as e:
+            logger.error(f"Failed to save queries: {e}")
+            return False
+
+    def load_queries(
+        self, 
+        namespace: str = "queries",
+        has_spike: Optional[bool] = None,
+        limit: Optional[int] = None
+    ) -> List[Dict[str, Any]]:
+        """Load query records from storage"""
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            return loop.run_until_complete(
+                self._load_queries(namespace, has_spike, limit)
+            )
+        finally:
+            loop.close()
+
+    async def _load_queries(
+        self, namespace: str, has_spike: Optional[bool], limit: Optional[int]
+    ) -> List[Dict[str, Any]]:
+        """Internal async load queries"""
+        queries = []
+        
+        try:
+            async with aiosqlite.connect(self.db_path) as db:
+                # Build query
+                query = "SELECT * FROM queries WHERE namespace = ?"
+                params = [namespace]
+                
+                # Add has_spike filter if specified
+                if has_spike is not None:
+                    query += " AND has_spike = ?"
+                    params.append(1 if has_spike else 0)
+                
+                # Order by timestamp descending
+                query += " ORDER BY timestamp DESC"
+                
+                # Add limit if specified
+                if limit is not None:
+                    query += " LIMIT ?"
+                    params.append(limit)
+                
+                cursor = await db.execute(query, params)
+                rows = await cursor.fetchall()
+                
+                # Get column names
+                columns = [desc[0] for desc in cursor.description]
+                
+                for row in rows:
+                    row_dict = dict(zip(columns, row))
+                    
+                    # Convert stored data
+                    if row_dict.get("vector"):
+                        row_dict["vec"] = np.frombuffer(row_dict["vector"], dtype=np.float32)
+                        del row_dict["vector"]
+                    
+                    row_dict["has_spike"] = bool(row_dict.get("has_spike", 0))
+                    
+                    if row_dict.get("metadata"):
+                        row_dict["metadata"] = json.loads(row_dict["metadata"])
+                    
+                    queries.append(row_dict)
+                
+                logger.info(f"Loaded {len(queries)} queries from {namespace}")
+                return queries
+                
+        except Exception as e:
+            logger.error(f"Failed to load queries: {e}")
+            return []

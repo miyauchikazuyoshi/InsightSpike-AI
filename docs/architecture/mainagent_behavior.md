@@ -11,7 +11,12 @@ MainAgent is the core orchestrator in InsightSpike that coordinates all 4 neurob
 def process_question(self, question: str, max_cycles: int = 5, verbose: bool = False) -> CycleResult
 ```
 
-The agent processes questions through multiple reasoning cycles:
+The agent processes questions through multiple reasoning cycles.
+
+**NEW: Query Storage** ⚡:
+- All queries are automatically saved with metadata
+- Includes processing time, LLM provider, spike status
+- Query ID returned in CycleResult for tracking
 
 ```
 Question → L1 (Error Analysis) → L2 (Memory Search) → L3 (Graph Analysis) → L4 (Response Generation)
@@ -222,6 +227,9 @@ answer = agent.process_question(
 if answer.spike_detected:
     print("Insight discovered!")
     insights = agent.get_insights()
+    
+# Access query ID (NEW)
+print(f"Query saved with ID: {answer.query_id}")
     
 # Save state
 agent.save_state()

@@ -1,6 +1,17 @@
 # geDIG-based Layer1 Development Roadmap
 
-## 概要
+## UPDATE (2025-07-30): Layer1's Vision Realized Through Donut Search
+
+The original Layer1 filtering concept has been elegantly realized through the **Donut Search** mechanism. What Layer1 aimed to achieve through sequential filters (relevance → novelty → value) is now accomplished with a single geometric operation. See [Donut Search and Known Information Ignorance](/docs/research/donut_search_and_known_ignorance.md) for details.
+
+### Key Transformation:
+- **Original**: Complex multi-stage filtering with unclear parameters
+- **Donut Search**: Query-centric sphere with inner radius (known) and outer radius (irrelevant)
+- **Benefits**: Intuitive parameters, single-pass computation, theoretical foundation
+
+---
+
+## 概要（Original）
 Layer1の検索メカニズムを単純なコサイン類似度から、グラフ編集距離と情報利得（geDIG）を活用した構造的類似度検索へと進化させる開発ロードマップ。
 
 ## 背景と動機

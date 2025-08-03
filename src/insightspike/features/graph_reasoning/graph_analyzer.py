@@ -38,12 +38,19 @@ class GraphAnalyzer:
             }
 
         try:
+            # Prepare config for multihop if available
+            kwargs = {}
+            if self.config and 'graph' in self.config:
+                graph_config = self.config['graph']
+                if 'metrics' in graph_config:
+                    kwargs['config'] = {'metrics': graph_config['metrics']}
+            
             # Calculate metrics directly on PyG Data objects
-            ged = delta_ged_func(previous_graph, current_graph)
+            ged = delta_ged_func(previous_graph, current_graph, **kwargs)
             
             # Calculate information gain using node features
             if hasattr(previous_graph, "x") and hasattr(current_graph, "x"):
-                ig = delta_ig_func(previous_graph, current_graph)
+                ig = delta_ig_func(previous_graph, current_graph, **kwargs)
             else:
                 ig = 0.0
 

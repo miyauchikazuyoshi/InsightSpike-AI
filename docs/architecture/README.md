@@ -9,6 +9,7 @@
 - **[MainAgent Behavior](mainagent_behavior.md)** - Detailed behavior and processing flow of MainAgent
 - **[Configuration System](configuration.md)** - YAML-based configuration and settings management
 - **[Data Management](data_management_strategy.md)** - DataStore abstraction and data handling
+- **[Query Storage System](query_storage.md)** ⚡ **NEW** - Query persistence and analysis architecture
 
 ### Advanced Features
 - **[Message Passing & Edge Re-evaluation](recent_features_2024_07.md)** - Question-aware graph enhancement
@@ -79,9 +80,19 @@ print(f"Spike detected: {result.has_spike}")
 - **Flexible vector search** - FAISS optional, NumPy backend available
 - **DataStore abstraction** - Filesystem, SQLite, or custom backends
 - **Message passing** - Question-aware graph enhancement
+- **Query persistence** - Full history tracking with analysis capabilities
 - **Production-ready** with caching, error handling, and monitoring
 
 ## 🔄 Recent Updates (July 2025)
+
+### Query Storage System ⚡ **NEW**
+- **Automatic query persistence** - All queries saved with rich metadata
+- **Graph integration** - Queries as nodes with edges to episodes
+- **Analysis capabilities** - Spike rate tracking, provider performance
+- **Multiple backends** - FileSystem, SQLite, Memory stores
+- See details in [Query Storage System](query_storage.md)
+
+## 🔄 Previous Updates (July 2025)
 
 ### Message Passing & Edge Re-evaluation
 - **Question-aware message passing** - Propagates query relevance through graph

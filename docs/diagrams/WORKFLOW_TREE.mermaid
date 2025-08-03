@@ -46,6 +46,11 @@ flowchart TD
     %% Response Processing
     Layer4 --> ResponseGeneration[📝 Response Generation]
     ResponseGeneration --> InsightExtraction[💡 Insight Extraction]
+    ResponseGeneration --> QueryStorage[💾 Query Storage]
+    
+    %% Query Storage
+    QueryStorage --> QueryDB[🗄️ Query Database]
+    QueryStorage --> QueryAnalysis[📊 Query Analytics]
     
     %% Insight Registration System
     InsightExtraction --> QualityAssessment[📋 Quality Assessment]

@@ -651,3 +651,44 @@ def detect_insight_spike(graph_before: Any,
     calculator = GeDIGCore(spike_threshold=threshold, **kwargs)
     result = calculator.calculate(graph_before, graph_after)
     return result.has_spike
+
+
+# Wrapper functions for backward compatibility with metrics_selector.py
+def delta_ged(graph_before: Any, graph_after: Any, **kwargs) -> float:
+    """
+    Calculate ΔGED for backward compatibility.
+    Returns negative value when graph simplifies (insight formation).
+    """
+    # Check if config is passed via kwargs
+    config = kwargs.get('config', {})
+    if config and 'metrics' in config:
+        metrics_config = config['metrics']
+        calculator = GeDIGCore(
+            enable_multihop=metrics_config.get('use_multihop_gedig', False),
+            max_hops=metrics_config.get('max_hops', 2),
+            decay_factor=metrics_config.get('decay_factor', 0.5)
+        )
+    else:
+        calculator = GeDIGCore()
+    result = calculator.calculate(graph_before, graph_after)
+    return result.ged_value
+
+
+def delta_ig(graph_before: Any, graph_after: Any, **kwargs) -> float:
+    """
+    Calculate ΔIG for backward compatibility.
+    Returns positive value when information gain occurs.
+    """
+    # Check if config is passed via kwargs
+    config = kwargs.get('config', {})
+    if config and 'metrics' in config:
+        metrics_config = config['metrics']
+        calculator = GeDIGCore(
+            enable_multihop=metrics_config.get('use_multihop_gedig', False),
+            max_hops=metrics_config.get('max_hops', 2),
+            decay_factor=metrics_config.get('decay_factor', 0.5)
+        )
+    else:
+        calculator = GeDIGCore()
+    result = calculator.calculate(graph_before, graph_after)
+    return result.ig_value

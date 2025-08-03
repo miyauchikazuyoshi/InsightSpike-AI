@@ -1,0 +1,40 @@
+{
+  "timestamp": "2025-07-29 06:59:50",
+  "summary": {
+    "correct": 1,
+    "total": 3,
+    "accuracy": 0.3333333333333333
+  },
+  "results": [
+    {
+      "question_id": "q1",
+      "question": "Why does ice float on water?",
+      "expected_spike": true,
+      "actual_spike": false,
+      "delta_ged": 2.0,
+      "delta_ig": 1.7169987255755813e-05,
+      "matches": false,
+      "processing_time": 0.168687105178833
+    },
+    {
+      "question_id": "q2",
+      "question": "What happens to water at 0 degrees?",
+      "expected_spike": false,
+      "actual_spike": false,
+      "delta_ged": 2.5,
+      "delta_ig": -6.546170038913046e-05,
+      "matches": true,
+      "processing_time": 0.05189037322998047
+    },
+    {
+      "question_id": "q3",
+      "question": "How does water's freezing behavior help fish survive winter?",
+      "expected_spike": true,
+      "actual_spike": false,
+      "delta_ged": 3.0,
+      "delta_ig": -9.836496855048399e-06,
+      "matches": false,
+      "processing_time": 0.06433725357055664
+    }
+  ]
+}

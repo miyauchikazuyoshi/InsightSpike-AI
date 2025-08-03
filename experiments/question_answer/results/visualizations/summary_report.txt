@@ -1,0 +1,25 @@
+============================================================
+EXPERIMENT SUMMARY REPORT
+============================================================
+Generated: 2025-07-29 14:03:48
+
+BASIC STATISTICS:
+Total Questions: 100
+Total Knowledge Entries: N/A
+Overall Spike Rate: 0.00%
+Average Response Time: 0.152s
+
+GED/IG METRICS:
+1-hop GED: mean=0.000, std=0.000
+1-hop IG:  mean=0.000, std=0.000
+2-hop GED: mean=0.000, std=0.000
+2-hop IG:  mean=0.000, std=0.000
+
+CORRELATION ANALYSIS:
+1-hop GED-IG correlation: nan
+2-hop GED-IG correlation: nan
+
+SPIKE DETECTION ANALYSIS:
+No spikes detected in this experiment
+
+============================================================

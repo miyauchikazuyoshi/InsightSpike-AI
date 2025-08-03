@@ -1,0 +1,137 @@
+{
+  "question_categories": {
+    "factual": {
+      "description": "Simple fact-checking questions that can be answered directly from knowledge base",
+      "questions": [
+        {
+          "id": "q_fact_001",
+          "question": "What is the law of conservation of energy?",
+          "expected_knowledge": ["kb_001"],
+          "difficulty": "easy"
+        },
+        {
+          "id": "q_fact_002",
+          "question": "What does photosynthesis produce?",
+          "expected_knowledge": ["kb_002"],
+          "difficulty": "easy"
+        },
+        {
+          "id": "q_fact_003",
+          "question": "How many hydrogen atoms are in a water molecule?",
+          "expected_knowledge": ["kb_003"],
+          "difficulty": "easy"
+        },
+        {
+          "id": "q_fact_004",
+          "question": "What causes bread dough to rise?",
+          "expected_knowledge": ["kb_004"],
+          "difficulty": "easy"
+        },
+        {
+          "id": "q_fact_005",
+          "question": "What is cognitive dissonance?",
+          "expected_knowledge": ["kb_006"],
+          "difficulty": "easy"
+        }
+      ]
+    },
+    "reasoning": {
+      "description": "Questions requiring logical reasoning and connecting multiple pieces of knowledge",
+      "questions": [
+        {
+          "id": "q_reason_001",
+          "question": "How does the law of conservation of energy apply to photosynthesis?",
+          "expected_knowledge": ["kb_001", "kb_002"],
+          "difficulty": "medium",
+          "reasoning_type": "application"
+        },
+        {
+          "id": "q_reason_002",
+          "question": "Why does the molecular structure of water matter for life?",
+          "expected_knowledge": ["kb_003", "kb_002"],
+          "difficulty": "medium",
+          "reasoning_type": "causation"
+        },
+        {
+          "id": "q_reason_003",
+          "question": "How do ecosystems demonstrate both energy flow and conservation principles?",
+          "expected_knowledge": ["kb_001", "kb_008"],
+          "difficulty": "medium",
+          "reasoning_type": "synthesis"
+        },
+        {
+          "id": "q_reason_004",
+          "question": "What similarities exist between yeast fermentation and cellular respiration?",
+          "expected_knowledge": ["kb_004", "kb_002"],
+          "difficulty": "medium",
+          "reasoning_type": "comparison"
+        },
+        {
+          "id": "q_reason_005",
+          "question": "How might machine learning help optimize basketball shooting techniques?",
+          "expected_knowledge": ["kb_005", "kb_009"],
+          "difficulty": "medium",
+          "reasoning_type": "application"
+        }
+      ]
+    },
+    "creative": {
+      "description": "Questions requiring creative thinking and insight generation",
+      "questions": [
+        {
+          "id": "q_creative_001",
+          "question": "How might the Ship of Theseus paradox apply to machine learning models that continuously update their parameters?",
+          "expected_knowledge": ["kb_007", "kb_009"],
+          "difficulty": "hard",
+          "insight_potential": "high"
+        },
+        {
+          "id": "q_creative_002",
+          "question": "Could cognitive dissonance be considered a form of energy that drives behavioral change?",
+          "expected_knowledge": ["kb_006", "kb_001"],
+          "difficulty": "hard",
+          "insight_potential": "high"
+        },
+        {
+          "id": "q_creative_003",
+          "question": "How is the spread of information through the internet similar to and different from energy flow in ecosystems?",
+          "expected_knowledge": ["kb_008", "kb_010"],
+          "difficulty": "hard",
+          "insight_potential": "high"
+        },
+        {
+          "id": "q_creative_004",
+          "question": "If we think of knowledge as a form of energy, how does learning transform it?",
+          "expected_knowledge": ["kb_001", "kb_009", "kb_010"],
+          "difficulty": "hard",
+          "insight_potential": "very_high"
+        },
+        {
+          "id": "q_creative_005",
+          "question": "Could the optimization principles in sports physics be applied to optimize human decision-making processes?",
+          "expected_knowledge": ["kb_005", "kb_006", "kb_009"],
+          "difficulty": "hard",
+          "insight_potential": "very_high"
+        }
+      ]
+    }
+  },
+  "evaluation_criteria": {
+    "factual": {
+      "accuracy": "Direct match with knowledge base content",
+      "completeness": "All relevant facts mentioned",
+      "clarity": "Clear and concise presentation"
+    },
+    "reasoning": {
+      "logical_coherence": "Sound reasoning chain",
+      "knowledge_integration": "Effective combination of multiple knowledge pieces",
+      "explanation_quality": "Clear explanation of connections"
+    },
+    "creative": {
+      "novelty": "New connections or perspectives",
+      "plausibility": "Reasonable and defensible insights",
+      "depth": "Profound understanding demonstrated",
+      "spike_generation": "Evidence of 'aha' moments"
+    }
+  }
+}
