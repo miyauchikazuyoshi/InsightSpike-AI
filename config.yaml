@@ -149,6 +149,33 @@ vector_search:
   optimize: true       # Use optimized implementations
   batch_size: 1000    # Batch size for operations
 
+# Integrated Index Settings (New)
+integrated_index:
+  # Enable integrated vector-graph index
+  enabled: false       # Set to true to enable (currently in migration phase)
+  
+  # Basic configuration
+  dimension: 768       # Vector dimension (should match embedding.dimension)
+  similarity_threshold: 0.3  # Threshold for creating graph edges
+  
+  # FAISS integration for large-scale data
+  use_faiss: true      # Enable FAISS for large datasets
+  faiss_threshold: 100000  # Number of vectors to trigger FAISS usage
+  
+  # Migration settings
+  migration_mode: shadow  # Options: shadow, partial, full
+  # - shadow: Run both old and new systems in parallel
+  # - partial: New data goes to integrated index
+  # - full: Migrate all existing data
+  
+  # Auto-save configuration
+  auto_save: true      # Enable automatic saving
+  save_interval: 1000  # Save every N episodes
+  
+  # Feature flags for gradual rollout
+  rollout_percentage: 0  # Percentage of requests using integrated index (0-100)
+  enable_rollback: true  # Allow rollback to old system if needed
+
 # Environment Settings
 environment: development
 # Options: development, testing, production, experiment
