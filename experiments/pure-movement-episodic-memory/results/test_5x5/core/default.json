@@ -1,0 +1,28 @@
+[
+  {
+    "text": "Movement from (2,3) down success",
+    "c_value": 0.5,
+    "timestamp": null,
+    "metadata": {
+      "type": "movement",
+      "position": [
+        2,
+        3
+      ],
+      "action": "down",
+      "success": true,
+      "is_wall": false,
+      "episode_id": 104,
+      "timestamp": 1754525340.029579
+    },
+    "vector": [
+      0.4000000059604645,
+      0.6000000238418579,
+      0.6666666865348816,
+      1.0,
+      1.0,
+      0.10986123234033585,
+      1.0
+    ]
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "text": "Move from (3,5) right: success",
+    "c_value": 0.5,
+    "timestamp": null,
+    "metadata": {
+      "type": "movement",
+      "success": true
+    },
+    "vector": [
+      0.05882352963089943,
+      0.09803921729326248,
+      0.3333333432674408,
+      1.0,
+      1.0,
+      0.5337538123130798,
+      0.0
+    ]
+  }
+]

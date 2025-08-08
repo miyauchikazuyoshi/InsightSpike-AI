@@ -1,0 +1,28 @@
+[
+  {
+    "text": "Movement from (1,1) left failed",
+    "c_value": 0.5,
+    "timestamp": null,
+    "metadata": {
+      "type": "movement",
+      "position": [
+        1,
+        1
+      ],
+      "action": "left",
+      "success": false,
+      "is_wall": true,
+      "episode_id": 2499,
+      "timestamp": 1754525582.240006
+    },
+    "vector": [
+      0.09090909361839294,
+      0.09090909361839294,
+      1.0,
+      0.0,
+      -1.0,
+      0.5564520359039307,
+      0.0
+    ]
+  }
+]

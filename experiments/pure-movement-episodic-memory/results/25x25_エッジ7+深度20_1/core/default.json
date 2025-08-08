@@ -1,0 +1,20 @@
+[
+  {
+    "text": "Move from (3,7) right: wall",
+    "c_value": 0.5,
+    "timestamp": null,
+    "metadata": {
+      "type": "movement",
+      "success": false
+    },
+    "vector": [
+      0.11999999731779099,
+      0.2800000011920929,
+      0.3333333432674408,
+      0.0,
+      -1.0,
+      0.46913477778434753,
+      0.0
+    ]
+  }
+]

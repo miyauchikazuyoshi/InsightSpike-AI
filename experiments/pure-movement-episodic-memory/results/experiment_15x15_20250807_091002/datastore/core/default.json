@@ -1,0 +1,26 @@
+[
+  {
+    "text": "Visual observation from (7,2) looking right",
+    "c_value": 0.5,
+    "timestamp": null,
+    "metadata": {
+      "type": "visual",
+      "position": [
+        7,
+        2
+      ],
+      "direction": "right",
+      "episode_id": 4766,
+      "timestamp": 1754525518.5918348
+    },
+    "vector": [
+      0.46666666865348816,
+      0.13333334028720856,
+      0.3333333432674408,
+      0.5,
+      1.0,
+      0.3135494291782379,
+      0.0
+    ]
+  }
+]
