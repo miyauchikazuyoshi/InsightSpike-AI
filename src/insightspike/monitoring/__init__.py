@@ -12,9 +12,16 @@ from .graph_monitor import (
     create_default_monitor,
 )
 
+from .index_monitor import (
+    IndexPerformanceMonitor,
+    IndexMonitoringDecorator,
+)
+
 __all__ = [
     "GraphOperationMonitor",
     "GraphOperationMetric",
     "MonitoredOperation",
     "create_default_monitor",
+    "IndexPerformanceMonitor",
+    "IndexMonitoringDecorator",
 ]

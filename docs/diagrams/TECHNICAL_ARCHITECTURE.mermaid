@@ -27,11 +27,12 @@ flowchart LR
             L1_Format[Formatting]
         end
         
-        subgraph "Layer 2: Memory (Graph-Centric)"
+        subgraph "Layer 2: Memory (Integrated Index)"
             L2_Episode[Episode Management<br/>No C-values]
             L2_Integration[Graph-Informed<br/>Integration/Splitting]
-            L2_Vector[FAISS Vector Search<br/>384-dim]
+            L2_Vector[Integrated Vector-Graph<br/>O(1) Search ⚡NEW]
             L2_Context[Context Building]
+            L2_Spatial[Spatial Indexing<br/>Position-aware ⚡NEW]
         end
         
         subgraph "Layer 3: Reasoning (Scalable)"
@@ -80,6 +81,14 @@ flowchart LR
             QS3[Query Nodes<br/>Graph Integration]
         end
         
+        subgraph "Integrated Index Storage ⚡NEW"
+            II_Vectors[normalized_vectors.npy<br/>Pre-normalized]
+            II_Norms[norms.npy<br/>Vector Norms]
+            II_Graph[graph.pkl<br/>NetworkX Graph]
+            II_Meta[metadata.json<br/>Episode Info]
+            II_Spatial[spatial_index.pkl<br/>Position Index]
+        end
+        
         subgraph "Graph Storage"
             Graph_Data[graph_pyg.pt<br/>PyTorch Graph]
             Graph_Cache[Graph Cache<br/>NetworkX]
@@ -89,6 +98,7 @@ flowchart LR
             Config_Local[local.yaml]
             Config_Prod[production.yaml]
             Config_Colab[colab.yaml]
+            Config_Index[integrated_index:<br/>enabled, migration_mode]
         end
     end
     
@@ -106,6 +116,7 @@ flowchart LR
     L1_Format --> L2_Episode
     L2_Episode --> L2_Integration
     L2_Integration --> L2_Vector --> L2_Context
+    L2_Vector --> L2_Spatial
     L2_Context --> L3_Graph
     L3_Graph --> L3_Scalable
     L3_Scalable --> L3_geDIG --> L3_Relation
@@ -125,12 +136,17 @@ flowchart LR
     Q4 --> Registry
     
     %% Storage Connections
-    L2_Vector -.-> DB3
+    L2_Vector -.-> II_Vectors
+    L2_Vector -.-> II_Norms
+    L2_Spatial -.-> II_Spatial
+    L2_Integration -.-> II_Graph
+    L2_Episode -.-> II_Meta
     L3_Graph -.-> Graph_Data
     L3_Graph -.-> Graph_Cache
     Registry --> DB1
     Main_Agent -.-> DB2
     Main_Agent -.-> Config_Local
+    Config_Index -.-> L2_Vector
     
     %% Query Storage Connections
     Main_Agent --> QS1

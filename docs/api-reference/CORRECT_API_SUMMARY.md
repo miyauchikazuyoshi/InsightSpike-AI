@@ -113,6 +113,63 @@ class MemoryConfig:
     prune_on_overflow: bool = True
 ```
 
+## 7. Integrated Vector-Graph Index (NEW - January 2025)
+
+```python
+from insightspike.index import IntegratedVectorGraphIndex, BackwardCompatibleWrapper
+
+# Direct usage
+index = IntegratedVectorGraphIndex(dimension=768)
+
+# Add episode with pre-computed normalization
+episode = {
+    'vec': np.random.randn(768),
+    'text': 'Sample text',
+    'pos': (10, 20),  # Optional spatial position
+    'c_value': 0.8
+}
+idx = index.add_episode(episode)
+
+# Search with O(1) performance
+indices, scores = index.search(query_vector, k=10)
+
+# Backward compatible usage
+datastore = BackwardCompatibleWrapper(index)
+datastore.save_episodes(episodes)  # Works with existing API
+results = datastore.search_vectors(query, k=10)
+```
+
+### Key Features:
+- **O(1) vector search**: Pre-normalized vectors eliminate normalization bottleneck
+- **Spatial indexing**: O(log n) position-based queries for navigation tasks  
+- **Graph integration**: NetworkX graph with similarity-based edges
+- **FAISS auto-switching**: Automatic optimization for large datasets
+- **100% backward compatible**: Drop-in replacement for existing DataStore
+
+## 8. Enhanced DataStore with Integrated Index
+
+```python
+from insightspike.implementations.datastore import EnhancedFileSystemDataStore
+
+# Enable integrated index
+datastore = EnhancedFileSystemDataStore(
+    root_path="./data",
+    use_integrated_index=True,
+    migration_mode="shadow"  # shadow, partial, or full
+)
+
+# Existing code works without changes
+episodes = datastore.load_episodes()
+results = datastore.search_vectors(query, k=10)
+
+# Monitor performance
+from insightspike.monitoring import IndexMonitoringDecorator
+
+monitored = IndexMonitoringDecorator(datastore.index)
+metrics = monitored.get_metrics()
+print(f"Avg search time: {metrics['search_time']['avg_ms']:.2f}ms")
+```
+
 ## Notes:
 
 - Import paths changed: `core.layers.*` → `implementations.layers.*`

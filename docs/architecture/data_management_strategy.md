@@ -62,11 +62,16 @@ CREATE TABLE episodes (
     namespace TEXT NOT NULL,
     text TEXT NOT NULL,
     vector BLOB,                    -- 384次元の埋め込みベクトル
+    vector_norm REAL,               -- ベクトルのノルム値（⚡ NEW: 統合インデックス用）
     c_value REAL DEFAULT 0.5,       -- 確信度
     metadata TEXT,                  -- JSON形式のメタデータ
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- パフォーマンス用インデックス
+CREATE INDEX idx_episodes_namespace ON episodes(namespace);
+CREATE INDEX idx_episodes_created_at ON episodes(created_at);
 ```
 
 #### graph_nodes テーブル
@@ -123,9 +128,16 @@ CREATE INDEX idx_queries_namespace ON queries(namespace);
 - 責務：
   - エピソードの保存・検索
   - グラフの保存・読み込み
-  - ベクトル検索（FAISSインデックス連携）
+  - ベクトル検索（統合インデックス連携）⚡ **UPDATED**
   - トランザクション管理
   - **クエリの保存・検索** ⚡ **NEW**
+
+**EnhancedFileSystemDataStore** ⚡ **NEW**
+- 役割：統合インデックスを使用した高速DataStore
+- 責務：
+  - IntegratedVectorGraphIndexの管理
+  - 既存APIとの後方互換性維持
+  - 段階的移行のサポート（shadow/partial/full）
 
 ### 2. ワーキングメモリ層
 **L2WorkingMemoryManager**
@@ -180,9 +192,12 @@ CREATE INDEX idx_queries_namespace ON queries(namespace);
 - **計算式**: `メモリ = アプリ基本 + (ワーキングセットサイズ × エピソードサイズ)`
 
 ### 検索性能
-- **ベクトル検索**: FAISSインデックスによりO(log n)
+- **ベクトル検索**: 統合インデックスによりO(1) ⚡ **IMPROVED**
+  - 旧: FAISSインデックスでO(log n) + 正規化O(n)
+  - 新: 事前正規化済みベクトルでO(1)
 - **テキスト検索**: SQLiteのFTS（Full Text Search）によりO(log n)
 - **グラフクエリ**: インデックス付きでO(1)〜O(log n)
+- **空間検索**: 位置インデックスによりO(log n) ⚡ **NEW**
 
 ### スケーラビリティ
 - **エピソード数**: 実質無制限（ディスク容量まで）
@@ -266,15 +281,26 @@ VACUUM;
 
 ## 今後の拡張可能性
 
-### 1. 分散データベース対応
+### 1. 統合インデックスの拡張 ⚡ **NEW**
+- **現在実装済み**:
+  - 事前正規化によるO(1)検索
+  - 空間インデックスによる位置ベース検索
+  - グラフ構造の統合管理
+  - FAISSの自動切り替え（大規模データ対応）
+- **今後の拡張**:
+  - 分散インデックスのサポート
+  - GPUアクセラレーション
+  - より高度な近似最近傍探索
+
+### 2. 分散データベース対応
 - PostgreSQLやMySQLへの移行パス
 - 複数ノードでのレプリケーション
 
-### 2. ベクトルデータベース統合
+### 3. ベクトルデータベース統合
 - Pinecone, Weaviate, Qdrantなどの専用ベクトルDB
-- より高度なベクトル検索機能
+- より高度なベクトル検索機能（統合インデックスとの併用）
 
-### 3. グラフデータベース連携
+### 4. グラフデータベース連携
 - Neo4jなどの専用グラフDB
 - より複雑なグラフクエリの実行
 

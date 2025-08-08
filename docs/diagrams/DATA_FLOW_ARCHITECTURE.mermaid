@@ -17,14 +17,28 @@ flowchart TB
         subgraph "Core System Files"
             Core[data/core/]
             Core_Ep[episodes.json<br/>Episode Metadata]
-            Core_Idx[index.faiss<br/>Vector Index]
+            Core_Idx[integrated_index/<br/>Vector-Graph Index ⚡NEW]
             Core_Graph[graph_pyg.pt<br/>Knowledge Graph]
-            Core_Scale[scalable_index.faiss<br/>Scalable FAISS]
+            Core_Scale[scalable_index.faiss<br/>Legacy FAISS]
             
             Core --> Core_Ep
             Core --> Core_Idx
             Core --> Core_Graph
             Core --> Core_Scale
+            
+            subgraph "Integrated Index Structure"
+                IIdx[normalized_vectors.npy<br/>Pre-normalized]
+                INorms[norms.npy<br/>Vector Norms]
+                IGraph[graph.pkl<br/>NetworkX Graph]
+                IMeta[metadata.json<br/>Episode Info]
+                ISpatial[spatial_index.pkl<br/>Position Index]
+            end
+            
+            Core_Idx --> IIdx
+            Core_Idx --> INorms
+            Core_Idx --> IGraph
+            Core_Idx --> IMeta
+            Core_Idx --> ISpatial
         end
         
         subgraph "Query Storage"
@@ -82,8 +96,19 @@ flowchart TB
         P3[Episode Creation<br/>store_episode]
         P4[Query Storage<br/>save_queries]
         P5[Graph Update<br/>Nodes & Edges]
-        P6[Index Update<br/>FAISS]
+        P6[Index Update<br/>Integrated Index ⚡NEW]
         P7[Conflict Detection<br/>& Splitting]
+        
+        subgraph "Vector Normalization Flow ⚡NEW"
+            VN1[Raw Vector Input]
+            VN2[Compute Norm]
+            VN3[Normalize Vector]
+            VN4[Store Separately]
+            
+            VN1 --> VN2
+            VN2 --> VN3
+            VN3 --> VN4
+        end
         
         P1 --> P2
         P2 --> P3
@@ -91,6 +116,8 @@ flowchart TB
         P3 --> P5
         P4 --> P5
         P5 --> P6
+        P3 --> VN1
+        VN4 --> P6
         P6 --> P7
     end
     
@@ -102,12 +129,13 @@ flowchart TB
         Write[Write Operations]
         
         Read --> ReadEp[load_episodes<br/>Read episodes.json]
-        Read --> ReadIdx[search_vectors<br/>Query FAISS]
+        Read --> ReadIdx[search<br/>O(1) Vector Search ⚡NEW]
         Read --> ReadGraph[load_graph<br/>Load NetworkX/PyG]
         Read --> ReadQueries[load_queries<br/>Read queries.json]
+        Read --> ReadSpatial[spatial_search<br/>O(log n) Position ⚡NEW]
         
         Write --> WriteEp[save_episodes<br/>Write episodes.json]
-        Write --> WriteIdx[save_vectors<br/>Update FAISS]
+        Write --> WriteIdx[add_episode<br/>Update Index ⚡NEW]
         Write --> WriteGraph[save_graph<br/>Save NetworkX/PyG]
         Write --> WriteQueries[save_queries<br/>Write queries.json]
     end
@@ -144,9 +172,9 @@ flowchart TB
     WriteGraph -.-> Core_Graph
     
     %% Performance Annotations
-    P4 -.- |"O(n log n)<br/>Scalable Updates"| note1[Performance<br/>Optimization]
-    P5 -.- |"IndexFlatIP<br/>Fast Similarity"| note2[Cosine<br/>Similarity]
-    P6 -.- |"Dynamic Splitting<br/>Graph-Based"| note3[Adaptive<br/>Management]
+    P6 -.- |"O(1) Search<br/>Pre-normalized"| note1[Vector Search<br/>⚡NEW]
+    VN4 -.- |"Dual Storage<br/>Vectors+Norms"| note2[Memory<br/>Efficient]
+    ReadSpatial -.- |"Spatial Index<br/>Position-aware"| note3[Navigation<br/>Support]
     
     %% Styling
     classDef dataSource fill:#e1f5fe
