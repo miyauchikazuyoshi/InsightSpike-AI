@@ -1,0 +1,20 @@
+% Fairness & Budget Conditions Table (template)
+% Replace PLACEHOLDERs with actual values.
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Fairness and budget conditions for maze and online RAG.}
+  \begin{tabular}{lll}
+    \toprule
+    Item & Maze & Online RAG \\
+    \midrule
+    Observation/Input & 3$\times$3 partial view & Fixed index, same preprocessing \\
+    Budget & $\alpha\,\mathrm{size}^2$ steps & Common $k$, depth $h\in\{1,2,3\}$ \\
+    Candidate cap & Common $K$ (geDIG selects) & Common $k$ across methods \\
+    Stop condition & Goal or budget exceeded & Retrieval/eval/integration aligned \\
+    Seeds & $\ge$30 per size & Fixed queries, $\ge$5 seeds \\
+    Metrics & Success/Steps/Revisit/Compression & PER/Acceptance/FMR/Latency (PSZ) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+

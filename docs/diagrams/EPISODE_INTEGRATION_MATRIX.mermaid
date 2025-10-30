@@ -1,0 +1,126 @@
+%% Episode Management Decision Matrix
+%% Graph-Centric Integration Matrix (C-value Free)
+
+flowchart TD
+    %% New Episode Input
+    NewEpisode[📥 New Episode<br/>Vector + Text]
+    
+    %% Graph-Informed Integration Check
+    subgraph "🔍 Graph-Informed Decision Process"
+        direction TB
+        
+        %% Core Calculations
+        VectorSim[📊 Vector Similarity<br/>FAISS Cosine Distance]
+        GraphConn[🔗 Graph Connection<br/>Edge Weight Strength]
+        ContentOver[📝 Content Overlap<br/>Word-level Jaccard]
+        
+        %% Dynamic Thresholds
+        subgraph "🎯 Adaptive Thresholds"
+            BaseThresh[Base: Similarity ≥ 0.85]
+            GraphBonus[Graph Bonus: -0.1 if connected]
+            EffectiveThresh[Effective: 0.75-0.85]
+        end
+        
+        %% Integration Weight
+        IntegWeight[⚖️ Integration Weight<br/>graph_strength OR similarity]
+    end
+    
+    %% Decision Matrix
+    subgraph "🎯 Decision Matrix"
+        direction LR
+        
+        subgraph "✅ INTEGRATE Conditions"
+            HighSimGraph[High Sim + Graph Connection]
+            MedSimStrong[Medium Sim + Strong Graph] 
+            HighSimContent[High Sim + High Content]
+        end
+        
+        subgraph "➕ NEW NODE Conditions"
+            LowSim[Low Similarity < 0.75]
+            NoGraph[No Graph Connection]
+            Conflict[Neighbor Conflicts]
+        end
+    end
+    
+    %% Graph-Based Actions
+    subgraph "🔄 Graph-Centric Actions"
+        direction TB
+        
+        subgraph "🔗 Graph Integration"
+            WeightedMerge[Graph-Weighted Vector Merge<br/>1-w × v1 + w × v2]
+            UpdateGraph[Update Graph Structure]
+            DynamicImport[Calculate Dynamic Importance]
+            HierarchyUpdate[Update Hierarchical Index]
+        end
+        
+        subgraph "⚡ Scalable Operations"
+            FAISSUpdate[FAISS Index Update<br/>O log n]
+            ClusterRebalance[Rebalance Clusters<br/>if needed]
+            ConflictDetect[Detect Neighbor Conflicts]
+        end
+    end
+    
+    %% Splitting Logic
+    subgraph "✂️ Automatic Splitting"
+        direction TB
+        
+        ConflictThresh[Conflict Score > 0.7]
+        NeighborCheck[Check All Neighbors]
+        SplitDecision[Split to Minimize Conflicts]
+        GraphCoherence[Maintain Graph Coherence]
+    end
+    
+    %% Flow
+    NewEpisode --> VectorSim
+    NewEpisode --> GraphConn
+    NewEpisode --> ContentOver
+    
+    VectorSim --> BaseThresh
+    GraphConn --> GraphBonus
+    BaseThresh --> EffectiveThresh
+    GraphBonus --> EffectiveThresh
+    
+    EffectiveThresh --> Decision{Integration Decision}
+    ContentOver --> Decision
+    
+    Decision -->|Graph + Sim| HighSimGraph
+    Decision -->|Low Sim| LowSim
+    Decision -->|Conflicts| ConflictThresh
+    
+    HighSimGraph --> WeightedMerge
+    WeightedMerge --> UpdateGraph
+    UpdateGraph --> DynamicImport
+    DynamicImport --> HierarchyUpdate
+    
+    LowSim --> FAISSUpdate
+    ConflictThresh --> NeighborCheck
+    NeighborCheck --> SplitDecision
+    SplitDecision --> GraphCoherence
+    
+    %% Performance Examples
+    subgraph "📊 Performance at Scale"
+        direction TB
+        
+        subgraph "1K Episodes"
+            Scale1[Build: 150ms<br/>Search: 0.5ms<br/>Compression: 100x]
+        end
+        
+        subgraph "10K Episodes"
+            Scale2[Build: 1.5s<br/>Search: 2ms<br/>Compression: 200x]
+        end
+        
+        subgraph "100K Episodes"
+            Scale3[Build: 15s<br/>Search: 5ms<br/>Compression: 500x]
+        end
+    end
+    
+    %% Styling
+    classDef integrationClass fill:#e8f5e8
+    classDef newNodeClass fill:#fff3e0
+    classDef graphClass fill:#e3f2fd
+    classDef scaleClass fill:#f3e5f5
+    
+    class HighSimGraph,MedSimStrong,HighSimContent,WeightedMerge,UpdateGraph integrationClass
+    class LowSim,NoGraph,Conflict,FAISSUpdate newNodeClass
+    class VectorSim,GraphConn,ContentOver,IntegWeight,DynamicImport graphClass
+    class Scale1,Scale2,Scale3 scaleClass

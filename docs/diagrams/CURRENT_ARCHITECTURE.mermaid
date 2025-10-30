@@ -1,0 +1,101 @@
+%% InsightSpike-AI Current Architecture (2025-01)
+%% Simplified, production-ready implementation
+
+flowchart TB
+    %% User Interaction Layer
+    subgraph "👤 User Interface"
+        CLI[CLI Commands<br/>spike.py]
+        API[Python API]
+        Notebook[Jupyter Notebooks]
+    end
+    
+    %% Application Layer
+    subgraph "🏗️ Application Layer"
+        direction TB
+        CompositionRoot[Composition Root<br/>__main__.py]
+        CLIApp[CLI Application<br/>Typer + Rich]
+        Config[Configuration<br/>Pydantic Models]
+        DependencyFactory[Dependency Factory<br/>Agent Creation]
+    end
+    
+    %% Core Agent
+    subgraph "🤖 Agent System"
+        MainAgent[MainAgent<br/>implementations/agents/main_agent.py]
+        DataStore[DataStore<br/>SQLite/PostgreSQL]
+        CycleResult[CycleResult<br/>Type-safe API]
+    end
+    
+    %% Layer Architecture
+    subgraph "🧠 Core Intelligence Layers"
+        direction TB
+        
+        subgraph "Layer 1: Error Monitor"
+            L1_Error[Error Detection]
+            L1_Uncertainty[Uncertainty Tracking]
+        end
+        
+        subgraph "Layer 2: Memory Manager"
+            L2_Memory[CompatibleL2MemoryManager/<br/>CachedMemoryManager]
+            L2_Episodes[Episode Storage/Retrieval]
+            L2_Queries[Query Storage/Analysis]
+            L2_Rewards[C-value Reward System]
+        end
+        
+        subgraph "Layer 3: Graph Reasoner (Optional)"
+            L3_Graph[Graph Analysis<br/>(GeDIGCore advanced,<br/>query-centric k-hop)]
+            L3_Spike[Spike Detection<br/>ΔGED/ΔIG]
+        end
+        
+        subgraph "Layer 4: LLM Interface"
+            L4_LLM[LLM Provider<br/>Local/OpenAI/Anthropic]
+            L4_Prompt[Prompt Builder]
+        end
+    end
+    
+    %% Data Storage
+    subgraph "💾 Data Storage"
+        direction LR
+        ConfigFiles[config.yaml<br/>Presets]
+        Database[Database<br/>Episodes/Graph/Queries]
+        Embeddings[Embeddings<br/>FAISS Index]
+        QueryStore[Query History<br/>queries.json/SQLite]
+    end
+    
+    %% Flow
+    CLI --> CLIApp
+    API --> MainAgent
+    Notebook --> MainAgent
+    
+    CLIApp --> CompositionRoot
+    CompositionRoot --> Config
+    CompositionRoot --> DataStore
+    
+    CLIApp --> DependencyFactory
+    DependencyFactory --> MainAgent
+    
+    MainAgent --> L1_Error
+    L1_Error --> L2_Memory
+    L2_Memory --> L3_Graph
+    L3_Graph --> L4_LLM
+    L4_LLM --> CycleResult
+    CycleResult --> MainAgent
+    
+    MainAgent <--> DataStore
+    DataStore <--> Database
+    DataStore <--> QueryStore
+    L2_Memory <--> Embeddings
+    L2_Memory <--> QueryStore
+    Config --> ConfigFiles
+    
+    %% Styling
+    classDef interface fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef app fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef agent fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    classDef layer fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef storage fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    
+    class CLI,API,Notebook interface
+    class CompositionRoot,CLIApp,Config,DependencyFactory app
+    class MainAgent,DataStore,CycleResult agent
+    class L1_Error,L1_Uncertainty,L2_Memory,L2_Episodes,L2_Queries,L2_Rewards,L3_Graph,L3_Spike,L4_LLM,L4_Prompt layer
+    class ConfigFiles,Database,Embeddings,QueryStore storage

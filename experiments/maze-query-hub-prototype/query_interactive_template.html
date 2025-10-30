@@ -1,0 +1,2751 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <title>Maze Fixed K★ Playback</title>
+  <style>
+    :root { color-scheme: light; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+      margin: 0;
+      padding: 28px 36px 48px;
+      background: #f4f6fb;
+      color: #1f2937;
+    }
+    h1 { margin: 0 0 18px; font-size: 2.0rem; letter-spacing: 0.02em; }
+    h2 { margin: 28px 0 14px; font-size: 1.22rem; }
+    .top-summary { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); margin-bottom: 24px; }
+    .card {
+      background: #fff;
+      border: 1px solid #dbe1f1;
+      border-radius: 14px;
+      padding: 18px 20px;
+      box-shadow: 0 8px 18px rgba(30,50,90,0.08);
+    }
+    .card-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: #5c6c83; margin-bottom: 8px; }
+    .card-value { font-size: 1.7rem; font-weight: 600; color: #13213a; }
+    .layout { display: grid; gap: 24px; grid-template-columns: minmax(320px, 400px) minmax(520px, 1fr); align-items: start; }
+    .controls-card { position: sticky; top: 24px; }
+    label { font-size: 0.85rem; color: #475569; }
+    select, input[type=range] { width: 100%; margin-top: 6px; }
+    .playback-bar { display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+    .playback-bar button { border: none; background: #1c7ed6; color: #fff; padding: 6px 14px; border-radius: 999px; font-size: 0.85rem; cursor: pointer; box-shadow: 0 4px 10px rgba(28,126,214,0.25); transition: background 0.2s ease; }
+    .playback-bar button.paused { background: #394867; }
+    .playback-bar .step-button { background: #475569; box-shadow: 0 4px 10px rgba(71,85,105,0.22); }
+    .playback-bar .step-button:hover { background: #334155; }
+    .playback-bar span { font-size: 0.83rem; color: #4b5563; min-width: 92px; text-align: right; margin-left: auto; }
+    .meta-table { width: 100%; border-collapse: collapse; margin-top: 18px; font-size: 0.9rem; }
+    .meta-table th, .meta-table td { padding: 6px 8px; border-bottom: 1px solid #edf0f6; text-align: left; }
+    .meta-table th { color: #5c667a; font-weight: 500; }
+    .config-table { margin-top: 16px; }
+    .config-table th { width: 48%; }
+    .config-table td { font-family: 'Menlo', 'Fira Code', monospace; font-size: 0.82rem; }
+    .alert { margin-top: 16px; padding: 12px 14px; border-radius: 10px; background: #fff0d5; border: 1px solid #ffe3a4; color: #7f6000; font-size: 0.88rem; display: none; }
+    .panels { display: grid; gap: 18px; }
+    canvas {
+      display: block;
+      width: 100%;
+      background: #fff;
+      border: 1px solid #dde3f0;
+      border-radius: 14px;
+      box-shadow: inset 0 1px 1px rgba(30,60,90,0.05);
+    }
+    .dual-grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+    .legend { display: flex; flex-wrap: wrap; gap: 18px; font-size: 0.85rem; color: #5c677d; margin-bottom: 6px; }
+    .legend span::before { content: ''; display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-right: 6px; vertical-align: middle; box-sizing: border-box; }
+    .legend .path::before { background: #4c6ef5; }
+    .legend .cand::before { background: #f59f00; }
+    .legend .graph::before { background: #7dd3fc; }
+    .legend .clink::before { background: transparent; border: 2px solid #0ea5e9; }
+    .legend .link::before { background: #0ea5e9; }
+    .legend .action::before { background: #1d4ed8; }
+    .legend .forced::before { background: transparent; border: 2px dashed #ef4444; }
+    .legend .shortcut::before { background: transparent; border: 2px dashed #9c36b5; }
+    .legend .g0::before { background: #1c7ed6; }
+    .legend .gmin::before { background: #f03e3e; }
+    .legend .ged::before { background: #845ef7; }
+    .legend .ig::before { background: #f08c00; }
+    .legend .ged-min::before { background: #0ca678; }
+    .legend .ig-min::before { background: #d9480f; }
+    .legend .kstar::before { background: #37b24d; }
+    .step-info { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top: 16px; }
+    .step-box { background: #fff; border: 1px solid #dbe1f1; border-radius: 12px; padding: 12px 14px; box-shadow: 0 4px 12px rgba(20,40,90,0.05); }
+    .step-box h4 { margin: 0 0 6px; font-size: 0.88rem; color: #495365; text-transform: uppercase; letter-spacing: 0.05em; }
+    .step-box span { font-size: 1.08rem; font-weight: 600; color: #101828; }
+    .cand-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
+    .cand-table th, .cand-table td { padding: 6px 8px; border-bottom: 1px solid #edf1fb; text-align: left; }
+    .cand-table tr.highlight { background: #fff4e6; }
+    .cand-table .cand-meta { display: block; color: #6b7280; font-size: 0.76rem; margin-top: 2px; }
+    .cand-placeholder { margin: 8px 0; color: #8d96a9; font-size: 0.84rem; }
+    .note { font-size: 0.78rem; color: #8d96a9; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <h1>Maze Fixed K★ Playback</h1>
+  <div class="top-summary">
+    <div class="card"><div class="card-title">Success Rate</div><div class="card-value">0.80</div></div>
+    <div class="card"><div class="card-title">Average Steps</div><div class="card-value">429.6</div></div>
+    <div class="card"><div class="card-title">Mean g₀</div><div class="card-value">0.0000</div></div>
+    <div class="card"><div class="card-title">Mean g_min</div><div class="card-value">0.0358</div></div>
+    <div class="card"><div class="card-title">k★ Mean</div><div class="card-value">0.0037</div></div>
+    <div class="card"><div class="card-title">k★ ≥ 1 Ratio</div><div class="card-value">0.0037</div></div>
+    <div class="card"><div class="card-title">Multihop Usage</div><div class="card-value">0.0000</div></div>
+  </div>
+
+  <div class="layout">
+    <div class="card controls-card">
+      <div class="card-title">Controls</div>
+      <label for="seed-select">Seed</label>
+      <select id="seed-select"></select>
+      <div style="margin-top:14px;">
+        <label for="edge-mode-select">Edges</label>
+        <select id="edge-mode-select">
+          <option value="all">All (graph + candidates)</option>
+          <option value="committed">Committed only</option>
+        </select>
+      </div>
+      <div style="margin-top:8px;">
+        <label><input type="checkbox" id="cumulative-toggle" /> Cumulative (up to current step)</label>
+      </div>
+      <div style="margin-top:6px;">
+        <label><input type="checkbox" id="evalgraph-toggle" /> Pre-step (eval) graph</label>
+      </div>
+      <div style="margin-top:6px;">
+        <label><input type="checkbox" id="dsgraph-toggle" checked /> Use DS graph (persisted)</label>
+        <label><input type="checkbox" id="ds-strict-toggle" checked /> Strict DS (no overlays)</label>
+        <label><input type="checkbox" id="mh-only-toggle" /> Timeline uses mh-only minima</label>
+      </div>
+      <div style="margin-top:6px;">
+        <label><input type="checkbox" id="query-toggle" /> Show all query nodes</label>
+        <label><input type="checkbox" id="sp-anchors-toggle" /> Show SP anchors</label>
+      </div>
+      <div style="margin-top:18px;">
+        <label for="step-slider">Step</label>
+        <input type="range" id="step-slider" min="0" max="0" value="0" />
+        <div class="note">ドラッグして迷路の進行を再生</div>
+        <div class="playback-bar">
+          <button id="play-toggle" type="button">▶︎ 再生</button>
+          <button id="step-prev" type="button" class="step-button">⟵ 1 ステップ</button>
+          <button id="step-next" type="button" class="step-button">1 ステップ ⟶</button>
+          <span id="step-counter">0 / 0</span>
+        </div>
+      </div>
+      <table class="meta-table" id="run-meta"></table>
+      <table class="meta-table config-table" id="config-meta"></table>
+      <div class="alert" id="kstar-alert">k★がほぼ立ち上がっていません。類似度スコアやθ_cand/θ_linkの見直しを検討してください。</div>
+    </div>
+
+  <div class="panels">
+      <div class="card">
+        <h3>Maze Playback &amp; Graph Integration</h3>
+        <div class="legend"><span class="path">訪問経路</span><span class="cand">候補 (S_cand)</span><span class="clink">接続候補 (S_link)</span><span class="graph">既存配線</span><span class="link">実行配線</span><span class="action">決定行動</span><span class="forced">強制配線 (r_link空)</span></div>
+        <canvas id="maze-canvas" width="640" height="640"></canvas>
+      </div>
+      <div class="dual-grid">
+        <div class="card">
+          <h3>Graph Snapshot</h3>
+          <canvas id="graph-canvas" width="520" height="520"></canvas>
+          <canvas id="graph-abstract-canvas" width="520" height="520" style="margin-top:16px;"></canvas>
+        </div>
+        <div class="card">
+          <h3>Temporal Metrics</h3>
+          <div class="legend"><span class="g0">g₀</span><span class="gmin">g_min</span><span class="shortcut">SP shortcut</span></div>
+          <canvas id="timeline-canvas" width="520" height="200"></canvas>
+          <div class="legend" style="margin-top:14px;"><span class="ged">ΔGED</span><span class="ig">ΔIG</span></div>
+          <canvas id="diff-canvas" width="520" height="200"></canvas>
+          <div class="legend" style="margin-top:14px;"><span class="ged-min">ΔGED (min)</span><span class="ig-min">ΔIG (min)</span></div>
+          <canvas id="diff-min-canvas" width="520" height="200"></canvas>
+          <div class="legend" style="margin-top:14px;"><span class="ged">ΔSP</span><span class="ig-min">ΔSP (min)</span></div>
+          <canvas id="sp-canvas" width="520" height="200"></canvas>
+          <div class="legend" style="margin-top:14px;"><span class="kstar">k★</span></div>
+          <canvas id="k-canvas" width="520" height="160"></canvas>
+          <div class="card" style="margin-top:16px;">
+            <h3>SP Debug (top δSP per hop)</h3>
+            <table class="cand-table" id="sp-debug-table"></table>
+          </div>
+        </div>
+      </div>
+      <div class="step-info" id="step-info"></div>
+      <div class="card" id="debug-card" style="display:block;">
+        <h3>Render Debug</h3>
+        <table class="cand-table" id="render-debug-table"></table>
+      </div>
+      <div class="card">
+        <h3>Candidate Snapshot</h3>
+        <div class="note">sim = exp(-d_w/T)。d_w は相対ベクトルの重み付きL2（類似度の元）。r_abs_* は絶対ベクトルの重み付きL2（半径フィルタ用の実測距離）。</div>
+        <table class="cand-table" id="cand-table"></table>
+      </div>
+      <div class="card" id="hop-card">
+        <h3>Per-hop Metrics (g(h), ΔGED, IG, H, ΔSP)</h3>
+        <div class="note">0hop から maxhop までの評価値を表示します。</div>
+        <table class="cand-table" id="hop-table"></table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const experimentData = {"config": {"graph_mode": "query_hub"}};
+    const dsGraphGlobal = (experimentData.ds_graph || {});
+    const globalDsEdges = (Array.isArray(dsGraphGlobal.edges) && dsGraphGlobal.edges.length) ? dsGraphGlobal.edges : null;
+    const globalDsNodes = (Array.isArray(dsGraphGlobal.nodes) && dsGraphGlobal.nodes.length) ? dsGraphGlobal.nodes : null;
+
+    const BLOCK_RADIUS = 1e6;
+    const QUERY_MARKER = -1;
+    const formatRadius = (value) => {
+      if (value === null || value === undefined) return '—';
+      const num = Number(value);
+      if (!Number.isFinite(num)) return '∞';
+      if (Math.abs(num) >= BLOCK_RADIUS / 10) return '∞';
+      return num.toFixed(2);
+    };
+const ACTIONS = {0: [-1, 0], 1: [0, 1], 2: [1, 0], 3: [0, -1]};
+const ACTION_NAMES = {0: '↑ up', 1: '→ right', 2: '↓ down', 3: '← left'};
+const DIR_DELTAS = {0: [-1, 0], 1: [0, 1], 2: [1, 0], 3: [0, -1]};
+const EDGE_STYLES = {
+  candidate: { color: 'rgba(245, 158, 11, 0.85)', width: 2.0, dash: [3, 3], node: 'rgba(252, 211, 77, 0.9)' },
+  obs: { color: 'rgba(250, 204, 21, 0.9)', width: 2.4, dash: [3, 3], node: 'rgba(253, 230, 138, 0.95)' },
+  mem: { color: 'rgba(56, 189, 248, 0.8)', width: 2.0, dash: [6, 4], node: 'rgba(191, 219, 254, 0.9)' },
+  graph: { color: 'rgba(125, 211, 252, 0.8)', width: 1.9, dash: [], node: 'rgba(186, 230, 253, 0.92)' },
+  link: { color: '#1e3a8a', width: 2.8, dash: [], node: 'rgba(96, 165, 250, 0.95)' },
+  forced: { color: 'rgba(239, 68, 68, 0.95)', width: 2.8, dash: [6, 4], node: 'rgba(252, 165, 165, 0.93)' },
+  selected: { color: '#ef4444', width: 3.4, dash: [], node: 'rgba(248, 113, 113, 0.95)' },
+  action: { color: '#1d4ed8', width: 3.2, dash: [], node: 'rgba(96, 165, 250, 0.95)' },
+  shortcut: { color: '#9c36b5', width: 2.6, dash: [6, 4], node: 'rgba(233, 168, 243, 0.85)' },
+  default: { color: 'rgba(203, 213, 225, 0.35)', width: 1.1, dash: [], node: 'rgba(226, 232, 240, 0.65)' },
+};
+
+window.addEventListener('error', (event) => {
+  console.error('Unhandled error:', event.error || event.message);
+  try {
+    const fallback = document.getElementById('graph-canvas');
+    if (fallback) {
+      const ctx = fallback.getContext('2d');
+      if (ctx) {
+        ctx.save();
+        ctx.fillStyle = '#fee2e2';
+        ctx.fillRect(0, 0, fallback.width, fallback.height);
+        ctx.fillStyle = '#b91c1c';
+        ctx.font = '13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`Fatal error: ${event.message}`, fallback.width / 2, fallback.height / 2);
+        ctx.restore();
+      }
+    }
+  } catch (_) {
+    /* ignore */
+  }
+});
+
+    const dirFromDelta = delta => {
+      if (delta === null || delta === undefined) return null;
+      let dr = null;
+      let dc = null;
+      if (Array.isArray(delta) && delta.length >= 2) {
+        dr = Number(delta[0]);
+        dc = Number(delta[1]);
+      } else if (typeof delta === 'object' && delta !== null) {
+        const keys = Object.keys(delta);
+        if (keys.length >= 2) {
+          dr = Number(delta[keys[0]]);
+          dc = Number(delta[keys[1]]);
+        }
+      } else if (typeof delta === 'string') {
+        const parts = delta.split(',').map(Number);
+        if (parts.length >= 2) {
+          dr = parts[0];
+          dc = parts[1];
+        }
+      }
+      if (dr === null || dc === null || Number.isNaN(dr) || Number.isNaN(dc)) return null;
+      if (dr === -1 && dc === 0) return 0;
+      if (dr === 0 && dc === 1) return 1;
+      if (dr === 1 && dc === 0) return 2;
+      if (dr === 0 && dc === -1) return 3;
+      return null;
+    };
+
+    const directionFromPositions = (target, origin) => {
+      if (!target || !origin) return null;
+      const dr = target[0] - origin[0];
+      const dc = target[1] - origin[1];
+      if (dr === 0 && dc === 0) return null;
+      if (Math.abs(dr) > Math.abs(dc)) return dr < 0 ? 0 : 2;
+      if (Math.abs(dc) > Math.abs(dr)) return dc > 0 ? 1 : 3;
+      if (dr !== 0) return dr < 0 ? 0 : 2;
+      if (dc !== 0) return dc > 0 ? 1 : 3;
+      return null;
+    };
+
+    const seedSelect = document.getElementById('seed-select');
+    const edgeModeSelect = document.getElementById('edge-mode-select');
+    const stepSlider = document.getElementById('step-slider');
+    const runMeta = document.getElementById('run-meta');
+    const configMeta = document.getElementById('config-meta');
+    const kstarAlert = document.getElementById('kstar-alert');
+    const playToggle = document.getElementById('play-toggle');
+    const stepCounter = document.getElementById('step-counter');
+    const stepPrev = document.getElementById('step-prev');
+    const stepNext = document.getElementById('step-next');
+    const mazeCanvas = document.getElementById('maze-canvas');
+    const mazeCtx = mazeCanvas.getContext('2d');
+    const graphCanvas = document.getElementById('graph-canvas');
+    const graphCtx = graphCanvas.getContext('2d');
+    const graphAbstractCanvas = document.getElementById('graph-abstract-canvas');
+    const graphAbstractCtx = graphAbstractCanvas ? graphAbstractCanvas.getContext('2d') : null;
+    const timelineCanvas = document.getElementById('timeline-canvas');
+    const timelineCtx = timelineCanvas.getContext('2d');
+    const diffCanvas = document.getElementById('diff-canvas');
+    const diffCtx = diffCanvas.getContext('2d');
+    const diffMinCanvas = document.getElementById('diff-min-canvas');
+    const diffMinCtx = diffMinCanvas.getContext('2d');
+    const spCanvas = document.getElementById('sp-canvas');
+    const spCtx = spCanvas.getContext('2d');
+    const kCanvas = document.getElementById('k-canvas');
+    const kCtx = kCanvas.getContext('2d');
+    const stepInfo = document.getElementById('step-info');
+    const candTable = document.getElementById('cand-table');
+    const hopTable = document.getElementById('hop-table');
+    const spDebugTable = document.getElementById('sp-debug-table');
+
+    const summaryCards = Array.from(document.querySelectorAll('.top-summary .card-value'));
+    const summary = experimentData.summary || {};
+    const seedStatsValues = Object.values(experimentData.seed_data || {});
+    const totalStepsAll = seedStatsValues.reduce((acc, entry) => acc + (entry.total_steps ?? 0), 0);
+    const kPositiveAll = seedStatsValues.reduce((acc, entry) => acc + (entry.k_positive ?? 0), 0);
+    const kRatioAll = totalStepsAll ? kPositiveAll / totalStepsAll : 0;
+    const summaryValues = [
+      (summary.success_rate ?? 0).toFixed(2),
+      (summary.avg_steps ?? 0).toFixed(1),
+      (summary.g0_mean ?? 0).toFixed(4),
+      (summary.gmin_mean ?? 0).toFixed(4),
+      (summary.k_star_mean ?? 0).toFixed(4),
+      kRatioAll.toFixed(4),
+      (summary.multihop_usage ?? 0).toFixed(4),
+    ];
+    summaryCards.forEach((node, idx) => {
+      if (summaryValues[idx] !== undefined) {
+        node.textContent = summaryValues[idx];
+      }
+    });
+
+    const graphMode = experimentData.config?.graph_mode || (experimentData.config?.selector ? 'center_hub' : 'center');
+    const cfg = experimentData.config || {};
+    const ged = cfg.gedig || {};
+    const state = { seed: null, step: 0, playing: false, edgeMode: 'all', cumulative: false, evalGraph: false, dsGraph: true, dsStrict: true, useMhOnly: false, showAllQueries: false, spAnchors: false, hoverNodeKey: null };
+    let playTimer = null;
+
+    const seeds = Object.keys(experimentData.seed_data).sort((a,b)=>Number(a)-Number(b));
+    seeds.forEach(seed => {
+      const option = document.createElement('option');
+      option.value = seed;
+      option.textContent = `Seed ${seed}`;
+      seedSelect.appendChild(option);
+    });
+    if (seeds.length) {
+      state.seed = seeds[0];
+      seedSelect.value = state.seed;
+    }
+
+    seedSelect.addEventListener('change', () => {
+      stopPlayback();
+      state.seed = seedSelect.value;
+      state.step = 0;
+      updateControls();
+      render();
+    });
+
+    stepSlider.addEventListener('input', () => {
+      state.step = Number(stepSlider.value);
+      if (state.step >= stepSlider.max) {
+        stopPlayback();
+      }
+      render();
+    });
+
+    playToggle.addEventListener('click', () => {
+      if (state.playing) {
+        stopPlayback();
+      } else {
+        startPlayback();
+      }
+    });
+
+    if (stepPrev) {
+      stepPrev.addEventListener('click', () => nudgeStep(-1));
+    }
+    if (stepNext) {
+      stepNext.addEventListener('click', () => nudgeStep(1));
+    }
+    if (edgeModeSelect) {
+      edgeModeSelect.addEventListener('change', () => {
+        state.edgeMode = edgeModeSelect.value;
+        render();
+      });
+    }
+    const cumulativeToggle = document.getElementById('cumulative-toggle');
+    if (cumulativeToggle) {
+      cumulativeToggle.addEventListener('change', () => {
+        state.cumulative = !!cumulativeToggle.checked;
+        render();
+      });
+    }
+    const evalToggle = document.getElementById('evalgraph-toggle');
+    if (evalToggle) {
+      evalToggle.addEventListener('change', () => {
+        state.evalGraph = !!evalToggle.checked;
+        render();
+      });
+    }
+    const dsToggle = document.getElementById('dsgraph-toggle');
+    if (dsToggle) {
+      dsToggle.addEventListener('change', () => {
+        state.dsGraph = !!dsToggle.checked;
+        render();
+      });
+    }
+    const dsStrictToggle = document.getElementById('ds-strict-toggle');
+    if (dsStrictToggle) {
+      dsStrictToggle.addEventListener('change', () => {
+        state.dsStrict = !!dsStrictToggle.checked;
+        render();
+      });
+    }
+    const mhOnlyToggle = document.getElementById('mh-only-toggle');
+    if (mhOnlyToggle) {
+      mhOnlyToggle.addEventListener('change', () => {
+        state.useMhOnly = !!mhOnlyToggle.checked;
+        render();
+      });
+    }
+    const queryToggle = document.getElementById('query-toggle');
+    if (queryToggle) {
+      queryToggle.addEventListener('change', () => {
+        state.showAllQueries = !!queryToggle.checked;
+        render();
+      });
+    }
+    const spAnchorsToggle = document.getElementById('sp-anchors-toggle');
+    if (spAnchorsToggle) {
+      spAnchorsToggle.addEventListener('change', () => {
+        state.spAnchors = !!spAnchorsToggle.checked;
+        render();
+      });
+    }
+
+    // Initialize UI defaults from payload if provided
+    ;(function initUiDefaults(){
+      try {
+        const def = experimentData?.config?.ui_defaults || null;
+        if (!def) return;
+        if (typeof def.edgeMode === 'string') {
+          state.edgeMode = def.edgeMode;
+          const em = document.getElementById('edge-mode-select');
+          if (em) em.value = state.edgeMode;
+        }
+        if (typeof def.dsGraph === 'boolean') {
+          state.dsGraph = !!def.dsGraph;
+          if (dsToggle) dsToggle.checked = state.dsGraph;
+        }
+        if (typeof def.dsStrict === 'boolean') {
+          state.dsStrict = !!def.dsStrict;
+          if (dsStrictToggle) dsStrictToggle.checked = state.dsStrict;
+        }
+        if (typeof def.evalGraph === 'boolean') {
+          state.evalGraph = !!def.evalGraph;
+          if (evalToggle) evalToggle.checked = state.evalGraph;
+        }
+        if (typeof def.cumulative === 'boolean') {
+          state.cumulative = !!def.cumulative;
+          if (cumulativeToggle) cumulativeToggle.checked = state.cumulative;
+        }
+        if (typeof def.useMhOnly === 'boolean') {
+          state.useMhOnly = !!def.useMhOnly;
+          if (mhOnlyToggle) mhOnlyToggle.checked = state.useMhOnly;
+        }
+        if (typeof def.showAllQueries === 'boolean') {
+          state.showAllQueries = !!def.showAllQueries;
+          if (queryToggle) queryToggle.checked = state.showAllQueries;
+        }
+        if (typeof def.spAnchors === 'boolean') {
+          state.spAnchors = !!def.spAnchors;
+          if (spAnchorsToggle) spAnchorsToggle.checked = state.spAnchors;
+        }
+      } catch (_) {}
+    })();
+
+    // Hover handling for abstract graph: track nearest node id "row,col,dir"
+    function installAbstractHover() {
+      if (!graphAbstractCanvas) return;
+      graphAbstractCanvas.addEventListener('mousemove', (e) => {
+        try {
+          const rect = graphAbstractCanvas.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const pos = (window.__lastAbstractPositions || new Map());
+          let best = null; let bestD = Infinity;
+          pos.forEach((p, key) => {
+            const dx = p.x - x; const dy = p.y - y;
+            const d = Math.sqrt(dx*dx + dy*dy);
+            if (d < bestD) { bestD = d; best = key; }
+          });
+          const thresh = 18; // px threshold for picking
+          const newKey = (bestD <= thresh) ? best : null;
+          if (newKey !== state.hoverNodeKey) {
+            state.hoverNodeKey = newKey;
+            render();
+          }
+        } catch (_) {}
+      });
+      graphAbstractCanvas.addEventListener('mouseleave', () => {
+        if (state.hoverNodeKey !== null) {
+          state.hoverNodeKey = null;
+          render();
+        }
+      });
+    }
+
+    function startPlayback() {
+      const records = getRecords();
+      if (!records.length) return;
+      state.playing = true;
+      playToggle.textContent = '⏸ 一時停止';
+      playToggle.classList.add('paused');
+      clearInterval(playTimer);
+      playTimer = setInterval(() => {
+        const maxStep = records.length ? records[records.length - 1].step : 0;
+        if (state.step >= maxStep) {
+          stopPlayback();
+          return;
+        }
+        state.step += 1;
+        stepSlider.value = state.step;
+        render();
+      }, 160);
+    }
+
+    function stopPlayback() {
+      state.playing = false;
+      playToggle.textContent = '▶︎ 再生';
+      playToggle.classList.remove('paused');
+      clearInterval(playTimer);
+      playTimer = null;
+    }
+
+    function nudgeStep(delta) {
+      const records = getRecords();
+      if (!records.length) return;
+      const maxStep = records[records.length - 1].step;
+      const nextStep = Math.min(Math.max(state.step + delta, 0), maxStep);
+      stopPlayback();
+      if (nextStep === state.step) {
+        return;
+      }
+      state.step = nextStep;
+      stepSlider.value = state.step;
+      render();
+    }
+
+    function getRecords() {
+      const seedData = experimentData.seed_data[state.seed];
+      if (!seedData) return [];
+      return seedData.records;
+    }
+
+    function getMaze() {
+      return experimentData.maze_data[state.seed];
+    }
+
+    function updateControls() {
+      const records = getRecords();
+      const maxStep = records.length ? records[records.length - 1].step : 0;
+      stepSlider.max = maxStep;
+      stepSlider.value = Math.min(state.step, maxStep);
+      state.step = Number(stepSlider.value);
+      stepCounter.textContent = `${records.length ? state.step + 1 : 0} / ${maxStep + 1}`;
+
+      const run = experimentData.seed_data[state.seed]?.run_summary || {};
+      runMeta.innerHTML = `
+        <tr><th>success</th><td>${run.success ? '✓' : '✗'}</td></tr>
+        <tr><th>steps</th><td>${run.steps ?? '-'}</td></tr>
+        <tr><th>edges</th><td>${run.edges ?? '-'}</td></tr>
+        <tr><th>dead-end steps</th><td>${run.dead_end_steps ?? '-'}</td></tr>
+        <tr><th>dead-end escape</th><td>${(run.dead_end_escape_rate ?? 0).toFixed(3)}</td></tr>`;
+
+      if (configMeta) {
+        const cfg = experimentData.config || {};
+        const selector = cfg.selector || {};
+        const gedig = cfg.gedig || {};
+        const thetaCand = selector.theta_cand ?? '-';
+        const thetaLink = selector.theta_link ?? '-';
+        const radiusCand = selector.radius_cand ?? selector.cand_radius ?? '-';
+        const radiusLink = selector.radius_link ?? selector.link_radius ?? '-';
+        const lambdaW = Number(gedig.lambda_weight ?? 0).toFixed(2);
+        const gamma = Number(gedig.sp_beta ?? 0).toFixed(2);
+        const hops = (gedig.max_hops ?? '-');
+        const thAG = Number(cfg.theta_ag ?? 0).toFixed(2);
+        const thDG = Number(cfg.theta_dg ?? 0).toFixed(2);
+        const actPol = cfg.action_policy ?? 'argmax';
+        const tau = Number(cfg.action_temp ?? 1).toFixed(2);
+        configMeta.innerHTML = `
+          <tr><th>maze_size × type</th><td>${cfg.maze_size ?? '-'} / ${cfg.maze_type ?? '-'}</td></tr>
+          <tr><th>max_steps</th><td>${cfg.max_steps ?? '-'}</td></tr>
+          <tr><th>θ_cand / θ_link (sim)</th><td>${thetaCand} / ${thetaLink}</td></tr>
+          <tr><th>cand_radius / link_radius</th><td>${radiusCand} / ${radiusLink}</td></tr>
+          <tr><th>cap / top_m</th><td>${selector.candidate_cap ?? '-'} / ${selector.top_m ?? '-'}</td></tr>
+          <tr><th>λ / γ / hops</th><td>${lambdaW} / ${gamma} / ${hops}</td></tr>
+          <tr><th>SP boundary / scope / expand</th><td>${gedig.sp_boundary_mode ?? '-'} / ${gedig.sp_scope_mode ?? '-'} / ${gedig.sp_hop_expand ?? 0}</td></tr>
+          <tr><th>θ_AG / θ_DG</th><td>${thAG} / ${thDG}</td></tr>
+          <tr><th>action / τ</th><td>${actPol} / ${tau}</td></tr>
+        `;
+      }
+
+      const total = experimentData.seed_data[state.seed]?.total_steps ?? 0;
+      const kPositive = experimentData.seed_data[state.seed]?.k_positive ?? 0;
+      kstarAlert.style.display = (total && kPositive / total < 0.05) ? 'block' : 'none';
+    }
+
+    function clearCanvas(ctx) {
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    }
+
+    const toCoord = (pos) => {
+      if (!pos) return null;
+      if (Array.isArray(pos) && pos.length >= 2) return [Number(pos[0]), Number(pos[1])];
+      if (typeof pos === 'object' && pos !== null) {
+        if ('0' in pos && '1' in pos) return [Number(pos[0]), Number(pos[1])];
+        if ('x' in pos && 'y' in pos) return [Number(pos.y), Number(pos.x)];
+      }
+      if (typeof pos === 'string') {
+        const parts = pos.split(',').map(Number);
+        if (parts.length >= 2 && parts.every(n => !Number.isNaN(n))) return [parts[0], parts[1]];
+      }
+      return null;
+    };
+
+    function drawMaze(stepIdxOverride) {
+      const maze = getMaze();
+      const records = getRecords();
+      mazeCtx.clearRect(0, 0, mazeCanvas.width, mazeCanvas.height);
+      if (!maze || !records.length) return;
+      const recIndex = Math.min(typeof stepIdxOverride === 'number' ? stepIdxOverride : state.step, records.length - 1);
+      const rec = records[recIndex];
+      const layout = maze.layout;
+      const rows = layout.length;
+      const cols = layout[0].length;
+      const padding = 32;
+      const cellSize = Math.min((mazeCanvas.width - padding * 2) / cols, (mazeCanvas.height - padding * 2) / rows);
+      const originX = (mazeCanvas.width - cellSize * cols) / 2;
+      const originY = (mazeCanvas.height - cellSize * rows) / 2;
+
+      const drawCell = (r, c, fill) => {
+        mazeCtx.fillStyle = fill;
+        mazeCtx.fillRect(originX + c * cellSize, originY + r * cellSize, cellSize, cellSize);
+      };
+
+      mazeCtx.fillStyle = '#ffffff';
+      mazeCtx.fillRect(0, 0, mazeCanvas.width, mazeCanvas.height);
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const value = layout[r][c];
+          if (value === 1) {
+            drawCell(r, c, '#1f2933');
+          } else {
+            drawCell(r, c, '#f8fafc');
+          }
+        }
+      }
+
+      const start = maze.start_pos;
+      const goal = maze.goal_pos;
+      drawCell(start[0], start[1], '#d0ebff');
+      drawCell(goal[0], goal[1], '#ffdce5');
+
+      mazeCtx.strokeStyle = '#ced4da';
+      mazeCtx.lineWidth = 1;
+      for (let r = 0; r <= rows; r++) {
+        mazeCtx.beginPath();
+        mazeCtx.moveTo(originX, originY + r * cellSize);
+        mazeCtx.lineTo(originX + cols * cellSize, originY + r * cellSize);
+        mazeCtx.stroke();
+      }
+      for (let c = 0; c <= cols; c++) {
+        mazeCtx.beginPath();
+        mazeCtx.moveTo(originX + c * cellSize, originY);
+        mazeCtx.lineTo(originX + c * cellSize, originY + rows * cellSize);
+        mazeCtx.stroke();
+      }
+
+      const pathPositions = [start.slice()];
+      records.forEach(r => {
+        const s = Number(r.step ?? 0);
+        const cap = typeof stepIdxOverride === 'number' ? stepIdxOverride : state.step;
+        if (s <= cap) pathPositions.push(r.position);
+      });
+      mazeCtx.strokeStyle = 'rgba(76, 110, 245, 0.55)';
+      mazeCtx.lineWidth = Math.max(2, cellSize * 0.24);
+      mazeCtx.lineJoin = 'round';
+      mazeCtx.lineCap = 'round';
+      mazeCtx.beginPath();
+      pathPositions.forEach((pos, idx) => {
+        const x = originX + (pos[1] + 0.5) * cellSize;
+        const y = originY + (pos[0] + 0.5) * cellSize;
+        if (idx === 0) mazeCtx.moveTo(x, y); else mazeCtx.lineTo(x, y);
+      });
+      mazeCtx.stroke();
+
+      const currentEdges = rec.graph_edges || [];
+      mazeCtx.strokeStyle = 'rgba(14, 165, 233, 0.45)';
+      mazeCtx.lineWidth = Math.max(1.6, cellSize * 0.18);
+      mazeCtx.beginPath();
+      currentEdges.forEach(edge => {
+        const [a, b] = edge;
+        const ax = originX + (a[1] + 0.5) * cellSize;
+        const ay = originY + (a[0] + 0.5) * cellSize;
+        const bx = originX + (b[1] + 0.5) * cellSize;
+        const by = originY + (b[0] + 0.5) * cellSize;
+        mazeCtx.moveTo(ax, ay);
+        mazeCtx.lineTo(bx, by);
+      });
+      mazeCtx.stroke();
+
+      const newEdge = rec.new_edge;
+      if (Array.isArray(newEdge) && newEdge.length === 2) {
+        const [a, b] = newEdge;
+        mazeCtx.strokeStyle = 'rgba(29, 78, 216, 0.9)';
+        mazeCtx.lineWidth = Math.max(2.6, cellSize * 0.3);
+        mazeCtx.beginPath();
+        mazeCtx.moveTo(originX + (a[1] + 0.5) * cellSize, originY + (a[0] + 0.5) * cellSize);
+        mazeCtx.lineTo(originX + (b[1] + 0.5) * cellSize, originY + (b[0] + 0.5) * cellSize);
+        mazeCtx.stroke();
+      }
+
+      const nodeToCell = node => {
+        if (!Array.isArray(node) || node.length < 3) return null;
+        const row = Number(node[0]);
+        const col = Number(node[1]);
+        const dir = Number(node[2]);
+        if (Number.isNaN(row) || Number.isNaN(col)) return null;
+        if (dir >= 0 && dir <= 3) {
+          const delta = DIR_DELTAS[dir];
+          return [row + delta[0], col + delta[1]];
+        }
+        return [row, col];
+      };
+
+      const drawCandEdgeOnMaze = entry => {
+        const nodes = entry.nodes || entry;
+        if (!Array.isArray(nodes) || nodes.length !== 2) return;
+        const startCell = nodeToCell(nodes[0]);
+        const endCell = nodeToCell(nodes[1]);
+        if (!startCell || !endCell) return;
+        const forced = Boolean(entry.forced);
+        const bridge = Boolean(entry.bridge);
+        mazeCtx.save();
+        if (forced) {
+          mazeCtx.strokeStyle = 'rgba(239, 68, 68, 0.9)';
+          mazeCtx.setLineDash([6, 4]);
+        } else if (bridge) {
+          mazeCtx.strokeStyle = 'rgba(59, 130, 246, 0.65)';
+          mazeCtx.setLineDash([4, 5]);
+        } else {
+          mazeCtx.strokeStyle = 'rgba(14, 165, 233, 0.85)';
+          mazeCtx.setLineDash([]);
+        }
+        mazeCtx.lineWidth = Math.max(2.4, cellSize * 0.23);
+        mazeCtx.beginPath();
+        mazeCtx.moveTo(originX + (startCell[1] + 0.5) * cellSize, originY + (startCell[0] + 0.5) * cellSize);
+        mazeCtx.lineTo(originX + (endCell[1] + 0.5) * cellSize, originY + (endCell[0] + 0.5) * cellSize);
+        mazeCtx.stroke();
+        mazeCtx.restore();
+      };
+
+      const highlightPositions = (items, fillStyle) => {
+        if (!items) return;
+        items.forEach(item => {
+          const anchor = toCoord(item.position || item.pos || item.anchor_position || item.anchorPosition);
+          const target = toCoord(item.target_position || item.targetPosition);
+          const pos = anchor;
+          const bridge = target && graphMode.startsWith('query') ? target : null;
+          if (!pos) return;
+          mazeCtx.fillStyle = fillStyle;
+          mazeCtx.beginPath();
+          mazeCtx.arc(originX + (pos[1] + 0.5) * cellSize, originY + (pos[0] + 0.5) * cellSize, cellSize * 0.25, 0, Math.PI * 2);
+          mazeCtx.fill();
+        });
+      };
+      if (!(state.dsGraph && state.dsStrict)) {
+        highlightPositions(rec.candidate_pool || [], 'rgba(245, 159, 0, 0.55)');
+        highlightPositions(rec.selected_links, 'rgba(14, 165, 233, 0.75)');
+        (rec.cand_edges || []).forEach(drawCandEdgeOnMaze);
+      }
+
+      const cellInDSEdges = (cell) => {
+        try {
+          if (!cell) return false;
+          const r = Number(cell[0]);
+          const c = Number(cell[1]);
+          const edges = (state.dsGraph && Array.isArray(rec.ds_graph_edges) && rec.ds_graph_edges.length) ? rec.ds_graph_edges : (globalDsEdges || []);
+          if (!Array.isArray(edges)) return false;
+          return edges.some(e => Array.isArray(e) && e.length===2 && ((Number(e[0][0])===r && Number(e[0][1])===c) || (Number(e[1][0])===r && Number(e[1][1])===c)));
+        } catch(_) { return false; }
+      };
+
+      if (graphMode.startsWith('query') && rec.query_node && !(state.dsGraph && state.dsStrict && !cellInDSEdges(rec.query_node))) {
+        const q = rec.query_node;
+        const qx = originX + (q[1] + 0.5) * cellSize;
+        const qy = originY + (q[0] + 0.5) * cellSize;
+        mazeCtx.strokeStyle = 'rgba(103, 80, 164, 0.9)';
+        mazeCtx.lineWidth = Math.max(2.2, cellSize * 0.22);
+        mazeCtx.beginPath();
+        mazeCtx.arc(qx, qy, cellSize * 0.35, 0, Math.PI * 2);
+        mazeCtx.stroke();
+      }
+
+      // In Strict DS, suppress agent (post-step) dot to avoid confusion with next-step query
+      if (!(state.dsGraph && state.dsStrict)) {
+        const agent = rec.position;
+        mazeCtx.fillStyle = '#1c7ed6';
+        mazeCtx.beginPath();
+        mazeCtx.arc(originX + (agent[1] + 0.5) * cellSize, originY + (agent[0] + 0.5) * cellSize, cellSize * 0.32, 0, Math.PI * 2);
+        mazeCtx.fill();
+      }
+    }
+
+    const DIR_LABELS_SHORT = { 0: 'N', 1: 'E', 2: 'S', 3: 'W' };
+
+    function drawAbstractGraph(abstractNodes, abstractEdges, rootKey, currentKey, queryKeySet) {
+      if (!graphAbstractCtx) {
+        return;
+      }
+      clearCanvas(graphAbstractCtx);
+      const hasNodes = abstractNodes && abstractNodes.size > 0;
+      const hasEdges = abstractEdges && abstractEdges.length > 0;
+      if (!hasNodes && !hasEdges && !rootKey) {
+        return;
+      }
+      const ctx = graphAbstractCtx;
+      const width = ctx.canvas.width;
+      const height = ctx.canvas.height;
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(0, 0, width, height);
+
+      const adjacency = new Map();
+      if (abstractNodes) {
+        abstractNodes.forEach(node => adjacency.set(node, new Set()));
+      }
+      (abstractEdges || []).forEach(edge => {
+        if (!adjacency.has(edge.a)) adjacency.set(edge.a, new Set());
+        if (!adjacency.has(edge.b)) adjacency.set(edge.b, new Set());
+        adjacency.get(edge.a).add(edge.b);
+        adjacency.get(edge.b).add(edge.a);
+      });
+      if (rootKey && !adjacency.has(rootKey)) {
+        adjacency.set(rootKey, new Set());
+      }
+      if (!adjacency.size) {
+        return;
+      }
+
+      const nodeKeys = Array.from(adjacency.keys());
+      if (!nodeKeys.length) {
+        return;
+      }
+
+      const directionalStatus = new Map();
+
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const margin = Math.min(width, height) * 0.12;
+      const positions = new Map();
+      const velocities = new Map();
+      const baseRadius = Math.min(width, height) * 0.35;
+      const angleStep = (2 * Math.PI) / Math.max(1, nodeKeys.length);
+      nodeKeys.forEach((node, idx) => {
+        const angle = angleStep * idx;
+        positions.set(node, {
+          x: centerX + baseRadius * Math.cos(angle),
+          y: centerY + baseRadius * Math.sin(angle),
+        });
+        velocities.set(node, { x: 0, y: 0 });
+      });
+      if (rootKey && positions.has(rootKey)) {
+        positions.get(rootKey).x = centerX;
+        positions.get(rootKey).y = centerY;
+      }
+
+      const edgesForLayout = [];
+      const seenEdgeKeys = new Set();
+      (abstractEdges || []).forEach(edge => {
+        const key = edge.a < edge.b ? `${edge.a}|${edge.b}` : `${edge.b}|${edge.a}`;
+        if (seenEdgeKeys.has(key)) return;
+        seenEdgeKeys.add(key);
+        edgesForLayout.push(edge);
+      });
+
+      const area = width * height;
+      const targetLength = Math.max(70, Math.min(120, Math.sqrt(area) / 5));
+      const iterations = Math.min(220, 80 + nodeKeys.length * 3);
+      const repulsion = targetLength * targetLength;
+      const damping = 0.82;
+      const attractionStrength = 0.08;
+      const rootPull = 0.12;
+
+      for (let iter = 0; iter < iterations; iter++) {
+        const forces = new Map(nodeKeys.map(node => [node, { x: 0, y: 0 }]));
+
+        for (let i = 0; i < nodeKeys.length; i++) {
+          for (let j = i + 1; j < nodeKeys.length; j++) {
+            const ni = nodeKeys[i];
+            const nj = nodeKeys[j];
+            const pi = positions.get(ni);
+            const pj = positions.get(nj);
+            if (!pi || !pj) continue;
+            let dx = pi.x - pj.x;
+            let dy = pi.y - pj.y;
+            const distSq = dx * dx + dy * dy + 0.01;
+            const dist = Math.sqrt(distSq);
+            const force = repulsion / distSq;
+            const fx = force * dx / dist;
+            const fy = force * dy / dist;
+            forces.get(ni).x += fx;
+            forces.get(ni).y += fy;
+            forces.get(nj).x -= fx;
+            forces.get(nj).y -= fy;
+          }
+        }
+
+        edgesForLayout.forEach(edge => {
+          const pi = positions.get(edge.a);
+          const pj = positions.get(edge.b);
+          if (!pi || !pj) return;
+          let dx = pj.x - pi.x;
+          let dy = pj.y - pi.y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
+          const spring = attractionStrength * (dist - targetLength);
+          const fx = spring * dx / dist;
+          const fy = spring * dy / dist;
+          forces.get(edge.a).x += fx;
+          forces.get(edge.a).y += fy;
+          forces.get(edge.b).x -= fx;
+          forces.get(edge.b).y -= fy;
+        });
+
+        if (rootKey && forces.has(rootKey) && positions.has(rootKey)) {
+          const pos = positions.get(rootKey);
+          const fx = (centerX - pos.x) * rootPull;
+          const fy = (centerY - pos.y) * rootPull;
+          forces.get(rootKey).x += fx;
+          forces.get(rootKey).y += fy;
+        }
+
+        nodeKeys.forEach(node => {
+          const force = forces.get(node);
+          const velocity = velocities.get(node);
+          velocity.x = (velocity.x + force.x) * damping;
+          velocity.y = (velocity.y + force.y) * damping;
+          const pos = positions.get(node);
+          pos.x += velocity.x;
+          pos.y += velocity.y;
+        });
+      }
+
+      const averageEdgeLength = () => {
+        let total = 0;
+        let count = 0;
+        edgesForLayout.forEach(edge => {
+          const aPos = positions.get(edge.a);
+          const bPos = positions.get(edge.b);
+          if (!aPos || !bPos) return;
+          const dx = bPos.x - aPos.x;
+          const dy = bPos.y - aPos.y;
+          total += Math.sqrt(dx * dx + dy * dy);
+          count += 1;
+        });
+        return count ? total / count : 0;
+      };
+
+      const adjustEdgeLengths = (passes = 6) => {
+        for (let pass = 0; pass < passes; pass++) {
+          edgesForLayout.forEach(edge => {
+            const aPos = positions.get(edge.a);
+            const bPos = positions.get(edge.b);
+            if (!aPos || !bPos) return;
+            let dx = bPos.x - aPos.x;
+            let dy = bPos.y - aPos.y;
+            let dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
+            const diff = (dist - targetLength) * 0.5;
+            const adjustX = (dx / dist) * diff;
+            const adjustY = (dy / dist) * diff;
+            aPos.x += adjustX;
+            aPos.y += adjustY;
+            bPos.x -= adjustX;
+            bPos.y -= adjustY;
+          });
+        }
+      };
+
+      const rescaleAroundCenter = () => {
+        const avg = averageEdgeLength();
+        if (!avg) return;
+        const scale = targetLength / avg;
+        positions.forEach(pos => {
+          pos.x = centerX + (pos.x - centerX) * scale;
+          pos.y = centerY + (pos.y - centerY) * scale;
+        });
+      };
+
+      adjustEdgeLengths(8);
+      rescaleAroundCenter();
+      adjustEdgeLengths(4);
+
+      let minX = Infinity;
+      let maxX = -Infinity;
+      let minY = Infinity;
+      let maxY = -Infinity;
+      let sumX = 0;
+      let sumY = 0;
+      positions.forEach(pos => {
+        minX = Math.min(minX, pos.x);
+        maxX = Math.max(maxX, pos.x);
+        minY = Math.min(minY, pos.y);
+        maxY = Math.max(maxY, pos.y);
+        sumX += pos.x;
+        sumY += pos.y;
+      });
+      const spanX = Math.max(maxX - minX, 1);
+      const spanY = Math.max(maxY - minY, 1);
+      const scale = Math.min(
+        (width - margin * 2) / spanX,
+        (height - margin * 2) / spanY,
+        1
+      );
+      const centroidX = sumX / positions.size;
+      const centroidY = sumY / positions.size;
+      const radiusFactor = Math.max(0.45, Math.min(1, scale));
+
+      positions.forEach(pos => {
+        pos.x = centerX + (pos.x - centroidX) * scale;
+        pos.y = centerY + (pos.y - centroidY) * scale;
+      });
+
+      let adjMinX = Infinity;
+      let adjMaxX = -Infinity;
+      let adjMinY = Infinity;
+      let adjMaxY = -Infinity;
+      positions.forEach(pos => {
+        adjMinX = Math.min(adjMinX, pos.x);
+        adjMaxX = Math.max(adjMaxX, pos.x);
+        adjMinY = Math.min(adjMinY, pos.y);
+        adjMaxY = Math.max(adjMaxY, pos.y);
+      });
+
+      const shiftX =
+        (adjMinX < margin ? margin - adjMinX : 0) -
+        (adjMaxX > width - margin ? adjMaxX - (width - margin) : 0);
+      const shiftY =
+        (adjMinY < margin ? margin - adjMinY : 0) -
+        (adjMaxY > height - margin ? adjMaxY - (height - margin) : 0);
+
+      positions.forEach(pos => {
+        pos.x += shiftX;
+        pos.y += shiftY;
+        pos.x = Math.min(width - margin, Math.max(margin, pos.x));
+        pos.y = Math.min(height - margin, Math.max(margin, pos.y));
+      });
+
+      const drawEdge = (from, to, status) => {
+        const aPos = positions.get(from);
+        const bPos = positions.get(to);
+        if (!aPos || !bPos) return;
+        const style = EDGE_STYLES[status] || EDGE_STYLES.graph;
+        ctx.save();
+        ctx.setLineDash(style.dash || []);
+        ctx.strokeStyle = style.color;
+        ctx.lineWidth = Math.max(1.5, style.width * 0.8);
+        ctx.beginPath();
+        ctx.moveTo(aPos.x, aPos.y);
+        ctx.lineTo(bPos.x, bPos.y);
+        ctx.stroke();
+        ctx.restore();
+      };
+
+      abstractEdges.forEach(edge => drawEdge(edge.a, edge.b, edge.status));
+      try { window.__lastAbstractEdges = abstractEdges.slice(0); } catch (_) {}
+
+      adjacency.forEach((_, nodeKey) => {
+        if (!positions.has(nodeKey)) {
+          positions.set(nodeKey, { x: centerX, y: centerY });
+        }
+      });
+
+      adjacency.forEach((_, nodeKey) => {
+        const pos = positions.get(nodeKey);
+        if (!pos) return;
+        const [row, col, dir] = nodeKey.split(',').map(Number);
+        const baseKey = `${row},${col}`;
+        const isQueryNode = dir === QUERY_MARKER;
+        const isCurrentQuery = isQueryNode && currentKey && baseKey === currentKey;
+        const isHistoricalQuery = isQueryNode && queryKeySet.has(baseKey);
+        const dirKey = `${row},${col}`;
+        const dirMap = directionalStatus.get(dirKey) || new Map();
+        const values = Array.from(dirMap.values());
+        const hasAction = values.includes('action');
+        const hasObs = values.includes('obs');
+        const hasForced = values.includes('forced');
+
+        let fill = 'rgba(96, 165, 250, 0.7)';
+        let stroke = '#1d4ed8';
+
+        if (isQueryNode) {
+          fill = isCurrentQuery ? 'rgba(124, 58, 237, 0.78)' : 'rgba(168, 85, 247, 0.6)';
+          stroke = isCurrentQuery ? '#eef2ff' : '#d6bcfa';
+        } else if (hasAction) {
+          fill = 'rgba(37, 99, 235, 0.75)';
+          stroke = '#1d4ed8';
+        } else if (hasObs) {
+          fill = 'rgba(251, 191, 36, 0.35)';
+          stroke = '#f59e0b';
+        } else if (hasForced) {
+          fill = 'rgba(248, 113, 113, 0.45)';
+          stroke = '#ef4444';
+        } else if (isHistoricalQuery && !isCurrentQuery) {
+          stroke = '#c084fc';
+        }
+
+        const baseRadius = isQueryNode ? 11 : 9;
+        const radius = Math.max(3, baseRadius * radiusFactor);
+        ctx.fillStyle = fill;
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        let outlineWidth = 1.6;
+        if (isQueryNode && isCurrentQuery) {
+          outlineWidth = 2.4;
+        } else if (hasAction) {
+          outlineWidth = 2.1;
+        } else if (hasObs) {
+          outlineWidth = 1.8;
+        } else if (hasForced) {
+          outlineWidth = 2.0;
+        }
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = outlineWidth;
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
+        ctx.stroke();
+
+        if (hasAction && !isQueryNode) {
+          ctx.save();
+          ctx.strokeStyle = 'rgba(59, 130, 246, 0.4)';
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.arc(pos.x, pos.y, radius + 4, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        if (isCurrentQuery) {
+          ctx.save();
+          ctx.strokeStyle = 'rgba(14, 165, 233, 0.35)';
+          ctx.lineWidth = 2.6;
+          ctx.beginPath();
+          ctx.arc(pos.x, pos.y, radius + 5, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // ラベルは省略し、色と位置のみで状態を示す
+      });
+
+      // Hovered node overlay (halo + label)
+      try {
+        if (state.hoverNodeKey && positions.has(state.hoverNodeKey)) {
+          const pos = positions.get(state.hoverNodeKey);
+          // Halo
+          ctx.save();
+          ctx.strokeStyle = '#22c55e';
+          ctx.lineWidth = 2.4;
+          ctx.setLineDash([4,3]);
+          ctx.beginPath();
+          ctx.arc(pos.x, pos.y, 14, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+          // Label box
+          const text = state.hoverNodeKey;
+          ctx.save();
+          ctx.font = '12px Menlo, monospace';
+          const pad = 6;
+          const tw = ctx.measureText(text).width;
+          const bx = Math.min(ctx.canvas.width - (tw + pad*2) - 8, Math.max(8, pos.x + 10));
+          const by = Math.max(18, pos.y - 10);
+          ctx.fillStyle = 'rgba(255,255,255,0.95)';
+          ctx.strokeStyle = '#334155';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.rect(bx, by - 14, tw + pad*2, 20);
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = '#0f172a';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(text, bx + pad, by - 4);
+          ctx.restore();
+        }
+      } catch (_) {}
+
+      try { window.__lastAbstractPositions = positions; } catch (_) {}
+    }
+
+    function drawGraph(stepIdxOverride) {
+      try {
+        clearCanvas(graphCtx);
+      clearCanvas(graphAbstractCtx);
+        const records = getRecords();
+        if (!records.length) return;
+        const recIndex = Math.min(typeof stepIdxOverride === 'number' ? stepIdxOverride : state.step, records.length - 1);
+        const rec = records[recIndex];
+        const maze = getMaze();
+        if (!maze) return;
+        const layout = maze.layout;
+        const rows = layout.length;
+        const cols = layout[0].length;
+        const padding = 28;
+        const cellSize = Math.min((graphCanvas.width - padding * 2) / cols, (graphCanvas.height - padding * 2) / rows);
+        const originX = (graphCanvas.width - cellSize * cols) / 2;
+        const originY = (graphCanvas.height - cellSize * rows) / 2;
+
+        // Helper: detect query nodes that are not the current step's query (always available in this scope)
+        const isForeignQueryNode = (node) => {
+          if (!Array.isArray(node) || node.length < 3) return false;
+          const r = Number(node[0]);
+          const c = Number(node[1]);
+          const d = Number(node[2]);
+          if (d !== QUERY_MARKER) return false;
+          const cr = Array.isArray(rec.position) ? Number(rec.position[0]) : null;
+          const cc = Array.isArray(rec.position) ? Number(rec.position[1]) : null;
+          return (cr !== null && (r !== cr || c !== cc));
+        };
+
+        
+
+      const normalizePos = pos => {
+        if (!pos) return null;
+        if (Array.isArray(pos)) {
+          if (pos.length === 2) {
+            return [Number(pos[0]), Number(pos[1])];
+          }
+          if (pos.length >= 3) {
+            return [Number(pos[0]), Number(pos[1])];
+          }
+        }
+        if (typeof pos === 'object' && pos !== null) {
+          if ('0' in pos && '1' in pos) return [Number(pos[0]), Number(pos[1])];
+          if ('x' in pos && 'y' in pos) return [Number(pos.y), Number(pos.x)];
+        }
+        if (typeof pos === 'string') {
+          const parts = pos.split(',').map(Number);
+          if (parts.length >= 2 && parts.every(n => !Number.isNaN(n))) return [parts[0], parts[1]];
+        }
+        return null;
+      };
+
+      const toKey = pos => {
+        const norm = normalizePos(pos);
+        return norm ? `${norm[0]},${norm[1]}` : '';
+      };
+
+      const manhattanDistance = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
+
+      graphCtx.fillStyle = '#f8fafc';
+      graphCtx.fillRect(0, 0, graphCanvas.width, graphCanvas.height);
+      graphCtx.strokeStyle = '#e4e7f5';
+      graphCtx.lineWidth = 1;
+      for (let r = 0; r <= rows; r++) {
+        graphCtx.beginPath();
+        graphCtx.moveTo(originX, originY + r * cellSize);
+        graphCtx.lineTo(originX + cols * cellSize, originY + r * cellSize);
+        graphCtx.stroke();
+      }
+      for (let c = 0; c <= cols; c++) {
+        graphCtx.beginPath();
+        graphCtx.moveTo(originX + c * cellSize, originY);
+        graphCtx.lineTo(originX + c * cellSize, originY + rows * cellSize);
+        graphCtx.stroke();
+      }
+
+      const nodeSet = new Set();
+      const queryKeySet = new Set();
+      const directionalStatus = new Map();
+      (rec.graph_nodes || []).forEach(node => {
+        if (!Array.isArray(node) || node.length < 3) return;
+        const key = `${Number(node[0])},${Number(node[1])}`;
+        if (Number(node[2]) === -1) {
+          queryKeySet.add(key);
+        }
+      });
+      // If not showing all queries, keep only the current query base key
+      try {
+        const currentBase = rec.query_node ? `${rec.query_node[0]},${rec.query_node[1]}` : null;
+        if (!state.showAllQueries) {
+          const keep = new Set();
+          if (currentBase) keep.add(currentBase);
+          // replace content
+          const only = new Set();
+          keep.forEach(k => only.add(k));
+          // assign back
+          queryKeySet.clear && queryKeySet.clear();
+          only.forEach(k => queryKeySet.add(k));
+        }
+      } catch (_) {}
+      const qn = (Array.isArray(rec.query_node_pre) && rec.query_node_pre.length>=2) ? rec.query_node_pre
+               : (Array.isArray(rec.query_node_pre_derived) && rec.query_node_pre_derived.length>=2) ? rec.query_node_pre_derived
+               : (Array.isArray(rec.query_node) && rec.query_node.length>=2) ? rec.query_node
+               : (Array.isArray(rec.query_node_post) && rec.query_node_post.length>=2) ? rec.query_node_post
+               : null;
+      const currentQueryKey = qn ? `${qn[0]},${qn[1]}` : null;
+      const registerNode = pos => {
+        const norm = normalizePos(pos);
+        if (!norm) return null;
+        const key = `${norm[0]},${norm[1]}`;
+        nodeSet.add(key);
+        return norm;
+      };
+
+      const statusPriority = { candidate: 0, graph: 1, link: 2, forced: 3, action: 4, shortcut: 5 };
+      const edgeStatus = new Map();
+      const linkBridgeSegments = [];
+      const abstractNodes = new Set();
+      const abstractEdges = [];
+
+      const normalizeNodeParts = node => {
+        if (!node) return null;
+        if (Array.isArray(node)) {
+          if (node.length >= 3) {
+            return [Number(node[0]), Number(node[1]), Number(node[2])];
+          }
+          if (node.length === 2) {
+            return [Number(node[0]), Number(node[1]), QUERY_MARKER];
+          }
+        } else if (typeof node === 'object') {
+          if (node === null) return null;
+          if ('0' in node && '1' in node) {
+            const dirVal = '2' in node
+              ? Number(node[2])
+              : ('dir' in node
+                ? Number(node.dir)
+                : ('direction' in node ? Number(node.direction) : QUERY_MARKER));
+            return [Number(node[0]), Number(node[1]), Number.isNaN(dirVal) ? QUERY_MARKER : dirVal];
+          }
+          if ('row' in node && 'col' in node) {
+            return [Number(node.row), Number(node.col), QUERY_MARKER];
+          }
+        } else if (typeof node === 'string') {
+          const parts = node.split(',').map(Number);
+          if (parts.length === 3 && parts.every(n => !Number.isNaN(n))) {
+            return parts;
+          }
+          if (parts.length === 2 && parts.every(n => !Number.isNaN(n))) {
+            return [parts[0], parts[1], QUERY_MARKER];
+          }
+        }
+        return null;
+      };
+
+      const canonicalNodeKey = parts => `${parts[0]},${parts[1]},${parts[2]}`;
+
+      const setEdgeStatus = (a, b, status) => {
+        if (!status) return;
+        const normA = normalizeNodeParts(a);
+        const normB = normalizeNodeParts(b);
+        if (!normA || !normB) return;
+        const keyA = canonicalNodeKey(normA);
+        const keyB = canonicalNodeKey(normB);
+        const key = keyA < keyB ? `${keyA}|${keyB}` : `${keyB}|${keyA}`;
+        const existing = edgeStatus.get(key);
+        if (!existing || statusPriority[status] >= statusPriority[existing]) {
+          edgeStatus.set(key, status);
+        }
+      };
+
+      const useCommitted = (state.edgeMode === 'committed');
+
+      const pushEdge = (edge, status) => {
+        if (!Array.isArray(edge) || edge.length !== 2) return;
+        setEdgeStatus(edge[0], edge[1], status);
+      };
+
+      // Helper to draw edges array
+      const drawEdges = (edges, status) => {
+        (edges || []).forEach(edge => {
+          if (!Array.isArray(edge) || edge.length !== 2) return;
+          setEdgeStatus(edge[0], edge[1], status);
+        });
+      };
+
+      if (useCommitted && state.cumulative) {
+        const records = getRecords();
+        const upto = Math.min(state.step, records.length - 1);
+        for (let i = 0; i <= upto; i++) {
+          const rci = records[i];
+          drawEdges(rci.committed_only_edges || [], 'graph');
+        }
+      } else {
+        let edgesSource;
+        // Prefer DS graph (step or global) when available to reflect datastore truth
+        if (state.dsGraph && ((Array.isArray(rec.ds_graph_edges) && rec.ds_graph_edges.length) || globalDsEdges)) {
+          edgesSource = (Array.isArray(rec.ds_graph_edges) && rec.ds_graph_edges.length) ? (rec.ds_graph_edges || []) : (globalDsEdges || []);
+        } else if (useCommitted) {
+          edgesSource = (rec.committed_only_edges || []);
+        } else if (state.evalGraph && Array.isArray(rec.graph_edges_eval) && rec.graph_edges_eval.length) {
+          edgesSource = rec.graph_edges_eval || [];
+        } else {
+          edgesSource = rec.graph_edges || [];
+        }
+        // Hide edges that touch "foreign" query nodes (next Q) when DS is used and we aren't showing all queries
+        if (state.dsGraph && !state.showAllQueries) {
+          const filtered = [];
+          (edgesSource || []).forEach(edge => {
+            if (!Array.isArray(edge) || edge.length !== 2) return;
+            const a = edge[0];
+            const b = edge[1];
+            if (isForeignQueryNode(a) || isForeignQueryNode(b)) return;
+            filtered.push(edge);
+          });
+          edgesSource = filtered;
+        }
+        drawEdges(edgesSource, 'graph');
+        // Always overlay forced edges (red dashed), even in DS strict mode
+        try { drawEdges(rec.forced_edges || [], 'forced'); } catch(_) {}
+        // Redundant safety: inject as abstract only when not in Strict DS
+        const injectDSEdges = (state.dsGraph && ((Array.isArray(rec.ds_graph_edges) && rec.ds_graph_edges.length) || globalDsEdges)) ? ((Array.isArray(rec.ds_graph_edges) && rec.ds_graph_edges.length) ? (rec.ds_graph_edges || []) : (globalDsEdges || [])) : [];
+        if (injectDSEdges.length && !(state.dsGraph && state.dsStrict)) {
+          injectDSEdges.forEach(edge => {
+            if (!Array.isArray(edge) || edge.length !== 2) return;
+            const a = edge[0];
+            const b = edge[1];
+            const normA = Array.isArray(a) && a.length >= 3 ? [Number(a[0]), Number(a[1]), Number(a[2])] : null;
+            const normB = Array.isArray(b) && b.length >= 3 ? [Number(b[0]), Number(b[1]), Number(b[2])] : null;
+            if (!normA || !normB) return;
+            // Skip foreign queries if we are hiding them
+            if (!state.showAllQueries && (isForeignQueryNode(a) || isForeignQueryNode(b))) return;
+            const keyA = `${normA[0]},${normA[1]},${normA[2]}`;
+            const keyB = `${normB[0]},${normB[1]},${normB[2]}`;
+            abstractNodes.add(keyA);
+            abstractNodes.add(keyB);
+            abstractEdges.push({ a: keyA, b: keyB, status: 'graph' });
+          });
+        }
+      }
+
+      if (!useCommitted) (rec.cand_edges || []).forEach(entry => {
+        if (!entry) return;
+        const nodes = entry.nodes || entry;
+        if (!Array.isArray(nodes) || nodes.length !== 2) return;
+        // Candidate edges should not look like committed links/actions; keep them as 'candidate'
+        const status = entry.forced ? 'forced' : 'candidate';
+        setEdgeStatus(nodes[0], nodes[1], status);
+      });
+
+      if (!useCommitted && rec.new_edge) {
+        setEdgeStatus(rec.new_edge[0], rec.new_edge[1], 'action');
+      }
+
+      // Timeline edges (explicit edges added this step): render as 'action'
+      if (!(state.dsGraph && state.dsStrict)) {
+        if (state.cumulative) {
+          const records = getRecords();
+          const upto = Math.min(state.step, records.length - 1);
+          for (let i = 0; i <= upto; i++) {
+            let tEdges = records[i].timeline_edges || [];
+            if (state.dsGraph && !state.showAllQueries) {
+              tEdges = tEdges.filter(e => Array.isArray(e) && e.length === 2 && !(isForeignQueryNode(e[0]) || isForeignQueryNode(e[1])));
+            }
+            drawEdges(tEdges, 'action');
+          }
+        } else {
+          let tEdges = rec.timeline_edges || [];
+          if (state.dsGraph && !state.showAllQueries) {
+            tEdges = tEdges.filter(e => Array.isArray(e) && e.length === 2 && !(isForeignQueryNode(e[0]) || isForeignQueryNode(e[1])));
+          }
+          drawEdges(tEdges, 'action');
+        }
+      }
+
+      // Overlay SP shortcuts (best hop) as dashed 'shortcut' edges
+      if (!(state.dsGraph && state.dsStrict)) {
+        const diagList = Array.isArray(rec.sp_diagnostics) ? rec.sp_diagnostics : [];
+        const bestHop = Number(rec.best_hop ?? -1);
+        const bestDiag = diagList.find(d => Number(d.hop ?? -1) === bestHop);
+        if (bestDiag && Array.isArray(bestDiag.top)) {
+          bestDiag.top.slice(0, 3).forEach(t => {
+            if (t && t.u && t.v) {
+              setEdgeStatus(t.u, t.v, 'shortcut');
+            }
+          });
+        }
+      }
+
+      const pushDirectional = (key, dir, status) => {
+        if (dir === null || dir === undefined) return;
+        const map = directionalStatus.get(key) || new Map();
+        const existing = map.get(dir);
+        if (!existing || statusPriority[status] >= statusPriority[existing]) {
+          map.set(dir, status);
+          directionalStatus.set(key, map);
+        }
+      };
+
+
+      const crossOffsets = {
+        center: [0.5, 0.5],
+        0: [0.5, 1 / 6],
+        1: [5 / 6, 0.5],
+        2: [0.5, 5 / 6],
+        3: [1 / 6, 0.5],
+      };
+
+      const pointFor = (row, col, part) => {
+        const offset = crossOffsets[part];
+        return [originX + (col + offset[0]) * cellSize, originY + (row + offset[1]) * cellSize];
+      };
+
+      const nodePoint = parts => {
+        if (!Array.isArray(parts) || parts.length < 3) return null;
+        const row = Number(parts[0]);
+        const col = Number(parts[1]);
+        const dir = Number(parts[2]);
+        if (Number.isNaN(row) || Number.isNaN(col)) return null;
+        if (dir >= 0 && dir <= 3) {
+          return pointFor(row, col, dir);
+        }
+        return pointFor(row, col, 'center');
+      };
+
+      const drawBetweenNodes = (aParts, bParts, status) => {
+        const style = EDGE_STYLES[status] || EDGE_STYLES.graph;
+        const aPoint = nodePoint(aParts);
+        const bPoint = nodePoint(bParts);
+        if (!aPoint || !bPoint) return;
+        graphCtx.save();
+        graphCtx.setLineDash(style.dash || []);
+        graphCtx.strokeStyle = style.color;
+        graphCtx.lineWidth = style.width;
+        graphCtx.beginPath();
+        graphCtx.moveTo(aPoint[0], aPoint[1]);
+        graphCtx.lineTo(bPoint[0], bPoint[1]);
+        graphCtx.stroke();
+        graphCtx.restore();
+      };
+
+      edgeStatus.forEach((status, key) => {
+        const [aKey, bKey] = key.split('|');
+        const aParts = aKey.split(',').map(Number);
+        const bParts = bKey.split(',').map(Number);
+        const aPos = [aParts[0], aParts[1]];
+        const bPos = [bParts[0], bParts[1]];
+        registerNode(aPos);
+        registerNode(bPos);
+        const dirA = directionFromPositions(bPos, aPos);
+        const dirB = directionFromPositions(aPos, bPos);
+        const anchorKeyA = `${aParts[0]},${aParts[1]}`;
+        const anchorKeyB = `${bParts[0]},${bParts[1]}`;
+        if (dirA !== null) pushDirectional(anchorKeyA, dirA, status);
+        if (dirB !== null) pushDirectional(anchorKeyB, dirB, status);
+        // Also mark directional presence directly from endpoint encodings (Q↔dir edges in same cell)
+        const encDirA = Number(aParts[2]);
+        const encDirB = Number(bParts[2]);
+        if (Number.isFinite(encDirA) && encDirA >= 0 && encDirA <= 3) {
+          pushDirectional(anchorKeyA, encDirA, status);
+        }
+        if (Number.isFinite(encDirB) && encDirB >= 0 && encDirB <= 3) {
+          pushDirectional(anchorKeyB, encDirB, status);
+        }
+        // Skip adding action edges to abstract graph (prevents "next Q" from appearing)
+        if (status !== 'action') {
+          abstractNodes.add(aKey);
+          abstractNodes.add(bKey);
+          abstractEdges.push({ a: aKey, b: bKey, status });
+        }
+        const sameCell = (aParts[0] === bParts[0] && aParts[1] === bParts[1]);
+        const aIsQ = (aParts[2] === QUERY_MARKER);
+        const bIsQ = (bParts[2] === QUERY_MARKER);
+        const isSameCellQDir = sameCell && ((aIsQ && !bIsQ) || (bIsQ && !aIsQ));
+        // Draw edges exactly as present in the selected source (DS or eval/graph)
+        drawBetweenNodes(aParts, bParts, status);
+      });
+
+      // Derive node source: if DS edges were used (step/global), build node set from those edges to avoid
+      // mismatches between node/edge sources that cause "floating" current-Q nodes.
+      let nodesSource;
+      const usedDsEdges = (state.dsGraph && ((Array.isArray(rec.ds_graph_edges) && rec.ds_graph_edges.length) || globalDsEdges));
+      if (usedDsEdges) {
+        const dsEdgesForNodes = (Array.isArray(rec.ds_graph_edges) && rec.ds_graph_edges.length) ? (rec.ds_graph_edges || []) : (globalDsEdges || []);
+        const seen = new Set();
+        const nodesFromEdges = [];
+        (dsEdgesForNodes || []).forEach(edge => {
+          if (!Array.isArray(edge) || edge.length !== 2) return;
+          const a = edge[0]; const b = edge[1];
+          if (Array.isArray(a) && a.length >= 2) {
+            const key = `${Number(a[0])},${Number(a[1])}`;
+            if (!seen.has(key)) { seen.add(key); nodesFromEdges.push([Number(a[0]), Number(a[1])]); }
+          }
+          if (Array.isArray(b) && b.length >= 2) {
+            const key = `${Number(b[0])},${Number(b[1])}`;
+            if (!seen.has(key)) { seen.add(key); nodesFromEdges.push([Number(b[0]), Number(b[1])]); }
+          }
+        });
+        nodesSource = nodesFromEdges;
+      } else {
+        nodesSource = (state.dsGraph && ((Array.isArray(rec.ds_graph_nodes) && rec.ds_graph_nodes.length) || globalDsNodes))
+          ? ((Array.isArray(rec.ds_graph_nodes) && rec.ds_graph_nodes.length) ? rec.ds_graph_nodes : (globalDsNodes || []))
+          : (rec.graph_nodes || []);
+      }
+      (nodesSource || []).forEach(node => {
+        if (!Array.isArray(node) || node.length < 2) return;
+        registerNode([Number(node[0]), Number(node[1])]);
+      });
+
+      const registerEpisodeDirection = (items, fallbackStatus, collector) => {
+        if (!items) return;
+        items.forEach(item => {
+          if (!item) return;
+          let status = item.forced ? 'forced' : (fallbackStatus || 'candidate');
+          if (!item.forced && (fallbackStatus === 'candidate' || !fallbackStatus)) {
+            const origin = (item.origin || '').toLowerCase();
+            if (origin === 'obs') {
+              status = 'obs';
+            } else if (origin === 'mem') {
+              status = 'mem';
+            }
+          }
+          const anchor = normalizePos(item.anchor_position || item.anchorPosition);
+          const target = normalizePos(item.position || item.pos);
+          const dir = dirFromDelta(item.meta_delta || item.metaDelta) ?? (anchor && target ? directionFromPositions(target, anchor) : null);
+          if (!anchor || dir === null) return;
+          const key = toKey(anchor);
+          registerNode(anchor);
+          pushDirectional(key, dir, status);
+          abstractNodes.add(`${anchor[0]},${anchor[1]},${dir}`);
+          if (collector) {
+            const bridgeTarget = normalizePos(item.target_position || item.targetPosition);
+            if (bridgeTarget) {
+              registerNode(bridgeTarget);
+              collector.push({
+                anchor,
+                dir,
+                target: bridgeTarget,
+                forced: Boolean(item.forced),
+                style: status,
+              });
+            }
+          }
+        });
+      };
+
+      // In DS graph mode, avoid injecting episode-derived nodes (candidates/selected)
+      // to keep node/edge sources consistent and prevent floating nodes.
+      if (!state.dsGraph) {
+        registerEpisodeDirection(rec.candidate_pool, 'candidate');
+        registerEpisodeDirection(rec.selected_links, 'link', linkBridgeSegments);
+        if (rec.new_edge && Array.isArray(rec.new_edge) && rec.new_edge.length === 2) {
+          registerEpisodeDirection([{ anchor_position: rec.new_edge[0], position: rec.new_edge[1] }], 'action');
+        }
+      }
+
+      const segmentMap = new Map();
+      const addSegments = (segments, overrideStyle) => {
+        if (!segments) return;
+        segments.forEach(seg => {
+          if (!seg || !seg.anchor) return;
+          const anchor = normalizePos(seg.anchor);
+          const target = normalizePos(seg.target);
+          if (!anchor || !target || seg.dir === null || seg.dir === undefined) return;
+          const key = toKey(anchor);
+          const entry = segmentMap.get(key) || [];
+          entry.push({
+            anchor,
+            dir: seg.dir,
+            target,
+            style: overrideStyle || seg.style || (seg.forced ? 'forced' : 'link'),
+          });
+          segmentMap.set(key, entry);
+        });
+      };
+
+      addSegments(linkBridgeSegments);
+
+      const drawSubgrid = (row, col) => {
+        const baseX = originX + col * cellSize;
+        const baseY = originY + row * cellSize;
+        const step = cellSize / 3;
+        graphCtx.save();
+        graphCtx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
+        graphCtx.lineWidth = Math.max(0.5, cellSize * 0.015);
+        for (let i = 1; i <= 2; i++) {
+          graphCtx.beginPath();
+          graphCtx.moveTo(baseX, baseY + i * step);
+          graphCtx.lineTo(baseX + cellSize, baseY + i * step);
+          graphCtx.stroke();
+        }
+        for (let j = 1; j <= 2; j++) {
+          graphCtx.beginPath();
+          graphCtx.moveTo(baseX + j * step, baseY);
+          graphCtx.lineTo(baseX + j * step, baseY + cellSize);
+          graphCtx.stroke();
+        }
+        graphCtx.restore();
+      };
+
+      const drawDirectionalEdge = (row, col, dir, status, centerPoint) => {
+        const endpoint = pointFor(row, col, dir);
+        const style = EDGE_STYLES[status] || EDGE_STYLES.default;
+        graphCtx.save();
+        graphCtx.setLineDash(style.dash || []);
+        graphCtx.strokeStyle = style.color;
+        graphCtx.lineWidth = style.width;
+        graphCtx.beginPath();
+        graphCtx.moveTo(centerPoint[0], centerPoint[1]);
+        graphCtx.lineTo(endpoint[0], endpoint[1]);
+        graphCtx.stroke();
+        graphCtx.restore();
+        graphCtx.fillStyle = style.node;
+        const radius = Math.max(3.6, cellSize * 0.12);
+        if (status === 'obs') {
+          const size = radius * 1.6;
+          graphCtx.save();
+          graphCtx.translate(endpoint[0], endpoint[1]);
+          graphCtx.beginPath();
+          graphCtx.rect(-size / 2, -size / 2, size, size);
+          graphCtx.fill();
+          graphCtx.restore();
+        } else {
+          graphCtx.beginPath();
+          graphCtx.arc(endpoint[0], endpoint[1], radius, 0, Math.PI * 2);
+          graphCtx.fill();
+          if (status === 'action') {
+            graphCtx.strokeStyle = '#1d4ed8';
+            graphCtx.lineWidth = style.width * 0.9;
+            graphCtx.beginPath();
+            graphCtx.arc(endpoint[0], endpoint[1], radius + 2, 0, Math.PI * 2);
+            graphCtx.stroke();
+          }
+        }
+      };
+
+      // In DS mode, treat the "current" query as the pre-step query (rec.query_node),
+      // not the post-step agent position, to avoid mismatches with DS graph state.
+      const currentKey = (state.dsGraph && qn)
+        ? `${Number(qn[0])},${Number(qn[1])}`
+        : toKey(rec.position);
+      // Avoid injecting a floating current-Q node when using DS graph:
+      // Only draw the current cell center if it actually exists in the selected
+      // node source (DS step/global, or eval/graph fallback).
+      let addCurrent = true;
+      try {
+        if (state.dsGraph) {
+          const pos = rec.position || null;
+          if (pos && Array.isArray(nodesSource)) {
+            const r = Number(pos[0]);
+            const c = Number(pos[1]);
+            const found = nodesSource.some(n => Array.isArray(n) && n.length >= 2 && Number(n[0]) === r && Number(n[1]) === c);
+            addCurrent = !!found;
+          }
+        }
+      } catch (_) { addCurrent = true; }
+      if (addCurrent && !(state.dsGraph && state.dsStrict)) nodeSet.add(currentKey);
+
+      nodeSet.forEach(key => {
+        const [row, col] = key.split(',').map(Number);
+        if (Number.isNaN(row) || Number.isNaN(col)) return;
+        if (row < 0 || row >= rows || col < 0 || col >= cols) return;
+        const centerPoint = pointFor(row, col, 'center');
+        drawSubgrid(row, col);
+        const isCurrent = key === currentKey;
+        const centerRadius = Math.max(4.8, cellSize * 0.22);
+        const isQueryRaw = queryKeySet.has(key);
+        const isCurrentQueryRaw = isQueryRaw && currentQueryKey === key;
+        // In Strict DS mode, never style query nodes specially to avoid showing next-Q hints
+        const showQueryStyle = !(state.dsGraph && state.dsStrict) && isQueryRaw;
+        const showCurrentQueryStyle = !(state.dsGraph && state.dsStrict) && isCurrentQueryRaw;
+        let fillColor = '#94a3b8';
+        if (isCurrent) {
+          fillColor = '#1c7ed6';
+        } else if (showCurrentQueryStyle) {
+          fillColor = '#7c3aed';
+        } else if (showQueryStyle) {
+          fillColor = '#a855f7';
+        }
+        graphCtx.fillStyle = fillColor;
+        graphCtx.beginPath();
+        graphCtx.arc(centerPoint[0], centerPoint[1], centerRadius, 0, Math.PI * 2);
+        graphCtx.fill();
+        if (showQueryStyle) {
+          graphCtx.strokeStyle = showCurrentQueryStyle ? '#f0abfc' : '#a855f7';
+          graphCtx.lineWidth = Math.max(1.2, cellSize * 0.08);
+          graphCtx.beginPath();
+          graphCtx.arc(centerPoint[0], centerPoint[1], centerRadius * 1.05, 0, Math.PI * 2);
+          graphCtx.stroke();
+        }
+        if ((isCurrent || showCurrentQueryStyle) && !(state.dsGraph && state.dsStrict)) {
+          graphCtx.fillStyle = '#ffffff';
+          graphCtx.font = `${Math.max(10, cellSize * 0.3)}px sans-serif`;
+          graphCtx.textAlign = 'center';
+          graphCtx.textBaseline = 'middle';
+          graphCtx.fillText('Q', centerPoint[0], centerPoint[1]);
+        } else if (showQueryStyle) {
+          graphCtx.fillStyle = '#fef3ff';
+          graphCtx.font = `${Math.max(10, cellSize * 0.3)}px sans-serif`;
+          graphCtx.textAlign = 'center';
+          graphCtx.textBaseline = 'middle';
+          graphCtx.fillText('Q', centerPoint[0], centerPoint[1]);
+        }
+        const dirMap = directionalStatus.get(key) || new Map();
+        for (let dir = 0; dir < 4; dir++) {
+          const status = dirMap.get(dir);
+          if (!status) continue;
+          drawDirectionalEdge(row, col, dir, status, centerPoint);
+        }
+        const segments = segmentMap.get(key) || [];
+      segments.forEach(seg => {
+        if (!seg || seg.dir === null || seg.dir === undefined || !seg.target) return;
+        const startPoint = pointFor(row, col, seg.dir);
+        const endPoint = pointFor(seg.target[0], seg.target[1], 'center');
+        const style = EDGE_STYLES[seg.style] || EDGE_STYLES.link;
+        graphCtx.save();
+        graphCtx.setLineDash(style.dash || []);
+        graphCtx.strokeStyle = style.color;
+        graphCtx.lineWidth = style.width;
+        graphCtx.beginPath();
+        graphCtx.moveTo(startPoint[0], startPoint[1]);
+        graphCtx.lineTo(endPoint[0], endPoint[1]);
+        graphCtx.stroke();
+        graphCtx.restore();
+      });
+      });
+
+      if (!state.dsGraph) (rec.candidate_pool || []).forEach(item => {
+        const pos = normalizePos(item.position || item.pos || item.anchor_position || item.anchorPosition);
+        if (!pos) return;
+        const key = toKey(pos);
+        if (nodeSet.has(key) || key === currentKey) return;
+        const [x, y] = pointFor(pos[0], pos[1], 'center');
+        const radius = Math.max(5, cellSize * 0.2);
+        graphCtx.fillStyle = 'rgba(245, 159, 0, 0.7)';
+        graphCtx.beginPath();
+        graphCtx.arc(x, y, radius, 0, Math.PI * 2);
+        graphCtx.fill();
+      });
+
+        if (!state.dsGraph) (rec.selected_links || []).forEach(item => {
+          const pos = normalizePos(item.position || item.pos || item.anchor_position || item.anchorPosition);
+          if (!pos) return;
+          const key = toKey(pos);
+          if (nodeSet.has(key) || key === currentKey) return;
+          const [x, y] = pointFor(pos[0], pos[1], 'center');
+          const radius = Math.max(5, cellSize * 0.2);
+          graphCtx.fillStyle = item.forced ? 'rgba(239, 68, 68, 0.9)' : 'rgba(14, 165, 233, 0.75)';
+          graphCtx.beginPath();
+          graphCtx.arc(x, y, radius, 0, Math.PI * 2);
+          graphCtx.fill();
+        });
+
+      const queryRootKey = rec.query_node ? `${rec.query_node[0]},${rec.query_node[1]},${QUERY_MARKER}` : null;
+        if (queryRootKey) {
+          abstractNodes.add(queryRootKey);
+        }
+      drawAbstractGraph(abstractNodes, abstractEdges, queryRootKey, currentQueryKey, queryKeySet);
+      // Overlay SP anchors on grid graph (center halos), using debug_hop0 anchors if available
+      try {
+        if (state.spAnchors && rec.debug_hop0) {
+          const anchors = (rec.debug_hop0.post && Array.isArray(rec.debug_hop0.post.anchors)) ? rec.debug_hop0.post.anchors
+                         : (Array.isArray(rec.debug_hop0.anchors) ? rec.debug_hop0.anchors : []);
+          if (Array.isArray(anchors) && anchors.length) {
+            const rows = maze.layout?.rows || (experimentData.maze_data[state.seed]?.layout?.rows) || 0;
+            const cols = maze.layout?.cols || (experimentData.maze_data[state.seed]?.layout?.cols) || 0;
+            const padding = 24;
+            const cellSize = Math.min((graphCanvas.width - padding * 2) / cols, (graphCanvas.height - padding * 2) / rows);
+            const originX = (graphCanvas.width - cellSize * cols) / 2;
+            const originY = (graphCanvas.height - cellSize * rows) / 2;
+            graphCtx.save();
+            graphCtx.strokeStyle = '#ef4444';
+            graphCtx.lineWidth = Math.max(1.5, cellSize * 0.08);
+            graphCtx.setLineDash([6, 4]);
+            anchors.forEach(a => {
+              if (!Array.isArray(a) || a.length < 2) return;
+              const r = Number(a[0]); const c = Number(a[1]);
+              if (!Number.isFinite(r) || !Number.isFinite(c)) return;
+              const cx = originX + (c + 0.5) * cellSize;
+              const cy = originY + (r + 0.5) * cellSize;
+              graphCtx.beginPath();
+              graphCtx.arc(cx, cy, Math.max(7, cellSize * 0.35), 0, Math.PI * 2);
+              graphCtx.stroke();
+            });
+            graphCtx.restore();
+          }
+        }
+      } catch (_) { /* ignore overlay errors */ }
+      } catch (error) {
+        console.error('Failed to draw graph snapshot', error);
+        try {
+          if (graphCtx) {
+            clearCanvas(graphCtx);
+            graphCtx.fillStyle = '#fee2e2';
+            graphCtx.fillRect(0, 0, graphCanvas.width, graphCanvas.height);
+            graphCtx.fillStyle = '#b91c1c';
+            graphCtx.font = '13px sans-serif';
+            graphCtx.textAlign = 'center';
+            graphCtx.textBaseline = 'middle';
+            let errMsg = 'unknown';
+            if (error && typeof error.message === 'string' && error.message.length) {
+              errMsg = error.message;
+            }
+            const msg = `Graph render error: ${errMsg}`;
+            graphCtx.fillText(msg, graphCanvas.width / 2, graphCanvas.height / 2);
+          }
+          if (graphAbstractCtx) {
+            clearCanvas(graphAbstractCtx);
+          }
+        } catch (_) {
+          /* noop */
+        }
+      }
+    }
+
+    function drawGraphLegacy() {
+      clearCanvas(graphCtx);
+      const records = getRecords();
+      if (!records.length) return;
+      const recIndex = Math.min(state.step, records.length - 1);
+      const rec = records[recIndex];
+      const maze = getMaze();
+      if (!maze) return;
+      const layout = maze.layout;
+      const rows = layout.length;
+      const cols = layout[0].length;
+      const padding = 28;
+      const cellSize = Math.min((graphCanvas.width - padding * 2) / cols, (graphCanvas.height - padding * 2) / rows);
+      const originX = (graphCanvas.width - cellSize * cols) / 2;
+      const originY = (graphCanvas.height - cellSize * rows) / 2;
+
+      graphCtx.fillStyle = '#f8fafc';
+      graphCtx.fillRect(0, 0, graphCanvas.width, graphCanvas.height);
+      graphCtx.strokeStyle = '#e4e7f5';
+      graphCtx.lineWidth = 1;
+      for (let r = 0; r <= rows; r++) {
+        graphCtx.beginPath();
+        graphCtx.moveTo(originX, originY + r * cellSize);
+        graphCtx.lineTo(originX + cols * cellSize, originY + r * cellSize);
+        graphCtx.stroke();
+      }
+      for (let c = 0; c <= cols; c++) {
+        graphCtx.beginPath();
+        graphCtx.moveTo(originX + c * cellSize, originY);
+        graphCtx.lineTo(originX + c * cellSize, originY + rows * cellSize);
+        graphCtx.stroke();
+      }
+
+      const CENTER_DIR = 4;
+      const DIR_DELTAS = {0: [-1, 0], 1: [0, 1], 2: [1, 0], 3: [0, -1]};
+      const DIR_OFFSETS = {
+        0: [0.5, 0.18],
+        1: [0.82, 0.5],
+        2: [0.5, 0.82],
+        3: [0.18, 0.5],
+      };
+      const statusPriority = { candidate: 0, graph: 1, link: 2, forced: 3, action: 4, shortcut: 5 };
+
+      const normalizeNode = node => {
+        if (!node) return null;
+        if (Array.isArray(node)) {
+          if (node.length >= 3) return [Number(node[0]), Number(node[1]), Number(node[2])];
+          if (node.length === 2) return [Number(node[0]), Number(node[1]), CENTER_DIR];
+        }
+        if (typeof node === 'object' && node !== null) {
+          if ('0' in node && '1' in node) {
+            const baseDir = '2' in node ? Number(node[2]) : ('dir' in node ? Number(node.dir) : CENTER_DIR);
+            return [Number(node[0]), Number(node[1]), Number(baseDir)];
+          }
+        }
+        if (typeof node === 'string') {
+          const parts = node.split(',').map(Number);
+          if (parts.length === 3 && parts.every(n => !Number.isNaN(n))) return parts;
+          if (parts.length === 2 && parts.every(n => !Number.isNaN(n))) return [parts[0], parts[1], CENTER_DIR];
+        }
+        return null;
+      };
+
+      const deltaToDir = delta => {
+        if (delta === null || delta === undefined) return null;
+        let dr = null;
+        let dc = null;
+        if (Array.isArray(delta) && delta.length >= 2) {
+          dr = Number(delta[0]);
+          dc = Number(delta[1]);
+        } else if (typeof delta === 'object' && delta !== null) {
+          const keys = Object.keys(delta);
+          if (keys.length >= 2) {
+            dr = Number(delta[keys[0]]);
+            dc = Number(delta[keys[1]]);
+          }
+        } else if (typeof delta === 'string') {
+          const parts = delta.split(',').map(Number);
+          if (parts.length >= 2) {
+            dr = parts[0];
+            dc = parts[1];
+          }
+        }
+        if (dr === null || dc === null || Number.isNaN(dr) || Number.isNaN(dc)) return null;
+        if (dr === -1 && dc === 0) return 0;
+        if (dr === 0 && dc === 1) return 1;
+        if (dr === 1 && dc === 0) return 2;
+        if (dr === 0 && dc === -1) return 3;
+        return null;
+      };
+
+      const extractAnchor = entry => {
+        const raw = entry.anchor_position || entry.anchorPosition || entry.position || entry.pos;
+        if (!raw) return null;
+        if (Array.isArray(raw) && raw.length >= 2) return [Number(raw[0]), Number(raw[1])];
+        if (typeof raw === 'object' && raw !== null) {
+          if ('0' in raw && '1' in raw) return [Number(raw[0]), Number(raw[1])];
+        }
+        if (typeof raw === 'string') {
+          const parts = raw.split(',').map(Number);
+          if (parts.length >= 2 && parts.every(n => !Number.isNaN(n))) return [parts[0], parts[1]];
+        }
+        return null;
+      };
+
+      const extractDirection = entry => {
+        if (entry.direction !== undefined && entry.direction !== null) return Number(entry.direction);
+        return deltaToDir(entry.relative_delta || entry.relativeDelta || entry.meta_delta || entry.metaDelta);
+      };
+
+      const cellData = new Map();
+      const ensureCell = (r, c) => {
+        const key = `${r},${c}`;
+        if (!cellData.has(key)) {
+          cellData.set(key, { center: false, dirs: new Map(), present: new Set() });
+        }
+        return cellData.get(key);
+      };
+      const markDirPresent = (r, c, dir) => {
+        if (dir === null || dir === undefined) return;
+        ensureCell(r, c).present.add(dir);
+      };
+      const setDirStatus = (r, c, dir, status) => {
+        if (dir === null || dir === undefined || !status) return;
+        const cell = ensureCell(r, c);
+        const current = cell.dirs.get(dir);
+        if (!current || statusPriority[status] >= statusPriority[current]) {
+          cell.dirs.set(dir, status);
+        }
+        cell.present.add(dir);
+      };
+
+      const centerConnections = [];
+      const pushCenterConnection = (a, b, status) => {
+        centerConnections.push({ a, b, status });
+      };
+
+      (rec.graph_nodes || []).forEach(node => {
+        const norm = normalizeNode(node);
+        if (!norm) return;
+        const [r, c, dir] = norm;
+        const cell = ensureCell(r, c);
+        if (dir === CENTER_DIR) {
+          cell.center = true;
+        } else {
+          markDirPresent(r, c, dir);
+        }
+      });
+
+      (rec.graph_edges || []).forEach(edge => {
+        if (!Array.isArray(edge) || edge.length !== 2) return;
+        const a = normalizeNode(edge[0]);
+        const b = normalizeNode(edge[1]);
+        if (!a || !b) return;
+        const [ar, ac, adir] = a;
+        const [br, bc, bdir] = b;
+        if (adir === CENTER_DIR && bdir !== CENTER_DIR) {
+          setDirStatus(ar, ac, bdir, 'graph');
+        } else if (bdir === CENTER_DIR && adir !== CENTER_DIR) {
+          setDirStatus(br, bc, adir, 'graph');
+        } else if (adir === CENTER_DIR && bdir === CENTER_DIR) {
+          pushCenterConnection(a, b, 'graph');
+        }
+      });
+
+      (rec.forced_edges || []).forEach(edge => {
+        if (!Array.isArray(edge) || edge.length !== 2) return;
+        const a = normalizeNode(edge[0]);
+        const b = normalizeNode(edge[1]);
+        if (!a || !b) return;
+        const [ar, ac, adir] = a;
+        const [br, bc, bdir] = b;
+        if (adir === CENTER_DIR && bdir !== CENTER_DIR) {
+          setDirStatus(ar, ac, bdir, 'forced');
+        } else if (bdir === CENTER_DIR && adir !== CENTER_DIR) {
+          setDirStatus(br, bc, adir, 'forced');
+        } else if (adir === CENTER_DIR && bdir === CENTER_DIR) {
+          pushCenterConnection(a, b, 'forced');
+        }
+      });
+
+      (rec.candidate_pool || []).forEach(item => {
+        const anchor = extractAnchor(item);
+        const dir = extractDirection(item);
+        if (!anchor || dir === null) return;
+        setDirStatus(anchor[0], anchor[1], dir, 'candidate');
+      });
+
+      (rec.selected_links || []).forEach(item => {
+        const anchor = extractAnchor(item);
+        const dir = extractDirection(item);
+        if (!anchor || dir === null) return;
+        setDirStatus(anchor[0], anchor[1], dir, item.forced ? 'forced' : 'link');
+      });
+
+      const decision = rec.candidate_selection && rec.candidate_selection.decision;
+      if (decision && decision.origin === 'obs' && decision.action !== null && decision.action !== undefined) {
+        const delta = ACTIONS[decision.action];
+        const dir = deltaToDir(delta);
+        if (dir !== null && Array.isArray(rec.position)) {
+          setDirStatus(Number(rec.position[0]), Number(rec.position[1]), dir, 'action');
+        }
+      }
+
+      if (rec.new_edge && Array.isArray(rec.new_edge) && rec.new_edge.length === 2) {
+        const a = normalizeNode(rec.new_edge[0]);
+        const b = normalizeNode(rec.new_edge[1]);
+        if (a && b) pushCenterConnection(a, b, 'action');
+      }
+
+      const pointFor = (row, col, dir) => {
+        if (dir === CENTER_DIR) {
+          return [originX + (col + 0.5) * cellSize, originY + (row + 0.5) * cellSize];
+        }
+        const offset = DIR_OFFSETS[dir];
+        return [originX + (col + offset[1]) * cellSize, originY + (row + offset[0]) * cellSize];
+      };
+
+      const drawDirectionalEdge = (row, col, dir, status) => {
+        const centerPoint = pointFor(row, col, CENTER_DIR);
+        const endpoint = pointFor(row, col, dir);
+        const style = EDGE_STYLES[status] || EDGE_STYLES.default;
+        graphCtx.save();
+        graphCtx.setLineDash(style.dash || []);
+        graphCtx.strokeStyle = style.color;
+        graphCtx.lineWidth = style.width;
+        graphCtx.beginPath();
+        graphCtx.moveTo(centerPoint[0], centerPoint[1]);
+        graphCtx.lineTo(endpoint[0], endpoint[1]);
+        graphCtx.stroke();
+        graphCtx.restore();
+
+        graphCtx.fillStyle = style.node;
+        graphCtx.beginPath();
+        graphCtx.arc(endpoint[0], endpoint[1], Math.max(3.6, cellSize * 0.12), 0, Math.PI * 2);
+        graphCtx.fill();
+
+        // Badge: show node origin 'G' (graph/link), 'C' (candidate), 'F' (forced), 'A' (action)
+        let badge = '';
+        if (status === 'graph' || status === 'link') badge = 'G';
+        else if (status === 'candidate' || status === 'mem' || status === 'obs') badge = 'C';
+        else if (status === 'forced') badge = 'F';
+        else if (status === 'action') badge = 'A';
+        if (badge) {
+          const bx = endpoint[0] + Math.max(4, cellSize * 0.06);
+          const by = endpoint[1] - Math.max(4, cellSize * 0.06);
+          graphCtx.save();
+          graphCtx.fillStyle = '#ffffff';
+          graphCtx.strokeStyle = style.color;
+          graphCtx.lineWidth = 1;
+          const r = Math.max(6, cellSize * 0.16);
+          graphCtx.beginPath();
+          graphCtx.arc(bx, by, r * 0.6, 0, Math.PI * 2);
+          graphCtx.fill();
+          graphCtx.stroke();
+          graphCtx.fillStyle = style.color;
+          graphCtx.font = `${Math.max(8, cellSize * 0.22)}px sans-serif`;
+          graphCtx.textAlign = 'center';
+          graphCtx.textBaseline = 'middle';
+          graphCtx.fillText(badge, bx, by);
+          graphCtx.restore();
+        }
+      };
+
+      const drawCenterConnection = entry => {
+        const style = EDGE_STYLES[entry.status] || EDGE_STYLES.graph;
+        const [ar, ac] = entry.a;
+        const [br, bc] = entry.b;
+        const [ax, ay] = pointFor(ar, ac, CENTER_DIR);
+        const [bx, by] = pointFor(br, bc, CENTER_DIR);
+        graphCtx.save();
+        graphCtx.setLineDash(style.dash || []);
+        graphCtx.strokeStyle = style.color;
+        graphCtx.lineWidth = style.width;
+        graphCtx.beginPath();
+        graphCtx.moveTo(ax, ay);
+        graphCtx.lineTo(bx, by);
+        graphCtx.stroke();
+        graphCtx.restore();
+      };
+
+      centerConnections.forEach(drawCenterConnection);
+
+      const currentKey = Array.isArray(rec.position) ? `${Number(rec.position[0])},${Number(rec.position[1])}` : null;
+      if (currentKey && !cellData.has(currentKey)) {
+        ensureCell(Number(rec.position[0]), Number(rec.position[1])).center = true;
+      }
+
+      cellData.forEach((cell, key) => {
+        const [row, col] = key.split(',').map(Number);
+        if (Number.isNaN(row) || Number.isNaN(col)) return;
+        if (row < 0 || row >= rows || col < 0 || col >= cols) return;
+        const centerPoint = pointFor(row, col, CENTER_DIR);
+        const isCurrent = key === currentKey;
+        const drawCenter = cell.center || isCurrent || cell.present.size > 0;
+        if (drawCenter) {
+          const centerRadius = Math.max(4.8, cellSize * 0.22);
+          graphCtx.fillStyle = isCurrent ? '#1c7ed6' : '#94a3b8';
+          graphCtx.beginPath();
+          graphCtx.arc(centerPoint[0], centerPoint[1], centerRadius, 0, Math.PI * 2);
+          graphCtx.fill();
+          if (isCurrent) {
+            graphCtx.fillStyle = '#ffffff';
+            graphCtx.font = `${Math.max(10, cellSize * 0.3)}px sans-serif`;
+            graphCtx.textAlign = 'center';
+            graphCtx.textBaseline = 'middle';
+            graphCtx.fillText('Q', centerPoint[0], centerPoint[1]);
+          }
+        }
+
+        for (let dir = 0; dir < 4; dir++) {
+          if (!cell.present.has(dir) && !cell.dirs.has(dir)) continue;
+          const status = cell.dirs.get(dir) || 'graph';
+          drawDirectionalEdge(row, col, dir, status);
+        }
+      });
+    }
+
+    function drawSeries(ctx, records, series, colors, options = {}) {
+      if (!records.length) { if (!options.overlay) clearCanvas(ctx); return; }
+      const padding = options.padding || { left: 48, right: 16, top: 16, bottom: 28 };
+      const width = ctx.canvas.width;
+      const height = ctx.canvas.height;
+      if (!options.overlay) {
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0,0,width,height);
+        ctx.strokeStyle = '#e5e8f2';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, padding.top);
+        ctx.lineTo(padding.left, height - padding.bottom);
+        ctx.lineTo(width - padding.right, height - padding.bottom);
+        ctx.stroke();
+      }
+
+      const values = [];
+      series.forEach(fn => records.forEach(rec => {
+        const v = fn(rec);
+        if (Number.isFinite(v)) values.push(v);
+      }));
+      let min = values.length ? Math.min(...values) : -0.1;
+      let max = values.length ? Math.max(...values) : 0.1;
+      if (options.forceMinZero) {
+        min = Math.min(min, 0);
+        max = Math.max(max, 1);
+      }
+      const span = Math.max(max - min, 0.05);
+      min -= span * 0.1;
+      max += span * 0.1;
+      if (min > 0) min = 0;
+      if (max < 0) max = 0.05;
+      if (Math.abs(max - min) < 1e-6) {
+        max = min + 1.0;
+      }
+      const domain = Math.max(records[records.length - 1].step, 1);
+      const widthSpan = width - padding.left - padding.right;
+      const heightSpan = height - padding.top - padding.bottom;
+      const denom = (max - min);
+
+      series.forEach((fn, idx) => {
+        ctx.beginPath();
+        let started = false;
+        records.forEach(rec => {
+          const value = fn(rec);
+          if (!Number.isFinite(value)) return;
+          const ratio = Math.max(0, Math.min(rec.step / domain, 1));
+          const x = padding.left + ratio * widthSpan;
+          const y = padding.top + (max - value) / denom * heightSpan;
+          if (!started) {
+            ctx.moveTo(x, y);
+            started = true;
+          } else {
+            ctx.lineTo(x, y);
+          }
+        });
+        ctx.strokeStyle = colors[idx] || '#1c7ed6';
+        ctx.lineWidth = options.lineWidth || 2;
+        ctx.stroke();
+      });
+
+      if (!options.overlay) {
+        const markerRatio = Math.max(0, Math.min(state.step / domain, 1));
+        const markerX = padding.left + markerRatio * widthSpan;
+        ctx.strokeStyle = '#adb5bd';
+        ctx.setLineDash([4,4]);
+        ctx.beginPath();
+        ctx.moveTo(markerX, padding.top);
+        ctx.lineTo(markerX, height - padding.bottom);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+
+    function drawScatter(ctx, records, series, colors, opts = {}) {
+      if (!records.length) { if (!opts.overlay) clearCanvas(ctx); return; }
+      const padding = opts.padding || { left: 48, right: 16, top: 16, bottom: 28 };
+      const width = ctx.canvas.width, height = ctx.canvas.height;
+      if (!opts.overlay) {
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,width,height);
+        // axes
+        ctx.strokeStyle = '#e5e8f2'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(padding.left, padding.top); ctx.lineTo(padding.left, height - padding.bottom); ctx.lineTo(width - padding.right, height - padding.bottom); ctx.stroke();
+      }
+      // scale
+      const values = [];
+      series.forEach(fn => records.forEach(rec => { const v = fn(rec); if (Number.isFinite(v)) values.push(v); }));
+      let min = values.length ? Math.min(...values) : -0.1;
+      let max = values.length ? Math.max(...values) : 0.1;
+      if (opts.forceMinZero) { min = Math.min(min, 0); max = Math.max(max, 1); }
+      const span = Math.max(max - min, 0.05);
+      min -= span * 0.1; max += span * 0.1;
+      if (min > 0) min = 0; if (max < 0) max = 0.05; if (Math.abs(max - min) < 1e-6) max = min + 1.0;
+      const domain = Math.max(records[records.length - 1].step, 1);
+      const widthSpan = width - padding.left - padding.right; const heightSpan = height - padding.top - padding.bottom;
+      const denom = (max - min);
+      const thetaAg = Number(experimentData?.config?.theta_ag ?? NaN);
+      const agOnly = !!opts.agOnly;
+      const skipHop0 = !!opts.skipHop0;
+      // draw points
+      series.forEach((fn, idx) => {
+        ctx.fillStyle = colors[idx] || '#1c7ed6';
+        records.forEach(rec => {
+          if (agOnly && !(Number(rec.g0 ?? 0) > thetaAg)) return;
+          if (skipHop0) {
+            const bh = Number(rec.best_hop ?? NaN);
+            if (!Number.isFinite(bh) || bh <= 0) return; // hide hop0-only steps
+          }
+          const value = fn(rec); if (!Number.isFinite(value)) return;
+          const ratio = Math.max(0, Math.min(rec.step / domain, 1));
+          const x = padding.left + ratio * widthSpan;
+          const y = padding.top + (max - value) / denom * heightSpan;
+          const r = opts.pointRadius || 3.0;
+          ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill();
+          if (opts.labelBestHop) {
+            const bh = rec.best_hop; if (Number.isFinite(bh)) {
+              ctx.fillStyle = '#475569'; ctx.font = '11px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+              ctx.fillText(String(bh), x + 4, y);
+              ctx.fillStyle = colors[idx] || '#1c7ed6';
+            }
+          }
+          if (opts.overlayShortcut && typeof opts.spSelector === 'function') {
+            const spv = Number(opts.spSelector(rec));
+            if (Number.isFinite(spv) && spv > 0) {
+              ctx.save();
+              ctx.strokeStyle = '#9c36b5';
+              ctx.lineWidth = 2.0;
+              ctx.setLineDash([6,4]);
+              const rr = (opts.pointRadius || 3.0) + 4;
+              ctx.beginPath(); ctx.arc(x, y, rr, 0, Math.PI*2); ctx.stroke();
+              ctx.restore();
+            }
+          }
+        });
+      });
+      // marker
+      const markerRatio = Math.max(0, Math.min(state.step / domain, 1));
+      const markerX = padding.left + markerRatio * widthSpan;
+      ctx.strokeStyle = '#adb5bd'; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(markerX, padding.top); ctx.lineTo(markerX, height - padding.bottom); ctx.stroke(); ctx.setLineDash([]);
+    }
+
+    function renderStepInfo(rec) {
+      if (!rec) {
+        stepInfo.innerHTML = '<div class="step-box"><h4>Step</h4><span>-</span></div>';
+        candTable.innerHTML = '<p class="cand-placeholder">候補情報がありません</p>';
+        if (hopTable) hopTable.innerHTML = '<p class="cand-placeholder">hop情報がありません</p>';
+        return;
+      }
+      const fmt = (value, digits = 4) => Number.isFinite(value) ? value.toFixed(digits) : '—';
+      // Fallback helpers for older step logs that lack mh-only fields or ΔSP fields
+      const hopSeries = Array.isArray(rec?.hop_series) ? rec.hop_series : [];
+      const firstHop = (key) => {
+        if (!hopSeries.length) return 0;
+        // prefer explicit hop==0; otherwise take the first entry
+        const s0 = hopSeries.find(s => Number(s.hop ?? 0) === 0) || hopSeries[0];
+        const v = Number(s0?.[key]);
+        return Number.isFinite(v) ? v : 0;
+      };
+      const minHop = (key, fromHop = 1) => {
+        if (!hopSeries.length) return 0;
+        const series = hopSeries.filter(s => Number(s.hop ?? 0) >= fromHop);
+        if (!series.length) return 0;
+        let m = Number.POSITIVE_INFINITY;
+        for (const s of series) {
+          const v = Number(s?.[key]);
+          if (Number.isFinite(v) && v < m) m = v;
+        }
+        return (m === Number.POSITIVE_INFINITY) ? 0 : m;
+      };
+      const cs = rec.candidate_selection || {};
+      const pool = rec.candidate_pool || [];
+      const links = rec.selected_links || [];
+      const ranked = rec.ranked_candidates || [];
+      const status = rec.done ? 'Goal' : (rec.is_dead_end ? 'Dead-end' : 'Exploring');
+      const possibleMoves = (rec.possible_moves || []).map(idx => ACTION_NAMES[idx] || idx).join(', ');
+      const counts = rec.candidate_selection?.counts || {};
+      const decision = rec.candidate_selection?.decision || {};
+      const decisionText = (() => {
+        if (!decision || !decision.origin) return 'fallback';
+        if (decision.origin === 'obs') {
+          const actionCode = decision.action;
+          const display = Number.isFinite(actionCode)
+            ? (ACTION_NAMES[actionCode] || actionCode)
+            : decision.index || 'obs';
+          return `obs (${display})`;
+        }
+        return decision.origin;
+      })();
+      const linksetSize = cs.linkset_size ?? cs.linked ?? 0;
+      const asNum = (v, fb = 0) => {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : fb;
+      };
+      const linksetBoxes = `
+        <div class="step-box"><h4>ΔGED (linkset) / ΔIG (linkset)</h4><span>${fmt(asNum(rec.linkset_delta_ged))} / ${fmt(asNum(rec.linkset_delta_h))}</span></div>
+        <div class="step-box"><h4>ΔSP (linkset)</h4><span>${fmt(asNum(rec.linkset_delta_sp))}</span></div>
+        <div class="step-box"><h4>g₀ (linkset)</h4><span>${fmt(asNum(rec.linkset_g))}</span></div>
+        <div class="step-box"><h4>|S_linkset|</h4><span>${linksetSize}</span></div>
+      `;
+      // Resolve values with robust fallbacks
+      const gminMh = Number.isFinite(rec.gmin_mh) ? rec.gmin_mh : minHop('g', 1);
+      const gedMinMh = Number.isFinite(rec.delta_ged_min_mh) ? rec.delta_ged_min_mh : minHop('ged', 1);
+      const igMinMh = Number.isFinite(rec.delta_ig_min_mh) ? rec.delta_ig_min_mh : minHop('ig', 1);
+      const spMinMh = Number.isFinite(rec.delta_sp_min_mh) ? rec.delta_sp_min_mh : minHop('sp', 1);
+      const sp0 = Number.isFinite(rec.delta_sp) ? rec.delta_sp : firstHop('sp');
+      // Prefer explicit min fields; fallback to mh-only; then to hop_series
+      const gedMinDisplay = Number.isFinite(rec.delta_ged_min) ? rec.delta_ged_min : (Number.isFinite(gedMinMh) ? gedMinMh : minHop('ged', 1));
+      const igMinDisplay = Number.isFinite(rec.delta_ig_min) ? rec.delta_ig_min : (Number.isFinite(igMinMh) ? igMinMh : minHop('ig', 1));
+      const spMinDisplay = Number.isFinite(rec.delta_sp_min) ? rec.delta_sp_min : (Number.isFinite(spMinMh) ? spMinMh : Math.min(firstHop('sp'), minHop('sp', 1)));
+
+      stepInfo.innerHTML = `
+        <div class="step-box"><h4>Step</h4><span>${rec.step}</span></div>
+        <div class="step-box"><h4>Status</h4><span>${status}</span></div>
+        <div class="step-box"><h4>g₀ / g_min</h4><span>${fmt(rec.g0)} / ${fmt(rec.gmin)}</span></div>
+        <div class="step-box"><h4>ΔGED / ΔIG</h4><span>${fmt(rec.delta_ged)} / ${fmt(rec.delta_ig)}</span></div>
+        <div class="step-box"><h4>ΔGED (min) / ΔIG (min)</h4><span>${fmt(gedMinDisplay)} / ${fmt(igMinDisplay)}</span></div>
+        <div class="step-box"><h4>ΔSP / ΔSP (min)</h4><span>${fmt(sp0)} / ${fmt(spMinDisplay)}</span></div>
+        <div class="step-box"><h4>θAG (auto/q/len)</h4><span>${fmt(Number(rec.theta_ag ?? 0))} / ${fmt(Number(rec.ag_quantile ?? 0),2)} / ${Number(rec.g0_history_len ?? 0)}</span></div>
+        <div class="step-box"><h4>debug g_min(json/calc)</h4><span>${fmt(rec.gmin)} / ${fmt(rec.dbg_gmin_calc)}</span></div>
+        <div class="step-box"><h4>debug bestHop(json/calc)</h4><span>${rec.best_hop} / ${rec.dbg_best_hop_calc}</span></div>
+        <div class="step-box"><h4>g_min(mh) / ΔGED(min,mh) / ΔIG(min,mh)</h4><span>${fmt(gminMh)} / ${fmt(gedMinMh)} / ${fmt(igMinMh)}</span></div>
+        <div class="step-box"><h4>ΔSP(min,mh)</h4><span>${fmt(spMinMh)}</span></div>
+        <div class="step-box"><h4>time_ms (cand / eval)</h4><span>${fmt(Number(rec.time_ms_candidates ?? 0),2)} / ${fmt(Number(rec.time_ms_eval ?? 0),2)}</span></div>
+        <div class="step-box"><h4>ring (cells / nodes)</h4><span>${Number(rec.ring_cells ?? 0)} / ${Number(rec.ring_nodes ?? 0)}</span></div>
+        <div class="step-box"><h4>dist evals (obs|mem|tot)</h4><span>${Number(rec.obs_dist_evals ?? 0)} | ${Number(rec.mem_dist_evals ?? 0)} | ${Number(rec.total_dist_evals ?? 0)}</span></div>
+        ${linksetBoxes}
+        <div class="step-box"><h4>k★ / cand(obs|mem)</h4><span>${cs.k_star ?? 0} / ${(counts.cand_obs ?? 0)} | ${(counts.cand_mem ?? 0)}</span></div>
+        <div class="step-box"><h4>Pool totals (obs|mem)</h4><span>${counts.obs_total ?? 0} | ${counts.mem_total ?? 0}</span></div>
+        <div class="step-box"><h4>Action</h4><span>${rec.action}</span></div>
+        <div class="step-box"><h4>Moves</h4><span>${possibleMoves || '—'}</span></div>
+        <div class="step-box"><h4>Decision origin</h4><span>${decisionText}</span></div>
+        <div class="step-box"><h4>Query node</h4><span>${rec.query_node ? `[${rec.query_node[0]}, ${rec.query_node[1]}]` : '—'}</span></div>
+      `;
+
+      const toKey = pos => Array.isArray(pos) ? pos.join(',') : String(pos ?? '');
+      const anchorOf = item => item?.position || item?.pos || item?.anchor_position || item?.anchorPosition;
+      const targetOf = item => item?.target_position || item?.targetPosition;
+      const directionOf = item => {
+        if (typeof item?.direction === 'number') return item.direction;
+        const delta = item?.relative_delta || item?.meta_delta;
+        if (delta && Array.isArray(delta) && delta.length >= 2) {
+          const dir = dirFromDelta(delta);
+          if (typeof dir === 'number') return dir;
+        }
+        return null;
+      };
+      const keyFor = item => {
+        const anchor = anchorOf(item);
+        if (!anchor || anchor.length < 2) return null;
+        const dir = directionOf(item);
+        const base = `${anchor[0]},${anchor[1]}`;
+        return dir === null ? base : `${base},${dir}`;
+      };
+
+      const candSet = new Set();
+      pool.forEach(item => {
+        const key = keyFor(item);
+        if (key) candSet.add(key);
+      });
+
+      const clinkSet = new Set();
+      links.forEach(item => {
+        const key = keyFor(item);
+        if (key) clinkSet.add(key);
+      });
+
+      const actionKey = (() => {
+        const decision = rec.candidate_selection?.decision;
+        const poolForAction = Array.isArray(rec.candidate_pool) && rec.candidate_pool.length
+          ? rec.candidate_pool
+          : (Array.isArray(rec.ranked_candidates) ? rec.ranked_candidates : []);
+        if (decision?.origin === 'obs' && poolForAction.length) {
+          const match = poolForAction.find(item => {
+            if (!item || item.origin !== 'obs') return false;
+            if (typeof decision.action === 'number' && item.action === decision.action) return true;
+            if (decision.index && item.index === decision.index) return true;
+            return false;
+          });
+          if (match) {
+            const key = keyFor(match);
+            if (key) return key;
+          }
+        }
+        if (rec.selected_links && rec.selected_links.length) {
+          const key = keyFor(rec.selected_links[0]);
+          if (key) return key;
+        }
+        return null;
+      })();
+
+      if (!ranked.length) {
+        candTable.innerHTML = '<p class="cand-placeholder">候補なし</p>';
+      } else {
+        const rows = ranked.slice(0, 8).map((item, idx) => {
+          const anchorPos = anchorOf(item);
+          const key = keyFor(item);
+          const tags = [];
+          if (key && key === actionKey) tags.push('action');
+          if (key && clinkSet.has(key)) tags.push('clink');
+          if (key && candSet.has(key)) tags.push('cand');
+          const label = tags.join(',');
+          const cls = key === actionKey ? 'highlight' : '';
+          const similarity = Number(item.similarity ?? item.score ?? 0).toFixed(4);
+          const passable = item.passable === undefined ? '-' : (item.passable ? '✓' : '✗');
+          const rCand = formatRadius((item.r_abs_cand !== undefined) ? item.r_abs_cand : item.radius_cand);
+          const rLink = formatRadius((item.r_abs_link !== undefined) ? item.r_abs_link : item.radius_link);
+          const origin = item.origin || (String(item.index).startsWith('mem') ? 'mem' : 'obs');
+          const directionIdx = typeof item.direction === 'number'
+            ? item.direction
+            : (origin === 'obs' && typeof item.action === 'number' ? item.action : null);
+          const headingRaw = item.direction_label
+            || (typeof item.action_label === 'string' ? item.action_label : null)
+            || (directionIdx !== null ? (ACTION_NAMES[directionIdx] || '') : '');
+          const heading = headingRaw ? headingRaw.split(' ')[0] : (directionIdx !== null ? `dir:${directionIdx}` : '-');
+          const visitValue = item.visit ?? item.meta_visits ?? item.visit_count;
+          const visitDisplay = Number.isFinite(visitValue) ? visitValue : (visitValue ?? '-');
+          const wDist = Number(item.d_w_rel ?? item.weighted_distance ?? item.distance ?? 0).toFixed(4);
+          const anchorDisplay = Array.isArray(anchorPos) ? `[${anchorPos.join(', ')}]` : '-';
+          const targetPos = targetOf(item);
+          const subInfo = targetPos ? `→ [${targetPos.join(', ')}]` : '';
+          const posCell = `${anchorDisplay}${subInfo ? `<span class="cand-meta">${subInfo}</span>` : ''}<span class="cand-meta">dir: ${heading || '-'} / visit: ${visitDisplay}</span>`;
+          return `<tr class="${cls}"><td>${idx + 1}</td><td>${origin}</td><td>${posCell}</td><td>${heading || '-'}</td><td>${visitDisplay}</td><td>${similarity}</td><td>${passable}</td><td>${wDist}</td><td>${rCand}</td><td>${rLink}</td><td>${label || '-'}</td></tr>`;
+        }).join('');
+
+        candTable.innerHTML = `
+          <thead><tr><th>#</th><th>origin</th><th>pos</th><th>heading</th><th>visits</th><th>sim</th><th>pass</th><th>d_w(rel)</th><th>r_abs_cand</th><th>r_abs_link</th><th>tag</th></tr></thead>
+          <tbody>${rows}</tbody>
+        `;
+      }
+
+      // hop-series 0..H の表を更新（表示は hop>=1 のみ）
+      const hs = Array.isArray(rec.hop_series) ? rec.hop_series : null;
+      if (!hs || !hs.length) {
+        hopTable.innerHTML = '<p class="cand-placeholder">hop情報がありません</p>';
+        if (spDebugTable) spDebugTable.innerHTML = '<p class="cand-placeholder">SP診断なし</p>';
+      } else {
+        let list = hs.filter(s => Number(s.hop ?? 0) >= 1);
+        if (!list.length) {
+          // Fallback: show hop0 only if multi-hop skipped
+          list = hs.slice(0, 1);
+        }
+        const rowsHop = list.map(s => {
+          const hop = Number(s.hop ?? 0);
+          const g = Number(s.g ?? 0).toFixed(6);
+          const ged = Number(s.ged ?? 0).toFixed(6);
+          const ig = Number(s.ig ?? 0).toFixed(6);
+          const h = Number(s.h ?? 0).toFixed(6);
+          const sp = Number(s.sp ?? 0).toFixed(6);
+          return `<tr><td>${hop}</td><td>${g}</td><td>${ged}</td><td>${ig}</td><td>${h}</td><td>${sp}</td></tr>`;
+        }).join('');
+        hopTable.innerHTML = `
+          <thead><tr><th>hop</th><th>g(h)</th><th>ΔGED</th><th>IG</th><th>H</th><th>ΔSP</th></tr></thead>
+          <tbody>${rowsHop}</tbody>
+        `;
+        const sd = Array.isArray(rec.sp_diagnostics) ? rec.sp_diagnostics : [];
+        if (spDebugTable) {
+          if (!sd.length) {
+            spDebugTable.innerHTML = '<p class="cand-placeholder">SP診断なし</p>';
+          } else {
+            const rowsSD = sd.slice(0,5).map(d => {
+              const hop = Number(d.hop ?? 0);
+              const pairs = Number(d.pair_count ?? 0);
+              const lb = Number(d.lb_avg ?? 0).toFixed(4);
+              const top = Array.isArray(d.top) ? d.top.slice(0,3).map(t => {
+                const ds = Number(t.delta_sp ?? 0).toFixed(4);
+                const u = Array.isArray(t.u) ? t.u.join(',') : '';
+                const v = Array.isArray(t.v) ? t.v.join(',') : '';
+                return `${ds} (${u}↔${v})`;
+              }).join('<br/>') : '';
+              return `<tr><td>${hop}</td><td>${pairs}</td><td>${lb}</td><td>${top}</td></tr>`;
+            }).join('');
+            spDebugTable.innerHTML = `
+              <thead><tr><th>hop</th><th>pairs</th><th>Lb</th><th>top δSP</th></tr></thead>
+              <tbody>${rowsSD}</tbody>
+            `;
+          }
+        }
+      }
+    }
+
+    function render() {
+      const records = getRecords();
+      const stepIdx = Math.min(state.step, records.length ? records[records.length - 1].step : 0);
+      // helpers: multi-hop only minima (exclude hop0) computed on client as fallback
+      const minMh = (rec, key) => {
+        const hs = Array.isArray(rec.hop_series) ? rec.hop_series : [];
+        const mh = hs.filter(s => Number(s.hop ?? 0) >= 1);
+        if (!mh.length) return Number(rec[key] ?? 0);
+        return mh.reduce((m, s) => {
+          const v = Number(s[key] ?? 0);
+          return (v < m) ? v : m;
+        }, Number.POSITIVE_INFINITY);
+      };
+      drawMaze(stepIdx);
+      drawGraph(stepIdx);
+      if (records.length) {
+        // Timeline: first draw g_min (skip hop0), then overlay shortcut rings, finally g0 line on top
+        drawScatter(timelineCtx, records,
+          [ state.useMhOnly ? (r => Number((r.gmin_mh ?? minMh(r,'g')) ?? 0)) : (r => Number(r.gmin ?? r.dbg_gmin_calc ?? 0)) ],
+          ['#f03e3e'], {
+            agOnly: false,
+            labelBestHop: true,
+            pointRadius: 3.2,
+            skipHop0: true,
+            overlayShortcut: true,
+            spSelector: (r) => (state.useMhOnly
+                                 ? Number((r.delta_sp_min_mh ?? minMh(r,'sp')) ?? 0)
+                                 : Number((r.delta_sp_min ?? Math.min(r.delta_sp ?? 0, minMh(r,'sp'))) ?? 0))
+          }
+        );
+        // Draw g0 line last (front layer, overlay)
+        drawSeries(timelineCtx, records, [r => Number(r.g0 ?? 0)], ['#1c7ed6'], { overlay: true });
+        drawSeries(diffCtx, records,
+          [r => Number(r.delta_ged ?? 0), r => Number(r.delta_ig ?? 0)],
+          ['#845ef7', '#f08c00']
+        );
+        // ΔGED(min), ΔIG(min): points only（AG発火のみ） with bestHop label
+        drawScatter(diffMinCtx, records,
+          state.useMhOnly
+            ? [ r => Number((r.delta_ged_min_mh ?? minMh(r,'ged')) ?? 0), r => Number((r.delta_ig_min_mh ?? minMh(r,'ig')) ?? 0) ]
+            : [ r => Number(r.delta_ged_min ?? 0), r => Number(r.delta_ig_min ?? 0) ],
+          ['#0ca678', '#d9480f'], { agOnly: true, labelBestHop: true, pointRadius: 3.0 });
+        drawSeries(spCtx, records,
+          [r => Number(r.delta_sp ?? 0), r => Number((r.delta_sp_min_mh ?? minMh(r,'sp')) ?? 0)],
+          ['#22b8cf', '#ff922b']
+        );
+        drawSeries(kCtx, records, [r => (r.candidate_selection?.k_star ?? 0)], ['#37b24d'], { forceMinZero: true });
+        const rec = records[Math.min(state.step, records.length - 1)];
+        renderStepInfo(rec);
+        // Render debug: show which edge source was used and abstract edge count
+        try {
+          const tbl = document.getElementById('render-debug-table');
+          if (tbl) {
+            let source = 'graph';
+            let edgesCount = Array.isArray(rec.graph_edges) ? rec.graph_edges.length : 0;
+            if (state.dsGraph && Array.isArray(rec.ds_graph_edges) && rec.ds_graph_edges.length) {
+              source = 'ds_graph';
+              edgesCount = rec.ds_graph_edges.length;
+            } else if (state.evalGraph && Array.isArray(rec.graph_edges_eval) && rec.graph_edges_eval.length) {
+              source = 'graph_eval';
+              edgesCount = rec.graph_edges_eval.length;
+            } else if (state.edgeMode === 'committed') {
+              source = 'committed_only';
+              edgesCount = Array.isArray(rec.committed_only_edges) ? rec.committed_only_edges.length : 0;
+            }
+            const hopSeries = Array.isArray(rec.hop_series) ? rec.hop_series : [];
+            const abEdges = (window.__lastAbstractEdges || []);
+            tbl.innerHTML = `
+              <thead><tr><th>step</th><th>edge source</th><th>edges</th><th>ds_edges</th><th>abstractEdges</th><th>cur(cell)</th><th>cur-in-ds</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>${rec.step}</td>
+                  <td>${source}</td>
+                  <td>${edgesCount}</td>
+                  <td>${Array.isArray(rec.ds_graph_edges) ? rec.ds_graph_edges.length : 0}</td>
+                  <td>${abEdges.length || 0}</td>
+                  <td>${state.dsGraph ? (rec.query_node ? `[${rec.query_node[0]},${rec.query_node[1]}]` : '-') : `[${rec.position?.[0]},${rec.position?.[1]}]`}</td>
+                  <td>${(function(){
+                        try {
+                          const cell = state.dsGraph && rec.query_node ? [Number(rec.query_node[0]), Number(rec.query_node[1])] : [Number(rec.position?.[0]), Number(rec.position?.[1])];
+                          const edges = (state.dsGraph && Array.isArray(rec.ds_graph_edges) && rec.ds_graph_edges.length) ? rec.ds_graph_edges : (globalDsEdges || []);
+                          if (!Array.isArray(edges) || !cell) return '-';
+                          const ok = edges.some(e => Array.isArray(e) && e.length===2 && ((e[0][0]===cell[0] && e[0][1]===cell[1]) || (e[1][0]===cell[0] && e[1][1]===cell[1])));
+                          return ok ? 'yes' : 'no';
+                        } catch(_){ return '?'; }
+                      })()}</td>
+                </tr>
+              </tbody>`;
+          }
+        } catch (_) {}
+        const maxStep = records.length ? records[records.length - 1].step : 0;
+        stepCounter.textContent = `${records.length ? state.step + 1 : 0} / ${maxStep + 1}`;
+      } else {
+        clearCanvas(graphCtx);
+        if (graphAbstractCtx) {
+          clearCanvas(graphAbstractCtx);
+        }
+        clearCanvas(timelineCtx);
+        clearCanvas(diffCtx);
+        clearCanvas(diffMinCtx);
+        clearCanvas(spCtx);
+        clearCanvas(kCtx);
+        renderStepInfo(null);
+      }
+    }
+
+    // populate meta tables
+    if (runMeta) {
+      const rows = [];
+      rows.push(`<tr><th>Maze</th><td>${(cfg.maze_size ?? '?')} × ${(cfg.maze_size ?? '?')}</td></tr>`);
+      rows.push(`<tr><th>Type</th><td>${cfg.maze_type ?? '-'}</td></tr>`);
+      rows.push(`<tr><th>Max Steps</th><td>${cfg.max_steps ?? '-'}</td></tr>`);
+      rows.push(`<tr><th>Seeds</th><td>${cfg.seeds ?? '-'}</td></tr>`);
+      runMeta.innerHTML = rows.join('');
+    }
+    if (configMeta) {
+      const rows = [];
+      rows.push(`<tr><th>λ / γ / hops</th><td>${Number(ged.lambda_weight ?? 0).toFixed(2)} / ${Number(ged.sp_beta ?? 0).toFixed(2)} / ${Number(ged.max_hops ?? 0)}</td></tr>`);
+      rows.push(`<tr><th>SP boundary / scope / expand</th><td>${ged.sp_boundary_mode ?? '-'} / ${ged.sp_scope_mode ?? '-'} / ${ged.sp_hop_expand ?? 0}</td></tr>`);
+      rows.push(`<tr><th>θ_AG / θ_DG</th><td>${Number(cfg.theta_ag ?? 0).toFixed(2)} / ${Number(cfg.theta_dg ?? 0).toFixed(2)}</td></tr>`);
+      rows.push(`<tr><th>Action policy / τ</th><td>${cfg.action_policy ?? 'argmax'} / ${Number(cfg.action_temp ?? 1).toFixed(2)}</td></tr>`);
+      configMeta.innerHTML = rows.join('');
+    }
+
+    updateControls();
+    installAbstractHover();
+    render();
+  
+
+</script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+# InsightSpike Configuration - FIXED VERSION
+# This configuration uses properly normalized GED calculation
+# Date: 2025-08-21
+
+# LLM Provider Settings
+llm:
+  provider: mock
+  model: distilgpt2
+
+# DataStore Settings
+datastore:
+  type: filesystem
+  root_path: ./data/insight_store
+
+# Memory Settings
+memory:
+  max_retrieved_docs: 10
+  short_term_capacity: 10
+  working_memory_capacity: 20
+  episodic_memory_capacity: 60
+  pattern_cache_capacity: 15
+
+# Graph Processing Settings - CRITICAL CHANGES
+graph:
+  # Spike detection thresholds (for normalized GED)
+  spike_ged_threshold: 0.5
+  spike_ig_threshold: 0.2
+  similarity_threshold: 0.3
+  conflict_threshold: 0.5
+  use_gnn: false
+  gnn_hidden_dim: 64
+  
+  # ⚠️ CRITICAL FIX: Use 'advanced' instead of 'hybrid'
+  # 'hybrid' references non-existent hybrid_metrics.py
+  # 'advanced' uses properly normalized gedig_core.py
+  ged_algorithm: advanced  # CHANGED FROM: hybrid
+  ig_algorithm: advanced   # ADDED FOR CONSISTENCY
+  
+  # Message passing configuration (unchanged)
+  enable_message_passing: false
+  message_passing:
+    alpha: 0.3
+    iterations: 2
+    max_hops: 1
+    aggregation: weighted_mean
+    self_loop_weight: 0.5
+    decay_factor: 0.8
+    similarity_threshold: 0.3
+    convergence_threshold: 0.0001
+    enable_batch_computation: true
+    cache_similarities: true
+    top_k_relevance_percentile: 75
+    
+  # Hybrid weights (unused with 'advanced' algorithm)
+  hybrid_weights:
+    structure: 0.4
+    semantic: 0.4
+    quality: 0.2
+
+# Reasoning Engine Settings
+reasoning:
+  max_cycles: 10
+  convergence_threshold: 0.8
+  spike_threshold: 0.7
+
+# Processing Settings
+processing:
+  max_cycles: 10
+  convergence_threshold: 0.8
+  min_quality_threshold: 0.7
+  use_advanced_metrics: true
+
+# Advanced Metrics (geDIG) Settings
+metrics:
+  use_normalized_ged: true
+  use_entropy_variance_ig: false
+  use_multihop_gedig: false
+  
+  spectral_evaluation:
+    enabled: false
+    weight: 0.3
+
+# ============================================
+# CHANGE LOG:
+# 2025-08-21: Fixed GED algorithm from 'hybrid' to 'advanced'
+#             This resolves spike detection failures in language tasks
+#             where GED values were reaching 350+ (threshold is 0.5)
+# ============================================

@@ -1,0 +1,95 @@
+%% InsightSpike Configuration System
+%% New Pydantic-based configuration architecture
+
+flowchart LR
+    %% Configuration Sources
+    subgraph "📄 Configuration Sources"
+        EnvVars[Environment Variables<br/>INSIGHTSPIKE_*]
+        ConfigYAML[config.yaml<br/>User Settings]
+        ConfigJSON[config.json<br/>Alternative Format]
+        Presets[Built-in Presets<br/>development/experiment/production]
+    end
+    
+    %% Configuration System
+    subgraph "⚙️ Configuration System"
+        direction TB
+        
+        subgraph "Models (Pydantic)"
+            InsightSpikeConfig[InsightSpikeConfig<br/>Root Model]
+            CoreConfig[CoreConfig]
+            MemoryConfig[MemoryConfig]
+            RetrievalConfig[RetrievalConfig]
+            GraphConfig[GraphConfig]
+            EmbeddingConfig[EmbeddingConfig]
+            LLMConfig[LLMConfig]
+        end
+        
+        subgraph "Loader System"
+            ConfigLoader[ConfigLoader<br/>Priority Resolution]
+            ConfigPresets[ConfigPresets<br/>Preset Definitions]
+            ConfigConverter[ConfigConverter<br/>Legacy Bridge]
+        end
+    end
+    
+    %% Usage Patterns
+    subgraph "🔧 Usage Patterns"
+        LoadConfig[load_config<br/>Auto-load]
+        GetConfig[get_config<br/>Singleton]
+        DirectLoad[Direct Preset<br/>ConfigPresets.get_preset]
+        LegacyConvert[Legacy Conversion<br/>For MainAgent]
+    end
+    
+    %% Applications
+    subgraph "📱 Applications"
+        CLI[CLI Commands]
+        Experiments[Experiments]
+        MainAgentApp[MainAgent]
+        Tests[Unit Tests]
+    end
+    
+    %% Flow
+    EnvVars --> ConfigLoader
+    ConfigYAML --> ConfigLoader
+    ConfigJSON --> ConfigLoader
+    Presets --> ConfigPresets
+    
+    ConfigLoader --> InsightSpikeConfig
+    ConfigPresets --> InsightSpikeConfig
+    
+    InsightSpikeConfig --> CoreConfig
+    InsightSpikeConfig --> MemoryConfig
+    InsightSpikeConfig --> RetrievalConfig
+    InsightSpikeConfig --> GraphConfig
+    InsightSpikeConfig --> EmbeddingConfig
+    InsightSpikeConfig --> LLMConfig
+    
+    LoadConfig --> ConfigLoader
+    GetConfig --> ConfigLoader
+    DirectLoad --> ConfigPresets
+    
+    InsightSpikeConfig --> ConfigConverter
+    ConfigConverter --> LegacyConvert
+    
+    LoadConfig --> CLI
+    LoadConfig --> Experiments
+    LegacyConvert --> MainAgentApp
+    DirectLoad --> Tests
+    
+    %% Priority Order
+    ConfigLoader -.->|1st Priority| EnvVars
+    ConfigLoader -.->|2nd Priority| ConfigYAML
+    ConfigLoader -.->|3rd Priority| ConfigJSON
+    ConfigLoader -.->|4th Priority| Presets
+    
+    %% Styling
+    classDef source fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px
+    classDef model fill:#e0f2f1,stroke:#009688,stroke-width:2px
+    classDef loader fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    classDef usage fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    classDef app fill:#e8f5e9,stroke:#4caf50,stroke-width:2px
+    
+    class EnvVars,ConfigYAML,ConfigJSON,Presets source
+    class InsightSpikeConfig,CoreConfig,MemoryConfig,RetrievalConfig,GraphConfig,EmbeddingConfig,LLMConfig model
+    class ConfigLoader,ConfigPresets,ConfigConverter loader
+    class LoadConfig,GetConfig,DirectLoad,LegacyConvert usage
+    class CLI,Experiments,MainAgentApp,Tests app

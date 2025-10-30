@@ -1,0 +1,58 @@
+# InsightSpike Configuration with DataStore
+# =========================================
+# This configuration uses DataStore to prevent memory explosion
+
+# Agent configuration
+agent:
+  type: "datastore_main"  # Use new DataStore-based agent
+  debug: false
+
+# DataStore configuration
+datastore:
+  type: "sqlite"
+  path: "data/insight.db"
+  
+# Memory management
+memory:
+  # Cache configuration
+  cache_size: 100  # Maximum episodes in memory cache
+  
+  # Memory monitoring thresholds
+  warning_threshold_mb: 500
+  critical_threshold_mb: 1000
+  check_interval_seconds: 60
+  
+  # No more in-memory episode limits!
+  # max_episodes: 10000  # REMOVED - DataStore handles this
+
+# Embedding configuration
+embedding:
+  dimension: 768
+  model: "sentence-transformers/all-MiniLM-L6-v2"
+
+# LLM Provider
+llm_provider:
+  type: "mock"  # Change to "openai" or "anthropic" for real usage
+  model: "gpt-3.5-turbo"
+  temperature: 0.7
+  max_tokens: 500
+
+# Graph configuration
+graph:
+  similarity_threshold: 0.7
+  max_neighbors: 50
+  
+# Spike detection
+spike_detection:
+  uncertainty_threshold: 0.7
+  novelty_threshold: 0.5
+
+# Performance
+performance:
+  batch_size: 32
+  async_processing: true
+
+# Logging
+logging:
+  level: "INFO"
+  show_memory_stats: true

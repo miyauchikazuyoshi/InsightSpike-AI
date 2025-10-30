@@ -1,0 +1,75 @@
+name: Weekly Monitoring
+
+on:
+  schedule:
+    # Run every Sunday at 2 AM UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:  # Allow manual triggers
+
+jobs:
+  gedig-health-check:
+    runs-on: ubuntu-latest
+    if: github.repository == 'miyauchikazuyoshi/InsightSpike-AI'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+    
+    - name: Install dependencies
+      run: poetry install --with dev
+    
+    - name: geDIG Health Check
+      env:
+        PYTHONPATH: ${{ github.workspace }}/src
+        INSIGHTSPIKE_LITE_MODE: "1"
+      run: |
+        echo "🔍 Running geDIG health checks..."
+        
+        # Test geDIG selector
+        python -c "
+        from insightspike.algorithms.gedig.selector import compute_gedig
+        import networkx as nx
+        
+        # Create simple test graphs
+        g1 = nx.Graph()
+        g1.add_edge(1, 2)
+        g2 = nx.Graph() 
+        g2.add_edges_from([(1, 2), (2, 3)])
+        
+        # Test all modes
+        for mode in ['pure', 'full', 'ab']:
+            try:
+                result = compute_gedig(g1, g2, mode=mode)
+                print(f'✅ geDIG {mode} mode: {result[\"gedig\"]:.3f}')
+            except Exception as e:
+                print(f'❌ geDIG {mode} mode failed: {e}')
+        
+        print('🎉 geDIG health check completed')
+        "
+    
+    - name: Public API Health Check  
+      env:
+        PYTHONPATH: ${{ github.workspace }}/src
+        INSIGHTSPIKE_LITE_MODE: "1"
+      run: |
+        echo "🔍 Testing public API..."
+        python -c "
+        from insightspike.public import create_agent, get_config_summary
+        
+        # Test agent creation
+        agent = create_agent()
+        print('✅ Agent creation successful')
+        
+        # Test config summary
+        summary = get_config_summary()
+        print(f'✅ Config summary: {len(summary)} keys')
+        
+        print('🎉 Public API health check completed')
+        "

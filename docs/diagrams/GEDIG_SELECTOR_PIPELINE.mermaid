@@ -1,0 +1,11 @@
+flowchart TD
+  A[Caller] -->|compute_gedig| S[algorithms.gedig.selector]
+  S -->|mode=pure| P[PureGeDIGCalculator]
+  S -->|mode=full| C[GeDIGCore]
+  S -->|mode=ab| P & C
+  subgraph Core
+    M[core.metrics\n normalized_ged/entropy_ig]
+    C --> M
+  end
+  S -->|result| R[Dict: gedig, ged, ig]
+

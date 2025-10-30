@@ -1,0 +1,174 @@
+%% Insight Lifecycle Flow
+%% Lifecycle from insight discovery to utilization
+
+flowchart TD
+    %% Input Stage
+    subgraph "📥 Input Stage"
+        Question[❓ User Question]
+        Context[📋 Existing Context]
+    end
+    
+    %% Processing Stage
+    subgraph "⚙️ Processing Stage"
+        Agent[🤖 MainAgent Processing]
+        Layers[🧠 4-Layer Architecture]
+        Response[📝 Response Generation]
+    end
+    
+    %% Insight Discovery
+    subgraph "💡 Insight Discovery"
+        direction TB
+        Extract[🔍 Insight Extraction]
+        
+        subgraph "Extraction Patterns"
+            Pattern1[Causal Relationship<br/>A causes B]
+            Pattern2[Analogical Relationship<br/>A is like B]
+            Pattern3[Integration Relationship<br/>A + B = C]
+            Pattern4[Structural Relationship<br/>A contains B]
+        end
+        
+        Extract --> Pattern1
+        Extract --> Pattern2
+        Extract --> Pattern3
+        Extract --> Pattern4
+    end
+    
+    %% Quality Assessment
+    subgraph "📊 Quality Assessment"
+        direction TB
+        Evaluate[Quality Assessment Engine]
+        
+        subgraph "Evaluation Criteria"
+            Conf[Confidence<br/>0.0-1.0]
+            Novel[Novelty<br/>0.0-1.0]
+            Coher[Coherence<br/>0.0-1.0]
+            Spec[Specificity<br/>0.0-1.0]
+        end
+        
+        Evaluate --> Conf
+        Evaluate --> Novel
+        Evaluate --> Coher
+        Evaluate --> Spec
+        
+        Score[Total Score Calculation]
+        Conf --> Score
+        Novel --> Score
+        Coher --> Score
+        Spec --> Score
+    end
+    
+    %% Registration Decision
+    subgraph "✅ Registration Decision"
+        Filter{Quality Filter<br/>Score >= 0.6}
+        Accept[✅ Registration Approved]
+        Reject[❌ Registration Rejected]
+    end
+    
+    %% Storage & Indexing
+    subgraph "💾 Storage & Indexing"
+        direction TB
+        Store[Database Storage]
+        Index[Index Creation]
+        
+        subgraph "Storage Items"
+            ID[Insight ID]
+            Text[Insight Text]
+            Concepts[Related Concepts]
+            Meta[Metadata]
+            Timestamp[Timestamp]
+        end
+        
+        Store --> ID
+        Store --> Text
+        Store --> Concepts
+        Store --> Meta
+        Store --> Timestamp
+    end
+    
+    %% Insight Utilization
+    subgraph "🔄 Insight Utilization"
+        direction TB
+        
+        subgraph "Search & Utilization"
+            Search[Concept Search]
+            Context_Build[Context Building]
+            Reasoning[Reasoning Support]
+        end
+        
+        subgraph "Management & Optimization"
+            Validate[Manual Validation]
+            Update[Quality Update]
+            Cleanup[Low Quality Removal]
+        end
+    end
+    
+    %% Feedback Loop
+    subgraph "🔄 Feedback Loop"
+        Learn[Continuous Learning]
+        Improve[Quality Improvement]
+        Adapt[Adaptive Adjustment]
+    end
+    
+    %% Flow Connections
+    Question --> Agent
+    Context --> Agent
+    Agent --> Layers
+    Layers --> Response
+    Response --> Extract
+    
+    Pattern1 --> Evaluate
+    Pattern2 --> Evaluate
+    Pattern3 --> Evaluate
+    Pattern4 --> Evaluate
+    
+    Score --> Filter
+    Filter -->|Score >= 0.6| Accept
+    Filter -->|Score < 0.6| Reject
+    
+    Accept --> Store
+    Store --> Index
+    Index --> Search
+    
+    Search --> Context_Build
+    Context_Build --> Reasoning
+    Reasoning --> Learn
+    
+    Validate --> Update
+    Update --> Improve
+    Cleanup --> Adapt
+    
+    Learn -.-> Context
+    Improve -.-> Evaluate
+    Adapt -.-> Filter
+    
+    %% CLI Commands Integration
+    subgraph "🖥️ CLI Commands"
+        CMD1[insights<br/>Display Statistics]
+        CMD2[insights-search<br/>Concept Search]
+        CMD3[insights-validate<br/>Manual Validation]
+        CMD4[insights-cleanup<br/>Quality Management]
+    end
+    
+    Index --> CMD1
+    Search --> CMD2
+    Validate --> CMD3
+    Cleanup --> CMD4
+    
+    %% Styling
+    classDef input fill:#e3f2fd
+    classDef process fill:#e8f5e8
+    classDef discovery fill:#fff3e0
+    classDef quality fill:#f3e5f5
+    classDef storage fill:#fafafa
+    classDef utilization fill:#e0f2f1
+    classDef feedback fill:#fce4ec
+    classDef cli fill:#f1f8e9
+    
+    class Question,Context input
+    class Agent,QT,Layers,Response process
+    class Extract,Pattern1,Pattern2,Pattern3,Pattern4 discovery
+    class Evaluate,Conf,Novel,Coher,Spec,Score,Filter quality
+    class Store,Index,ID,Text,Concepts,Meta,Timestamp storage
+    class Search,Context_Build,Reasoning,Validate,Update,Cleanup utilization
+    class Learn,Improve,Adapt feedback
+    class CMD1,CMD2,CMD3,CMD4 cli

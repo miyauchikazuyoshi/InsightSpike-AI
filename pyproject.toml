@@ -1,0 +1,217 @@
+[tool.poetry]
+name = "insightspike-ai"
+version = "0.8.0"
+description = "Brain-Inspired Multi-Agent Architecture for Insight Detection and Knowledge Restructuring"
+authors = ["Kazuyoshi Miyauchi <contact@insightspike-ai.org>"]
+packages = [{ include = "insightspike", from = "src" }]
+exclude = [
+    "src/insightspike/deprecated/**",
+    "src/insightspike/experimental/**/heavy/**",
+    "src/insightspike/experimental/**",
+    "src/insightspike/legacy/**",
+]
+readme = "README.md"
+license = "Apache-2.0"
+homepage = "https://github.com/miyauchikazuyoshi/InsightSpike-AI"
+repository = "https://github.com/miyauchikazuyoshi/InsightSpike-AI"
+keywords = ["artificial-intelligence", "insight-detection", "knowledge-graphs", "reinforcement-learning", "neuroscience"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+
+
+
+
+
+
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+# Core ML dependencies - optimized for Colab and local compatibility
+# CUDA auto-detection: PyTorch will automatically use GPU when available
+torch = { version = "2.2.2", optional = true }
+torchvision = { version = "0.17.2", optional = true }
+torchaudio = { version = "2.2.2", optional = true }
+torch-geometric = { version = "^2.4.0", optional = true }  # Requires torch >=2.2,<2.5
+torch-scatter = { version = "^2.1.2", optional = true }
+torch-sparse = { version = "^0.6.18", optional = true }
+torch-cluster = { version = "^1.6.3", optional = true }
+torch-spline-conv = { version = "^1.2.2", optional = true }
+numpy = "<2.0,>=1.26.0"
+sentence-transformers = { version = "^2.2.0", optional = true }  # Auto GPU optimization
+scipy = "^1.10.0"
+transformers = { version = "^4.30.0", optional = true }
+networkx = "^3.1"
+typer = "^0.9.0"
+click = "<8.2.0"
+rich = "^13.0.0"
+scikit-learn = "^1.3.0"
+matplotlib = "^3.7.0"
+pyyaml = "^6.0.1"
+packaging = "^23.0"
+pydantic = "^1.10.0"
+hnswlib = "^0.8.0"
+
+# Vector search - CPU version (GPU version can be added optionally)
+
+jupyter = { version = "^1.0", optional = true }
+pandas = { version = "^2.0", optional = true }
+seaborn = "^0.12.0"
+
+imageio = "^2.34.0"
+toml = "^0.10.2"
+psutil = "^5.9.0"
+notebook = { version = "^7.4.4", optional = true }
+
+# LLM providers - lightweight local models
+accelerate = { version = "^0.25.0", optional = true }
+bitsandbytes = { version = "^0.41.0", optional = true }
+einops = { version = "^0.7.0", optional = true }
+aiosqlite = "^0.21.0"
+openai = { version = "^1.97.1", optional = true }
+faiss-cpu = { version = "^1.8.0", optional = true }
+sentencepiece = { version = "^0.1.99", optional = true }
+
+
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+pytest-asyncio = "^0.21.0"
+black = "^23.0.0"
+isort = "^5.12.0"
+flake8 = "^6.0.0"
+mypy = "^1.5.0"
+types-pyyaml = "^6.0.0"
+types-requests = "^2.31.0"
+pillow = "^11.3.0"
+
+[tool.poetry.group.ci]
+optional = true
+
+[tool.poetry.group.ci.dependencies]
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+pytest-asyncio = "^0.21.0"
+black = "^23.0.0"
+isort = "^5.12.0"
+flake8 = "^6.0.0"
+
+[tool.poetry.extras]
+# Sentence-BERT を使った RAG 向け
+rag = ["sentence-transformers", "transformers", "accelerate"]
+# Layer3 / Layer4 の GNN 機能一式（後方互換のため残す）
+gnn = [
+    "torch",
+    "torchvision",
+    "torchaudio",
+    "torch-geometric",
+    "torch-scatter",
+    "torch-sparse",
+    "torch-cluster",
+    "torch-spline-conv"
+]
+
+# 分割版: 最小構成（torch + PyG 本体 + ネイティブ拡張）
+gnn-core = [
+    "torch",
+    "torch-geometric",
+    "torch-scatter",
+    "torch-sparse",
+    "torch-cluster",
+    "torch-spline-conv"
+]
+
+# 分割版: 画像/音声（任意）
+vision = ["torchvision"]
+audio = ["torchaudio"]
+# LLM・洞察ベクトル生成向け
+llm = ["transformers", "accelerate", "sentencepiece", "bitsandbytes", "einops"]
+# 近似近傍探索エンジン
+retrieval = ["faiss-cpu", "hnswlib"]
+# Notebook / データサイエンス補助
+notebook = ["jupyter", "pandas", "seaborn", "notebook"]
+# OpenAI SDK 連携
+openai = ["openai"]
+# 全機能をまとめてインストール
+full = [
+    "torch",
+    "torchvision",
+    "torchaudio",
+    "torch-geometric",
+    "torch-scatter",
+    "torch-sparse",
+    "torch-cluster",
+    "torch-spline-conv",
+    "sentence-transformers",
+    "transformers",
+    "accelerate",
+    "sentencepiece",
+    "bitsandbytes",
+    "einops",
+    "faiss-cpu",
+    "hnswlib",
+    "jupyter",
+    "pandas",
+    "seaborn",
+    "notebook",
+    "openai"
+]
+
+[tool.poetry.scripts]
+insightspike = "insightspike.cli.legacy:main"
+spike = "insightspike.__main__:run_app"
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: marks tests as integration tests",
+    "slow: marks tests as slow",
+    "performance: marks performance/benchmark tests",
+    "reproducibility: marks tests verifying reproducibility of results",
+    "benchmark: marks micro/throughput benchmark style tests",
+    "calibration: marks tests related to calibration analysis",
+]
+testpaths = ["tests"]
+norecursedirs = ["tests/development"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --strict-markers --tb=short --color=yes -p no:asyncio"
+
+[tool.coverage.run]
+source = ["src/insightspike"]
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+]
+
+[tool.coverage.report]
+fail_under = 20
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+line_length = 88
+known_first_party = ["insightspike"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

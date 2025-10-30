@@ -1,0 +1,181 @@
+# InsightSpike Configuration
+# This file defines the application's behavior.
+# It is validated against the Pydantic models in src/insightspike/config.py
+
+# LLM Provider Settings
+llm:
+  # Use "mock" provider for fast initialization (no external dependencies)
+  # Options: openai, anthropic, ollama, local, mock
+  provider: mock
+  
+  # Model name (used for 'local' or 'ollama' providers)
+  model: distilgpt2
+  
+  # For experiments requiring actual LLM responses, uncomment:
+  # provider: local
+  # model: distilgpt2
+
+# DataStore Settings
+datastore:
+  # Type of data store. Options: filesystem, in_memory
+  type: filesystem
+  # Root path for the filesystem data store
+  root_path: ./data/insight_store
+
+# Memory Settings
+memory:
+  # Maximum retrieved documents for context
+  max_retrieved_docs: 10
+  # Short-term memory capacity
+  short_term_capacity: 10
+  # Working memory capacity
+  working_memory_capacity: 20
+  # Episodic memory capacity
+  episodic_memory_capacity: 60
+  # Pattern cache capacity
+  pattern_cache_capacity: 15
+
+# Graph Processing Settings
+graph:
+  # Spike detection thresholds
+  spike_ged_threshold: 0.5
+  spike_ig_threshold: 0.2
+  # Similarity and conflict thresholds
+  similarity_threshold: 0.3
+  conflict_threshold: 0.5
+  # GNN settings
+  use_gnn: false
+  gnn_hidden_dim: 64
+  # GED algorithm: simple, advanced, networkx, hybrid
+  ged_algorithm: hybrid
+  
+  # Message passing configuration
+  enable_message_passing: false
+  message_passing:
+    alpha: 0.3              # Question influence weight (0-1)
+    iterations: 2           # Number of iterations (reduced from 3)
+    max_hops: 1            # Maximum hops from relevant nodes (NEW)
+    aggregation: weighted_mean
+    self_loop_weight: 0.5
+    decay_factor: 0.8
+    similarity_threshold: 0.3
+    convergence_threshold: 0.0001
+    enable_batch_computation: true
+    cache_similarities: true
+    top_k_relevance_percentile: 75  # Top 25% most relevant nodes as starting points
+  # Hybrid weights
+  hybrid_weights:
+    structure: 0.4
+    semantic: 0.4
+    quality: 0.2
+
+# Reasoning Engine Settings
+reasoning:
+  # Maximum cycles for the agent to reach a conclusion
+  max_cycles: 10
+  # Thresholds for detecting significant insights
+  convergence_threshold: 0.8
+  spike_threshold: 0.7
+
+# Processing Settings
+processing:
+  # Maximum reasoning cycles
+  max_cycles: 10
+  # Convergence detection
+  convergence_threshold: 0.8
+  # Minimum quality threshold
+  min_quality_threshold: 0.7
+  # Enable advanced metrics
+  use_advanced_metrics: true
+
+# Advanced Metrics (geDIG) Settings
+metrics:
+  use_normalized_ged: true
+  use_entropy_variance_ig: false
+  use_multihop_gedig: false
+  
+  # Spectral evaluation settings
+  spectral_evaluation:
+    enabled: false        # Default disabled for backward compatibility
+    weight: 0.3          # Weight when enabled
+    
+  multihop_config:
+    max_hops: 3
+    decay_factor: 0.5
+
+# Embedding Settings
+embedding:
+  # Model for text embeddings
+  model_name: sentence-transformers/all-MiniLM-L6-v2
+  device: cpu
+  dimension: 384
+
+# Output Settings
+output:
+  # Response style: concise, detailed, academic, conversational
+  response_style: concise
+  # Include reasoning trace
+  show_reasoning: false
+  # Include metadata
+  show_metadata: false
+
+# Performance Settings
+performance:
+  enable_cache: true
+  parallel_workers: 4
+
+# Monitoring Settings
+monitoring:
+  # Enable performance monitoring
+  enable_monitoring: true
+  # Memory usage tracking
+  track_memory_usage: true
+  # Metrics collection interval
+  metrics_interval: 60
+
+# Logging Settings
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR
+  level: INFO
+  # Log format
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  # Enable file logging
+  file_enabled: false
+  file_path: logs/insightspike.log
+
+# Vector Search Settings
+vector_search:
+  backend: numpy       # Options: auto, numpy
+  optimize: true       # Use optimized implementations
+  batch_size: 1000    # Batch size for operations
+
+# Integrated Index Settings (New)
+# integrated_index:
+#   # Enable integrated vector-graph index
+#   enabled: false       # Set to true to enable (currently in migration phase)
+#   
+#   # Basic configuration
+#   dimension: 768       # Vector dimension (should match embedding.dimension)
+#   similarity_threshold: 0.3  # Threshold for creating graph edges
+  
+  # FAISS integration for large-scale data
+  use_faiss: true      # Enable FAISS for large datasets
+  faiss_threshold: 100000  # Number of vectors to trigger FAISS usage
+  
+  # Migration settings
+  migration_mode: shadow  # Options: shadow, partial, full
+  # - shadow: Run both old and new systems in parallel
+  # - partial: New data goes to integrated index
+  # - full: Migrate all existing data
+  
+  # Auto-save configuration
+  auto_save: true      # Enable automatic saving
+  save_interval: 1000  # Save every N episodes
+  
+  # Feature flags for gradual rollout
+  rollout_percentage: 0  # Percentage of requests using integrated index (0-100)
+  enable_rollback: true  # Allow rollback to old system if needed
+
+# Environment Settings
+environment: development
+# Options: development, testing, production, experiment

@@ -1,0 +1,102 @@
+%% InsightSpike-AI System Dashboard
+%% Real-time system metrics and performance monitoring
+
+flowchart TB
+    %% System Overview
+    subgraph "🎯 System Overview"
+        Status[System Status<br/>🟢 Active]
+        Uptime[Uptime<br/>99.9%]
+        Version[Version<br/>v0.8.0]
+    end
+    
+    %% Memory Metrics
+    subgraph "🧠 Memory Metrics (Graph-Centric)"
+        direction TB
+        Episodes[Total Episodes<br/>1,234]
+        Importance[Dynamic Importance<br/>Graph: 40%<br/>Access: 30%<br/>Time: 30%]
+        IndexStatus[Hierarchical Index<br/>3 Layers ✓]
+        MemoryUsage[Memory Usage<br/>256 MB<br/>Compression: 100x]
+    end
+    
+    %% Graph Metrics
+    subgraph "📊 Scalable Graph Metrics"
+        direction TB
+        Nodes[Graph Structure<br/>L0: 10,000 episodes<br/>L1: 100 clusters<br/>L2: 10 super]
+        Edges[Total Edges<br/>45,890<br/>FAISS top-k: 50]
+        SearchPerf[Search Performance<br/>O log n<br/>Avg: 2ms]
+        GeDIG[geDIG Metrics<br/>ΔGED: 0.23<br/>ΔIG: 0.45]
+    end
+    
+    %% Insight Metrics
+    subgraph "💡 Insight Metrics"
+        direction TB
+        TotalInsights[Total Insights<br/>342]
+        QualityDist[Quality Distribution<br/>High: 45%<br/>Med: 40%<br/>Low: 15%]
+        RecentSpikes[Recent Spikes<br/>12/day]
+        ValidationRate[Validation Rate<br/>78%]
+    end
+    
+    %% Performance Metrics
+    subgraph "⚡ Performance Metrics"
+        direction TB
+        ResponseTime[Avg Response Time<br/>450 ms]
+        Throughput[Throughput<br/>120 q/min]
+        CPUUsage[CPU Usage<br/>35%]
+        GPUUsage[GPU Usage<br/>60%]
+    end
+    
+    %% Episode Management Activity
+    subgraph "🔄 Graph-Based Management"
+        direction TB
+        GraphIntegrations[Graph-Informed<br/>Integrations: 45%]
+        ConflictSplits[Conflict-Based<br/>Splits: 12]
+        ImportancePrunes[Low Importance<br/>Prunes: 15]
+        HierarchyRebuilds[Hierarchy<br/>Rebuilds: 3/day]
+    end
+    
+    %% Active Processes
+    subgraph "🔧 Active Processes"
+        direction TB
+        ActiveQueries[Active Queries<br/>3]
+        QueuedTasks[Queued Tasks<br/>7]
+        BackgroundJobs[Background Jobs<br/>2]
+    end
+    
+    %% Alerts and Warnings
+    subgraph "⚠️ Alerts"
+        direction TB
+        MemoryAlert[Memory Usage > 80%]
+        QualityAlert[Low Quality Insights > 30%]
+        PerformanceAlert[Response Time > 1s]
+    end
+    
+    %% Flow connections
+    Status --> Episodes
+    Episodes --> Nodes
+    Nodes --> TotalInsights
+    TotalInsights --> ResponseTime
+    ResponseTime --> ActiveQueries
+    
+    %% Alert triggers
+    MemoryUsage -.->|> 80%| MemoryAlert
+    QualityDist -.->|Low > 30%| QualityAlert
+    ResponseTime -.->|> 1000ms| PerformanceAlert
+    
+    %% Styling
+    classDef overview fill:#e3f2fd
+    classDef memory fill:#e8f5e8
+    classDef graph fill:#f3e5f5
+    classDef insight fill:#fff3e0
+    classDef performance fill:#e0f2f1
+    classDef management fill:#fce4ec
+    classDef process fill:#f1f8e9
+    classDef alert fill:#ffebee
+    
+    class Status,Uptime,Version overview
+    class Episodes,Importance,IndexStatus,MemoryUsage memory
+    class Nodes,Edges,SearchPerf,GeDIG graph
+    class TotalInsights,QualityDist,RecentSpikes,ValidationRate insight
+    class ResponseTime,Throughput,CPUUsage,GPUUsage performance
+    class GraphIntegrations,ConflictSplits,ImportancePrunes,HierarchyRebuilds management
+    class ActiveQueries,QueuedTasks,BackgroundJobs process
+    class MemoryAlert,QualityAlert,PerformanceAlert alert

@@ -1,0 +1,39 @@
+# Anthropic Claude Provider Configuration Example
+# ===============================================
+
+# LLM Configuration
+llm:
+  provider: anthropic
+  model_name: claude-3-sonnet-20240229  # or claude-3-opus-20240229
+  api_key: ${ANTHROPIC_API_KEY}  # Set via environment variable
+  temperature: 0.7
+  max_tokens: 1000
+  timeout: 30
+
+# Embedding Configuration  
+embedding:
+  provider: sentence-transformers  # Anthropic doesn't provide embeddings
+  model_name: all-MiniLM-L6-v2
+  dimension: 384
+
+# Spike Detection
+spike:
+  spike_ged: 0.5
+  spike_ig: 0.2
+  eta_spike: 0.2
+
+# Memory Configuration
+memory:
+  max_episodes: 10000
+  retrieval_k: 20
+  
+# Graph Configuration
+graph:
+  max_nodes: 5000
+  max_edges: 10000
+  pruning_threshold: 0.1
+
+# System
+system:
+  safe_mode: false
+  log_level: INFO

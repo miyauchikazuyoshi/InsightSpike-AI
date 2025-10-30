@@ -1,0 +1,39 @@
+name: Docs Lint & Index Consistency
+on:
+  pull_request:
+    paths:
+      - 'docs/development/**.md'
+      - 'scripts/build_plan_index.py'
+      - 'scripts/doc_meta_update.py'
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/development/**.md'
+      - 'scripts/build_plan_index.py'
+      - 'scripts/doc_meta_update.py'
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run plan index build
+        run: |
+          python scripts/build_plan_index.py
+      - name: Verify front matter presence & statuses
+        run: |
+          python -c "import pathlib,sys;\nroot=pathlib.Path('docs/development');\nallowed={'canonical','proposal','active','deprecated','archive','research'};\ninvalid=[];\n\nfor md in root.glob('*.md'):\n    txt=md.read_text(encoding='utf-8');\n    if not txt.startswith('---'):\n        invalid.append((str(md),'missing_front_matter'));\n        continue;\n    fm_end=txt.find('\n---\n',3);\n    if fm_end==-1: invalid.append((str(md),'unterminated_front_matter')); continue;\n    fm=txt[0:fm_end].splitlines()[1:];\n    status_line=[l for l in fm if l.startswith('status:')];\n    if not status_line: invalid.append((str(md),'missing_status')); continue;\n    status=status_line[0].split(':',1)[1].strip();\n    if status not in allowed: invalid.append((str(md),f'bad_status:{status}'));\nidx=root/'PLAN_INDEX.md';\nif idx.exists():\n    t=idx.read_text(encoding='utf-8');\n    if '<!-- AUTO-SECTION:BEGIN -->' not in t or '<!-- AUTO-SECTION:END -->' not in t: invalid.append(('PLAN_INDEX.md','missing_auto_section'));\nif invalid:\n    [print(f'{f}: {r}') for f,r in invalid];\nelse: print('All docs passed basic front matter checks.');"
+      - name: Decision schedule report
+        run: |
+          python scripts/doc_issue_scheduler.py > decision_schedule.jsonl
+          echo '--- decision schedule (top 20) ---'
+          head -n 20 decision_schedule.jsonl || true
+      - name: Upload schedule artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: decision-schedule
+          path: decision_schedule.jsonl

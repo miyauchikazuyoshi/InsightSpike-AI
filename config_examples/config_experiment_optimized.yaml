@@ -1,0 +1,149 @@
+# InsightSpike Configuration - Optimized for Experiments
+# ======================================================
+# This configuration enables all performance optimizations for real experiments
+
+# Environment
+environment: production
+
+# LLM Provider Settings
+llm:
+  # For experiments, use mock provider since real ones require API keys
+  provider: mock
+  model: mock
+  # For real experiments with API keys, use:
+  # provider: anthropic
+  # model: claude-3-opus-20240229
+  # provider: openai
+  # model: gpt-4
+  
+  temperature: 0.3
+  max_tokens: 256
+  top_p: 0.9
+  
+  prompt_style: standard
+  max_context_docs: 5
+  use_simple_prompt: false
+  include_metadata: false
+
+# Memory Settings - Optimized for large-scale
+memory:
+  # Increased capacities for experiments
+  max_retrieved_docs: 15
+  short_term_capacity: 20
+  working_memory_capacity: 50
+  episodic_memory_capacity: 100
+  pattern_cache_capacity: 30
+  
+  # Graph-based search enabled for scalability
+  enable_graph_search: true
+  graph_hop_limit: 2
+  graph_neighbor_threshold: 0.35    # Lower threshold for more exploration
+  graph_path_decay: 0.7
+
+# Processing Settings - All optimizations enabled
+processing:
+  # Insight management
+  enable_insight_registration: true
+  enable_insight_search: true
+  max_insights_per_query: 5
+  
+  # Layer1 bypass for known queries
+  enable_layer1_bypass: true
+  bypass_uncertainty_threshold: 0.2
+  bypass_known_ratio_threshold: 0.9
+  
+  # Prompt optimization
+  dynamic_doc_adjustment: true
+  max_docs_with_insights: 5
+  insight_relevance_boost: 0.2
+  
+  # Learning mechanism enabled
+  enable_learning: true
+  learning_rate: 0.1
+  exploration_rate: 0.15
+  
+  # Memory management
+  enable_aging: true
+  memory_consolidation_interval: 50
+  prune_threshold: 0.1
+  enable_reorganization: true
+
+# Graph Configuration - Optimized
+graph:
+  # geDIG thresholds
+  spike_ged_threshold: -0.5
+  spike_ig_threshold: 0.2
+  spike_conflict_threshold: 0.5
+  
+  # Graph construction
+  similarity_threshold: 0.35       # Lower for more connections
+  use_gnn: false
+  hop_limit: 2
+  neighbor_threshold: 0.35
+  path_decay: 0.7
+  
+  # Scalable graph settings
+  enable_monitoring: true
+  enable_caching: true
+  batch_size: 1000
+  faiss_index_type: IVF
+  use_graph_integration: true
+  
+  # Algorithm selection
+  ged_algorithm: simple
+  ig_algorithm: simple
+  enable_cached: true              # Enable caching for performance
+  enable_parallel: false
+
+# Embedding Configuration
+embedding:
+  model_name: sentence-transformers/all-MiniLM-L6-v2
+  dimension: 384
+  batch_size: 32
+  device: cpu
+  normalize: true
+  cache_embeddings: true
+
+# Monitoring Configuration
+monitoring:
+  enable_metrics: true
+  enable_tracing: false
+  metrics_port: 8080
+  service_name: insightspike_experiment
+  
+  slow_operation_threshold: 1.0
+  memory_usage_threshold: 2000     # 2GB for experiments
+
+# Logging Configuration
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "experiments/logs/experiment.log"
+  max_file_size: 10485760
+  backup_count: 3
+  
+  components:
+    insightspike.memory: INFO
+    insightspike.graph: INFO
+    insightspike.llm: WARNING
+
+# Output Configuration
+output:
+  format: json
+  include_reasoning: true
+  include_sources: true
+  max_sources: 5
+  max_context_length: 2000
+
+# Paths Configuration
+paths:
+  data_dir: ./data
+  cache_dir: ./cache
+  logs_dir: ./logs
+  models_dir: ./models
+
+# Experiment-specific settings can be handled in the experiment script
+# random_seed: 42
+# save_intermediate_results: true
+# save_graph_snapshots: true
+# track_memory_usage: true

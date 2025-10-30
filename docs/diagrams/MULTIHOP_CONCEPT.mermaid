@@ -1,0 +1,128 @@
+%% Multi-hop geDIG Concept Visualization
+%% Shows how different hop levels capture different insight depths
+
+graph TB
+    %% Title
+    subgraph "🎯 Multi-hop geDIG: Capturing Insights at Different Depths"
+        direction TB
+        
+        %% Initial State
+        subgraph "Initial Knowledge State"
+            A1[Math: Addition]
+            A2[Math: Multiplication]
+            B1[Physics: Force]
+            B2[Physics: Mass]
+            C1[Chemistry: Atoms]
+            C2[Chemistry: Molecules]
+            
+            A1 -.-> A2
+            B1 -.-> B2
+            C1 -.-> C2
+        end
+        
+        %% Arrow
+        Arrow1[" "]
+        Initial Knowledge State --> Arrow1
+        
+        %% After Insight
+        subgraph "After Insight Discovery"
+            %% Central insight node
+            I[🌟 E=mc²<br/>Mass-Energy Equivalence]
+            
+            %% Original nodes
+            A1b[Math: Addition]
+            A2b[Math: Multiplication]
+            B1b[Physics: Force]
+            B2b[Physics: Mass]
+            C1b[Chemistry: Atoms]
+            C2b[Chemistry: Molecules]
+            
+            %% Original connections
+            A1b -.-> A2b
+            B1b -.-> B2b
+            C1b -.-> C2b
+            
+            %% New connections from insight
+            I ==> A2b
+            I ==> B2b
+            I ==> C1b
+            
+            %% Style insight node
+            style I fill:#ffeb3b,stroke:#f57f17,stroke-width:4px
+        end
+        
+        Arrow1 --> After Insight Discovery
+    end
+    
+    %% Hop Analysis
+    subgraph "📊 Hop-by-Hop Analysis"
+        direction LR
+        
+        %% Hop 0
+        subgraph "Hop 0: Direct Impact"
+            H0[Only Insight Node<br/>geDIG = 0.35<br/>New concept added]
+            style H0 fill:#ffcdd2
+        end
+        
+        %% Hop 1
+        subgraph "Hop 1: Immediate Connections"
+            H1[Insight + Direct Links<br/>geDIG = 0.23<br/>Cross-domain bridging]
+            H1_nodes[Math × Physics × Chemistry]
+            H1 --> H1_nodes
+            style H1 fill:#f8bbd0
+        end
+        
+        %% Hop 2
+        subgraph "Hop 2: Ripple Effects"
+            H2[Extended Network<br/>geDIG = 0.10<br/>Indirect influences]
+            H2_nodes[Addition, Force, Molecules...]
+            H2 --> H2_nodes
+            style H2 fill:#e1bee7
+        end
+        
+        %% Hop 3
+        subgraph "Hop 3: Global Context"
+            H3[Full Graph<br/>geDIG = 0.05<br/>System-wide change]
+            H3_nodes[All concepts involved]
+            H3 --> H3_nodes
+            style H3 fill:#c5cae9
+        end
+        
+        Hop 0 --> Hop 1
+        Hop 1 --> Hop 2
+        Hop 2 --> Hop 3
+    end
+    
+    %% Interpretation
+    subgraph "🧠 Interpretation by Hop Level"
+        direction TB
+        
+        Int0[Hop 0: "What changed?"<br/>→ New unifying concept]
+        Int1[Hop 1: "What does it connect?"<br/>→ Links math, physics, chemistry]
+        Int2[Hop 2: "How far does it reach?"<br/>→ Affects fundamental understanding]
+        Int3[Hop 3: "What's the full impact?"<br/>→ Reorganizes knowledge structure]
+        
+        Int0 --> Int1
+        Int1 --> Int2
+        Int2 --> Int3
+    end
+    
+    %% Configuration Example
+    subgraph "⚙️ Configuration Example"
+        direction LR
+        
+        Config[config.yaml]
+        ConfigContent["use_multihop_gedig: true<br/>multihop_config:<br/>  max_hops: 3<br/>  decay_factor: 0.7<br/>  adaptive_hops: true"]
+        
+        Config --> ConfigContent
+        
+        style Config fill:#e8f5e9
+        style ConfigContent fill:#f1f8e9,font-family:monospace
+    end
+    
+    %% Mathematical Formula
+    subgraph "📐 Weighted geDIG Calculation"
+        Formula["Total geDIG = Σ(decay^hop × geDIG_hop)<br/><br/>Example:<br/>= 1.0×0.35 + 0.7×0.23 + 0.49×0.10 + 0.34×0.05<br/>= 0.577"]
+        
+        style Formula fill:#fff3e0,font-family:monospace
+    end

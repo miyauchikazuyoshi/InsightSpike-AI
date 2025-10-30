@@ -1,0 +1,5 @@
+tests/unit/test_vector_weights.py
+tests/unit/test_public_api_surface.py
+tests/unit/config/test_pydantic_config.py
+tests/unit/test_knowledge_management_basic.py
+tests/unit/test_public_api_extras.py

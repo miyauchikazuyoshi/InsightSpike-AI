@@ -1,0 +1,10 @@
+name: "✨ Feature request / Research note"
+description: "Propose a new capability or open research question"
+labels: [enhancement]
+body:
+  - type: textarea
+    attributes:
+      label: Problem / Motivation
+  - type: textarea
+    attributes:
+      label: Proposed solution / References

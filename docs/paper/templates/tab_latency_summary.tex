@@ -1,0 +1,44 @@
+% Latency summaries (side-by-side): Maze (left) and RAG (right)
+\begin{table}[H]
+  \centering
+  \begin{subtable}[t]{0.48\linewidth}
+    \centering
+    \caption{追加レイテンシ分布（MAZE，P50/P95/P99）}
+    \begin{tabular}{lrrrr}
+      \toprule
+      H×k & P50 (ms) & P95 (ms) & P99 (ms) & n \\ 
+      \midrule
+      1$\times$4 & 137 & 184 & 196 & 64 \\ 
+      1$\times$8 & 155 & 209 & 235 & 64 \\ 
+      1$\times$12 & 171 & 246 & 256 & 64 \\ 
+      2$\times$4 & 177 & 238 & 257 & 64 \\ 
+      2$\times$8 & 202 & 273 & 279 & 64 \\ 
+      2$\times$12 & 217 & 322 & 338 & 64 \\ 
+      3$\times$4 & 210 & 282 & 309 & 64 \\ 
+      3$\times$8 & 222 & 313 & 341 & 64 \\ 
+      3$\times$12 & 251 & 322 & 353 & 64 \\ 
+      \bottomrule
+    \end{tabular}
+    \label{tab:latency_maze}
+  \end{subtable}\hfill
+  \begin{subtable}[t]{0.48\linewidth}
+    \centering
+    \caption{追加レイテンシ分布（RAG，P50/P95/P99）}
+    \begin{tabular}{lrrrr}
+      \toprule
+      H×k & P50 (ms) & P95 (ms) & P99 (ms) & n \\ 
+      \midrule
+      1$\times$4 & 16913 & 23272 & 24449 & 21 \\ 
+      1$\times$6 & 17434 & 25120 & 28070 & 21 \\ 
+      1$\times$8 & 18585 & 24027 & 24846 & 21 \\ 
+      2$\times$4 & 16034 & 21411 & 22247 & 21 \\ 
+      2$\times$6 & 17264 & 21790 & 23677 & 21 \\ 
+      2$\times$8 & 16868 & 19177 & 22390 & 21 \\ 
+      3$\times$4 & 16079 & 22152 & 26276 & 21 \\ 
+      3$\times$6 & 16975 & 19518 & 20062 & 21 \\ 
+      3$\times$8 & 17111 & 22884 & 23201 & 21 \\ 
+      \bottomrule
+    \end{tabular}
+    \label{tab:latency_rag}
+  \end{subtable}
+\end{table}

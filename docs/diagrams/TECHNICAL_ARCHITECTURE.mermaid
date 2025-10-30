@@ -1,0 +1,176 @@
+%% InsightSpike-AI Technical Architecture Flow
+%% Details of technical implementation flow
+
+flowchart LR
+    %% User Interaction Layer
+    subgraph "👤 User Layer"
+        U1[Terminal/CLI]
+        U2[Python API]
+        U3[Jupyter Notebook]
+    end
+    
+    %% Application Layer
+    subgraph "🖥️ Application Layer"
+        direction TB
+        CLI_App[CLI Application<br/>typer + rich]
+        Agent_Loop[Agent Loop<br/>agent_loop.py]
+        Main_Agent[MainAgent<br/>main_agent.py]
+    end
+    
+    %% Core Processing Layers
+    subgraph "🧠 Core Intelligence Layers"
+        direction TB
+        
+        subgraph "Layer 1: Input"
+            L1_Input[Input Processing]
+            L1_Valid[Validation]
+            L1_Format[Formatting]
+        end
+        
+        subgraph "Layer 2: Memory (Enhanced)"
+            L2_Episode[Episode Management<br/>C-values (0.1-1.0)]
+            L2_Weight[Weight Vector Manager<br/>Task-specific dims]
+            L2_Confidence[Confidence Manager<br/>Selection feedback]
+            L2_Vector[Integrated Vector-Graph<br/>O(1) Search]
+            L2_Context[Context Building]
+            L2_Spatial[Spatial Indexing<br/>Position-aware]
+        end
+        
+        subgraph "Layer 3: Reasoning (Scalable)"
+            L3_Graph[Hierarchical Graph<br/>3-Layer Structure]
+            L3_Scalable[Scalable Builder<br/>O n log n → O log n]
+            L3_geDIG[geDIG Evaluator<br/>GeDIGCore advanced\nquery-centric k-hop]
+            L3_Insight[Insight Generator<br/>C-value propagation]
+            L3_Relation[Relationship Discovery]
+        end
+        
+        subgraph "Layer 4: Generation"
+            L4_LLM[LLM Processing]
+            L4_Local[LocalProvider]
+            L4_Response[Response Generation]
+        end
+    end
+    
+    %% Insight Discovery System
+    subgraph "💡 Insight Discovery System"
+        direction TB
+        Extract[Insight Extraction<br/>NLP Analysis]
+        Quality[Quality Assessment<br/>Multi-criteria Scoring]
+        
+        subgraph "Quality Metrics"
+            Q1[Confidence Score]
+            Q2[Novelty Score]
+            Q3[Coherence Score]
+            Q4[Specificity Score]
+        end
+        
+        Registry[InsightFactRegistry<br/>Central Management]
+    end
+    
+    %% Storage Layer
+    subgraph "💾 Storage Layer"
+        direction TB
+        
+        subgraph "SQLite Databases"
+            DB1[insight_facts.db<br/>Insight Database]
+            DB2[unknown_learning.db<br/>Learning Database]
+            DB3[Memory Cache<br/>Episodes]
+        end
+        
+        subgraph "Query Storage"
+            QS1[queries.json<br/>FileSystem Store]
+            QS2[queries table<br/>SQLite Store]
+            QS3[Query Nodes<br/>Graph Integration]
+        end
+        
+        subgraph "Integrated Index Storage ⚡NEW"
+            II_Vectors[normalized_vectors.npy<br/>Pre-normalized]
+            II_Norms[norms.npy<br/>Vector Norms]
+            II_Graph[graph.pkl<br/>NetworkX Graph]
+            II_Meta[metadata.json<br/>Episode Info]
+            II_Spatial[spatial_index.pkl<br/>Position Index]
+        end
+        
+        subgraph "Graph Storage"
+            Graph_Data[graph_pyg.pt<br/>PyTorch Graph]
+            Graph_Cache[Graph Cache<br/>NetworkX]
+        end
+        
+        subgraph "Configuration"
+            Config_Local[local.yaml]
+            Config_Prod[production.yaml]
+            Config_Colab[colab.yaml]
+            Config_Index[integrated_index:<br/>enabled, migration_mode]
+        end
+    end
+    
+    %% Data Flow Connections
+    U1 --> CLI_App
+    U2 --> Agent_Loop
+    U3 --> Main_Agent
+    
+    CLI_App --> Main_Agent
+    Agent_Loop --> Main_Agent
+    Main_Agent --> L1_Input
+    
+    %% Layer Flow
+    L1_Input --> L1_Valid --> L1_Format
+    L1_Format --> L2_Episode
+    L2_Episode --> L2_Integration
+    L2_Integration --> L2_Vector --> L2_Context
+    L2_Vector --> L2_Spatial
+    L2_Context --> L3_Graph
+    L3_Graph --> L3_Scalable
+    L3_Scalable --> L3_geDIG --> L3_Relation
+    L3_Relation --> L4_LLM
+    L4_LLM --> L4_Local --> L4_Response
+    
+    %% Insight Flow
+    L4_Response --> Extract
+    Extract --> Quality
+    Quality --> Q1
+    Quality --> Q2
+    Quality --> Q3
+    Quality --> Q4
+    Q1 --> Registry
+    Q2 --> Registry
+    Q3 --> Registry
+    Q4 --> Registry
+    
+    %% Storage Connections
+    L2_Vector -.-> II_Vectors
+    L2_Vector -.-> II_Norms
+    L2_Spatial -.-> II_Spatial
+    L2_Integration -.-> II_Graph
+    L2_Episode -.-> II_Meta
+    L3_Graph -.-> Graph_Data
+    L3_Graph -.-> Graph_Cache
+    Registry --> DB1
+    Main_Agent -.-> DB2
+    Main_Agent -.-> Config_Local
+    Config_Index -.-> L2_Vector
+    
+    %% Query Storage Connections
+    Main_Agent --> QS1
+    Main_Agent --> QS2
+    L2_Context --> QS3
+    L3_Graph -.-> QS3
+    
+    %% Feedback Loops
+    Registry -.-> L2_Context
+    Registry -.-> L3_geDIG
+    DB1 -.-> L2_Episode
+    L3_Graph -.-> L2_Integration
+    
+    %% Styling
+    classDef userLayer fill:#e3f2fd
+    classDef appLayer fill:#f3e5f5
+    classDef coreLayer fill:#e8f5e8
+    classDef insightLayer fill:#fff8e1
+    classDef storageLayer fill:#fafafa
+    
+    class U1,U2,U3 userLayer
+    class CLI_App,Agent_Loop,Main_Agent appLayer
+    class L1_Input,L2_Episode,L3_Graph,L4_LLM coreLayer
+    class Extract,Quality,Registry insightLayer
+    class DB1,DB2,DB3,Graph_Data storageLayer

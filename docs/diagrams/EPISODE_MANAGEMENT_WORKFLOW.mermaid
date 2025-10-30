@@ -1,0 +1,79 @@
+%% InsightSpike-AI Episode Management Workflow
+%% Graph-Centric Episode Management (C-value Free)
+
+flowchart TD
+    A[New Episode Input] --> B{Graph-Informed Integration Check}
+    
+    %% Graph-Based Integration Decision
+    B --> C[Calculate Vector Similarity<br/>FAISS Search ≥ 0.85?]
+    C --> D[Check Graph Connection<br/>Edge Weight > 0.5?]
+    D --> E[Calculate Content Overlap<br/>Word Overlap ≥ 0.7?]
+    E --> F{Should Integrate?<br/>Sim ≥ 0.85 OR<br/>(Sim ≥ 0.75 + Graph Connection)}
+    
+    %% Integration Path
+    F -->|Yes| G[INTEGRATE with Graph Weight]
+    G --> H[Update Vector<br/>weight = graph_strength or similarity]
+    H --> I[Combine Text<br/>Using Pipe Character]
+    I --> J[Update Graph Structure<br/>Merge Nodes if Needed]
+    J --> K[Update Metadata<br/>Integration History]
+    K --> L[Rebuild Hierarchical Index]
+    
+    %% New Node Path
+    F -->|No| M[CREATE New Episode Node]
+    M --> N[Add to Episodes List]
+    N --> O[Update Hierarchical Graph<br/>3-Layer Structure]
+    
+    %% Scalable Graph Analysis
+    O --> P[Hierarchical Graph Analysis<br/>O log n Search]
+    L --> P
+    P --> Q[Calculate geDIG Metrics<br/>ΔGED/ΔIG with FAISS]
+    Q --> R{High Insight Signal?<br/>GED+IG > Threshold}
+    
+    %% Dynamic Importance Calculation
+    R -->|Yes| S[Update Dynamic Importance<br/>No C-values]
+    S --> SA[Calculate from:<br/>• Graph Degree<br/>• Access Frequency<br/>• Time Decay]
+    SA --> T[Check Splitting Triggers]
+    T --> U{High Neighbor Conflict?<br/>Incompatible Connections}
+    T --> V{Low Importance?<br/>Few connections + No access}
+    
+    %% Graph-Based Management
+    U -->|Yes| X[SPLIT Episode<br/>Minimize Conflicts]
+    V -->|Yes| Y[PRUNE Episode<br/>Remove from Graph]
+    
+    %% Hierarchical Update
+    R -->|No| AA[Update Hierarchy if Needed]
+    X --> BB[Rebalance Clusters]
+    Y --> BB
+    BB --> AA
+    
+    %% Decision Matrix Box
+    subgraph "Graph-Centric Integration"
+        direction TB
+        DM1["🔄 High Sim + Graph Connection → INTEGRATE weight=graph"]
+        DM2["🔄 Medium Sim + Strong Graph → INTEGRATE threshold -0.1"]
+        DM3["🆕 High Sim + No Graph → NEW NODE"]
+        DM4["⚖️ Conflict Detection → SPLIT if needed"]
+    end
+    
+    %% Scalability Features
+    subgraph "Scalable Implementation"
+        direction TB
+        SC1["FAISS Approximate NN: O n log n build"]
+        SC2["Hierarchical Search: O log n query"]
+        SC3["3-Layer Structure: Episodes→Clusters→Super"]
+        SC4["Dynamic Rebalancing: Add without rebuild"]
+        SC5["100K+ Episodes: <5ms search time"]
+    end
+    
+    %% Styling
+    classDef decision fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef process fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef integrate fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef manage fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    classDef scalable fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    
+    class B,F,R,U,V decision
+    class C,D,E,P,Q,S,SA,T process
+    class G,H,I,J,K,M,N,O,L integrate
+    class X,Y,BB manage
+    class SC1,SC2,SC3,SC4,SC5 scalable

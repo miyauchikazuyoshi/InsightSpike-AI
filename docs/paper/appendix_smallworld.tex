@@ -1,0 +1,9 @@
+% Appendix S1: Small-world metrics for RAG graph
+\section*{付録B. Small‑world 指標（RAG グラフ）}
+本付録では，RAG 知識グラフの Small‑world 性を概観する指標（平均次数\,\,$\bar{k}$，クラスタ係数\,\,$C$，平均最短距離\,\,$L$）を提示する。$H\approx \alpha\,\log n$ の運用妥当性に対する外形的根拠として参照する。表S1は実グラフ（最大連結成分）に基づく推定値である（詳細は付記スクリプト参照）。
+
+% Auto-generated table is included if present
+\IfFileExists{templates/tab_smallworld.tex}{\input{templates/tab_smallworld.tex}}{\noindent\emph{備考}: 実測表は `docs/paper/templates/tab_smallworld.tex` に自動生成される（スクリプト: `docs/paper/make_smallworld_table.py`）。}
+
+\paragraph{再現スクリプト}
+\texttt{python docs/paper/make\_smallworld\_table.py} を実行すると，\texttt{experiments/rag-dynamic-db-v3/insight\_eval/results/exports/doc\_cooccurrence\_edges.csv}（共起エッジ）から表S1を再計算し，\texttt{docs/paper/templates/tab\_smallworld.tex} を出力する。グラフは共起から近似した無向単純グラフで，各指標は最大連結成分で算出する（NetworkX）。

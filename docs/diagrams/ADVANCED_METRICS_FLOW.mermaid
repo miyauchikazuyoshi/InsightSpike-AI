@@ -1,0 +1,152 @@
+%% Advanced Metrics System Flow (2025-01)
+%% Shows how new metrics integrate into the geDIG calculation pipeline
+
+flowchart TB
+    %% Input Layer
+    subgraph "📥 Input"
+        Question[User Question]
+        GraphBefore[Graph Before<br/>t=0]
+        GraphAfter[Graph After<br/>t=1]
+        Features[Node Features<br/>Embeddings]
+    end
+    
+    %% Configuration
+    subgraph "⚙️ Configuration"
+        ConfigYAML[config.yaml]
+        MetricsFlags[Metrics Flags<br/>use_normalized_ged<br/>use_entropy_variance_ig<br/>use_multihop_gedig]
+    end
+    
+    %% Metrics Selector
+    subgraph "🎯 Metrics Selection"
+        MetricsSelector[MetricsSelector<br/>metrics_selector.py]
+        GEDMethod{GED Method?}
+        IGMethod{IG Method?}
+    end
+    
+    %% GED Calculations
+    subgraph "📐 Structure Analysis (GED)"
+        SimpleGED[Simple GED<br/>Node/Edge Count]
+        NormalizedGED[Normalized GED<br/>Scale-invariant [-1,1]]
+        AdvancedGED[Advanced GED<br/>NetworkX-based]
+    end
+    
+    %% IG Calculations
+    subgraph "📊 Information Analysis (IG)"
+        SimpleIG[Simple IG<br/>Cosine Similarity]
+        LocalIGV2[Local IG V2<br/>Surprise + Diffusion]
+        EntropyVarianceIG[Entropy Variance IG<br/>Shannon Entropy]
+    end
+    
+    %% Query-Centric & Multi-hop Analysis
+    subgraph "🔍 Multi-hop geDIG"
+        MultiHopCalc[MultiHopGeDIG<br/>multihop_gedig.py]
+        
+        subgraph "Hop Levels"
+            Hop0[Hop 0<br/>Direct Changes]
+            Hop1[Hop 1<br/>First Neighbors]
+            Hop2[Hop 2<br/>Second Neighbors]
+            HopN[Hop N<br/>N-distance]
+        end
+        
+        WeightedSum[Weighted Sum<br/>decay^hop × geDIG]
+    end
+
+    %% Query-centric local evaluation
+    subgraph "📍 Query-Centric"
+        QueryCenters[Top-K Centers<br/>k nodes]
+        QueryRadius[Local Radius<br/>r-hop]
+    end
+    
+    %% geDIG Calculator
+    subgraph "🧮 geDIG Calculation"
+        GeDIGCalc[GeDIGCalculator<br/>gedig_calculator.py]
+        BasicGeDIG[Basic geDIG<br/>GED × IG]
+        MultiHopGeDIG[Multi-hop geDIG<br/>Σ(weighted)]
+    end
+    
+    %% Output
+    subgraph "📤 Output"
+        Result[geDIG Result<br/>+ Components<br/>+ Hop Details]
+        SpikeDetection{Spike?<br/>geDIG > θ}
+        Insight[Insight Detected!]
+        NoInsight[Regular Response]
+    end
+    
+    %% Flow connections
+    Question --> GraphAfter
+    GraphBefore --> MetricsSelector
+    GraphAfter --> MetricsSelector
+    Features --> MetricsSelector
+    
+    ConfigYAML --> MetricsFlags
+    MetricsFlags --> MetricsSelector
+    
+    MetricsSelector --> GEDMethod
+    MetricsSelector --> IGMethod
+    
+    %% GED routing
+    GEDMethod -->|simple| SimpleGED
+    GEDMethod -->|normalized=true| NormalizedGED
+    GEDMethod -->|advanced| AdvancedGED
+    
+    %% IG routing
+    IGMethod -->|simple| SimpleIG
+    IGMethod -->|local_ig=true| LocalIGV2
+    IGMethod -->|entropy_variance=true| EntropyVarianceIG
+    
+    %% All paths lead to calculator
+    SimpleGED --> GeDIGCalc
+    NormalizedGED --> GeDIGCalc
+    AdvancedGED --> GeDIGCalc
+    SimpleIG --> GeDIGCalc
+    LocalIGV2 --> GeDIGCalc
+    EntropyVarianceIG --> GeDIGCalc
+    
+    %% Multi-hop branch
+    MetricsFlags -->|query_centric=true| QueryCenters
+    MetricsFlags -->|query_centric=true| QueryRadius
+    QueryCenters --> MultiHopCalc
+    QueryRadius --> MultiHopCalc
+    MetricsFlags -->|multihop=true| MultiHopCalc
+    GraphBefore --> MultiHopCalc
+    GraphAfter --> MultiHopCalc
+    Features --> MultiHopCalc
+    
+    MultiHopCalc --> Hop0
+    MultiHopCalc --> Hop1
+    MultiHopCalc --> Hop2
+    MultiHopCalc --> HopN
+    
+    Hop0 --> WeightedSum
+    Hop1 --> WeightedSum
+    Hop2 --> WeightedSum
+    HopN --> WeightedSum
+    
+    %% Final calculation
+    GeDIGCalc --> BasicGeDIG
+    WeightedSum --> MultiHopGeDIG
+    BasicGeDIG --> Result
+    MultiHopGeDIG --> Result
+    
+    Result --> SpikeDetection
+    SpikeDetection -->|Yes| Insight
+    SpikeDetection -->|No| NoInsight
+    
+    %% Styling
+    classDef input fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef config fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef selector fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    classDef ged fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef ig fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    classDef multihop fill:#e0f2f1,stroke:#00796b,stroke-width:2px
+    classDef calc fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+    classDef output fill:#efebe9,stroke:#5d4037,stroke-width:2px
+    
+    class Question,GraphBefore,GraphAfter,Features input
+    class ConfigYAML,MetricsFlags config
+    class MetricsSelector,GEDMethod,IGMethod selector
+    class SimpleGED,NormalizedGED,AdvancedGED ged
+    class SimpleIG,LocalIGV2,EntropyVarianceIG ig
+    class MultiHopCalc,Hop0,Hop1,Hop2,HopN,WeightedSum multihop
+    class GeDIGCalc,BasicGeDIG,MultiHopGeDIG calc
+    class Result,SpikeDetection,Insight,NoInsight output

@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>geDIG 2D Graph Visualizer — ΔGEDnorm / ΔIGnorm (k-hop, loops)</title>
+<style>
+  :root { --bg:#0f172a; --panel:#111827; --ink:#e5e7eb; --muted:#9ca3af; --acc:#60a5fa; --acc2:#34d399; --warn:#f59e0b; --bad:#ef4444; }
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+  header{background:var(--panel);padding:10px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  header h1{margin:0;font-size:16px}
+  header .sub{color:var(--muted);font-size:12px}
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px 10px;padding:8px 12px}
+  .toolbar>*{background:#0b1220;border:1px solid #1f2937;color:var(--ink);border-radius:10px;padding:6px 10px;font-size:12px}
+  .toolbar input[type=range]{width:150px}
+  .wrap{display:grid;grid-template-columns:1.2fr .8fr;gap:10px;padding:10px}
+  .card{background:var(--panel);border:1px solid #1f2937;border-radius:14px;padding:10px}
+  .card h2{margin:0 0 8px;font-size:14px}
+  #stage{height:calc(100vh - 200px);border-radius:14px;background:#0b1220;position:relative;overflow:hidden}
+  svg{width:100%;height:100%;display:block}
+  .edge{stroke:#253142;stroke-width:1;opacity:.7}
+  .edge.hop0{stroke:#e5e7eb;opacity:.9}
+  .edge.hop1{stroke:#93c5fd;opacity:.9}
+  .edge.hop2{stroke:#a7f3d0;opacity:.9}
+  .edge.hop3{stroke:#fde68a;opacity:.9}
+  .edge.added{stroke:var(--acc);stroke-width:1.4;opacity:.95}
+  .node{fill:#9ca3af}
+  .node.hop0{fill:#e5e7eb;stroke:var(--acc2);stroke-width:2}
+  .node.hop1{fill:#93c5fd}
+  .node.hop2{fill:#a7f3d0}
+  .node.hop3{fill:#fde68a}
+  .legend{display:flex;gap:10px;align-items:center;font-size:12px;color:var(--muted);margin-top:6px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:10px;height:10px;border-radius:999px;display:inline-block}
+  .muted{color:var(--muted)} .ok{color:var(--acc2)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .pill{font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid #1f2937;background:#0b1220;color:var(--muted)}
+  /* insight overlay */
+  .insight-arrow{stroke:#34d399;stroke-width:2;opacity:.95}
+  .insight-node{fill:#34d399;stroke:#0b1220;stroke-width:1.5}
+  .diag{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+  <header>
+    <h1>geDIG 2D Graph Visualizer</h1>
+    <div class="sub">Fig.2準拠：k=0 は {Q とその接続先} = ego-1、k=1 はさらにその先 = ego-2、… の拡張で各 hop の誘導部分グラフを評価。</div>
+  </header>
+
+  <div class="toolbar">
+    <button id="btnReset">初期化</button>
+    <button id="btnAddCenter">中心ノードを追加（最も近い3点に接続）</button>
+    <button id="btnToggleInsight">洞察ベクトル表示</button>
+    <button id="btnPlantInsight">洞察ノードを刺す</button>
+
+    <label class="pill">配置
+      <select id="layoutSel" style="background:#0b1220;border:1px solid #1f2937;color:var(--ink);border-radius:8px;padding:4px 8px;">
+        <option value="clusters">2クラスタ</option>
+        <option value="donut">ドーナツ</option>
+        <option value="uniform">一様</option>
+      </select>
+    </label>
+
+    <label class="pill">R(ドーナツ半径): <span id="rVal">2.2</span></label>
+    <input id="rRange" type="range" min="1.0" max="2.8" step="0.05" value="2.2" />
+
+    <label class="pill">揺らぎ: <span id="jitVal">0.25</span></label>
+    <input id="jitRange" type="range" min="0.00" max="0.80" step="0.01" value="0.25" />
+
+    <label class="pill">k-hop: <span id="kVal">2</span></label>
+    <input id="kRange" type="range" min="0" max="3" value="2" />
+
+    <label class="pill">σ (RBF): <span id="sigmaVal">0.90</span></label>
+    <input id="sigmaRange" type="range" min="0.4" max="1.5" step="0.05" value="0.90" />
+
+    <label class="pill">閾値: <span id="thrVal">0.60</span></label>
+    <input id="thrRange" type="range" min="0.40" max="0.95" step="0.01" value="0.60" />
+
+    <label class="pill">Cmaxモード
+      <select id="cmaxSel" style="background:#0b1220;border:1px solid #1f2937;color:var(--ink);border-radius:8px;padding:4px 8px;">
+        <option value="nC2">ノード数から nC2</option>
+        <option value="unionE">|E_b ∪ E_a|</option>
+      </select>
+    </label>
+
+    <label class="pill">λ: <span id="lambdaVal">0.50</span></label>
+    <input id="lambdaRange" type="range" min="0" max="3" step="0.01" value="0.50" />
+
+    <label class="pill">中心ノード配置：</label>
+    <button id="btnPlaceClick">クリック配置</button>
+    <button id="btnPlaceAuto">自動配置(0,-0.2)</button>
+  </div>
+
+  <div class="wrap">
+    <div class="card">
+      <h2>2D Graph</h2>
+      <div id="stage"><svg id="svg" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet"><g id="edges"></g><g id="nodes"></g></svg></div>
+      <div class="muted" style="margin-top:6px">ヒント：ドーナツにしてR/揺らぎを動かし、中心ノードをクリックで置く→右表の各 hop を確認。</div>
+      <div class="legend"><span><i class="sw" style="background:#e5e7eb;border:2px solid var(--acc2)"></i>hop0(中心)</span><span><i class="sw" style="background:#93c5fd"></i>hop1</span><span><i class="sw" style="background:#a7f3d0"></i>hop2</span><span><i class="sw" style="background:#fde68a"></i>hop3</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Hop-wise Metrics（0..3）</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>hop</th><th>|V|</th><th>|E_b|</th><th>|E_a|</th><th>GED<sub>norm</sub></th>
+            <th>H<sub>b</sub></th><th>H<sub>a</sub></th><th>ΔIG<sub>norm</sub></th><th>geDIG</th>
+          </tr>
+        </thead>
+        <tbody id="hopRows"></tbody>
+      </table>
+      <h2 style="margin-top:12px">全体メモ</h2>
+      <table>
+        <tbody>
+          <tr><th>追加エッジ数</th><td id="mAdded">-</td></tr>
+          <tr><th>三角形増分</th><td id="mTri">-</td></tr>
+          <tr><th>平均最短路（全体）Before/After/差</th><td id="mAPL">-</td></tr>
+        </tbody>
+      </table>
+      <div class="muted" style="margin-top:6px">定義: <b>GED</b>（SP補正含む）は <b>正=構造改悪</b> / <b>負=構造改善</b>。<b>ΔIG</b> は <b>正=エントロピー縮小(整備)</b> / <b>負=エントロピー増大(乱雑)</b>。<b>geDIG = GED − λ·ΔIG</b>。この可視化では ΔIG を Hop 0: `H_before - H_after`、それ以外: `angleEntropy_before - angleEntropy_after` の比率正規化で計算。geDIG 列は θ<sub>BT</sub>=0.30, θ<sub>NA</sub>=0.35 で色分け（緑 &lt; θ<sub>BT</sub>、橙 ≥ θ<sub>BT</sub>、赤 ≥ θ<sub>NA</sub>）。</div>
+    </div>
+
+    <div class="card">
+      <h2>Diagnostics</h2>
+      <button id="btnRunTests">Run Tests</button>
+      <div id="testOutput" class="diag"></div>
+    </div>
+  </div>
+
+<script>
+// ---------- Utilities & Params ----------
+const rng=(()=>{let s=1234567;return()=> (s=(1103515245*s+12345)>>>0)/0xffffffff;})();
+function randn(mu=0,sd=1){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return mu+sd*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+
+// Default λ(=0.5) を迷路系実験と揃える
+let SIGMA=0.9, THR=0.60, KHOP=2; let LAYOUT='clusters', R_DONUT=2.2, JITTER=0.25; let CMAX_MODE='nC2'; let LAMBDA=0.50;
+let CLICK_PLACE=false; let centerId=null; let nodes=[], edges=[], addedEdges=new Set();
+let SHOW_INSIGHT=false; let INSIGHT_PT=null;
+
+function ensureSet(x){ return (x instanceof Set)? x : new Set(); }
+addedEdges = ensureSet(addedEdges);
+
+function key(a,b){
+  if(a==null || b==null) return `${a}-${b}`;
+  return (a<b)? `${a}-${b}` : `${b}-${a}`;
+}
+function rbfSim(p,q,s){const dx=p.x-q.x,dy=p.y-q.y;const d2=dx*dx+dy*dy;return Math.exp(-d2/(2*s*s))}
+function toScreen(p){return{x:(p.x+3)/6*1000,y:(1-(p.y+1.5)/3)*700}}
+
+// ---------- Graph Builders ----------
+function resetGraph(){
+  nodes=[]; edges=[]; addedEdges=ensureSet(addedEdges); addedEdges.clear(); centerId=null;
+  const nBase=70;
+  if(LAYOUT==='clusters'){
+    const n1=30,n2=30,nz=10;
+    for(let i=0;i<n1;i++)nodes.push({id:nodes.length,x:randn(-1.5,0.4),y:randn(0.0,0.2),kind:'base'});
+    for(let i=0;i<n2;i++)nodes.push({id:nodes.length,x:randn( 1.5,0.4),y:randn(0.2,0.25),kind:'base'});
+    for(let i=0;i<nz;i++) nodes.push({id:nodes.length,x:rng()*6-3,y:(rng()*3)-1.5,kind:'base'});
+  }else if(LAYOUT==='donut'){
+    for(let i=0;i<nBase;i++){const th=rng()*Math.PI*2;const r=Math.max(0.1,R_DONUT+randn(0,JITTER));nodes.push({id:nodes.length,x:r*Math.cos(th),y:r*Math.sin(th),kind:'base'})}
+  }else if(LAYOUT==='crescent'){
+    // 三日月配置: 半円から一部を削り取るような曲線配置
+    const nC=70; const innerR=1.6, outerR=2.4; const angleSpan=Math.PI*1.1; // 弧の角度
+    for(let i=0;i<nC;i++){
+      const th=-angleSpan/2 + angleSpan*(i/(nC-1));
+      const r=(th>0?outerR:innerR) + randn(0,JITTER*0.5);
+      const x=r*Math.cos(th);
+      const y=r*Math.sin(th);
+      nodes.push({id:nodes.length,x,y,kind:'base'});
+    }
+  }else{
+    for(let i=0;i<nBase;i++)nodes.push({id:nodes.length,x:rng()*6-3,y:(rng()*3)-1.5,kind:'base'});
+  }
+  rebuildEdges(); clearTables(); draw();
+}
+
+function rebuildEdges(){
+  const base=nodes.filter(n=>n.kind==='base'); edges=[]; addedEdges=ensureSet(addedEdges); addedEdges.clear();
+  for(let i=0;i<base.length;i++)for(let j=i+1;j<base.length;j++){
+    if(rbfSim(base[i],base[j],SIGMA)>THR) edges.push({a:base[i].id,b:base[j].id});
+  }
+  if(centerId!=null){
+    const pt=nodes.find(n=>n.id===centerId);
+    if(pt){ topKNeighbors(pt,3).forEach(o=>{ if(o&&Number.isInteger(o.id)){ edges.push({a:centerId,b:o.id}); addedEdges.add(key(centerId,o.id)); } }); }
+  }
+  draw();
+}
+
+function topKNeighbors(pt,k=3){
+  const arr=nodes.filter(n=>n.kind==='base').map(n=>({id:n.id,s:rbfSim(pt,n,SIGMA)}));
+  arr.sort((a,b)=> b.s-a.s);
+  return arr.slice(0,k);
+}
+
+// ---------- Metrics ----------
+function triangleCount(Ns,Es){
+  const adj=new Map(); Ns.forEach(n=>adj.set(n.id,new Set()));
+  for(const e of Es){
+    const sa = adj.get(e.a); const sb = adj.get(e.b);
+    if(sa) sa.add(e.b); // guard: skip edges whose endpoints are not in Ns
+    if(sb) sb.add(e.a);
+  }
+  let tri=0;
+  for(const u of Ns){ const Nu=[...adj.get(u.id)||[]]; for(let i=0;i<Nu.length;i++) for(let j=i+1;j<Nu.length;j++){ const s=adj.get(Nu[i]); if(s && s.has(Nu[j])) tri++; } }
+  return tri/3;
+}
+
+function avgSPL(Ns,Es){
+  if(Ns.length<2) return NaN;
+  const adj=new Map(); Ns.forEach(n=>adj.set(n.id,[]));
+  for(const e of Es){ const a=adj.get(e.a), b=adj.get(e.b); if(a) a.push(e.b); if(b) b.push(e.a); }
+  const seen=new Set(), comps=[];
+  for(const n of Ns){ if(seen.has(n.id)) continue; const q=[n.id]; const comp=new Set([n.id]); seen.add(n.id);
+    while(q.length){ const v=q.shift(); for(const w of adj.get(v)||[]){ if(!seen.has(w)){ seen.add(w); q.push(w); comp.add(w); } } }
+    comps.push(comp);
+  }
+  let total=0,weight=0;
+  for(const comp of comps){ if(comp.size<2) continue; const compArr=[...comp]; let tt=0,cc=0;
+    for(const s of compArr){ const dist=new Map(); dist.set(s,0); const q=[s];
+      while(q.length){ const v=q.shift(); for(const w of adj.get(v)||[]){ if(!dist.has(w)){ dist.set(w,dist.get(v)+1); q.push(w); } } }
+      for(const t of compArr){ if(t!==s && dist.has(t)){ tt+=dist.get(t); cc++; } }
+    }
+    if(cc>0){ total += (tt/cc)*comp.size; weight += comp.size; }
+  }
+  return weight>0? total/weight : NaN;
+}
+
+function nodesOfEgo(center,k,Ns,Es){
+  const adj=new Map(); Ns.forEach(n=>adj.set(n.id,[])); for(const e of Es){ const a=adj.get(e.a), b=adj.get(e.b); if(a) a.push(e.b); if(b) b.push(e.a); }
+  const dist=new Map(); dist.set(center,0); const q=[center];
+  while(q.length){ const v=q.shift(); if((dist.get(v)||0)===k) continue; for(const w of adj.get(v)||[]){ if(!dist.has(w)){ dist.set(w, (dist.get(v)||0)+1); q.push(w); } } }
+  return new Set([...dist.entries()].filter(([id,d])=> d<=k).map(([id])=>id));
+}
+
+function induced(ids,Ns,Es){ const set=new Set(ids); return { Ns:Ns.filter(n=>set.has(n.id)), Es:Es.filter(e=>set.has(e.a)&&set.has(e.b)) }; }
+
+function angleEntropy(centerId, Ns, Es, binN=24){
+  const center = Ns.find(n=>n.id===centerId); if(!center) return null;
+  const targets = Ns.filter(n=>n.id!==centerId); if(targets.length===0) return 0;
+  const hist=new Array(binN).fill(0);
+  for(const q of targets){ const ang=Math.atan2(q.y-center.y,q.x-center.x); let k=Math.floor(((ang+Math.PI)/(2*Math.PI))*binN); if(k<0)k=0; if(k>=binN)k=binN-1; hist[k]++; }
+  const total=hist.reduce((a,b)=>a+b,0); let H=0; for(const c of hist){ if(c>0){ const p=c/total; H += -p*Math.log(p); } }
+  return H; // 非正規化（正規化は式で分母に Hb を使う）
+}
+
+function neighborInfo(centerId, Ns, Es, sigma=SIGMA){
+  const center = Ns.find(n=>n.id===centerId); if(!center) return null;
+  const adj=new Map(); Ns.forEach(n=>adj.set(n.id,[])); for(const e of Es){ const a=adj.get(e.a), b=adj.get(e.b); if(a) a.push(e.b); if(b) b.push(e.a); }
+  const nbrs = adj.get(centerId) || [];
+  if(nbrs.length===0) return 0;
+  const EPS=1e-9; let sum=0;
+  for(const nb of nbrs){ const q = Ns.find(n=>n.id===nb); if(!q) continue; const dx=center.x-q.x, dy=center.y-q.y; const sim=Math.exp(-(dx*dx+dy*dy)/(2*sigma*sigma)); sum += -Math.log(Math.max(sim, EPS)); }
+  return sum / nbrs.length;
+}
+
+function gedNorm(subB, subA, mode){
+  const eKey=e=> (e && Number.isInteger(e.a) && Number.isInteger(e.b)) ? (e.a<e.b?`${e.a}-${e.b}`:`${e.b}-${e.a}`) : '';
+  const Eb=new Set(subB.Es.map(eKey).filter(Boolean)), Ea=new Set(subA.Es.map(eKey).filter(Boolean));
+  let diff=0; Ea.forEach(k=>{if(!Eb.has(k))diff++}); Eb.forEach(k=>{if(!Ea.has(k))diff++});
+  const GED=diff/2;
+  let Cmax=1;
+  if(mode==='nC2'){
+    const idSet=new Set([...subB.Ns.map(n=>n.id),...subA.Ns.map(n=>n.id)]); const n=idSet.size; Cmax = Math.max(1, n*(n-1)/2);
+  }else{
+    const unionE=new Set([...Eb,...Ea]); Cmax=Math.max(1, unionE.size);
+  }
+  return GED/Cmax;
+}
+
+// ---------- Draw ----------
+const svg=document.getElementById('svg'), gEdges=document.getElementById('edges'), gNodes=document.getElementById('nodes');
+const THRESHOLDS={bt:0.30, na:0.35};
+let gInsight; // group for insight overlay
+
+function draw(){
+
+  gEdges.innerHTML='';
+  for(const e of edges){
+    const A=nodes[e.a],B=nodes[e.b]; if(!A||!B) continue; // guard invalid endpoints
+    const p=toScreen(A), q=toScreen(B);
+    const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
+    ln.setAttribute('x1',p.x); ln.setAttribute('y1',p.y);
+    ln.setAttribute('x2',q.x); ln.setAttribute('y2',q.y);
+    let cls='edge'+(ensureSet(addedEdges).has(key(e.a,e.b))?' added':'');
+    if(centerId!=null){
+      const adj=new Map(); nodes.forEach(n=>adj.set(n.id,[])); for(const ed of edges){ const a=adj.get(ed.a), b=adj.get(ed.b); if(a) a.push(ed.b); if(b) b.push(ed.a); }
+      const dist=new Map(); dist.set(centerId,0); const qq=[centerId];
+      while(qq.length){ const v=qq.shift(); if((dist.get(v)||0)>=3) continue; for(const w of adj.get(v)||[]){ if(!dist.has(w)){ dist.set(w, (dist.get(v)||0)+1); qq.push(w); } } }
+      const da=dist.get(e.a), db=dist.get(e.b); const dh = Math.min(da??Infinity, db??Infinity); if(isFinite(dh) && dh>=0){ cls += ' hop'+Math.min(dh,3); }
+    }
+    ln.setAttribute('class',cls);
+    gEdges.appendChild(ln);
+  }
+
+  // hop coloring for nodes
+  let hopClass = new Map();
+  if(centerId!=null){
+    const adj=new Map(); nodes.forEach(n=>adj.set(n.id,[])); for(const e of edges){ const a=adj.get(e.a), b=adj.get(e.b); if(a) a.push(e.b); if(b) b.push(e.a); }
+    const dist=new Map(); dist.set(centerId,0); const q=[centerId];
+    while(q.length){ const v=q.shift(); if((dist.get(v)||0)>=3) continue; for(const w of adj.get(v)||[]){ if(!dist.has(w)){ dist.set(w, (dist.get(v)||0)+1); q.push(w); } } }
+    nodes.forEach(n=>{ const d=dist.get(n.id); if(d===0) hopClass.set(n.id,'hop0'); else if(d===1) hopClass.set(n.id,'hop1'); else if(d===2) hopClass.set(n.id,'hop2'); else if(d===3) hopClass.set(n.id,'hop3'); });
+  }
+
+  gNodes.innerHTML='';
+  nodes.forEach(n=>{
+    const P=toScreen(n);
+    const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',P.x); c.setAttribute('cy',P.y);
+    c.setAttribute('r', n.kind==='center'?6:3);
+    let cls='node'; const hc=hopClass.get(n.id); if(hc) cls += ' '+hc; if(n.kind==='center') cls += ' hop0';
+    c.setAttribute('class',cls);
+    gNodes.appendChild(c);
+  });
+
+  // Insight overlay
+  if(!gInsight){ gInsight = document.createElementNS('http://www.w3.org/2000/svg','g'); svg.appendChild(gInsight); }
+  gInsight.innerHTML='';
+  if(SHOW_INSIGHT && INSIGHT_PT && centerId!=null){
+    const C = nodes.find(n=>n.id===centerId);
+    if(C){
+      const pC=toScreen(C), pI=toScreen(INSIGHT_PT);
+      const arrow=document.createElementNS('http://www.w3.org/2000/svg','line');
+      arrow.setAttribute('x1',pC.x); arrow.setAttribute('y1',pC.y);
+      arrow.setAttribute('x2',pI.x); arrow.setAttribute('y2',pI.y);
+      arrow.setAttribute('class','insight-arrow');
+      gInsight.appendChild(arrow);
+      const dot=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      dot.setAttribute('cx',pI.x); dot.setAttribute('cy',pI.y); dot.setAttribute('r',4);
+      dot.setAttribute('class','insight-node');
+      gInsight.appendChild(dot);
+    }
+  }
+}
+
+// ---------- Add center & Tables ----------
+function addCenter(pt){
+  if(centerId!=null) return;
+  const id=nodes.length; nodes.push({id,x:pt.x,y:pt.y,kind:'center'}); centerId=id;
+  const triB=triangleCount(nodes.slice(0,-1), edges); const aplB=avgSPL(nodes.slice(0,-1), edges);
+  const kn=topKNeighbors(pt,3);
+  for(const o of kn){ if(o && Number.isInteger(o.id)){ edges.push({a:id,b:o.id}); addedEdges.add(key(id,o.id)); } }
+  const triA=triangleCount(nodes,edges); const aplA=avgSPL(nodes,edges);
+  document.getElementById('mAdded').textContent = '+3';
+  const triGain=(triA-triB).toFixed(1);
+  const triNote = (triA-triB)>0 ? ' <span class="ok">(ループ増)</span>' : '';
+  document.getElementById('mTri').innerHTML = `${triGain}${triNote}`;
+  const diffAPL = (aplA-aplB); document.getElementById('mAPL').innerHTML = `${isFinite(aplB)?aplB.toFixed(3):'-'} / ${isFinite(aplA)?aplA.toFixed(3):'-'} / ${isFinite(diffAPL)?diffAPL.toFixed(3):'-'}`;
+
+  const baseNodes=nodes.slice(0,-1); const baseEdges=edges.filter(e=>e.a!==id&&e.b!==id);
+  const rep = (kn && kn[0] && Number.isInteger(kn[0].id)) ? kn[0].id : (baseNodes.length? baseNodes[0].id : null);
+  const rows=[];
+  for(let k=0;k<=3;k++){
+    const kForEdges = (k + 1);
+    const setB=nodesOfEgo(rep,kForEdges,baseNodes,baseEdges); const setA=nodesOfEgo(id,kForEdges, nodes, edges);
+    const subB=induced(setB,baseNodes,baseEdges); const subA=induced(setA,nodes,edges);
+    const SPLb=avgSPL(subB.Ns,subB.Es); const SPLa=avgSPL(subA.Ns,subA.Es);
+    const dSPrel=(Number.isFinite(SPLb)&&Number.isFinite(SPLa))?((SPLb-SPLa)/Math.max(SPLb,1e-6)):null;
+    const gedBase = gedNorm(subB,subA,CMAX_MODE);
+    const gedn = (dSPrel==null) ? gedBase : (gedBase + 0.5*dSPrel);
+    let Hb=null, Ha=null;
+    if(k===0){ Hb = neighborInfo(rep, subB.Ns, subB.Es, SIGMA); Ha = neighborInfo(id,  subA.Ns, subA.Es, SIGMA); }
+    else     { Hb = angleEntropy(rep, subB.Ns, subB.Es, 24);  Ha = angleEntropy(id,  subA.Ns, subA.Es, 24); }
+    const dIGn = (Hb!=null && Ha!=null)? ( (Hb-Ha) / Math.max(Hb,1e-6) ) : null;
+    rows.push({k, n:new Set([...setB,...setA]).size, Eb:subB.Es.length, Ea:subA.Es.length, gedn, Hb, Ha, dIGn});
+  }
+  const hopRows=document.getElementById('hopRows'); hopRows.innerHTML='';
+  const fmt=v=> v==null? '<span class="muted">N/A</span>' : (typeof v==='number'? v.toFixed(3) : String(v));
+  rows.forEach(r=>{
+    const ge = (r.gedn==null || r.dIGn==null)? null : (r.gedn - LAMBDA * r.dIGn);
+    let geSpan = '<span class="muted">N/A</span>';
+    if (ge != null) {
+      let cls = 'ok';
+      if (ge >= THRESHOLDS.na) cls = 'bad';
+      else if (ge >= THRESHOLDS.bt) cls = 'warn';
+      geSpan = `<span class="${cls}">${fmt(ge)}</span>`;
+    }
+    const gedCell = r.gedn==null?'<span class="muted">N/A</span>':(r.gedn<0?`<span class="ok">${fmt(r.gedn)}</span>`:`<span class="bad">${fmt(r.gedn)}</span>`);
+    const igCell = r.dIGn==null?'<span class="muted">N/A</span>':(r.dIGn>0?`<span class="ok">${fmt(r.dIGn)}</span>`:`<span class="bad">${fmt(r.dIGn)}</span>`);
+    const tr=document.createElement('tr');
+    tr.innerHTML = `<td>k=${r.k}</td><td>${r.n}</td><td>${r.Eb}</td><td>${r.Ea}</td>
+      <td>${gedCell}</td>
+      <td>${fmt(r.Hb)}</td><td>${fmt(r.Ha)}</td>
+      <td>${igCell}</td>
+      <td>${geSpan}</td>`;
+    hopRows.appendChild(tr);
+  });
+  draw();
+}
+
+// ---------- UI ----------
+const kRange=document.getElementById('kRange'), kVal=document.getElementById('kVal');
+kRange.addEventListener('input',()=>{KHOP=+kRange.value;kVal.textContent=KHOP;draw()});
+const sigmaRange=document.getElementById('sigmaRange'), sigmaVal=document.getElementById('sigmaVal');
+sigmaRange.addEventListener('input',()=>{SIGMA=+sigmaRange.value;sigmaVal.textContent=SIGMA.toFixed(2);rebuildEdges()});
+const thrRange=document.getElementById('thrRange'), thrVal=document.getElementById('thrVal');
+thrRange.addEventListener('input',()=>{THR=+thrRange.value;thrVal.textContent=THR.toFixed(2);rebuildEdges()});
+const layoutSel=document.getElementById('layoutSel'); layoutSel.addEventListener('change',()=>{LAYOUT=layoutSel.value;resetGraph()});
+const rRange=document.getElementById('rRange'), rVal=document.getElementById('rVal'); rRange.addEventListener('input',()=>{R_DONUT=+rRange.value;rVal.textContent=R_DONUT.toFixed(2);if(LAYOUT==='donut')resetGraph()});
+const jitRange=document.getElementById('jitRange'), jitVal=document.getElementById('jitVal'); jitRange.addEventListener('input',()=>{JITTER=+jitRange.value;jitVal.textContent=JITTER.toFixed(2);if(LAYOUT==='donut')resetGraph()});
+const cmaxSel=document.getElementById('cmaxSel'); cmaxSel.addEventListener('change',()=>{CMAX_MODE=cmaxSel.value; if(centerId!=null){ const pt=nodes.find(n=>n.id===centerId); recomputeTables(pt); } });
+
+const lambdaRange=document.getElementById('lambdaRange');
+const lambdaVal=document.getElementById('lambdaVal');
+lambdaRange.addEventListener('input',()=>{LAMBDA=+lambdaRange.value; lambdaVal.textContent=LAMBDA.toFixed(2); if(centerId!=null){const pt=nodes.find(n=>n.id===centerId); recomputeTables(pt);} });
+
+function recomputeTables(pt){
+  const id = centerId;
+  const baseNodes = nodes.slice(0, -1);
+  const baseEdges = edges.filter(e => e.a !== id && e.b !== id);
+  const kn = topKNeighbors(pt, 3);
+  const rep = (kn[0] && Number.isInteger(kn[0].id)) ? kn[0].id : (baseNodes[0] ? baseNodes[0].id : null);
+
+  const triB = triangleCount(baseNodes, baseEdges);
+  const aplB = avgSPL(baseNodes, baseEdges);
+  const triA = triangleCount(nodes, edges);
+  const aplA = avgSPL(nodes, edges);
+  document.getElementById('mAdded').textContent = '+3';
+  const triGain = (triA - triB).toFixed(1);
+  const triNote = (triA - triB) > 0 ? ' <span class="ok">(ループ増)</span>' : '';
+  document.getElementById('mTri').innerHTML = `${triGain}${triNote}`;
+  const diffAPL = (aplA - aplB);
+  document.getElementById('mAPL').innerHTML =
+    `${isFinite(aplB) ? aplB.toFixed(3) : '-'} / ${isFinite(aplA) ? aplA.toFixed(3) : '-'} / ${isFinite(diffAPL) ? diffAPL.toFixed(3) : '-'}`;
+
+  const rows = [];
+  for (let k = 0; k <= 3; k++) {
+    const kForEdges = k + 1;
+    const setB = nodesOfEgo(rep, kForEdges, baseNodes, baseEdges);
+    const setA = nodesOfEgo(id, kForEdges, nodes, edges);
+    const subB = induced(setB, baseNodes, baseEdges);
+    const subA = induced(setA, nodes, edges);
+    const SPLb = avgSPL(subB.Ns, subB.Es);
+    const SPLa = avgSPL(subA.Ns, subA.Es);
+    const dSPrel = (Number.isFinite(SPLb) && Number.isFinite(SPLa)) ? ((SPLb - SPLa) / Math.max(SPLb, 1e-6)) : null;
+    const gedBase = gedNorm(subB, subA, CMAX_MODE);
+    const gedn = (dSPrel == null) ? gedBase : (gedBase + 0.5 * dSPrel);
+    const Hb = (k === 0 ? neighborInfo(rep, subB.Ns, subB.Es, SIGMA) : angleEntropy(rep, subB.Ns, subB.Es, 24));
+    const Ha = (k === 0 ? neighborInfo(id, subA.Ns, subA.Es, SIGMA) : angleEntropy(id, subA.Ns, subA.Es, 24));
+    const dIGn = (Hb != null && Ha != null) ? ((Hb - Ha) / Math.max(Hb, 1e-6)) : null;
+    rows.push({ k, n: new Set([...setB, ...setA]).size, Eb: subB.Es.length, Ea: subA.Es.length, gedn, Hb, Ha, dIGn });
+  }
+
+  const hopRows = document.getElementById('hopRows');
+  hopRows.innerHTML = '';
+  const fmt = v => v == null ? '<span class="muted">N/A</span>' : (typeof v === 'number' ? v.toFixed(3) : String(v));
+  rows.forEach(r => {
+    const ge = (r.gedn == null || r.dIGn == null) ? null : (r.gedn - LAMBDA * r.dIGn);
+    let geSpan = '<span class="muted">N/A</span>';
+    if (ge != null) {
+      let cls = 'ok';
+      if (ge >= THRESHOLDS.na) cls = 'bad';
+      else if (ge >= THRESHOLDS.bt) cls = 'warn';
+      geSpan = `<span class="${cls}">${fmt(ge)}</span>`;
+    }
+    const geCell = geSpan;
+    const gedCell = r.gedn == null ? '<span class="muted">N/A</span>' : (r.gedn < 0 ? `<span class="ok">${fmt(r.gedn)}</span>` : `<span class="bad">${fmt(r.gedn)}</span>`);
+    const igCell = r.dIGn == null ? '<span class="muted">N/A</span>' : (r.dIGn > 0 ? `<span class="ok">${fmt(r.dIGn)}</span>` : `<span class="bad">${fmt(r.dIGn)}</span>`);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>k=${r.k}</td><td>${r.n}</td><td>${r.Eb}</td><td>${r.Ea}</td><td>${gedCell}</td><td>${fmt(r.Hb)}</td><td>${fmt(r.Ha)}</td><td>${igCell}</td><td>${geCell}</td>`;
+    hopRows.appendChild(tr);
+  });
+}
+
+// ---------- Clicks & Coordinate Mapping ----------
+const btnReset=document.getElementById('btnReset'); btnReset.addEventListener('click',resetGraph);
+const btnAddCenter=document.getElementById('btnAddCenter'); btnAddCenter.addEventListener('click',()=>{if(centerId==null) addCenter({x:0,y:-0.2})});
+const btnPlaceClick=document.getElementById('btnPlaceClick'); const btnPlaceAuto=document.getElementById('btnPlaceAuto');
+btnPlaceClick.addEventListener('click',()=>{CLICK_PLACE=true;btnPlaceClick.textContent='クリック配置（ON）'});
+btnPlaceAuto.addEventListener('click',()=>{if(centerId==null) addCenter({x:0,y:-0.2})});
+
+function screenToSVG(evt, svgEl){ const pt = svgEl.createSVGPoint(); pt.x = evt.clientX; pt.y = evt.clientY; const ctm = svgEl.getScreenCTM(); if(!ctm) return {x:0, y:0}; const svgP = pt.matrixTransform(ctm.inverse()); return {x: svgP.x, y: svgP.y}; }
+function svgToGraph(sx, sy){ const gx = (sx/1000)*6 - 3; const gy = (1 - sy/700)*3 - 1.5; return {x: gx, y: gy}; }
+svg.addEventListener('click', (ev)=>{ if(!CLICK_PLACE || centerId!=null) return; const p = screenToSVG(ev, svg); const g = svgToGraph(p.x, p.y); addCenter(g); CLICK_PLACE = false; btnPlaceClick.textContent = 'クリック配置'; });
+
+function clearTables(){document.getElementById('mAdded').textContent='-';document.getElementById('mTri').textContent='-';document.getElementById('mAPL').textContent='-';document.getElementById('hopRows').innerHTML=''}
+
+// ---------- Insight ----------
+function computeInsight(){
+  if(centerId==null) return null;
+  const C = nodes.find(n=>n.id===centerId); if(!C) return null;
+  const base = nodes.filter(n=>n.kind==='base');
+  const adj=new Map(); nodes.forEach(n=>adj.set(n.id,[])); for(const e of edges){ const a=adj.get(e.a), b=adj.get(e.b); if(a) a.push(e.b); if(b) b.push(e.a); }
+  const direct = new Set(adj.get(centerId)||[]);
+  const cand = base.filter(n=>!direct.has(n.id)); if(cand.length===0) return null;
+  let vx=0, vy=0; let maxD=0;
+  for(const n of cand){ const dx=n.x-C.x, dy=n.y-C.y; const d=Math.hypot(dx,dy); if(d>maxD) maxD=d; }
+  for(const n of cand.slice(0,200)){ const dx=n.x-C.x, dy=n.y-C.y; const d=Math.hypot(dx,dy) || 1e-6; const sim = Math.exp(-(d*d)/(2*SIGMA*SIGMA)); const novelty = -Math.log(Math.max(sim,1e-9)); const distw = d/(maxD||1); const w = novelty * (0.5 + 0.5*distw); vx += (dx/d) * w; vy += (dy/d) * w; }
+  const norm = Math.hypot(vx,vy) || 1e-9; const len = 0.5; return {x: C.x + (vx/norm)*len, y: C.y + (vy/norm)*len};
+}
+
+const btnToggleInsight=document.getElementById('btnToggleInsight');
+const btnPlantInsight=document.getElementById('btnPlantInsight');
+if(btnToggleInsight){ btnToggleInsight.addEventListener('click',()=>{ if(centerId==null) return; SHOW_INSIGHT = !SHOW_INSIGHT; INSIGHT_PT = computeInsight(); draw(); }); }
+if(btnPlantInsight){ btnPlantInsight.addEventListener('click',()=>{ if(centerId==null) return; if(!INSIGHT_PT) INSIGHT_PT = computeInsight(); if(!INSIGHT_PT) return; const id = nodes.length; nodes.push({id,x:INSIGHT_PT.x,y:INSIGHT_PT.y,kind:'base'}); topKNeighbors(INSIGHT_PT,3).forEach(o=>{ if(o&&Number.isInteger(o.id)) edges.push({a:id,b:o.id}); }); edges.push({a:centerId,b:id}); ensureSet(addedEdges).add(key(centerId,id)); SHOW_INSIGHT=false; INSIGHT_PT=null; recomputeTables(nodes.find(n=>n.id===centerId)); draw(); }); }
+
+// ---------- Diagnostics (basic tests) ----------
+const btnRunTests=document.getElementById('btnRunTests'); const testOutput=document.getElementById('testOutput');
+function pass(msg){ return `<div>✅ ${msg}</div>` } function fail(msg){ return `<div>❌ ${msg}</div>` }
+function runTests(){
+  let out='';
+  try{ addedEdges=ensureSet(addedEdges); addedEdges.add('0-1'); out+=pass('addedEdges is Set & add works'); }catch(e){ out+=fail('addedEdges.add failed: '+e.message); }
+  try{ const Ns=[{id:1},{id:2}]; const Es=[{a:1,b:2},{a:9,b:9}]; const t=triangleCount(Ns,Es); out+=pass('triangleCount guards invalid endpoints (t='+t+')'); }catch(e){ out+=fail('triangleCount threw: '+e.message); }
+  try{ const Ns=[{id:1},{id:2},{id:3}]; const Es=[{a:1,b:2},{a:2,b:3}]; const l=avgSPL(Ns,Es); out+=pass('avgSPL computed: '+l.toFixed(3)); }catch(e){ out+=fail('avgSPL threw: '+e.message); }
+  try{ const k=key(5,2); if(typeof k==='string') out+=pass('key() returns string: '+k); else out+=fail('key() not string'); }catch(e){ out+=fail('key() threw: '+e.message); }
+  testOutput.innerHTML = out;
+}
+if(btnRunTests){ btnRunTests.addEventListener('click', runTests); }
+
+// ---------- Init ----------
+resetGraph();
+</script>
+</body>
+</html>

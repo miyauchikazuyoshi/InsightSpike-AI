@@ -1,0 +1,192 @@
+%% InsightSpike-AI Data Flow Architecture
+%% Data flow and management structure
+
+flowchart TB
+    %% Data Sources
+    subgraph "📥 Data Sources"
+        DS1[User Input]
+        DS2[Document Corpus]
+        DS3[Q&A Datasets]
+        DS4[Experiment Data]
+    end
+    
+    %% Main Data Directory Structure
+    subgraph "📁 Main Data Directory (/data)"
+        direction TB
+        
+        subgraph "Core System Files"
+            Core[data/core/]
+            Core_Ep[episodes.json<br/>Episode Metadata]
+            Core_Idx[integrated_index/<br/>Vector-Graph Index ⚡NEW]
+            Core_Graph[graph_pyg.pt<br/>Knowledge Graph]
+            Core_Scale[scalable_index.faiss<br/>Legacy FAISS]
+            
+            Core --> Core_Ep
+            Core --> Core_Idx
+            Core --> Core_Graph
+            Core --> Core_Scale
+            
+            subgraph "Integrated Index Structure"
+                IIdx[normalized_vectors.npy<br/>Pre-normalized]
+                INorms[norms.npy<br/>Vector Norms]
+                IGraph[graph.pkl<br/>NetworkX Graph]
+                IMeta[metadata.json<br/>Episode Info]
+                ISpatial[spatial_index.pkl<br/>Position Index]
+            end
+            
+            Core_Idx --> IIdx
+            Core_Idx --> INorms
+            Core_Idx --> IGraph
+            Core_Idx --> IMeta
+            Core_Idx --> ISpatial
+        end
+        
+        subgraph "Query Storage"
+            Queries[data/queries/]
+            Queries_Json[queries.json<br/>Query History]
+            Queries_Meta[Query Metadata<br/>Processing Info]
+            
+            Queries --> Queries_Json
+            Queries --> Queries_Meta
+        end
+        
+        subgraph "Databases"
+            DB[data/db/]
+            DB_Insights[insight_facts.db<br/>Discovered Insights]
+            DB_Learn[unknown_learning.db<br/>Learning Progress]
+            
+            DB --> DB_Insights
+            DB --> DB_Learn
+        end
+        
+        subgraph "Other Directories"
+            Raw[data/raw/<br/>Input Data]
+            Proc[data/processed/<br/>Processed Data]
+            Cache[data/cache/<br/>Temporary Cache]
+            Logs[~/.insightspike/logs/<br/>System Logs]
+            Config[~/.insightspike/config/<br/>SimpleConfig]
+        end
+    end
+    
+    %% Experiment Data Flow
+    subgraph "🧪 Experiment Data Flow"
+        direction LR
+        
+        subgraph "Experiment Directory"
+            Exp[experiments/XX_name/]
+            ExpData[data/<br/>Experiment Data]
+            ExpRes[results/<br/>Results & Metrics]
+            ExpCode[code/<br/>Experiment Code]
+        end
+        
+        subgraph "Backup Process"
+            B1[1. Backup Main Data]
+            B2[2. Run Experiment]
+            B3[3. Save Results]
+            B4[4. Restore Optional]
+        end
+    end
+    
+    %% Processing Pipeline
+    subgraph "⚙️ Processing Pipeline"
+        direction TB
+        
+        P1[Query Processing<br/>MainAgent/AdaptiveProcessor]
+        P2[Text Processing<br/>& Embedding]
+        P3[Episode Creation<br/>C-value: 0.3-0.7]
+        P4[Query Storage<br/>save_queries]
+        P5[Graph Update<br/>Nodes & Edges]
+        P6[Index Update<br/>With Confidence]
+        P7[Conflict Detection<br/>& Splitting]
+        
+        subgraph "Enhanced Processing ⚡NEW"
+            VN1[Weight Vector Apply]
+            VN2[C-value Init]
+            VN3[Confidence Update]
+            VN4[Memory Pruning]
+            
+            VN1 --> VN2
+            VN2 --> VN3
+            VN3 --> VN4
+        end
+        
+        P1 --> P2
+        P2 --> P3
+        P1 --> P4
+        P3 --> P5
+        P4 --> P5
+        P5 --> P6
+        P3 --> VN1
+        VN4 --> P6
+        P6 --> P7
+    end
+    
+    %% Data Access Patterns
+    subgraph "🔍 Data Access Patterns"
+        direction LR
+        
+        Read[Read Operations]
+        Write[Write Operations]
+        
+        Read --> ReadEp[load_episodes<br/>Read episodes.json]
+        Read --> ReadIdx[search<br/>O(1) Vector Search ⚡NEW]
+        Read --> ReadGraph[load_graph<br/>Load NetworkX/PyG]
+        Read --> ReadQueries[load_queries<br/>Read queries.json]
+        Read --> ReadSpatial[spatial_search<br/>O(log n) Position ⚡NEW]
+        
+        Write --> WriteEp[save_episodes<br/>Write episodes.json]
+        Write --> WriteIdx[add_episode<br/>Update Index ⚡NEW]
+        Write --> WriteGraph[save_graph<br/>Save NetworkX/PyG]
+        Write --> WriteQueries[save_queries<br/>Write queries.json]
+    end
+    
+    %% Data Flow Connections
+    DS1 --> P1
+    DS2 --> P1
+    DS3 --> P1
+    DS4 --> Exp
+    
+    P1 --> P2 --> P3
+    P3 --> P4
+    P3 --> P5
+    P4 --> P6
+    
+    P3 -.-> Core_Ep
+    P5 -.-> Core_Idx
+    P4 -.-> Core_Graph
+    P4 -.-> Core_Scale
+    
+    Exp --> B1
+    Core -.-> |Backup| ExpData
+    B1 --> B2 --> B3
+    B3 --> ExpRes
+    B4 -.-> |Restore| Core
+    
+    %% Access Pattern Connections
+    ReadEp -.-> Core_Ep
+    ReadIdx -.-> Core_Idx
+    ReadGraph -.-> Core_Graph
+    
+    WriteEp -.-> Core_Ep
+    WriteIdx -.-> Core_Idx
+    WriteGraph -.-> Core_Graph
+    
+    %% Performance Annotations
+    P6 -.- |"O(1) Search<br/>Pre-normalized"| note1[Vector Search<br/>⚡NEW]
+    VN4 -.- |"Dual Storage<br/>Vectors+Norms"| note2[Memory<br/>Efficient]
+    ReadSpatial -.- |"Spatial Index<br/>Position-aware"| note3[Navigation<br/>Support]
+    
+    %% Styling
+    classDef dataSource fill:#e1f5fe
+    classDef coreData fill:#c8e6c9,stroke:#4caf50,stroke-width:2px
+    classDef database fill:#fff9c4
+    classDef process fill:#f3e5f5
+    classDef experiment fill:#ffccbc
+    classDef access fill:#e8eaf6
+    
+    class DS1,DS2,DS3,DS4 dataSource
+    class Core,Core_Ep,Core_Idx,Core_Graph,Core_Scale coreData
+    class DB,DB_Insights,DB_Learn database
+    class P1,P2,P3,P4,P5,P6 process
+    class Exp,ExpData,ExpRes,B1,B2,B3,B4 experiment
+    class Read,Write,ReadEp,ReadIdx,WriteEp,WriteIdx access

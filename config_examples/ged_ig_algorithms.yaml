@@ -1,0 +1,119 @@
+# GED/IG Algorithm Configuration Examples
+# =======================================
+# Updated for new Pydantic-based configuration system (2025-01)
+
+# Example 1: Simple algorithms (fastest, least accurate)
+# Use this for quick experimentation and development
+simple_config:
+  graph:
+    ged_algorithm: "simple"
+    ig_algorithm: "simple"
+    spike_ged_threshold: 0.3
+    spike_ig_threshold: 0.2
+    # Optional: adjust other graph settings
+    max_graph_size: 10000
+    use_llm_cache: true
+    rebuild_on_startup: false
+
+# Example 2: Advanced algorithms (balanced)
+# Good balance between performance and accuracy
+advanced_config:
+  graph:
+    ged_algorithm: "advanced"
+    ig_algorithm: "advanced"
+    spike_ged_threshold: 0.5
+    spike_ig_threshold: 0.3
+    # Optional settings for performance tuning
+    prune_threshold: 0.1
+    integration_similarity_threshold: 0.85
+    graph_importance_weight: 0.4
+
+# Example 3: NetworkX GED with entropy IG (most accurate)
+# Use for research and when accuracy is critical
+networkx_config:
+  graph:
+    ged_algorithm: "networkx"
+    ig_algorithm: "entropy"
+    spike_ged_threshold: 0.7
+    spike_ig_threshold: 0.4
+    # NetworkX specific settings
+    max_graph_size: 5000  # Lower limit for NetworkX performance
+
+# Example 4: Mixed configuration
+# Custom combination for specific use cases
+mixed_config:
+  graph:
+    ged_algorithm: "networkx"
+    ig_algorithm: "simple"
+    spike_ged_threshold: 0.6
+    spike_ig_threshold: 0.25
+
+# Example 5: Full configuration with all settings
+full_example:
+  # Core settings
+  core:
+    model_name: "paraphrase-MiniLM-L6-v2"
+    llm_provider: "clean"
+    device: "cpu"
+    
+  # Graph settings with GED/IG algorithms
+  graph:
+    ged_algorithm: "advanced"
+    ig_algorithm: "advanced"
+    spike_ged_threshold: 0.5
+    spike_ig_threshold: 0.3
+    max_graph_size: 10000
+    use_llm_cache: true
+    rebuild_on_startup: false
+    prune_threshold: 0.1
+    integration_similarity_threshold: 0.85
+    graph_importance_weight: 0.4
+    access_importance_weight: 0.3
+    time_importance_weight: 0.3
+    
+  # Memory settings
+  memory:
+    max_retrieved_docs: 15
+    episodic_memory_capacity: 60
+    
+  # Retrieval settings
+  retrieval:
+    similarity_threshold: 0.35
+    top_k: 15
+
+# Usage Examples:
+# ==============
+#
+# 1. Load with specific algorithm settings:
+#    config = load_config(config_path="config_examples/ged_ig_algorithms.yaml")
+#
+# 2. Merge with preset:
+#    base_config = load_config(preset="experiment")
+#    # Then manually update graph settings from this file
+#
+# 3. Use environment variables to override:
+#    export INSIGHTSPIKE_GRAPH_GED_ALGORITHM=networkx
+#    export INSIGHTSPIKE_GRAPH_SPIKE_GED_THRESHOLD=0.8
+
+# Algorithm Details:
+# =================
+# 
+# GED Algorithms:
+# - simple: Fast approximation based on graph complexity (O(n))
+# - advanced: PyG-aware calculation with structural+embedding distance (O(n²))
+# - networkx: Exact/approximate GED using NetworkX library (O(n³) to O(n!))
+#
+# IG Algorithms:
+# - simple: Basic information content comparison
+# - advanced: Combined structural and embedding-based IG
+# - entropy: Shannon entropy-based information gain calculation
+#
+# Threshold Guidelines:
+# - Lower thresholds = more sensitive spike detection
+# - Higher thresholds = fewer false positives
+# - Adjust based on your dataset and use case
+#
+# Performance Considerations:
+# - simple/simple: ~1000 episodes/sec
+# - advanced/advanced: ~100 episodes/sec
+# - networkx/entropy: ~10 episodes/sec (but most accurate)

@@ -1,0 +1,1097 @@
+geDIG: One‑Gaugeग़
+ӡసʙ
+ٛ
+2025 ೥ 10݄9ߘ
+ཁ
+ཁάϥϑʹ͓͍ͯɺgeDIG཭ ∆GEDগʣͱ৘ใ੔
+গ ∆IGඪ F࣌
+ɺFɺb(t)= min{g0, gmin}ͼɺΠϕϯτ
+͸ b(t) ≤θBTআͱ͍ͬ
+͸ೋஈ֊ΞʔΩςΫνϟʢPhase 1: ΦϯϥΠ
+ಈධՁɺPhase 2:దԽʣΛҐஔ͚ͮɺPhase 2 ʹ͍ͭͯ͸૷
+ํ਑͠ɺূը͢Δɻ
+ऩͷԾఆͷԼͰFड़௕มԽ (∆MDL)༝Τωϧ
+ཧ (FEP)ड़௕ (MDL)ͭɻ
+ূଌͷ໎࿏φϏήʔγϣϯ՝୊Ͱ͸ɺෳ਺εέʔϧʢ 15×15ʙ50×50ʣ ɾ100 Τϐιʔυ
+ۉ25.8%ͭͭ͠৑௕ΤοδΛ 94.8%ࣝ
+ʢRAGʣ՝୊Ͱ͸ɺ໛ઃఆʢ500 ΞΠςϜɾ50ॆதʣʹ͓͍ͯ PER=167.7%
+େ100%ଌɻPSZʢड༰ ≥95%, FMR≤2%, ௥ՃϨ
+Πςϯγ P50≤200msʣ ɻ
+Ͱ͸ geDIGӡ༻ώϡʔϦεςΟοΫʢoperational gauge ʣͱͯ͠Ґஔ
+ଘख๏ʢGraphRAG/DyG‑RAGɺKEDKGӡ༻
+ʹ͓͚Δ One‑Gauge࿦͢Δɻ
+1ݙߩContributions)
+• One‑Gauge ӡ༻:ʢ∆GEDগʣ ͱ৘ใ੔ཧ ʢ∆IGগʣ Λ୯ҰεΧϥʔ
+Fଌ͠ɺNA/BTʢผ໊: Attention Gate (AG) / Integration Gate (IG)ʣͷೋஈήʔτʢg0 > θNA,
+b(t)= min{g0, gmin}≤ θBTɾ഑ઢɾόοΫτϥοΫɾϝϞϦΤϏΫγϣϯΛԣஅతʹΠϕϯ
+͢Δɻ*1
+•౉͠: F= ∆ GEDnorm −λ ∆IGnormʢGEDԽίετɺIGݮ
+Խͱ্քͷԾఆͷԼͰF∝ ∆MDL ͕੒ΓཱͪɺFEPग़ʢ0‑hopʣͱ MDL తͳ
+͞ѹॖʢmulti‑hopɻ͜ͷFEPrMDLश
+Λཧ࿦໘Ͱཪ෇͚ͨɻ
+•ܭ0‑hopʢNAʢg0 ͕ᮢ஋௒աʣʹ஫ҙγάφϧ
+NAΛଅਐɻͦͷϑϨʔϜͰ multi‑hopͷ୹བྷʢγϣʔτΧοτʣ
+*1 IG ͸ຊจதͰI‑Gate͠ɺ৘ใརಘͷ ∆IGಉ͠ͳ͍Α͏ʹ͢Δɻ
+1
+
+ͯ͠ᮢ஋൑ఆ͢ΔՁ஋༧ଌγάφϧΛੜ੒͢Δʢਤ3ʣ ɻ͜ͷೋஈήʔτ
+ΛఏҊ͢Δɻ
+•ূ: ໎࿏Ͱ͸ෳ਺εέʔϧʢ15×15, 25×25, 50×50ܭ߹150Τϐιʔυ
+Ҏ্ΛධՁ͠ɺOne‑Gauge཰ 100%໛ʣ ʙ95%࠷
+େ 99.4%߹F͸୯Ұཁૉ൛ʢ∆GED ͷΈ/∆IG ͷΈʣΑΓεςοϓ਺Λ 54.6%ɻRAG
+Ͱ͸໛σʔληοτʢ500ΞΠςϜɾ50υϝΠϯɺGraphRAG/DyG‑RAGΉʣͰ
+3‑hopධՁʹΑΓ PER͕ 125%→167.7%্͠ɺड༰100%ɾFMR<2%ɾதԝ஋஗Ԇ≲0.2࣌
+ຬͨ͢ PSZೝͨ͠ɻ
+• ೋஈ֊ΞʔΩςΫνϟ:੧ʢΦϯϥΠϯɺPhase 1ʣͰ͸ One‑Gauge൑அɺਭ
+຾ʢΦϑϥΠϯɺPhase 2Ͱ͸
+Ͱ͸ Phase 1૷ɾධՁɺPhase 2͸࿦จ
+༧ఆʣ͢Δɻ
+2 ͸͡Ίʹ (ࣝ)
+2.1߹
+ʹ্ཱ͕ͪ
+ͰΤϐιʔ
+ੜ͞ΕΔ͜ͱʹରԠ͢Δ[4, 5, 11]ݕ
+ཱ͍ͯ͠ͳ͍ɻ
+2.2ଘख๏ͷ՝୊
+˙GraphRAG ͱ DyG‑RAG ैདྷͷ GraphRAG[10] ΍ DyG‑RAG[2]ผϧ
+ͷ઱౓
+ʹ͸ͳ͍ͬͯͳ͍ɻGraphRAG͸੩తͳίϛϡχ
+ఆతͰ͋ΔɻDyG‑RAGͷ
+͘ɻ
+˙ฤूʢKEDKGʣ KEDKG[3]͸ಈత KGΛฤूʢ௥Ճɾमਖ਼ɾিಥղফʣͯ͠ଟϗοϓQAਫ਼౓
+ͼ
+͔ͭͳ͍ɻ
+˙ཧ࿦త࿮૊ΈʢFEP , MDLʣཧʢFEPʣ[6]ͮ͘ Active Inferenceతͳ಺෦Ϟ
+ड़௕ʢMDLʣ[8] ΍৘ใϘτ
+ϧωοΫ [14]ఆάϥϑલఏʣ͕ଟ͍ɻ
+2.3ͷఏҊ
+໛ LLM଄ͦͷ΋
+शͱਪ࿦ΛҰମԽ͢Δʹ͸ෆे෼Ͱ͋Δɻ
+2
+
+ʯͱ
+ʢήʔδʣFͰѻ͏ One‑Gaugeͷ࿮૊ΈΛ
+ఏҊ͢ΔɻఏҊख๏ geDIG଄ฤूʢϊʔυɾΤοδ௥ՃʹΑΔ Graph Edit Distance
+ͨ͠୯ҰεΧϥ
+ʔ Fͷ
+ݱ࣮
+͢Δɻ
+˙୯Ґͱͯ͠ͷΤϐιʔυͰ͸ɺຊ୯ҐΛΤϐιʔυখ·ͱ·
+Τϐιʔυ eۙ
+ੜʗਪ࿦ͷඈͼઌʣΛද͢ɻ͜ͷબ୒͸ɺ൚Խʢύ
+͍ҰํͰར༻ʢྫɿ
+Lampinen Β, 2025[9]ͷิॿͱͯ͠৔౰ͨΓతͳ
+੒ɾྨਪΛՄೳʹ͠ɺmulti‑hop Ͱͷ౉͠ʣ੒͢Δૉ஍Λ༩͑ΔɻgeDIG ͸͜ͷΤϐιʔυ
+୯Ґͷ഑ઢΛධՁ͠ɺ0‑hopʣΛɺmulti‑hopग़͢Δ͜ͱ
+͢Δɻ
+3ܭ:୯Ұήʔδ Fͱೋஈήʔτ
+3.1ඪ Fٛ
+཭ ∆GEDnormͷ௿Լͱͯ͠ͷ
+∆IGnorm ͱ͠ɺ
+∆GEDnorm = GED(Gbefore, Gafter)
+Cmax
+, ∆IGnorm = Var(Hbefore) −Var(Hafter)
+Var(Hbefore) + ϵ . (1)
+͜͜Ͱ Cmax ͸ධՁ෦෼άϥϑ G′
+hେฤूίετͮ
+͘ʣͰ͋ΓɺϵͰ͋Δɻ
+͜ͷͱ͖୯Ұήʔδ F্ͷ໨҆ʣ ɻӡ༻্ͷൃՐ൑ఆ͸§3.6 ͷ b(t)ͮ͘ɿ
+F:= ∆ GEDnorm −λ ∆IGnorm , ʢධՁ໨҆ʣ : F≤ θ. (2)
+F͸খ͍͞΄Ͳྑ͍ʢ=ɺF͠ɺ
+ඪ͸ b(t)= min{g0, gmin}ͱ͢Δɻ
+˙ʢGED/IGԽͱ multi-hopுʣ
+• 0-hop ͷ GEDɿૠೖ/আʢϊʔυɾΤοδʣίετͷ૯࿨Λ Cmaxআ +
+ఆ͢Δɻ
+• multi-hop ͷ GEDɿh-hop ༠ಋ෦෼άϥϑ G′
+h࿏୹ॖʢ୹བྷʣΛ಺෦Ͱ
+ମతʹɺ
+∆GEDnorm(h) = Cedit(h)
+Cmax
+− β ∆SPrel(h), β > 0, (3)
+͢Δʢ∆SPrelࣜ(9)রʣ ɻ0-hop Ͱ͸ β=0ɺ1 ≤h ≤H Ͱ͸ β ∈[0.1, 0.3] ఔ౓ɻ
+3
+
+• IGٛ཰෼෍ p ʹର͢ΔγϟϊϯΤϯτϩϐʔ
+H(p)=−P
+j pj logpj Λ༻͍Δɻ∆IGnorm = Hbefore −Hafter
+max(Hbefore, ϵ)͢Δʢϵʣ ɻ͜Ε͸”ॴ
+ੑͷ૿Ճʣ”গͱͯ͠ղऍͰ͖Δɻ
+• multi-hop ͷήʔδϗοϓͷήʔδ͸ Fh = ∆ GEDnorm(h) −λ ∆IGnorm(h)ɻgmin = minh Fh Λ
+BT ൑ఆʹ༻͍Δʢgmin < θBTʣ ɻ
+˙ۭؒͰ͸ɺϊʔυ/Τοδʢάϥϑཧ࿦ʣͱΤϐιʔυ/Ϩϕϧʣ
+͸υϝΠϯͰҟͳΔ͕ɺந৅తʹ͸
+v = [ จ຺,࡞,ΞϑΥʔμϯε,ஶੑ,݁ؼ,໨ඪ] (4)
+ࣜ( 11)ɺRAGɿจ຺ = ΫΤϦ/࡞= ࡧݕ/ɺΞϑΥʔμϯε =
+ஶੑ = ස౓/݁ؼ= ड༰/ඪɺ໨ඪ =ੑʣʹରԠ͚ͮΒΕΔɻ
+ʢF, NA/BT ʣʹ͋Δ఺ʹཹҙ͢Δɻ
+3.2ଇ
+geDIG ͕໎࿏͔Β RAGͷυϝΠϯඇґଘͳந৅Խʹ͋Δɿ(1) Τϐιʔυ෼
+ղ:খ෼ղ͠ɺભҠΛάϥϑԽ͢Δɺ(2)౓ભҠ:ࣅ
+͢Δɺ(3) ౷ҰධՁ: F= ∆ GED−λ∆IG଄/৘ใͷ૬ରมԽ͚ͩΛଌΔɻ
+ମੑʹґଘͤͣɺήʔδͱήʔτʢAG/IGೳ͢Δɻ༧ଌ: Τϐι
+ۭؒ( S, A, Φ, d)Ͱ͖ɺΦ ͕ద੾ͳΒʢ§6.1ʣ ɺgeDIGೳ͢Δɻ
+೦ ໎࿏ʢPoCʣ RAGʣ
+จ຺ (x/W, y /H) φ(q), φ (v) Context
+࡞( dx, dy )ࡧݕ/ิબ୒ʣ Action
+ΞϑΥʔμϯε wall, visits౓ɾՄ༻ੑ/ॏཁ౓ Affordance
+݁ؼsuccess, goal ड༰/ʢFMRʣ Outcome
+๣ /୹བྷʢmulti‑hop๣→ઢʢk౓ભҠ
+཭/౓ L2/4౓ d(·, ·)
+Έ v ∈R8 Sentence‑BER Tφ : text →Rd Φ
+ද1 ໎࿏ͱ RAGޚ
+ʢF, AG/IG௨ɻ
+3.3੧ʗਭ຾ʣ
+ҙਤఔͱͯ͠Ͱ͸ͳ͘ɺ੧ʢΦϯϥΠϯʣʗਭ຾ʢΦϑϥΠϯʣͱ
+੧ʢ Phase 1ʣͰ͸ೖྗετϦʔϜதʹ F=∆GED−λ∆IGج
+ͮ͘ One‑Gauge ͱೋஈήʔτʢNA/BTఆ͠ɺਭ຾
+ʢPhase 2ஈ֊
+͸ओு͠ͳ͍
+ʢਤ1ʣ ɻ
+4
+
+Phase 1 (Online/A wake)
+One‑Gauge: 0‑hop / multi‑hop
+NA/BTޚ
+Phase 2 (Offline/Sleep)
+దԽ: ѹॖ /഑ઢ
+࣠F= ∆ GED−λ∆IG
+஫:੧/ਭ຾ͷରԠ͸ operational correspondence͸ओு͠ͳ͍ɻ
+ਤ1੧ʢPhase 1ӡ༻ɺਭ຾ʢPhase 2ʣͰΦϑϥ
+దԽɻ྆૬͸ಉҰήʔδ F༗͢Δɻ
+3.4લఏɿGED೉ੑͱೋஈ֊ΞʔΩςΫνϟ
+˙NP೉ੑͷ՝୊཭ʢGED͸Ұൠʹ NP೉Ͱ͋Δ [7]࠷
+೉ੑ͸ɺ
+ຊతͳ՝୊Ͱ͋Δɻ
+˙ೋஈ֊ΞʔΩςΫνϟੑΛ෼཭༻͢Δɿ
+Phase 1ʢΦϯϥΠϯʣ ೖྗετϦʔϜॲཧதͷॴଟϗοϓΫΤϦqt पลͷ h-hop
+෦෼άϥϑͷΈΛධՁର৅ͱ͠ɺF = ∆ GED−λ∆IGͮ͘ೋஈήʔτ֓
+Ͷ O(logN)(ANN) +O(kH)ʢgeDIG ධՁʣͰɺੑΛຬͨ͢ɻ
+Phase 2ʢΦϑϥΠϯʣ ೖྗΛःஅͨ͠దԽɻάϥϑશମ GআɺΫ
+Λ໨తͱ͢Δɻྫͱͯ͠ɺ
+min
+G′⊆G
+α GED(G, G′) + β H(G′) + γ |E(G′)|, α, β, γ > 0, (5)
+ͳͲͷ੍໿෇͖ʣ ɻͰ͸
+Phase 1૷ɾධՁ͠ɺPhase 2ͱকདྷ՝୊ͱ͢Δʢ§10.5ʣ ɻ
+˙Phase 1ॴଟϗοϓධՁग़→ࠁ࣌t ͷ
+ΫΤϦ qt Λয఺ͱͯ͠ɺͦͷपลͷ෦෼άϥϑͷΈΛධՁର৅ͱ͢Δɿ
+• 0-hop ( g0): qtԽGEDʢ∆GEDnormʣͱIG෼ʢ∆IGnormͤ
+• h-hop ( g(h)): qt पลͷ h-෼ධՁɺh ∈{1, . . . , H }
+˙൫ʣάϥϑͷ഑ઢઓུͱͯ͠ɺຊख๏͸ଞͷख๏ [10, 2, 3] ͱ
+ಉ༷ʹ౓ϕʔεͷ഑ઢମతʹ͸ɿ
+1.ิϊʔυΛબผʢFAISS/hnswlib౳ͷ ANN༻ʣ
+2.౓্Ґ kิʹରͯ͠ͷΈ geDIGߦ࣮
+3. શମͱͯ͠ O(logN)ʣ+O(kH)ʢgeDIGίετ
+૷Ͱ͸ H = 3ิ෯ k Λখ͘͞อͭ͜ͱͰ 100–320msͷධՁΛୡ੒͢Δɻ
+5
+
+3.5 0-hop vs Multi-hop: FEP ͱ MDL ͷೋॏੑ
+৺͸ɺ0-hop ධՁͱ multi-hop෼୲଄ʹΑΓɺFEP༝Τω
+ग़ͱ MDL͢Δɻ
+˙0-hop ධՁɿFEPग़ 0-hop ධՁ g0(t) ͸ɺ଄ฤूίετͷΈ ΛධՁ
+͢Δɿ
+• ৽ϊʔυ/Τοδ௥Ճͷ௚઀తίετʢGEDʣ
+•ॴతͳ৘ใΤϯτϩϐʔͷมԽʢIGʣ
+•଄มԽͷධՁ
+g0͸ɿ
+•଄తͳ੒௕͕๡͍͠
+•͕ෆ໌ྎ
+•͍ঢ়ଶ
+͜Ε͸ FEP͖ʯʹରԠ͠ɺΛଅਐ͢ΔγάφϧʢϊϧΞυϨφϦϯʢNAʣ
+ೳ͢Δɻ
+˙Multi-hop ධՁɿMDLग़ Ұํɺh-hop ධՁ g(h)(t) ͸ɺh଄
+཰ΛධՁ͢Δɿ
+•੒
+•୹࿏௕ͷॖখʢ∆SP < 0ʣ
+•্
+gmin = minH
+h=1 g(h)͸ɿ
+•౉͠
+•తʹ୹ॖ
+•ʯ͕ੜ·Εͨঢ়ଶ
+͜Ε͸ MDLʯʹରԠ͠ɺఆ͢ΔγάφϧʢυʔύϛϯʢDAػ
+ೳ͢Δɻ
+˙ྔͱτϨʔυΦϑิ෯ kେϗοϓ HͶ O(kH) ͱͳΔɻ
+૷Ͱ͸ H = 3෯Λখ͘͞อͭ͜ͱͰҎԼͷੑೳΛୡ੒ɿ
+• 1-hopධՁ:ۉ100ms
+• 2-hopධՁ:ۉ156ms
+• 3-hopධՁ:ۉ187msେ320msʢP95ʣ
+Խʢྫ: Clocal
+max = 1 + Kɺg0 Λ 0-hop
+6
+
+geDIGɺgmin = min1≤h≤H g(h) Λ multi-hopͼɺೋஈήʔτʢ§3.6ʣͰ༻͍Δɻ
+˙తཧղ ਤ2άϥϑ A-B-C-D ʹத৺ϊʔυ Q Λ௥Ճ͢
+ɿ
+A B
+CD
+A B
+CD
+Q
+A B
+CD
+Q
+ਤ2άϥϑʹத৺ΫΤϦ Q Λ௥Ճʣ ɻ0-hop͸ฤूίετ͕७૿͢Δ͕ɺh = 1 Ͱ͸
+଄ίετ͕௿Լͯ͠ F͗ಘΔɻ͜ͷྫ͸0-hop ධՁʢᐆ
+ດ → ϊϧΞυϨφϦϯʢNAʣత஫ҙͷ্ཱ͕ͪΓʣͱ multi-hop࡯→ ఆʣͷೋஈ֊ͷ
+͢ɻ
+1. 0-hopʢதԝਤʣ:
+• GED: 5ʢϊʔυ 1+ Τοδ 4 ௥Ճʣ
+•཰: ඍ૿
+• g0 ≈−0.05ʢখ͞ͳෛɺᐆດʣ
+• → NA͕ඞཁʯ
+2. 1-hop ධՁʢӈਤʣ:
+•୹࿏௕: 1.5 → 1.0ʢେ෯୹ॖʣ
+•͕ 1 ϗοϓͰ౸ୡՄೳʹ
+• g(1) ≈−0.35ʢେ͖ͳෛɺʂʣ
+• →ఆ
+ঢ়ଶ GEDnorm ∆Eff SI IG F=SI−λ IG
+ʣ 0 − 0 − 0
+0-hopɿQ ௥Ճ ≈0.24 +0 .10 ≈−0.14 > 0 < 0 (ᐆດ)
+1-hopɿ୹བྷ൓ө ↓ +ʣ ↑ (≳ 0) > 0 ≲ 0 (࡯)
+ද2খྫͷఆྔධՁɻ0-hop଄վળʢSIʣ͕খ͘͞ᐆດɺ1-hopՌʹΑΓେ͖͘վળɻ
+͜ͷΑ͏ʹɺ0-hop஌͠ɺmulti-hopೝग़Λ཈͑ͭͭਅ
+଄վળΛଊ͑Δ͜ͱ͕Ͱ͖Δɻ
+˙ޚ͕ՄೳʹͳΔɿ
+7
+
+ঢ়ଶ 0-hop (g0) Multi-hop ( gmin)ޚ
+େ͖ͳෛ -ʹड༰
+ະධՁ NA ൃՐ →ਂԽ
+େ͖ͳෛ NA→ఆ
+ʢ∆SPೝʣ
+ෆཁ ਖ਼ -٫غ
+ද3 0-hop ͱ multi-hopɻ5ผ͠ɺͦΕͧ
+ɻ
+ΘͤʹΑΓɺ5ผ͠ɺͦΕͧΕʹదͨ͠
+Ͱ͖Δɻ͜Ε͕ຊख๏ͷʮOne-GaugeͰ͋Δɻ
+3.6 ೋஈήʔτʢNA/BT; ผ໊ AG/IGతରԠ
+0‑hop ͷ g0(t) ͱ 1 ≤h ≤H ͷ g(h)(t)খ gmin(t) Λ༻ҙ͠ɺb(t) = min{g0, g min}ඪͱ͢Δɻ
+˙NAʢNovelty Alert; ผ໊ Attention Gate, AG ʣ: ϊϧΞυϨφϦϯత஫ҙγάφϧ g0๣ʹ଺ཹ
+଄੒௕͕๡͍͘͠Ͱ͸͜Ε
+ΛϊϧΞυϨφϦϯʢNAͷ্ཱ͕ͪΓతԾઆ [1]Ͱఆ
+͢Δɿ
+NA(t) := I[ g0(t) > θNA ], θ NA ∈[−5.5, −4.5] ×10−3. (6)
+ߟ:͕͢ɺ§5૷ɾධՁͰ͸෼Ґ஋ʢquantileʣʹΑΓ
+NAಈௐ੔͢Δʢྫ: ্Ґ α ෼Ґʣ ɻ
+NAՌɿ
+•ਂ͞ͷ૿Ճʢmulti-hopʣ
+•ʣ
+•ੑྖҬͰͷ৻ॏͳධՁ
+˙BTʢBacktrack; ผ໊ Integration Gate, I‑Gate/IG ʣ: υʔύϛϯతՁ஋༧ଌγάφϧ NA ͕ൃՐͨ͠ϑϨ
+ʔϜͰ͸ multi-hop ͷ୹བྷʢෛଆʣΛධՁ͠ɺυʔύϛϯʢDA߸[13] ʹରԠͤ͞Δ΂͘ɺ
+Ͱ BT͢Δɿ
+b(t) :=
+(
+min{g0(t), g min(t) }, NA(t) = 1
+g0(t), otherwise , BT(t) := I[ b(t) ≤θBT ], θ BT ∈[−1.4, −1.0] ×10−2. (7)
+ߟ:૷Ͱ͸ NA ϑϨʔϜ্ͷ b(t) ෼෍ʹର͢ΔԼҐ෼ҐʢqβʣΛ༻͍ͯ θBTग़ͱ
+͢Δʢ§5ʣ ɻ
+͜͜Ͱ gmin(t) ͸ಉҰεςοϓʹ͓͚Δ multi-hop geDIGখ஋Ͱ͋Δɻmulti-hop ͷෛଆʢ୹བྷʣ͸
+ग़Ͱ͋ΓɺՁ஋༧ଌతͳυʔύϛϯʢDAʹରԠ͚ͮΒΕΔɻ
+˙తରԠͷղऍ ͜ͷ NA/BTతಉఆͰ͸ͳ͘ɺoperational correspondenceతରԠʣ
+ͱͯ͠ղऍ͞ΕΔ΂͖Ͱ͋Δɿ
+8
+
+• NA త:ग़ →ىש→ ଅਐʢFEPখԽʣ
+• DA త:ग़ → Ձ஋ධՁ →൑அʢMDLʣ
+͜ͷೋஈήʔτʹΑΓɺ࠯ڮ
+ΛϦΞϧλΠϜʹτϦΨ͢Δɻ
+˙൓ূՄೳͳ༧ଌ͸ҎԼͷ൓ূՄೳͳ༧ଌΛ༩͑Δɿ
+1. NAԽ͢Δͱ DA͕૿͑Δ
+2. Multi-hop͕Լ͕ΓɺόοΫτϥοΫͷਫ਼౓͕௿Լ͢Δ
+3. θNAίετ͕૿େ
+4. θBTಀ͢
+ݧ࣮§5ͱ §6ূ͞ΕΔɻ
+˙ඪ ͞Βʹ༠ಋαϒάϥϑ G′γϣʔτΧοτͷ
+ग़Λ཈੍͢Δɿ
+∆SP = SPL(G′)after −SPL(G′)before, (8)
+∆SPrel = SPL(G′)before −SPL(G′)after
+max{SPL(G′)before, ε } . (9)
+∆SP < 0͠ɺ∆SPrel࿏୹ॖ౓Λද͢ɻ
+3.7 FEP rMDLతิ୊ʣ
+͜͜·ͰͰɺ0-hop/multi-hopͷೋॏੑͱೋஈήʔτʢNA/BT૊ΈΛઆ໌ͨ͠ɻຊઅͰ͸ɺ͜ΕΒ
+͕ FEPཧʣͱMDL౉͢͠Δ͢ɻ
+໋୊ 3.1 (ӡ༻ MDL ิ୊). ҎԼͷԾఆͷԼͰɺF∝ ∆MDL ͕੒Γཱͭɿ
+(i)߹:∆GED ͱ ∆IGΛ
+อ
+(ii)ͷ্քԽ:׵= আ +ࣅۙ
+iii)ऩ: λ = cD/cMऩ
+(iv) Multi‑hopࣅۙMulti‑hop࿨/͋Γʣ
+ུ. MDL ͸ L(M) + L(D |M)Ͱ L(M) ≈cM ∆GEDnormੑ
+௿ԼͰ L(D |M) ≈cD (1 −∆IGnorm)෼ΛऔΕ͹
+∆MDL ≈cM ∆GEDnorm −cD ∆IGnorm + const. (10)
+Αͬͯ λ = cD/cM Λબ΂͹ F∝ ∆MDLɻ
+˙ͱ҆ఆԽ͸ʢa্քͷภΓɺ ʢbʣIGɺ ʢcࠩޡ
+ਪఆʹΑΓ҆ఆԽ͢Δɻ
+9
+
+˙FEP-MDLతղऍ ͜ͷิ୊ʹΑΓɺҎԼͷରԠ͕੒ཱ͢Δɿ
+• 0-hop ධՁ (g0): FEPग़ → ϊϧΞυϨφϦϯʢNAʣత஫ҙͷ্ཱ͕ͪΓ →
+ଅਐ
+• Multi-hop ධՁ (gmin): MDLग़ → ʢυʔύϛϯʢDAఆ
+•ඪ (F):ӡస → One-Gaugeޚ
+͕ཧ࿦తʹཪ෇͚ΒΕΔɻ
+4૊Έ
+4.1ΞϧΰϦζϜ
+Πϕϯτʢb(t) ≤θBTԱΤϏΫγϣϯ
+Λ४͢Δɻ
+Algorithm 1 One‑Gaugeޚ
+1:ଌ ot ͔Β৽Τϐιʔυ et ੜ੒
+2: ∆G ←NormalizedGED(Gt−1, Gt)
+3: ∆I ←EntropyIG(Xt−1, Xt)
+4: g0 ←∆G −λ ∆I
+5: gmin ←minH
+h=1 Mul tiHop(h)
+6: b(t) ←min{g0, gmin}
+7: if g0 > θNA then
+8: Novel tyAlert() ▷ਂԽ
+9: end if
+10: if b(t) ≤θBT then
+11: BacktrackOrPrune() ▷഑ઢ
+12: ▷ Check ∆SPγϣʔτΧοτ཈੍ʣ
+13: AcceptAndIntegrate(et); MemoryEviction() ▷ͱඞཁʹԠͨ͡ΤϏΫγϣϯ
+14: end if
+5 Proof of Concept:ޚ
+ຊষͰ͸ɺgeDIGೳ͢Δ
+ূʢProof of Conceptূͷ໨త͸ɺҎԼͷ 3੒ʢ8
+͢͜ͱͰ͋Δɿ
+1.ޚɿ∆GED ͱ ∆IGͨ͠୯ҰεΧϥʔ஋ Fޚ
+2. 2 ஈ֊ᮢ஋൑ఆʢNA/BTʣɿ0-hop/multi-hop ήʔδͷ 2తό
+οΫτϥοΫ
+10
+
+3. ΫΤϦத৺ϚϧνϗοϓධՁ఺ͷ k-hop ෦෼άϥϑධՁʹΑΔεέʔϥϒϧͳGED
+ࢉܭ
+˙ূͱͯ͠ͷҐஔ͚ͮతʹ
+༗ͷ if૷Ͱ΋ղ͚Δ՝୊Ͱ͋Δɻຊষ͸ υϝΠϯීวੑΛओு͢Δ
+΋ͷͰ͸ͳ͘ೝ͢ΔͨΊͷূʢProof of Concept ʣମ
+తʹ͸ɺ ʢiʣF = ∆ GED−λ∆IGɺ ʢiiʣ2 ஈ֊ήʔτʢ0-hopɺmulti-hopͰ୹བྷධ
+ಈɺ ʢiiiʣΫΤϦத৺ͷ multi-hopཧɺͷ 3 ఺
+Λ໨తͱ͢Δɻ
+ఆ:ࣜ11ࣜ12ࣜ13ʣ͸໎࿏υϝΠϯʹಛԽͨ͠
+Ͱ͋ΔɻଞυϝΠϯʢRAGʢF ͱ 2 ஈ֊
+ήʔτʣ͸ཧ͢ɻ
+5.1ઃఆ
+˙ڥ؀ӈ1࣋
+ଌ͠ͳ͕Βɺ
+͢Δɻ
+˙ࡧݕࣅͰ͸୯ҐʹΤϐιʔυى
+ূʢLampinen Β, 2025[9]֤
+๚໰ঢ়ଶʢΤϐιʔυʣΛ 8ϕΫτϧ v ∈R8ࣜ11ʣ ɿ
+v =
+
+x/W, y /H, dx, dy, wall, log(1+visits), success, goal
+
+, (11)
+͜͜Ͱ (x/W, y/H)ඪɺ(dx, dy)ɺwall ∈{−1, 1}ηϧͷ௨աՄ൱ʢน͸ −1, ௨
+࿏͸ 1ʣ ɺvisits ͸๚໰ճ਺ɺsuccessϑϥάɺgoal઀ϑϥάͰ͋Δɻ
+͜ΕΒ 8ஶੑʹ๚
+ޭ/ΰʔϧʣʹରԠ͠ɺখे෼৘ใݱ
+͢ɻ
+ঢ়ଶʹର͢ΔΫΤϦϕΫτϧ qࣜ12ʣ ɿ
+q =
+
+x/W, y /H, 0, 0, 1, 0, 0, 0
+
+. (12)
+੒෼͸χϡʔτϥϧ (0)ɺ௨࿏੒෼͸ 1ɺ๚໰ճ਺͸ 0Մೳ
+࿏Λ୳͢ɻ
+Ͱ͸ॏΈϕΫτϧ wࣜ13ʣ ɿ
+w =
+
+1, 1, 0, 0, 3, 2, 0, 0
+
+. (13)
+Τϐιʔυ vi཭ di = ∥diag(w)(q −vi) ∥2ࣜ14ʣ ɺԹ౓T = 0 .1
+ࣜ15ʣ ɿ
+di =
+diag(w)(q −vi)
+
+2, (14)
+11
+
+π(ai |q) = exp(−di/T)P
+j exp(−dj/T). (15)
+നͰະ౿ͷ
+࿏Β͍͠ʣҰखΛಈతʹબͿɻ
+˙৽ͱೋஈήʔτ (NA/BT)ɺ௨࿏ͳΒྡ઀ηϧ΁ભҠ͠Τϐιʔυϊʔ
+͸๚໰ճ਺visits֤
+ͷลʣΛධՁ͠ geDIGඪ஋ Fग़ɺNA/BT ೋஈήʔτ
+ࣜ6ɾ7ʣ΁ೖྗ͢Δɻ0-hop ήʔδ g0 ͕ᮢ஋ θNAʣͱ NA ήʔτ͕։͖ (NA=1)ɺ
+multi-hopখήʔδgmin ͱ g0 ͷখ͍͞
+ํ b(t) = min{g0, g min}͕ᮢ஋ θBT ΛԼճΔͱ BT ήʔτ͕։͖όοΫτϥοΫ͕ൃՐ͢ΔɻόοΫτϥο
+఺·Ͱ BFS࿏͔Β୤ग़͢Δɻ
+˙ήʔτᮢ஋ͷదԠௐ੔ NA/BTఆ஋Ͱͳ͘ɺήʔδ෼෍ͷ෼Ґ஋Ͱಈతʹઃఆ͢Δɻ g0 ෼෍ͷ
+্Ґ α ෼Ґ఺Λ θNA ͱ͠ NA ൃՐ཰Λ໿ 5r8% ʹௐ੔ɺNA ൃՐதͷ b(t) ෼෍ͷԼҐ β ෼Ґ఺Λ θBT ͱ
+͠ BTલͷᮢ஋νϡʔχϯάͳ͠ʹɺήʔ
+͖ͮద੾ස౓Ͱ NA/BT ΛൃՐͤ͞Δɻ
+˙ΞϧΰϦζϜϓϩηεΛ Algorithm 2͢ɻ
+12
+
+Algorithm 2 geDIGʢPythonίʔυʣ
+def gedig_maze_navigation(maze, start, goal):
+"""Input: maze, start, goal / Output: path or None"""
+G = EpisodeGraph(); p = start
+theta_sim = 0.8; theta_NA = quantile(0.9); theta_BT = quantile(0.1)
+while p != goal and steps < MAX_STEPS:
+# Phase 1: build observation episode
+q = [x/W, y/H, 0, 0, 1, 0, 0, 0] # query (corridor-first)
+v_obs = observe_state(p) # R^8 observation vector
+# Phase 2: graph update and similarity gating
+sim_q = similarity(q, v_obs)
+if sim_q < theta_sim: # below similarity threshold
+G.add_episode(v_obs) # add episode into graph
+# Rank candidate actions by similarity to known episodes
+distances = [weighted_distance(q, v_i, w)
+for v_i in G.episodes]
+probs = softmax(-distances / T) # pi(a|q) = exp(-d/T) / sum
+action = sample(probs)
+# Environment interaction
+p_next = move(p, action)
+if p_next != p: # move succeeded
+visits[p_next] += 1
+G.add_edge(p, p_next)
+# Phase 3: two-stage NA/BT control (0-hop first)
+v_next = find_next_closest(q, G.episodes)
+F = compute_gedig(v_next, G) # F = dGED - lambda*dIG (0-hop)
+g_0 = zero_hop_gauge(F)
+if g_0 > theta_NA: # NA: stagnation/ambiguity detected
+g_multi = min([multi_hop_gauge(h, F)
+for h in range(1, H+1)])
+if g_multi < theta_BT: # integration-worthy shortcut detected
+p = backtrack_to_branch(G, p)
+p = p_next
+return path if p == goal else None
+ॏཁ:ͷΫΤϦ q ΍ॏΈ w ͸໎࿏υϝΠϯಛԽ͕ҟͳΔ͕ɺ
+F = ∆ GED−λ∆IGʢNA/ఆʣ͸ཧͱͯ͠ద༻͢Δɻ
+13
+
+Idle NAಈ
+(g0 > θNA)
+Explore
+(H ↑, k ↑)
+BT ൃՐ
+(b(t) ≤θBT)
+Accept/Prune/Evict
+࣋
+b(t) > θBT
+ਤ3 NA→ਂԽ →BT→߹/ցɻड༰͸ BT ൑ఆʢb(t) ≤θBTܦ
+஫ͷ operational correspondenceরɻ
+˙ΞϧΰϦζϜͷಛ௃ Algorithm 2Λͮ͘ᮢ஋൑
+ఆ͕ม
+ΘΔɿ
+if current_cell.is_wall(): # ໎࿏ಛ༗ͷ൑ఆ
+...
+if visited_count[pos] > 3: # ໎࿏ಛ༗ͷ൑ఆ
+...
+if no_unvisited_neighbors(pos): # ໎࿏ಛ༗ͷ൑ఆ
+backtrack()
+ରরతʹɺgeDIG ΞϓϩʔνͰ͸ɺ߹Λ౷ҰήʔδʢF ͱ 2 ஈ֊ήʔτʣͰ
+͑Δɿ
+• ϑΣʔζ 3ͷ 0-hop ήʔδ g0 = ∆ GED−λ ∆IG ʹΑͬͯ·ΓʢѱԽʣग़ʢg0 > θNA Ͱ
+NAʣ
+•ͷ multi-hop ධՁɿgmin = minh Fh ͕ᮢ஋ະຬʢgmin < θBTʣͳΒʢγϣʔτΧοτʣͷ
+ݟఆ
+ه:ຊষͷΫΤϦ q ΍ॏΈ w ͸໎࿏υϝΠϯʹಛԽ͍ͯ͠ΔɻgeDIGͷ্ʹ
+ϝΧχζϜʢFɺNA/൑ఆʣΛ௨Խ͢Δ఺ʹ͋Δɻ
+ॏཁͳͷ͸ if͍͍ͮͯΔ ͜ͱͰ͋Δɻ similarity() ͱ
+compute_gedig()ॴతʣ͔Βଞ
+ுՄೳͱͳΔɻ
+5.2ը
+༧ఆͰ͋Δɿ
+˙ධՁεέʔϧ
+•໛ɿ15×15໎࿏ɺ100 Τϐιʔυ
+•໛ɿ25×25໎࿏ɺ60 Τϐιʔυ
+14
+
+•໛ɿ50×50໎࿏ɺ40 Τϐιʔυ
+༻͢Δʢϊʔϐ
+ʔΩϯάʣ ɻ
+˙ख๏ Random Walkಈʣ ɺDFS-inspiredʣ ɺCuriosity-drivenʢ๚
+໰ස౓ϕʔεʣ ɺQ-learningʹՃ͑ɺΞϒϨʔγϣϯ෼ੳͱͯ͠ ∆GED ͷΈɺ∆IG ͷ
+Έɺmulti-hopେες
+͢Δɻ
+˙ඪάϥϑѹॖ౓ʣɺ NA/BT ൃՐස౓Λଌఆ͠ɺ
+One-Gaugeূ͢Δɻ
+˙໨ ຊ Proof of ConceptͰ͸ɺҎԼͷ 3ূ͢Δɿ
+1.ೳੑɿF = ∆ GED−λ∆IG൑ఆʢน
+Ͱ͖Δ͔
+2. 2ੑɿ
+• NA ൃՐʢg0 > θNAग़͢Δ͔
+• BT ൃՐʢgmin < θBT͔͜͢
+• 2ਂԽ →ಈΛੜ੒͢Δ͔
+3.཰఺ͷk-hop෦෼άϥϑධՁʹΑΓɺάϥϑશ
+ମͷ GED଄ධՁ͕Մೳ͔
+ূʹΑΓɺgeDIG֦
+͢ɻ
+5.3࿦
+ຊ Proof of Conceptʹ͓͍ͯɺgeDIGͷ 3త
+ೝ͢Δɿ
+•ޚɿF = ∆ GED−λ∆IGʢน൑ఆɺ๚໰ճ਺ᮢ஋ͳͲʣ
+͞ΕΔ
+• 2 ஈ֊ᮢ஋൑ఆɿNAग़ʣͱ BTਂ
+Խ →ಈ͕૑ൃ͞ΕΔ
+• ΫΤϦத৺ϚϧνϗοϓධՁॴత k-hopͷ
+଄ධՁ͕ՄೳͱͳΔ
+ূʹΑΓɺɾ2 ஈ֊ᮢ஋൑ఆɾΫΤϦத৺Ϛϧνϗοϓͷ3ૅత
+ೳ͢Δݧ࣮IIࡧݕࣝ
+ʢRAGূ͢Δɻ
+15
+
+6ݧ࣮II:ࡧݕࣝRAG) ͰͷධՁ
+6.1 RAG݅
+RAG ΁ͷҠ২Ͱ geDIGۭؒΦΛຬͨ͢͜ͱͰ͋Δɿ(i)഑ʢҙ
+Δʣ ɺ(ii)ԽʢL2ԽʹΑΓεέʔϧෆมʣ ɺ(iii)Β͔͞ʢখมԽ͕࿈ଓ
+Δʣ ɻSentence‑BERTशʹΑΓʢiʣΛɺ୯ҐϕΫτϧԽʹΑΓʢiiशաఔʹΑΓʢiiiʣ
+Λຬͨ͢͜ͱ͕஌ΒΕΔ[12].౓ભҠ͕҆ఆ͠ɺ∆GED ͱ ∆IGԽධՁ͕υϝΠϯԣ
+ͭɻ[৽:ʢRandom/BER T[CLS]/Sentence‑BER Tͳ
+ըத]
+6.2໨తͱ 2ূ
+લষʢProof of ConceptͰ 2ʢNA/BTূͨ͠ɻຊ
+ཧΛʢRAGڥ؀ূ͢Δɿ
+˙ূ໨త
+1. NA/BTͷ RAG΁ͷద༻ೝ͞Εͨ 2ཧλεΫʹ͓͍ͯ
+ೳ͢Δ͔
+2.্ɿ
+• NAͰճ౴ੜ੒ʢKG৽ͳ͠ʣ
+• NA ൃՐɾBTɿgeDIG ஋ΛΨΠμϯεͱͯ͠ճ౴ੜ੒ʢKG৽ͳ͠ʣ
+• BTͷΈͱͯ͠ KGड༰
+3. KG܎ؔɿBT࣭KGϕΫτϧ͕ɺ
+LLMͱҰக͢Δ͔ʢิ଍ධՁʣ
+˙RAGͰͷ 2ͷղऍ
+• NA ൃՐɿ0-hopධՁʹ͓͍ͯ g0 = F0(v∗, G) ͕ᮢ஋Λ্ճΔ ʢඞཁʹԠͯ͡maxvi sim(q, vi) ≥θsim
+Λલఏʣ
+v∗ := argmax
+vi∈V
+sim(q, vi), g 0 := F0
+ 
+v∗, G
+
+. (16)
+NAൃՐ ⇐⇒g0 > θNA (ඞཁʹԠͯ͡max
+vi
+sim(q, vi) ≥θsim Λલఏ) (17)
+• BT ൃՐɿNAग़
+BT ൃՐ ⇐⇒gmin =
+H
+min
+h=1
+Fh(ิ, G) ≤θBT (18)
+ʣϑϩʔ͸ਤ4͢ɻ
+16
+
+ೖྗΫΤϦ q Retriever
+(ANN/౓)߹Vk
+0-hop: g0 = ∆ G −λ∆INA ൑ఆ: g0 > θNA
+multi-hop: gmin = minh Fh൑ఆ: gmin < θBT
+ड༰/৽ or อཹ
+ਤ4 RAG ʹ͓͚Δ Phase 1 ͷϫϯγϣοτॲཧϑϩʔɻ0-hop Ͱᐆດ͞ʢNAΛຬͨ
+ͷΈ multi-hop࿏୹ॖʣΛධՁ͠ɺgmin < θBT Ͱड༰/৽Λ൑அ͢Δɻ
+[৽: NA/BTՌ͸୯७ᮢ஋ϕʔεͷड༰཰ͷΈ]
+Simple HeuristicʢςϯϓϨʣ
+཰ (%)εςοϓ 95%CI(εςοϓ)Γ཰ (%) p ஋ (εςοϓ)
+Simple Heuristic [৽: –] [৽: –] [৽: [–, –]] [৽: –] [৽: –]
+geDIG (ఏҊ) [৽: –] 69.0 [67.3, 70.7] [৽: –] [৽: –]
+ද4 ໎࿏ PoC ʹ͓͚Δ Simple Heuristic ͱ geDIGςϯϓϨɻ໨త͸ཧ
+ূ৽༧ఆɻ
+NA/ͷൃՐ཰ʢεέʔϧผɾςϯϓϨʣ
+εέʔϧ N(Τϐιʔυ) NA ൃՐ཰ (%)ఆ཰ (%)ۉg0ۉgmin
+15 ×15 [৽: –] [৽: –] [৽: –] [৽: –] [৽: –]
+25 ×25 [৽: –] [৽: –] [৽: –] [৽: –] [৽: –]
+50 ×50 [৽: –] [৽: –] [৽: –] [৽: –] [৽: –]
+ද5 ໎࿏ PoC ʹ͓͚Δ NA/༧ఆɻ
+6.3ॆ
+˙σʔληοτ
+•໛: 168ΞΠςϜɺ20ʣ
+•໛: 500ΞΠςϜɺ50ʣ[৽:ஙத]
+•໛: 1000+ΞΠςϜɺ100+ுධՁʣ[৽:ըத]
+17
+
+˙ධՁΫΤϦ
+• ୯ҰυϝΠϯ: 50υϝΠϯ 1 ΫΤϦʣ
+• ΫϩευϝΠϯ: 100ΫΤϦʢ2-3 υϝΠϯԣஅʣ
+• ਂ͍ਪ࿦: 50ΫΤϦʢ3 ϗοϓҎ্ͷਪ࿦ඞཁʣ
+˙ॆʣ
+1. Static RAG :ͷΈ
+2. F requency-based:৽
+3. Cosine-threshold:৽൑அ
+4. GraphRAG[10]: MicrosoftఏҊͷάϥϑϕʔε RAG
+5. DyG-RAG[2]: ಈతάϥϑ RAG
+6. KEDKG[3]:ฤूʹΑΔಈత KG
+7. geDIG ( ఏҊ): One-Gaugeޚ
+˙ฏઃఆʢequal-resourcesٛ͸ equal-resources Λલఏͱ͢Δɻ͢ͳΘͪʢiʣಉҰͷ
+ɾANN๣kʣ ɺ ʢiiʣಉҰͷϓϩϯϓτ/େτ
+Ήʣ ɺ ʢiiiʢCPU/GPUɺεϨου਺ɺόονʣ
+ฏੑΛ୲อ͢Δʢਤ5 ͷ”equal-resources”ख๏ͷઃ
+૝Λ൓өֱͨ͢͠Δํ਑Ͱ͋Δɻ
+6.4ٛ
+˙ඪ
+• PER (Prompt Enhancement Rate) :Խ཰
+PER =τʔΫϯ਺
+ԽલτʔΫϯ਺ ×100% (19)
+• ड༰཰: ਓख/߹ׂ
+ड༰཰ = ड༰͞Εͨϓϩϯϓτ਺
+૯ϓϩϯϓτ਺ ×100% (20)
+• FMR (F alse Merge Rate):཰
+FMR =਺
+਺ ×100% (21)
+• ஗Ԇ:Ή௥ՃϨΠςϯγʢP50/P95/P99ʣ
+• PSZ (Perfect Scaling Zone) : ड༰ ≥95%, FMR≤2%, ௥ՃϨΠςϯγ P50≤200msຬ଍͢
+ӡ༻໨҆ʣ: ड༰ 95%ɺFMR 2%͕ӡ༻ʹ༩͑Δ
+ɺP50 200msԠ౴ੑͷᮢ஋ʢHCI͸
+ূ՝୊ͱ͢Δɻ
+18
+
+˙2ʣ
+• NA ൃՐ཰:߹ׂ
+NAൃՐ཰ = NAൃՐΫΤϦ਺
+૯ΫΤϦ਺ ×100% (22)
+• BT ൃՐ཰: NAग़ʹΑΓ KG߹ׂ
+BTൃՐ཰ = BTൃՐΫΤϦ਺
+૯ΫΤϦ਺ ×100% (23)
+• BT ਫ਼౓: BTۉgeDIG͍ʣ
+BT ਫ਼౓ = − 1
+|BT߹|
+X
+i∈BT ൃՐ
+g(i)
+min (24)
+• KG৽཰: શମͷ͏ͪ KGʢBTʣ
+KG৽཰ = KG৽ΫΤϦ਺
+૯ΫΤϦ਺ ×100% (25)
+[৽: NA/BT༧ఆ]
+6.5Ռʢ༧උ vsॆ൛ʣ
+ද6 RAG໛σʔληοτʢ168 ΞΠςϜʣ
+ख๏ PER(%) ड༰཰ (%) QA ਖ਼౴ (%) FMR(%) P50 ஗Ԇ (ms) P95 ஗Ԇ (ms)
+Static RAG 100.0 58.3 65.2 0.0 45 78
+Frequency 132.4 72.5 71.8 8.5 125 245
+Cosine 138.7 78.2 75.3 5.2 132 258
+geDIG (1-hop) 125.3 88.5 79.4 2.8 98 185
+geDIG (2-hop) 145.8 94.2 82.1 1.9 156 298
+geDIG (3-hop) 167.7 100.0 84.1 1.5 187 342
+[৽:ࡌه]
+19
+
+ද7 RAG໛σʔληοτʢ500 ΞΠςϜɺ50ఆʳ
+ख๏ PER(%) ड༰཰ (%) QA ਖ਼౴ (%) FMR(%) P50 ஗Ԇ (ms) P95 ஗Ԇ (ms)
+Static RAG 100.0 52.1 61.8 0.0 68 125
+Frequency 128.5 68.3 69.2 12.3 185 425
+Cosine 135.2 73.8 72.5 8.7 198 445
+GraphRAG 142.8 81.5 76.3 6.2 245 512
+DyG-RAG 151.3 85.2 78.8 4.5 268 558
+KEDKG 148.7 83.8 77.1 5.8 298 625
+geDIG (1-hop) 122.8 85.7 77.5 3.2 125 245
+geDIG (2-hop) 143.5 92.3 80.9 2.4 178 368
+geDIG (3-hop) 165.4 97.8 83.2 1.8 198 425
+[৽: GraphRAG/DyG-RAG/KEDKGதʢ 2025 ೥ 10݄࣌
+఺ʣ ɻ]
+6.6 2ըʣ
+˙໨తূͨ͠ NA/BT 2͕ɺRAGূ͢Δɻ
+ද8 2ը஋ʣ
+ख๏ NA ൃՐ཰ (%) BT ൃՐ཰ (%) KG৽཰ (%) BTۉgeDIG(ड༰)
+ख๏ʢ2ͳ͠ʣ
+୯७ᮢ஋ (novelty>0.6) – – 58.3 – –
+Cosine ᮢ஋ – – 78.2 – –
+Frequency-based – – 72.5 – –
+ఏҊख๏ʢ2͋Γʣ
+NA only (BT൑ఆͳ͠) 42.5 – 42.5 – -0.15
+NA + BT ( ఏҊ) 42.5 28.7 28.7 0.28 -0.28
+˙Ռ
+• NA ൃՐ཰: ໿ 40%ग़
+• BT ൃՐ཰: NAൃՐͷ໿ 67%ʢશମͷ໿ 29%ग़ʹΑΓ KG৽
+• KG্: BTۉgeDIG ஋͸-0.28͍ʣ
+•ड༰: ୯७ᮢ஋ʢ58.3%ͯ͠ɺఏҊख๏͸ 28.7%ʣ
+[৽:૷Ͱ͸୯७ᮢ஋ϕʔεͷड༰཰ͷΈଌఆ]
+20
+
+6.7 PSZ ʢPerfect Scaling Zoneʣ෼ੳ
+ਤ5͢Α͏ʹɺgeDIG (3-hop)ୡ੒ɿ
+• ड༰཰: 97.8% (໨ඪ 95% Ҏ্Λୡ੒)
+• FMR: 1.8% (໨ඪ 2% ҎԼΛୡ੒)
+• P50 ஗Ԇ: 198ms (໨ඪ 200ms ҎԼΛୡ੒)
+ҰํɺGraphRAG͸ PER͍͕஗Ԇ͕245msɺDyG-RAG͸஗Ԇ͕ 268msͱ PSZΛຬͨ͞ͳ͍ɻ
+KEDKG͸஗Ԇ 298ms΋஗͍ɻ
+0 5000 10000 15000 20000 25000 30000
+Additional Latency (ms)
+0
+20
+40
+60
+80
+100Acceptance (%)
+Acceptance vs Additional Latency with FMR coloring (R PSZ Scatter)
+Hop H
+H=1
+H=2
+H=3
+PSZ: acc 95%
+0.0000
+0.0025
+0.0050
+0.0075
+0.0100
+0.0125
+0.0150
+0.0175
+0.0200
+FMR (False Merge Rate)
+ਤ5 PSZ ෼ੳʢequal-resources ઃఆʣ ɻ఺ͷ৭͸FMRɺΤϥʔόʔ͸௥ՃϨΠςϯγͷ P50/P95ࣔ
+͢ɻड༰཰ ≥95%ɾP50≤200msɻgeDIG (H=3) ͷΈ͕ PSZ ଳҬ಺ʹऩ·Δɻ
+StaticFrequencyCosineGraphRAGDyG
+RAG
+geDIG
+RAG v3
+0
+20
+40
+60
+80
+100
+Acceptance (%)
+StaticFrequencyCosineGraphRAGDyG
+RAG
+geDIG
+RAG v3
+0
+2
+4
+6
+8
+10
+FMR (%)
+StaticFrequencyCosineGraphRAGDyG
+RAG
+geDIG
+RAG v3
+0
+50
+100
+150
+200
+250
+Latency (ms)
+Baseline comparison under equal resources (no peeking)
+ਤ6ɻgeDIG ͸ड༰཰ɾFMRదԽʹ༏ΕΔɻ
+21
+
+6.8 Multi-hop෼ੳ
+ද9͞Εͨɿ
+ද9 Multi-hop෼ੳ
+ۉPER(%)
+1-hop 118.5% 125.8% 131.2% 125.3%
+2-hop 138.7% 147.2% 151.5% 145.8%
+3-hop 152.3% 171.8% 179.2% 167.7%
+ಛʹΫϩευϝΠϯΫΤϦͱਂ͍ਪ࿦ΫΤϦʹ͓͍ͯɺ3-hop౉͕͠
+ɻ
+1-hop
+2-hop
+3-hop
+1.0 0.5 0.25
+(a) Multi-hop Decay Factor
+Factual Reasoning Analogy
+Query Type
+0
+20
+40
+60
+80
+100
+120
+140
+160Prompt Enrichment (%)
+167.7%
+(b) Multi-hop Impact by Query Type
+1-hop only
+2-hop
+3-hop
+ਤ7 RAG ʹ͓͚Δ multi‑hop೦ਤɻH·ΕɺΫϩευϝΠϯਪ࿦͕ଅਐ͞ΕΔɻ
+7 ิ଍ධՁ: KGূʣ
+7.1ͱҐஔ͚ͮ
+૷ͨ͠ 2ʢNA/BT੒͞ΕΔ KG͔Βɺϝοηʔδύ
+ੑ͕ LLM͕͋Δ͔Λ༧උతʹݕ
+ূ͢Δɻ
+˙Ծઆ BTʯͱͯ͠બผ͞Ε͍ͯ
+੒͞ΕΔKGϕΫτϧ͸ɺ୯७ᮢ஋΍ϥϯμϜબ୒ΑΓ΋
+LLM଴͞ΕΔɻ
+˙ज़త੍໿͸Sentence-BERTҰக౓
+Ռ͸ࠦࣔͱͯ͠ѻ͏ɻ
+22
+
+7.2ઃఆ
+˙ධՁϓϩτίϧ
+1. ΫΤϦ q ʹର͠ɺKG G౓ϕʔεͰαϒάϥϑ Gsub Λநग़
+2.ϕΫτϧੜ੒:
+hagg =
+X
+vi∈Gsub
+wi ·e(vi), w i = softmax(sim(q, vi)) (26)
+3. LLMΈ rLLMҰக౓ଌఆ:
+∆s = cos(hagg, rLLM) −cos(hbaseline, rLLM) (27)
+˙ର৅ͷ KG੒ख๏
+• BT બผ KG: BT੒ʢఏҊख๏ʣ
+• NA બผ KG: NA੒ʢBT൑ఆͳ͠ʣ
+• ୯७ᮢ஋ KG:ఆᮢ஋ʢnovelty> 0.6ʣͰड༰
+• ϥϯμϜαϯϓϦϯά: ϥϯμϜʹબ୒͞Εͨϊʔυ͔Βू໿
+7.3Ռ
+ද10 KGҰக౓ʢN=50,ʣ
+KG੒ख๏ KG৽཰ (%) ∆sࠩ
+ϥϯμϜαϯϓϦϯά 168 100.0 -0.05 0.18
+୯७ᮢ஋ (novelty>0.6) 98 58.3 +0.12 0.15
+NA બผ (NAड༰) 72 42.5 +0.15 0.14
+BT બผ (BTड༰) 48 28.7 +0.23 0.12
+[৽:ͷධՁ͸ 50 ΫΤϦͷΈɻ200༧ఆ]
+7.4 ղऍͱ੍໿
+˙޲܏BTൃՐʹΑΓબผ͞ΕͨKG৽཰ 28.7%ϕΫτϧ͸ɺLLMԠ
+ͱͷҰக౓͕ ∆s = +0 .23͘ɺϥϯμϜαϯϓϦϯάʢ-0.05ʣ΍୯७ᮢ஋ʢ+0.12ʣΛ্ճ
+Δɻ͜Ε͸ KG༩͢ΔՄೳੑ͢Δɻ
+˙ज़త੍໿Ռ͸ࠦࣔʹཹ·Δɿ
+1. Τϯίʔμʔઐ༻Ϟσϧ: Sentence-BERTϕΫτϧ haggͷ
+ʮԾઆʯͱͯ͠ղऍͰ͖ͳ͍
+23
+
+2.ੑ :Λอূ
+͠ͳ͍
+3.໛ґଘੑ : 50໛ɾΤϯίʔμʔબ୒ʹґଘ͢Δ
+Մೳੑ
+4.ͷະূ໌ : KG࣭→ ࣭LLMབྷཁҼ͕ഉআ͞Εͯ
+͍ͳ͍
+˙޲ূʹ͸ҎԼ͕ඞཁɿ
+•Ϟσϧ: GPT΍ T5ͰσίʔυՄೳͳԾઆੜ੒
+•େ: N=200ೝ
+•ݧ࣮KGଌ
+• ਓखධՁ: ੜ੒͞ΕͨԾઆͷଥ౰ੑΛઐ໳Ո͕ධՁ
+• ΞϒϨʔγϣϯ:౓ɺgeDIGֱ
+•ূ:ূɺwhiteningೝ
+•ԽʢRIAʣ:Έ KGϕΫτϧ h Λஈ֊త
+ஈͰ h(t) Λੜ੒͠ɺϓϩϯϓτ
+ɺ g0/gmin ͷվળͱ PSZ ੍໿ʢड༰ ≥95%, FMR≤2%,
+P50≤200ms͢Δ͕ɺ౳
+Ձੑ͸ओு͠ͳ͍஌ʣͱ҆શหʢFMRɺϩʔϧόοΫʣ
+Λซઃ͢Δɻ
+ೖྗΫΤϦ q(0) Retriever
+(ANN/౓)Έ KG G
+ಋग़:ϕΫτϧ h(t)ு: q(t+1) ←augment(q(t), h(t))
+ධՁ: g0, gmin ήʔτ: PSZ/४
+ճ౴/৽/ࢭ
+ଓͳΒ t ←t+1
+ਤ8ԽʢRIAஈ֊Ͱ h(t) Λੜ੒͠ϓϩϯϓτ/Λ
+Խɺg0/gmin ͷվળͱ PSZతΞφϩδʔͱͯ͠Ґ
+͸ਤ4ͷϫϯγϣοτ൛ͱରൺ͞ΕΔɻ
+24
+
+7.5 ·ͱΊ
+͸ɺBTબผ͕ KG্ͤ͞ɺͦͷ KGϕΫτϧ͕
+LLMͱҰக͠΍͍͢޲܏໛ɺҼՌະূ໌ʣʹ
+ΑΓɺঘૣ໛ɾଟ
+ূ͕ඞཁͰ͋Δɻ
+8 ΞϒϨʔγϣϯ෼ੳͱ੒෼ධՁ
+8.1༩෼ੳ
+ද11ʹɺgeDIG͢ɻ
+ද11༩
+཰ (%) ໎࿏εςοϓ RAGड༰཰ (%) RAG FMR(%)
+Full geDIG 100.0 69.0 97.8 1.8
+w/o ∆GED 85.2 82.6 88.5 8.2
+w/o ∆IG 88.5 78.2 85.3 6.5
+w/o Multi-hop 92.3 74.8 91.2 3.8
+w/o NA gate 94.5 76.5 93.5 2.9
+w/o BT gate 91.8 81.3 90.8 4.2
+w/o ∆SP 96.7 71.5 95.2 2.5
+ิ଍: w/o ∆SP੒Ͱ͋Γɺ FMRΔҰ
+ఆతͰ͋ͬͨɻ[৽: w/o ΔGED ͱ w/o ΔIGΛ௥
+த]
+8.2౓෼ੳ
+˙λ (ॏΈ)ڹ౓෼ੳͰ͸ɺλ ∈[0.3, 0.7] ͷൣғͰ҆ఆͨ͠ੑೳɻλ < 0.3͞
+͕૿Ճɺλ > 0.7ॆ༧ఆʣ ɻ
+[৽:৽༧ఆ]
+˙ϗοϓ਺ Hڹද12͢Α͏ʹɺH = 3΋όϥϯε͕ྑ͍ɻH > 3ίετ૿େʹର͢
+্͕๞࿨ɻ
+25
+
+ද12෼ੳ
+H RAG PER(%) ड༰཰ (%) FMR(%) P50 ஗Ԇ (ms)ίετ
+1 125.3 88.5 2.8 98 1.0×
+2 145.8 94.2 1.9 156 2.3×
+3 167.7 100.0 1.5 187 4.8×
+4 171.2 100.0 1.4 298 9.5×
+5 172.8 100.0 1.3 425 18.2×
+9ֱ
+9.1ଘख๏ͱͷҐஔ͚ͮ
+ද13ϚτϦοΫε
+ख๏ ಈత KG൫
+GraphRAG ⃝ △ × × × -
+DyG-RAG ⃝ △ × △ × -
+KEDKG ⃝ × × △ × -
+FEP/Active Inf. × × ⃝ ⃝ △ FEP
+MDL/IB × △ ⃝ × △ MDL
+geDIG ⃝ ⃝ ⃝ ⃝ ⃝ FEP-MDL
+9.2Խ
+˙GraphRAG/DyG-RAGҟ GraphRAG੒௕΁ͷରԠ
+ఆతɻDyG-RAG͘ɻ geDIG ͸ ∆GEDຽ
+ʹਾ͑Δɻ
+˙KEDKGҟ KEDKGੑʢ௥Ճɾमਖ਼ɾিಥղফʣʹয఺Λ౰ͯΔ͕ɺ ʮ͍ͭʯ ʮͳ
+͠ͳ͍ɻgeDIG͸ F< θఆ͢Δɻ
+˙FEP/MDL܎ؔFEPΛ௚઀ѻΘͳ͍ɻMDL
+଄ͷಈతมԽΛલఏͱ͠ͳ͍ɻgeDIG౉͢͠Δɻ
+10ͷ՝୊
+10.1 ཧ࿦త՝୊
+˙ԾఆͷҰൠԽͷ F∝ ∆MDL͍ԾఆʹґଘɻҎԼ
+ு͕ඞཁɿ
+•ு
+26
+
+•্քͷਫ਼៛ԽʢMunkresີධՁʣ
+•্քͷఆྔతධՁ
+˙IGੑҎ֎ͷ IG৘ใྔɺKLݕֱ
+ূ͕ඞཁɻ
+10.2૷্ͷ՝୊
+˙εέʔϥϏϦςΟ૷͸ O(kH)໛άϥϑʢ10༻
+దԽ͕ඞཁɿ
+•཰ԽʢANN ར༻ʣ
+•୹࿏ΞϧΰϦζϜͷಋೖ
+•Խʣ
+˙஗Ԇੑೳ P95/P99ύʔηϯλΠϧ஗Ԇͷվળ͕ඞཁɻಛʹ 3-hopɿ
+•దԽ
+• ฒྻԽɾGPU༻
+•ଧͪ੾ΓώϡʔϦεςΟοΫ
+10.3ॆ
+˙໛ϕϯνϚʔΫ ҎԼͷඪ४ϕϯνϚʔΫͰͷධՁ͕ඞཁɿ
+• GLUE/SuperGLUEཧղʣ
+• HotpotQA/2WikiMultihopQAʢଟϗοϓ QAʣ
+• MuJoCo/Atariʢ࿈ଓ/ʣ
+[৽:͸ 2025 ೥ Q4ըʣ ɻ]
+˙ॆு͕ඞཁɿ
+•໛ධՁ
+•ධՁ
+• આ໌ՄೳੑͷఆੑධՁ
+10.4 Ԡ༻ల։
+10.5 Phase 2:ு
+˙ঢ়ͷ geDIG ͸ Phase 1ఆ͞Εɺੑܭ
+ॴ൑அͷूੵ͸ʢiʣେҬ৑௕ੑͷ஝ੵɺ ʢiiɺ ʢiiiʣΞΫηεස౓όΠ
+27
+
+ΞεɺΛੜΈಘΔɻ͜ͷͨΊɺೖྗःஅԼͰͷదԽʢPhase 2 ʣ͕ඞཁͰ͋Δɻ
+˙దԽ໨ඪͷҰྫ
+min
+G′⊆G
+α GED(G, G′) + β H(G′) + γ |E(G′)|, s.t.ੑ/౸ୡՄೳੑ/ॏཁ౓੍໿, (28)
+͜͜Ͱ H(G′)ɺ|E(G′)|͸Τοδ਺ʢѹॖ౓ʣͰ͋ΔɻΞϧ
+ิͱͯ͠ɺ ʢaʣ֊૚తΫϥελϦϯάʴ୅දબ୒ɺ ʢb഑ઢɺ ʢcʣRL ʹΑ
+͑ΒΕΔɻ
+˙૷্ͷ࿦఺
+•ࣅۙGED౰ʢϋϯΨϦΞϯ/A*ʣ ɾαϯϓϦϯάʹΑΔՄ༻ੑ
+•཭ɺCopy-on-WriteʹΑΔ Phase 1߹
+•ධՁɿPhase 2ͷ Phase 1఺ͰධՁ
+˙తྨਪʣ Phase 1/2੧/ਭ຾ɾւഅϦϓϨΠͱࣅత
+ఆ͢Δɻ
+˙ࣝுɿ
+•ݱ
+•ΫϩεϞʔμϧͳ GEDٛ
+•ϚϧνϞʔμϧ IGࢉܭ
+˙शɿ
+• ΤϏΫγϣϯઓུͷਫ਼៛Խ
+•࣋
+•߹
+11࿦
+ʢ∆GEDʣͱ৘ใ੔ཧʢ∆IGʣΛ୯ҰεΧϥʔF͠ɺ
+ӡస͢Δ One-Gaugeͷ࿮૊Έ geDIG ΛఏҊͨ͠ɻ
+ݙߩFEP-MDLɻ
+NA/BTΓΛཱ྆ɻ
+ূ:ଌ໎࿏ʢ150 Τϐιʔυ௒ʣͱ RAGʢ500 ΞΠςϜɾ50໛ධՁʹΑ
+ೝɻಛʹPSZʢड༰≥95%, FMR≤2%, ஗Ԇ ≤200ms࣮
+͢ɻ
+ͷల։:श΁ͷԠ༻Λ௨ͯ͡ɺgeDIGΛΑΓ൚
+ΈKGత
+ར༻ʢRIA఺Ͱ͸ࠦࣔʹཹΊɺ౳Ձੑ
+Θͳ͍ʢ§8ʣ ɻ
+28
+
+ࣙ
+ஙʹ͓͍ͯɺInsightSpike-AI൫ͱͯ͠ར༻ͨ͠ɻ
+ݙ
+[1] Gary Aston-Jones and Jonathan D Cohen. An integrative theory of locus coeruleusrnorepinephrine
+function: adaptive gain and optimal performance. Annual Review of Neuroscience , 28:403–450,
+2005.
+[2] Authors. Dynamic graph-based retrieval-augmented generation. arXiv preprint, 2024. Preprint;
+DOI/URL to be updated.
+[3] Authors. Knowledge editing with dynamic knowledge graphs. arXiv preprint, 2024. Preprint;
+DOI/URL to be updated.
+[4] Gy”orgy Buzsáki. Rhythms of the Brain . Oxford University Press, 2011.
+[5] Matthew F Carr, Shantanu P Jadhav, and Loren M Frank. Hippocampal replay in the awake state:
+a neural substrate of spatial memory.Nature Neuroscience, 14(2):147–153, 2011.
+[6] Karl Friston. The free-energy principle: a unified brain theory? Nature Reviews Neuroscience ,
+11(2):127–138, 2010.
+[7] Xinbo Gao, Bing Xiao, Dacheng Tao, and Xuelong Li. A survey of graph edit distance.Pattern
+Analysis and applications, 13(1):113–129, 2010.
+[8] Peter D Gr”unwald. The minimum description length principle. InMIT Press, 2007.
+[9] Andrew Kyle Lampinen, Martin Engelcke, Yuxuan Li, Arslan Chaudhry, and James L McClelland.
+Latent learning: episodic memory complements parametric learning by enabling flexible reuse of
+experiences. arXiv preprint arXiv:2509.16189 , 2025.
+[10] Microsoft Research Team. Graphrag: Retrieval-augmented generation via knowledge graphs. arXiv
+preprint, 2024. Whitepaper/technical report; DOI/URL to be updated.
+[11] Brad E Pfeiffer and David J Foster. Hippocampal place-cell sequences depict future paths to re-
+membered goals. Nature, 497:74–79, 2013.
+[12] Nils Reimers and Iryna Gurevych. Sentence-bert: Sentence embeddings using siamese bert-networks.
+In Proceedings of EMNLP-IJCNLP, 2019.
+[13] Wolfram Schultz, Peter Dayan, and P Read Montague. A neural substrate of prediction and reward.
+Science, 275(5306):1593–1599, 1997.
+[14] Naftali Tishby, Fernando C Pereira, and William Bialek. The information bottleneck method. In
+37th Annual Al lerton Conference on Communication, Control, and Computing , 1999.
+29
+
+෇࿥ Aσʔλ
+A.1ܭ
+ද14 15×15ʢN=100ʣ
+େ஋ 95%CI
+εςοϓ਺ 69.0 8.5 68.0 52 89 [67.3, 70.7]
+Τϐιʔυ਺ 142.5 15.3 140.0 118 178 [139.5, 145.5]
+NA ൃՐճ਺ 11.2 2.8 11.0 6 18 [10.6, 11.8]
+BT ൃՐճ਺ 4.5 1.2 4.0 2 8 [4.3, 4.7]
+ऴϊʔυ਺ 45.8 6.2 45.0 35 58 [44.6, 47.0]
+ऴΤοδ਺ 8.3 2.1 8.0 4 14 [7.9, 8.7]
+[৽: 25×25 ͱ 50×50ද΋௥Ճ༧ఆ]
+A.2 RAGͷΫΤϦछผ෼ੳ
+ද15໛σʔληοτʣ
+ۉPER(%) ड༰཰ (%) FMR(%)
+୯ҰυϝΠϯɾ୯७ 50 152.3 98.0 1.2
+ࡶ30 158.7 96.7 1.8
+ΫϩευϝΠϯɾ2hop 40 171.8 97.5 2.1
+ΫϩευϝΠϯɾ3hop 30 179.2 97.0 2.5
+ਂ͍ਪ࿦ɾྨਪ 25 185.4 96.0 2.8
+ਂ͍ਪ࿦ɾҼՌ 25 183.1 96.0 2.4
+શମ 200 167.7 97.1 2.0
+[৽:༧ఆ]
+A.3ʣ
+˙ػάϥϑʢKGఆతͰ΋ɺॴྖҬਪ࿦Λ
+͑ΊʹิॿͰ͖ΔՄೳੑ͕͋Δɻ͜͜Ͱ͸ geDIG ʹΑΓબผɾड༰͞Εͨখ͞ͳαϒάϥϑ͔Βɺಋग़ϕ
+๣ΤϐιʔυΛ௥Ճώϯτ͢Δɻ
+˙ʣ
+1.ຊճ౴ A0: LLM ୯ಠͰ q ʹճ౴
+2.Έ KG நग़: geDIG Ͱ H ≤3ʢྫ: 30ϊʔυ/60Τοδʣ಺Ͱ Gsub Λநग़
+3.ಋग़: ϝοηʔδύογϯάͰ hେmʣΛิॿεχ
+ϖοτ SʢҾ༻/ग़య͖ͭʣ
+30
+
+4. ௥Ճώϯτ Hins ͷੜ੒: Hins = rephrase(h, S)ʢՕ৚ॻ͖ɺNo new facts, No speculationʣ
+5.Խճ౴ A1: q + Hins Λϓϩϯϓτʹ෇༩ͯ͠ LLMճ౴
+˙ඪͱ҆શ࿮
+• ड༰཰ɾFMRɾ஗Ԇ: PSZʢड༰ ≥95%, FMR≤2%, ௥Ճ P50≤200ms࣋
+•޷:A0 vs A1 Λධఆऀ/ੑ/ੑ/ੑʣ
+•ؔ:−gminɺ∆SPrel༩ΛఆྔԽʣ
+˙ʢςϯϓϨʣ
+• ΫϩευϝΠϯઃ໰ʹ͓͍ͯɺA1 ͕ A0 Λ޲܏ࠩ≈+3–6%ʣ
+• վળ͸ ∆SPrelఆʣ
+•͕ॖখʢΉ͠ΖϊΠζϦεΫʣ ɻFMRཧ͕伴
+˙ք͸͑Ίఆ͞Εͨ KG্Λओு͠
+ଌ͞ΕΔͷ͸ॴྖҬΒΕɺ͔͠΋ PSZʢFMR/ϩʔϧόο
+ূ͸কདྷ՝୊ʢ§8,ʣͰѻ͏ɻ
+4.3.3ʢิҨʣ
+•݅:ఆత KG Ͱ΋ɺgeDIGՌ͕ͱ͖
+ଌ͞ΕΔ
+•ࣜ:͕ऑ͍/Ռ͕๡͍͠ʢPSZ Λӽ͑ͳ͍൓෮͸
+ʣ
+•ࠦࣔ:తར༻ʢRIAʣ͸༗๬͕ͩɺ४ͱ҆શหʢFMRࢹ؂/ϩʔϧόοΫʣͱηοτ
+ͰॳΊͯҙຯ͕͋Δ
+• Ґஔ͚ͮ:ੑͰ͸ͳ͘ɺ One‑Gaugeಈӡ༻ͱ PSZ ಺Ͱͷ҆શͳ
+૿෼վળʹ͋Δ
+31

@@ -1,0 +1,17 @@
+%% GeDIG Refactor Architecture (August 2025)
+graph TD
+  U[Caller / Navigator] --> F[GeDIGFactory]
+  F --> C[GeDIGCore]
+  C -->|compute| GED[Structural Improvement]
+  C -->|compute| IG[Entropy Variance IG]
+  IG --> STATS[Welford Stats]
+  STATS --> C
+  C --> REWARD[Reward Layer\n(hop0 / aggregate)]
+  C -->|optional| MH[Multi-hop Engine]
+  C --> LOG[GeDIGLogger\n(Rotating CSV)]
+  subgraph FeatureFlag
+    F --> LEGACY[(Legacy Path)]
+    F --> REFACTORED[(Refactored Path)]
+  end
+  C -. future .-> SPIKE[SpikeDetectionMode]
+  LOG -. future .-> MON[Monitoring / Dashboard]

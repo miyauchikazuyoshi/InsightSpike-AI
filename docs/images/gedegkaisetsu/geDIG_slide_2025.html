@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>geDIG: One‑Gaugeで学習×推論×記憶を同時運用</title>
+  <style>
+    :root {
+      --bg-a: #f4f6f8;
+      --bg-b: #ffffff;
+      --ink-0: #0f172a;
+      --ink-1: #1d3557;
+      --ink-2: #2a4b7c;
+      --ink-3: #3a7bd5;
+      --ink-4: #66ccff;
+      --muted: #6b7280;
+      --ok: #16a34a;
+      --warn: #eab308;
+      --bad: #dc2626;
+    }
+
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                   'Hiragino Kaku Gothic ProN', 'メイリオ', Meiryo, sans-serif;
+      color: var(--ink-0);
+      background: var(--bg-a);
+      overflow: hidden;
+    }
+
+    .deck { width: 100vw; height: 100vh; overflow-y: auto; scroll-snap-type: y mandatory; }
+    .slide {
+      width: 100%; height: 100vh; scroll-snap-align: start;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 4vw; box-sizing: border-box; text-align: center; position: relative;
+    }
+    .slide:nth-child(odd) { background: var(--bg-b); }
+    .slide:nth-child(even) { background: var(--bg-a); }
+
+    h1 { font-size: 3.0rem; color: var(--bg-b); margin: 0 0 0.5rem; }
+    h2 { font-size: 2.1rem; color: var(--ink-2); margin: 0 0 1.2rem; border-bottom: 3px solid var(--ink-4); display: inline-block; padding-bottom: 8px; }
+    p  { font-size: 1.2rem; line-height: 1.75; max-width: 980px; margin: 0.4rem 0; }
+    ul { list-style: none; padding: 0; margin: 0.6rem 0; max-width: 980px; }
+    li { font-size: 1.15rem; margin: 0.5rem 0; text-align: left; }
+    .muted { color: var(--muted); }
+    .emph  { color: var(--ink-3); font-weight: 700; }
+    .strong { color: #e63946; font-weight: 700; }
+
+    /* Title */
+    .title {
+      background: linear-gradient(135deg, #3a7bd5, #3a6073);
+      color: var(--bg-b);
+    }
+    .title h2 { color: var(--bg-b); border-bottom-color: rgba(255,255,255,0.6); }
+    .byline { color: rgba(255,255,255,0.85); font-size: 1.1rem; margin-top: 0.6rem; }
+
+    /* Lists */
+    .summary-list li {
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"><path fill="%233a7bd5" d="M12 2A10 10 0 1 0 22 12 10 10 0 0 0 12 2Zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8Z"/></svg>') no-repeat left center;
+      padding-left: 32px;
+    }
+
+    /* Formula */
+    .formula { font-family: 'Times New Roman', serif; font-size: 1.8rem; font-style: italic; color: #111827; background: #f8fafc; border: 1px solid #e5e7eb; padding: 10px 18px; border-radius: 6px; display: inline-block; margin: 10px 0 2px; }
+
+    /* Flow / 4コマ */
+    .flow { display: grid; grid-template-columns: repeat(4, minmax(200px, 1fr)); gap: 14px; max-width: 1100px; width: 100%; }
+    .flow-card { background: #fff; border: 2px solid #e5e7eb; border-radius: 10px; padding: 12px 14px; box-shadow: 0 3px 8px rgba(0,0,0,0.06); }
+    .flow-card h3 { margin: 0 0 6px; font-size: 1.1rem; color: var(--ink-2); }
+    .tag { display: inline-block; padding: 1px 6px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 0.85rem; color: #475569; background: #f1f5f9; }
+
+    /* Image helpers */
+    .img-wide  { width: min(92vw, 1080px); height: auto; border-radius: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+    .img-mid   { width: min(82vw, 980px);  height: auto; border-radius: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+    .img-narrow{ width: min(70vw, 860px);  height: auto; border-radius: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+
+    /* Footer */
+    .slide-no { position: absolute; bottom: 14px; right: 20px; font-size: 0.95rem; color: #94a3b8; }
+
+    @media (max-width: 1080px) {
+      .flow { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .flow { grid-template-columns: 1fr; }
+      h1 { font-size: 2.2rem; }
+      h2 { font-size: 1.6rem; }
+      p  { font-size: 1.05rem; }
+      li { font-size: 1.05rem; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <!-- 1. タイトル -->
+    <section class="slide title">
+      <h1>geDIG: 単一スカラーで学習×推論×記憶を同時運用</h1>
+      <h2>One‑Gauge（ℱ）で洞察イベントを検出し、その場で制御へ接続</h2>
+      <p class="byline">InsightSpike‑AI / geDIG Framework — 2025</p>
+      <div class="slide-no">1 / 16</div>
+    </section>
+
+    <!-- 2. 課題意識 -->
+    <section class="slide">
+      <h2>いま何が難しい？（直観）</h2>
+      <ul class="summary-list">
+        <li>RAGや探索では「検索・更新・推論」が<span class="emph">バラバラ</span>に動き、<b>いつ止める／何を残す</b>が難しい。</li>
+        <li>ルールが増えがちで、<span class="emph">安定運用・再現</span>が崩れやすい（ドメインが変わると特に）。</li>
+        <li>私たちの直観では、<b>良い“ひらめき”</b>があるときにだけ更新・探索を強めたい。</li>
+      </ul>
+      <div class="slide-no">2 / 16</div>
+    </section>
+
+    <!-- 3. 目的（何をしたいか） -->
+    <section class="slide">
+      <h2>目的（何をしたいか）</h2>
+      <ul class="summary-list">
+        <li><b>洞察イベント</b>（ℱ&lt;θ）を検出し、探索・検索・記憶の挙動を<b>一つの基準</b>で即時制御する。</li>
+        <li><b>PSZ</b>（受容≥95%・FMR≤2%・P50≤200ms）を維持しつつ、<b>強化率↑・誤統合↓・レイテンシ制御</b>を両立。</li>
+        <li>学習（更新）と推論（検索）の<b>同時進行</b>を実用的に支援し、<b>手作業ルールの乱立</b>を減らす。</li>
+      </ul>
+      <p class="muted">注: 本手法は<b>運用ヒューリスティック</b>です（理論保証ではなく、計器としての実用重視）。</p>
+      <div class="slide-no">3 / 16</div>
+    </section>
+
+    <!-- 4. 想定用途（どこで使うか） -->
+    <section class="slide">
+      <h2>用途（どこで使うか）</h2>
+      <ul class="summary-list">
+        <li><b>オンライン更新RAG</b>: FAQ/社内ナレッジ/開発資料で、検索深さ・サブグラフ・更新範囲を横断制御。</li>
+        <li><b>エージェント探索/計画</b>: ツール選択・Web探索の深さ/幅・バックトラックの自動調整。</li>
+        <li><b>知識グラフ整備</b>: 同義統合・重複排除・橋概念の昇格/抑制（構造と情報の同時評価）。</li>
+        <li><b>運用監視</b>: 受容/FMR/PSZの監視で、<b>強く速く安全</b>な帯域を保つ。</li>
+        <li><b>研究/評価</b>: 迷路など部分観測タスクの評価器・アブレーションの共通軸として。</li>
+      </ul>
+      <p class="muted">対象外/注意: 厳密最適化や完全保証ではなく、<b>現場運用を支える計器</b>としての適用を想定。</p>
+      <div class="slide-no">4 / 16</div>
+    </section>
+
+    <!-- 3. One‑Gauge 定義 -->
+    <section class="slide">
+      <h2>One‑Gauge: geDIG（差分・オンライン・単一スカラー）</h2>
+      <p>構造統合（ΔGED）と情報整理（ΔIG）を同一スケールに整え、単一スカラーℱに。</p>
+      <div class="formula">ℱ = ΔGED<sub>norm</sub> − λ · ΔIG<sub>norm</sub></div>
+      <p class="muted">0‑hop（誤差/曖昧さ）と multi‑hop（短絡利得）を併用。</p>
+      <img class="img-mid" src="../../paper/figures/fig3_overall.png" alt="geDIG overview diagram" />
+      <div class="slide-no">5 / 16</div>
+    </section>
+
+    <!-- 4. One‑Gauge の価値（So what） -->
+    <section class="slide">
+      <h2>One‑Gaugeで何が嬉しい？</h2>
+      <ul class="summary-list">
+        <li>学習×推論×記憶を<strong>単一スカラー</strong>で同時運用（実用ヒューリスティック）。</li>
+        <li>取得段数・候補幅・バックトラック・エビクションを<strong>横断制御</strong>、PSZ（受容≥95%・FMR≤2%・P50≤200ms）で安全運転。</li>
+        <li>分位ベースのしきい値校正で<strong>安定・再現</strong>、手作業ルールの乱立を回避。</li>
+      </ul>
+      <p class="muted">表現を控えめに言えば、<b>「学びながら考える」</b>同時進行の制御を<strong>実用的に支援</strong>。</p>
+      <div class="slide-no">6 / 16</div>
+    </section>
+
+    <!-- 5. 同時進行が効くタスク（導入） -->
+    <section class="slide">
+      <h2>同時に学び・考えると効く場面</h2>
+      <ul class="summary-list">
+        <li><b>部分観測迷路</b>：地図を<span class="emph">作りながら</span>進む。曖昧さ→短絡→枝刈りの即時連鎖。</li>
+        <li><b>オンライン更新RAG</b>：知識の欠落/陳腐化に対し、検索深さ・サブグラフ・更新を<strong>一つの基準</strong>で調整。</li>
+      </ul>
+      <div class="slide-no">7 / 16</div>
+    </section>
+
+    <!-- 6. 4コマ（迷路） -->
+    <section class="slide">
+      <h2>4コマ: 迷路での同時運用</h2>
+      <div class="flow">
+        <div class="flow-card"><h3>1. スタート</h3><p>視野が狭く情報が疎。<span class="tag">NA: 曖昧さ↑</span></p></div>
+        <div class="flow-card"><h3>2. 多ホップ評価</h3><p>短絡の手応え。<span class="tag">g<sub>min</sub>↓</span> → イベント検出</p></div>
+        <div class="flow-card"><h3>3. 即時制御</h3><p>BTで<b>不要枝を剪定</b>。深さ/幅を再配分。</p></div>
+        <div class="flow-card"><h3>4. 収束</h3><p>ステップ数↓、<b>最短路に接近</b>。記憶グラフもスリム化。</p></div>
+      </div>
+      <p class="muted">結果（例）: ステップ −25.8%、BT精度↑、無駄な往復減。</p>
+      <div class="slide-no">8 / 16</div>
+    </section>
+
+    <!-- 7. 迷路結果（図） -->
+    <section class="slide">
+      <h2>迷路：タイムラインと収束</h2>
+      <img class="img-narrow" src="../../paper/figures/fig_maze25_timeline.png" alt="NA/BT timeline (25x25)" />
+      <img class="img-narrow" src="../../paper/figures/fig_steps_cdf.png" alt="Steps CDF (shorter steps with geDIG)" />
+      <div class="slide-no">9 / 16</div>
+    </section>
+
+    <!-- 8. RAG 実験デザイン -->
+    <section class="slide">
+      <h2>RAG実験の設計（同時進行）</h2>
+      <ul class="summary-list">
+        <li>基準: <b>PER</b>（強化率） / <b>受容</b> / <b>FMR</b>（誤統合） / <b>追加レイテンシ</b> → <span class="emph">PSZ</span>を目標。</li>
+        <li>操作: geDIGで<b>検索深さ・サブグラフ・エビクション</b>を横断制御。</li>
+        <li>校正: λ・しきい値は小規模で校正→<b>本番固定</b>（ノーピーキング）。</li>
+      </ul>
+      <div class="slide-no">10 / 16</div>
+    </section>
+
+    <!-- 9. RAG 適用（One‑Gauge運用） -->
+    <section class="slide">
+      <h2>RAGへの適用（One‑Gauge運用）</h2>
+      <ul class="summary-list">
+        <li>ℱ&lt;θ でイベント → 取得段数/候補幅/BT/エビクションを<b>即時制御</b>。</li>
+        <li>PSZ（受容≥95%・FMR≤2%・P50≤200ms）を<b>目標帯</b>として設計。</li>
+        <li>多ホップ（H≤3）で<b>遠距離の橋</b>を掴み、強化と安全性を両立。</li>
+      </ul>
+      <img class="img-mid" src="../../paper/figures/fig7_multihop.png" alt="RAG multihop" />
+      <div class="slide-no">11 / 16</div>
+    </section>
+
+    <!-- 10. RAG 主結果（PSZ） -->
+    <section class="slide">
+      <h2>RAG結果（PSZ: 強く・速く・安全に）</h2>
+      <img class="img-mid" src="../../paper/figures/fig7_psz_scatter.png" alt="PSZ scatter" />
+      <p class="muted">例: PER 167.7%、受容 100%、FMR &lt; 2%、H=3 で平均 320ms、P50 ≤ 200ms 帯の設定を同定。</p>
+      <div class="slide-no">12 / 16</div>
+    </section>
+
+    <!-- 11. RAG ベースライン比較 -->
+    <section class="slide">
+      <h2>RAG: ベースライン横並び</h2>
+      <img class="img-mid" src="../../paper/figures/fig_r_baseline_comparison.png" alt="Baseline comparison" />
+      <p class="muted">公平条件（同一観測・同一資源・ノーピーキング）下で比較。</p>
+      <div class="slide-no">13 / 16</div>
+    </section>
+
+    <!-- 12. 洞察ベクトル（補足） -->
+    <section class="slide">
+      <h2>補足: 言語ベクトル“洞察”の間接評価</h2>
+      <p>クエリと知識ノードの<b>類似度ベースMP</b>で言語ベクトル <span class="emph">z<sub>ins</sub></span> を合成。</p>
+      <p>強化プロンプトからの回答埋め込み <span class="emph">z<sub>ans</sub></span> と整合度 <b>s=cos(z<sub>ins</sub>, z<sub>ans</sub>)</b> を測ると、<br/>複数ドメインで <b>一貫して s↑</b>（Δs&gt;0）の傾向。</p>
+      <p class="muted">注: SBERT は逆変換不能 — <b>間接評価</b>（ヒューリスティック）として位置づけ。</p>
+      <div class="slide-no">14 / 16</div>
+    </section>
+
+    <!-- 13. 実装ミニノート -->
+    <section class="slide">
+      <h2>実装メモ（ミニ）</h2>
+      <ul class="summary-list">
+        <li>ΔGED: 総和規格化の編集 + 効率/スペクトル補助、ΔIG: 局所エントロピー分散。</li>
+        <li>multi‑hop: H≤3、減衰 γ≈0.9、必要に応じて最短路利得（relative）で構造項調整。</li>
+        <li>NA/BT二段ゲート + 分位校正 → 安定・再現（固定ハイパラで評価）。</li>
+      </ul>
+      <div class="slide-no">15 / 16</div>
+    </section>
+
+    <!-- 14. まとめ -->
+    <section class="slide">
+      <h2>まとめ</h2>
+      <ul class="summary-list">
+        <li>geDIGは<b>単一スカラー</b>で洞察イベントを検出し、探索・検索・記憶の制御に<b>即時反映</b>。</li>
+        <li>迷路とRAGで<b>効果と安全域（PSZ）</b>を確認。<span class="muted">（“強く速く安全”の帯）</span></li>
+        <li>次へ: ΔSPの正規化比較、集約方式、スケール、統計の拡充。</li>
+      </ul>
+      <div class="slide-no">16 / 16</div>
+    </section>
+  </main>
+</body>
+</html>
