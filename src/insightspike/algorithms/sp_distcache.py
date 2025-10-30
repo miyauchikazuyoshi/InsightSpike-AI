@@ -13,8 +13,10 @@ Modes:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Tuple, List, Optional, Set
+from typing import Dict, Tuple, List, Optional, Set, Protocol
 import hashlib
+import json
+import os
 
 import networkx as nx
 
@@ -46,6 +48,8 @@ class DistanceCache:
         self.pair_samples = int(max(1, pair_samples))
         self._pair_cache: Dict[str, PairSet] = {}
         self._sssp_cache: Dict[Tuple[str, object], Dict[object, int]] = {}
+        # Optional persistent registry for PairSet reuse (signature -> PairSet)
+        self._registry: Optional[_PairsetRegistry] = _create_registry_from_env()
 
     def signature(self, g_before: nx.Graph, anchors: Set[object], hop: int, scope: str, boundary: str) -> str:
         base = _hash_nodes_edges(g_before)
@@ -80,11 +84,25 @@ class DistanceCache:
         return PairSet(pairs, lb)
 
     def get_fixed_pairs(self, sig: str, g_before: nx.Graph) -> PairSet:
+        # 1) in-proc cache
         ps = self._pair_cache.get(sig)
         if ps is not None:
             return ps
+        # 2) registry
+        if self._registry is not None:
+            loaded = self._registry.load(sig)
+            if loaded is not None:
+                self._pair_cache[sig] = loaded
+                return loaded
+        # 3) sample now
         ps = self._sample_pairs(g_before)
         self._pair_cache[sig] = ps
+        # save to registry
+        if self._registry is not None:
+            try:
+                self._registry.save(sig, ps)
+            except Exception:
+                pass
         return ps
 
     def get_sssp(self, sig: str, src: object, g_before: nx.Graph) -> Dict[object, int]:
@@ -181,3 +199,97 @@ class DistanceCache:
         la_avg = total_la / count
         gain = max(0.0, pairs.lb_avg - la_avg)
         return max(0.0, min(1.0, gain / pairs.lb_avg))
+
+
+# ---------------- Registry (optional) ----------------
+class _PairsetRegistry(Protocol):
+    def load(self, signature: str) -> Optional[PairSet]: ...
+    def save(self, signature: str, pairset: PairSet) -> None: ...
+
+
+class _MemoryRegistry:
+    def __init__(self) -> None:
+        self._mem: Dict[str, Dict] = {}
+
+    def load(self, signature: str) -> Optional[PairSet]:
+        obj = self._mem.get(signature)
+        if not obj:
+            return None
+        return _decode_pairset(obj)
+
+    def save(self, signature: str, pairset: PairSet) -> None:
+        self._mem[signature] = _encode_pairset(pairset)
+
+
+class _FileRegistry:
+    def __init__(self, path: str) -> None:
+        self.path = path
+        self._ensure_dir()
+        self._cache: Optional[Dict[str, Dict]] = None
+
+    def _ensure_dir(self) -> None:
+        d = os.path.dirname(self.path)
+        if d and not os.path.exists(d):
+            os.makedirs(d, exist_ok=True)
+
+    def _load_all(self) -> Dict[str, Dict]:
+        if self._cache is not None:
+            return self._cache
+        try:
+            with open(self.path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                if isinstance(data, dict):
+                    self._cache = data
+                else:
+                    self._cache = {}
+        except Exception:
+            self._cache = {}
+        return self._cache
+
+    def _flush(self) -> None:
+        if self._cache is None:
+            return
+        try:
+            with open(self.path, 'w', encoding='utf-8') as f:
+                json.dump(self._cache, f)
+        except Exception:
+            pass
+
+    def load(self, signature: str) -> Optional[PairSet]:
+        data = self._load_all().get(signature)
+        if not data:
+            return None
+        return _decode_pairset(data)
+
+    def save(self, signature: str, pairset: PairSet) -> None:
+        data = self._load_all()
+        data[signature] = _encode_pairset(pairset)
+        self._flush()
+
+
+def _encode_pairset(ps: PairSet) -> Dict:
+    return {"lb_avg": float(ps.lb_avg), "pairs": [(u, v, float(d)) for (u, v, d) in ps.pairs]}
+
+
+def _decode_pairset(obj: Dict) -> PairSet:
+    lb = float(obj.get("lb_avg", 0.0))
+    pairs_raw = obj.get("pairs", [])
+    pairs: List[Tuple[object, object, float]] = []
+    for it in pairs_raw:
+        try:
+            u, v, d = it
+            pairs.append((u, v, float(d)))
+        except Exception:
+            continue
+    return PairSet(pairs=pairs, lb_avg=lb)
+
+
+def _create_registry_from_env() -> Optional[_PairsetRegistry]:
+    path = os.getenv('INSIGHTSPIKE_SP_REGISTRY', '').strip()
+    if path:
+        try:
+            return _FileRegistry(path)
+        except Exception:
+            return _MemoryRegistry()
+    # No file path → use in-memory registry to allow cross-call reuse
+    return _MemoryRegistry()
