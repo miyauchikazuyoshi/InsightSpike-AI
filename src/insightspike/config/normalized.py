@@ -113,6 +113,28 @@ class NormalizedConfig:
         else:
             src_type = 'legacy'
 
+        # Build provisional NormSpec (fallback defaults)
+        def _default_norm_spec() -> Dict[str, Any]:
+            dim = int(get('embedding.dimension', 384))
+            theta_link = float(get('metrics.theta_link', 0.35))
+            theta_cand = float(get('metrics.theta_cand', 0.45))
+            return {
+                'metric': 'cosine',
+                'radius_mode': 'intuitive',
+                'intuitive': {'outer': 0.6, 'inner': 0.2},
+                'dimension': dim,
+                'scope': 'sphere',
+                'effective': {
+                    'theta_link': theta_link,
+                    'theta_cand': theta_cand,
+                },
+            }
+
+        # If norm_spec missing, derive minimal defaults
+        norm_spec_val = (o.get('norm_spec', get('graph.norm_spec', None)) or None)
+        if norm_spec_val is None:
+            norm_spec_val = _default_norm_spec()
+
         nc = NormalizedConfig(
             embedding_model = o.get('embedding_model', get('embedding.model_name', 'sentence-transformers/all-MiniLM-L6-v2')),
             embedding_dim = int(o.get('embedding_dim', get('embedding.dimension', 384))),
@@ -147,7 +169,7 @@ class NormalizedConfig:
             ig_denominator = str(o.get('ig_denominator', get('metrics.ig_denominator', 'fixed_kstar'))).lower(),
             use_local_normalization = bool(o.get('use_local_normalization', get('metrics.use_local_normalization', False))),
             sp_engine = str(o.get('sp_engine', get('graph.sp_engine', 'core'))).lower(),
-            norm_spec = (o.get('norm_spec', get('graph.norm_spec', None)) or None),
+            norm_spec = norm_spec_val,
             source_type = src_type,
             applied_defaults = tuple(applied),
             _raw = cfg,
