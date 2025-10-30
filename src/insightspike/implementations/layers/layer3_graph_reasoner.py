@@ -1296,7 +1296,34 @@ class L3GraphReasoner(L3GraphReasonerInterface):
 
             # Ensure normalized metrics are available for downstream logic
             metrics.setdefault("delta_ged_norm", abs(float(metrics.get("delta_ged", 0.0))))
-            metrics.setdefault("delta_h", float(metrics.get("delta_ig", 0.0)))
+            # Compute delta_h (after-before; entropy decrease => negative) when missing
+            if 'delta_h' not in metrics:
+                try:
+                    from ...metrics.pyg_compatible_metrics import pyg_to_networkx as _pyg2nx
+                    from ...algorithms.core.metrics import entropy_ig as _nx_entropy_ig
+                    def _as_np(x):
+                        try:
+                            obj = x
+                            if hasattr(obj, 'detach'):
+                                obj = obj.detach()
+                            if hasattr(obj, 'cpu'):
+                                obj = obj.cpu()
+                            if hasattr(obj, 'numpy'):
+                                return obj.numpy()
+                            import numpy as _np
+                            return _np.asarray(obj)
+                        except Exception:
+                            return None
+                    feats_b = _as_np(getattr(previous_graph, 'x', None)) if previous_graph is not None else None
+                    feats_a = _as_np(getattr(current_graph, 'x', None)) if current_graph is not None else None
+                    if feats_b is not None and feats_a is not None:
+                        nx_curr = _pyg2nx(current_graph)
+                        res_h = _nx_entropy_ig(nx_curr, feats_b, feats_a, delta_mode='after_before')
+                        metrics['delta_h'] = float(res_h.get('ig_value', 0.0))
+                    else:
+                        metrics.setdefault('delta_h', 0.0)
+                except Exception:
+                    metrics.setdefault('delta_h', 0.0)
             metrics.setdefault("delta_sp", 0.0)
             metrics.setdefault("g0", float(metrics.get("delta_ged", 0.0)))
             # Benefit-oriented helpers（正が良い）

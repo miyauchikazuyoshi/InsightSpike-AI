@@ -1578,7 +1578,15 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                     delta_ged = float(m.get('delta_ged', 0.0))
                     delta_ig = float(m.get('delta_ig', 0.0))
                     delta_sp = float(m.get('delta_sp', 0.0))
-                    hop_series = [{"hop": 0, "g": gmin, "ged": float(m.get('delta_ged_norm', abs(delta_ged))), "ig": delta_ig, "h": delta_ig, "sp": delta_sp}]
+                    # H uses delta_h (after-before; negative when entropy decreases)
+                    hop_series = [{
+                        "hop": 0,
+                        "g": gmin,
+                        "ged": float(m.get('delta_ged_norm', abs(delta_ged))),
+                        "ig": delta_ig,
+                        "h": float(m.get('delta_h', delta_ig)),
+                        "sp": delta_sp
+                    }]
                     records_h = [(0, gmin, float(m.get('delta_ged_norm', abs(delta_ged))), delta_ig, delta_sp)]
                     chosen_edges_by_hop = []
                     # SP perf counters are not available from L3 in this mode
