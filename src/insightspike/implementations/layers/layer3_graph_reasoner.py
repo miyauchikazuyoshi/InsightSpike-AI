@@ -865,6 +865,34 @@ class L3GraphReasoner(L3GraphReasonerInterface):
                 )
                 if selection_summary:
                     metrics.setdefault("candidate_selection", selection_summary)
+            # Attach norm_spec metadata (from context or config) for reproducibility
+            try:
+                norm_spec = None
+                if isinstance(context, dict):
+                    norm_spec = context.get('norm_spec')
+                if norm_spec is None:
+                    # Fallback to config.graph.norm_spec if provided
+                    def _getf(obj, path, default=None):
+                        try:
+                            cur = obj
+                            for p in path.split('.'):
+                                if cur is None:
+                                    return default
+                                if hasattr(cur, p):
+                                    cur = getattr(cur, p)
+                                elif isinstance(cur, dict) and p in cur:
+                                    cur = cur[p]
+                                else:
+                                    return default
+                            return cur
+                        except Exception:
+                            return default
+                    norm_spec = _getf(self.config, 'graph.norm_spec', None)
+                if norm_spec is not None:
+                    metrics.setdefault('norm_spec', norm_spec)
+            except Exception:
+                pass
+
             # Ensure normalized metrics are available for downstream logic
             metrics.setdefault("delta_ged_norm", abs(float(metrics.get("delta_ged", 0.0))))
             metrics.setdefault("delta_h", float(metrics.get("delta_ig", 0.0)))

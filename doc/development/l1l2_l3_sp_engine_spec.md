@@ -148,7 +148,7 @@ metrics = {
 - [x] L2 ヘルパ `propose_candidate_edges_from_graph` を追加
 - [x] Layer3 cached_incr の簡易実装（candidate_edges があれば貪欲/予算採用、なければ cached）
 - [ ] NormSpec の実値（effective θ_link/θ_cand 等）を L1/L2 で生成して context に格納（実装中）
-- [ ] Layer3 で `metrics["norm_spec"]` へのエコー（実装中）
+- [x] Layer3 で `metrics["norm_spec"]` へのエコー（context→metrics。無い場合は config.graph.norm_spec を採用）
 
 ---
 
