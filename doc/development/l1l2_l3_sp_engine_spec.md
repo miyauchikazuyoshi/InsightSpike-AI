@@ -171,6 +171,7 @@ graph:
   sp_beta: 0.2               # γ（ΔSP 重み）
   sp_scope_mode: auto        # auto | union
   sp_boundary_mode: trim     # induced | trim | nodes
+  cached_incr_budget: 1      # 候補エッジ採用の最大本数（逐次）
   # NormSpec（ノルム仕様）
   norm_spec:
     metric: cosine           # cosine | l2
@@ -193,6 +194,8 @@ INSIGHTSPIKE_SP_PAIR_SAMPLES=200
 INSIGHTSPIKE_SP_REGISTRY=/path/to/pairsets.json
 INSIGHTSPIKE_GEDIG_LAMBDA=1.0
 INSIGHTSPIKE_SP_BETA=0.2
+INSIGHTSPIKE_SP_BUDGET=2
+INSIGHTSPIKE_CAND_TOPK=10
 ```
 
 NormalizedConfig では、`graph.sp_engine` と `graph.norm_spec.*` を読み出し、L1/L2/L3 へ一貫して渡す。現行の SphereSearchConfig（intuitive_radius 等）からの移行は後方互換のブリッジで吸収する。
