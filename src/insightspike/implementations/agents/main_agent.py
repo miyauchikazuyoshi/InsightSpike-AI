@@ -172,7 +172,7 @@ if _IMPORT_MAX_LAYER >= 3:
         if _DIAG_IMPORT:
             _t2 = time.time()
             print('[main_agent] importing layer3_graph_reasoner (gated)...', flush=True)
-        from ..layers.layer3_graph_reasoner import L3GraphReasoner
+from ..layers.layer3_graph_reasoner import L3GraphReasoner
         GRAPH_REASONER_AVAILABLE = True
         if _DIAG_IMPORT:
             print(f'[main_agent] layer3_graph_reasoner imported elapsed={time.time()-_t2:.3f}s', flush=True)
@@ -326,6 +326,8 @@ class MainAgent:
         if _DIAG_IMPORT:
             print('[main_agent] graph_memory_search constructed', flush=True)
         self.current_graph = None
+        # Optional decision controller (Phase2 scaffold)
+        self._decision_controller = None
         self.pattern_logger = None
         self.strategy_optimizer = None
         if os.getenv('INSIGHTSPIKE_MIN_IMPORT') != '1':
@@ -905,6 +907,24 @@ class MainAgent:
                 graph_analysis = self.l3_graph.analyze_documents(
                     retrieved_docs, graph_context
                 )
+                # Optional: decision controller
+                try:
+                    use_dc = False
+                    if self.is_pydantic_config:
+                        use_dc = bool(getattr(getattr(self.config, 'agent', None), 'use_decision_controller', False))
+                    if use_dc:
+                        if self._decision_controller is None:
+                            from .decision_controller import DecisionController
+                            self._decision_controller = DecisionController()
+                        decision = self._decision_controller.decide(graph_analysis.get('metrics', {}), state={})
+                        logger.debug(f"DecisionController: {decision.mode} {decision.params}")
+                        # Store latest decision for observability (no behavior change yet)
+                        try:
+                            self._last_decision = {'mode': decision.mode, 'params': decision.params}
+                        except Exception:
+                            pass
+                except Exception as _dc_ex:
+                    logger.debug(f"DecisionController skipped: {_dc_ex}")
                 # Store current graph for multi-hop search
                 if graph_analysis and "graph" in graph_analysis:
                     self.current_graph = graph_analysis["graph"]

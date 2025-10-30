@@ -218,6 +218,25 @@ NormalizedConfig では、`graph.sp_engine` と `graph.norm_spec.*` を読み出
 - `graph.sp_sources_focus`（ENV: `INSIGHTSPIKE_SP_SOURCES_FOCUS`）
   - ソース抽出を centers 近傍にバイアス（`off|near|strict`）
 
+## 仕様アップデート（候補所有・ΔH母集団・自動候補 OFF）
+
+本仕様の運用で、以下の点を明示的に追記・上書きする。
+
+- 候補の所有（Ownership）
+  - Ecand の決定は L1/L2（実質 L1 が指揮）。L3 は消費のみ。L3 の自動候補生成（autocand）は既定 OFF。
+  - `candidate_edges_by_hop: Dict[int, List[(u,v,meta)]]` を context で受けられるよう拡張（存在時は hop 別候補を優先）。
+
+- ΔH の母集団（統一）
+  - ΔH は候補マスク母集団で計算（`centers ∪ endpoints(Ecand)` 以外の特徴は 0 化）。
+  - 迷路 8D 系は `WEIGHT_VECTOR` を適用。正規化は `norm_strategy='before'`。
+  - メトリクスに `h_scope='cand_mask'` を記録し、A/B と一致させる。
+
+- フォールバック（契約違反時）
+  - `sp_engine=cached_incr` かつ `candidate_edges` 未提供時は `cached` にダウンシフト。
+  - `metrics.input_contract_ok=false`, `metrics.autocand_used=false` を記録（研究時のみ明示フラグでautocandを許可）。
+
+---
+
 ## テスト計画
 ### ユニットテスト
 - GateDecider/PSZ: 閾値条件の境界値での判定、PSZ の P50 計算

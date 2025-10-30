@@ -4,6 +4,9 @@ from typing import Any, Dict, List, Sequence, Tuple, Set
 
 import numpy as np
 
+# Match A/B's feature weighting for maze 8D vectors
+WEIGHT_VECTOR = np.array([1.0, 1.0, 0.0, 0.0, 3.0, 2.0, 0.0, 0.0], dtype=np.float32)
+
 
 class _LiteData:
     def __init__(self, x: np.ndarray, edge_index: np.ndarray):
@@ -28,6 +31,9 @@ def _nx_to_litedata(g, node_order: Sequence[Any], default_dim: int = 8) -> _Lite
                 arr = arr[:default_dim]
         feats.append(arr.astype(np.float32))
     x = np.vstack(feats) if feats else np.zeros((0, default_dim), dtype=np.float32)
+    # Apply weighting to align with Core's entropy_ig path
+    if x.size and x.shape[1] == WEIGHT_VECTOR.size:
+        x = x * WEIGHT_VECTOR
     # Edge index from mapping
     idx = {n: i for i, n in enumerate(node_order)}
     edges = []
@@ -52,6 +58,7 @@ def eval_query_centric_via_l3(
     budget: int = 1,
     cand_topk: int = 0,
     default_dim: int = 8,
+    max_hops: int = 3,
 ) -> Dict[str, Any]:
     """Use main L3GraphReasoner to compute query-centric metrics between two NX graphs.
 
@@ -89,6 +96,40 @@ def eval_query_centric_via_l3(
             tmp.append((int(iu), int(iv), meta or {}))
         cand_idx = tmp
 
+    # Optional: by-hop candidates (union-of-k-hop)
+    cand_by_hop_idx: Dict[int, List[Tuple[int,int,Dict[str,Any]]]] | None = None
+    try:
+        import networkx as nx
+        # expand from centers over curr_graph
+        def k_hop_nodes(G: Any, srcs: Sequence[Any], k: int) -> set[int]:
+            seen: set[int] = set()
+            from collections import deque
+            dq = deque()
+            for c in srcs:
+                if c in G:
+                    seen.add(int(c)); dq.append((int(c), 0))
+            while dq:
+                u, d = dq.popleft()
+                if d >= k:
+                    continue
+                for v in G.neighbors(u):
+                    iv = int(v)
+                    if iv not in seen:
+                        seen.add(iv); dq.append((iv, d+1))
+            return seen
+        cand_by_hop_idx = {}
+        centers_set = set(centers or [])
+        for h in range(0, max(0, int(max_hops)) + 1):
+            nodes_h = k_hop_nodes(curr_graph, list(centers_set), h)
+            hop_list: List[Tuple[int,int,Dict[str,Any]]] = []
+            if cand_idx:
+                for (u,v,meta) in cand_idx:
+                    if (u in nodes_h) and (v in nodes_h):
+                        hop_list.append((u, v, meta))
+            cand_by_hop_idx[h] = hop_list
+    except Exception:
+        cand_by_hop_idx = None
+
     # Call L3
     from insightspike.implementations.layers.layer3_graph_reasoner import L3GraphReasoner
     l3 = L3GraphReasoner()
@@ -97,7 +138,7 @@ def eval_query_centric_via_l3(
         'previous_graph': data_prev,
         'centers': centers_idx,
         'candidate_edges': cand_idx,
+        'candidate_edges_by_hop': cand_by_hop_idx,
     }
     res = l3.analyze_documents([], context)  # docs unused when graph provided
     return res
-

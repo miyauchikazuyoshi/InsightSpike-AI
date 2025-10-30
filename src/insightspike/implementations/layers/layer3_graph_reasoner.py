@@ -875,6 +875,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
                                 best_h = 0
                                 sp_engine2 = str(os.getenv('INSIGHTSPIKE_SP_ENGINE', str(_cfg_attr(self.config, 'graph.sp_engine', 'core') or 'core'))).lower()
                                 cand_edges = context.get('candidate_edges') if isinstance(context, dict) else None
+                                cand_by_hop = context.get('candidate_edges_by_hop') if isinstance(context, dict) else None
                                 # Bring in metric helpers for ΔGED/ΔH per hop
                                 from ...algorithms.core.metrics import normalized_ged as _nx_norm_ged
                                 from ...algorithms.core.metrics import entropy_ig as _nx_entropy_ig
@@ -914,21 +915,54 @@ class L3GraphReasoner(L3GraphReasonerInterface):
                                         dged_h = float(ged_h.get('normalized_ged', 0.0))
                                     except Exception:
                                         dged_h = delta_ged_norm
-                                    # ΔH_norm per hop（after-before）
+                                    # ΔH_norm per hop（after-before, cand_mask if available）
                                     try:
                                         feats_b = _feat_array(sub_prev, list(sub_prev.nodes()))
                                         feats_a = _feat_array(sub_curr, list(sub_curr.nodes()))
+                                        # Apply candidate-mask per hop: centers ∪ endpoints(cand at hop)
+                                        try:
+                                            mask_nodes = set(centers)
+                                            cand_h = None
+                                            if isinstance(cand_by_hop, dict) and (h in cand_by_hop):
+                                                cand_h = cand_by_hop.get(h)
+                                            if not cand_h:
+                                                cand_h = cand_edges
+                                            if cand_h:
+                                                for item in cand_h:
+                                                    if isinstance(item, (list, tuple)) and len(item) >= 2:
+                                                        try:
+                                                            mask_nodes.add(int(item[0])); mask_nodes.add(int(item[1]))
+                                                        except Exception:
+                                                            pass
+                                            # zero-out rows (features) not in mask_nodes
+                                            if mask_nodes:
+                                                node_list = list(sub_curr.nodes())
+                                                idx_mask = [ (1 if (isinstance(n, int) and (n in mask_nodes)) else 0) for n in node_list ]
+                                                import numpy as _np
+                                                idx_mask_np = _np.asarray(idx_mask, dtype=bool)
+                                                if feats_b.shape[0] == idx_mask_np.size and feats_a.shape[0] == idx_mask_np.size:
+                                                    feats_b = feats_b.copy(); feats_a = feats_a.copy()
+                                                    feats_b[~idx_mask_np] = 0.0
+                                                    feats_a[~idx_mask_np] = 0.0
+                                        except Exception:
+                                            pass
                                         ig_res = _nx_entropy_ig(sub_curr, feats_b, feats_a, delta_mode='after_before', fixed_den=ig_fixed_den)
                                         dh_h = float(ig_res.get('ig_value', 0.0))
                                     except Exception:
                                         dh_h = float(metrics.get('delta_h', 0.0)) if isinstance(metrics.get('delta_h', None), (int, float)) else 0.0
-                                    if sp_engine2 == 'cached_incr' and cand_edges:
+                                    # For ΔSP, prefer hop-local candidates if provided
+                                    cand_for_sp = None
+                                    if isinstance(cand_by_hop, dict) and (h in cand_by_hop):
+                                        cand_for_sp = cand_by_hop.get(h)
+                                    if not cand_for_sp:
+                                        cand_for_sp = cand_edges
+                                    if sp_engine2 == 'cached_incr' and cand_for_sp:
                                         # Greedy sequential on sub_prev with filtered candidates
                                         try:
                                             # Filter candidates to subgraph nodes
                                             nodes_set = set(nodes_prev_h)
                                             rem = []
-                                            for item in cand_edges:
+                                            for item in cand_for_sp:
                                                 try:
                                                     u = int(item[0]); v = int(item[1])
                                                 except Exception:
@@ -1034,8 +1068,14 @@ class L3GraphReasoner(L3GraphReasonerInterface):
                         # Optional cached_incr: use candidate edges for greedy ΔSP update
                         sp_engine2 = str(os.getenv('INSIGHTSPIKE_SP_ENGINE', str(_cfg_attr(self.config, 'graph.sp_engine', 'core') or 'core'))).lower()
                         cand_edges = context.get('candidate_edges') if isinstance(context, dict) else None
-                        # If cached_incr requested but candidate_edges missing, try to propose from current_graph
-                        if sp_engine2 == 'cached_incr' and not cand_edges:
+                        allow_autocand = bool(_cfg_attr(self.config, 'graph.allow_autocand', False))
+                        # mark input contract
+                        try:
+                            metrics.setdefault('input_contract_ok', bool(cand_edges))
+                        except Exception:
+                            pass
+                        # If cached_incr requested but candidate_edges missing, optionally try to propose from current_graph
+                        if sp_engine2 == 'cached_incr' and not cand_edges and allow_autocand:
                             try:
                                 centers_in = None
                                 if isinstance(context, dict):
@@ -1063,9 +1103,20 @@ class L3GraphReasoner(L3GraphReasonerInterface):
                                     top_k=topk_c,
                                     theta_link=theta_link_eff,
                                 )
+                                try:
+                                    metrics.setdefault('autocand_used', True)
+                                except Exception:
+                                    pass
                             except Exception as _auto_cand_e:
                                 logger.debug(f"auto candidate_edges generation failed: {_auto_cand_e}")
                                 cand_edges = None
+                        elif sp_engine2 == 'cached_incr' and not cand_edges and not allow_autocand:
+                            # Downshift to cached when no Ecand is provided
+                            sp_engine2 = 'cached'
+                            try:
+                                metrics.setdefault('autocand_used', False)
+                            except Exception:
+                                pass
                         # Pre-validate candidate edges if provided
                         def _normalize_candidates(cands, n_nodes=None):
                             try:
@@ -1296,34 +1347,62 @@ class L3GraphReasoner(L3GraphReasonerInterface):
 
             # Ensure normalized metrics are available for downstream logic
             metrics.setdefault("delta_ged_norm", abs(float(metrics.get("delta_ged", 0.0))))
-            # Compute delta_h (after-before; entropy decrease => negative) when missing
-            if 'delta_h' not in metrics:
-                try:
-                    from ...metrics.pyg_compatible_metrics import pyg_to_networkx as _pyg2nx
-                    from ...algorithms.core.metrics import entropy_ig as _nx_entropy_ig
-                    def _as_np(x):
+            # Compute delta_h (after-before; entropy decrease => negative). Use candidate-mask if available.
+            try:
+                from ...metrics.pyg_compatible_metrics import pyg_to_networkx as _pyg2nx
+                from ...algorithms.core.metrics import entropy_ig as _nx_entropy_ig
+                import numpy as _np
+                def _as_np(x):
+                    try:
+                        obj = x
+                        if hasattr(obj, 'detach'):
+                            obj = obj.detach()
+                        if hasattr(obj, 'cpu'):
+                            obj = obj.cpu()
+                        if hasattr(obj, 'numpy'):
+                            return obj.numpy()
+                        return _np.asarray(obj)
+                    except Exception:
+                        return None
+                feats_b = _as_np(getattr(previous_graph, 'x', None)) if previous_graph is not None else None
+                feats_a = _as_np(getattr(current_graph, 'x', None)) if current_graph is not None else None
+                if feats_b is not None and feats_a is not None:
+                    # Build candidate mask from centers and candidate_edges
+                    mask_nodes: set[int] = set()
+                    try:
+                        if isinstance(context, dict):
+                            for c in (context.get('centers') or []):
+                                try: mask_nodes.add(int(c))
+                                except Exception: pass
+                            for e in (context.get('candidate_edges') or []):
+                                if isinstance(e, (list, tuple)) and len(e) >= 2:
+                                    try:
+                                        mask_nodes.add(int(e[0])); mask_nodes.add(int(e[1]))
+                                    except Exception: pass
+                    except Exception:
+                        pass
+                    fb = feats_b; fa = feats_a
+                    if mask_nodes:
                         try:
-                            obj = x
-                            if hasattr(obj, 'detach'):
-                                obj = obj.detach()
-                            if hasattr(obj, 'cpu'):
-                                obj = obj.cpu()
-                            if hasattr(obj, 'numpy'):
-                                return obj.numpy()
-                            import numpy as _np
-                            return _np.asarray(obj)
+                            n = fb.shape[0]
+                            mask = _np.zeros(n, dtype=bool)
+                            for idx in mask_nodes:
+                                if 0 <= int(idx) < n:
+                                    mask[int(idx)] = True
+                            fb = fb.copy(); fa = fa.copy()
+                            fb[~mask] = 0.0; fa[~mask] = 0.0
+                            metrics.setdefault('h_scope', 'cand_mask')
                         except Exception:
-                            return None
-                    feats_b = _as_np(getattr(previous_graph, 'x', None)) if previous_graph is not None else None
-                    feats_a = _as_np(getattr(current_graph, 'x', None)) if current_graph is not None else None
-                    if feats_b is not None and feats_a is not None:
-                        nx_curr = _pyg2nx(current_graph)
-                        res_h = _nx_entropy_ig(nx_curr, feats_b, feats_a, delta_mode='after_before')
-                        metrics['delta_h'] = float(res_h.get('ig_value', 0.0))
+                            metrics.setdefault('h_scope', 'global')
                     else:
-                        metrics.setdefault('delta_h', 0.0)
-                except Exception:
+                        metrics.setdefault('h_scope', 'global')
+                    nx_curr = _pyg2nx(current_graph)
+                    res_h = _nx_entropy_ig(nx_curr, fb, fa, delta_mode='after_before')
+                    metrics['delta_h'] = float(res_h.get('ig_value', 0.0))
+                else:
                     metrics.setdefault('delta_h', 0.0)
+            except Exception:
+                metrics.setdefault('delta_h', float(metrics.get('delta_h', 0.0)))
             metrics.setdefault("delta_sp", 0.0)
             metrics.setdefault("g0", float(metrics.get("delta_ged", 0.0)))
             # Remove benefit-oriented helpers to avoid alternate sign conventions

@@ -40,6 +40,7 @@ from insightspike.algorithms.gedig.selector import TwoThresholdCandidateSelector
 from insightspike.algorithms.gedig_core import GeDIGCore
 from insightspike.environments.maze import MazeObservation, SimpleMaze
 from insightspike.algorithms.core.metrics import normalized_ged as _norm_ged
+from insightspike.algorithms.core.metrics import entropy_ig as _entropy_ig
 from insightspike.algorithms.sp_distcache import DistanceCache
 EXPERIMENT_ROOT = Path(__file__).resolve().parent
 if str(EXPERIMENT_ROOT) not in sys.path:
@@ -1690,11 +1691,25 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
             delta_ged_min = hrec[2]
             delta_ig_min = hrec[3]
             delta_sp_min = hrec[4]
-        delta_h = base_ig
-        delta_h_min = base_ig
-        # 序列をJSON化
+        # H (after-before) を A/B でも entropy_ig ベースで統一（L3 と同源）
+        try:
+            feats_b = gather_node_features(graph_pre)
+            feats_a = gather_node_features(graph_eval)
+            # Apply same weighting as Core for entropy (maze 8D)
+            if feats_b.size and feats_b.shape[1] == WEIGHT_VECTOR.size:
+                feats_b = feats_b * WEIGHT_VECTOR
+            if feats_a.size and feats_a.shape[1] == WEIGHT_VECTOR.size:
+                feats_a = feats_a * WEIGHT_VECTOR
+            ab_h_dict = _entropy_ig(graph_eval, feats_b, feats_a, delta_mode='after_before')
+            ab_delta_h = float(ab_h_dict.get('ig_value', 0.0))
+        except Exception:
+            ab_delta_h = float(base_ig)
+
+        delta_h = ab_delta_h
+        delta_h_min = ab_delta_h
+        # 序列をJSON化（H 列は ab_delta_h を使用）
         hop_series = [
-            {"hop": int(h), "g": float(g), "ged": float(ged), "ig": float(ig), "h": float(base_ig), "sp": float(sp)}
+            {"hop": int(h), "g": float(g), "ged": float(ged), "ig": float(ig), "h": float(ab_delta_h), "sp": float(sp)}
             for (h, g, ged, ig, sp) in records_h
         ]
 
