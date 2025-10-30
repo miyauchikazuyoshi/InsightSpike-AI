@@ -208,14 +208,8 @@ class GeDIGCore:
                 self.ig_norm_strategy = str(env_norm).lower()
         except Exception:
             pass
-        # IG delta orientation (sign convention for entropy term)
-        self.ig_delta_mode = str(ig_delta_mode or 'after_before').lower()
-        try:
-            env_delta = os.environ.get('MAZE_GEDIG_IG_DELTA')
-            if env_delta:
-                self.ig_delta_mode = str(env_delta).lower()
-        except Exception:
-            pass
+        # IG delta orientation is fixed to after_before (no knob to flip sign)
+        self.ig_delta_mode = 'after_before'
         # IG non-negative clamp (treat negative IG as 0 = no information gain)
         try:
             self._ig_nonneg = os.environ.get('MAZE_GEDIG_IG_NONNEG', '0').strip() not in ("0","false","False","")
@@ -580,10 +574,8 @@ class GeDIGCore:
         H_before = _entropy(before_list)
         H_after = _entropy(after_list)
         norm_den = math.log(len(after_list) + 1.0) if len(after_list) >= 0 else 1.0
-        if str(self.ig_delta_mode).lower() in ('before_after','reduction','entropy_reduction'):
-            delta_h_norm = (H_before - H_after) / norm_den if norm_den > 0 else 0.0
-        else:
-            delta_h_norm = (H_after - H_before) / norm_den if norm_den > 0 else 0.0
+        # Fixed orientation: after-before (entropy decrease => negative)
+        delta_h_norm = (H_after - H_before) / norm_den if norm_den > 0 else 0.0
         delta_sp_rel = 0.0
         combined_ig = delta_h_norm + self.sp_beta * delta_sp_rel if self.use_multihop_sp_gain else delta_h_norm
 

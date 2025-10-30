@@ -2942,8 +2942,8 @@ def main() -> None:
             "theta_dg": float(args.theta_dg),
             "action_policy": str(args.action_policy),
             "action_temp": float(args.action_temp),
-            # Record IG/H sign convention for reproducibility (after_before|before_after)
-            "ig_delta_mode": os.environ.get("MAZE_GEDIG_IG_DELTA", "after_before"),
+            # Record IG/H sign convention (fixed): after_before
+            "ig_delta_mode": "after_before",
             # Also expose whether main L3 lite path was used (query-centric hop0)
             "use_main_l3": bool(getattr(args, 'use_main_l3', False)),
             "sp_cache_mode": str(getattr(args, 'sp_cache_mode', 'core')),

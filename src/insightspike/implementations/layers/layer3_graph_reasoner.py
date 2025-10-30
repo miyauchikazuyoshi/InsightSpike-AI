@@ -1326,15 +1326,7 @@ class L3GraphReasoner(L3GraphReasonerInterface):
                     metrics.setdefault('delta_h', 0.0)
             metrics.setdefault("delta_sp", 0.0)
             metrics.setdefault("g0", float(metrics.get("delta_ged", 0.0)))
-            # Benefit-oriented helpers（正が良い）
-            try:
-                _dh = float(metrics.get('delta_h', 0.0))
-                _sp = float(metrics.get('delta_sp', 0.0))
-                _spb = float(os.getenv('INSIGHTSPIKE_SP_BETA', str(_cfg_attr(self.config, 'graph.sp_beta', 0.2))))
-                metrics.setdefault('h_benefit', float(-_dh))  # Hbefore-Hafter
-                metrics.setdefault('ig_benefit', float(-_dh + _spb * _sp))
-            except Exception:
-                pass
+            # Remove benefit-oriented helpers to avoid alternate sign conventions
             metrics.setdefault("gmin", float(metrics.get("delta_ged", 0.0)))
 
             # Log metrics values
