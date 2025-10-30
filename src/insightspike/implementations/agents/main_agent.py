@@ -904,9 +904,35 @@ class MainAgent:
                 logger.debug(
                     f"L3GraphReasoner available, processing {len(retrieved_docs)} documents"
                 )
-                graph_analysis = self.l3_graph.analyze_documents(
-                    retrieved_docs, graph_context
-                )
+                # Optional: L1 conductor proposes Ecand (/by-hop) before L3
+                try:
+                    use_l1c = False
+                    try:
+                        if self.is_pydantic_config:
+                            use_l1c = bool(getattr(getattr(self.config, 'agent', None), 'use_l1_conductor', False))
+                    except Exception:
+                        use_l1c = False
+                    if use_l1c:
+                        from ..layers.layer1_conductor import L1Conductor
+                        l1c = L1Conductor(self.config)
+                        # centers: from retrieved top docs (already chosen below for subgraph view)
+                        centers = []
+                        for doc in retrieved_docs[:3]:
+                            if "index" in doc:
+                                centers.append(int(doc["index"]))
+                        # choose defaults (can be refined via config)
+                        top_k = 16
+                        theta_link = 0.3
+                        max_hops = int(getattr(getattr(self.config, 'graph', None), 'sp_hop_expand', 3) or 3)
+                        l1_out = l1c.propose_candidates(retrieved_docs, centers, top_k=top_k, theta_link=theta_link, max_hops=max_hops)
+                        # pass candidates into context
+                        graph_context["candidate_edges"] = l1_out.get('candidate_edges')
+                        if l1_out.get('candidate_edges_by_hop') is not None:
+                            graph_context["candidate_edges_by_hop"] = l1_out.get('candidate_edges_by_hop')
+                except Exception as _l1c_ex:
+                    logger.debug(f"L1Conductor skipped: {_l1c_ex}")
+
+                graph_analysis = self.l3_graph.analyze_documents(retrieved_docs, graph_context)
                 # Optional: decision controller
                 try:
                     use_dc = False
