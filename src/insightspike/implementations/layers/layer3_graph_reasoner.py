@@ -824,6 +824,60 @@ class L3GraphReasoner(L3GraphReasonerInterface):
                         # Optional cached_incr: use candidate edges for greedy ΔSP update
                         sp_engine2 = str(os.getenv('INSIGHTSPIKE_SP_ENGINE', str(_cfg_attr(self.config, 'graph.sp_engine', 'core') or 'core'))).lower()
                         cand_edges = context.get('candidate_edges') if isinstance(context, dict) else None
+                        # If cached_incr requested but candidate_edges missing, try to propose from current_graph
+                        if sp_engine2 == 'cached_incr' and not cand_edges:
+                            try:
+                                centers_in = None
+                                if isinstance(context, dict):
+                                    centers_in = context.get('centers')
+                                if not centers_in or not isinstance(centers_in, (list, tuple)):
+                                    centers_in = centers
+                                # theta_link from context.norm_spec.effective or config fallback
+                                theta_link_eff = 0.35
+                                try:
+                                    if isinstance(context, dict):
+                                        _ns = context.get('norm_spec') or {}
+                                        _eff = _ns.get('effective') or {}
+                                        _tl = _eff.get('theta_link')
+                                        if _tl is not None:
+                                            theta_link_eff = float(_tl)
+                                except Exception:
+                                    pass
+                                topk_c = int(os.getenv('INSIGHTSPIKE_CAND_TOPK', '10'))
+                                from .scalable_graph_builder import ScalableGraphBuilder as _GB
+                                # Use graph_builder utility to propose candidate edges over graph.x
+                                gb = self.graph_builder if hasattr(self, 'graph_builder') and self.graph_builder else _GB(config=self.config)
+                                cand_edges = gb.propose_candidate_edges_from_graph(
+                                    graph=current_graph,
+                                    centers=list(centers_in or []),
+                                    top_k=topk_c,
+                                    theta_link=theta_link_eff,
+                                )
+                            except Exception as _auto_cand_e:
+                                logger.debug(f"auto candidate_edges generation failed: {_auto_cand_e}")
+                                cand_edges = None
+                        # Pre-validate candidate edges if provided
+                        def _normalize_candidates(cands, n_nodes=None):
+                            try:
+                                cleaned = []
+                                seen = set()
+                                for item in cands:
+                                    if not isinstance(item, (list, tuple)) or len(item) < 2:
+                                        continue
+                                    u = int(item[0]); v = int(item[1])
+                                    if n_nodes is not None and (u < 0 or v < 0 or u >= n_nodes or v >= n_nodes):
+                                        continue
+                                    key = (u, v)
+                                    if key in seen:
+                                        continue
+                                    seen.add(key)
+                                    meta = item[2] if len(item) > 2 and isinstance(item[2], dict) else {}
+                                    cleaned.append((u, v, meta))
+                                return cleaned
+                            except Exception:
+                                return []
+                        if sp_engine2 == 'cached_incr' and cand_edges:
+                            cand_edges = _normalize_candidates(cand_edges, getattr(current_graph, 'num_nodes', None))
                         if sp_engine2 == 'cached_incr' and cand_edges:
                             try:
                                 # Build PairSet for before-subgraph signature
@@ -865,6 +919,30 @@ class L3GraphReasoner(L3GraphReasonerInterface):
                 )
                 if selection_summary:
                     metrics.setdefault("candidate_selection", selection_summary)
+            # Normalize/declare sp_engine even when not in query-centric path (for reproducibility/tests)
+            try:
+                def _getf(obj, path, default=None):
+                    try:
+                        cur = obj
+                        for p in path.split('.'):
+                            if cur is None:
+                                return default
+                            if hasattr(cur, p):
+                                cur = getattr(cur, p)
+                            elif isinstance(cur, dict) and p in cur:
+                                cur = cur[p]
+                            else:
+                                return default
+                        return cur
+                    except Exception:
+                        return default
+                _sp_sel = str(os.getenv('INSIGHTSPIKE_SP_ENGINE', str(_getf(self.config, 'graph.sp_engine', 'core') or 'core'))).lower()
+                if _sp_sel in ('cached', 'cached_incr', 'core'):
+                    metrics.setdefault('sp_engine', _sp_sel)
+                else:
+                    metrics.setdefault('sp_engine', 'core')
+            except Exception:
+                pass
             # Attach norm_spec metadata (from context or config) for reproducibility
             try:
                 norm_spec = None

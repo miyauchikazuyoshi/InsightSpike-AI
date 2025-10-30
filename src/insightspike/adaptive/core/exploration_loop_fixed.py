@@ -6,6 +6,8 @@ import logging
 from typing import Dict, List, Any, Optional
 
 from .interfaces import ExplorationParams, ExplorationResult
+from ...config.normalized import NormalizedConfig
+from ...config import get_config
 
 logger = logging.getLogger(__name__)
 
@@ -91,10 +93,17 @@ class ExplorationLoopFixed:
         
         # Layer 3: Graph analysis and spike detection
         # Compare against the stable graph from before exploration
+        # NormSpec from config for consistent norm radius/thresholds across layers
+        try:
+            _nc = NormalizedConfig.from_any(get_config())
+            _norm_spec = _nc.norm_spec
+        except Exception:
+            _norm_spec = None
         context = {
             "l1_analysis": l1_analysis,
             "question": question,
-            "previous_graph": previous_stable_graph
+            "previous_graph": previous_stable_graph,
+            "norm_spec": _norm_spec,
         }
         
         graph_analysis = self._run_layer3(docs_for_graph, context)

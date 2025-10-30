@@ -113,17 +113,33 @@ class NormalizedConfig:
         else:
             src_type = 'legacy'
 
-        # Build provisional NormSpec (fallback defaults)
+        # Build provisional NormSpec (prefer WakeSleep SphereSearchConfig when available)
         def _default_norm_spec() -> Dict[str, Any]:
             dim = int(get('embedding.dimension', 384))
             theta_link = float(get('metrics.theta_link', 0.35))
             theta_cand = float(get('metrics.theta_cand', 0.45))
+            # Try derive from WakeSleepConfig.search
+            method = str(get('wake_sleep.wake.search.method', 'sphere') or 'sphere').lower()
+            scope = 'donut' if method == 'donut' else 'sphere'
+            # Intuitive radii preferred
+            inner_i = get('wake_sleep.wake.search.intuitive_inner_radius', None)
+            outer_i = get('wake_sleep.wake.search.intuitive_outer_radius', None)
+            if outer_i is None:
+                outer_i = get('wake_sleep.wake.search.intuitive_radius', 0.6)
+            if inner_i is None:
+                # fallback for sphere (no inner): small default filter
+                inner_i = 0.2
+            try:
+                inner_i = float(inner_i)
+                outer_i = float(outer_i)
+            except Exception:
+                inner_i, outer_i = 0.2, 0.6
             return {
                 'metric': 'cosine',
                 'radius_mode': 'intuitive',
-                'intuitive': {'outer': 0.6, 'inner': 0.2},
+                'intuitive': {'outer': outer_i, 'inner': inner_i},
                 'dimension': dim,
-                'scope': 'sphere',
+                'scope': scope,
                 'effective': {
                     'theta_link': theta_link,
                     'theta_cand': theta_cand,

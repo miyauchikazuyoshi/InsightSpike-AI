@@ -147,7 +147,16 @@ metrics = {
 - [x] NormalizedConfig に `graph.sp_engine`, `graph.norm_spec` を取り込み
 - [x] L2 ヘルパ `propose_candidate_edges_from_graph` を追加
 - [x] Layer3 cached_incr の簡易実装（candidate_edges があれば貪欲/予算採用、なければ cached）
-- [ ] NormSpec の実値（effective θ_link/θ_cand 等）を L1/L2 で生成して context に格納（実装中）
+- [x] NormSpec の実値（effective θ_link/θ_cand 等）を L1/L2 相当（ExplorationLoop/Agent 経由）で context に格納（WakeSleep.SphereSearchConfig を優先して導出）
+- [x] candidate_edges 未提供時の自動候補生成（L3 内で graph.x と centers から提案）
+- [x] torch 非依存の GraphBuilder フォールバック（numpy + Data スタブ）
+- [x] 非 query-centric 経路でも metrics に `sp_engine` を明示
+
+未完了/次タスク
+- [ ] cached_incr の逐次適用（相互作用考慮）と簡易→忠実版の切替ノブ整備
+- [ ] candidate_edges の堅牢化拡張（重複/空/無効index/予算境界を網羅するテスト追加）
+- [ ] config ノブの整理と API リファレンス反映（`graph.cached_incr_budget`, 自動候補 `candidate_topk`/`theta_link`）
+- [ ] 図・アーキテクチャ更新（centers/Ecand/norm_spec データフロー、SP scope/boundary）
 - [x] Layer3 で `metrics["norm_spec"]` へのエコー（context→metrics。無い場合は config.graph.norm_spec を採用）
 
 ---

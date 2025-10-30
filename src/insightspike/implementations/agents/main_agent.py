@@ -876,6 +876,14 @@ class MainAgent:
             logger.debug(f"Memory search returned {len(retrieved_docs)} documents")
 
             # L3: Graph reasoning and analysis
+            # NormSpec from NormalizedConfig for consistent thresholds across layers
+            try:
+                from ...config import get_config as _get_cfg
+                from ...config.normalized import NormalizedConfig as _NC
+                _nc = _NC.from_any(_get_cfg())
+                _norm_spec = _nc.norm_spec
+            except Exception:
+                _norm_spec = None
             graph_context = {
                 "previous_state": self.previous_state,
                 "error_state": error_state,
@@ -885,6 +893,7 @@ class MainAgent:
                 else None,
                 "query_vector": memory_results.get("query_embedding", None),
                 "candidate_selection": memory_results.get("candidate_selection"),
+                "norm_spec": _norm_spec,
             }
 
             # L3: Graph analysis (optional)

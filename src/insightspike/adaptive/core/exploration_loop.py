@@ -6,6 +6,8 @@ import logging
 from typing import Dict, List, Any, Optional
 
 from .interfaces import ExplorationParams, ExplorationResult
+from ...config.normalized import NormalizedConfig
+from ...config import get_config
 
 logger = logging.getLogger(__name__)
 
@@ -116,10 +118,17 @@ class ExplorationLoop:
                 docs_for_graph = self._ensure_embeddings(retrieved_docs)
             
             # Pass the graph state from before temporary episode was added
+            # Derive NormSpec from config to keep Layer norms consistent across layers
+            try:
+                _nc = NormalizedConfig.from_any(get_config())
+                _norm_spec = _nc.norm_spec
+            except Exception:
+                _norm_spec = None
             context = {
                 "l1_analysis": l1_analysis,
                 "question": question,
-                "previous_graph": graph_before_temp  # Use pre-temp graph for comparison
+                "previous_graph": graph_before_temp,  # Use pre-temp graph for comparison
+                "norm_spec": _norm_spec,
             }
             
             graph_analysis = self._run_layer3(docs_for_graph, context)

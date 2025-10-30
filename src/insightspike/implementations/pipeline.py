@@ -113,7 +113,17 @@ class ProcessingPipeline:
             retrieved_docs = self.l2.search(query_embedding, top_k=top_k)
 
             # L3: Graph reasoning
-            graph_result = self.l3.analyze_documents(retrieved_docs, {"query": query})
+            # Attach NormSpec for consistent evaluation across layers
+            try:
+                from ..config import get_config as _get_cfg
+                from ..config.normalized import NormalizedConfig as _NC
+                _nc = _NC.from_any(_get_cfg())
+                _norm_spec = _nc.norm_spec
+            except Exception:
+                _norm_spec = None
+            graph_result = self.l3.analyze_documents(
+                retrieved_docs, {"query": query, "norm_spec": _norm_spec}
+            )
 
             # L4: Generate response
             l4_input = {

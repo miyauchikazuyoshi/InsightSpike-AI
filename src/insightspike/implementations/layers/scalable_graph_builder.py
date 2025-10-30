@@ -16,8 +16,20 @@ try:
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
-    torch = None
-    Data = None
+    torch = None  # type: ignore
+
+    class Data:  # Minimal stub compatible with pyg_compatible_metrics
+        def __init__(self, x, edge_index):
+            self.x = x
+            self.edge_index = edge_index
+            try:
+                self.num_nodes = int(x.shape[0])
+            except Exception:
+                try:
+                    self.num_nodes = len(x)
+                except Exception:
+                    self.num_nodes = 0
+            self.documents = None
 
 # Removed get_config import - now passed via constructor
 from ...config.legacy_adapter import LegacyConfigAdapter
@@ -149,26 +161,44 @@ class ScalableGraphBuilder:
                 self.documents = documents
                 self.embeddings = embeddings
 
-            # Convert to PyG format
-            if incremental and self.embeddings is not None:
-                x = torch.tensor(self.embeddings, dtype=torch.float)
+            # Convert to PyG format (with numpy fallback when torch unavailable)
+            if TORCH_AVAILABLE:
+                if incremental and self.embeddings is not None:
+                    x = torch.tensor(self.embeddings, dtype=torch.float)
+                else:
+                    x = torch.tensor(embeddings, dtype=torch.float)
+                if edge_index:
+                    edge_index_tensor = (
+                        torch.tensor(edge_index, dtype=torch.long).t().contiguous()
+                    )
+                else:
+                    edge_index_tensor = torch.empty(2, 0, dtype=torch.long)
+                graph = Data(x=x, edge_index=edge_index_tensor)
+                # noinspection PyUnresolvedReferences
+                graph.num_nodes = x.size(0)
             else:
-                x = torch.tensor(embeddings, dtype=torch.float)
-
-            if edge_index:
-                edge_index_tensor = (
-                    torch.tensor(edge_index, dtype=torch.long).t().contiguous()
-                )
-            else:
-                edge_index_tensor = torch.empty(2, 0, dtype=torch.long)
-
-            graph = Data(x=x, edge_index=edge_index_tensor)
-            graph.num_nodes = x.size(0)
+                import numpy as _np
+                if incremental and self.embeddings is not None:
+                    x = _np.asarray(self.embeddings, dtype=_np.float32)
+                else:
+                    x = _np.asarray(embeddings, dtype=_np.float32)
+                if edge_index:
+                    ei = _np.asarray(edge_index, dtype=_np.int64).T
+                else:
+                    ei = _np.empty((2, 0), dtype=_np.int64)
+                graph = Data(x=x, edge_index=ei)
+                graph.num_nodes = int(x.shape[0])
             graph.documents = self.documents if incremental else documents
 
+            try:
+                if hasattr(graph.edge_index, 'size') and callable(getattr(graph.edge_index, 'size')):
+                    _edges_n = int(graph.edge_index.size(1))
+                else:
+                    _edges_n = int(getattr(graph.edge_index, 'shape', (2, 0))[1])
+            except Exception:
+                _edges_n = 0
             logger.info(
-                f"Built graph with {graph.num_nodes} nodes, "
-                f"{graph.edge_index.size(1)} edges"
+                f"Built graph with {graph.num_nodes} nodes, {_edges_n} edges"
             )
             
             # Store edge index for next incremental update
@@ -289,7 +319,7 @@ class ScalableGraphBuilder:
                 # Convert to numpy array if needed
                 if isinstance(emb, list):
                     emb = np.array(emb)
-                elif isinstance(emb, torch.Tensor):
+                elif TORCH_AVAILABLE and isinstance(emb, torch.Tensor):
                     emb = emb.cpu().numpy()
                 embeddings.append(emb)
             else:
@@ -303,11 +333,17 @@ class ScalableGraphBuilder:
 
     def _empty_graph(self) -> Any:
         """Create an empty graph for error cases."""
-        return Data(
-            x=torch.empty(0, self.dimension),
-            edge_index=torch.empty(2, 0, dtype=torch.long),
-            num_nodes=0,
-        )
+        if TORCH_AVAILABLE:
+            return Data(
+                x=torch.empty(0, self.dimension),
+                edge_index=torch.empty(2, 0, dtype=torch.long),
+            )
+        else:
+            import numpy as _np
+            return Data(
+                x=_np.empty((0, self.dimension), dtype=_np.float32),
+                edge_index=_np.empty((2, 0), dtype=_np.int64),
+            )
 
     def get_neighbors(
         self, node_idx: int, k: int = None
