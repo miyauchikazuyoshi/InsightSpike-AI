@@ -172,7 +172,7 @@ if _IMPORT_MAX_LAYER >= 3:
         if _DIAG_IMPORT:
             _t2 = time.time()
             print('[main_agent] importing layer3_graph_reasoner (gated)...', flush=True)
-from ..layers.layer3_graph_reasoner import L3GraphReasoner
+        from ..layers.layer3_graph_reasoner import L3GraphReasoner
         GRAPH_REASONER_AVAILABLE = True
         if _DIAG_IMPORT:
             print(f'[main_agent] layer3_graph_reasoner imported elapsed={time.time()-_t2:.3f}s', flush=True)
@@ -908,9 +908,13 @@ class MainAgent:
                 try:
                     from ..layers.layer1_conductor import L1Conductor
                     l1c = L1Conductor(self.config)
-                    # centers: Top 3 retrieved docs (adjustable)
+                    # centers: Top N retrieved docs (configurable via graph.centers_count)
+                    try:
+                        centers_count = int(getattr(getattr(self.config, 'graph', None), 'centers_count', 3) or 3)
+                    except Exception:
+                        centers_count = 3
                     centers = []
-                    for doc in retrieved_docs[:3]:
+                    for doc in retrieved_docs[:centers_count]:
                         if "index" in doc:
                             centers.append(int(doc["index"]))
                     # defaults（設定で上書き可）

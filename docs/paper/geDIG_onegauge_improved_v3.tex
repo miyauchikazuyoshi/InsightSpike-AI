@@ -176,7 +176,17 @@ Phase~1 は、RAG における\,\textbf{クエリ中心の評価と制御}を通
 \begin{equation}
   \Delta H_{\mathrm{norm}}\;=\;\frac{H_{\text{after}} - H_{\text{before}}}{\log K},\label{eq:dh_norm}
 \end{equation}
-\noindent\textit{注（$K$ の定義）}\; $K$ はカテゴリサイズ（記号一覧を参照）。\\
+\noindent\textit{注（$K$ の定義）}\; $K$ は \emph{after 集合のカテゴリ数} である。Base 集合 $S_{\text{base}}$（運用上は既定で\,\textbf{mem 候補集合}；必要に応じて \texttt{pool/link} に切替可）に対し，\,\textbf{query エピソード $q$ を 1 要素として追加}して
+\begin{align*}
+  S_{\text{before}} &:= S_{\text{base}},\qquad
+  S_{\text{after}}  := S_{\text{base}}\cup\{q\},\quad
+  K := |S_{\text{after}}|.\tag*{}
+\end{align*}
+各要素 $i\in S$ に非負の重み $w_i\,(\ge 0)$ を割り当て（例：$w_i=\exp(-d(q,i)/T)$ や $w_i=\exp(\beta\,\cos(q,i))$），確率 $p_i:=w_i/\sum_j w_j$ としてシャノンエントロピー
+\begin{align*}
+  H(S) := -\sum_{i\in S} p_i\,\log p_i
+\end{align*}
+を定める。よって $H_{\text{before}}{=}H(S_{\text{before}})$，$H_{\text{after}}{=}H(S_{\text{after}})$ であり，$K{=}|S_{\text{after}}|$ を分母の正規化に用いる。実装上は $K{<}2$ の場合に数値安定化のため $\log K$ を微小値で下駄履き（$\varepsilon$）する。\\
 \noindent\textit{注記（符号規約）}: 本稿では、$\Delta H_{\rm norm}$ は \emph{after−before}（秩序化=H低下で\,\emph{負}）、$\Delta\mathrm{SP}_{\rm rel}$ は \emph{before−after}（経路短縮で正）を用いる。情報利得は $\Delta H_{\rm norm}+\gamma\,\Delta\mathrm{SP}_{\rm rel}$ で構成する。以後、$\Delta(\cdot)$ は\,\textbf{各項ごとに定義された符号規約}に従う。
 
 \noindent\textit{注（$\Delta\mathrm{SP}_{\rm rel}$ の安定化）}\; $\mathrm{ASPL}$ の分母が極小となる場合に備え、実装では $\Delta\mathrm{SP}_{\rm rel}{=}(L_{\rm before}{-}L_{\rm after})/\max\{L_{\rm before},\,\varepsilon\}$（既定 $\varepsilon{=}10^{-8}$）を用いる。

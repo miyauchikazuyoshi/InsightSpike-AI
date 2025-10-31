@@ -267,6 +267,15 @@ class StepRecord:
     linkset_delta_h: float = 0.0
     linkset_delta_sp: float = 0.0
     linkset_g: float = 0.0
+    # For display: linkset entropies and SP levels
+    linkset_entropy_before: float = 0.0
+    linkset_entropy_after: float = 0.0
+    linkset_pos_w_before: int = 0
+    linkset_pos_w_after: int = 0
+    linkset_topw_before: List[float] = field(default_factory=list)
+    linkset_topw_after: List[float] = field(default_factory=list)
+    sp_before: float = 0.0
+    sp_after: float = 0.0
     structural_cost: float = 0.0
     structural_improvement: float = 0.0
     g0: float = 0.0
@@ -374,6 +383,7 @@ class QueryHubConfig:
     selector: Dict[str, Any]
     gedig: Dict[str, Any]
     linkset_mode: bool = False
+    linkset_base: str = "mem"  # 'link' (S_link) | 'mem' (memory pool) | 'pool' (all candidates)
     theta_ag: float = 0.0
     theta_dg: float = 0.0
     top_link: int = 1
@@ -935,13 +945,18 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
         l1_candidates = base_count
 
         def choose_observation_candidate(collections: Sequence[Sequence[Dict[str, Any]]]) -> Optional[Dict[str, Any]]:
+            """Prefer feasible observation candidates; if none, fallback to best overall (incl. mem).
+
+            This avoids returning None at dead-ends (no passable obs), which would
+            cause linkset before-set to be empty and ΔH≈0 at hop0.
+            """
+            # 1) Try passable observation candidates in each collection
             for items in collections:
                 if not items:
                     continue
                 if getattr(config, 'obs_guard', True):
                     obs_items = [
-                        item
-                        for item in items
+                        item for item in items
                         if item.get("origin") == "obs"
                         and item.get("action") in possible_moves_set
                         and bool(item.get("passable", True))
@@ -968,7 +983,6 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                     tau = float(getattr(config, 'action_temp', 1.0) or 1.0)
                     try:
                         sims = [max(0.0, float(x.get("similarity", 0.0) or 0.0)) for x in obs_items]
-                        # guard: if all sims ~0, fallback to argmax
                         if all(s <= 1e-12 for s in sims) or not math.isfinite(tau) or tau <= 1e-9:
                             raise ValueError("degenerate sims or tau")
                         weights = [math.exp(s / tau) for s in sims]
@@ -982,10 +996,15 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                             if r <= acc:
                                 return item
                     except Exception:
-                        # Fallback to argmax
-                        pass
-                # Argmax (default)
+                        pass  # fallback to argmax
                 return max(obs_items, key=lambda entry: float(entry.get("similarity", 0.0)))
+            # 2) Fallback: choose the single best candidate (obs or mem) across all
+            try:
+                flat = [it for items in collections for it in items]
+                if flat:
+                    return max(flat, key=lambda entry: float(entry.get("similarity", 0.0) or 0.0))
+            except Exception:
+                pass
             return None
 
         chosen_obs = choose_observation_candidate(
@@ -1125,6 +1144,7 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                     "similarity": chosen_obs.get("similarity") if chosen_obs else None,
                 },
                 "query_entry": pre_query_entry,
+                "base_mode": str(getattr(config, 'linkset_base', 'link')).lower(),
             }
 
         debug_hop0_pre = {}
@@ -1259,9 +1279,11 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
             sub = graph_obj.subgraph(all_nodes).copy()
             return sub
 
-        def _sp_gain_fixed_pairs(sub_before: nx.Graph, sub_after: nx.Graph) -> float:
-            """Delegate SP gain to Core implementation (signed, relative),
-            using union-of-nodes and optional boundary trim like evaluator.
+        def _sp_gain_fixed_pairs_ex(sub_before: nx.Graph, sub_after: nx.Graph, eff_hop: int = 1) -> Tuple[float, float, float]:
+            """Compute relative SP gain along with before/after ASPL levels using the SAME pair set
+            as SP計算（fixed-before-pairs）で使われるもの。
+
+            Returns: (delta_sp_rel, Lb, La)
             """
             try:
                 # Align scope to core settings
@@ -1274,12 +1296,41 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                     g1 = sub_before.subgraph(all_nodes).copy()
                     g2 = sub_after.subgraph(all_nodes).copy()
                 if bound in ("trim", "terminal", "nodes"):
-                    # Use hop=1 for terminal trimming like evaluator's conservative cut
-                    g1 = core._trim_terminal_edges(g1, anchors_core, 1)
-                    g2 = core._trim_terminal_edges(g2, anchors_core, 1)
-                return float(core._compute_sp_gain_norm(g1, g2, mode=core.sp_norm_mode))
+                    g1 = core._trim_terminal_edges(g1, anchors_core, max(1, int(eff_hop)))
+                    g2 = core._trim_terminal_edges(g2, anchors_core, max(1, int(eff_hop)))
+
+                # Use DistanceCache fixed-before pairs to get the SAME pair set as SP
+                try:
+                    sig = distcache.signature(g1, anchors_core, max(1, int(eff_hop)), str(core.sp_scope_mode), str(core.sp_boundary_mode))
+                    pairs_obj = distcache.get_fixed_pairs(sig, g1)
+                    pairs = list(pairs_obj.pairs)
+                    # Lb as average baseline from pairs_obj
+                    Lb = float(pairs_obj.lb_avg) if getattr(pairs_obj, 'lb_avg', None) is not None else 0.0
+                except Exception:
+                    pairs = []
+                    Lb = 0.0
+                if not pairs or Lb <= 0.0:
+                    return 0.0, 0.0, 0.0
+
+                # La on g2 measured over the same pairs
+                dist2 = dict(nx.all_pairs_shortest_path_length(g2))
+                total2 = 0.0
+                count2 = 0
+                for u, v, _ in pairs:
+                    dm = dist2.get(u, {})
+                    if v in dm:
+                        total2 += float(dm[v])
+                        count2 += 1
+                La = (total2 / count2) if count2 > 0 else Lb
+                gain = Lb - La
+                rel = max(-1.0, min(1.0, gain / (Lb if Lb > 0 else 1.0)))
+                return float(rel), float(Lb), float(La)
             except Exception:
-                return 0.0
+                return 0.0, 0.0, 0.0
+
+        def _sp_gain_fixed_pairs(sub_before: nx.Graph, sub_after: nx.Graph) -> float:
+            rel, _, _ = _sp_gain_fixed_pairs_ex(sub_before, sub_after)
+            return rel
 
         # IG は linkset に基づき一定（paper-mode）。以降は SP で差をつける
         # linkset IG を pre_result から流用（なければ通常IG）。pre-eval無効時は0。
@@ -1349,6 +1400,7 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
         h_best = 0
         g_best = None
         records_h: List[Tuple[int,float,float,float,float]] = []  # (h, g, ged, ig, sp)
+        hop_extras: Dict[int, Dict[str, float]] = {}
         chosen_edges_by_hop: List[Tuple[Tuple[int,int,int], Tuple[int,int,int]]] = []
 
         # h=0 評価（追加なし）: 二重アンカーのユニオンでサブグラフを切る
@@ -1362,9 +1414,20 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                                norm_override=denom_cmax_base)["normalized_ged"]) if denom_cmax_base > 0 else 0.0
         ged0 = float(min(1.0, max(0.0, ged0)))
         sp0 = 0.0
-        const_ig0 = base_ig + core.sp_beta * sp0
+        # Compute SP levels at hop0 neighborhood for display (Lb/La)
+        try:
+            eff_hop_eval0 = 1
+            sub_b0 = _union_khop_subgraph(g_before_for_expansion, anchors_core, anchors_top_before, max(1, eff_hop_eval0))
+            sub_a0 = _union_khop_subgraph(stage_graph, anchors_core, anchors_top_after, max(1, eff_hop_eval0))
+            sp0_rel, sp0_before, sp0_after = _sp_gain_fixed_pairs_ex(sub_b0, sub_a0, eff_hop=eff_hop_eval0)
+        except Exception:
+            sp0_rel, sp0_before, sp0_after = (0.0, 0.0, 0.0)
+        const_ig0 = base_ig + core.sp_beta * sp0_rel
         g0_stage = float(ged0 - core.lambda_weight * const_ig0)
-        records_h.append((0, g0_stage, ged0, const_ig0, sp0))
+        records_h.append((0, g0_stage, ged0, const_ig0, sp0_rel))
+        # Ensure SP_after reflects the ΔSP reported: infer La_eff = Lb*(1-ΔSP)
+        sp0_after_eff = float(max(0.0, sp0_before * (1.0 - sp0_rel)))
+        hop_extras[0] = {"sp_before": float(sp0_before), "sp_after": float(sp0_after_eff), "h": float(base_ig)}
         g_best = g0_stage; h_best = 0
 
         # h>=1 の貪欲構築
@@ -1387,7 +1450,7 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                                         enable_spectral=core.enable_spectral, spectral_weight=core.spectral_weight,
                                         norm_override=denom_cmax_base)["normalized_ged"]) if denom_cmax_base > 0 else 0.0
                 ged_h = float(min(1.0, max(0.0, ged_h)))
-                sp_h = _sp_gain_fixed_pairs(sub_b, sub_a)
+                sp_h_rel, sp_bef, sp_aft = _sp_gain_fixed_pairs_ex(sub_b, sub_a, eff_hop=eff_hop_eval)
                 # IG per-hop
                 ig_h_val = base_ig
                 try:
@@ -1396,9 +1459,11 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                         ig_h_val = float(ls_h.delta_h_norm)
                 except Exception:
                     ig_h_val = base_ig
-                ig_h = ig_h_val + core.sp_beta * sp_h
+                ig_h = ig_h_val + core.sp_beta * sp_h_rel
                 g_h = float(ged_h - core.lambda_weight * ig_h)
-                records_h.append((h, g_h, ged_h, ig_h, sp_h))
+                records_h.append((h, g_h, ged_h, ig_h, sp_h_rel))
+                sp_aft_eff = float(max(0.0, sp_bef * (1.0 - sp_h_rel)))
+                hop_extras[h] = {"sp_before": float(sp_bef), "sp_after": float(sp_aft_eff), "h": float(ig_h_val)}
                 if g_best is None or g_h < g_best:
                     g_best = g_h; h_best = h
         else:
@@ -1475,10 +1540,19 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                                                 enable_spectral=core.enable_spectral, spectral_weight=core.spectral_weight,
                                                 norm_override=denom_cmax_base)["normalized_ged"]) if denom_cmax_base > 0 else 0.0
                         ged_h = float(min(1.0, max(0.0, ged_h)))
-                        sp_h = 0.0
-                        ig_h = base_ig + core.sp_beta * sp_h
+                        sp_h_rel, sp_bef, sp_aft = _sp_gain_fixed_pairs_ex(sub_b, sub_a)
+                        # per-hop linkset ΔH（可能なら）
+                        ig_h_val = base_ig
+                        try:
+                            if str(core.ig_source_mode).lower() in ("linkset","paper","strict") and str(core.ig_hop_apply).lower() == "all" and pre_result is not None:
+                                ls_h = core._compute_linkset_metrics(prev_graph, h_graph, pre_linkset_info, query_vector=query_vec_list, ig_fixed_den=ig_fixed_den)
+                                ig_h_val = float(ls_h.delta_h_norm)
+                        except Exception:
+                            ig_h_val = base_ig
+                        ig_h = ig_h_val + core.sp_beta * sp_h_rel
                         g_h = float(ged_h - core.lambda_weight * ig_h)
-                        records_h.append((h, g_h, ged_h, ig_h, sp_h))
+                        records_h.append((h, g_h, ged_h, ig_h, sp_h_rel))
+                        hop_extras[h] = {"sp_before": float(sp_bef), "sp_after": float(sp_aft), "h": float(ig_h_val)}
                         # g_best/h_best の更新（無採用でも評価値が改善していれば反映）
                         if g_best is None or g_h < g_best:
                             g_best = g_h; h_best = h
@@ -1503,7 +1577,7 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                                         enable_spectral=core.enable_spectral, spectral_weight=core.spectral_weight,
                                         norm_override=denom_cmax_base)["normalized_ged"]) if denom_cmax_base > 0 else 0.0
                 ged_h = float(min(1.0, max(0.0, ged_h)))
-                sp_h = _sp_gain_fixed_pairs(sub_b, sub_a)
+                sp_h_rel, sp_bef, sp_aft = _sp_gain_fixed_pairs_ex(sub_b, sub_a, eff_hop=eff_hop_eval)
                 # IGをhopごとに再評価（linksetモード時は全hop適用）
                 ig_h_val = base_ig
                 try:
@@ -1513,9 +1587,11 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                         ig_h_val = float(ls_h.delta_h_norm)
                 except Exception:
                     ig_h_val = base_ig
-                ig_h = ig_h_val + core.sp_beta * sp_h
+                ig_h = ig_h_val + core.sp_beta * sp_h_rel
                 g_h = float(ged_h - core.lambda_weight * ig_h)
-                records_h.append((h, g_h, ged_h, ig_h, sp_h))
+                records_h.append((h, g_h, ged_h, ig_h, sp_h_rel))
+                sp_aft_eff = float(max(0.0, sp_bef * (1.0 - sp_h_rel)))
+                hop_extras[h] = {"sp_before": float(sp_bef), "sp_after": float(sp_aft_eff), "h": float(ig_h_val)}
                 if g_best is None or g_h < g_best:
                     g_best = g_h; h_best = h
 
@@ -1593,6 +1669,12 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                     sp_sssp_du_ct = sp_sssp_dv_ct = sp_dv_leaf_skips_ct = sp_cycle_verifies_ct = 0
                     gmin_mh_val = gmin; ged_mh_val = float(m.get('delta_ged_norm', abs(delta_ged))); ig_mh_val = delta_ig; sp_mh_val = delta_sp
                     eval_applied = True
+                    # When adaptive union-of-k-hop comparison is desired, fall back to evaluator for per-hop series
+                    try:
+                        if (os.getenv('INSIGHTSPIKE_SP_ADAPTIVE','').strip().lower() in ('1','true','on','yes')) or (str(core.sp_scope_mode).lower()=='union'):
+                            eval_applied = False
+                    except Exception:
+                        pass
                 except Exception as _lite_e:
                     print(f"[WARN] use_main_l3 path failed, falling back to evaluator: {_lite_e}")
                     eval_applied = False
@@ -1627,6 +1709,49 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                 signature_builder=sig_builder,
                 )
                 hop_series = eval_res.hop_series
+                # Optional: enrich hop_series with L3-union cand debug (cand_used/cand_total)
+                try:
+                    want_union_dbg = (os.getenv('INSIGHTSPIKE_SP_ADAPTIVE','').strip().lower() in ('1','true','on','yes')) or (str(core.sp_scope_mode).lower()=='union')
+                except Exception:
+                    want_union_dbg = False
+                if want_union_dbg:
+                    try:
+                        from qhlib.l3_adapter import eval_query_centric_via_l3
+                        centers_nodes = list(anchors_core)
+                        cand_edges = list(ecand)
+                        sp_mode = str(getattr(config, 'sp_cache_mode', 'cached_incr'))
+                        dbg_res = eval_query_centric_via_l3(
+                            prev_graph=prev_graph,
+                            curr_graph=stage_graph,
+                            centers=centers_nodes,
+                            cand_edges=cand_edges,
+                            sp_engine=sp_mode,
+                            pair_samples=int(getattr(config, 'sp_pair_samples', 200)),
+                            budget=int(getattr(config, 'commit_budget', 1)),
+                            cand_topk=int(getattr(config, 'sp_cand_topk', 0)),
+                            default_dim=8,
+                            max_hops=int(core.max_hops) if hasattr(core, 'max_hops') else int(getattr(config.gedig, 'max_hops', 0)),
+                        )
+                        dbg_map = {}
+                        try:
+                            dbg_map = (dbg_res.get('metrics', {}) or {}).get('debug', {}).get('union_linkset', {}) or {}
+                        except Exception:
+                            dbg_map = {}
+                        if isinstance(dbg_map, dict) and hop_series:
+                            # merge per-hop cand counts if present
+                            for rec in hop_series:
+                                try:
+                                    h = int(rec.get('hop', -1))
+                                except Exception:
+                                    h = -1
+                                if h in dbg_map and isinstance(dbg_map[h], dict):
+                                    dh = dbg_map[h]
+                                    if 'cand_used' in dh:
+                                        rec['cand_used'] = int(dh.get('cand_used', 0))
+                                    if 'cand_count_total' in dh:
+                                        rec['cand_count_total'] = int(dh.get('cand_count_total', 0))
+                    except Exception:
+                        pass
                 records_h = [(int(rec["hop"]), float(rec["g"]), float(rec["ged"]), float(rec["ig"]), float(rec["sp"])) for rec in hop_series]
                 chosen_edges_by_hop = list(eval_res.chosen_edges_by_hop)
                 g0 = float(eval_res.g0)
@@ -1692,26 +1817,51 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
             delta_ig_min = hrec[3]
             delta_sp_min = hrec[4]
         # H (after-before) を A/B でも entropy_ig ベースで統一（L3 と同源）
+        # Prefer L3-provided ΔH when use_main_l3 経路が適用された場合（union/L3ベースの比較）
         try:
-            feats_b = gather_node_features(graph_pre)
-            feats_a = gather_node_features(graph_eval)
-            # Apply same weighting as Core for entropy (maze 8D)
-            if feats_b.size and feats_b.shape[1] == WEIGHT_VECTOR.size:
-                feats_b = feats_b * WEIGHT_VECTOR
-            if feats_a.size and feats_a.shape[1] == WEIGHT_VECTOR.size:
-                feats_a = feats_a * WEIGHT_VECTOR
-            ab_h_dict = _entropy_ig(graph_eval, feats_b, feats_a, delta_mode='after_before')
-            ab_delta_h = float(ab_h_dict.get('ig_value', 0.0))
+            if eval_applied and isinstance(m, dict) and ('delta_h' in m):
+                delta_h = float(m.get('delta_h', 0.0))
+                delta_h_min = delta_h
+            else:
+                feats_b = gather_node_features(graph_pre)
+                feats_a = gather_node_features(graph_eval)
+                if feats_b.size and feats_b.shape[1] == WEIGHT_VECTOR.size:
+                    feats_b = feats_b * WEIGHT_VECTOR
+                if feats_a.size and feats_a.shape[1] == WEIGHT_VECTOR.size:
+                    feats_a = feats_a * WEIGHT_VECTOR
+                ab_h_dict = _entropy_ig(graph_eval, feats_b, feats_a, delta_mode='after_before')
+                ab_delta_h = float(ab_h_dict.get('ig_value', 0.0))
+                delta_h = ab_delta_h
+                delta_h_min = ab_delta_h
         except Exception:
-            ab_delta_h = float(base_ig)
-
-        delta_h = ab_delta_h
-        delta_h_min = ab_delta_h
-        # 序列をJSON化（H 列は ab_delta_h を使用）
-        hop_series = [
-            {"hop": int(h), "g": float(g), "ged": float(ged), "ig": float(ig), "h": float(ab_delta_h), "sp": float(sp)}
-            for (h, g, ged, ig, sp) in records_h
-        ]
+            delta_h = float(base_ig)
+            delta_h_min = delta_h
+        # 序列をJSON化（H 列は delta_h を使用）
+        hop_series = []
+        for rec_h in records_h:
+            h, g, ged, ig, sp = rec_h
+            extra = hop_extras.get(int(h), {})
+            dh = float(extra.get("h", delta_h))
+            sp_bef = extra.get("sp_before")
+            sp_aft = extra.get("sp_after")
+            row = {"hop": int(h), "g": float(g), "ged": float(ged), "ig": float(ig), "h": float(dh), "sp": float(sp)}
+            if sp_bef is not None:
+                row["sp_before"] = float(sp_bef)
+            if sp_bef is not None:
+                # Derive SP_after directly from reported ΔSP: La_eff = Lb*(1-ΔSP)
+                row["sp_after"] = float(max(0.0, float(sp_bef) * (1.0 - float(sp))))
+            hop_series.append(row)
+        # Ensure hop0 carries SP_before/after (evaluate_multihop 経由では未設定な場合がある)
+        try:
+            if hop_series and (hop_series[0].get('sp_before') is None or hop_series[0].get('sp_after') is None):
+                eff_hop_eval0 = 1
+                sub_b0 = _union_khop_subgraph(g_before_for_expansion, anchors_core, anchors_top_before, max(1, eff_hop_eval0))
+                sub_a0 = _union_khop_subgraph(stage_graph, anchors_core, anchors_top_after, max(1, eff_hop_eval0))
+                sp0_rel_fix, sp0_bef_fix, sp0_aft_fix = _sp_gain_fixed_pairs_ex(sub_b0, sub_a0, eff_hop=eff_hop_eval0)
+                hop_series[0]['sp_before'] = float(sp0_bef_fix)
+                hop_series[0]['sp_after'] = float(sp0_aft_fix)
+        except Exception:
+            pass
 
         # Snapshot the evaluation graph (pre-step, after commit; before env.step) — uses eval overlay graph
         if str(getattr(config, 'snapshot_level', 'standard')).lower() == 'minimal':
@@ -2070,6 +2220,7 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                 "candidate_pool": [dict(item) for item in selection.candidates],
                 "decision": dict(decision_info),
                 "query_entry": query_entry,
+                "base_mode": str(getattr(config, 'linkset_base', 'link')).lower(),
             }
         # Compute linkset metrics against the post-commit graphs for logging
         linkset_delta_ged = 0.0
@@ -2083,8 +2234,37 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                 linkset_delta_h = float(ls.delta_h_norm)
                 linkset_delta_sp = float(ls.delta_sp_rel)
                 linkset_g = float(ls.gedig_value)
+                try:
+                    linkset_entropy_before = float(ls.entropy_before)
+                    linkset_entropy_after = float(ls.entropy_after)
+                except Exception:
+                    linkset_entropy_before = 0.0
+                    linkset_entropy_after = 0.0
+                try:
+                    linkset_pos_w_before = int(getattr(ls, 'pos_w_before', 0))
+                    linkset_pos_w_after = int(getattr(ls, 'pos_w_after', 0))
+                    linkset_topw_before = list(getattr(ls, 'topw_before', []) or [])[:5]
+                    linkset_topw_after = list(getattr(ls, 'topw_after', []) or [])[:5]
+                except Exception:
+                    linkset_pos_w_before = 0
+                    linkset_pos_w_after = 0
+                    linkset_topw_before = []
+                    linkset_topw_after = []
             except Exception:
                 linkset_delta_ged = linkset_delta_h = linkset_delta_sp = linkset_g = 0.0
+                linkset_entropy_before = 0.0
+                linkset_entropy_after = 0.0
+                linkset_pos_w_before = 0
+                linkset_pos_w_after = 0
+                linkset_topw_before = []
+                linkset_topw_after = []
+        else:
+            linkset_entropy_before = 0.0
+            linkset_entropy_after = 0.0
+            linkset_pos_w_before = 0
+            linkset_pos_w_after = 0
+            linkset_topw_before = []
+            linkset_topw_after = []
 
         if False:
             features_prev = build_feature_matrix(prev_graph, cand_node_ids, current_query_node, zero_candidates=True)
@@ -2475,6 +2655,12 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                 linkset_delta_h=float(linkset_delta_h),
                 linkset_delta_sp=float(linkset_delta_sp),
                 linkset_g=float(linkset_g),
+                linkset_entropy_before=float(linkset_entropy_before),
+                linkset_entropy_after=float(linkset_entropy_after),
+                linkset_pos_w_before=int(linkset_pos_w_before),
+                linkset_pos_w_after=int(linkset_pos_w_after),
+                linkset_topw_before=list(linkset_topw_before),
+                linkset_topw_after=list(linkset_topw_after),
                 g0=float(g0),
                 gmin=float(gmin),
                 best_hop=best_hop,
@@ -2538,6 +2724,8 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                 delta_ged_min_mh=float(ged_mh_val),
                 delta_ig_min_mh=float(ig_mh_val),
                 delta_sp_min_mh=float(sp_mh_val),
+                sp_before=float(hop_series[0].get('sp_before', 0.0) if (hop_series and isinstance(hop_series[0], dict)) else 0.0),
+                sp_after=float(hop_series[0].get('sp_after', 0.0) if (hop_series and isinstance(hop_series[0], dict)) else 0.0),
             )
         )
 
@@ -2683,6 +2871,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--adaptive-hops", action="store_true")
     parser.add_argument("--sp-beta", type=float, default=1.0)
     parser.add_argument("--linkset-mode", action="store_true")
+    parser.add_argument("--linkset-base", type=str, default="mem", choices=["link","mem","pool"], help="Base set for linkset IG before: link=S_link, mem=memory candidates, pool=all candidates")
     parser.add_argument("--sp-scope", type=str, default="auto", choices=["auto", "union"], help="SP evaluation scope")
     parser.add_argument("--sp-hop-expand", type=int, default=0, help="Extra hops to expand SP neighborhood")
     parser.add_argument("--sp-boundary", type=str, default="trim", choices=["induced","trim","nodes"], help="SP boundary mode (Core) for subgraph evaluation")
@@ -2784,6 +2973,7 @@ def main() -> None:
         selector=selector_params,
         gedig=gedig_params,
         linkset_mode=bool(args.linkset_mode),
+        linkset_base=str(args.linkset_base),
         theta_ag=float(args.theta_ag),
         theta_dg=float(args.theta_dg),
         top_link=int(args.top_link),
@@ -2872,6 +3062,14 @@ def main() -> None:
                     "linkset_delta_h": record.linkset_delta_h,
                     "linkset_delta_sp": record.linkset_delta_sp,
                     "linkset_g": record.linkset_g,
+                    "linkset_entropy_before": getattr(record, 'linkset_entropy_before', None),
+                    "linkset_entropy_after": getattr(record, 'linkset_entropy_after', None),
+                    "linkset_pos_w_before": getattr(record, 'linkset_pos_w_before', None),
+                    "linkset_pos_w_after": getattr(record, 'linkset_pos_w_after', None),
+                    "linkset_topw_before": getattr(record, 'linkset_topw_before', []),
+                    "linkset_topw_after": getattr(record, 'linkset_topw_after', []),
+                    "linkset_entropy_before": getattr(record, 'linkset_entropy_before', None),
+                    "linkset_entropy_after": getattr(record, 'linkset_entropy_after', None),
                     "structural_cost": record.structural_cost,
                     "structural_improvement": record.structural_improvement,
                     "g0": record.g0,
@@ -2931,6 +3129,8 @@ def main() -> None:
                     "delta_ged_min_mh": getattr(record, 'delta_ged_min_mh', None),
                     "delta_ig_min_mh": getattr(record, 'delta_ig_min_mh', None),
                     "delta_sp_min_mh": getattr(record, 'delta_sp_min_mh', None),
+                    "sp_before": getattr(record, 'sp_before', None),
+                    "sp_after": getattr(record, 'sp_after', None),
                     "sp_ds_saved": getattr(record, 'sp_ds_saved', False),
                     "sp_ds_eff_saved": getattr(record, 'sp_ds_eff_saved', 0),
                     "ds_nodes_total": getattr(record, 'ds_nodes_total', 0),

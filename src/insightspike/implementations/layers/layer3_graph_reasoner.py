@@ -785,6 +785,48 @@ class L3GraphReasoner(L3GraphReasonerInterface):
                             "candidate_selection": selection_summary,
                         }
                         metrics.setdefault("sp_engine", "core")
+                        # Populate SP_before/SP_after for hop0 (global scope) using fixed-before pairs
+                        try:
+                            from ...algorithms.sp_distcache import DistanceCache
+                            # Reuse the same cache settings used above for ΔSP estimation
+                            pair_samples = int(os.getenv('INSIGHTSPIKE_SP_PAIR_SAMPLES', str(_getf(self.config, 'graph.sp_pair_samples', 200) or 200)))
+                            cache0 = DistanceCache(mode='cached', pair_samples=pair_samples)
+                            from ...metrics.pyg_compatible_metrics import pyg_to_networkx as _pyg2nx
+                            nx_prev0 = _pyg2nx(previous_graph)
+                            nx_curr0 = _pyg2nx(current_graph)
+                            sig0 = cache0.signature(nx_prev0, set(centers), 0, 'global', 'none')
+                            pairs0 = cache0.get_fixed_pairs(sig0, nx_prev0)
+                            # Before graph relative SP (will be 0.0 for fixed-before pairs by definition)
+                            sp_before0 = DistanceCache.current_sp_from_pairs(pairs0)
+                            # After graph relative SP (matches delta_sp under fixed-before scheme)
+                            # Compute La_avg on after graph via SSSP reuse
+                            sources = []
+                            seen = set()
+                            for a, b, _ in pairs0.pairs:
+                                if a not in seen:
+                                    sources.append(a); seen.add(a)
+                            sssp_after = {}
+                            import networkx as _nx
+                            for a in sources:
+                                try:
+                                    sssp_after[a] = dict(_nx.single_source_shortest_path_length(nx_curr0, a))
+                                except Exception:
+                                    sssp_after[a] = {}
+                            total_la = 0.0; cnt_la = 0
+                            for a, b, dab in pairs0.pairs:
+                                dmap = sssp_after.get(a, {})
+                                dafter = dmap.get(b)
+                                la = float(dab) if dafter is None else float(dafter)
+                                total_la += la; cnt_la += 1
+                            if cnt_la > 0 and pairs0.lb_avg > 0.0:
+                                la_avg = total_la / cnt_la
+                                sp_after0 = max(0.0, min(1.0, max(0.0, (pairs0.lb_avg - la_avg) / pairs0.lb_avg)))
+                            else:
+                                sp_after0 = 0.0
+                            metrics.setdefault('sp_before', float(sp_before0))
+                            metrics.setdefault('sp_after', float(sp_after0))
+                        except Exception:
+                            pass
                     else:
                         # Cached (approximate ΔSP) path
                         # Step1: hop0 evaluate without SP gain
@@ -915,39 +957,107 @@ class L3GraphReasoner(L3GraphReasonerInterface):
                                         dged_h = float(ged_h.get('normalized_ged', 0.0))
                                     except Exception:
                                         dged_h = delta_ged_norm
-                                    # ΔH_norm per hop（after-before, cand_mask if available）
+                                    # ΔH_norm per hop（after-before）
                                     try:
                                         feats_b = _feat_array(sub_prev, list(sub_prev.nodes()))
                                         feats_a = _feat_array(sub_curr, list(sub_curr.nodes()))
-                                        # Apply candidate-mask per hop: centers ∪ endpoints(cand at hop)
-                                        try:
-                                            mask_nodes = set(centers)
-                                            cand_h = None
-                                            if isinstance(cand_by_hop, dict) and (h in cand_by_hop):
-                                                cand_h = cand_by_hop.get(h)
-                                            if not cand_h:
-                                                cand_h = cand_edges
-                                            if cand_h:
-                                                for item in cand_h:
-                                                    if isinstance(item, (list, tuple)) and len(item) >= 2:
-                                                        try:
-                                                            mask_nodes.add(int(item[0])); mask_nodes.add(int(item[1]))
-                                                        except Exception:
-                                                            pass
-                                            # zero-out rows (features) not in mask_nodes
-                                            if mask_nodes:
-                                                node_list = list(sub_curr.nodes())
-                                                idx_mask = [ (1 if (isinstance(n, int) and (n in mask_nodes)) else 0) for n in node_list ]
-                                                import numpy as _np
-                                                idx_mask_np = _np.asarray(idx_mask, dtype=bool)
-                                                if feats_b.shape[0] == idx_mask_np.size and feats_a.shape[0] == idx_mask_np.size:
-                                                    feats_b = feats_b.copy(); feats_a = feats_a.copy()
-                                                    feats_b[~idx_mask_np] = 0.0
-                                                    feats_a[~idx_mask_np] = 0.0
-                                        except Exception:
-                                            pass
-                                        ig_res = _nx_entropy_ig(sub_curr, feats_b, feats_a, delta_mode='after_before', fixed_den=ig_fixed_den)
-                                        dh_h = float(ig_res.get('ig_value', 0.0))
+                                        # Decide IG source: linkset (optional) or entropy_ig with candidate-mask
+                                        _ig_source = str(_cfg_attr(self.config, 'graph.ig_source_mode', 'graph') or 'graph').lower()
+                                        # Build masks per hop for before/after node lists
+                                        mask_nodes = set(centers)
+                                        cand_h = None
+                                        if isinstance(cand_by_hop, dict) and (h in cand_by_hop):
+                                            cand_h = cand_by_hop.get(h)
+                                        if not cand_h:
+                                            cand_h = cand_edges
+                                        if cand_h:
+                                            for item in cand_h:
+                                                if isinstance(item, (list, tuple)) and len(item) >= 2:
+                                                    try:
+                                                        mask_nodes.add(int(item[0])); mask_nodes.add(int(item[1]))
+                                                    except Exception:
+                                                        pass
+                                        nodes_prev_list = list(sub_prev.nodes())
+                                        nodes_curr_list = list(sub_curr.nodes())
+                                        import numpy as _np
+                                        fb = feats_b; fa = feats_a
+                                        if mask_nodes:
+                                            fb_mask = _np.array([ (isinstance(n,int) and (n in mask_nodes)) for n in nodes_prev_list ], dtype=bool)
+                                            fa_mask = _np.array([ (isinstance(n,int) and (n in mask_nodes)) for n in nodes_curr_list ], dtype=bool)
+                                            if fb.shape[0] == fb_mask.size:
+                                                fb = fb.copy(); fb[~fb_mask] = 0.0
+                                            if fa.shape[0] == fa_mask.size:
+                                                fa = fa.copy(); fa[~fa_mask] = 0.0
+                                        # Option A: linkset-based ΔH（候補分布エントロピー; A/B寄せ）
+                                        if _ig_source in ('linkset','paper','strict'):
+                                            # Use hop-local candidates (filtered to nodes in subgraphs)
+                                            try:
+                                                # Build weight lists from candidates (fallback weight=1.0 if no score)
+                                                def _cand_weights(_cands):
+                                                    ws = []
+                                                    if _cands:
+                                                        for it in _cands:
+                                                            try:
+                                                                meta = it[2] if len(it) > 2 and isinstance(it[2], dict) else {}
+                                                                s = meta.get('score', None)
+                                                                s = float(s) if (s is not None) else 1.0
+                                                                if s > 0.0:
+                                                                    ws.append(s)
+                                                            except Exception:
+                                                                continue
+                                                    return ws
+                                                def _entropy_from_weights(ws):
+                                                    if not ws:
+                                                        return 0.0, 1e-6
+                                                    S = float(sum(ws))
+                                                    ps = [w / S for w in ws if w > 0.0]
+                                                    if not ps:
+                                                        return 0.0, 1e-6
+                                                    H = -sum(p * (_np.log(p + 1e-12)) for p in ps)
+                                                    K = len(ps)
+                                                    den = _np.log(K) if K >= 2 else 1e-6
+                                                    return float(H), float(den)
+                                                # Before: candidate weights only
+                                                ws_b = _cand_weights(cand_h)
+                                                H_b, den_b = _entropy_from_weights(ws_b)
+                                                # After: candidate weights + query weight
+                                                try:
+                                                    _qw_cfg = _getf(self.config, 'graph.linkset_query_weight', 1.0) if ' _getf' in locals() else 1.0
+                                                except Exception:
+                                                    _qw_cfg = 1.0
+                                                try:
+                                                    _qw_env = float(os.getenv('INSIGHTSPIKE_LINKSET_QW', 'nan'))
+                                                except Exception:
+                                                    _qw_env = float('nan')
+                                                q_w = float(_qw_env) if (_qw_env == _qw_env) else (float(_qw_cfg) if _qw_cfg is not None else 1.0)
+                                                if not (q_w > 0):
+                                                    q_w = 1.0
+                                                ws_a = list(ws_b) + [q_w]
+                                                H_a, den_a = _entropy_from_weights(ws_a)
+                                                # Paper-consistent normalization: use after-size denominator (log K_after)
+                                                den = max(den_a, 1e-6)
+                                                dh_h = float((H_a - H_b) / den)
+                                                # Debug metadata for denominator/candidate counts per hop
+                                                try:
+                                                    dbg = metrics.setdefault('debug', {})
+                                                    hop_dbg = dbg.setdefault('union_linkset', {})
+                                                    hop_dbg[int(h)] = {
+                                                        'den_before': float(den_b),
+                                                        'den_after': float(den_a),
+                                                        'cand_count': int(len(cand_h) if cand_h is not None else 0),
+                                                        'q_w': float(q_w),
+                                                    }
+                                                except Exception:
+                                                    pass
+                                            except Exception:
+                                                nx_curr2 = sub_curr
+                                                ig_res = _nx_entropy_ig(nx_curr2, fb, fa, delta_mode='after_before', fixed_den=ig_fixed_den)
+                                                dh_h = float(ig_res.get('ig_value', 0.0))
+                                            metrics.setdefault('ig_source', 'linkset')
+                                        else:
+                                            nx_curr2 = sub_curr
+                                            ig_res = _nx_entropy_ig(nx_curr2, fb, fa, delta_mode='after_before', fixed_den=ig_fixed_den)
+                                            dh_h = float(ig_res.get('ig_value', 0.0))
                                     except Exception:
                                         dh_h = float(metrics.get('delta_h', 0.0)) if isinstance(metrics.get('delta_h', None), (int, float)) else 0.0
                                     # For ΔSP, prefer hop-local candidates if provided
@@ -969,6 +1079,14 @@ class L3GraphReasoner(L3GraphReasonerInterface):
                                                     continue
                                                 if (u in nodes_set) and (v in nodes_set):
                                                     rem.append((u, v, item[2] if len(item) > 2 and isinstance(item[2], dict) else {}))
+                                            try:
+                                                dbg = metrics.setdefault('debug', {})
+                                                hop_dbg = dbg.setdefault('union_linkset', {})
+                                                rec = hop_dbg.setdefault(int(h), {})
+                                                rec['cand_count_total'] = int(len(cand_for_sp) if cand_for_sp is not None else 0)
+                                                rec['cand_used'] = int(len(rem))
+                                            except Exception:
+                                                pass
                                             if not rem:
                                                 # fallback to between-graphs
                                                 sp_h = cache.estimate_sp_between_graphs(sig=sig_h, g_before=sub_prev, g_after=sub_curr)
@@ -1063,6 +1181,20 @@ class L3GraphReasoner(L3GraphReasonerInterface):
                                     'sp_engine': 'cached_incr' if sp_engine2 == 'cached_incr' else 'cached',
                                     'sp_scope': 'union',
                                 })
+                                # debug meta for diagnostics
+                                try:
+                                    dbg = metrics.setdefault('debug', {})
+                                    dbg.setdefault('cand_counts_by_hop', {})
+                                    dbg.setdefault('mask_counts_by_hop', {})
+                                    ch = len(cand_h) if cand_h else 0
+                                    dbg['cand_counts_by_hop'][str(h)] = ch
+                                    if 'fb_mask' in locals() and 'fa_mask' in locals():
+                                        dbg['mask_counts_by_hop'][str(h)] = {
+                                            'before': int(fb_mask.sum()) if hasattr(fb_mask, 'sum') else 0,
+                                            'after': int(fa_mask.sum()) if hasattr(fa_mask, 'sum') else 0,
+                                        }
+                                except Exception:
+                                    pass
                         except Exception as _union_e:
                             logger.debug(f"union-of-k-hop adaptive eval skipped: {_union_e}")
                         # Optional cached_incr: use candidate edges for greedy ΔSP update
@@ -1347,60 +1479,123 @@ class L3GraphReasoner(L3GraphReasonerInterface):
 
             # Ensure normalized metrics are available for downstream logic
             metrics.setdefault("delta_ged_norm", abs(float(metrics.get("delta_ged", 0.0))))
-            # Compute delta_h (after-before; entropy decrease => negative). Use candidate-mask if available.
+            # Compute delta_h (after-before). Prefer linkset-based when configured, otherwise proxy graph entropy.
             try:
-                from ...metrics.pyg_compatible_metrics import pyg_to_networkx as _pyg2nx
-                from ...algorithms.core.metrics import entropy_ig as _nx_entropy_ig
                 import numpy as _np
-                def _as_np(x):
-                    try:
-                        obj = x
-                        if hasattr(obj, 'detach'):
-                            obj = obj.detach()
-                        if hasattr(obj, 'cpu'):
-                            obj = obj.cpu()
-                        if hasattr(obj, 'numpy'):
-                            return obj.numpy()
-                        return _np.asarray(obj)
-                    except Exception:
-                        return None
-                feats_b = _as_np(getattr(previous_graph, 'x', None)) if previous_graph is not None else None
-                feats_a = _as_np(getattr(current_graph, 'x', None)) if current_graph is not None else None
-                if feats_b is not None and feats_a is not None:
-                    # Build candidate mask from centers and candidate_edges
-                    mask_nodes: set[int] = set()
+                _ig_src = str(_cfg_attr(self.config, 'graph.ig_source_mode', 'graph') or 'graph').lower()
+                if _ig_src in ('linkset','paper','strict'):
+                    # linkset-based: use candidate_edges weights (+query) as distribution
+                    cand = []
                     try:
                         if isinstance(context, dict):
-                            for c in (context.get('centers') or []):
-                                try: mask_nodes.add(int(c))
-                                except Exception: pass
-                            for e in (context.get('candidate_edges') or []):
-                                if isinstance(e, (list, tuple)) and len(e) >= 2:
-                                    try:
-                                        mask_nodes.add(int(e[0])); mask_nodes.add(int(e[1]))
-                                    except Exception: pass
+                            cand = context.get('candidate_edges') or []
                     except Exception:
-                        pass
-                    fb = feats_b; fa = feats_a
-                    if mask_nodes:
-                        try:
-                            n = fb.shape[0]
-                            mask = _np.zeros(n, dtype=bool)
-                            for idx in mask_nodes:
-                                if 0 <= int(idx) < n:
-                                    mask[int(idx)] = True
-                            fb = fb.copy(); fa = fa.copy()
-                            fb[~mask] = 0.0; fa[~mask] = 0.0
-                            metrics.setdefault('h_scope', 'cand_mask')
-                        except Exception:
-                            metrics.setdefault('h_scope', 'global')
-                    else:
-                        metrics.setdefault('h_scope', 'global')
-                    nx_curr = _pyg2nx(current_graph)
-                    res_h = _nx_entropy_ig(nx_curr, fb, fa, delta_mode='after_before')
-                    metrics['delta_h'] = float(res_h.get('ig_value', 0.0))
+                        cand = []
+                    def _cand_weights(_cands):
+                        ws = []
+                        for it in (_cands or []):
+                            try:
+                                meta = it[2] if len(it) > 2 and isinstance(it[2], dict) else {}
+                                s = meta.get('score', None)
+                                s = float(s) if (s is not None) else 1.0
+                                if s > 0.0:
+                                    ws.append(s)
+                            except Exception:
+                                continue
+                        return ws
+                    def _entropy_from_weights(ws):
+                        if not ws:
+                            return 0.0, 1e-6
+                        S = float(sum(ws))
+                        ps = [w / S for w in ws if w > 0.0]
+                        if not ps:
+                            return 0.0, 1e-6
+                        H = -sum(p * (_np.log(p + 1e-12)) for p in ps)
+                        K = len(ps)
+                        den = _np.log(K) if K >= 2 else 1e-6
+                        return float(H), float(den)
+                    ws_b = _cand_weights(cand)
+                    H_b, den_b = _entropy_from_weights(ws_b)
+                    # query weight
+                    try:
+                        _qw_env = float(os.getenv('INSIGHTSPIKE_LINKSET_QW', 'nan'))
+                    except Exception:
+                        _qw_env = float('nan')
+                    try:
+                        _qw_cfg = float(_cfg_attr(self.config, 'graph.linkset_query_weight', 1.0) or 1.0)
+                    except Exception:
+                        _qw_cfg = 1.0
+                    q_w = float(_qw_env) if (_qw_env == _qw_env) else _qw_cfg
+                    if not (q_w > 0):
+                        q_w = 1.0
+                    ws_a = list(ws_b) + [q_w]
+                    H_a, den_a = _entropy_from_weights(ws_a)
+                    # Use after-size normalization (log K_after)
+                    den = max(den_a, 1e-6)
+                    metrics['delta_h'] = float((H_a - H_b) / den)
+                    metrics.setdefault('h_scope', 'linkset')
+                    metrics.setdefault('ig_source', 'linkset')
+                    metrics.setdefault('linkset_entropy_before', float(H_b))
+                    metrics.setdefault('linkset_entropy_after', float(H_a))
                 else:
-                    metrics.setdefault('delta_h', 0.0)
+                    # proxy graph entropy (local similarity diversity)
+                    from ...algorithms.core.metrics import entropy_ig as _nx_entropy_ig
+                    def _as_np(x):
+                        try:
+                            obj = x
+                            if hasattr(obj, 'detach'):
+                                obj = obj.detach()
+                            if hasattr(obj, 'cpu'):
+                                obj = obj.cpu()
+                            if hasattr(obj, 'numpy'):
+                                return obj.numpy()
+                            return _np.asarray(obj)
+                        except Exception:
+                            return None
+                    feats_b = _as_np(getattr(previous_graph, 'x', None)) if previous_graph is not None else None
+                    feats_a = _as_np(getattr(current_graph, 'x', None)) if current_graph is not None else None
+                    if feats_b is not None and feats_a is not None:
+                        mask_nodes: set[int] = set()
+                        try:
+                            if isinstance(context, dict):
+                                for c in (context.get('centers') or []):
+                                    try: mask_nodes.add(int(c))
+                                    except Exception: pass
+                                for e in (context.get('candidate_edges') or []):
+                                    if isinstance(e, (list, tuple)) and len(e) >= 2:
+                                        try:
+                                            mask_nodes.add(int(e[0])); mask_nodes.add(int(e[1]))
+                                        except Exception: pass
+                        except Exception:
+                            pass
+                        fb = feats_b; fa = feats_a
+                        if mask_nodes:
+                            try:
+                                n_b = fb.shape[0]; n_a = fa.shape[0]
+                                fb_mask = _np.zeros(n_b, dtype=bool)
+                                fa_mask = _np.zeros(n_a, dtype=bool)
+                                for idx in mask_nodes:
+                                    i = int(idx)
+                                    if 0 <= i < n_b:
+                                        fb_mask[i] = True
+                                    if 0 <= i < n_a:
+                                        fa_mask[i] = True
+                                fb = fb.copy(); fa = fa.copy()
+                                fb[~fb_mask] = 0.0; fa[~fa_mask] = 0.0
+                                metrics.setdefault('h_scope', 'cand_mask')
+                            except Exception:
+                                metrics.setdefault('h_scope', 'global')
+                        else:
+                            metrics.setdefault('h_scope', 'global')
+                        try:
+                            from ...metrics.pyg_compatible_metrics import pyg_to_networkx as _pyg2nx
+                            nx_curr = _pyg2nx(current_graph)
+                        except Exception:
+                            nx_curr = None
+                        res_h = _nx_entropy_ig(nx_curr if nx_curr is not None else None, fb, fa, delta_mode='after_before')
+                        metrics['delta_h'] = float(res_h.get('ig_value', 0.0))
+                    else:
+                        metrics.setdefault('delta_h', 0.0)
             except Exception:
                 metrics.setdefault('delta_h', float(metrics.get('delta_h', 0.0)))
             metrics.setdefault("delta_sp", 0.0)

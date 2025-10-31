@@ -132,7 +132,8 @@ def eval_query_centric_via_l3(
 
     # Call L3
     from insightspike.implementations.layers.layer3_graph_reasoner import L3GraphReasoner
-    l3 = L3GraphReasoner()
+    # Force union scope + linkset-based ΔH for A/B寄せの比較
+    l3 = L3GraphReasoner(config={'graph': {'sp_scope_mode': 'union', 'ig_source_mode': 'linkset', 'allow_autocand': False}})
     context = {
         'graph': data_curr,
         'previous_graph': data_prev,

@@ -15,6 +15,7 @@
     - 予算制御: `graph.cached_incr_budget` または ENV `INSIGHTSPIKE_SP_BUDGET`
   - 候補が無い場合は自動で `cached` にフォールバック
   - 追加: 候補未提供時は L3 内で `graph.x` と `centers` から自動提案（Top‑K/θ_link）
+  - 追加: L3（global, 非‐union）経路で `sp_before`/`sp_after` を metrics に格納（UIの H/SP 列と整合）
 - NormSpec（ノルム仕様）の受け渡し
   - NormalizedConfig で `graph.norm_spec` を提供し、ExplorationLoop が `context['norm_spec']` に格納
   - L3 は metrics に `norm_spec` をエコー（再現性のため）
@@ -35,6 +36,7 @@
   - 小規模グラフで `core` vs `cached_incr` の順位相関/劣化しないことの保証
   - 空/重複/無効候補、budget > |Ecand| 等のエッジケース
   - L2→L3 結合テスト（centers/candidate_edges/norm_spec 伝播のE2E）
+  - L3‐union デバッグ（cand_used/cand_total）を JSON に反映して HTML の hop 表に表示（現在は列のみ追加済み）
 
 ---
 
@@ -45,6 +47,7 @@
 - ドキュメント更新（仕様・アーキテクチャ・図）
   - `doc/development/l1l2_l3_sp_engine_spec.md` へ進捗反映済み（NormSpec 伝播/自動候補）
   - `docs/api-reference/*` と `docs/architecture/*` に SPエンジン切替と NormSpec データフローを追記
+  - 迷路 HTML（`query_interactive_template.html`）に `cand_used`/`cand_total` 列を追加（L3‐union デバッグ可視化の受け皿）
 - 実行ログの軽量化
   - DIAGログ（import markers）と通常ログの切り分け、既定 INFO の静穏化
 

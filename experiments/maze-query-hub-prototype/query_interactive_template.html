@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <title>Maze Fixed K★ Playback</title>
+  <title>Maze Report v-SPfix-2</title>
   <style>
     :root { color-scheme: light; }
     body {
@@ -176,7 +176,7 @@
         <table class="cand-table" id="cand-table"></table>
       </div>
       <div class="card" id="hop-card">
-        <h3>Per-hop Metrics (g(h), ΔGED, IG, H, ΔSP)</h3>
+        <h3>Per-hop Metrics (g(h), ΔEPC, IG, H, ΔSP)</h3>
         <div class="note">0hop から maxhop までの評価値を表示します。</div>
         <table class="cand-table" id="hop-table"></table>
       </div>
@@ -2396,15 +2396,15 @@ window.addEventListener('error', (event) => {
         return Number.isFinite(v) ? v : 0;
       };
       const minHop = (key, fromHop = 1) => {
-        if (!hopSeries.length) return 0;
+        if (!hopSeries.length) return NaN; // no series
         const series = hopSeries.filter(s => Number(s.hop ?? 0) >= fromHop);
-        if (!series.length) return 0;
+        if (!series.length) return NaN;    // no entries beyond hop0
         let m = Number.POSITIVE_INFINITY;
         for (const s of series) {
           const v = Number(s?.[key]);
           if (Number.isFinite(v) && v < m) m = v;
         }
-        return (m === Number.POSITIVE_INFINITY) ? 0 : m;
+        return (m === Number.POSITIVE_INFINITY) ? NaN : m;
       };
       const cs = rec.candidate_selection || {};
       const pool = rec.candidate_pool || [];
@@ -2431,7 +2431,8 @@ window.addEventListener('error', (event) => {
         return Number.isFinite(n) ? n : fb;
       };
       const linksetBoxes = `
-        <div class="step-box"><h4>ΔGED (linkset) / ΔIG (linkset)</h4><span>${fmt(asNum(rec.linkset_delta_ged))} / ${fmt(asNum(rec.linkset_delta_h))}</span></div>
+        <div class="step-box"><h4>ΔEPC (linkset) / ΔIG (linkset)</h4><span>${fmt(asNum(rec.linkset_delta_ged))} / ${fmt(asNum(rec.linkset_delta_h))}</span></div>
+        <div class="step-box"><h4>H_before / H_after (linkset)</h4><span>${fmt(asNum(rec.linkset_entropy_before))} / ${fmt(asNum(rec.linkset_entropy_after))}</span></div>
         <div class="step-box"><h4>ΔSP (linkset)</h4><span>${fmt(asNum(rec.linkset_delta_sp))}</span></div>
         <div class="step-box"><h4>g₀ (linkset)</h4><span>${fmt(asNum(rec.linkset_g))}</span></div>
         <div class="step-box"><h4>|S_linkset|</h4><span>${linksetSize}</span></div>
@@ -2451,7 +2452,7 @@ window.addEventListener('error', (event) => {
         <div class="step-box"><h4>Step</h4><span>${rec.step}</span></div>
         <div class="step-box"><h4>Status</h4><span>${status}</span></div>
         <div class="step-box"><h4>g₀ / g_min</h4><span>${fmt(rec.g0)} / ${fmt(rec.gmin)}</span></div>
-        <div class="step-box"><h4>ΔGED / ΔIG</h4><span>${fmt(rec.delta_ged)} / ${fmt(rec.delta_ig)}</span></div>
+        <div class="step-box"><h4>ΔEPC / ΔIG</h4><span>${fmt(rec.delta_ged)} / ${fmt(rec.delta_ig)}</span></div>
         <div class="step-box"><h4>ΔGED (min) / ΔIG (min)</h4><span>${fmt(gedMinDisplay)} / ${fmt(igMinDisplay)}</span></div>
         <div class="step-box"><h4>ΔSP / ΔSP (min)</h4><span>${fmt(sp0)} / ${fmt(spMinDisplay)}</span></div>
         <div class="step-box"><h4>θAG (auto/q/len)</h4><span>${fmt(Number(rec.theta_ag ?? 0))} / ${fmt(Number(rec.ag_quantile ?? 0),2)} / ${Number(rec.g0_history_len ?? 0)}</span></div>
@@ -2573,11 +2574,8 @@ window.addEventListener('error', (event) => {
         hopTable.innerHTML = '<p class="cand-placeholder">hop情報がありません</p>';
         if (spDebugTable) spDebugTable.innerHTML = '<p class="cand-placeholder">SP診断なし</p>';
       } else {
-        let list = hs.filter(s => Number(s.hop ?? 0) >= 1);
-        if (!list.length) {
-          // Fallback: show hop0 only if multi-hop skipped
-          list = hs.slice(0, 1);
-        }
+        // Show hop0..H (include g0 row)
+        let list = hs.slice();
         const rowsHop = list.map(s => {
           const hop = Number(s.hop ?? 0);
           const g = Number(s.g ?? 0).toFixed(6);
@@ -2585,10 +2583,18 @@ window.addEventListener('error', (event) => {
           const ig = Number(s.ig ?? 0).toFixed(6);
           const h = Number(s.h ?? 0).toFixed(6);
           const sp = Number(s.sp ?? 0).toFixed(6);
-          return `<tr><td>${hop}</td><td>${g}</td><td>${ged}</td><td>${ig}</td><td>${h}</td><td>${sp}</td></tr>`;
+          const hb = Number(s.h_before ?? (rec.linkset_entropy_before ?? NaN));
+          const ha = Number(s.h_after ?? (rec.linkset_entropy_after ?? NaN));
+          const spb = Number(s.sp_before ?? (rec.sp_before ?? NaN));
+          const spa = Number(s.sp_after ?? (rec.sp_after ?? NaN));
+          const cu = (s.cand_used !== undefined) ? Number(s.cand_used) : NaN;
+          const ct = (s.cand_count_total !== undefined) ? Number(s.cand_count_total) : ((s.cand_total !== undefined) ? Number(s.cand_total) : NaN);
+          const fmt6 = v => Number.isFinite(v) ? v.toFixed(6) : '—';
+          const fmtI = v => Number.isFinite(v) ? String(v) : '—';
+          return `<tr><td>${hop}</td><td>${g}</td><td>${ged}</td><td>${ig}</td><td>${h}</td><td>${sp}</td><td>${fmt6(hb)}</td><td>${fmt6(ha)}</td><td>${fmt6(spb)}</td><td>${fmt6(spa)}</td><td>${fmtI(cu)}</td><td>${fmtI(ct)}</td></tr>`;
         }).join('');
         hopTable.innerHTML = `
-          <thead><tr><th>hop</th><th>g(h)</th><th>ΔGED</th><th>IG</th><th>H</th><th>ΔSP</th></tr></thead>
+          <thead><tr><th>hop</th><th>g(h)</th><th>ΔEPC</th><th>IG</th><th>H</th><th>ΔSP</th><th>H_before</th><th>H_after</th><th>SP_before</th><th>SP_after</th><th>cand_used</th><th>cand_total</th></tr></thead>
           <tbody>${rowsHop}</tbody>
         `;
         const sd = Array.isArray(rec.sp_diagnostics) ? rec.sp_diagnostics : [];

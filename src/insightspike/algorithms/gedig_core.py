@@ -494,22 +494,40 @@ class GeDIGCore:
         decision = linkset_info.get('decision') or {}
         chosen_index = decision.get('index')
         query_entry = linkset_info.get('query_entry')
+        base_mode = str(linkset_info.get('base_mode', 'link') or 'link').lower()
         if query_entry is not None:
             query_entry = dict(query_entry)
 
-        # Build before/after sets based on unique candidate indices
+        # Build before/after sets based on base_mode and unique candidate indices
         before_map: Dict[str, Dict[str, Any]] = {}
         chosen_entry: Optional[Dict[str, Any]] = None
+        # Helper to push items into before_map
+        def _add_before_items(items: List[Dict[str, Any]]):
+            nonlocal chosen_entry
+            for item in items:
+                idx = item.get('index')
+                if not idx:
+                    continue
+                key = str(idx)
+                snap = dict(item)
+                before_map.setdefault(key, snap)
+                if chosen_entry is None and idx == chosen_index:
+                    chosen_entry = snap
 
-        for item in s_link:
-            idx = item.get('index')
-            if not idx:
-                continue
-            key = str(idx)
-            snap = dict(item)
-            before_map.setdefault(key, snap)
-            if chosen_entry is None and idx == chosen_index:
-                chosen_entry = snap
+        if base_mode in ('mem','pool'):
+            # Use candidate_pool as base for entropy: mem-only or full pool
+            if base_mode == 'mem':
+                base_items = [dict(it) for it in candidate_pool if (it.get('origin') == 'mem')]
+            else:
+                base_items = [dict(it) for it in candidate_pool]
+            # Fallback to s_link if pool is empty
+            if base_items:
+                _add_before_items(base_items)
+            else:
+                _add_before_items([dict(it) for it in s_link])
+        else:
+            # Default: use s_link as base
+            _add_before_items([dict(it) for it in s_link])
 
         if chosen_entry is None:
             for item in candidate_pool:
@@ -562,18 +580,26 @@ class GeDIGCore:
         denom = 1.0 + len(after_list)
         delta_ged_norm = raw_ged / denom if denom > 0 else 0.0
 
-        def _entropy(items: List[Dict[str, Any]]) -> float:
-            weights = [item.get('similarity', 0.0) or 0.0 for item in items]
-            weights = [w for w in weights if w > 0]
+        def _weights(items: List[Dict[str, Any]]) -> List[float]:
+            ws = [item.get('similarity', 0.0) or 0.0 for item in items]
+            return [float(w) for w in ws if w > 0.0]
+        def _entropy_from_weights(weights: List[float]) -> float:
             if not weights:
                 return 0.0
             total = sum(weights)
+            if total <= 0:
+                return 0.0
             probabilities = [w / total for w in weights]
             return -sum(p * math.log(p + 1e-12) for p in probabilities)
 
-        H_before = _entropy(before_list)
-        H_after = _entropy(after_list)
-        norm_den = math.log(len(after_list) + 1.0) if len(after_list) >= 0 else 1.0
+        ws_before = _weights(before_list)
+        ws_after = _weights(after_list)
+        H_before = _entropy_from_weights(ws_before)
+        H_after = _entropy_from_weights(ws_after)
+        # Paper-consistent normalization: log K with K = |after|
+        # Guard: if K < 2, denominator approaches 0 -> clamp with epsilon
+        K = max(0, len(after_list))
+        norm_den = math.log(K) if K >= 2 else 1e-6
         # Fixed orientation: after-before (entropy decrease => negative)
         delta_h_norm = (H_after - H_before) / norm_den if norm_den > 0 else 0.0
         delta_sp_rel = 0.0
@@ -587,6 +613,9 @@ class GeDIGCore:
         lambda_term = self.lambda_weight * ig_for_lambda
         g_value = float(delta_ged_norm - lambda_term)
 
+        # Diagnostics: weight counts and top weights (descending)
+        topw_b = sorted(ws_before, reverse=True)[:5] if ws_before else []
+        topw_a = sorted(ws_after, reverse=True)[:5] if ws_after else []
         return LinksetMetrics(
             delta_ged_norm=float(delta_ged_norm),
             delta_h_norm=float(delta_h_norm),
@@ -601,6 +630,10 @@ class GeDIGCore:
             before_size=len(before_list),
             after_size=len(after_list),
             query_similarity=float(query_entry.get('similarity', 1.0)),
+            pos_w_before=int(len(ws_before)),
+            pos_w_after=int(len(ws_after)),
+            topw_before=topw_b,
+            topw_after=topw_a,
         )
 
     # ------------ Multi-hop ------------
@@ -1937,3 +1970,8 @@ class LinksetMetrics:
     before_size: int
     after_size: int
     query_similarity: float
+    # Diagnostics: positive-weight counts and top weights (before/after)
+    pos_w_before: int = 0
+    pos_w_after: int = 0
+    topw_before: list[float] | None = None
+    topw_after: list[float] | None = None
