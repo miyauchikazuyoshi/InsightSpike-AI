@@ -1066,6 +1066,15 @@ class L3GraphReasoner(L3GraphReasonerInterface):
                                         cand_for_sp = cand_by_hop.get(h)
                                     if not cand_for_sp:
                                         cand_for_sp = cand_edges
+                                    # Ensure debug bucket exists and record zero counts by default
+                                    try:
+                                        dbg = metrics.setdefault('debug', {})
+                                        hop_dbg = dbg.setdefault('union_linkset', {})
+                                        rec = hop_dbg.setdefault(int(h), {})
+                                        rec.setdefault('cand_count_total', int(len(cand_for_sp) if cand_for_sp is not None else 0))
+                                        rec.setdefault('cand_used', 0)
+                                    except Exception:
+                                        pass
                                     if sp_engine2 == 'cached_incr' and cand_for_sp:
                                         # Greedy sequential on sub_prev with filtered candidates
                                         try:
@@ -1080,9 +1089,6 @@ class L3GraphReasoner(L3GraphReasonerInterface):
                                                 if (u in nodes_set) and (v in nodes_set):
                                                     rem.append((u, v, item[2] if len(item) > 2 and isinstance(item[2], dict) else {}))
                                             try:
-                                                dbg = metrics.setdefault('debug', {})
-                                                hop_dbg = dbg.setdefault('union_linkset', {})
-                                                rec = hop_dbg.setdefault(int(h), {})
                                                 rec['cand_count_total'] = int(len(cand_for_sp) if cand_for_sp is not None else 0)
                                                 rec['cand_used'] = int(len(rem))
                                             except Exception:

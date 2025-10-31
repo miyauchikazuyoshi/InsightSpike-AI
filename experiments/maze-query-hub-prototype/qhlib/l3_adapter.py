@@ -100,31 +100,37 @@ def eval_query_centric_via_l3(
     cand_by_hop_idx: Dict[int, List[Tuple[int,int,Dict[str,Any]]]] | None = None
     try:
         import networkx as nx
-        # expand from centers over curr_graph
-        def k_hop_nodes(G: Any, srcs: Sequence[Any], k: int) -> set[int]:
-            seen: set[int] = set()
+        # Expand from centers over NX graph, then map to index-space via idx_map
+        def k_hop_nodes_idx(G: Any, srcs: Sequence[Any], k: int, to_idx: Dict[Any, int]) -> set[int]:
             from collections import deque
+            seen_nodes: set[Any] = set()
             dq = deque()
             for c in srcs:
                 if c in G:
-                    seen.add(int(c)); dq.append((int(c), 0))
+                    seen_nodes.add(c); dq.append((c, 0))
             while dq:
                 u, d = dq.popleft()
                 if d >= k:
                     continue
-                for v in G.neighbors(u):
-                    iv = int(v)
-                    if iv not in seen:
-                        seen.add(iv); dq.append((iv, d+1))
-            return seen
+                try:
+                    for v in G.neighbors(u):
+                        if v not in seen_nodes:
+                            seen_nodes.add(v); dq.append((v, d+1))
+                except Exception:
+                    continue
+            out: set[int] = set()
+            for n in seen_nodes:
+                if n in to_idx:
+                    out.add(int(to_idx[n]))
+            return out
         cand_by_hop_idx = {}
         centers_set = set(centers or [])
         for h in range(0, max(0, int(max_hops)) + 1):
-            nodes_h = k_hop_nodes(curr_graph, list(centers_set), h)
+            nodes_h_idx = k_hop_nodes_idx(curr_graph, list(centers_set), h, idx_map)
             hop_list: List[Tuple[int,int,Dict[str,Any]]] = []
             if cand_idx:
-                for (u,v,meta) in cand_idx:
-                    if (u in nodes_h) and (v in nodes_h):
+                for (u, v, meta) in cand_idx:
+                    if (u in nodes_h_idx) and (v in nodes_h_idx):
                         hop_list.append((u, v, meta))
             cand_by_hop_idx[h] = hop_list
     except Exception:

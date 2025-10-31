@@ -1663,6 +1663,18 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                         "h": float(m.get('delta_h', delta_ig)),
                         "sp": delta_sp
                     }]
+                    # Enrich hop0 with SP_before/after if provided by L3 (global path)
+                    try:
+                        sp_b = float(m.get('sp_before', 0.0))
+                    except Exception:
+                        sp_b = 0.0
+                    try:
+                        # Prefer L3-provided sp_after, otherwise fallback to ΔSP semantics
+                        sp_a = float(m.get('sp_after', delta_sp))
+                    except Exception:
+                        sp_a = max(0.0, sp_b * (1.0 - delta_sp))
+                    hop_series[0]['sp_before'] = float(sp_b)
+                    hop_series[0]['sp_after'] = float(sp_a)
                     records_h = [(0, gmin, float(m.get('delta_ged_norm', abs(delta_ged))), delta_ig, delta_sp)]
                     chosen_edges_by_hop = []
                     # SP perf counters are not available from L3 in this mode
@@ -1770,6 +1782,37 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                 ged_mh_val = float(eval_res.delta_ged_min_mh)
                 ig_mh_val = float(eval_res.delta_ig_min_mh)
                 sp_mh_val = float(eval_res.delta_sp_min_mh)
+                # Precompute cand_used/cand_total per hop from ecand and union-of-k-hop node sets
+                cand_stats = {}
+                try:
+                    def _union_nodes(G, anchors_core, anchors_top, hop: int):
+                        sub = _union_khop_subgraph(G, anchors_core, anchors_top, max(1, int(hop)))
+                        return set(sub.nodes())
+                    # Build quick mapping of chosen edges per hop (if available)
+                    chosen_map = {}
+                    try:
+                        for (eu, ev) in chosen_edges_by_hop:
+                            for rec_h in hop_series:
+                                h = int(rec_h.get('hop', 0))
+                                if h >= 1:
+                                    chosen_map.setdefault(h, set()).add((eu, ev))
+                    except Exception:
+                        chosen_map = {}
+                    for rec_h in hop_series:
+                        h = int(rec_h.get('hop', 0))
+                        try:
+                            nodes_h = _union_nodes(g_before_for_expansion, anchors_core, anchors_top_before, h)
+                            total = 0; used = 0
+                            for (u, v, _meta) in (ecand or []):
+                                if (u in nodes_h) and (v in nodes_h):
+                                    total += 1
+                                    if (h in chosen_map) and (((u, v) in chosen_map[h]) or ((v, u) in chosen_map[h])):
+                                        used += 1
+                            cand_stats[h] = { 'total': int(total), 'used': int(used) }
+                        except Exception:
+                            continue
+                except Exception:
+                    cand_stats = {}
             t_eval_ms = (time.perf_counter() - t_eval_run_start) * 1000.0
             # best-hop deltas for display
             try:
@@ -1848,8 +1891,16 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
             if sp_bef is not None:
                 row["sp_before"] = float(sp_bef)
             if sp_bef is not None:
-                # Derive SP_after directly from reported ΔSP: La_eff = Lb*(1-ΔSP)
-                row["sp_after"] = float(max(0.0, float(sp_bef) * (1.0 - float(sp))))
+                # Fixed-before pairset: SP_before ≈ 0, SP_after = ΔSP
+                row["sp_after"] = float(max(0.0, float(sp)))
+            try:
+                if 'cand_stats' in locals():
+                    cs = cand_stats.get(int(h))
+                    if cs:
+                        row['cand_count_total'] = int(cs.get('total', 0))
+                        row['cand_used'] = int(cs.get('used', 0))
+            except Exception:
+                pass
             hop_series.append(row)
         # Ensure hop0 carries SP_before/after (evaluate_multihop 経由では未設定な場合がある)
         try:
