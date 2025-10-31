@@ -399,6 +399,7 @@ def config(
             console.print("  - experiment: For running experiments")
             console.print("  - production: Production deployment")
             console.print("  - research: Academic research configuration")
+            console.print("  - cloud: Ultra-light, mock LLM, no heavy deps")
 
         elif action == "preset":
             valid_presets = [

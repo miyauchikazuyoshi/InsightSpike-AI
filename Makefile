@@ -39,6 +39,11 @@ pytest-gedig-pure:
 	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 INSIGHTSPIKE_MIN_IMPORT=1 INSIGHTSPIKE_LITE_MODE=1 PYTHONPATH=src \
 		pytest -k "gedig_pure_api" -q
 
+# Codex Cloud smoke: tiny, deterministic subset
+.PHONY: codex-smoke
+codex-smoke:
+	bash scripts/codex_smoke.sh
+
 # Clean build artifacts
 clean:
 	rm -rf build/

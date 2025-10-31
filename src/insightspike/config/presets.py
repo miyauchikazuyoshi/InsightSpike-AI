@@ -189,6 +189,55 @@ class ConfigPresets:
                 log_to_console=True,
             ),
         )
+
+    @staticmethod
+    def cloud() -> InsightSpikeConfig:
+        """Cloud/testing preset — ultra‑light, mock LLM, conservative logging.
+
+        Notes:
+        - Uses mock LLM to avoid network.
+        - Disables GNN and heavy graph options.
+        - Keeps small memory sizes and safe thresholds.
+        - Environment is set to 'testing' to match allowed values.
+        """
+        return InsightSpikeConfig(
+            pre_warm_models=False,
+            environment="testing",
+            llm=LLMConfig(
+                provider="mock",
+                model="mock",
+                temperature=0.2,
+                max_tokens=128,
+                prompt_style="standard",
+                max_context_docs=3,
+            ),
+            memory=MemoryConfig(
+                episodic_memory_capacity=40,
+                max_retrieved_docs=8,
+                similarity_threshold=0.3,
+            ),
+            embedding=EmbeddingConfig(
+                model_name="sentence-transformers/all-MiniLM-L6-v2",
+                dimension=384,
+            ),
+            graph=GraphConfig(
+                spike_ged_threshold=-0.5,
+                spike_ig_threshold=0.2,
+                similarity_threshold=0.3,
+                use_gnn=False,
+                ged_algorithm="advanced",
+                ig_algorithm="advanced",
+            ),
+            monitoring=MonitoringConfig(
+                enabled=False,
+                performance_tracking=False,
+            ),
+            logging=LoggingConfig(
+                level="WARNING",
+                file_path="logs",
+                log_to_console=True,
+            ),
+        )
     
     @staticmethod
     def production_optimized() -> InsightSpikeConfig:
@@ -250,6 +299,7 @@ class ConfigPresets:
             "experiment": ConfigPresets.experiment(),
             "production": ConfigPresets.production(),
             "research": ConfigPresets.research(),
+            "cloud": ConfigPresets.cloud(),
             "production_optimized": ConfigPresets.production_optimized(),
             "minimal": ConfigPresets.minimal(),
             "graph_enhanced": ConfigPresets.graph_enhanced(),
