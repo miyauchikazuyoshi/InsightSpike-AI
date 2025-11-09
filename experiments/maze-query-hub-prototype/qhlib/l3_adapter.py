@@ -53,12 +53,14 @@ def eval_query_centric_via_l3(
     curr_graph,  # nx.Graph
     centers: Sequence[Any] | None,
     cand_edges: Sequence[Tuple[Any, Any, Dict[str, Any]]] | None,
+    selection_summary: Dict[str, Any] | None = None,
     sp_engine: str = "cached_incr",
     pair_samples: int = 200,
     budget: int = 1,
     cand_topk: int = 0,
     default_dim: int = 8,
     max_hops: int = 3,
+    lambda_weight: float | None = None,
 ) -> Dict[str, Any]:
     """Use main L3GraphReasoner to compute query-centric metrics between two NX graphs.
 
@@ -136,10 +138,26 @@ def eval_query_centric_via_l3(
     except Exception:
         cand_by_hop_idx = None
 
-    # Call L3
+    # Optional: inject λ (information temperature) for consistency with evaluator/core
+    if lambda_weight is not None:
+        os.environ['INSIGHTSPIKE_GEDIG_LAMBDA'] = str(float(lambda_weight))
+
+    # Call L3 with a paper-aligned overlay
     from insightspike.implementations.layers.layer3_graph_reasoner import L3GraphReasoner
-    # Force union scope + linkset-based ΔH for A/B寄せの比較
-    l3 = L3GraphReasoner(config={'graph': {'sp_scope_mode': 'union', 'ig_source_mode': 'linkset', 'allow_autocand': False}})
+    l3 = L3GraphReasoner(config={
+        'graph': {
+            'sp_scope_mode': 'union',
+            'ig_source_mode': 'linkset',
+            'ged_norm_scheme': 'candidate_base',
+            'sp_eval_mode': 'fixed_before_pairs',
+            'linkset_query_weight': 1.0,
+            'allow_autocand': False,
+        },
+        'metrics': {
+            'ig_denominator': 'fixed_kstar',
+            'use_local_normalization': True,
+        },
+    })
     context = {
         'graph': data_curr,
         'previous_graph': data_prev,
@@ -147,5 +165,22 @@ def eval_query_centric_via_l3(
         'candidate_edges': cand_idx,
         'candidate_edges_by_hop': cand_by_hop_idx,
     }
+    # Provide candidate_selection so ΔH denominator can be fixed to log k★
+    if selection_summary is not None:
+        cs = {}
+        try:
+            k_val = int(selection_summary.get('k_star') or 0)
+            cs['k_star'] = k_val
+            if 'log_k_star' in selection_summary and selection_summary['log_k_star'] is not None:
+                cs['log_k_star'] = float(selection_summary['log_k_star'])
+            elif k_val >= 1:
+                import math as _math
+                cs['log_k_star'] = float(_math.log(float(k_val)))
+            # optional l1_candidates to guide local normalization
+            cs['l1_candidates'] = int(selection_summary.get('l1_candidates', k_val) or k_val)
+        except Exception:
+            pass
+        if cs:
+            context['candidate_selection'] = cs
     res = l3.analyze_documents([], context)  # docs unused when graph provided
     return res

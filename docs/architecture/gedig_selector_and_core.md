@@ -2,11 +2,12 @@
 
 This document summarizes the canonical geDIG entrypoint, the refactored core, and the supporting guardrails.
 
-## Canonical Entry
+## Canonical Entry (Linkset‑First)
 
 - Single entry: `insightspike.algorithms.gedig.selector.compute_gedig(G_prev, G_curr, *, mode)`
   - `mode`: `pure | full | ab`
   - Side‑effect free; A/B logging is opt‑in via writer injection
+  - For `mode='full'`, the selector supplies a minimal `linkset_info` to the Core. Callers that invoke the Core directly should pass `linkset_info` explicitly to avoid graph‑IG fallback (deprecated).
 
 ## Core Composition
 
@@ -36,4 +37,3 @@ This document summarizes the canonical geDIG entrypoint, the refactored core, an
 
 - `INSIGHTSPIKE_STRICT_PROVIDER=1` forbids legacy/fallback provider initialization
 - Direct Local/Ollama initializers are deprecated and scheduled for removal after two stable releases
-

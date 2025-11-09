@@ -1165,7 +1165,15 @@ class GraphManager:
             use_multihop_sp_gain=use_sp_gain,
             sp_norm_mode=sp_mode,
         )
-        res = core.calculate(g_prev=g_before, g_now=g_after, l1_candidates=l1_count)
+        try:
+            from insightspike.algorithms.linkset_adapter import build_linkset_info as _build_ls  # type: ignore
+        except Exception:
+            _build_ls = None  # type: ignore
+        ls = _build_ls(s_link=[], candidate_pool=[], decision={}, query_vector=None, base_mode="link") if _build_ls else None
+        if ls is not None:
+            res = core.calculate(g_prev=g_before, g_now=g_after, l1_candidates=l1_count, linkset_info=ls)
+        else:
+            res = core.calculate(g_prev=g_before, g_now=g_after, l1_candidates=l1_count)
         out: Dict[int, Dict[str, float]] = {}
         hops = sorted(res.hop_results.keys()) if res.hop_results else []  # type: ignore
         for h in hops:

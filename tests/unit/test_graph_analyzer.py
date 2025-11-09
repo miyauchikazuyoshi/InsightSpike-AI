@@ -15,6 +15,8 @@ from unittest.mock import Mock, patch
 import numpy as np
 import pytest
 import torch
+import pytest
+pytest.importorskip("torch_geometric")
 from torch_geometric.data import Data
 
 from insightspike.features.graph_reasoning.graph_analyzer import GraphAnalyzer

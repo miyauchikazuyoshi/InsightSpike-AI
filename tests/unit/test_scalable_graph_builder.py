@@ -11,6 +11,8 @@ import pytest
 # Handle optional imports
 try:
     import torch
+    import pytest
+    pytest.importorskip("torch_geometric")
     from torch_geometric.data import Data
     TORCH_AVAILABLE = True
 except ImportError:

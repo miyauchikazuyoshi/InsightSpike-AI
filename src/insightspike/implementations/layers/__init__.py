@@ -22,14 +22,10 @@ except ImportError:
     GRAPH_REASONER_AVAILABLE = False
 
 # Layer 4: Language Interface (Broca's/Wernicke's areas analog)
-from .layer4_llm_interface import (
-    L4LLMInterface,
-    LLMConfig,
-    LLMProviderType,
-    get_llm_provider,
-)
+# Heavy imports are deferred to attribute access to avoid import-time issues
+# in lightweight test environments that stub out torch/torch_geometric.
 
-# Supporting components
+# Supporting components (lightweight)
 from .scalable_graph_builder import ScalableGraphBuilder
 
 # from .layer4_prompt_builder import PromptBuilder  # Temporarily disabled due to missing interfaces module
@@ -46,7 +42,7 @@ __all__ = [
     # Layer 3
     "L3GraphReasoner",
     "GRAPH_REASONER_AVAILABLE",
-    # Layer 4
+    # Layer 4 (lazy)
     "L4LLMInterface",
     "LLMConfig",
     "LLMProviderType",
@@ -55,3 +51,24 @@ __all__ = [
     # Supporting
     "ScalableGraphBuilder",
 ]
+
+
+def __getattr__(name):  # PEP 562 lazy attribute access for heavy L4 imports
+    if name in {"L4LLMInterface", "LLMConfig", "LLMProviderType", "get_llm_provider"}:
+        try:
+            from .layer4_llm_interface import (
+                L4LLMInterface as _L4,
+                LLMConfig as _Cfg,
+                LLMProviderType as _PT,
+                get_llm_provider as _get,
+            )
+            globals().update({
+                "L4LLMInterface": _L4,
+                "LLMConfig": _Cfg,
+                "LLMProviderType": _PT,
+                "get_llm_provider": _get,
+            })
+            return globals()[name]
+        except Exception as e:
+            raise AttributeError(f"Could not load {name}: {e}")
+    raise AttributeError(name)

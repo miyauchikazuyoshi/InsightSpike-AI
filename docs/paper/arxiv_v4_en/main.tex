@@ -1,0 +1,122 @@
+% geDIG v4 (English Draft)
+% arXiv-friendly preamble
+\pdfoutput=1
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,graphicx,booktabs}
+\usepackage{amsthm}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,shapes.geometric}
+\usepackage[hidelinks]{hyperref}
+\usepackage[nameinlink]{cleveref}
+\usepackage{microtype}
+\usepackage{siunitx}
+\usepackage{enumitem}
+\usepackage[table]{xcolor}
+\usepackage{float}
+\usepackage[a4paper,margin=1in]{geometry}
+\graphicspath{{figures/}{docs/paper/figures/}}
+
+% Build switch: ignore missing figures when compiling
+\makeatletter
+\newif\iffigs
+\figsfalse
+\iffigs\else
+  \renewcommand{\includegraphics}[2][]{\rule{0pt}{0pt}}
+\fi
+\makeatother
+
+% Theorems
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{corollary}{Corollary}[section]
+
+% Macros
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\gednorm}{\Delta\mathrm{EPC}_{\mathrm{norm}}}
+\newcommand{\ignorm}{\Delta\mathrm{IG}_{\mathrm{norm}}}
+\newcommand{\experimNote}[1]{\textcolor{red}{\textbf{[TBD: #1]}}}
+
+\title{geDIG: A One-Gauge Framework for Controlling Dynamic Knowledge Graphs}
+\author{Kazuyoshi Miyauchi\\ \small\texttt{miyauchikazuyoshi@gmail.com}}
+\date{Draft (v4, English)}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We propose geDIG, a single-gauge ($\F$) control framework for dynamic knowledge graphs that unifies structure cost (normalized edit path cost, $\Delta$EPC) and information gain (entropy decrease and path shortening, $\Delta$IG). The two-stage gating (AG: attention, DG: decision) drives acceptance/rejection/exploration/backtrack/eviction in an event-driven manner. The design cleanly separates 0-hop novelty/error detection (FEP-side) from multi-hop compression/shortcuts (MDL-side), achieving practical anytime operation. We present results-first summaries for four experiments: (I) PoC on partial-observation mazes, (II) static RAG baselines (flat vs GraphRAG/GNN vs Graph Transformer vs geDIG-soft), (III) dynamic GRAG with PSZ (Perfect Scaling Zone), and (IV) insight-vector alignment. Finally, we formulate an operational FEP–MDL bridge and provide a thermodynamic reading (free energy) of $\F$.
+\end{abstract}
+
+\section{Introduction}
+We study when and how to accept, connect, and reuse new knowledge episodes in a dynamic knowledge graph (KG). Our core hypothesis: a single numerical gauge $\F$ can reliably drive both learning (curation) and inference (retrieval/use).
+
+\paragraph{One-Gauge and Two-Stage Gates}
+We define
+\begin{equation}
+  \F = \gednorm - \lambda\,\ignorm,\quad \ignorm = \Delta H_{\mathrm{norm}} + \gamma\,\Delta\mathrm{SP}_{\mathrm{rel}},
+\end{equation}
+where $\lambda$ sets the information temperature and $\gamma$ balances entropy vs path-efficiency. AG (attention) triggers on high 0-hop novelty/error; DG (decision) commits only when multi-hop gain is confirmed (shortcuts/compression).
+
+\paragraph{Contributions (short)}
+\begin{itemize}[leftmargin=1.2em]
+  \item Results-first, unified control: $\F$ and two-stage gates for online acceptance/search/eviction.
+  \item Static and dynamic RAG: clean split; dynamic metrics (PSZ, FMR) isolated in the Dynamic chapter.
+  \item Operational FEP–MDL bridge and a free-energy reading of $\F$ (engineering, not identity).
+\end{itemize}
+
+\section{Design: One Gauge and Two-Stage Gating}
+\subsection{0-hop vs Multi-hop: FEP and MDL}
+0-hop evaluates draft wiring at the query hub (novelty/error; FEP-side), while multi-hop evaluates shortcuts/compression on induced subgraphs (MDL-side). Let $g_0 = \Delta\mathrm{EPC}_{\mathrm{norm}} - \lambda\,\Delta H_{\mathrm{norm}}$ and $g_{\min}=\min_h\{\Delta\mathrm{EPC}_{\mathrm{norm}}-\lambda(\Delta H_{\mathrm{norm}}+\gamma\,\Delta\mathrm{SP}_{\mathrm{rel}}^{(h)})\}$. AG fires if $g_0>\theta_{\mathrm{AG}}$; DG fires if $\min\{g_0,g_{\min}\}\le\theta_{\mathrm{DG}}$.
+
+\subsection{Thermodynamic Reading (Metaphor)}
+We can read $\F$ as an operational free energy:
+\begin{equation}
+  U := \Delta\mathrm{EPC}_{\mathrm{norm}} - \lambda\,\gamma\,\Delta\mathrm{SP}_{\mathrm{rel}},\quad S := \Delta H_{\mathrm{norm}},\quad F := U - \lambda S,\label{eq:free_energy_en}
+\end{equation}
+so $\F$ is isomorphic to $F$ by term rearrangement. The coefficient $\lambda$ plays the role of information temperature.
+
+\section{Experiment I: Maze PoC (results-first)}
+\paragraph{Summary} geDIG achieves large reductions in exploration ratio and revisit rate, with short backtracks and near-immediate dead-end detection. Example (25×25): \experimNote{exploration 0.38, revisit 1.28, backtrack 4.3, detection 0.8, success 100\%}.
+
+\paragraph{Metrics} Primary: exploration ratio (unique/total), revisit (steps/unique), avg backtrack (AG→DG), dead-end detection delay, success rate. Secondary: Regret, SPL.
+
+\paragraph{Success Criteria} Necessary: success\,$\ge$\,95\%, AG 5–10\%, DG 2–5\%, DG/AG 30–50\%, threshold stability (train/val within 2\%). Sufficient: exploration\,$\le$\,0.40, revisit\,$\le$\,1.5, backtrack\,$\le$\,5, detection\,$\le$\,1 with significance vs Greedy Novelty (Welch+Bonferroni, $p{<}0.01$, $d{>}0.5$). Diagnostic: Regret median\,$\le$\,+5, SPL mean\,$\ge$\,0.85.
+
+\paragraph{Baselines (same conditions)} Greedy Novelty, $\varepsilon$-greedy, UCB1-like, Partially-Observed A*, and ablations (EPC-only / IG-only / no AG/DG / 0-hop only). Dijkstra/A* used as upper-bound diagnostics.
+
+\section{Experiment II: RAG Baselines (static only)}
+\paragraph{Summary} Under equal-resources, geDIG-soft (G1) improves EM/F1 by \experimNote{+2–5pt} over GT-RAG (B2), increases citation/path faithfulness by \experimNote{+5–10pt}, with comparable P50/P95 latency.
+
+\paragraph{Baselines} B0: Flat RAG (SBERT, HNSW, Top-k), B1: GraphRAG (GNN), B2: Graph Transformer, G1: B2 + geDIG-soft (sigmoid$\,(\tau\F)$ for weighting/pruning/ordering). Static-only here; dynamic is in Experiment III.
+
+\paragraph{Dataset and Protocol} 50 domains (mix of single-domain, cross-domain 2/3-hop, analogical). Sources: HotpotQA/2Wiki + curated. Equal-resources table (embedder/ANN/Top-k/LLM/temp/tokens/HW/parallelism/measurement) fixed across methods. No-peeking: train (burn-in for thresholds) / val / test split; thresholds fixed on val.
+
+\section{Experiment III: Dynamic GRAG × geDIG}
+\paragraph{Summary} With geDIG-soft applied consistently to retrieval/integration/summarization (G2), Temporal Consistency improves by \experimNote{+5–10pt}, update lag remains comparable or lower, KG contamination (FMR) decreases, and PSZ points emerge.
+
+\paragraph{Dynamic Metrics} Temporal Consistency, update lag (ingest→available), KG contamination rate (FMR, rolling), 0-hop rejection, AG/DG rates. PSZ: Acc\,$\ge$\,95\%, FMR\,$\le$\,2\%, extra P50\,$\le$\,200ms.
+
+\paragraph{Time-Series and Operating Curves} Plot $\Delta$EPC/$\Delta H$/\,$\Delta$SP/$\F$ with acceptance time-series (pending→confirmed, C-value), and Operating Curves (Acc–FMR–Latency) with PSZ band.
+
+\section{Experiment IV: Insight-Vector Alignment}
+\paragraph{Summary} Readout vectors from DG-confirmed subgraphs align with LLM answer embeddings: \experimNote{$\Delta s{=}{+}0.2x$, $p{<}0.0x$, $N{=}200$}. Baselines: random, Top-k, threshold, AG-selected.
+
+\section{FEP–MDL Bridge (operational proposition)}
+\paragraph{Definition} We call an operational correspondence a relation that (i) is proportional (not identical), (ii) has a bounded residual $O(1/N)$ under assumptions, and (iii) yields testable predictions. Under mild assumptions (normalization, bounded horizon, decomposable edits, stable entropy estimation), $\F\propto\Delta\mathrm{MDL}+O(1/N)$. The coefficient $\lambda\approx c_D/c_M$ anchors scales.
+
+\paragraph{Implications} A single control signal justifies simultaneous control of structure edits and inference. EPC on the structure side and IG on the information side avoid double counting. Ablations corroborate the roles of $\Delta H$ and $\Delta$SP.
+
+\section{Conclusion}
+We presented geDIG, a one-gauge control framework with two-stage gates, covering PoC (maze), static RAG baselines, dynamic GRAG (PSZ), and insight alignment, and provided an operational FEP–MDL bridge (free-energy reading). Future work includes Phase~2 (offline rewiring) and large-scale evaluations.
+
+\vspace{0.5em}
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

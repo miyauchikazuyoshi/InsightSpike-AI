@@ -41,6 +41,7 @@
   - Calculate geDIG (GED + IG)
   - Detect "Eureka spikes"
   - **NEW**: Auto-register high-quality insights
+  - Note: IG is Linkset‑First (paper‑aligned). When invoking the Core directly, pass `linkset_info`; otherwise a deprecated graph‑IG fallback will emit a warning.
 - **Core Innovation**: Mathematical insight modeling
 - **Insight Registration** (July 2024):
   - Automatic extraction from spike responses

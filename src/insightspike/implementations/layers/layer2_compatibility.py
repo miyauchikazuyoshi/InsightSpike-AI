@@ -97,6 +97,14 @@ class CompatibleL2MemoryManager(L2MemoryManager):
 
         # Fallback
         return -1
+
+    # Compatibility alias: some tests call l2_memory.retrieve(query_text, top_k)
+    def retrieve(self, query_text: str, top_k: int = 5):
+        try:
+            res = self.search_episodes(query_text, k=top_k)
+            return res or []
+        except Exception:
+            return []
     
     def _encode_text(self, text: str) -> np.ndarray:
         """

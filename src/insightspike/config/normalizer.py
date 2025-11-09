@@ -130,8 +130,13 @@ class ConfigNormalizer:
     @staticmethod
     def _create_embedding_config(embedding_dict: Dict[str, Any]) -> EmbeddingConfig:
         """Create EmbeddingConfig with defaults."""
+        # Treat None/empty as missing to avoid pydantic validation error when tests
+        # explicitly set model_name=None for lightweight runs.
+        model_name = embedding_dict.get('model_name')
+        if not model_name:  # None or ""
+            model_name = 'sentence-transformers/all-MiniLM-L6-v2'
         return EmbeddingConfig(
-            model_name=embedding_dict.get('model_name', 'sentence-transformers/all-MiniLM-L6-v2'),
+            model_name=model_name,
             dimension=embedding_dict.get('dimension', 384),
             batch_size=embedding_dict.get('batch_size', 32),
             normalize=embedding_dict.get('normalize', True)

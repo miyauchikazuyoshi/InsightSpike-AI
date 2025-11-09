@@ -281,10 +281,14 @@ class StepRecord:
     g0: float = 0.0
     gmin: float = 0.0
     best_hop: int = 0
-    is_dead_end: bool = False
+    # Dead-end flags: pre = before env.step(action), post = after step
+    is_dead_end: bool = False  # post-step (kept for backward compat)
+    is_dead_end_pre: bool = False
     reward: float = 0.0
     done: bool = False
+    # possible_moves: pre-step (before action). For clarity, also store post-step.
     possible_moves: List[int] = field(default_factory=list)
+    possible_moves_post: List[int] = field(default_factory=list)
     candidate_pool: List[Dict[str, Any]] = field(default_factory=list)
     selected_links: List[Dict[str, Any]] = field(default_factory=list)
     ranked_candidates: List[Dict[str, Any]] = field(default_factory=list)
@@ -402,6 +406,14 @@ class QueryHubConfig:
     sp_cache: bool = False
     sp_cache_mode: str = "core"  # 'core' or 'cached'
     sp_cand_topk: int = 0  # 0 = no cap
+    sp_eval_allpairs: bool = False
+    sp_eval_allpairs_exact: bool = False
+    # ALL-PAIRS-EXACT: keep SA node-set stable across steps to improve APSP reuse
+    sp_exact_stable_nodes: bool = False
+    # Treat ΔSP as signed (no clamp) for reporting and diagnostics
+    sp_signed: bool = False
+    # Report delta_sp as best-hop (min g) instead of hop0 when True
+    sp_report_best_hop: bool = False
     sp_pair_samples: int = 400
     sp_verify_threshold: float = 0.05
     # Evaluation policy
@@ -434,7 +446,7 @@ class QueryHubConfig:
     # Skip multi-hop evaluation on dead-end/backtrack steps (evaluate hop0 only)
     skip_mh_on_deadend: bool = False
     # Spatial prefilter options
-    ring_ellipse: bool = False
+    ring_ellipse: bool = True
     # Layer1 vector prefilter options
     layer1_prefilter: bool = False
     l1_cap: int = 128
@@ -446,7 +458,22 @@ class QueryHubConfig:
     verbose: bool = False
     # DS-backed SP pairsets
     sp_ds_sqlite: Optional[str] = None
-    sp_ds_namespace: str = "maze_query_hub_sp"
+    sp_ds_namespace: str = "mq_sp"
+    # Checkpointing (periodic JSON writes to avoid timeout loss)
+    checkpoint_interval: int = 0  # 0 disables periodic checkpoints
+    checkpoint_path: Optional[str] = None  # path to write partial steps JSON
+    # Post-step SP diagnostics (hop_series_post)
+    post_sp_diagnostics: bool = True
+    # Ultra-light steps JSON (skip heavy snapshot arrays entirely)
+    steps_ultra_light: bool = False
+    # Maze snapshot explicit dump (paper reproducibility)
+    maze_snapshot_out: Optional[str] = None
+    # Force per-hop series via evaluator fallback even in L3-only mode
+    force_per_hop: bool = False
+    # Per-hop evaluator fallback only when AG fires (L3-only)
+    eval_per_hop_on_ag: bool = False
+    # DG fire: commit chosen multi-hop edges as a BFS-like shortcut in one step
+    dg_bfs_shortcut: bool = False
 
 
 @dataclass
@@ -492,9 +519,10 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
         feature_weights=WEIGHT_VECTOR,
         linkset_mode=config.linkset_mode,
         sp_beta=float(config.gedig.get("sp_beta", 0.2)),
+        sp_pair_samples=int(getattr(config, 'sp_pair_samples', 400)),
         # 論文準拠寄せ: linkset IG + 候補台ベースGED正規化
         ig_source_mode=("linkset" if config.linkset_mode else "graph"),
-        ig_hop_apply="all",
+        ig_hop_apply=str(config.gedig.get("ig_hop_apply", "all")),
         ged_norm_scheme=("candidate_base" if str(config.norm_base) in ("link","cand") else "edges_after"),
         sp_eval_mode="fixed_before_pairs",
         sp_scope_mode=str(config.gedig.get("sp_scope_mode", "auto")),
@@ -545,6 +573,14 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
         "size": [env.height, env.width],
         "maze_type": config.maze_type,
     }
+    # Optional: write explicit maze snapshot for paper reproducibility
+    try:
+        outp = getattr(config, 'maze_snapshot_out', None)
+        if outp:
+            Path(outp).parent.mkdir(parents=True, exist_ok=True)
+            Path(outp).write_text(json.dumps(maze_snapshot, ensure_ascii=False, indent=2), encoding='utf-8')
+    except Exception:
+        pass
 
     def register_direction_node(
         anchor_tuple: Tuple[int, int],
@@ -594,11 +630,19 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
 
     # Dynamic AG g0 history (for online percentile threshold)
     g0_history: deque = deque(maxlen=int(getattr(config, 'ag_window', 30)))
+    # Cross-step APSP carry for ALL-PAIRS-EXACT
+    apsp_exact_state: Dict[int, Dict[str, Any]] = {} if bool(getattr(config, 'sp_eval_allpairs_exact', False)) else {}
 
     for step in range(config.max_steps):
         minimal_snap = str(getattr(config, 'snapshot_level', 'standard')).lower() == 'minimal'
         cand_edge_store: List[Tuple[Tuple[int, int, int], Tuple[int, int, int], bool, int]] = []
         possible_moves = obs.possible_moves
+        # Pre-step dead-end heuristic (before taking action)
+        deadend_pre = False
+        try:
+            deadend_pre = (len(possible_moves) <= 1)
+        except Exception:
+            deadend_pre = False
         # Debug: trace possible moves only when verbose enabled (or env override)
         try:
             if bool(getattr(config, 'verbose', False)) or os.environ.get('QH_DEBUG_STEP'):
@@ -735,11 +779,12 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                     "d_w_rel": w_distance_rel,
                     "origin": "obs",
                     "pos_key": pos_key,
-                    # 半径フィルタ用の距離（absベクトル側）。従来互換のためradius_*も残す
+                    # 半径フィルタ用の距離は相対距離ベースに切替（クエリ基準）。
+                    # 従来の絶対距離は診断用キーとして残す。
                     "r_abs_cand": w_distance_abs,
                     "r_abs_link": w_distance_abs,
-                    "radius_cand": w_distance_abs,
-                    "radius_link": w_distance_abs,
+                    "radius_cand": w_distance_rel,
+                    "radius_link": w_distance_rel,
                     "vector": candidate_vec_rel.tolist(),
                     "abs_vector": candidate_vec_abs.tolist(),
                     "passable": bool(is_passable),
@@ -798,7 +843,12 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                     topk = 128
                 # Search by current query's abs vector
                 q_abs = compute_query_vector(center, maze_shape)
-                results = l1_index.search(q_abs, top_k=topk)
+                # Use candidate radius (relative distance) to bound L1 search
+                try:
+                    r_cand = float(config.selector.get("cand_radius", 1.0) or 1.0)
+                except Exception:
+                    r_cand = 1.0
+                results = l1_index.search_radius(q_abs, radius=r_cand, top_k=topk)
                 ring_cells_counter = 0
                 ring_nodes_counter = len(results)
                 for nid, dist in results:
@@ -884,8 +934,8 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                     "pos_key": pos_key,
                     "r_abs_cand": w_distance_abs,
                     "r_abs_link": w_distance_abs,
-                    "radius_cand": w_distance_abs,
-                    "radius_link": w_distance_abs,
+                    "radius_cand": w_distance_rel,
+                    "radius_link": w_distance_rel,
                     "vector": stored_vec_rel.tolist(),
                     "abs_vector": stored_vec_abs.tolist(),
                     "meta_delta": list(rel_delta),
@@ -1114,38 +1164,65 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
         # Pre-evaluate geDIG before env.step using 『配線前』の状態
         pre_linkset_info = None
         if config.linkset_mode:
-            qsim = chosen_obs.get("similarity") if chosen_obs else None
-            if not isinstance(qsim, (int, float)) or qsim <= 0:
-                qsim = 1.0
-            pre_query_entry = {
-                "index": f"query:{anchor_position[0]},{anchor_position[1]}",
-                "origin": "query",
-                "position": [int(anchor_position[0]), int(anchor_position[1])],
-                "target_position": [int(anchor_position[0]), int(anchor_position[1])],
-                "similarity": float(qsim),
-                "distance": 0.0,
-                "weighted_distance": 0.0,
-                "vector": list(query_vec_list),
-                "abs_vector": list(query_vec_list),
-            }
+            try:
+                from qhlib.linkset_adapter import build_linkset_info as _build_ls
+            except Exception:
+                _build_ls = None  # type: ignore
             # forced-as-base: when S_link empty and forced exists, use forced as base
             if selection.links:
                 pre_s_link: List[Dict[str, Any]] = [dict(item) for item in selection.links]
             else:
                 pre_s_link = [dict(item) for item in forced_links] if getattr(config, 'link_forced_as_base', False) else []
-            pre_linkset_info = {
-                "s_link": pre_s_link,
-                "candidate_pool": [dict(item) for item in selection.candidates],
-                "decision": {
-                    "origin": chosen_obs.get("origin") if chosen_obs else "fallback",
-                    "index": chosen_obs.get("index") if chosen_obs else None,
-                    "action": chosen_obs.get("action") if chosen_obs else None,
-                    "distance": chosen_obs.get("distance") if chosen_obs else None,
-                    "similarity": chosen_obs.get("similarity") if chosen_obs else None,
-                },
-                "query_entry": pre_query_entry,
-                "base_mode": str(getattr(config, 'linkset_base', 'link')).lower(),
-            }
+            base_mode = str(getattr(config, 'linkset_base', 'link')).lower()
+            if _build_ls is not None:
+                pre_linkset_info = _build_ls(
+                    s_link=pre_s_link,
+                    candidate_pool=[dict(item) for item in selection.candidates],
+                    decision={
+                        "origin": chosen_obs.get("origin") if chosen_obs else "fallback",
+                        "index": chosen_obs.get("index") if chosen_obs else None,
+                        "action": chosen_obs.get("action") if chosen_obs else None,
+                        "distance": chosen_obs.get("distance") if chosen_obs else None,
+                        "similarity": chosen_obs.get("similarity") if chosen_obs else None,
+                    },
+                    query_vector=list(query_vec_list),
+                    base_mode=base_mode,
+                )
+                # include positional tags for debug parity
+                try:
+                    pre_linkset_info["query_entry"]["position"] = [int(anchor_position[0]), int(anchor_position[1])]
+                    pre_linkset_info["query_entry"]["target_position"] = [int(anchor_position[0]), int(anchor_position[1])]
+                except Exception:
+                    pass
+            else:
+                # Fallback: prior inline construction
+                qsim = chosen_obs.get("similarity") if chosen_obs else None
+                if not isinstance(qsim, (int, float)) or qsim <= 0:
+                    qsim = 1.0
+                pre_query_entry = {
+                    "index": f"query:{anchor_position[0]},{anchor_position[1]}",
+                    "origin": "query",
+                    "position": [int(anchor_position[0]), int(anchor_position[1])],
+                    "target_position": [int(anchor_position[0]), int(anchor_position[1])],
+                    "similarity": float(qsim),
+                    "distance": 0.0,
+                    "weighted_distance": 0.0,
+                    "vector": list(query_vec_list),
+                    "abs_vector": list(query_vec_list),
+                }
+                pre_linkset_info = {
+                    "s_link": pre_s_link,
+                    "candidate_pool": [dict(item) for item in selection.candidates],
+                    "decision": {
+                        "origin": chosen_obs.get("origin") if chosen_obs else "fallback",
+                        "index": chosen_obs.get("index") if chosen_obs else None,
+                        "action": chosen_obs.get("action") if chosen_obs else None,
+                        "distance": chosen_obs.get("distance") if chosen_obs else None,
+                        "similarity": chosen_obs.get("similarity") if chosen_obs else None,
+                    },
+                    "query_entry": pre_query_entry,
+                    "base_mode": base_mode,
+                }
 
         debug_hop0_pre = {}
         pre_result = None
@@ -1210,10 +1287,10 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                 eval_after.add_edge(current_query_node, node_id)
             registered_link_positions.add(node_id)
 
-        # eval-only forced fallback (display/diagnostics): if no commit and forced exists, optionally overlay Q↔dir for eval snapshot only
+        # eval-only forced fallback: if S_link commit is empty and forced exists, overlay Top-L forced Q↔dir on eval graph
         graph_eval = eval_after.copy()
         try:
-            if not commit_items and forced_links and bool(getattr(config, 'persist_forced_candidates', False)):
+            if not commit_items and forced_links:
                 # pick Top-L forced by similarity
                 forced_sorted = sorted(forced_links, key=lambda it: float(it.get('similarity', 0.0)), reverse=True)
                 for it in forced_sorted[: max(0, int(getattr(config, 'top_link', 1)) )]:
@@ -1332,6 +1409,51 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
             rel, _, _ = _sp_gain_fixed_pairs_ex(sub_before, sub_after)
             return rel
 
+        def _sp_gain_allpairs_ex(sub_before: nx.Graph, sub_after: nx.Graph, eff_hop: int = 1) -> Tuple[float, float, float]:
+            """Compute ΔSP using ALL-PAIRS average shortest-path (fallback when fixed-pairs miss improvements).
+
+            Returns: (delta_sp_rel, Lb, La)
+            """
+            try:
+                scope = str(core.sp_scope_mode).lower()
+                bound = str(core.sp_boundary_mode).lower()
+                g1 = sub_before
+                g2 = sub_after
+                if scope in ("union", "merge", "superset"):
+                    all_nodes = set(g1.nodes()) | set(g2.nodes())
+                    g1 = sub_before.subgraph(all_nodes).copy()
+                    g2 = sub_after.subgraph(all_nodes).copy()
+                if bound in ("trim", "terminal", "nodes"):
+                    g1 = core._trim_terminal_edges(g1, stage_anchor_nodes, max(1, int(eff_hop)))
+                    g2 = core._trim_terminal_edges(g2, stage_anchor_nodes, max(1, int(eff_hop)))
+                # Average shortest-path on all unordered pairs
+                def _avg_sp(g: nx.Graph) -> float:
+                    try:
+                        n = g.number_of_nodes()
+                        if n < 2:
+                            return 0.0
+                        total = 0.0
+                        cnt = 0
+                        for u, dmap in nx.all_pairs_shortest_path_length(g):
+                            for v, d in dmap.items():
+                                if v == u:
+                                    continue
+                                if v <= u:
+                                    continue
+                                total += float(d)
+                                cnt += 1
+                        return (total / cnt) if cnt > 0 else 0.0
+                    except Exception:
+                        return 0.0
+                Lb = _avg_sp(g1)
+                La = _avg_sp(g2)
+                if Lb <= 0.0:
+                    return 0.0, 0.0, 0.0
+                rel = max(0.0, min(1.0, max(0.0, (Lb - La)) / Lb))
+                return float(rel), float(Lb), float(La)
+            except Exception:
+                return 0.0, 0.0, 0.0
+
         # IG は linkset に基づき一定（paper-mode）。以降は SP で差をつける
         # linkset IG を pre_result から流用（なければ通常IG）。pre-eval無効時は0。
         base_ig = 0.0
@@ -1357,6 +1479,24 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
             nid = _ensure_dir_node_on(stage_graph, at, int(d), item)
             return canonical_edge_id(current_query_node, nid)
 
+        # Optional weighted-norm prefilter for Ecand (reuse Layer1 index results)
+        prefilter_nodes: Optional[Set[Tuple[int,int,int]]] = None
+        try:
+            if bool(getattr(config, 'layer1_prefilter', False)):
+                try:
+                    topk_ec = int(max(1, int(getattr(config, 'l1_cap', 128))))
+                except Exception:
+                    topk_ec = 128
+                try:
+                    r_ec = float(config.selector.get("cand_radius", 1.0) or 1.0)
+                except Exception:
+                    r_ec = 1.0
+                q_abs_vec = compute_query_vector(anchor_position, maze_shape)
+                l1_hits = l1_index.search_radius(q_abs_vec, radius=r_ec, top_k=topk_ec)
+                prefilter_nodes = set(nid for (nid, _d) in l1_hits)
+        except Exception:
+            prefilter_nodes = None
+
         ecand, ecand_mem_count, ecand_qpast_count = build_ecand(
             prev_graph=prev_graph,
             selection_candidates=selection.candidates,
@@ -1367,7 +1507,40 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
             ring_center=anchor_position,
             ring_size=(Rr, Rc),
             ellipse=bool(getattr(config, 'ring_ellipse', False)),
+            prefilter_nodes=prefilter_nodes,
         )
+
+        # Ensure forced fallback candidates are also evaluated for ΔSP when S_link is empty
+        try:
+            if (not selection.links) and getattr(config, 'link_forced_as_base', True) and forced_links:
+                existing_e: Set[Tuple[Tuple[int,int,int], Tuple[int,int,int]]] = set(
+                    canonical_edge_id(u, v) for (u, v, _m) in ecand
+                )
+                for forced in forced_links:
+                    # Consider only mem-origin forced entries by default
+                    if str(forced.get("origin", "")).lower() != "mem":
+                        continue
+                    anchor_src = forced.get("anchor_position") or forced.get("position") or [anchor_position[0], anchor_position[1]]
+                    at = (int(anchor_src[0]), int(anchor_src[1]))
+                    d = forced.get("direction")
+                    if d is None:
+                        rd = tuple(forced.get("relative_delta") or forced.get("meta_delta") or (0, 0))
+                        d = direction_from_delta(rd)
+                    if d is None:
+                        continue
+                    nid_prev = make_direction_node(at, int(d))
+                    if nid_prev not in prev_graph:
+                        # Require existence on prev_graph so Lb>0 is meaningful
+                        continue
+                    e_forced = canonical_edge_id(current_query_node, nid_prev)
+                    if e_forced in existing_e:
+                        continue
+                    meta = dict(forced)
+                    meta.setdefault("forced", True)
+                    ecand.append((e_forced[0], e_forced[1], meta))
+                    existing_e.add(e_forced)
+        except Exception:
+            pass
 
         # δe（SP利得の限界寄与）: DistanceCache 経由で計算（core|cached）。
         def _sp_gain_rel(g_before: nx.Graph, g_after: nx.Graph, eff_hop: int, e_u=None, e_v=None) -> float:
@@ -1451,6 +1624,13 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                                         norm_override=denom_cmax_base)["normalized_ged"]) if denom_cmax_base > 0 else 0.0
                 ged_h = float(min(1.0, max(0.0, ged_h)))
                 sp_h_rel, sp_bef, sp_aft = _sp_gain_fixed_pairs_ex(sub_b, sub_a, eff_hop=eff_hop_eval)
+                # Fallback: if compressive structure (added edges exceed nodes) OR no fixed-pair gain, recompute by ALL-PAIRS
+                add_nodes = max(0, sub_a.number_of_nodes() - sub_b.number_of_nodes())
+                add_edges = max(0, sub_a.number_of_edges() - sub_b.number_of_edges())
+                if (add_edges > add_nodes) or (sp_h_rel <= 0.0):
+                    sp_h_rel2, sp_bef2, sp_aft2 = _sp_gain_allpairs_ex(sub_b, sub_a, eff_hop=eff_hop_eval)
+                    # Prefer the recomputed ALL-PAIRS result
+                    sp_h_rel, sp_bef, sp_aft = sp_h_rel2, sp_bef2, sp_aft2
                 # IG per-hop
                 ig_h_val = base_ig
                 try:
@@ -1636,16 +1816,24 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                     # Candidate edges: Ecand as (u,v,meta)
                     cand_edges = list(ecand)
                     sp_mode = str(getattr(config, 'sp_cache_mode', 'cached_incr'))
+                    # Minimal selection summary for ΔH denominator (log k★)
+                    _sel_summary = {
+                        'k_star': int(base_count),
+                        'log_k_star': float(math.log(base_count)) if base_count >= 1 else None,
+                        'l1_candidates': int(base_count),
+                    }
                     res_l3 = eval_query_centric_via_l3(
                         prev_graph=prev_graph,
                         curr_graph=stage_graph,
                         centers=centers_nodes,
                         cand_edges=cand_edges,
+                        selection_summary=_sel_summary,
                         sp_engine=sp_mode,
                         pair_samples=int(getattr(config, 'sp_pair_samples', 200)),
                         budget=int(getattr(config, 'commit_budget', 1)),
                         cand_topk=int(getattr(config, 'sp_cand_topk', 0)),
                         default_dim=8,
+                        lambda_weight=float(core.lambda_weight),
                     )
                     m = res_l3.get('metrics', {})
                     g0 = float(m.get('g0', 0.0))
@@ -1669,10 +1857,10 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                     except Exception:
                         sp_b = 0.0
                     try:
-                        # Prefer L3-provided sp_after, otherwise fallback to ΔSP semantics
-                        sp_a = float(m.get('sp_after', delta_sp))
+                        # Prefer L3-provided sp_after (La). If missing, leave 0 and fallback later.
+                        sp_a = float(m.get('sp_after', 0.0))
                     except Exception:
-                        sp_a = max(0.0, sp_b * (1.0 - delta_sp))
+                        sp_a = 0.0
                     hop_series[0]['sp_before'] = float(sp_b)
                     hop_series[0]['sp_after'] = float(sp_a)
                     records_h = [(0, gmin, float(m.get('delta_ged_norm', abs(delta_ged))), delta_ig, delta_sp)]
@@ -1691,7 +1879,13 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                     print(f"[WARN] use_main_l3 path failed, falling back to evaluator: {_lite_e}")
                     eval_applied = False
 
-            if not eval_applied:
+            # Optionally fallback to evaluator when AG fires (per-hop only on-demand)
+            try:
+                theta_ag_cfg = float(getattr(config, 'theta_ag', 0.0))
+            except Exception:
+                theta_ag_cfg = 0.0
+            ag_wants_hops = bool(getattr(config, 'eval_per_hop_on_ag', False)) and bool(g0 > theta_ag_cfg)
+            if (not eval_applied) or bool(getattr(config, 'force_per_hop', False)) or ag_wants_hops:
                 eval_res = evaluate_multihop(
             core=core,
             prev_graph=prev_graph,
@@ -1717,9 +1911,19 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                 sp_cache_mode=str(getattr(config, 'sp_cache_mode', 'core')),
                 sp_pair_samples=int(getattr(config, 'sp_pair_samples', 400)),
                 sp_verify_threshold=float(getattr(config, 'sp_verify_threshold', 0.05)),
+                sp_allpairs=bool(getattr(config, 'sp_eval_allpairs', False)),
+                sp_allpairs_exact=bool(getattr(config, 'sp_eval_allpairs_exact', False)),
+                apsp_carry=apsp_exact_state,
+                sp_exact_stable_nodes=bool(getattr(config, 'sp_exact_stable_nodes', False)),
+                sp_signed=bool(getattr(config, 'sp_signed', False)),
                 pairset_service=sp_svc,
                 signature_builder=sig_builder,
                 )
+                try:
+                    if getattr(eval_res, 'apsp_carry', None) is not None:
+                        apsp_exact_state = eval_res.apsp_carry  # type: ignore[assignment]
+                except Exception:
+                    pass
                 hop_series = eval_res.hop_series
                 # Optional: enrich hop_series with L3-union cand debug (cand_used/cand_total)
                 try:
@@ -1771,6 +1975,7 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                 best_hop = int(eval_res.best_hop)
                 delta_ged = float(eval_res.delta_ged)
                 delta_ig = float(eval_res.delta_ig)
+                # Start with hop0 ΔSP; may override after computing best-hop row
                 delta_sp = float(eval_res.delta_sp)
                 # SP perf counters
                 sp_sssp_du_ct = int(getattr(eval_res, 'sssp_calls_du', 0))
@@ -1821,6 +2026,9 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                     delta_ged_min = float(hrec_obj.get("ged", delta_ged))
                     delta_ig_min = float(hrec_obj.get("ig", delta_ig))
                     delta_sp_min = float(hrec_obj.get("sp", delta_sp))
+                    # Prefer best-hop ΔSP for reporting when enabled
+                    if bool(getattr(config, 'sp_report_best_hop', False)) and best_hop > 0:
+                        delta_sp = float(delta_sp_min)
             except Exception:
                 pass
             eval_applied = True
@@ -1879,20 +2087,87 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
         except Exception:
             delta_h = float(base_ig)
             delta_h_min = delta_h
-        # 序列をJSON化（H 列は delta_h を使用）
+        # 序列をJSON化
+        # 優先: evaluator が返した per-hop 'h'（ΔH: after-before）をそのまま使用。
+        # フォールバック: hop_extras['h'] → delta_h（pre-evalのΔH）。
+        _orig_hs_by_hop = {}
+        try:
+            if isinstance(hop_series, list):
+                for _rec in hop_series:
+                    try:
+                        _orig_hs_by_hop[int(_rec.get('hop', -1))] = dict(_rec)
+                    except Exception:
+                        pass
+        except Exception:
+            pass
         hop_series = []
         for rec_h in records_h:
             h, g, ged, ig, sp = rec_h
             extra = hop_extras.get(int(h), {})
-            dh = float(extra.get("h", delta_h))
+            if int(h) in _orig_hs_by_hop and isinstance(_orig_hs_by_hop[int(h)], dict):
+                dh = float(_orig_hs_by_hop[int(h)].get('h', delta_h))
+            else:
+                dh = float(extra.get("h", delta_h))
             sp_bef = extra.get("sp_before")
             sp_aft = extra.get("sp_after")
             row = {"hop": int(h), "g": float(g), "ged": float(ged), "ig": float(ig), "h": float(dh), "sp": float(sp)}
+            # Carry through H_before/H_after if provided by evaluator
+            try:
+                if int(h) in _orig_hs_by_hop:
+                    o = _orig_hs_by_hop[int(h)]
+                    if 'h_before' in o:
+                        row['h_before'] = float(o.get('h_before'))
+                    if 'h_after' in o:
+                        row['h_after'] = float(o.get('h_after'))
+                    # Also carry evaluator SP diagnostics when present
+                    if 'sp_mode' in o:
+                        row['sp_mode'] = str(o.get('sp_mode'))
+                    if 'sp_Lb' in o:
+                        row['sp_Lb'] = float(o.get('sp_Lb'))
+                    if 'sp_La' in o:
+                        row['sp_La'] = float(o.get('sp_La'))
+                    if 'sp_pairs' in o:
+                        try:
+                            row['sp_pairs'] = int(o.get('sp_pairs'))
+                        except Exception:
+                            pass
+                    if 'sp_improved' in o:
+                        try:
+                            row['sp_improved'] = int(o.get('sp_improved'))
+                        except Exception:
+                            pass
+                    if 'sp_examples' in o:
+                        try:
+                            row['sp_examples'] = o.get('sp_examples')
+                        except Exception:
+                            pass
+                    if 'add_nodes' in o:
+                        try:
+                            row['add_nodes'] = int(o.get('add_nodes'))
+                        except Exception:
+                            pass
+                    if 'add_edges' in o:
+                        try:
+                            row['add_edges'] = int(o.get('add_edges'))
+                        except Exception:
+                            pass
+                    if 'sp_improved' in o:
+                        try:
+                            row['sp_improved'] = int(o.get('sp_improved'))
+                        except Exception:
+                            pass
+                    if 'sp_examples' in o:
+                        try:
+                            row['sp_examples'] = o.get('sp_examples')
+                        except Exception:
+                            pass
+            except Exception:
+                pass
             if sp_bef is not None:
                 row["sp_before"] = float(sp_bef)
-            if sp_bef is not None:
-                # Fixed-before pairset: SP_before ≈ 0, SP_after = ΔSP
-                row["sp_after"] = float(max(0.0, float(sp)))
+            if sp_aft is not None:
+                # Show raw shortest-path averages: Lb (before), La (after)
+                row["sp_after"] = float(sp_aft)
             try:
                 if 'cand_stats' in locals():
                     cs = cand_stats.get(int(h))
@@ -1993,6 +2268,7 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
             policy=dg_commit_policy,
             fire_dg=bool(dg_fire),
             commit_budget=int(getattr(config, 'commit_budget', 0)),
+            bfs_shortcut=bool(getattr(config, 'dg_bfs_shortcut', False)),
             cand_edge_store=cand_edge_store,
         )
         # 選択された配線を実体の graph にコミット（評価専用のeval_afterとは分離）
@@ -2026,6 +2302,11 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
         moved = (current_position != last_position)
         current_query_node = make_query_node(current_position)
         visit_counts[current_position] = visit_counts.get(current_position, 0) + 1
+        # Post-step possible moves (for consistent UI/debug)
+        try:
+            possible_moves_post = list(getattr(obs, 'possible_moves', []))
+        except Exception:
+            possible_moves_post = []
 
         # Build timeline edges for DS/visualization
         timeline_edges_now: List[List[List[int]]] = []
@@ -2087,77 +2368,90 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
             # Suppress Q_prev <-> Q_next timeline pair in this configuration
 
         # After env.step: compute post-step per-hop diagnostics (SP with executed action)
-        try:
-            post_stage_anchors: Set[Tuple[int,int,int]] = set()
-            if last_query_node in graph:
-                post_stage_anchors.add(last_query_node)
-            if current_query_node in graph:
-                post_stage_anchors.add(current_query_node)
-            # also include committed dir nodes around current Q
-            for it in commit_items:
-                anchor_source = it.get("anchor_position") or it.get("position") or [anchor_position[0], anchor_position[1]]
-                anchor_tuple = (int(anchor_source[0]), int(anchor_source[1]))
-                d = it.get("direction")
-                if d is None:
-                    rd = tuple(it.get("relative_delta") or it.get("meta_delta") or (0, 0))
-                    d = direction_from_delta(rd)
-                if d is not None:
-                    nid = make_direction_node(anchor_tuple, int(d))
-                    if nid in graph:
-                        post_stage_anchors.add(nid)
-            # include recent Q anchors
-            for qn in list(recent_q_nodes):
-                if qn in graph:
-                    post_stage_anchors.add(qn)
-            denom_cmax_post = float(core.node_cost + core.edge_cost * max(1, int(base_count)))
-            max_h_post = int(config.gedig["max_hops"]) if int(config.gedig["max_hops"]) > 0 else 0
-            hop_series_post = []
-            for h in range(0, max_h_post + 1):
-                eff_h = h + int(max(0, int(config.gedig.get("sp_hop_expand", 0))))
-                # Compute subgraphs and SP stats under core scope/boundary rules
-                sub_b = prev_graph.subgraph(post_stage_anchors).copy()
-                sub_a = graph.subgraph(post_stage_anchors).copy()
-                sp_g1, nodes_sp1 = core._extract_k_hop_subgraph(sub_b, post_stage_anchors, max(1, eff_h))
-                sp_g2, nodes_sp2 = core._extract_k_hop_subgraph(sub_a, post_stage_anchors, max(1, eff_h))
-                if str(core.sp_scope_mode).lower() in ("union","merge","superset"):
-                    all_nodes = set(nodes_sp1) | set(nodes_sp2)
-                    if all_nodes:
-                        sp_g1 = sub_b.subgraph(all_nodes).copy()
-                        sp_g2 = sub_a.subgraph(all_nodes).copy()
-                if str(core.sp_boundary_mode).lower() in ("trim","terminal","nodes"):
-                    sp_g1 = core._trim_terminal_edges(sp_g1, post_stage_anchors, max(1, eff_h))
-                    sp_g2 = core._trim_terminal_edges(sp_g2, post_stage_anchors, max(1, eff_h))
-                # Lb/La and relative gain
-                def _avg_and_pairs(gx: nx.Graph) -> Tuple[float, int]:
-                    total = 0.0; cnt = 0
+        hop_series_post = []
+        _need_post = bool(getattr(config, 'post_sp_diagnostics', True)) and (
+            (len(locals().get('dg_committed_edges_snapshot', []) or []) > 0) or bool(getattr(config, 'timeline_to_graph', False))
+        )
+        if _need_post:
+            try:
+                post_stage_anchors: Set[Tuple[int,int,int]] = set()
+                if last_query_node in graph:
+                    post_stage_anchors.add(last_query_node)
+                if current_query_node in graph:
+                    post_stage_anchors.add(current_query_node)
+                # also include committed dir nodes around current Q
+                for it in commit_items:
+                    anchor_source = it.get("anchor_position") or it.get("position") or [anchor_position[0], anchor_position[1]]
+                    anchor_tuple = (int(anchor_source[0]), int(anchor_source[1]))
+                    d = it.get("direction")
+                    if d is None:
+                        rd = tuple(it.get("relative_delta") or it.get("meta_delta") or (0, 0))
+                        d = direction_from_delta(rd)
+                    if d is not None:
+                        nid = make_direction_node(anchor_tuple, int(d))
+                        if nid in graph:
+                            post_stage_anchors.add(nid)
+                # include recent Q anchors
+                for qn in list(recent_q_nodes):
+                    if qn in graph:
+                        post_stage_anchors.add(qn)
+                denom_cmax_post = float(core.node_cost + core.edge_cost * max(1, int(base_count)))
+                max_h_post = int(config.gedig["max_hops"]) if int(config.gedig["max_hops"]) > 0 else 0
+                hop_series_post = []
+                for h in range(0, max_h_post + 1):
+                    eff_h = h + int(max(0, int(config.gedig.get("sp_hop_expand", 0))))
+                    # Compute subgraphs and SP stats under core scope/boundary rules
+                    sub_b = prev_graph.subgraph(post_stage_anchors).copy()
+                    sub_a = graph.subgraph(post_stage_anchors).copy()
+                    sp_g1, nodes_sp1 = core._extract_k_hop_subgraph(sub_b, post_stage_anchors, max(1, eff_h))
+                    sp_g2, nodes_sp2 = core._extract_k_hop_subgraph(sub_a, post_stage_anchors, max(1, eff_h))
+                    if str(core.sp_scope_mode).lower() in ("union","merge","superset"):
+                        all_nodes = set(nodes_sp1) | set(nodes_sp2)
+                        if all_nodes:
+                            sp_g1 = sub_b.subgraph(all_nodes).copy()
+                            sp_g2 = sub_a.subgraph(all_nodes).copy()
+                    if str(core.sp_boundary_mode).lower() in ("trim","terminal","nodes"):
+                        sp_g1 = core._trim_terminal_edges(sp_g1, post_stage_anchors, max(1, eff_h))
+                        sp_g2 = core._trim_terminal_edges(sp_g2, post_stage_anchors, max(1, eff_h))
+                    # Use DistanceCache fixed-before pairs to evaluate SP efficiently
                     try:
-                        for u, dmap in nx.all_pairs_shortest_path_length(gx):
-                            for v, d in dmap.items():
-                                if v == u:
-                                    continue
-                                if str(v) <= str(u):
-                                    continue
-                                total += float(d); cnt += 1
+                        sigp = distcache.signature(sp_g1, post_stage_anchors, max(1, eff_h), str(core.sp_scope_mode), str(core.sp_boundary_mode))
+                        pairs_obj = distcache.get_fixed_pairs(sigp, sp_g1)
+                        pairs = list(getattr(pairs_obj, 'pairs', []) or [])
+                        Lb = float(getattr(pairs_obj, 'lb_avg', 0.0) or 0.0)
                     except Exception:
-                        cnt = 0; total = 0.0
-                    return ((total / cnt) if cnt > 0 else 0.0, cnt)
-                Lb, nb_pairs = _avg_and_pairs(sp_g1)
-                La, na_pairs = _avg_and_pairs(sp_g2)
-                sp_rel = 0.0
-                if Lb > 0.0:
-                    sp_rel = max(0.0, min(1.0, max(0.0, Lb - La) / Lb))
-                ged_h = float(_norm_ged(sub_b, sub_a, node_cost=core.node_cost, edge_cost=core.edge_cost,
-                                        normalization=core.normalization, efficiency_weight=core.efficiency_weight,
-                                        enable_spectral=core.enable_spectral, spectral_weight=core.spectral_weight,
-                                        norm_override=denom_cmax_post)["normalized_ged"]) if denom_cmax_post > 0 else 0.0
-                ig_h = base_ig + core.sp_beta * sp_rel
-                g_h = float(ged_h - core.lambda_weight * ig_h)
-                hop_series_post.append({
-                    "hop": int(h), "g": float(g_h), "ged": float(ged_h), "ig": float(ig_h), "h": float(base_ig), "sp": float(sp_rel),
-                    "Lb": float(Lb), "La": float(La), "pairs_before": int(nb_pairs), "pairs_after": int(na_pairs)
-                })
-        except Exception:
-            hop_series_post = []
+                        pairs = []
+                        Lb = 0.0
+                    La = 0.0
+                    nb_pairs = len(pairs)
+                    na_pairs = 0
+                    if Lb > 0.0 and pairs:
+                        total2 = 0.0
+                        count2 = 0
+                        for u, v, _ in pairs:
+                            try:
+                                d2 = nx.shortest_path_length(sp_g2, source=u, target=v)
+                                total2 += float(d2)
+                                count2 += 1
+                            except Exception:
+                                pass
+                        na_pairs = count2
+                        La = (total2 / count2) if count2 > 0 else Lb
+                    sp_rel = 0.0
+                    if Lb > 0.0:
+                        sp_rel = max(0.0, min(1.0, max(0.0, Lb - La) / Lb))
+                    ged_h = float(_norm_ged(sub_b, sub_a, node_cost=core.node_cost, edge_cost=core.edge_cost,
+                                            normalization=core.normalization, efficiency_weight=core.efficiency_weight,
+                                            enable_spectral=core.enable_spectral, spectral_weight=core.spectral_weight,
+                                            norm_override=denom_cmax_post)["normalized_ged"]) if denom_cmax_post > 0 else 0.0
+                    ig_h = base_ig + core.sp_beta * sp_rel
+                    g_h = float(ged_h - core.lambda_weight * ig_h)
+                    hop_series_post.append({
+                        "hop": int(h), "g": float(g_h), "ged": float(ged_h), "ig": float(ig_h), "h": float(base_ig), "sp": float(sp_rel),
+                        "Lb": float(Lb), "La": float(La), "pairs_before": int(nb_pairs), "pairs_after": int(na_pairs)
+                    })
+            except Exception:
+                hop_series_post = []
 
         if last_query_node in graph:
             graph.nodes[last_query_node]["visit_count"] = visit_counts[last_position]
@@ -2716,9 +3010,11 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                 gmin=float(gmin),
                 best_hop=best_hop,
                 is_dead_end=bool(obs.is_dead_end),
+                is_dead_end_pre=bool(deadend_pre),
                 reward=float(reward),
                 done=bool(done),
                 possible_moves=list(possible_moves),
+                possible_moves_post=list(possible_moves_post),
                 candidate_pool=(candidate_pool if not minimal_snap else []),
                 selected_links=selected_for_log,
                 ranked_candidates=ranked_for_log,
@@ -2780,6 +3076,54 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
             )
         )
 
+        # Periodic checkpoint: write partial steps JSON to --step-log (atomic replace)
+        try:
+            ci = int(getattr(config, 'checkpoint_interval', 0) or 0)
+            cpath = getattr(config, 'checkpoint_path', None)
+            if ci > 0 and cpath:
+                if (step + 1) % ci == 0:
+                    from pathlib import Path as _Path
+                    _p = _Path(str(cpath))
+                    _p.parent.mkdir(parents=True, exist_ok=True)
+                    # Build a lightweight JSON list of steps so far
+                    _steps = []
+                    for rec in step_records:
+                        _steps.append({
+                            "seed": rec.seed,
+                            "step": rec.step,
+                            "position": list(rec.position),
+                            "action": rec.action,
+                            "candidate_selection": rec.candidate_selection,
+                            "delta_ged": rec.delta_ged,
+                            "delta_ig": rec.delta_ig,
+                            "delta_ged_min": rec.delta_ged_min,
+                            "delta_ig_min": rec.delta_ig_min,
+                            "delta_sp": rec.delta_sp,
+                            "delta_sp_min": rec.delta_sp_min,
+                            "delta_h": rec.delta_h,
+                            "delta_h_min": rec.delta_h_min,
+                            "g0": rec.g0,
+                            "gmin": rec.gmin,
+                            "best_hop": rec.best_hop,
+                            "is_dead_end": rec.is_dead_end,
+                            "reward": rec.reward,
+                            "done": rec.done,
+                            "possible_moves": list(rec.possible_moves),
+                            # perf counters helpful for long runs
+                            "time_ms_candidates": getattr(rec, 'time_ms_candidates', 0.0),
+                            "time_ms_eval": getattr(rec, 'time_ms_eval', 0.0),
+                        })
+                    _tmp = _p.with_suffix(_p.suffix + ".part")
+                    _tmp.write_text(json.dumps(_steps, indent=2), encoding="utf-8")
+                    try:
+                        _tmp.replace(_p)
+                    except Exception:
+                        # Fallback to writing in-place if replace not supported
+                        _p.write_text(json.dumps(_steps, indent=2), encoding="utf-8")
+        except Exception:
+            # Checkpointing is best-effort; ignore failures
+            pass
+
         if done:
             break
 
@@ -2808,6 +3152,8 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
         "delta_sp_series": [rec.delta_sp for rec in step_records],
         "delta_sp_min_series": [rec.delta_sp_min for rec in step_records],
         "eval_time_ms_series": [getattr(rec, 'time_ms_eval', 0.0) for rec in step_records],
+        # Treat DG fire as acceptance for PSZ-style summaries
+        "accepted_series": [bool(getattr(rec, 'dg_fire', False)) for rec in step_records],
         "dead_end_steps": dead_end_steps,
         "dead_end_escape_rate": (dead_end_escape / dead_end_steps) if dead_end_steps else 1.0,
     }
@@ -2857,6 +3203,7 @@ def aggregate(runs: List[MazeSummary]) -> Dict[str, float]:
     sp_min_values: List[float] = []
     best_hops: List[int] = []
     eval_times: List[float] = []
+    psz_samples: List[Dict[str, float]] = []
     for run in runs:
         g0_values.extend(float(v) for v in run.get("g0_series", []))
         gmin_values.extend(float(v) for v in run.get("gmin_series", []))
@@ -2865,6 +3212,14 @@ def aggregate(runs: List[MazeSummary]) -> Dict[str, float]:
         sp_min_values.extend(float(v) for v in run.get("delta_sp_min_series", []))
         best_hops.extend(int(h) for h in run.get("multihop_best_hop", []))
         eval_times.extend(float(t) for t in run.get("eval_time_ms_series", []))
+        # Build PSZ samples from accepted flags and eval times (per-step)
+        acc_flags = run.get("accepted_series", [])
+        lat_values = run.get("eval_time_ms_series", [])
+        for a, l in zip(acc_flags, lat_values):
+            try:
+                psz_samples.append({"accepted": bool(a), "latency_ms": float(l)})
+            except Exception:
+                continue
     # best hop histogram (0..3; others bucketed to 3+)
     hop_hist = {0: 0, 1: 0, 2: 0, 3: 0}
     for h in best_hops:
@@ -2884,12 +3239,33 @@ def aggregate(runs: List[MazeSummary]) -> Dict[str, float]:
         idx = int(max(0, min(len(vals_sorted) - 1, round(0.95 * (len(vals_sorted) - 1)))))
         return float(vals_sorted[idx])
 
-    return {
+    def _pctl(vals: List[float], q: float) -> float:
+        if not vals:
+            return 0.0
+        v = sorted(vals)
+        q = max(0.0, min(1.0, float(q)))
+        i = int(round(q * (len(v) - 1)))
+        return float(v[i])
+
+    # PSZ summary (acceptance/FMR/P50)
+    try:
+        from insightspike.metrics.psz import summarize_accept_latency as _psz
+        psz = _psz(psz_samples) if psz_samples else None
+    except Exception:
+        psz = None
+
+    out = {
         "success_rate": success_rate,
         "avg_steps": avg_steps,
         "avg_edges": avg_edges,
         "g0_mean": _mean(g0_values),
         "gmin_mean": _mean(gmin_values),
+        "g0_p50": _pctl(g0_values, 0.50),
+        "g0_p90": _pctl(g0_values, 0.90),
+        "g0_p95": _pctl(g0_values, 0.95),
+        "gmin_p50": _pctl(gmin_values, 0.50),
+        "gmin_p90": _pctl(gmin_values, 0.90),
+        "gmin_p95": _pctl(gmin_values, 0.95),
         "avg_k_star": _mean(k_values),
         "avg_delta_sp": _mean(sp_values),
         "avg_delta_sp_min": _mean(sp_min_values),
@@ -2901,6 +3277,20 @@ def aggregate(runs: List[MazeSummary]) -> Dict[str, float]:
         "avg_time_ms_eval": _mean(eval_times),
         "p95_time_ms_eval": _p95(eval_times),
     }
+    if psz is not None:
+        try:
+            out.update({
+                "psz_acceptance_rate": float(psz.acceptance_rate),
+                "psz_fmr": float(psz.fmr),
+                "psz_latency_p50_ms": float(psz.latency_p50_ms),
+                "psz_inside": bool(psz.inside_psz),
+                # Heuristic recommendations for gating thresholds
+                # - θ_DG ≈ gminの95パーセンタイル（gmin < θ_DG を ~95% にする）
+                "rec_theta_dg_p95": _pctl(gmin_values, 0.95),
+            })
+        except Exception:
+            pass
+    return out
 
 
 def parse_args() -> argparse.Namespace:
@@ -2915,7 +3305,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--candidate-cap", type=int, default=32)
     parser.add_argument("--top-m", type=int, default=32)
     parser.add_argument("--cand-radius", type=float, default=1.0)
-    parser.add_argument("--link-radius", type=float, default=0.1)
+    parser.add_argument("--link-radius", type=float, default=0.05)
     parser.add_argument("--lambda-weight", type=float, default=1.0)
     parser.add_argument("--max-hops", type=int, default=10)
     parser.add_argument("--decay-factor", type=float, default=0.7)
@@ -2951,9 +3341,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--sp-cache", action="store_true", help="Enable SP DistanceCache path")
     parser.add_argument("--sp-cache-mode", type=str, default="core", choices=["core", "cached", "cached_incr"], help="SP cache mode: core=Core委譲, cached=端点SSSP推定, cached_incr=端点SSSPの増分合成+検証")
     parser.add_argument("--sp-cand-topk", type=int, default=0, help="Top-K cap for Ecand during greedy (0 = unlimited)")
+    parser.add_argument("--sp-allpairs", dest="sp_allpairs", action="store_true", help="Force SP evaluation to use ALL-PAIRS average (no fixed-before-pairs) [diagnostic]")
+    parser.add_argument("--sp-allpairs-exact", dest="sp_allpairs_exact", action="store_true", help="Greedy exact ALL-PAIRS on evaluation subgraph with incremental 2-BFS update per candidate")
+    parser.add_argument("--sp-exact-stable-nodes", dest="sp_exact_stable_nodes", action="store_true", help="Keep evaluation SA node set monotonically growing across steps to improve APSP reuse (off by default)")
+    parser.add_argument("--sp-signed", dest="sp_signed", action="store_true", help="Treat ΔSP as signed (no clamp) in reporting and diagnostics")
+    parser.add_argument("--sp-report-best-hop", dest="sp_report_best_hop", action="store_true", help="Report delta_sp as best-hop value instead of hop0")
     parser.add_argument("--sp-pair-samples", type=int, default=400, help="Fixed-pair sampling size for SP (before graph)")
+    parser.add_argument("--ig-hop-apply", type=str, default="all", choices=["all","hop0"], help="Apply linkset IG to which hops (all or hop0 only)")
     parser.add_argument("--eval-all-hops", action="store_true", help="Force evaluation to add one candidate per hop (diagnostic)")
     parser.add_argument("--no-ged-hop0-const", dest="ged_hop0_const", action="store_false")
+    # Optional: write recommended thresholds next to summary
+    parser.add_argument("--write-recommendations", action="store_true", help="Write recommended θ values (DG/AG) as JSON next to output")
+    # Optional: automatically rerun once with suggested thresholds (guarded by env INSIGHTSPIKE_AUTORERUN_OK=1)
+    parser.add_argument("--auto-rerun-with-suggested", action="store_true", help="Rerun once with suggested θ values (requires env INSIGHTSPIKE_AUTORERUN_OK=1)")
     # Snapshot level
     parser.add_argument("--snapshot-level", type=str, default="standard", choices=["minimal","standard","full"], help="Step log snapshot level")
     # Observation guard ablation
@@ -2967,34 +3367,66 @@ def parse_args() -> argparse.Namespace:
     # Timeline graph policies
     parser.add_argument("--timeline-to-graph", dest="timeline_to_graph", action="store_true", help="Also add timeline edges (Q_prev→dir→Q_next, Q_prev↔Q_next) to graph. Default: off (visual-only)")
     parser.add_argument("--add-next-q", dest="add_next_q", action="store_true", help="Also add next-step Q node to graph at end of step. Default: off")
+    # Paper preset: linkset IG + candidate-base GED + ig-hop-apply=all
+    parser.add_argument("--preset", type=str, default=None, choices=["paper"], help="Quick preset: 'paper' = linkset IG + candidate-base GED + ig-hop-apply=all")
     parser.set_defaults(ged_hop0_const=True)
     # Lite path: delegate per-step evaluation to main L3 (query-centric)
     parser.add_argument("--use-main-l3", dest="use_main_l3", action="store_true", help="Use main L3GraphReasoner (query-centric) for per-step eval (hop0 only)")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--step-log", type=Path)
+    # Optional explicit maze snapshot JSON for paper reproducibility
+    parser.add_argument("--maze-snapshot-out", type=Path, default=None, help="If set, write maze layout/start/goal/size to this JSON path at run start")
     # Persistence
     parser.add_argument("--persist-graph-sqlite", type=str, default="", help="If set, persist committed diffs (nodes/edges) to a SQLite DB at this path")
     parser.add_argument("--persist-namespace", type=str, default="maze_query_hub")
     parser.add_argument("--persist-forced-candidates", dest="persist_forced_candidates", action="store_true", help="Persist forced candidate edges (Q↔dir) to SQLite/steps even if not committed")
     parser.add_argument("--persist-timeline-edges", dest="persist_timeline_edges", action="store_true", help="Persist timeline edges (Q_prev→dir→Q_next 等) to SQLite/steps for relaxed/strict再生")
+    # Forced-as-base toggle (when S_link is empty, use forced Top‑L as base)
+    parser.add_argument("--link-forced-as-base", dest="link_forced_as_base", action="store_true", help="Use forced Top‑L as linkset base when S_link is empty (affects Cmax and pre-eval)")
+    parser.add_argument("--no-link-forced-as-base", dest="link_forced_as_base", action="store_false")
+    # Periodic checkpointing of step log (for long runs / timeout resilience)
+    parser.add_argument("--checkpoint-interval", type=int, default=0, help="Write partial steps JSON every N steps to --step-log (0 disables)")
     # Defaults for persistence toggles
     parser.set_defaults(persist_timeline_edges=True)
+    # Ensure dead-end skip is OFF by default (explicit)
+    parser.set_defaults(skip_mh_on_deadend=False)
     # Layer1 vector prefilter options
-    parser.add_argument("--layer1-prefilter", dest="layer1_prefilter", action="store_true", help="Use Layer1 weighted-L2 vector prefilter for mem candidates (disables spatial ring)")
-    parser.add_argument("--l1-cap", type=int, default=128, help="Top-K cap for Layer1 vector prefilter")
+    # Layer1 vector prefilter options (weighted radius mode is default)
+    parser.add_argument("--layer1-prefilter", dest="layer1_prefilter", action="store_true", default=False, help="Use Layer1 weighted-L2 vector prefilter for mem candidates (disables spatial ring)")
+    parser.add_argument("--no-layer1-prefilter", dest="layer1_prefilter", action="store_false")
+    parser.add_argument("--l1-cap", type=int, default=16, help="Top-K cap for Layer1 vector prefilter")
     # Spatial prefilter options
-    parser.add_argument("--ring-ellipse", dest="ring_ellipse", action="store_true", help="Use elliptical window for spatial prefilter (default: rectangular)")
+    parser.add_argument("--ring-ellipse", dest="ring_ellipse", action="store_true", default=True, help="Use elliptical window for spatial prefilter (default: rectangular)")
     parser.add_argument("--verbose", dest="verbose", action="store_true", help="Verbose per-step logging (debug)")
-    # DS-backed SP pairsets
-    parser.add_argument("--sp-ds-sqlite", type=str, default="", help="Optional SQLite DB path for SP pairset reuse (before/after)")
-    parser.add_argument("--sp-ds-namespace", type=str, default="maze_query_hub_sp", help="Namespace for SP pairsets in DS")
+    parser.add_argument("--log-minimal", dest="log_minimal", action="store_true", help="Write only minimal fields to steps.json (reduces IO)")
+    # DS-backed SP pairsets (default: enabled with shared cache)
+    parser.add_argument("--sp-ds-sqlite", type=str, default="results/mq_sp.sqlite", help="SQLite DB path for SP pairset reuse (before/after)")
+    parser.add_argument("--sp-ds-namespace", type=str, default="mq_sp", help="Namespace for SP pairsets in DS")
+    # Post-step diagnostics
+    parser.add_argument("--no-post-sp-diagnostics", dest="post_sp_diagnostics", action="store_false", help="Disable post-step SP diagnostics (hop_series_post) to save time")
+    # Ultra-light steps (skip heavy graph snapshots entirely)
+    parser.add_argument("--steps-ultra-light", dest="steps_ultra_light", action="store_true", help="Do not generate heavy snapshot arrays in steps.json; prefer DS/HTML light mode")
+    parser.add_argument("--force-per-hop", dest="force_per_hop", action="store_true", help="Force per-hop series via evaluator even in L3-only path")
+    parser.add_argument("--eval-per-hop-on-ag", dest="eval_per_hop_on_ag", action="store_true", help="Fallback to evaluator (per-hop) only when AG fires in L3-only path")
+    parser.add_argument("--dg-bfs-shortcut", dest="dg_bfs_shortcut", action="store_true", help="When DG fires, commit chosen multi-hop edges as a BFS-like shortcut in one step")
     # Defaults
     parser.set_defaults(link_autowire_all=True)
+    # Prefer recording per-hop on AG in L3-light path unless explicitly disabled
+    parser.set_defaults(eval_per_hop_on_ag=True)
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
+    # Apply quick presets
+    if getattr(args, 'preset', None) == 'paper':
+        args.linkset_mode = True
+        args.linkset_base = 'link'
+        args.norm_base = 'link'
+        try:
+            setattr(args, 'ig_hop_apply', 'all')
+        except Exception:
+            pass
     selector_params = {
         "theta_cand": args.theta_cand,
         "theta_link": args.theta_link,
@@ -3016,6 +3448,7 @@ def main() -> None:
         "sp_scope_mode": args.sp_scope,
         "sp_hop_expand": args.sp_hop_expand,
         "sp_boundary_mode": args.sp_boundary,
+        "ig_hop_apply": str(args.ig_hop_apply),
     }
     config = QueryHubConfig(
         maze_size=args.maze_size,
@@ -3039,6 +3472,11 @@ def main() -> None:
         sp_cache=bool(args.sp_cache),
         sp_cache_mode=str(args.sp_cache_mode),
         sp_cand_topk=int(args.sp_cand_topk),
+        sp_eval_allpairs=bool(getattr(args, 'sp_allpairs', False)),
+        sp_eval_allpairs_exact=bool(getattr(args, 'sp_allpairs_exact', False)),
+        sp_exact_stable_nodes=bool(getattr(args, 'sp_exact_stable_nodes', False)),
+        sp_signed=bool(getattr(args, 'sp_signed', False)),
+        sp_report_best_hop=bool(getattr(args, 'sp_report_best_hop', False)),
         sp_pair_samples=int(args.sp_pair_samples),
         eval_all_hops=bool(args.eval_all_hops),
         ged_hop0_const=bool(args.ged_hop0_const),
@@ -3050,21 +3488,29 @@ def main() -> None:
         persist_sqlite_path=(str(args.persist_graph_sqlite).strip() or None),
         persist_namespace=str(args.persist_namespace),
         persist_forced_candidates=bool(getattr(args, 'persist_forced_candidates', False)),
-        link_forced_as_base=False,
+        link_forced_as_base=bool(getattr(args, 'link_forced_as_base', True)),
         persist_timeline_edges=bool(getattr(args, 'persist_timeline_edges', False)),
         dg_commit_policy=str(args.dg_commit_policy),
         dg_commit_all_linkset=bool(getattr(args, 'dg_commit_all_linkset', False)),
         skip_mh_on_deadend=bool(getattr(args, 'skip_mh_on_deadend', False)),
         snapshot_level=str(args.snapshot_level),
         ring_ellipse=bool(getattr(args, 'ring_ellipse', False)),
-        layer1_prefilter=bool(getattr(args, 'layer1_prefilter', False)),
-        l1_cap=int(getattr(args, 'l1_cap', 128)),
+        layer1_prefilter=bool(getattr(args, 'layer1_prefilter', True)),
+        l1_cap=int(getattr(args, 'l1_cap', 16)),
         ag_auto=bool(getattr(args, 'ag_auto', False)),
         ag_window=int(getattr(args, 'ag_window', 30)),
         ag_quantile=float(getattr(args, 'ag_quantile', 0.9)),
         verbose=bool(getattr(args, 'verbose', False)),
         sp_ds_sqlite=(str(getattr(args, 'sp_ds_sqlite', '')).strip() or None),
         sp_ds_namespace=str(getattr(args, 'sp_ds_namespace', 'maze_query_hub_sp')),
+        checkpoint_interval=int(getattr(args, 'checkpoint_interval', 0)),
+        checkpoint_path=(str(getattr(args, 'step_log', '')).strip() or None),
+        post_sp_diagnostics=bool(getattr(args, 'post_sp_diagnostics', True)),
+        steps_ultra_light=bool(getattr(args, 'steps_ultra_light', False)),
+        maze_snapshot_out=(str(getattr(args, 'maze_snapshot_out', '')).strip() or None),
+        force_per_hop=bool(getattr(args, 'force_per_hop', False)),
+        eval_per_hop_on_ag=bool(getattr(args, 'eval_per_hop_on_ag', False)),
+        dg_bfs_shortcut=bool(getattr(args, 'dg_bfs_shortcut', False)),
     )
 
     runs: List[MazeSummary] = []
@@ -3076,9 +3522,39 @@ def main() -> None:
         artifacts = run_episode_query(seed=seed, config=config)
         runs.append(artifacts.summary)
         maze_data[str(seed)] = artifacts.maze_snapshot
-    for record in artifacts.steps:
-        all_steps.append(
-            {
+        # Append this seed's step records as we go (not only the last seed)
+        for record in artifacts.steps:
+            minimal = bool(getattr(args, 'log_minimal', False) or getattr(args, 'steps_ultra_light', False))
+            if minimal:
+                # Minimal logging: keep UIに必要な基本値は残す（g0/gminに加えΔEPC/ΔIGも出力）
+                all_steps.append({
+                    "seed": record.seed,
+                    "step": record.step,
+                    "position": list(record.position),
+                    "action": record.action,
+                    # geDIG core metrics
+                    "g0": record.g0,
+                    "gmin": record.gmin,
+                    "delta_ged": record.delta_ged,
+                    "delta_ig": record.delta_ig,
+                    "delta_ged_min": record.delta_ged_min,
+                    "delta_ig_min": record.delta_ig_min,
+                    "delta_sp": record.delta_sp,
+                    "delta_sp_min": record.delta_sp_min,
+                    "best_hop": record.best_hop,
+                    # gating
+                    "ag_fire": bool(getattr(record, 'ag_fire', False)),
+                    "dg_fire": bool(getattr(record, 'dg_fire', False)),
+                    "theta_ag": float(getattr(record, 'theta_ag', 0.0)),
+                    # topology context
+                    "possible_moves": getattr(record, 'possible_moves', []),
+                    "is_dead_end": bool(getattr(record, 'is_dead_end', False)),
+                    # perf
+                    "time_ms_candidates": getattr(record, 'time_ms_candidates', 0.0),
+                    "time_ms_eval": getattr(record, 'time_ms_eval', 0.0),
+                })
+                continue
+            all_steps.append({
                     "seed": record.seed,
                     "step": record.step,
                     "position": list(record.position),
@@ -3188,8 +3664,7 @@ def main() -> None:
                     "ds_edges_total": getattr(record, 'ds_edges_total', 0),
                     "ds_nodes_saved": getattr(record, 'ds_nodes_saved', []),
                     "ds_edges_saved": getattr(record, 'ds_edges_saved', []),
-                }
-        )
+                })
 
     summary = aggregate(runs)
     output_payload = {
@@ -3218,12 +3693,78 @@ def main() -> None:
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(output_payload, indent=2), encoding="utf-8")
+    # Optional: write recommended thresholds next to summary
+    try:
+        if bool(getattr(args, 'write_recommendations', False)):
+            rec = {
+                "theta_dg_recommended": float(summary.get("rec_theta_dg_p95", 0.0)),
+                # Heuristic: use g0_p90 as AG目安（大きいg0の上位10%を弾く）
+                "theta_ag_recommended": float(summary.get("g0_p90", 0.0)),
+            }
+            rec_path = args.output.with_name(args.output.stem + "_recommend.json")
+            rec_path.write_text(json.dumps(rec, indent=2), encoding="utf-8")
+    except Exception:
+        pass
 
     if args.step_log:
         args.step_log.parent.mkdir(parents=True, exist_ok=True)
         args.step_log.write_text(json.dumps(all_steps, indent=2), encoding="utf-8")
 
+    # Optional console hint for DG/AG threshold suggestions (paper-aligned)
+    try:
+        rec_dg = summary.get("rec_theta_dg_p95")
+        if isinstance(rec_dg, (int, float)):
+            print(f"[recommend] theta_dg ≈ p95(gmin) = {float(rec_dg):.4f}")
+    except Exception:
+        pass
     print(json.dumps(summary, indent=2))
+
+    # Optional: auto rerun once with suggested thresholds (guarded by env)
+    try:
+        import os, sys, shlex, subprocess
+        if bool(getattr(args, 'auto_rerun_with_suggested', False)):
+            ok = os.getenv('INSIGHTSPIKE_AUTORERUN_OK', '').strip().lower() in ('1','true','yes','on')
+            if ok:
+                theta_dg_s = summary.get('rec_theta_dg_p95')
+                theta_ag_s = summary.get('g0_p90')
+                if isinstance(theta_dg_s, (int, float)):
+                    new_argv = [sys.executable, sys.argv[0]]
+                    # filter out flags that should not carry into rerun
+                    skip_next = False
+                    for i, tok in enumerate(sys.argv[1:]):
+                        if skip_next:
+                            skip_next = False
+                            continue
+                        if tok in ('--auto-rerun-with-suggested','--write-recommendations'):
+                            continue
+                        if tok in ('--theta-dg','--theta-ag','--output','--step-log'):
+                            skip_next = True
+                            continue
+                        new_argv.append(tok)
+                    # add overridden thresholds
+                    new_argv += ['--theta-dg', f"{float(theta_dg_s):.6f}"]
+                    if isinstance(theta_ag_s, (int, float)):
+                        new_argv += ['--theta-ag', f"{float(theta_ag_s):.6f}"]
+                    # redirect outputs to *_rerun.json
+                    try:
+                        out_path = Path(args.output)
+                        new_out = out_path.with_name(out_path.stem + '_rerun.json')
+                        new_argv += ['--output', str(new_out)]
+                    except Exception:
+                        pass
+                    try:
+                        if args.step_log:
+                            step_path = Path(args.step_log)
+                            new_step = step_path.with_name(step_path.stem + '_rerun.json')
+                            new_argv += ['--step-log', str(new_step)]
+                    except Exception:
+                        pass
+                    print('[autorun] Rerunning with suggested thresholds:', ' '.join(shlex.quote(a) for a in new_argv))
+                    subprocess.run(new_argv, check=False)
+            else:
+                print('[autorun] Skipped (set INSIGHTSPIKE_AUTORERUN_OK=1 to enable)')
+    except Exception as _e:
+        print('[autorun] Failed to schedule rerun:', _e)
 
 
 if __name__ == "__main__":

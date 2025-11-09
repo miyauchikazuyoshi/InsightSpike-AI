@@ -57,7 +57,8 @@ class ConfigPresets:
             ),
             logging=LoggingConfig(
                 level="DEBUG",
-                file_path="/Users/miyauchikazuyoshi/.insightspike/logs",
+                # Repo-relative by default; error_handler further resolves safely
+                file_path="results/logs",
             ),
         )
 
@@ -98,7 +99,7 @@ class ConfigPresets:
             ),
             logging=LoggingConfig(
                 level="INFO",
-                file_path="/Users/miyauchikazuyoshi/.insightspike/logs",
+                file_path="results/logs",
             ),
         )
 
@@ -185,7 +186,7 @@ class ConfigPresets:
             ),
             logging=LoggingConfig(
                 level="DEBUG",
-                file_path="/Users/miyauchikazuyoshi/.insightspike/logs",
+                file_path="results/logs",
                 log_to_console=True,
             ),
         )
@@ -238,6 +239,26 @@ class ConfigPresets:
                 log_to_console=True,
             ),
         )
+
+    @staticmethod
+    def paper() -> InsightSpikeConfig:
+        """Paper-aligned preset (query-centric, linkset IG, candidate-base GED).
+
+        Intended for parity between experiment evaluator and Layer3 via adapter.
+        """
+        cfg = ConfigPresets.development()
+        # Graph/paper controls
+        cfg.graph.sp_scope_mode = "union"
+        cfg.graph.sp_eval_mode = "fixed_before_pairs"
+        cfg.graph.ged_norm_scheme = "candidate_base"
+        cfg.graph.ig_source_mode = "linkset"
+        cfg.graph.linkset_query_weight = 1.0
+        cfg.graph.lambda_weight = 1.0
+        cfg.graph.sp_beta = 1.0
+        # Metrics controls
+        cfg.metrics.ig_denominator = "fixed_kstar"
+        cfg.metrics.use_local_normalization = True
+        return cfg
     
     @staticmethod
     def production_optimized() -> InsightSpikeConfig:
@@ -300,6 +321,8 @@ class ConfigPresets:
             "production": ConfigPresets.production(),
             "research": ConfigPresets.research(),
             "cloud": ConfigPresets.cloud(),
+            # Alias for CLI convenience; testing → cloud (ultra-light)
+            "testing": ConfigPresets.cloud(),
             "production_optimized": ConfigPresets.production_optimized(),
             "minimal": ConfigPresets.minimal(),
             "graph_enhanced": ConfigPresets.graph_enhanced(),

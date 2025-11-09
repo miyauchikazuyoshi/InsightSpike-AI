@@ -64,6 +64,8 @@ def build_ecand(
     ring_center: Optional[Tuple[int, int]] = None,
     ring_size: Optional[Tuple[int, int]] = None,
     ellipse: bool = False,
+    # Optional: prefilter by explicit node-id set (e.g., weighted-L2 index results)
+    prefilter_nodes: Optional[Set[Node]] = None,
 ) -> Tuple[List[Tuple[Node, Node, Dict[str, Any]]], int, int]:
     """Build Ecand for greedy SP evaluation.
 
@@ -78,8 +80,10 @@ def build_ecand(
     mem_count = 0
     qpast_count = 0
 
-    # Optional ring prefilter for mem-origin items
+    # Optional ring prefilter for mem-origin items (skipped when prefilter_nodes is provided)
     def _in_ring(item_anchor: Tuple[int, int]) -> bool:
+        if prefilter_nodes is not None:
+            return True
         if ring_center is None or ring_size is None:
             return True
         ar, ac = int(item_anchor[0]), int(item_anchor[1])
@@ -107,6 +111,9 @@ def build_ecand(
         if d is None:
             continue
         nid_prev = make_direction_node(at, int(d))
+        # Optional node-id prefilter (e.g., weighted-L2 radius search results)
+        if prefilter_nodes is not None and nid_prev not in prefilter_nodes:
+            continue
         if nid_prev not in prev_graph:
             # require existence on prev_graph so Lb>0 is meaningful
             continue

@@ -1,0 +1,61 @@
+name: CI (API Surface)
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api-surface:
+    name: API surface (lite imports)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PYTHONPATH: src
+      INSIGHTSPIKE_LITE_MODE: "1"
+      INSIGHTSPIKE_MIN_IMPORT: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Quick import checks
+        run: |
+          python - << 'PY'
+          # Basic public and package entrypoints should import in lite mode
+          import importlib
+          import sys
+          ok = []
+          for mod in [
+            'insightspike',
+            'insightspike.public',
+            'insightspike.algorithms',
+            'insightspike.implementations',
+          ]:
+            try:
+              importlib.import_module(mod)
+              ok.append(mod)
+            except Exception as e:
+              print(f'IMPORT FAIL: {mod}: {e}', file=sys.stderr)
+              raise
+          print('OK imports:', ok)
+          PY
+
+      - name: Public API smoke
+        run: |
+          python - << 'PY'
+          from insightspike.public import create_agent, get_config_summary
+          agent = create_agent()  # mock LLM in lite mode
+          res = agent.process_question('geDIG quick check')
+          print('agent success:', bool(res))
+          summ = get_config_summary()
+          print('summary keys:', len(summ))
+          PY
+

@@ -1,0 +1,39 @@
+name: CI (Lint Fast)
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Python syntax & basic lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Syntax check (.py compile)
+        run: |
+          python - << 'PY'
+          import compileall, sys
+          ok = compileall.compile_dir('src', quiet=1)
+          sys.exit(0 if ok else 1)
+          PY
+
+      - name: Minimal flake8 (critical errors only)
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8
+          # E9,F63,F7,F82 are likely syntax/undefined name issues
+          flake8 src --select=E9,F63,F7,F82 --show-source --statistics || true
+

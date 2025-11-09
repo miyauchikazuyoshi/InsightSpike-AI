@@ -20,6 +20,7 @@ sys.path.insert(0, '/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/sr
 # Import InsightSpike's geDIG
 try:
     from insightspike.algorithms.gedig_core import GeDIGCore, GeDIGResult
+    from insightspike.algorithms.linkset_adapter import build_linkset_info
     print("✅ InsightSpike geDIG loaded successfully")
     INSIGHTSPIKE_AVAILABLE = True
 except ImportError as e:
@@ -400,10 +401,15 @@ class EnhancedRAGSystem:
         if self.gedig_core:
             # Use InsightSpike's geDIG
             try:
+                # Build a simple linkset from similar_nodes as candidate_pool
+                pool = [{"index": str(nid), "similarity": float(sim)} for (nid, sim) in similar_nodes]
+                decision = {"index": str(pool[0]["index"]) if pool else None, "similarity": float(pool[0]["similarity"]) if pool else 1.0}
+                ls = build_linkset_info(s_link=[], candidate_pool=pool, decision=decision, query_vector=None, base_mode="pool")
                 result = self.gedig_core.calculate(
                     g_prev=g_before,
                     g_now=g_after,
-                    focal_nodes={new_node_id}
+                    focal_nodes={new_node_id},
+                    linkset_info=ls,
                 )
                 
                 # Store metrics

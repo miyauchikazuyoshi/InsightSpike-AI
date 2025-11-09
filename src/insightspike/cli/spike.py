@@ -112,6 +112,8 @@ class DependencyFactory:
             pydantic_config = ConfigPresets.production()
         elif preset == "research":
             pydantic_config = ConfigPresets.research()
+        elif preset == "paper":
+            pydantic_config = ConfigPresets.paper()
         else:
             # Default to development
             pydantic_config = ConfigPresets.development()
@@ -774,7 +776,7 @@ def version():
     console.print("[bold]InsightSpike AI[/bold]")
     console.print("Version: 0.8.0")
     console.print("Brain-inspired AI for insight detection")
-    console.print("\n[dim]GitHub: https://github.com/miyauchi/InsightSpike-AI[/dim]")
+    console.print("\n[dim]GitHub: https://github.com/miyauchikazuyoshi/InsightSpike-AI[/dim]")
 
 
 # Register the discover command

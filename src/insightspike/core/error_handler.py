@@ -63,42 +63,78 @@ class InsightSpikeLogger:
             self._initialized = True
 
     def _setup_logging(self):
-        """ロギングの設定"""
-        # ログディレクトリの作成
-        log_dir = Path.home() / ".insightspike" / "logs"
-        log_dir.mkdir(parents=True, exist_ok=True)
+        """ロギングの設定（クラウド安全・相対パス優先）"""
+        # 1) 決定順: 環境変数 -> プロジェクト相対 results/logs -> ホーム
+        env_dir = os.getenv("INSIGHTSPIKE_LOG_DIR")
+        log_dir: Path
+        log_file: Path
+        resolved = None
+        if env_dir:
+            try:
+                # 可能ならプロジェクト相対に解決
+                try:
+                    from ..utils.path_utils import resolve_project_relative  # type: ignore
+                except Exception:  # フォールバック
+                    resolve_project_relative = lambda p: str(Path(p))  # type: ignore
+                resolved = Path(resolve_project_relative(env_dir))
+            except Exception:
+                resolved = Path(env_dir).expanduser()
+        if not resolved:
+            try:
+                from ..utils.path_utils import resolve_project_relative  # type: ignore
+                resolved = Path(resolve_project_relative("results/logs"))
+            except Exception:
+                resolved = Path.cwd() / "results" / "logs"
+        log_dir = resolved
 
-        # ログファイル名（日付付き）
-        log_file = log_dir / f"insightspike_{datetime.now().strftime('%Y%m%d')}.log"
+        # 2) ディレクトリ作成は失敗しても致命にしない
+        try:
+            log_dir.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            # 最後のフォールバック: ホーム配下。それもダメならコンソールのみ。
+            try:
+                home_dir = Path.home() / ".insightspike" / "logs"
+                home_dir.mkdir(parents=True, exist_ok=True)
+                log_dir = home_dir
+            except Exception:
+                log_dir = None  # type: ignore
 
-        # ルートロガーの設定
+        # 3) ロガーベース設定
         self.logger = logging.getLogger("insightspike")
         self.logger.setLevel(logging.DEBUG)
 
-        # ファイルハンドラー（詳細ログ）
-        fh = logging.FileHandler(log_file, encoding="utf-8")
-        fh.setLevel(logging.DEBUG)
-
-        # コンソールハンドラー（重要なログのみ）
+        # コンソールハンドラー（重要ログ）
         ch = logging.StreamHandler()
         ch.setLevel(logging.INFO)
-
-        # フォーマッター
-        detailed_formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
-        )
         simple_formatter = logging.Formatter("%(levelname)s: %(message)s")
-
-        fh.setFormatter(detailed_formatter)
         ch.setFormatter(simple_formatter)
 
-        # ハンドラーの追加（既存のものは削除）
+        # 4) ファイルハンドラー（Lite/Minモードではスキップ可）
+        fh = None
+        lite_mode = os.getenv("INSIGHTSPIKE_LITE_MODE") == "1" or os.getenv("INSIGHTSPIKE_MIN_IMPORT") == "1"
+        if not lite_mode and log_dir is not None:
+            try:
+                log_file = log_dir / f"insightspike_{datetime.now().strftime('%Y%m%d')}.log"
+                fh = logging.FileHandler(log_file, encoding="utf-8")
+                fh.setLevel(logging.DEBUG)
+                detailed_formatter = logging.Formatter(
+                    "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
+                )
+                fh.setFormatter(detailed_formatter)
+            except Exception:
+                fh = None  # コンソールのみ
+
+        # 5) ハンドラーの追加（既存のものは削除）
         self.logger.handlers.clear()
-        self.logger.addHandler(fh)
+        if fh is not None:
+            self.logger.addHandler(fh)
         self.logger.addHandler(ch)
 
-        # 初期メッセージ
-        self.logger.info(f"InsightSpike logging initialized. Log file: {log_file}")
+        # 初期メッセージ（ファイル出力がない場合も明示）
+        if fh is not None:
+            self.logger.info(f"InsightSpike logging initialized. Log dir: {log_dir}")
+        else:
+            self.logger.info("InsightSpike logging initialized (console-only mode)")
 
     def get_logger(self, name: str) -> logging.Logger:
         """名前付きロガーを取得"""

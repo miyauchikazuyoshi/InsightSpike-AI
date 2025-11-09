@@ -10,8 +10,13 @@ install:
 
 # Install with development dependencies
 install-dev:
-	pip install -e ".[dev]"
-	@echo "Skipping model setup (no scripts/setup_models.py)"
+	# Unified to pure pip for portability (Poetry groups not used here)
+	pip install -e .
+	python -m pip install -U \
+		pytest pytest-cov pytest-asyncio \
+		black isort flake8 mypy \
+		types-pyyaml types-requests pillow
+	@echo "Dev dependencies installed via pip."
 
 # Setup models only
 setup-models:
@@ -66,10 +71,16 @@ tidy-top:
 	  if [ -f "$$f" ]; then echo "Moving $$f -> docs/paper/"; mv -f "$$f" docs/paper/; fi; \
 	done
 
+# Move known stray artifacts under results/ for tidiness (non-destructive)
+.PHONY: tidy-strays
+tidy-strays:
+	@mkdir -p results/strays
+	@if [ -f None ]; then echo "Moving top-level 'None' -> results/strays/None.json"; mv -f None results/strays/None.json; fi
+
 # Quick setup for new users
 quickstart: install setup-models
 	@echo "✅ InsightSpike-AI is ready to use!"
-	@echo "Try running: python examples/basic_usage.py"
+	@echo "Try running: python examples/public_quick_start.py"
 
 # ---------------------------------------------------------------------
 # Dockerized maze experiments (Linux/OpenBLAS for stability)
@@ -172,6 +183,57 @@ rag-figs:
 	@echo "[rag] Generating paper figures (performance & PSZ)"
 	PYTHONPATH=experiments/rag-dynamic-db-v3/src MPLCONFIGDIR=results/mpl \
 	python experiments/rag-dynamic-db-v3/src/plot_paper_figs.py
+
+# ------------------------------------------------------------
+# Exp II–IV (lite) one-click helpers
+# ------------------------------------------------------------
+.PHONY: exp23-paper exp23-psz-sweep exp23-export-figs exp23-export-tables exp23-all paper-en paper-ja
+
+# Calibrate gates on val and run test; real latency enabled.
+exp23-paper:
+	INSIGHTSPIKE_LITE_MODE=1 INSIGHTSPIKE_MIN_IMPORT=1 EXP_LITE_REAL_LATENCY=1 \
+	python -m experiments.exp2to4_lite.src.run_suite \
+	  --config experiments/exp2to4_lite/configs/exp23_paper.yaml --calibrate
+	@# Generate figures for the latest paper result
+	@LATEST=$$(ls -1t experiments/exp2to4_lite/results/exp23_paper_*.json | grep -v _alignment.json | head -n1); \
+	python -c "from experiments.exp2to4_lite.src.viz import plot_psz_curves, plot_gating_timeseries; from pathlib import Path; import sys; res=Path(sys.argv[1]); out=Path('docs/paper/figures'); plot_psz_curves(res,out); plot_gating_timeseries(res,out)" $$LATEST
+	@# Alignment JSON + table
+	@LATEST=$$(ls -1t experiments/exp2to4_lite/results/exp23_paper_*.json | grep -v _alignment.json | head -n1); \
+	python -m experiments.exp2to4_lite.src.alignment --results $$LATEST || true
+	python -m experiments.exp2to4_lite.src.export_alignment_tex || true
+	python -m experiments.exp2to4_lite.src.export_resources_tex || true
+	python -m experiments.exp2to4_lite.src.export_tables_tex || true
+
+# Sweep parameters toward PSZ band (50 queries, percentile acceptance example)
+exp23-psz-sweep:
+	INSIGHTSPIKE_LITE_MODE=1 INSIGHTSPIKE_MIN_IMPORT=1 EXP_LITE_REAL_LATENCY=1 \
+	python -m experiments.exp2to4_lite.src.psz_sweep \
+	  --config experiments/exp2to4_lite/configs/exp23_psz_target.yaml \
+	  --accept-mode percentile --accept-percentile 0.02
+
+# Export figures for latest paper + latest PSZ-target results
+exp23-export-figs:
+	@PAPER=$$(ls -1t experiments/exp2to4_lite/results/exp23_paper_*.json | grep -v _alignment.json | head -n1); \
+	  PSZ=$$(ls -1t experiments/exp2to4_lite/results/exp23_psz_target_*.json | head -n1); \
+	python -c "from experiments.exp2to4_lite.src.viz import plot_psz_curves, plot_gating_timeseries; from pathlib import Path; import sys; out=Path('docs/paper/figures'); [plot_psz_curves(Path(p),out) or plot_gating_timeseries(Path(p),out) for p in sys.argv[1:] if Path(p).exists()]" $$PAPER $$PSZ
+
+# Export LaTeX tables (summary, ablation, resources, alignment)
+exp23-export-tables:
+	python -m experiments.exp2to4_lite.src.export_tables_tex || true
+	python -m experiments.exp2to4_lite.src.export_resources_tex || true
+	python -m experiments.exp2to4_lite.src.export_alignment_tex || true
+
+# Build PDFs for both EN/JA v4 drafts
+paper-en:
+	cd docs/paper && xelatex -interaction=nonstopmode geDIG_onegauge_improved_v4_en.tex >/dev/null || true && \
+	  xelatex -interaction=nonstopmode geDIG_onegauge_improved_v4_en.tex >/dev/null || true
+
+paper-ja:
+	cd docs/paper && xelatex -interaction=nonstopmode geDIG_onegauge_improved_v4.tex >/dev/null || true && \
+	  xelatex -interaction=nonstopmode geDIG_onegauge_improved_v4.tex >/dev/null || true
+
+# End-to-end: run paper, sweep PSZ, export assets, and compile PDFs
+exp23-all: exp23-paper exp23-psz-sweep exp23-export-figs exp23-export-tables paper-en paper-ja
 
 # ------------------------------------------------------------
 # Maze tuning (15x15)

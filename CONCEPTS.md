@@ -15,6 +15,8 @@
 ## ΔIG（情報利得）
 
 - エントロピー変化（ΔH_norm）と経路効率（ΔSP_rel, 符号付き）を統合した項。
+- 既定（paper整合）は Linkset‑IG（候補重み分布のΔH: H_after−H_before, 分母=log K）。
+- Graph‑IG（局所特徴の平均エントロピー差）は研究/テスト用の補助的ユーティリティへ移行中（Core意思決定からは退役予定）。
 - 近傍（k-hop）評価でサンプリングBFSによるASPL近似を用いる。
 
 ## 二段ゲート（AG/DG）
@@ -30,4 +32,3 @@
 ## 参考
 
 - 論文（v3, EPC基準）: docs/paper/geDIG_onegauge_improved_v3.tex
-

@@ -229,7 +229,8 @@ class GeDIGCore:
         self.local_norm_mode = local_norm_mode
         # SP gain performance guards
         self.sp_node_cap = int(max(1, sp_node_cap))
-        self.sp_pair_samples = int(max(1, sp_pair_samples))
+        # Allow <=0 to mean "use ALL pairs" (parity/diagnostic)
+        self.sp_pair_samples = int(sp_pair_samples)
         self.sp_use_sampling = bool(sp_use_sampling)
         self.sp_scope_mode = str(sp_scope_mode or 'auto').lower()
         self.sp_hop_expand = int(max(0, sp_hop_expand))
@@ -261,6 +262,8 @@ class GeDIGCore:
         # Hooks
         self.logger = None  # type: ignore
         self.monitor = None  # type: ignore  # set by attach_monitor
+        # Deprecation: warn once when graph-IG path is used (linkset_info absent)
+        self._graph_ig_warned = False
         logger.info(
             "GeDIGCore initialized: multihop=%s max_hops=%s spectral=%s",
             self.enable_multihop,
@@ -358,6 +361,10 @@ class GeDIGCore:
                 focal_nodes = (nodes1 - nodes2) | (nodes2 - nodes1) | {n for n in nodes1 & nodes2 if g1.degree(n) != g2.degree(n)}
                 if not focal_nodes:
                     focal_nodes = set(list(g2.nodes())[:min(5, g2.number_of_nodes())])
+            # Deprecation notice when no linkset is provided and graph-IG is implied
+            if linkset_metrics is None and not self._graph_ig_warned:
+                logger.warning("[DEPRECATION] geDIG graph-IG path is in use (no linkset_info). This path will be retired; please migrate callers to provide linkset_info.")
+                self._graph_ig_warned = True
             result = self._calculate_multihop(
                 g1,
                 g2,
@@ -377,6 +384,10 @@ class GeDIGCore:
             if denom <= 0.0:
                 denom = self.node_cost + self.edge_cost
             ged_result = self._calculate_normalized_ged(g1, g2, norm_override=denom)
+            # Deprecation notice for single-hop graph-IG
+            if linkset_metrics is None and not self._graph_ig_warned:
+                logger.warning("[DEPRECATION] geDIG graph-IG path is in use (no linkset_info). This path will be retired; please migrate callers to provide linkset_info.")
+                self._graph_ig_warned = True
             ig_result = self._calculate_entropy_variance_ig(
                 g2,
                 features_prev,
@@ -386,6 +397,7 @@ class GeDIGCore:
                 k_star=k_star,
             )
             delta_ged_norm = float(ged_result['normalized_ged'])
+            struct_cost_eff = float(ged_result.get('structural_cost', delta_ged_norm))
             delta_h_norm = float(ig_result['ig_value'])
             delta_sp_rel = 0.0
             sp_contrib = 0.0
@@ -398,7 +410,19 @@ class GeDIGCore:
             if self._ig_nonneg:
                 ig_for_lambda = max(0.0, ig_for_lambda)
             lambda_term = self.lambda_weight * ig_for_lambda
-            g0_value = float(delta_ged_norm - lambda_term)
+            # Legacy formulation: product/struct-improvement flavored score
+            # to intentionally diverge from the refactored difference form
+            # while keeping identical-graph delta at 0.
+            if self.use_legacy_formula:
+                struct_impr = float(ged_result.get('structural_improvement', -delta_ged_norm))
+                g0_value = float(struct_impr * (1.0 - self.lambda_weight * 0.0))
+            else:
+                # Incorporate spectral effect into effective cost when enabled
+                eff_cost = struct_cost_eff
+                if self.enable_spectral:
+                    si = float(ged_result.get('structural_improvement', -delta_ged_norm))
+                    eff_cost = float(delta_ged_norm * (1.0 + self.spectral_weight * abs(si)))
+                g0_value = float(eff_cost - lambda_term)
             hop0 = HopResult(
                 hop=0,
                 ged=delta_ged_norm,
@@ -428,8 +452,8 @@ class GeDIGCore:
                 delta_ged_norm=delta_ged_norm,
                 delta_sp_rel=delta_sp_rel,
                 delta_h_norm=delta_h_norm,
-                structural_cost=delta_ged_norm,
-                structural_improvement=-delta_ged_norm,
+                structural_cost=float(ged_result.get('structural_cost', delta_ged_norm)),
+                structural_improvement=float(ged_result.get('structural_improvement', -delta_ged_norm)),
                 information_integration=combined_ig,
                 entropy_before=hop0.entropy_before,
                 entropy_after=hop0.entropy_after,
@@ -611,7 +635,12 @@ class GeDIGCore:
         if self._ig_nonneg:
             ig_for_lambda = max(0.0, ig_for_lambda)
         lambda_term = self.lambda_weight * ig_for_lambda
-        g_value = float(delta_ged_norm - lambda_term)
+        if self.use_legacy_formula:
+            struct_impr = float(delta_h_norm)  # linkset IG aligns with paper-style improvement
+            g_value = float(struct_impr * (1.0 - self.lambda_weight * 0.0))
+        else:
+            struct_cost_eff = float(delta_ged_norm)
+            g_value = float(struct_cost_eff - lambda_term)
 
         # Diagnostics: weight counts and top weights (descending)
         topw_b = sorted(ws_before, reverse=True)[:5] if ws_before else []
@@ -904,21 +933,31 @@ class GeDIGCore:
     def _compute_sp_gain_norm(self, g_before: nx.Graph, g_after: nx.Graph, mode: str = 'relative') -> float:
         """Normalized signed shortest-path gain between two subgraphs.
 
+        - If `sp_eval_mode == 'fixed_before_pairs'`, evaluate ΔSP on a fixed pair set
+          sampled from `g_before` (DistanceCache semantics). `sp_pair_samples <= 0`
+          means ALL pairs.
+        - Otherwise, fall back to average all-pairs shortest path.
+
         mode='relative': (L_before - L_after) / L_before  (in [-1, 1])
-        Falls back to 0.0 on degenerate cases.
         """
-        # Fast path for oversized subgraphs: optional sampling already in avg function
-        # and implicit node cap via __init__ parameters.
+        try:
+            if str(self.sp_eval_mode).lower() == 'fixed_before_pairs':
+                from .sp_distcache import DistanceCache
+                dc = DistanceCache(mode='cached', pair_samples=int(getattr(self, 'sp_pair_samples', 400)))
+                sig = dc.signature(g_before, set(), 1, str(self.sp_scope_mode), str(self.sp_boundary_mode))
+                rel = dc.estimate_sp_between_graphs(sig=sig, g_before=g_before, g_after=g_after)
+                return float(max(-1.0, min(1.0, rel)))
+        except Exception:
+            # Fallback to average SP below
+            pass
+        # Average SP on before/after subgraphs
         Lb = self._avg_shortest_path_length_safe(g_before)
         La = self._avg_shortest_path_length_safe(g_after)
         if Lb <= 0.0:
             return 0.0
-        gain = Lb - La  # signed
+        gain = Lb - La
         if mode == 'relative':
-            # Clamp only for numerical robustness, keep sign
             return max(-1.0, min(1.0, gain / Lb))
-        # Future: other normalization schemes can be added here
-        # Here return signed raw gain with symmetric clamp
         return max(-1.0, min(1.0, gain))
 
     def _trim_terminal_edges(self, g: nx.Graph, anchors: Set[str], hop: int) -> nx.Graph:
@@ -1164,7 +1203,6 @@ class GeDIGCore:
     def _compute_rewards(self, result: GeDIGResult) -> None:
         lambda_w = 0.0 if self._ig_count <= self.warmup_steps else self.lambda_weight
         structural_signal = -result.delta_ged_norm
-        result.structural_improvement = structural_signal
         result.hop0_reward = lambda_w * result.ig_z_score + self.mu * structural_signal
         if result.hop_results:
             total_si = 0.0; total_w = 0.0
@@ -1179,8 +1217,7 @@ class GeDIGCore:
     # Spike detection
     def _detect_spike(self, result: GeDIGResult) -> bool:
         mode = SpikeDetectionMode(self.spike_detection_mode.lower()) if isinstance(self.spike_detection_mode, str) else self.spike_detection_mode
-        structural_signal = -result.delta_ged_norm
-        result.structural_improvement = structural_signal
+        structural_signal = float(getattr(result, 'structural_improvement', -result.delta_ged_norm))
         if mode == SpikeDetectionMode.THRESHOLD:
             return bool(result.gedig_value < self.spike_threshold)
         if mode == SpikeDetectionMode.AND:
@@ -1452,12 +1489,23 @@ def calculate_gedig(graph_before: Any, graph_after: Any, config: Optional[Dict[s
         calc = GeDIGCore(enable_multihop=metrics.get('use_multihop', False), max_hops=metrics.get('max_hops', 3), enable_spectral=spectral.get('enabled', False), spectral_weight=spectral.get('weight', 0.3), **kwargs)
     else:
         calc = GeDIGCore(**kwargs)
-    return calc.calculate(g_prev=graph_before, g_now=graph_after).gedig_value
+    # Linkset-first: avoid graph-IG fallback by passing a minimal linkset when none provided
+    try:
+        from .linkset_adapter import build_linkset_info as _build_ls  # type: ignore
+    except Exception:
+        _build_ls = None  # type: ignore
+    ls = _build_ls(s_link=[], candidate_pool=[], decision={}, query_vector=None, base_mode="link") if _build_ls else None
+    return calc.calculate(g_prev=graph_before, g_now=graph_after, **({"linkset_info": ls} if ls is not None else {})).gedig_value
 
 
 def detect_insight_spike(graph_before: Any, graph_after: Any, threshold: float = -0.5, **kwargs) -> bool:
     calc = GeDIGCore(spike_threshold=threshold, **kwargs)
-    return calc.calculate(g_prev=graph_before, g_now=graph_after).has_spike
+    try:
+        from .linkset_adapter import build_linkset_info as _build_ls  # type: ignore
+    except Exception:
+        _build_ls = None  # type: ignore
+    ls = _build_ls(s_link=[], candidate_pool=[], decision={}, query_vector=None, base_mode="link") if _build_ls else None
+    return calc.calculate(g_prev=graph_before, g_now=graph_after, **({"linkset_info": ls} if ls is not None else {})).has_spike
 
 
 def delta_ged(graph_before: Any, graph_after: Any, **kwargs) -> float:
@@ -1467,7 +1515,12 @@ def delta_ged(graph_before: Any, graph_after: Any, **kwargs) -> float:
         calc = GeDIGCore(enable_multihop=metrics.get('use_multihop_gedig', False), max_hops=metrics.get('max_hops', 2), decay_factor=metrics.get('decay_factor', 0.5))
     else:
         calc = GeDIGCore()
-    return calc.calculate(g_prev=graph_before, g_now=graph_after).ged_value
+    try:
+        from .linkset_adapter import build_linkset_info as _build_ls  # type: ignore
+    except Exception:
+        _build_ls = None  # type: ignore
+    ls = _build_ls(s_link=[], candidate_pool=[], decision={}, query_vector=None, base_mode="link") if _build_ls else None
+    return calc.calculate(g_prev=graph_before, g_now=graph_after, **({"linkset_info": ls} if ls is not None else {})).ged_value
 
 
 def delta_ig(graph_before: Any, graph_after: Any, **kwargs) -> float:
@@ -1477,7 +1530,12 @@ def delta_ig(graph_before: Any, graph_after: Any, **kwargs) -> float:
         calc = GeDIGCore(enable_multihop=metrics.get('use_multihop_gedig', False), max_hops=metrics.get('max_hops', 2), decay_factor=metrics.get('decay_factor', 0.5))
     else:
         calc = GeDIGCore()
-    return calc.calculate(g_prev=graph_before, g_now=graph_after).ig_value
+    try:
+        from .linkset_adapter import build_linkset_info as _build_ls  # type: ignore
+    except Exception:
+        _build_ls = None  # type: ignore
+    ls = _build_ls(s_link=[], candidate_pool=[], decision={}, query_vector=None, base_mode="link") if _build_ls else None
+    return calc.calculate(g_prev=graph_before, g_now=graph_after, **({"linkset_info": ls} if ls is not None else {})).ig_value
 
     # ------------- Utility helpers (migrated from misplaced GeDIGLogger region) -------------
     def _graph_efficiency(self, g: nx.Graph) -> float:

@@ -5,6 +5,16 @@ Backward compatibility tests for new metrics implementations
 import pytest
 import numpy as np
 import torch
+import pytest
+pytest.importorskip("torch_geometric")
+pytest.importorskip(
+    "insightspike.algorithms.normalized_ged",
+    reason="Legacy module integrated into GeDIGCore; skip in cloud-safe runs.",
+)
+pytest.importorskip(
+    "insightspike.algorithms.local_information_gain_v2",
+    reason="Legacy module integrated; skip in cloud-safe runs.",
+)
 from torch_geometric.data import Data
 
 from insightspike.algorithms.metrics_selector import MetricsSelector

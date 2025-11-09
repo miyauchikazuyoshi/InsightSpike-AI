@@ -18,8 +18,11 @@ Creates a ready-to-use InsightSpike agent with minimal configuration.
   - `"clean"`: Clean provider for testing
 
 - **\*\*kwargs**: Additional configuration options
-  - `model` (str): Model name to use with the provider
-  - Other provider-specific options
+  - Use `section__field=value` 形式で任意の Pydantic 設定を安全に上書きできます  
+    例: `llm__temperature=0.2`, `processing__max_cycles=3`
+  - `model` は `llm__model` のショートカットです
+  - `preset="cloud"` のようにプリセットを `kwargs` から明示指定可能です
+  - 未知のキーや不正なネストを渡すと `ValueError` が送出されます
 
 #### Returns
 
@@ -44,7 +47,14 @@ print(res.get("response", getattr(res, "response", "")))
 # With OpenAI
 agent = create_agent(provider="openai")  # Requires OPENAI_API_KEY env var
 
-# With custom model (local provider optional)
+# Override nested fields
+agent = create_agent(
+    provider="mock",
+    llm__temperature=0.2,
+    processing__max_cycles=3,
+)
+
+# With custom model (local provider optional; auto CPU fallback)
 # agent = create_agent(provider="local", model="google/flan-t5-small")
 ```
 

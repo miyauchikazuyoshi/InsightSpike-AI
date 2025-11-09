@@ -163,12 +163,19 @@ class GeDIGCalculator:
             focal_set = None
         
         # Use unified calculator
+        # Linkset-first: provide a minimal linkset_info to avoid graph-IG fallback
+        try:
+            from .linkset_adapter import build_linkset_info as _build_ls  # type: ignore
+        except Exception:
+            _build_ls = None  # type: ignore
+        _ls = _build_ls(s_link=[], candidate_pool=[], decision={}, query_vector=None, base_mode="link") if _build_ls else None
         result = self._gedig_core.calculate(
             g_prev=graph_before,
             g_now=graph_after,
             features_prev=features_before,
             features_now=features_after,
-            focal_nodes=focal_set
+            focal_nodes=focal_set,
+            **({"linkset_info": _ls} if _ls is not None else {}),
         )
         
         # Convert to backward-compatible format
@@ -191,10 +198,23 @@ class GeDIGCalculator:
         
         # Add multi-hop results if available
         if result.hop_results and self._gedig_core.enable_multihop and (features_before is not None or features_after is not None):
+            # Convert HopResult objects to dicts expected by integration tests
+            hop_details = {}
+            for hop, hr in result.hop_results.items():
+                try:
+                    w = (self._gedig_core.decay_factor ** hop)
+                except Exception:
+                    w = 1.0
+                hop_details[hop] = {
+                    'gedig': getattr(hr, 'gedig', 0.0),
+                    'nodes_in_subgraph': getattr(hr, 'node_count', 0),
+                    'edges_in_subgraph': getattr(hr, 'edge_count', 0),
+                    'weight': float(w),
+                }
             output['multihop_results'] = {
                 # Align multi-hop total with final gedig (legacy expectation)
                 'total_gedig': gedig_val,
-                'hop_details': result.hop_results,
+                'hop_details': hop_details,
                 'optimal_hop': self._find_optimal_hop(result.hop_results)
             }
         

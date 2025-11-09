@@ -199,9 +199,18 @@ class GeDIGEvaluator:
     # -------- Basic scoring --------
     def _core_result(self, g1: nx.Graph, g2: nx.Graph, *, l1_candidates: Optional[int] = None) -> GeDIGResult:  # type: ignore
         try:
+            from insightspike.algorithms.linkset_adapter import build_linkset_info as _build_ls  # type: ignore
+        except Exception:
+            _build_ls = None  # type: ignore
+        ls = _build_ls(s_link=[], candidate_pool=[], decision={}, query_vector=None, base_mode="link") if _build_ls else None
+        try:
+            if ls is not None:
+                return self.core.calculate(g_prev=g1, g_now=g2, l1_candidates=l1_candidates, linkset_info=ls)
             return self.core.calculate(g_prev=g1, g_now=g2, l1_candidates=l1_candidates)
         except TypeError:
             # Older cores without l1_candidates kwarg
+            if ls is not None:
+                return self.core.calculate(g_prev=g1, g_now=g2, linkset_info=ls)
             return self.core.calculate(g_prev=g1, g_now=g2)
 
     def calculate(self, g1: nx.Graph, g2: nx.Graph, *, l1_candidates: Optional[int] = None) -> float:

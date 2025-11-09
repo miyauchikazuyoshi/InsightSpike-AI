@@ -5,6 +5,8 @@ Regression tests for individual layers using NumPy backend to avoid Faiss issues
 import pytest
 import numpy as np
 import torch
+import pytest
+pytest.importorskip("torch_geometric")
 from torch_geometric.data import Data
 
 from insightspike.implementations.layers.layer2_memory_manager import L2MemoryManager

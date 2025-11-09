@@ -63,6 +63,7 @@ def apply_commit_policy(
     policy: str = "threshold",
     fire_dg: bool = False,
     commit_budget: int = 0,
+    bfs_shortcut: bool = False,
     # diagnostics/visualisation plumbing
     cand_edge_store: Optional[List[Tuple[Node, Node, bool, int]]] = None,
 ) -> Tuple[nx.Graph, List[List[List[int]]]]:
@@ -114,15 +115,17 @@ def apply_commit_policy(
         if cap > 0:
             to_commit = to_commit[:cap]
         for eu, ev in to_commit:
-            # Only allow (current Q) ↔ (direction)
-            try:
-                is_eu_q = int(eu[2]) == -1
-                is_ev_q = int(ev[2]) == -1
-            except Exception:
-                is_eu_q = False; is_ev_q = False
-            allow = (eu == current_query_node and not is_ev_q) or (ev == current_query_node and not is_eu_q)
-            if not allow:
-                continue
+            # By default: only allow (current Q) ↔ (direction). When bfs_shortcut=True,
+            # commit any chosen edge (eu, ev) to realize multi-hop shortcut in one step.
+            if not bfs_shortcut:
+                try:
+                    is_eu_q = int(eu[2]) == -1
+                    is_ev_q = int(ev[2]) == -1
+                except Exception:
+                    is_eu_q = False; is_ev_q = False
+                allow = (eu == current_query_node and not is_ev_q) or (ev == current_query_node and not is_eu_q)
+                if not allow:
+                    continue
             if not graph_commit.has_node(eu):
                 graph_commit.add_node(eu)
             if not graph_commit.has_node(ev):
@@ -133,4 +136,3 @@ def apply_commit_policy(
             committed_snap.append([[int(eu[0]), int(eu[1]), int(eu[2])], [int(ev[0]), int(ev[1]), int(ev[2])]])
 
     return graph_commit, committed_snap
-

@@ -66,13 +66,24 @@ gedig:
 - Phase D: Navigator integration
 - Phase E: Stability & reproducibility validation
 
-## Usage Snippet
+## Usage Snippet (Linkset‑First)
 
 ```python
+from insightspike.algorithms.linkset_adapter import build_linkset_info
+
 core = GeDIGFactory.create({'use_refactored_gedig': True})
-res = core.calculate(g_prev=g1, g_now=g2)
+ls = build_linkset_info(
+    s_link=[{"index": 1, "similarity": 1.0}],
+    candidate_pool=[],
+    decision={"index": 1, "similarity": 1.0},
+    query_vector=[1.0],
+    base_mode="link",
+)
+res = core.calculate(g_prev=g1, g_now=g2, linkset_info=ls)
 print(res.structural_cost, res.ig_z_score, res.hop0_reward)
 ```
+
+Note: Calling `calculate(...)` without `linkset_info` falls back to graph‑IG and now emits a one‑time deprecation warning. Prefer passing linkset info for paper‑aligned IG.
 
 ## Logging Columns
 

@@ -79,6 +79,14 @@ def run_probe(size: int, seed: int, max_steps: int) -> dict:
             local.update(G.neighbors(t))
             g_before = G.subgraph(local).copy()
             g_after = g_before.copy(); g_after.add_edge(s, t)
+        try:
+            from insightspike.algorithms.linkset_adapter import build_linkset_info as _build_ls  # type: ignore
+        except Exception:
+            _build_ls = None  # type: ignore
+        ls = _build_ls(s_link=[], candidate_pool=[], decision={}, query_vector=None, base_mode="link") if _build_ls else None
+        if ls is not None:
+            res = core.calculate(g_prev=g_before, g_now=g_after, linkset_info=ls)
+        else:
             res = core.calculate(g_prev=g_before, g_now=g_after)
             if res.hop_results:
                 for h in [0, 1, 2]:

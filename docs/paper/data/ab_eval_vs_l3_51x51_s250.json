@@ -1,0 +1,32 @@
+{
+  "baseline": {
+    "success_rate": 0.0,
+    "avg_steps": 250.0,
+    "avg_edges": 246.925,
+    "g0_mean": -0.3247297098438627,
+    "gmin_mean": -0.32474140209253205,
+    "avg_time_ms_eval": 31.851155400415884,
+    "ag_rate": 0.0229,
+    "dg_rate": 0.8512
+  },
+  "variant": {
+    "success_rate": 0.0,
+    "avg_steps": 250.0,
+    "avg_edges": 246.925,
+    "g0_mean": -0.3247297098438627,
+    "gmin_mean": -0.32474140209253205,
+    "avg_time_ms_eval": 30.918359020981008,
+    "ag_rate": 0.0229,
+    "dg_rate": 0.8512
+  },
+  "delta": {
+    "ag_rate": 0.0,
+    "avg_edges": 0.0,
+    "avg_steps": 0.0,
+    "avg_time_ms_eval": -0.9327963794348761,
+    "dg_rate": 0.0,
+    "g0_mean": 0.0,
+    "gmin_mean": 0.0,
+    "success_rate": 0.0
+  }
+}

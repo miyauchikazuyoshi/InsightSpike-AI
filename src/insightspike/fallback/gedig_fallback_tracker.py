@@ -23,21 +23,23 @@ class GeDIGFallbackTracker:
     events: List[GeDIGFallbackEvent] = field(default_factory=list)
     total: int = 0
 
-    def record(self, kind: str, exc: Exception) -> None:
+    def record(self, kind: str, exc: Exception | None = None) -> None:
         try:
-            evt = GeDIGFallbackEvent(kind=kind, error=repr(exc), count=self.total + 1)
+            err_text = repr(exc) if exc is not None else ""
+            evt = GeDIGFallbackEvent(kind=kind, error=err_text, count=self.total + 1)
             self.events.append(evt)
             self.total += 1
             logger.warning(
-                "[gedig_fallback] kind=%s total=%s err=%s", kind, self.total, exc
+                "[gedig_fallback] kind=%s total=%s err=%s", kind, self.total, err_text
             )
         except Exception:  # pragma: no cover
             pass
 
     def summary(self) -> Dict[str, Any]:
-        return {
-            'total': self.total,
-            'kinds': {k: sum(1 for e in self.events if e.kind == k) for k in {e.kind for e in self.events}},
-        }
+        kinds = {k: sum(1 for e in self.events if e.kind == k) for k in {e.kind for e in self.events}}
+        # Backward-compat: expose each kind as top-level key as well as under 'kinds'
+        out: Dict[str, Any] = {'total': self.total, 'kinds': kinds}
+        out.update(kinds)
+        return out
 
 __all__ = ["GeDIGFallbackTracker", "GeDIGFallbackEvent"]

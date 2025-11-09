@@ -107,11 +107,23 @@ class FileSystemDataStore(DataStore):
 
                 return serialized
 
-            # Use list comprehension for efficiency
+            # Load existing episodes (append behavior) if file exists
+            existing: List[Dict[str, Any]] = []
+            if file_path.exists():
+                try:
+                    with open(file_path, "r") as rf:
+                        existing = json.load(rf)
+                except Exception:
+                    existing = []
+
+            # Use list comprehension for efficiency and normalize new entries
             serializable_episodes = [serialize_episode(ep) for ep in episodes]
 
+            # Append to existing list
+            combined = existing + serializable_episodes
+
             with open(file_path, "w") as f:
-                json.dump(serializable_episodes, f, indent=2)
+                json.dump(combined, f, indent=2)
 
             logger.info(f"Saved {len(episodes)} episodes to {file_path}")
             return True

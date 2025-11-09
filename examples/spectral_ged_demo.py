@@ -9,6 +9,7 @@ This script demonstrates how spectral GED evaluation affects insight detection.
 import networkx as nx
 import numpy as np
 from insightspike.algorithms.gedig_core import GeDIGCore
+from insightspike.algorithms.linkset_adapter import build_linkset_info
 
 def demonstrate_spectral_ged():
     """Demonstrate spectral GED with different graph structures."""
@@ -38,7 +39,8 @@ def demonstrate_spectral_ged():
     # Calculate without spectral
     print("\n1. Without Spectral Evaluation:")
     calc_no_spectral = GeDIGCore(enable_spectral=False)
-    result_no_spectral = calc_no_spectral.calculate(g1, g2, features1, features2)
+    ls = build_linkset_info(s_link=[{"index": 1, "similarity": 1.0}], candidate_pool=[], decision={"index": 1, "similarity": 1.0}, query_vector=[1.0], base_mode="link")
+    result_no_spectral = calc_no_spectral.calculate(g1, g2, features1, features2, linkset_info=ls)
     
     print(f"   GED: {result_no_spectral.ged_value:.4f}")
     print(f"   IG: {result_no_spectral.ig_value:.4f}")
@@ -48,7 +50,7 @@ def demonstrate_spectral_ged():
     # Calculate with spectral
     print("\n2. With Spectral Evaluation (weight=0.5):")
     calc_spectral = GeDIGCore(enable_spectral=True, spectral_weight=0.5)
-    result_spectral = calc_spectral.calculate(g1, g2, features1, features2)
+    result_spectral = calc_spectral.calculate(g1, g2, features1, features2, linkset_info=ls)
     
     print(f"   GED: {result_spectral.ged_value:.4f}")
     print(f"   IG: {result_spectral.ig_value:.4f}")
@@ -94,8 +96,8 @@ def demonstrate_spectral_ged():
     print(f"Structured: Added 1 edge to complete cycle → {g4_structured.number_of_edges()} edges")
     
     # Compare results
-    result_random = calc_spectral.calculate(g3, g4_random, features3, features3)
-    result_structured = calc_spectral.calculate(g3, g4_structured, features3, features3)
+    result_random = calc_spectral.calculate(g3, g4_random, features3, features3, linkset_info=ls)
+    result_structured = calc_spectral.calculate(g3, g4_structured, features3, features3, linkset_info=ls)
     
     print(f"\nRandom edges - geDIG: {result_random.gedig_value:.4f}")
     print(f"Structured edge - geDIG: {result_structured.gedig_value:.4f}")

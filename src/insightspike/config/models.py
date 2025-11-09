@@ -126,6 +126,35 @@ class GraphConfig(BaseModel):
         default="advanced"
     )
     hybrid_weights: HybridWeightsConfig = Field(default_factory=HybridWeightsConfig)
+
+    # Paper-aligned geDIG controls (available to Layer3 and tools)
+    sp_scope_mode: Literal["auto", "union"] = Field(
+        default="auto", description="Scope for SP evaluation: auto or union-of-k-hop"
+    )
+    sp_eval_mode: Literal["connected", "fixed_before_pairs"] = Field(
+        default="connected", description="Shortest-path gain evaluation mode"
+    )
+    sp_hop_expand: int = Field(
+        default=0, ge=0, le=5, description="Extra hops to expand SP neighborhood"
+    )
+    sp_boundary_mode: Literal["induced", "trim", "nodes"] = Field(
+        default="induced", description="Boundary trimming for SP subgraphs"
+    )
+    ig_source_mode: Literal["graph", "linkset", "hybrid", "paper", "strict"] = Field(
+        default="graph", description="Information gain source"
+    )
+    ged_norm_scheme: Literal["edges_after", "candidate_base"] = Field(
+        default="edges_after", description="GED normalization scheme"
+    )
+    linkset_query_weight: float = Field(
+        default=1.0, ge=0.0, le=10.0, description="Relative weight for query entry in linkset entropy"
+    )
+    lambda_weight: float = Field(
+        default=1.0, ge=0.0, le=10.0, description="Information temperature λ"
+    )
+    sp_beta: float = Field(
+        default=0.2, ge=0.0, le=10.0, description="Weight γ for SP relative gain"
+    )
     
     # Graph-based search configuration
     enable_graph_search: bool = Field(
@@ -505,5 +534,10 @@ class InsightSpikeConfig(BaseModel):
     vector_search: VectorSearchConfig = Field(default_factory=VectorSearchConfig)
     wake_sleep: WakeSleepConfig = Field(default_factory=WakeSleepConfig)
 
-    # Pydantic v2 style configuration
+    # Strict extra handling across pydantic versions
+    # v2: use model_config; v1: provide inner Config
     model_config = ConfigDict(validate_assignment=True, extra='forbid')
+    if not _PYDANTIC_V2:  # pydantic v1 compatibility
+        class Config:  # type: ignore
+            validate_assignment = True
+            extra = 'forbid'

@@ -17,6 +17,8 @@ jobs:
       PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
       INSIGHTSPIKE_LITE_MODE: "1"
       INSIGHTSPIKE_MIN_IMPORT: "1"
+      INSIGHTSPIKE_LOG_DIR: "results/logs"
+      MPLCONFIGDIR: "results/mpl"
       PYTHONPATH: src
     steps:
       - name: Checkout
@@ -35,4 +37,3 @@ jobs:
       - name: Run unit subset
         run: |
           pytest -q tests/unit tests/test_minimal_healthcheck.py tests/test__minimal_probe.py -m "not slow and not integration and not performance and not benchmark and not calibration"
-

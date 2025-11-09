@@ -1,7 +1,16 @@
 #!/usr/bin/env python3
 """
-Demo of Multi-hop geDIG with Entropy Variance IG
+Demo of Multi-hop geDIG with Entropy Variance IG (legacy).
+
+Cloud-safe guard: this demo depends on legacy modules merged into GeDIGCore
+and on matplotlib animations; skip in constrained environments.
 """
+
+import pytest
+pytest.skip(
+    "Legacy multihop demo relies on merged modules and heavy viz; skip in cloud runs.",
+    allow_module_level=True,
+)
 
 import numpy as np
 import networkx as nx

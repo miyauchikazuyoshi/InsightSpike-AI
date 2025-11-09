@@ -314,7 +314,15 @@ class GeDIGNavigator:
                 )
                 self._last_dual_delta = delta_div
             else:
-                ref_res = self._ref_core.calculate(g_prev=g_prev, g_now=g_now)
+                try:
+                    from insightspike.algorithms.linkset_adapter import build_linkset_info as _build_ls  # type: ignore
+                except Exception:
+                    _build_ls = None  # type: ignore
+                _ls = _build_ls(s_link=[], candidate_pool=[], decision={}, query_vector=None, base_mode="link") if _build_ls else None
+                if _ls is not None:
+                    ref_res = self._ref_core.calculate(g_prev=g_prev, g_now=g_now, linkset_info=_ls)
+                else:
+                    ref_res = self._ref_core.calculate(g_prev=g_prev, g_now=g_now)
             structural_improvement = ref_res.structural_improvement if ref_res else 0.0
 
             # Monitor recording is already handled inside GeDIGCore.calculate; avoid duplicate writes.
@@ -401,7 +409,15 @@ class GeDIGNavigator:
                     score = ref_res.structural_improvement
                     candidate_delta = delta_div
                 else:
-                    ref_res = self._ref_core.calculate(g_prev=base, g_now=g_now)
+                    try:
+                        from insightspike.algorithms.linkset_adapter import build_linkset_info as _build_ls  # type: ignore
+                    except Exception:
+                        _build_ls = None  # type: ignore
+                    _ls = _build_ls(s_link=[], candidate_pool=[], decision={}, query_vector=None, base_mode="link") if _build_ls else None
+                    if _ls is not None:
+                        ref_res = self._ref_core.calculate(g_prev=base, g_now=g_now, linkset_info=_ls)
+                    else:
+                        ref_res = self._ref_core.calculate(g_prev=base, g_now=g_now)
                     score = ref_res.structural_improvement
                     candidate_delta = None
                 if score > best_score:

@@ -7,7 +7,24 @@
 最小実行例（小さいサイズで高速に）:
 
 ```bash
+# 最小: サイズ15、1000ステップ（高速）
 python examples/maze50_experiment.py --size 15 --max-steps 1000 --verbosity 1
+
+# Query-Hub プロトタイプ（paperプリセット: linkset IG + candidate-base GED）
+python experiments/maze-query-hub-prototype/run_experiment_query.py \
+  --preset paper \
+  --maze-size 25 --max-steps 100 \
+  --seeds 1 --seed-start 0 \
+  --output experiments/maze-query-hub-prototype/results/paper_25x25_s100_summary.json \
+  --step-log experiments/maze-query-hub-prototype/results/paper_25x25_s100_steps.json \
+  --write-recommendations
+
+# HTML 可視化（Strict DS 既定、タイムラインはUIでON/OFF）
+python experiments/maze-query-hub-prototype/build_reports.py \
+  --summary experiments/maze-query-hub-prototype/results/paper_25x25_s100_summary.json \
+  --steps   experiments/maze-query-hub-prototype/results/paper_25x25_s100_steps.json \
+  --out     experiments/maze-query-hub-prototype/results/paper_25x25_s100_interactive.html \
+  --strict --light-steps
 ```
 
 ポイント:
@@ -24,4 +41,3 @@ python examples/maze50_experiment.py --size 15 --max-steps 1000 --verbosity 1
 
 - 論文 v3（EPC基準）: docs/paper/geDIG_onegauge_improved_v3.tex
 - 図（概念・結果）: docs/paper/figures/
-

@@ -5,6 +5,8 @@ Integration test for question-aware message passing and query integration featur
 import pytest
 import numpy as np
 import torch
+import pytest
+pytest.importorskip("torch_geometric")
 from torch_geometric.data import Data
 
 from insightspike.graph.message_passing import MessagePassing

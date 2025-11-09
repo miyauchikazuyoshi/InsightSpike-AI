@@ -1,0 +1,8 @@
+{
+  "maze_size": 15,
+  "seeds": 100,
+  "seed_start": 0,
+  "baseline_success_rate": 0.99,
+  "baseline_avg_steps": 48.04040404040404,
+  "method": "bfs"
+}

@@ -5,6 +5,8 @@ Regression tests for existing algorithms
 import pytest
 import numpy as np
 import torch
+import pytest
+pytest.importorskip("torch_geometric")
 from torch_geometric.data import Data
 
 from insightspike.algorithms.graph_edit_distance import GraphEditDistance

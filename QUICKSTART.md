@@ -1,6 +1,6 @@
 # QUICKSTART — 5分で始める InsightSpike-AI
 
-このガイドは「最初の5分で動かす」ための最短経路です。詳細は README_FULL.md や docs/paper を参照してください。
+このガイドは「最初の5分で動かす」ための最短経路です。詳細は README.md や docs/paper を参照してください。
 
 ## 要件
 
@@ -24,10 +24,47 @@ pip install -e .
 python examples/public_quick_start.py
 ```
 
-geDIGゲージの最小デモ（ΔEPC/ΔIGとFを表示）
+geDIGゲージの最小デモ（ΔEPC/ΔIGとFを表示, paper整合: linkset IG）
 
 ```bash
 python examples/hello_insight.py
+```
+
+### 追加設定（セクション単位の上書き）
+
+`create_agent` に `section__field=value` 形式で渡すと、Pydantic 設定を安全に上書きできます。たとえば LLM 温度や処理サイクルを最短経路で調整可能です。
+
+```python
+from insightspike import create_agent
+
+agent = create_agent(
+    provider="mock",
+    llm__temperature=0.2,       # llm セクションの temperature を直接指定
+    processing__max_cycles=3,   # 任意のセクションにネストしてアクセス
+)
+print(agent.config.llm.temperature, agent.config.processing.max_cycles)
+```
+
+最小コード例（paper‑aligned: linkset_info を明示）
+
+```python
+from insightspike.algorithms.gedig_core import GeDIGCore
+from insightspike.algorithms.linkset_adapter import build_linkset_info
+import networkx as nx
+
+g1 = nx.Graph(); g1.add_edges_from([('A','B'),('B','C')])
+g2 = nx.Graph(); g2.add_edges_from([('A','B'),('B','C'),('A','C')])
+
+core = GeDIGCore()
+linkset = build_linkset_info(
+    s_link=[{"index": 1, "similarity": 1.0}],
+    candidate_pool=[],
+    decision={"index": 1, "similarity": 1.0},
+    query_vector=[1.0],
+    base_mode="link",
+)
+res = core.calculate(g_prev=g1, g_now=g2, linkset_info=linkset)
+print(res.gedig_value, res.ged_value, res.ig_value)
 ```
 
 期待される出力例（概略）:
@@ -58,4 +95,3 @@ RAG（準備中）
 - CONCEPTS.md で用語/理論（ΔEPC/ΔIG, One‑Gauge, AG/DG）を把握
 - EXPERIMENTS.md で迷路やRAGの再現を進める
 - 論文 v3（EPC基準）: docs/paper/geDIG_onegauge_improved_v3.tex
-

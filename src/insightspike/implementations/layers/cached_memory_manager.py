@@ -149,9 +149,9 @@ class CachedMemoryManager:
                 if ep_dict.get("id") == episode_id:
                     # Convert dict back to Episode
                     episode = Episode(
-                        text=ep_dict["text"],
-                        vec=ep_dict["vec"],
-                        c=ep_dict.get("c", 0.5),
+                        text=ep_dict.get("text", ""),
+                        vec=ep_dict.get("vec", np.array([])),
+                        c=ep_dict.get("c_value", ep_dict.get("confidence", ep_dict.get("c", 0.5))),
                         metadata=ep_dict.get("metadata", {})
                     )
                     self._add_to_cache(episode_id, episode)

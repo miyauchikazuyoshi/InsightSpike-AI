@@ -243,9 +243,17 @@ def compute_gedig(
 
     if m == "full":
         from ..gedig_core import GeDIGCore  # uses normalized GED + entropy IG orchestration
+        try:
+            from ..linkset_adapter import build_linkset_info as _build_ls  # type: ignore
+        except Exception:
+            _build_ls = None  # type: ignore
 
         core = GeDIGCore()
-        out = core.calculate(g_prev=G_prev, g_now=G_curr)
+        _ls = _build_ls(s_link=[], candidate_pool=[], decision={}, query_vector=None, base_mode="link") if _build_ls else None
+        if _ls is not None:
+            out = core.calculate(g_prev=G_prev, g_now=G_curr, linkset_info=_ls)
+        else:
+            out = core.calculate(g_prev=G_prev, g_now=G_curr)
         # Map to canonical shape
         return {"mode": "full", "gedig": float(out.gedig_value), "ged": float(out.ged_value), "ig": float(out.ig_value)}
 

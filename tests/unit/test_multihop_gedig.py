@@ -1,8 +1,15 @@
 """
-Unit tests for Multi-hop geDIG
+Unit tests for Multi-hop geDIG (legacy path).
+
+Cloud-safe guard: skip if torch_geometric or legacy module is unavailable.
 """
 
 import pytest
+pytest.importorskip("torch_geometric")
+pytest.importorskip(
+    "insightspike.algorithms.multihop_gedig",
+    reason="Legacy module integrated into GeDIGCore; skip in cloud-safe runs.",
+)
 import numpy as np
 import networkx as nx
 import torch

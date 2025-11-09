@@ -36,11 +36,20 @@ class Episode:
     episode_type: str = "experience"
     selection_count: int = 0
     creation_time: float = field(default_factory=time.time)
+    # July 2025 compatibility: standardized confidence field (alias of c)
+    confidence: Optional[float] = None
 
     def __post_init__(self):
         """Initialize episode with proper C-value based on type"""
         if isinstance(self.vec, np.ndarray):
             self.vec = self.vec.astype(np.float32)
+
+        # If explicit confidence provided, use it as the primary field
+        if self.confidence is not None:
+            try:
+                self.c = float(self.confidence)
+            except Exception:
+                pass
 
         # Set initial C-value based on episode type if not explicitly set
         if self.c == 0.5:  # Default value, auto-adjust based on type
@@ -53,6 +62,8 @@ class Episode:
         
         # Ensure c-value is in valid range
         self.c = max(0.1, min(1.0, float(self.c)))
+        # Keep alias in sync
+        self.confidence = self.c
 
     def __repr__(self):
         """String representation"""
@@ -73,6 +84,7 @@ class Episode:
         return {
             "text": self.text,
             "c_value": self.c,
+            "confidence": self.c,
             "timestamp": self.timestamp,
             "metadata": self.metadata,
             "embedding": self.vec.tolist()
@@ -89,13 +101,28 @@ class Episode:
         return cls(
             text=data["text"],
             vec=np.array(data["embedding"], dtype=np.float32),
-            c=data.get("c_value", 0.5),
+            c=data.get("c_value", data.get("confidence", data.get("c", 0.5))),
             timestamp=data.get("timestamp", time.time()),
             metadata=data.get("metadata", {}),
             episode_type=data.get("episode_type", "experience"),
             selection_count=data.get("selection_count", 0),
             creation_time=data.get("creation_time", time.time()),
+            confidence=data.get("confidence"),
         )
+
+    # Aliases for backward compatibility and clarity
+    @property
+    def c_value(self) -> float:
+        return self.c
+
+    @c_value.setter
+    def c_value(self, value: float) -> None:
+        try:
+            v = float(value)
+        except Exception:
+            v = self.c
+        self.c = max(0.1, min(1.0, v))
+        self.confidence = self.c
 
 
 # Backward compatibility - allow old-style initialization

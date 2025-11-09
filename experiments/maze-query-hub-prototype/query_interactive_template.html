@@ -113,6 +113,7 @@
       <div style="margin-top:6px;">
         <label><input type="checkbox" id="dsgraph-toggle" checked /> Use DS graph (persisted)</label>
         <label><input type="checkbox" id="ds-strict-toggle" checked /> Strict DS (no overlays)</label>
+        <label><input type="checkbox" id="timeline-toggle" /> Show timeline edges</label>
         <label><input type="checkbox" id="mh-only-toggle" /> Timeline uses mh-only minima</label>
       </div>
       <div style="margin-top:6px;">
@@ -332,7 +333,7 @@ window.addEventListener('error', (event) => {
     const graphMode = experimentData.config?.graph_mode || (experimentData.config?.selector ? 'center_hub' : 'center');
     const cfg = experimentData.config || {};
     const ged = cfg.gedig || {};
-    const state = { seed: null, step: 0, playing: false, edgeMode: 'all', cumulative: false, evalGraph: false, dsGraph: true, dsStrict: true, useMhOnly: false, showAllQueries: false, spAnchors: false, hoverNodeKey: null };
+    const state = { seed: null, step: 0, playing: false, edgeMode: 'all', cumulative: false, evalGraph: false, dsGraph: true, dsStrict: true, timeline: true, useMhOnly: false, showAllQueries: false, spAnchors: false, hoverNodeKey: null };
     let playTimer = null;
 
     const seeds = Object.keys(experimentData.seed_data).sort((a,b)=>Number(a)-Number(b));
@@ -343,8 +344,14 @@ window.addEventListener('error', (event) => {
       seedSelect.appendChild(option);
     });
     if (seeds.length) {
-      state.seed = seeds[0];
-      seedSelect.value = state.seed;
+      // Prefer UI default if provided; otherwise pick the first seed that has records
+      const uiDef = experimentData?.config?.ui_defaults || {};
+      let defaultSeed = (typeof uiDef.selectedSeed === 'string') ? uiDef.selectedSeed : null;
+      if (!defaultSeed) {
+        defaultSeed = seeds.find(s => (experimentData.seed_data[s]?.records || []).length > 0) || seeds[0];
+      }
+      state.seed = defaultSeed;
+      seedSelect.value = defaultSeed;
     }
 
     seedSelect.addEventListener('change', () => {
@@ -411,6 +418,13 @@ window.addEventListener('error', (event) => {
         render();
       });
     }
+    const timelineToggle = document.getElementById('timeline-toggle');
+    if (timelineToggle) {
+      timelineToggle.addEventListener('change', () => {
+        state.timeline = !!timelineToggle.checked;
+        render();
+      });
+    }
     const mhOnlyToggle = document.getElementById('mh-only-toggle');
     if (mhOnlyToggle) {
       mhOnlyToggle.addEventListener('change', () => {
@@ -450,6 +464,11 @@ window.addEventListener('error', (event) => {
         if (typeof def.dsStrict === 'boolean') {
           state.dsStrict = !!def.dsStrict;
           if (dsStrictToggle) dsStrictToggle.checked = state.dsStrict;
+        }
+        if (typeof def.timeline === 'boolean') {
+          state.timeline = !!def.timeline;
+          const tl = document.getElementById('timeline-toggle');
+          if (tl) tl.checked = state.timeline;
         }
         if (typeof def.evalGraph === 'boolean') {
           state.evalGraph = !!def.evalGraph;
@@ -1456,7 +1475,7 @@ window.addEventListener('error', (event) => {
       }
 
       // Timeline edges (explicit edges added this step): render as 'action'
-      if (!(state.dsGraph && state.dsStrict)) {
+      if (state.timeline && !(state.dsGraph && state.dsStrict)) {
         if (state.cumulative) {
           const records = getRecords();
           const upto = Math.min(state.step, records.length - 1);

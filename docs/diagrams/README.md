@@ -188,3 +188,5 @@ These diagrams can be:
 ---
 
 **Note**: All diagrams have been updated to reflect the current implementation with scalable graph management and C-value free episode handling.
+
+Linkset‑First: The geDIG IG component is now paper‑aligned (Linkset‑IG). When using Core directly in code snippets, prefer passing a `linkset_info` payload to avoid the deprecated graph‑IG fallback (which now emits a one‑time warning).

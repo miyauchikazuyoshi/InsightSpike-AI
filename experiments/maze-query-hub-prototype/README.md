@@ -32,6 +32,8 @@
 - DG（`g_min < θ_DG`）成立時のみ、S_cand から ΔSP の限界寄与が大きい枝を貪欲に選び、コミット（`--commit-budget` 本まで）。
 - `--theta-ag/--theta-dg/--top-link/--commit-budget/--commit-from` で制御可能。g₀/g_min と AG/DG の発火状況は `StepRecord` に記録。
   - 0‑hopで S_link を全本自動配線したい場合は `--link-autowire-all` を付与（Top‑Lを無視してベース配線）。
+  - S_link が空のとき、強制候補（未探索優先など）をベースに使いたい場合は `--link-forced-as-base`（既定ON）。無効化は `--no-link-forced-as-base`。
+  - 行き止まり/バックトラック時にマルチホップをスキップする `--skip-mh-on-deadend` は、既定OFF（推奨: 無効のまま）。
 
 #### 実行シーケンス（Phase 4, 2フェーズ）
 1) T0: prev_graph 退避（前ステップまでのグラフをコピー）
@@ -47,6 +49,71 @@
 - `StepRecord` にクエリノード ID（例: `query_node: [row, col]`）を出力。
 - HTML ビューアではクエリノードを中心ハブとして描画し、`cand` タグは `target_position` 基準で表示する。
 - 旧実装との比較のため、`graph_mode`（既存実装: `center_hub`, 本プロトタイプ: `query_hub`）で実行モードを切り替え可能にする。
+
+#### 長時間実行対策（チェックポイント）
+- `--checkpoint-interval N` を指定すると、N ステップごとに `--step-log` へ部分 JSON を原子的に書き出します（タイムアウト時の保全用）。
+
+### スナップショット戦略（速度と再現性の両立）
+
+2つのモードを用意しています。用途に応じて選択してください。
+
+- A) 実行軽量化優先（超軽量ステップ）
+  - フラグ: `--steps-ultra-light`（steps.json から重い配列を完全に省略） + `--no-post-sp-diagnostics`
+  - 併用推奨: SQLite永続化（`--persist-graph-sqlite ... --persist-namespace ...`）
+  - HTML生成: `build_reports.py --light-steps --sqlite <db> --namespace <ns>`（必要に応じて DS から再構成）
+
+- B) 可視化重視（最小スナップショット）
+  - フラグ: `--snapshot-level minimal`（重い配列を最小限に絞る）
+  - `--post_sp_diagnostics` は既定ON（必要に応じて `--no-post-sp-diagnostics` でOFF）
+
+補足
+- DS再構成: `build_reports.py` は `--sqlite` と `--present-mode`（`strict|relaxed`）で SQLite から段階的にグラフ断片を復元できます（dotted importが難しい環境でも動くようにパス読み込みに対応済み）。
+
+### 論文（v4）向けの補助ツール
+
+- 迷路スナップショットの明示保存
+  - 実行時に `--maze-snapshot-out docs/paper/data/maze_51x51.json` を指定すると、レイアウト/開始/目標/サイズをJSONで保存します。
+
+- 指標エクスポート（LaTeX取り込み用）
+  - `tools/export_paper_maze.py` … summary/steps から主要メトリクスを抽出して JSON/CSV 出力
+  - 例:
+    - `python experiments/maze-query-hub-prototype/tools/export_paper_maze.py \
+       --summary experiments/maze-query-hub-prototype/results/_51x51_s200_l3_summary.json \
+       --steps   experiments/maze-query-hub-prototype/results/_51x51_s200_l3_steps.json \
+       --out-json docs/paper/data/maze_51x51_l3_s200.json \
+       --out-csv  docs/paper/data/maze_51x51_l3_s200.csv \
+       --compression-base mem`
+
+- ベースライン比較（A/B差分）
+  - `baselines/compare_runs.py` … 2つの（summary, steps）を比較し、差分をJSONにまとめます。
+  - 例:
+    - `python experiments/maze-query-hub-prototype/baselines/compare_runs.py \
+       --base-summary A_summary.json --base-steps A_steps.json \
+       --var-summary  B_summary.json --var-steps  B_steps.json \
+       --out docs/paper/data/ab_diff.json`
+
+### 実行モードの違い（L3-only vs A/B）
+
+- L3-only（最終結果向け）
+  - 目的: 論文の最終値を一本化（Evaluatorを使わず、L3のmulti-hop/core SPで評価）
+  - 特徴: 速度最優先（`--sp-cache-mode core`、union無し）。per-hop記録はせず hop0/最終値を出力。
+  - 実行: `tools/run_paper_l3_only.py` を利用（15/25/51のサイズ別で seeds を設定）
+
+- A/B（Evaluator vs L3 の整合確認、診断）
+  - 目的: hop0/per-hop まで設計が揃っていることを確認（paper preset）。
+  - 特徴: `--sp-scope union` を付けると per-hop 記録のため evaluator にフォールバック→計算が重くなる（平均 3倍程度）。
+  - 実行: `tools/run_paper_comparison.py` または `tools/run_paper_grid.py`（任意）。最終報告には含めない。
+
+- おすすめ運用
+  - 最終値は L3-only（union 無し, `--sp_hop_expand=0` が基本）
+  - 診断時だけ A/B を回して per-hop を確認（必要なら `--union --force-per-hop`）
+
+### 付録: 実行スクリプト一覧
+
+- L3-only: `tools/run_paper_l3_only.py`
+- 比較（A/B）: `tools/run_paper_comparison.py`
+- グリッド（複数サイズ一括）: `tools/run_paper_grid.py`
+- 51×51 長時間（s=250, seeds=40）: `tools/run_51x51_s250_seeds40.sh`
 
 #### ステップログ（steps.json）の構造（要点）
 各ステップのスナップショットに加えて、差分レジャーを保持します。
@@ -104,6 +171,29 @@
   --present-mode strict --strict --light-steps \
   --out     experiments/maze-query-hub-prototype/results/_phase4c/interactive.html
 ```
+
+### ステップ上限を変えた安全ラン（25x25→500, 51x51→1500）
+論文 v4 では 250step 設定でしたが、25×25 / 51×51 で同じ設定を繰り返すと長距離経路が十分に観測できず、編集しながらの再実験でミスを起こしやすくなります。`tools/run_adjusted_step_caps.py` は迷路サイズごとの安全キャップを守りながら、L3-only 構成で再実行するためのラッパーです。
+
+````bash
+python experiments/maze-query-hub-prototype/tools/run_adjusted_step_caps.py \
+  --targets 25:600:60,51:2000:40 \
+  --safety-caps 25:500,51:1500 \
+  --out-root experiments/maze-query-hub-prototype/results/adjusted_steps \
+  --namespace-prefix adj_v4 --ultra-light
+````
+
+- `size:max_steps[:seeds]` 形式で複数ターゲットを列挙し、`--safety-caps` で最大全長を指定（既定: 25→500, 51→1500）。
+- 既定で **seed ごとに分割実行**し、`_seed{n}` 付きの summary/steps/SQLite/HTML を生成します。従来どおりまとめて出力したい場合は `--aggregate-output` を付けてください。
+- SP は `--sp-cache-mode cached_incr` + SP pairset DS (`sp_pairsets.sqlite`) を基盤に、**広域ノルム (`--link-radius 1 --cand-radius 1`)** と **無閾値 (`--theta-link 0 --theta-cand 0`)**、**SP貪欲無制限 (`--sp-cand-topk 0`)** を既定オンにしています。これにより遠方の未探索メモリや forced fallback も常に候補・SP評価に載ります。必要に応じて `--extra-args -- --sp-cand-topk 32` などで調整してください。
+- `--build-html` を付けると各 seed の summary/steps/SQLite から `build_reports.py` を呼び出し、Strict DS の HTML を自動生成します。
+- キャップを超えた値は自動で丸められるため、実行時間の暴走を防げます。明示的に超えたい場合のみ `--force-over-cap` を指定してください。
+- 論文用スクリプト（`run_paper_l3_only.py`, `run_paper_comparison.py`, `run_paper_grid.py`, `.sh` ランナー）は既定で **最小スナップショット＋`--steps-ultra-light`** を採用します。フル記録が必要な場合のみ `--rich-logs` を追加してください。
+- **短縮版（スループット優先）**: 長時間バッチでは以下を `--extra-args` で指定すると 1 seed あたりの時間を抑えられます。
+  - `--sp-cand-topk 32` …… ΔSP の貪欲候補を最大 32 件に制限（精度とのトレードオフあり）。
+  - `--candidate-cap 24 --top-m 24` …… ランキング対象を絞り、SP/IG の計算を軽量化。
+  - `--link-radius 0.7 --cand-radius 0.7` …… 遠方メモリを減らして候補生成時間を短縮。
+  - リスク: 遠距離ノードや low-frequency の洞察が候補から漏れる場合があるため、最終報告ではフル設定での再走を推奨。
 
 ### HTML トグル（初期値は `--strict/--relaxed` で設定可能）
 - Use DS graph / Strict DS / Pre‑step (eval) graph / Cumulative（積み上げ）

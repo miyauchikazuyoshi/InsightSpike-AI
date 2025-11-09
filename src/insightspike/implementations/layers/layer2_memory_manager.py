@@ -437,9 +437,10 @@ class L2MemoryManager:
         self, query: str, k: int = 5, filter_fn: Optional[callable] = None
     ) -> List[Dict[str, Any]]:
         """
-        Search for relevant episodes.
+        Search for relevant episodes using the configured vector index.
 
-        Unified search that works across all modes.
+        Returns a list of dicts with keys: text, similarity, relevance, c_value, index, timestamp, metadata.
+        Always returns a list (never None).
         """
         if not self.initialized or not self.episodes:
             return []
@@ -495,6 +496,18 @@ class L2MemoryManager:
 
         except Exception as e:
             logger.error(f"Search failed: {e}")
+            return []
+
+    # Backward-compat convenience alias used by integration tests
+    def retrieve(self, query_text: str, top_k: int = 5) -> List[Dict[str, Any]]:
+        """
+        Backward-compat convenience alias used by integration tests.
+        Delegates to search_episodes(query_text, k=top_k) and always returns a list.
+        """
+        try:
+            res = self.search_episodes(query_text, k=top_k)
+            return res or []
+        except Exception:
             return []
 
     def update_c_value(self, episode_idx: int, new_c_value: float):

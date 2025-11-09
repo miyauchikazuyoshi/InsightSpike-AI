@@ -45,7 +45,9 @@ class DistanceCache:
         pair_samples: int = 400,
     ) -> None:
         self.mode = str(mode)
-        self.pair_samples = int(max(1, pair_samples))
+        # Allow special value pair_samples <= 0 to mean "use ALL pairs"
+        # (suitable for parity checks and small subgraphs)
+        self.pair_samples = int(pair_samples)
         self._pair_cache: Dict[str, PairSet] = {}
         self._sssp_cache: Dict[Tuple[str, object], Dict[object, int]] = {}
         # Optional persistent registry for PairSet reuse (signature -> PairSet)
@@ -65,7 +67,8 @@ class DistanceCache:
         total = 0.0
         count = 0
         try:
-            # collect up to pair_samples pairs
+            # collect pairs; if pair_samples <= 0, collect ALL pairs
+            cap = None if self.pair_samples <= 0 else int(self.pair_samples)
             for u, dmap in nx.all_pairs_shortest_path_length(g):
                 for v, d in dmap.items():
                     if v == u:
@@ -75,7 +78,7 @@ class DistanceCache:
                     pairs.append((u, v, float(d)))
                     total += float(d)
                     count += 1
-                    if count >= self.pair_samples:
+                    if cap is not None and count >= cap:
                         lb = (total / count) if count > 0 else 0.0
                         return PairSet(pairs, lb)
         except Exception:

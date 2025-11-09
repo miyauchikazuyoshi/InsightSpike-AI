@@ -37,7 +37,7 @@ def load_ds_graph(db_path: str, namespace: str) -> Tuple[List[List[int]], List[L
     return nodes, edges
 
 
-def load_ds_graph_upto_step(db_path: str, namespace: str, step: int) -> Tuple[List[List[int]], List[List[List[int]]]]:
+def load_ds_graph_upto_step(db_path: str, namespace: str, step: int, *, include_timeline: bool = True) -> Tuple[List[List[int]], List[List[List[int]]]]:
     """Load graph snapshot including all nodes/edges with attribute step <= given step.
 
     Assumes 'attributes' column contains JSON with an optional integer 'step' field.
@@ -63,7 +63,7 @@ def load_ds_graph_upto_step(db_path: str, namespace: str, step: int) -> Tuple[Li
                     nodes.append(parts[:3])
             except Exception:
                 continue
-        # Edges (include timeline edges to keep continuity in Strict DS view)
+        # Edges
         cur.execute("SELECT source_id, target_id, attributes FROM graph_edges WHERE namespace=?", (namespace,))
         for su, sv, attrs in cur.fetchall():
             try:
@@ -74,6 +74,9 @@ def load_ds_graph_upto_step(db_path: str, namespace: str, step: int) -> Tuple[Li
                     meta = json.loads(attrs)
                     step_attr = int(meta.get('step', 0))
                     edge_type = (meta.get('edge_type') or meta.get('stage') or '').lower()
+                # Optionally skip timeline edges when strict reconstruction is desired
+                if (not include_timeline) and edge_type == 'timeline':
+                    continue
                 if step_attr is not None and step_attr > step:
                     continue
                 u = [int(p) for p in str(su).split(',')]
@@ -109,7 +112,7 @@ def reconstruct_records(
             out.append(rec)
             continue
         step = int(rec.get("step", 0))
-        s_nodes, s_edges = load_ds_graph_upto_step(db_path, namespace, step)
+        s_nodes, s_edges = load_ds_graph_upto_step(db_path, namespace, step, include_timeline=not strict)
         new_rec = dict(rec)
         if s_nodes or s_edges:
             new_rec["ds_graph_nodes"] = s_nodes

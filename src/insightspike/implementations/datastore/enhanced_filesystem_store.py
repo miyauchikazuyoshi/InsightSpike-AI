@@ -38,16 +38,8 @@ class EnhancedFileSystemDataStore(FileSystemDataStore):
         if self.use_integrated_index:
             # 統合インデックスを初期化
             dimension = self.config.get('dimension', 768)
-            index_config = {
-                'similarity_threshold': self.config.get('similarity_threshold', 0.3),
-                'use_faiss': self.config.get('use_faiss', True),
-                'faiss_threshold': self.config.get('faiss_threshold', 100000)
-            }
-            
-            self._integrated_index = IntegratedVectorGraphIndex(
-                dimension=dimension,
-                config=index_config
-            )
+            # Minimal stub index does not accept additional config; dimension only
+            self._integrated_index = IntegratedVectorGraphIndex(dimension=dimension)
             self._wrapper = BackwardCompatibleWrapper(self._integrated_index)
             
             # 既存データの移行（必要に応じて）
@@ -107,8 +99,34 @@ class EnhancedFileSystemDataStore(FileSystemDataStore):
             # 統合インデックスで高速検索
             return self._wrapper.find_similar(query_vector, k, namespace)
         else:
-            # 既存の実装
-            return super().find_similar(query_vector, k, namespace)
+            # 既存の実装がベクトルファイルを持たない場合があるため、
+            # episodes.json から直接簡易コサイン検索を行う（ベースライン実装）。
+            try:
+                episodes = super().load_episodes("episodes")
+                if episodes:
+                    import numpy as _np
+                    q = _np.array(query_vector, dtype=float).reshape(-1)
+                    scored = []
+                    for i, ep in enumerate(episodes):
+                        v = ep.get("vec")
+                        if v is None:
+                            v = ep.get("embedding")
+                        if v is None:
+                            continue
+                        v = _np.array(v, dtype=float).reshape(-1)
+                        denom = (_np.linalg.norm(q) * _np.linalg.norm(v)) + 1e-12
+                        sim = float((_np.dot(q, v)) / denom)
+                        scored.append((i, sim))
+                    scored.sort(key=lambda x: x[1], reverse=True)
+                    scored = scored[:k]
+                    if scored:
+                        idxs = [i for i, _ in scored]
+                        dists = [1.0 - s for _, s in scored]
+                        return idxs, dists
+            except Exception:
+                pass
+            # 最後のフォールバック: FileSystemDataStore の search_vectors
+            return super().search_vectors(query_vector, k, namespace)
     
     def search_vectors(self, query_vector: np.ndarray, k: int = 10,
                       namespace: str = "vectors") -> Tuple[List[int], List[float]]:

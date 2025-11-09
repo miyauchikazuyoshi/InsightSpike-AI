@@ -160,6 +160,14 @@ from insightspike.config import load_config
 config = load_config(preset="test")  # Uses mock LLM, minimal settings
 ```
 
+## geDIG IG Source Migration (Linkset‑First)
+
+We are retiring the Core graph‑IG decision path in favor of Linkset‑IG (paper‑aligned). For details and the staged rollout plan, see:
+
+- docs/migration/GRAPH_IG_RETIREMENT.md
+
+If you call `GeDIGCore.calculate(...)` directly, prefer passing `linkset_info` (use the adapter at `insightspike.algorithms.linkset_adapter.build_linkset_info`). Until full retirement, calling without `linkset_info` will emit a one‑time deprecation WARNING in the logs.
+
 ## Backward Compatibility
 
 During the migration period, you can still use the legacy format:

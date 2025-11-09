@@ -1,8 +1,0 @@
-Entropy is a fundamental concept in physics that measures the degree of disorder or randomness in a system. 
-It was first introduced by Rudolf Clausius in the 1850s in the context of thermodynamics.
-
-In information theory, Claude Shannon redefined entropy as a measure of information content or uncertainty.
-The mathematical formula for Shannon entropy is H = -Σ p(x) log p(x), where p(x) is the probability of each possible outcome.
-
-This connection between thermodynamic entropy and information entropy reveals a deep relationship between physics and information.
-The principle suggests that information is physical and has thermodynamic consequences.

@@ -1,8 +1,0 @@
-Recent discoveries in quantum biology have revealed that quantum effects play a crucial role in biological processes.
-Photosynthesis, for example, uses quantum coherence to achieve near-perfect energy transfer efficiency.
-
-Birds may navigate using quantum entanglement in certain proteins in their eyes, allowing them to "see" magnetic fields.
-This quantum compass relies on the spin states of electron pairs in cryptochrome proteins.
-
-The discovery of quantum effects in warm, wet biological systems challenges our traditional understanding 
-that quantum phenomena only occur in isolated, cold environments. This suggests life has evolved to harness quantum mechanics.

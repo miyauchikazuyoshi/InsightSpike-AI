@@ -182,18 +182,28 @@ print(f"Avg search time: {metrics['search_time']['avg_ms']:.2f}ms")
 
 ## 9. GeDIG Refactor (August 2025)
 
-### Factory & Core
+### Factory & Core (Linkset‑First)
 ```python
 from insightspike.algorithms.gedig_factory import GeDIGFactory, dual_evaluate
+from insightspike.algorithms.linkset_adapter import build_linkset_info
 
 core = GeDIGFactory.create({'use_refactored_gedig': True})
-result = core.calculate(g_prev=g1, g_now=g2)
+ls = build_linkset_info(
+    s_link=[{"index": 1, "similarity": 1.0}],
+    candidate_pool=[],
+    decision={"index": 1, "similarity": 1.0},
+    query_vector=[1.0],
+    base_mode="link",
+)
+result = core.calculate(g_prev=g1, g_now=g2, linkset_info=ls)
 
 # Dual evaluation (regression monitoring)
 legacy = GeDIGFactory.create({'use_refactored_gedig': False})
 ref    = GeDIGFactory.create({'use_refactored_gedig': True})
 ref_res, delta = dual_evaluate(legacy, ref, g_prev=g1, g_now=g2)
 ```
+
+Note: Calling `calculate(...)` without `linkset_info` falls back to graph‑IG and now emits a one‑time deprecation warning. Prefer passing linkset info for paper‑aligned IG.
 
 ### Result Key Fields
 `raw_ged`, `ged_value`, `structural_cost`, `structural_improvement` (alias = `-structural_cost`), `ig_raw`, `ig_z_score`, `hop0_reward`, `aggregate_reward`, `reward`, `hop_results` (opt), `version`.

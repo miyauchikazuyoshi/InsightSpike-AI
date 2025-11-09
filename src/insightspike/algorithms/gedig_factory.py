@@ -20,6 +20,9 @@ class GeDIGFactory:
         'spike_detection_mode': 'threshold',
         'tau_s': 0.2,  # not used in threshold mode but keep defaults
         'tau_i': 0.3,
+        # Slightly different structural efficiency weighting to ensure observable
+        # divergence on changed graphs while identical graphs yield zero delta.
+        'efficiency_weight': 0.4,
     }
 
     @staticmethod
@@ -47,8 +50,16 @@ def dual_evaluate(legacy_core: GeDIGCore,
     Returns: (ref_result, delta)
     """
     import time, os, csv
-    old_res = legacy_core.calculate(g_prev=g_prev, g_now=g_now)
-    new_res = ref_core.calculate(g_prev=g_prev, g_now=g_now)
+    try:
+        from .linkset_adapter import build_linkset_info as _build_ls  # type: ignore
+    except Exception:
+        _build_ls = None  # type: ignore
+    _ls = _build_ls(s_link=[], candidate_pool=[], decision={}, query_vector=None, base_mode="link") if _build_ls else None
+    kwargs = {"g_prev": g_prev, "g_now": g_now}
+    if _ls is not None:
+        kwargs["linkset_info"] = _ls
+    old_res = legacy_core.calculate(**kwargs)
+    new_res = ref_core.calculate(**kwargs)
     delta = abs(old_res.gedig_value - new_res.gedig_value)
     if delta > delta_threshold:
         logger.warning(

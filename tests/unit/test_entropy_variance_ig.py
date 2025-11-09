@@ -1,11 +1,19 @@
 """
-Unit tests for Entropy Variance IG
+Unit tests for Entropy Variance IG (legacy path).
+
+Skip in cloud-safe runs because the module was integrated into core.
 """
 
 import pytest
+pytest.skip(
+    "Legacy EntropyVarianceIG module was integrated; use core.metrics/GeDIGCore instead.",
+    allow_module_level=True,
+)
 import numpy as np
 import networkx as nx
 import torch
+import pytest
+pytest.importorskip("torch_geometric")
 from torch_geometric.data import Data
 
 from insightspike.algorithms.entropy_variance_ig import (

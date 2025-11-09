@@ -4,6 +4,7 @@ from __future__ import annotations
 import networkx as nx
 
 from insightspike.algorithms.gedig_core import GeDIGCore
+from insightspike.algorithms.linkset_adapter import build_linkset_info
 from insightspike.algorithms.gating import decide_gates
 
 
@@ -18,7 +19,14 @@ def tiny_graphs():
 def main() -> None:
     g1, g2 = tiny_graphs()
     core = GeDIGCore(enable_multihop=True, max_hops=2, lambda_weight=1.0, ig_mode="norm")
-    res = core.calculate(g_prev=g1, g_now=g2)
+    ls = build_linkset_info(
+        s_link=[{"index": 1, "similarity": 1.0}],
+        candidate_pool=[],
+        decision={"index": 1, "similarity": 1.0},
+        query_vector=[1.0],
+        base_mode="link",
+    )
+    res = core.calculate(g_prev=g1, g_now=g2, linkset_info=ls)
 
     if res.hop_results and 0 in res.hop_results:
         g0 = float(res.hop_results[0].gedig)
@@ -32,4 +40,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

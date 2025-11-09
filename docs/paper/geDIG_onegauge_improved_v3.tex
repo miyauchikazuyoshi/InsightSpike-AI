@@ -1009,6 +1009,19 @@ MDL/FEP と本指標 $\F$ の対応を表\,\ref{tab:theory_mapping_summary} に�
 \section{Proof of Concept: 部分観測迷路での統一指標制御}
 \label{sec:maze_experiment}
 
+\subsection*{結果サマリ（Maze；結果先行）}
+\label{sec:maze_result_summary}
+本節の主目的は、\textbf{未知迷路における探索効率の改善}を定量化することである。参照（Dijkstra／A*）は\,\emph{理想上限}として整合度（Regret／SPL や順位相関）で扱う。代表結果（25\,\mbox{$\times$}\,25, \,$N{=}100$）の要点を先にまとめる：
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{探索率}（unique/total）: geDIG は Random／DFS 比で大幅削減（\experimNote{確定値を反映}）
+  \item \textbf{訪問重複率}: geDIG は 1.\,\mbox{\experimNote{xx}} 回/セル近傍まで低減（\experimNote{確定値を反映}）
+  \item \textbf{平均バックトラック長}: AG\,$\to$\,DG 区間が \experimNote{xx} ステップ（最近傍分岐へ直行）
+  \item \textbf{デッドエンド検出遅延}: \experimNote{xx} ステップ（$\approx$ 即時）
+  \item \textbf{成功率}: \experimNote{xx}\%（25\,\mbox{$\times$}\,25, \,$N{=}100$）
+  \item \textbf{参照近接}: Regret 中央値 \experimNote{+\,x} ステップ、SPL 平均 \experimNote{0.9x}。Frontier 順位相関 $\rho{=}\,$\experimNote{0.8x}（geDIG の $-F$ と Dijkstra 優先度）。
+\end{itemize}
+\noindent 以上は、\textbf{$g_0$ による停滞の即時検知}と\,\textbf{DG による最近傍未探索分岐への復帰}が、\,\emph{無駄歩きの最小化}に直結していることを示す（仕組みの要点は \S\ref{sec:ag_dg_gate}）。詳細統計・図表は補遺を参照（Regret 箱ひげ・訪問ヒートマップ・BT 軌跡・Frontier 散布）。
+
 本章では、部分観測迷路環境において、動的知識グラフが i) 新規エピソードを\textbf{受容／保留／棄却}する選別判断と、ii) 記憶（エピソードグラフ）を\textbf{探索・再利用}する行動選好を、\textbf{同一の計器 $\F$ と二段ゲート（AG/DG）で同居}させられるかを原理検証（Proof of Concept）する。最小構成（8次元状態ベクトル、部分観測、逐次グラフ配線）において、以下の設計要素が一体として動作することを示す：
 
 \begin{enumerate}
@@ -1018,11 +1031,17 @@ MDL/FEP と本指標 $\F$ の対応を表\,\ref{tab:theory_mapping_summary} に�
 \end{enumerate}
 
 \paragraph{原理検証としての位置づけ}
-迷路環境では「周囲が壁」「訪問済み」「行き詰まり」といった条件は明示的に判定可能であり、ドメイン固有の if 文による実装でも解ける課題である。本章は\textbf{ドメイン普遍性を主張するものではなく}、設計原理の\emph{技術的実現可能性}を確認するための\textbf{原理検証（Proof of Concept）}である。具体的には、（i）$\F=\Delta\mathrm{EPC}_{\mathrm{norm}}-\lambda\,\Delta\mathrm{IG}$ の\emph{実時間計算}、（ii）\emph{2段階ゲート}（0\,\mbox{-}hopで注意喚起、multi\,\mbox{-}hopで短絡評価）の\emph{設計通りの挙動}、（iii）\emph{クエリ中心の multi\,\mbox{-}hop 評価}による\emph{計算量と精度のトレードオフ管理}、の3点を目的とする。
+本章は\textbf{探索効率}の検証を主眼とする\,\emph{PoC} であり、Dijkstra／A* は\,\emph{理想上限の参照枠}として扱う。確認対象は：（i）$\F{=}\Delta\mathrm{EPC}_{\mathrm{norm}}{-}\lambda\,\Delta\mathrm{IG}$ の\,\emph{実時間計算}、（ii）\,\emph{二段ゲート}（0\,\mbox{-}hop: 停滞検知, multi\,\mbox{-}hop: 短絡確認）の\,\emph{設計通りの挙動}、（iii）\,\emph{クエリ中心 multi\,\mbox{-}hop} による\,\emph{計算量と精度の管理}、の3点である（詳細アルゴリズムは付録参照）。
 
 \noindent 重要な限定: 迷路におけるエピソード表現（式\ref{eq:state_vec}）・クエリ（式\ref{eq:query_vec}）・重み（式\ref{eq:weights_vec}）は\textbf{迷路ドメインに特化}した設計である。他ドメイン（RAGなど）では表現設計が異なるが、\emph{統一ゲージによる評価・制御}（$\F$と2段階ゲート）は\textbf{同じ原理}で運用できることを次章で示す。
 
 \subsection{実験設計}
+
+\paragraph{評価指標と成功基準（Maze）}\label{sec:maze_metrics_success}
+\textbf{Primary（探索効率）}: \;探索率（\,unique\,/\,total\,), 訪問重複率（\,steps\,/\,unique\,), 平均バックトラック長（AG\,$\to$\,DG）, デッドエンド検出遅延（deadend\,$\to$\,AG）, 成功率。\\
+\textbf{Secondary（参照近接）}: \;Regret $=$ steps$-L^*$（\,小さいほど良い\,), \;SPL $=L^*/\max\{L^*,\,\text{steps}\}$（\,1に近いほど良い\,）。\\
+\textbf{診断}（付記）: \;P50/P95 時間、AG/DG 発火率、Frontier 順位相関（geDIG の $-F$ と Dijkstra 優先度）、経路一致度（Jaccard）。\\
+\textbf{成功基準の例（25\,\mbox{$\times$}\,25）}: \;探索率 $\le 0.40$, \;訪問重複 $\le 1.5$, \;BT 長 $\le 5$, \;検出遅延 $\le 1$, \;成功率 $\ge 95\%$, \;Regret 中央 $\le +3$, \;SPL 平均 $\ge 0.90$。（15/50 は規模別で設定）
 
 \paragraph{目的と仮定}
 本 PoC の目的は、\textbf{部分観測迷路}において統一指標 $\F$ と二段ゲート（AG/DG）で\,\emph{受容/保留/棄却} と \emph{バックトラック} を\,\emph{同時制御}できるかを確認することにある。状態・行動・結果の断片（エピソード）は\,\textbf{低次元ベクトルに埋め込み可能}で、\S\ref{sec:phi_requirements} の埋め込み要件（意味勾配の保存・局所的滑らかさ・スケール正規化）を満たすと仮定する。

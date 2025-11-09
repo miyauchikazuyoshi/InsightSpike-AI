@@ -8,6 +8,8 @@ Tests the integration of all PyG-based graph algorithms.
 import pytest
 import numpy as np
 import torch
+import pytest
+pytest.importorskip("torch_geometric")
 from torch_geometric.data import Data
 
 from insightspike.algorithms.graph_edit_distance import GraphEditDistance, compute_delta_ged

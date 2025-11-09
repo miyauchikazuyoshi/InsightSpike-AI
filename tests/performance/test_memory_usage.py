@@ -16,6 +16,8 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import numpy as np
+import pytest
+pytest.importorskip("psutil")
 import psutil
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))

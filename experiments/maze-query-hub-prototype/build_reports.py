@@ -20,6 +20,28 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List
 from importlib import import_module
+import importlib.util as _imp_util
+import sys as _sys
+
+# Optional metrics for maze exploration効率（ファイルパス経由で安全に読み込む）
+extract_exploration_metrics = None  # type: ignore
+detect_backtracks = None  # type: ignore
+summarize_backtrack = None  # type: ignore
+summarize_gates = None  # type: ignore
+try:  # best-effort: load qhlib/metrics.py by path (hyphenated package name prevents dotted import)
+    _metrics_path = (Path(__file__).with_name("qhlib") / "metrics.py").resolve()
+    if _metrics_path.exists():
+        _spec = _imp_util.spec_from_file_location("qh_metrics", str(_metrics_path))
+        if _spec and _spec.loader:
+            _mod = _imp_util.module_from_spec(_spec)
+            _sys.modules["qh_metrics"] = _mod
+            _spec.loader.exec_module(_mod)  # type: ignore[attr-defined]
+            extract_exploration_metrics = getattr(_mod, "extract_exploration_metrics", None)
+            detect_backtracks = getattr(_mod, "detect_backtracks", None)
+            summarize_backtrack = getattr(_mod, "summarize_backtrack", None)
+            summarize_gates = getattr(_mod, "summarize_gates", None)
+except Exception:
+    pass
 
 
 def load_json(path: Path) -> Any:
@@ -213,11 +235,51 @@ def main() -> None:
     # and matches expected keys; pass through
     summary = summary_raw
     steps = load_json(args.steps)
+
+    # Enrich summary with exploration/backtrack/gating metrics if possible
+    try:
+        maze_size = None
+        if isinstance(summary, dict):
+            maze_size = (summary.get("config") or {}).get("maze_size")
+            if not maze_size:
+                md = summary.get("maze_data") or {}
+                if isinstance(md, dict) and md:
+                    # pick first seed entry
+                    any_seed = next(iter(md.values()))
+                    size = (any_seed or {}).get("size")
+                    if isinstance(size, list) and len(size) >= 2:
+                        maze_size = int(size[0])  # assume square
+        if extract_exploration_metrics and maze_size:
+            ee = extract_exploration_metrics(steps, int(maze_size))
+            bt_segments = detect_backtracks(steps) if detect_backtracks else []
+            bt = summarize_backtrack(bt_segments) if summarize_backtrack else {}
+            gs = summarize_gates(steps) if summarize_gates else {}
+            # Attach under summary.summary
+            if isinstance(summary, dict):
+                summary.setdefault("summary", {})
+                summary["summary"]["exploration_efficiency"] = ee
+                summary["summary"]["backtrack_analysis"] = bt
+                summary["summary"]["gate_statistics"] = gs
+    except Exception:
+        pass
     ds_nodes = None
     ds_edges = None
     if args.sqlite is not None:
         try:
-            present = import_module('experiments.maze-query-hub-prototype.qhlib.present')
+            # Try dotted import (may fail due to hyphen in path); fallback to path import
+            try:
+                present = import_module('experiments.maze-query-hub-prototype.qhlib.present')
+            except Exception:
+                _present_path = (Path(__file__).with_name("qhlib") / "present.py").resolve()
+                if _present_path.exists():
+                    _spec = _imp_util.spec_from_file_location("qh_present", str(_present_path))
+                    if _spec and _spec.loader:
+                        _modp = _imp_util.module_from_spec(_spec)
+                        _sys.modules["qh_present"] = _modp
+                        _spec.loader.exec_module(_modp)  # type: ignore[attr-defined]
+                        present = _modp
+                else:
+                    raise ImportError("present.py not found for DS reconstruction")
             # Optionally reconstruct per-step fragments from DS (present layer)
             if args.present_mode and args.present_mode != 'none':
                 steps = present.reconstruct_records(str(args.sqlite), args.namespace, steps, mode=args.present_mode)
@@ -239,9 +301,9 @@ def main() -> None:
     # Decide UI defaults
     ui_defaults = None
     if args.strict and not args.relaxed:
-        ui_defaults = {"dsGraph": True, "dsStrict": True, "evalGraph": False, "useMhOnly": True, "showAllQueries": False}
+        ui_defaults = {"dsGraph": True, "dsStrict": True, "timeline": False, "evalGraph": False, "useMhOnly": True, "showAllQueries": False}
     elif args.relaxed and not args.strict:
-        ui_defaults = {"dsGraph": False, "dsStrict": False, "evalGraph": False, "useMhOnly": True, "showAllQueries": False}
+        ui_defaults = {"dsGraph": False, "dsStrict": False, "timeline": True, "evalGraph": False, "useMhOnly": True, "showAllQueries": False}
     payload = assemble_experiment_data(
         summary,
         steps,
@@ -250,6 +312,21 @@ def main() -> None:
         ui_defaults=ui_defaults,
         light_steps=bool(args.light_steps),
     )
+    # Ensure a sensible default seed is selected (one that has records) to avoid a blank view
+    try:
+        sd = payload.get("seed_data") or {}
+        first_with_records = None
+        for k, entry in sd.items():
+            recs = entry.get("records") or []
+            if recs:
+                first_with_records = k
+                break
+        if first_with_records is not None:
+            cfg = payload.setdefault("config", {})
+            ui = cfg.setdefault("ui_defaults", {})
+            ui.setdefault("selectedSeed", str(first_with_records))
+    except Exception:
+        pass
     args.out.parent.mkdir(parents=True, exist_ok=True)
     inject_into_template(args.template, args.out, payload)
     print(f"Wrote interactive HTML: {args.out}")
