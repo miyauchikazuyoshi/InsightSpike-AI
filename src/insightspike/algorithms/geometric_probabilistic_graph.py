@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Geometric Probabilistic Graph: Three-Space Integration
 =====================================================
@@ -107,87 +109,91 @@ class ThreeSpaceMetrics:
         }
 
 
-class GraphAttentionProbability(nn.Module):
-    """
-    Graph Attention layer that produces probability distributions.
+if TORCH_AVAILABLE:
+    class GraphAttentionProbability(nn.Module):
+        """
+        Graph Attention layer that produces probability distributions.
 
-    Uses multi-head attention to derive probability distributions over
-    neighboring nodes. These distributions satisfy probability axioms:
-    - Non-negative: softmax ensures p(x) >= 0
-    - Normalized: Σ p(x) = 1
-    - Measurable: attention weights form σ-algebra
-    """
+        Uses multi-head attention to derive probability distributions over
+        neighboring nodes. These distributions satisfy probability axioms:
+        - Non-negative: softmax ensures p(x) >= 0
+        - Normalized: Σ p(x) = 1
+        - Measurable: attention weights form σ-algebra
+        """
 
-    def __init__(
-        self,
-        in_channels: int,
-        out_channels: int,
-        heads: int = 4,
-        dropout: float = 0.1,
-        concat: bool = True,
-    ):
-        super().__init__()
+        def __init__(
+            self,
+            in_channels: int,
+            out_channels: int,
+            heads: int = 4,
+            dropout: float = 0.1,
+            concat: bool = True,
+        ):
+            super().__init__()
 
-        if not TORCH_AVAILABLE:
+            self.gat = GATConv(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                heads=heads,
+                dropout=dropout,
+                concat=concat,
+                add_self_loops=True,
+            )
+
+            self.heads = heads
+            self.out_channels = out_channels
+
+        def forward(
+            self, x: torch.Tensor, edge_index: torch.Tensor
+        ) -> Tuple[torch.Tensor, torch.Tensor]:
+            """
+            Forward pass computing embeddings and attention probabilities.
+
+            Args:
+                x: Node features [num_nodes, in_channels]
+                edge_index: Edge indices [2, num_edges]
+
+            Returns:
+                Tuple of (node_embeddings, attention_probabilities)
+                - node_embeddings: [num_nodes, out_channels * heads] if concat else [num_nodes, out_channels]
+                - attention_probabilities: [num_edges, heads] - softmax normalized per node
+            """
+            # Get embeddings and attention coefficients
+            out, (edge_index_att, attention_weights) = self.gat(
+                x, edge_index, return_attention_weights=True
+            )
+
+            # attention_weights shape: [num_edges, heads]
+            # These are already softmax normalized per source node
+            return out, attention_weights
+
+        def get_node_probability_distribution(
+            self, attention_weights: torch.Tensor, edge_index: torch.Tensor, node_idx: int
+        ) -> torch.Tensor:
+            """
+            Extract probability distribution for a specific node.
+
+            Args:
+                attention_weights: Attention coefficients [num_edges, heads]
+                edge_index: Edge indices [2, num_edges]
+                node_idx: Index of target node
+
+            Returns:
+                Probability distribution over neighbors [num_neighbors, heads]
+            """
+            # Find edges where source node is node_idx
+            source_mask = edge_index[0] == node_idx
+            node_attention = attention_weights[source_mask]
+
+            return node_attention
+else:
+    class GraphAttentionProbability:  # type: ignore[no-redef]
+        """Stub when torch is unavailable; raises on use."""
+
+        def __init__(self, *args, **kwargs) -> None:  # pragma: no cover
             raise ImportError(
                 "PyTorch Geometric required for GraphAttentionProbability"
             )
-
-        self.gat = GATConv(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            heads=heads,
-            dropout=dropout,
-            concat=concat,
-            add_self_loops=True,
-        )
-
-        self.heads = heads
-        self.out_channels = out_channels
-
-    def forward(
-        self, x: torch.Tensor, edge_index: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
-        """
-        Forward pass computing embeddings and attention probabilities.
-
-        Args:
-            x: Node features [num_nodes, in_channels]
-            edge_index: Edge indices [2, num_edges]
-
-        Returns:
-            Tuple of (node_embeddings, attention_probabilities)
-            - node_embeddings: [num_nodes, out_channels * heads] if concat else [num_nodes, out_channels]
-            - attention_probabilities: [num_edges, heads] - softmax normalized per node
-        """
-        # Get embeddings and attention coefficients
-        out, (edge_index_att, attention_weights) = self.gat(
-            x, edge_index, return_attention_weights=True
-        )
-
-        # attention_weights shape: [num_edges, heads]
-        # These are already softmax normalized per source node
-        return out, attention_weights
-
-    def get_node_probability_distribution(
-        self, attention_weights: torch.Tensor, edge_index: torch.Tensor, node_idx: int
-    ) -> torch.Tensor:
-        """
-        Extract probability distribution for a specific node.
-
-        Args:
-            attention_weights: Attention coefficients [num_edges, heads]
-            edge_index: Edge indices [2, num_edges]
-            node_idx: Index of target node
-
-        Returns:
-            Probability distribution over neighbors [num_neighbors, heads]
-        """
-        # Find edges where source node is node_idx
-        source_mask = edge_index[0] == node_idx
-        node_attention = attention_weights[source_mask]
-
-        return node_attention
 
 
 class GeometricProbabilisticGraph:
@@ -439,11 +445,28 @@ class GeometricProbabilisticGraph:
                 return float(np.mean(entropies))
 
             else:
-                # Global graph entropy: average over all nodes
-                entropies = []
-                for node_id in self.node_to_idx.keys():
-                    node_entropy = self.calculate_shannon_entropy(node_id)
-                    entropies.append(node_entropy)
+                # Global graph entropy: average over all nodes (vectorized using cached distributions)
+                entropies: List[float] = []
+                unique_sources = edge_index[0].unique()
+                for node_idx in unique_sources:
+                    mask_src = edge_index[0] == node_idx
+                    node_probs = attention_weights[mask_src]  # [deg(node), heads]
+                    if node_probs.numel() == 0:
+                        entropies.append(0.0)
+                        continue
+
+                    # Per-head Shannon entropy with zero-safe log
+                    head_entropies: List[float] = []
+                    for h in range(node_probs.shape[1]):
+                        p = node_probs[:, h]
+                        m = p > 1e-10
+                        if m.any():
+                            Hh = -torch.sum(p[m] * torch.log2(p[m]))
+                            head_entropies.append(float(Hh.item() if isinstance(Hh, torch.Tensor) else Hh))
+                        else:
+                            head_entropies.append(0.0)
+
+                    entropies.append(float(np.mean(head_entropies)))
 
                 return float(np.mean(entropies)) if entropies else 0.0
 

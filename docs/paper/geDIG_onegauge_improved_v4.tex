@@ -52,7 +52,13 @@
 \maketitle
 
 \begin{abstract}
-本稿は、動的知識グラフにおける\textbf{受容のタイミング（When）}を単一ゲージ\,\textbf{$\F$}（定義は §3.2）で定式化し、\textbf{0‑hop} の曖昧検知（AG）と \textbf{multi‑hop} の洞察確証（DG）によるイベント駆動制御（geDIG）を提案する。\;\textbf{静的RAG}では $\F$ を\,\emph{再ランキングの連続弱化}として用い、\,equal‑resources 下で \textbf{EM/F1 と根拠整合}の向上を確認した。\;\textbf{動的RAG}では $\F$ を\,\emph{更新ゲート}として用い、\,\textbf{受容（Acc）・誤統合（FMR）・遅延（P50）}の三者について \textbf{PSZ}（Acc$\ge$95\%, FMR$\le$2\%, P50$\le$200ms）を運用目標とした曲線を提示し、\,\textit{s\textsubscript{PSZ}} の改善と\,AG/DG 決定ログの\,\emph{可観測化}を示した（到達自体は未達）。\;\textbf{迷路PoCとRAG}の双方で、構造コストと情報利得の差分で\,\emph{短絡}を検出できることを示し、\,FEP–MDL への\,\textbf{操作的ブリッジ}を与える。Phase~2（オフライン再配線）は\,\emph{設計提示のみ}とし、数学的厳密化と大規模検証は今後の課題とする。
+私たちは、動的に成長する知識グラフにおいて\textbf{「いつ受け入れるか（When）」}を決める規範が欠落しているという根本課題に対し、\textbf{単一ゲージ $\F$} を用いた統一制御（geDIG）を提案する。$\F$ は\,\textit{正規化編集経路コスト}（$\Delta$EPC; 実際に適用した編集列のコスト）と\,\textit{情報利得}（シャノンエントロピー差 $\Delta H$ と経路短縮 $\Delta\mathrm{SP}$）を統合し、\,\textbf{0‑hop} の曖昧検知（AG）と \textbf{multi‑hop} の洞察確証（DG）という二段ゲートで、\textbf{探索／統合／バックトラック／エビクション}をイベント駆動で横断制御する。
+
+本稿の新規性は次の3点に集約される。（i）\textbf{設計の単一化}: 静的RAGでは $\F$ を\,\emph{再ランキングの連続弱化}として用い、動的RAGでは\,\emph{更新ゲート}として用いることで、\textbf{“What を選ぶ” と “When 受容する”} を同一指標に束ねた。（ii）\textbf{運用の実装性}: Linkset固定・正規化上界・相対SPなどの\,\textit{固定尺}により、equal‑resources かつ\,\textit{no‑peeking} な比較で、P50/P95 の\,\textbf{遅延上限を守りながら} 0/多ホップの整合を実現する。（iii）\textbf{理論との橋渡し}: \textbf{FEP–MDL ブリッジ}を\,\textit{操作的命題}として提示し、$\F\propto\Delta\mathrm{MDL}{+}O(1/N)$ の関係（仮定下）と\,\textbf{自由エネルギー的な読み替え}を与える（過度な同値主張は避ける）。
+
+実験的には、\textbf{迷路PoC}と\textbf{RAG}の双方で検証する。迷路では、$\F$ の閾値分位（AG/DG）を用いた\,\textit{バックトラックの自動化}により、\textbf{冗長分岐の抑制とステップ削減}を示す。静的RAGでは、equal‑resources 下で\,\textbf{EM/F1 と根拠整合}の改善傾向を確認し、動的RAGでは、Acc/FMR/遅延（P50）から構成される\textbf{PSZ（Perfect Scaling Zone）} を\,\textit{SLO} として採用し、\textbf{PSZ短欠 $s_{\mathrm{PSZ}}$ の一貫した縮小}と\,\textbf{AG/DG 決定ログの可観測化}を提示する（PSZ帯への完全到達は現状未達）。さらに、アブレーションにより、$\Delta$EPC／$\Delta H$／$\Delta\mathrm{SP}$／0‑hop／multi‑hop／ゲートの\,\textbf{各構成要素が有意に寄与}することを示す。
+
+本研究は、\textbf{理論の厳密性よりも運用可能性}を優先した\,\textit{最小の反証可能な仮説}として位置づける。コード・スクリプト・閾値分位の設定（burn‑in）・可視化を\,\textbf{再現経路として公開}し、読者が “いつ機能したか” を追跡できる実装（AG/DG時系列・ゲージ分布・Operating Curves）を提供する。Phase~2（\textit{オフライン再配線}）は設計スケッチに留め、数学的厳密化と大規模検証は今後の共同研究に委ねる。
 \end{abstract}
 
 \subsection*{研究課題と仮説}
