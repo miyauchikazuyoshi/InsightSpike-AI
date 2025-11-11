@@ -418,15 +418,23 @@ class GeometricProbabilisticGraph:
                     attention_weights, edge_index, node_idx
                 )
 
+                # Handle isolated nodes (no outgoing edges)
+                if len(node_probs) == 0:
+                    return 0.0  # No uncertainty for isolated nodes
+
                 # Shannon entropy: H = -Σ p log₂ p
                 # Average over attention heads
                 entropies = []
                 for head in range(node_probs.shape[1]):
                     p = node_probs[:, head]
-                    # Add small epsilon to avoid log(0)
-                    p = p + 1e-10
-                    H = -torch.sum(p * torch.log2(p))
-                    entropies.append(H.item())
+                    # Only compute entropy for non-zero probabilities
+                    # This preserves the probability axiom: Σp = 1.0
+                    mask = p > 1e-10
+                    if mask.any():
+                        H = -torch.sum(p[mask] * torch.log2(p[mask]))
+                    else:
+                        H = 0.0  # No uncertainty if all probabilities are zero
+                    entropies.append(H.item() if isinstance(H, torch.Tensor) else H)
 
                 return float(np.mean(entropies))
 
@@ -499,16 +507,26 @@ class GeometricProbabilisticGraph:
             try:
                 h = self.calculate_shannon_entropy(node_id)
                 entropy_per_node.append(h)
-            except:
+            except Exception as e:
+                logger.warning(f"Failed to compute entropy for node {node_id}: {e}")
                 entropy_per_node.append(0.0)
         entropy_per_node = np.array(entropy_per_node)
 
         # Verify probability mass conservation
         try:
-            attention_weights, _ = self.compute_probability_distributions()
-            # Sum over each node's distribution should be ~1.0
-            probability_mass = float(attention_weights.sum(dim=0).mean())
-        except:
+            attention_weights, edge_index = self.compute_probability_distributions()
+            # For each source node, probabilities should sum to ~1.0
+            unique_sources = edge_index[0].unique()
+            masses = []
+            for node_idx in unique_sources:
+                mask = edge_index[0] == node_idx
+                node_probs = attention_weights[mask]
+                # Average over attention heads
+                mass = node_probs.sum(dim=0).mean()
+                masses.append(mass.item())
+            probability_mass = float(np.mean(masses)) if masses else 1.0
+        except Exception as e:
+            logger.debug(f"Could not verify probability mass: {e}")
             probability_mass = 1.0  # Assume normalized if cannot compute
 
         # Space 3: Similarity metrics
