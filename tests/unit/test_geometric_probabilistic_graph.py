@@ -400,13 +400,22 @@ class TestProbabilityDistributions:
         assert attention_weights.shape[0] > 0  # Has edges
         assert attention_weights.shape[1] == gpg.attention_heads  # Correct heads
 
-        # All probabilities should be non-negative
-        assert torch.all(attention_weights >= 0.0)
+        # Probability Axiom P1: Non-negative
+        assert torch.all(attention_weights >= 0.0), "Axiom P1 violated: probabilities must be non-negative"
 
-        # For each source node, probabilities should sum to ~1.0
-        # (GAT uses softmax, so this is guaranteed per-node)
-        # We can verify that probabilities are in [0, 1]
-        assert torch.all(attention_weights <= 1.0)
+        # Probability Axiom P2: Normalized (Σp = 1 for each source node)
+        unique_sources = edge_index[0].unique()
+        for node_idx in unique_sources:
+            mask = edge_index[0] == node_idx
+            node_probs = attention_weights[mask]
+            # For each attention head
+            for head in range(node_probs.shape[1]):
+                prob_sum = node_probs[:, head].sum()
+                assert torch.isclose(prob_sum, torch.tensor(1.0), atol=1e-5), \
+                    f"Axiom P2 violated: node {node_idx} head {head} has Σp = {prob_sum:.10f} (should be 1.0)"
+
+        # All probabilities should be in [0, 1]
+        assert torch.all(attention_weights <= 1.0), "Probabilities must be <= 1.0"
 
     @pytest.mark.skipif(not TORCH_AVAILABLE, reason="PyTorch not available")
     def test_probability_distribution_caching(self):
@@ -478,6 +487,27 @@ class TestEdgeCases:
         assert metrics.num_nodes == 5
         assert metrics.num_edges == 0
         assert metrics.graph_density == 0.0
+
+    @pytest.mark.skipif(not TORCH_AVAILABLE, reason="PyTorch not available")
+    def test_isolated_node_entropy(self):
+        """Test entropy calculation for isolated nodes"""
+        gpg = GeometricProbabilisticGraph(embedding_dim=384)
+
+        # Create graph with one isolated node
+        gpg.add_node("isolated", embedding=np.random.randn(384))
+        gpg.add_node("connected1", embedding=np.random.randn(384))
+        gpg.add_node("connected2", embedding=np.random.randn(384))
+
+        # Only connect two nodes
+        gpg.add_edge("connected1", "connected2")
+
+        # Isolated node should have zero entropy
+        entropy_isolated = gpg.calculate_shannon_entropy("isolated")
+        assert entropy_isolated == 0.0, "Isolated node should have zero entropy"
+
+        # Connected nodes should have non-zero entropy
+        entropy_connected = gpg.calculate_shannon_entropy("connected1")
+        assert entropy_connected >= 0.0
 
     def test_dimension_consistency(self):
         """Test that embedding dimensions are consistent"""
