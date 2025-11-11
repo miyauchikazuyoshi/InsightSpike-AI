@@ -1,6 +1,5 @@
 % geDIG v4 (English Draft)
-% arXiv-friendly preamble
-\pdfoutput=1
+% XeLaTeX build (arXiv note: \pdfoutput is only for pdfTeX)
 \documentclass[12pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -83,6 +82,7 @@ We can read $\F$ as an operational free energy:
 so $\F$ is isomorphic to $F$ by term rearrangement. The coefficient $\lambda$ plays the role of information temperature. We keep later references in the short form $\F=\gednorm-\lambda\,\ignorm$ to avoid redundancy.
 
 \subsection{Evaluation Common Conditions}\label{sec:common_setup_en}
+\footnote{For quick reproduction, see Make targets (e.g., \texttt{make exp23-paper}, \texttt{make maze-suite}) and the smoke script \texttt{scripts/codex\_smoke.sh}.}
 We compare static and dynamic RAG under \emph{shared} conditions. Chapters only state their differences; definitions and resources live here.
 \begin{itemize}[leftmargin=1.6em]
   \item \textbf{Knowledge source / Retriever / LM}: same corpus, retriever, and generation settings (prompt, temperature, max tokens).
@@ -248,6 +248,15 @@ These trends are robust to the lightweight embedder; absolute scores improve wit
 
 \paragraph{Remarks.} The lite suite isolates decision-time control (When) and aligns with the paper's FEP--MDL operational reading.
 
+\paragraph{Key metrics (equal-resources).} Table~\ref{tab:rag_summary_en} summarizes the main metrics (mean$\pm$SE; $n{=}16$) under equal-resources.
+\begin{table}[H]
+  \centering
+  \small
+  \caption{RAG key metrics (equal-resources; mean$\pm$SE; $n{=}16$).}
+  \label{tab:rag_summary_en}
+  \input{figures/exp23_summary_table.tex}
+\end{table}
+
 \section*{Supplementary: Equal-Resources Table}\label{sec:supp_resources}
 \begin{table}[H]
   \centering
@@ -255,6 +264,13 @@ These trends are robust to the lightweight embedder; absolute scores improve wit
   \label{tab:resources_en}
   \input{figures/exp23_resources_table.tex}
 \end{table}
+
+\section*{Threats to Validity (Brief)}\label{sec:threats_validity_en}
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Scorer / prompt dependence}: automatic scoring and templates can bias absolute numbers; we rely on relative comparisons and percentile calibration.
+  \item \textbf{Embedding variance / external validity}: encoder and domain vocabulary affect transfer; we control with equal-resources and a no-peeking protocol.
+  \item \textbf{Compute and latency}: P50/P95 depend on hardware/load; we cap $H$/$k$, reuse caches, and track latency percentiles to enforce operational bounds.
+\end{itemize}
 
 \section{Conclusion}
 
