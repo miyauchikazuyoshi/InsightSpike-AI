@@ -1969,7 +1969,7 @@ AG発火率、DG発火率、DG発火時の平均 $g_{\min}$（洞察スコア）
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.82\linewidth]{exp23_paper_20251104_052644_psz_curve.png}
-  \caption{Operating Curves（PSZ 関連；実測曲線）。分位掃引により FMR・受容率・遅延のトレードオフを示す。}
+  \caption{Operating Curves（PSZ 関連；実測）。equal-resources 下での分位掃引により FMR・受容率・遅延のトレードオフを示す（例: $p_{\mathrm{AG}}{=}0.92,\,p_{\mathrm{DG}}{=}0.08$；平均$\pm$SE，$n{=}16$）。}
   \label{fig:operating_curves}
 \end{figure}
 
@@ -1986,7 +1986,7 @@ AG発火率、DG発火率、DG発火時の平均 $g_{\min}$（洞察スコア）
 \begin{table}[H]
 \centering
 \small
-\caption{RAG 主要指標（equal-resources; 実測）。}
+\caption{RAG 主要指標（equal-resources; 実測，平均$\pm$SE，$n{=}16$）。}
 \label{tab:rag_summary}
 \input{figures/exp23_summary_table.tex}
 \end{table}
@@ -2922,6 +2922,13 @@ DG発火回数 & 4.5 & 1.2 & 4.0 & 2 & 8 & [4.3, 4.7] \\
   \label{tab:resources_ja}
   \input{figures/exp23_resources_table.tex}
 \end{table}
+
+\section*{妥当性の脅威（簡略）}\label{sec:threats_validity_ja}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{採点器・プロンプト依存}: 自動採点器やテンプレ設定に依存するため、絶対値は変動し得る（相対比較と分位校正で緩和）。
+  \item \textbf{埋め込み差・外的妥当性}: 埋め込み器・ANN設定・語彙/ドメイン差により再現差が出る可能性（equal-resources と “no peeking” で統制）。
+  \item \textbf{計算資源と遅延}: P50/P95 はマシン/負荷に依存。$H/k$ のクリップとキャッシュ再利用で運用上限を担保（表~\ref{tab:complexity_summary}）。
+\end{itemize}
 
 \section*{再現コマンド（簡略）}\label{sec:repro_lite_ja}
 \begin{verbatim}
