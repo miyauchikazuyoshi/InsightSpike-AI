@@ -1639,7 +1639,18 @@ DFS風バックトラック & — & — & — & — & — & — & — \\
   \IfFileExists{maze_25x25_snapshots/maze_graph_seed0_step16_tjunction.png}{\includegraphics[width=.48\linewidth]{maze_25x25_snapshots/maze_graph_seed0_step16_tjunction.png}}{\fbox{t-junction snapshot}}
   \\
   \vspace{0.6em}
-  \IfFileExists{maze_25x25_snapshots/maze_graph_seed0_step0_deadend.png}{\includegraphics[width=.48\linewidth]{maze_25x25_snapshots/maze_graph_seed0_step0_deadend.png}}{\fbox{dead-end snapshot}}
+\IfFileExists{maze_25x25_snapshots/maze_graph_seed0_step0_deadend.png}{\includegraphics[width=.48\linewidth]{maze_25x25_snapshots/maze_graph_seed0_step0_deadend.png}}{\fbox{dead-end snapshot}}
+
+\paragraph{25$\times$25（500 step）の概要}\label{sec:maze_25x25_500}
+\noindent 最新の 25$\times$25 \;500\,step 実行の要約を表~\ref{tab:maze_25_s500} に示す（equal-resources, no\,peeking）。受容判定は分位ゲート（AG: $p{=}0.92$, DG: $p{=}0.08$）に基づく。成功率は 1.00、平均ステップは 276、DG 発火率は約 0.35 であった。評価時間（ms）は平均 0.63（L3\,: 0.95）、P95 は 2.87（L3\,: 4.71）。
+
+\begin{table}[H]
+  \centering
+  \caption{25$\times$25（500 step）— 代表指標（equal-resources）。}
+  \label{tab:maze_25_s500}
+  \small
+  \input{figures/maze_25x25_s500_table.tex}
+\end{table}
   \caption{実行ログから再構成した\,\textbf{迷路（左）＋グラフ（右）}のスナップショット（25\,\mbox{$\times$}\,25; seed=0）。Strict\,DS の累積グラフ（時系列差分のコミット）を描画し，本文の定性所見（通常／T字路／行き止まり）の振る舞いを静止画で対応付ける。}
   \label{fig:maze_graph_snapshots}
 \end{figure}
