@@ -236,6 +236,27 @@ paper-ja:
 exp23-all: exp23-paper exp23-psz-sweep exp23-export-figs exp23-export-tables paper-en paper-ja
 
 # ------------------------------------------------------------
+# Paper helpers: maze batch aggregation (25x25 / s500)
+# ------------------------------------------------------------
+.PHONY: paper-maze-agg-l3 paper-maze-agg-eval paper-build-ja
+
+paper-maze-agg-l3:
+	python scripts/aggregate_maze_batch.py \
+	  --dir experiments/maze-query-hub-prototype/results/batch_25x25 \
+	  --prefix paper25_25x25_s500_seed \
+	  --out docs/paper/data/maze_25x25_l3_s500.json
+
+paper-maze-agg-eval:
+	python scripts/aggregate_maze_batch.py \
+	  --dir experiments/maze-query-hub-prototype/results/batch_25x25 \
+	  --prefix paper25_25x25_s500_eval_seed \
+	  --out docs/paper/data/maze_25x25_eval_s500.json
+
+paper-build-ja:
+	cd docs/paper && xelatex -interaction=nonstopmode geDIG_onegauge_improved_v4.tex >/dev/null || true && \
+	  xelatex -interaction=nonstopmode geDIG_onegauge_improved_v4.tex >/dev/null || true
+
+# ------------------------------------------------------------
 # Maze tuning (15x15)
 # ------------------------------------------------------------
 .PHONY: maze-tune-15

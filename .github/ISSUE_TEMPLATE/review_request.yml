@@ -1,0 +1,49 @@
+name: "Review Request"
+description: "Share feedback on theory, experiments, or reproducibility"
+title: "[Review] <short topic>"
+labels: ["Review"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reviewing geDIG. This form helps us triage feedback.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area(s)
+      multiple: true
+      options:
+        - Theory (F, ΔEPC, ΔIG, PSZ)
+        - Experiments (Maze)
+        - Experiments (RAG)
+        - Reproducibility
+        - Performance / Scaling
+        - API / Docs
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Summary
+      description: One paragraph describing your suggestion or finding.
+      placeholder: e.g., Clarify the sign convention for ΔH in the short-form; add SE/CI to Table X…
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence / References
+      description: Links to code, paper sections, or external references.
+  - type: input
+    id: env
+    attributes:
+      label: Environment (if running code)
+      placeholder: Python 3.11, macOS 14, CPU only
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction Steps (optional)
+      description: Commands you ran, datasets used, seeds, etc.
+
