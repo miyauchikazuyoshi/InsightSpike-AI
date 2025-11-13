@@ -82,6 +82,12 @@ quickstart: install setup-models
 	@echo "✅ InsightSpike-AI is ready to use!"
 	@echo "Try running: python examples/public_quick_start.py"
 
+# Coverage run (lightweight env flags)
+.PHONY: coverage
+coverage:
+	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 INSIGHTSPIKE_MIN_IMPORT=1 INSIGHTSPIKE_LITE_MODE=1 \
+		pytest -q --cov=insightspike --cov-report=term-missing tests/
+
 # ---------------------------------------------------------------------
 # Dockerized maze experiments (Linux/OpenBLAS for stability)
 # ---------------------------------------------------------------------

@@ -103,6 +103,33 @@ PYTHONPATH=src:$PYTHONPATH
 INSIGHTSPIKE_LOG_LEVEL=DEBUG
 ```
 
+## Version Alignment — Pydantic v2 Migration Plan
+
+We currently support Pydantic v1 in the core package. Some experimental submodules may use v2 APIs. To reduce confusion:
+
+- Short‑term (v0.1.x): core remains on Pydantic v1; experiments that need v2 should vendor minimal adapters.
+- Mid‑term (v0.2): introduce a tiny compat layer (e.g., `insightspike.utils.pydantic_compat`) exposing `model_dump`/`model_json` shims for v1.
+- Migration rules:
+  - Do not call `.dict()`/.json() directly in new code; use a compat helper (to be provided)
+  - Avoid referencing `BaseModel.Config`; prefer field validators compatible with v2
+  - Keep public config models stable (documented in README/Docs)
+- When the core flips to v2, the compat shims will forward to native v2 and v1 paths will be deprecated for one minor.
+
+## Stable Public API Surface
+
+The following modules are considered stable (semantic‑versioned):
+- `insightspike.public` (create_agent, load_config wrapper)
+- CLI (`python -m insightspike.cli.spike`)
+
+Internal modules may change between minors. If you need stability guarantees, open an issue to discuss promoting specific functions to the public surface.
+
+## Coverage & Testing Targets
+
+- Coverage threshold is enforced via coverage.py; target will increase over time:
+  - v0.1: 35%
+  - v0.2: 50% (focus: core metrics, datastore, gating)
+- Use `make coverage` (added) to run with lightweight env flags.
+
 ## Contributing Guidelines
 
 ### Types of Contributions

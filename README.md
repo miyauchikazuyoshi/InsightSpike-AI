@@ -170,3 +170,22 @@ What you get
 How to join
 - Open an Issue with label “Review” or “Collaboration” and 3–5 lines on your focus
 - Or DM on X (@kazuyoshim5436)
+
+## Environment Variables (Core)
+
+Common variables you might set:
+
+- INSIGHTSPIKE_LITE_MODE=1 — enable lightweight paths (no heavy deps)
+- INSIGHTSPIKE_MIN_IMPORT=1 — minimize import surface for faster startup
+- PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 — prevent third‑party pytest plugins
+- INSIGHTSPIKE_LLM__PROVIDER=mock — mock LLM (no network)
+- INSIGHTSPIKE_LLM__MODEL=mock — mock model identifier
+- INSIGHTSPIKE_CONFIG_PATH=path/to/config.yaml — override config file
+- INSIGHTSPIKE_DATA_DIR=./data/insight_store — override data root
+- INSIGHTSPIKE_LOG_DIR=./results/logs — safe write location for logs
+
+Advanced overrides (geDIG internals):
+- INSIGHTSPIKE_GEDIG_LAMBDA=1.0 — λ (trade‑off) override
+- INSIGHTSPIKE_SP_BETA=1.0 — γ (ΔSP weight) override
+
+Note: With Lite mode or when sentence‑transformers/torch are not installed, the system falls back to a simple CPU embedder and Numpy index; functionality remains intact for docs/tests.

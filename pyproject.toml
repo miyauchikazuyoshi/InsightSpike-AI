@@ -200,7 +200,7 @@ omit = [
 ]
 
 [tool.coverage.report]
-fail_under = 20
+fail_under = 35
 
 [tool.black]
 line-length = 88

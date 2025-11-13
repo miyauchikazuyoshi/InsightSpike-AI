@@ -14,6 +14,7 @@ Make this repo easy to test in constrained cloud agents (no GPU, restricted netw
 ## Environment Defaults (cloud-safe)
 - `INSIGHTSPIKE_LITE_MODE=1` and `INSIGHTSPIKE_MIN_IMPORT=1`
   - Forces lightweight code paths and fallback embedder (no torch/sentence-transformers).
+  - When embedding backends are not installed, the system degrades to a simple CPU embedder and Numpy index; examples and smoke tests still run.
 - `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`
   - Prevents unexpected slow/fragile third‑party pytest plugins.
 - Optional when running CLI in cloud: set LLM to mock
