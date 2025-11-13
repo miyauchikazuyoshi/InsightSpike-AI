@@ -76,8 +76,16 @@ F = -0.42  (ΔEPC_norm=0.15,  ΔIG=0.57,  spike=True)
       <img alt="Maze demo (seed0 short)" src="docs/images/maze_seed0_recon.gif" width="560" />
     </p>
 
+  - Demo GIF (seed17, AG/DG 活発):
+
+    <p align="center">
+      <img alt="Maze demo (seed17 recon)" src="docs/images/maze_seed17_recon.gif" width="560" />
+    </p>
+
   - Interactive HTML (seed0):
     - experiments/maze-query-hub-prototype/results/batch_25x25/paper25_25x25_s500_seed0_interactive.html
+  - Interactive HTML (seed17):
+    - experiments/maze-query-hub-prototype/results/batch_25x25/paper25_25x25_s300_seed17_interactive.html
 
 <p align="center">
   <img alt="Maze overview" src="docs/paper/figures/fig4_maze.png" width="640" />

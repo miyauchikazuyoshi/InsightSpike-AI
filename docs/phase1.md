@@ -32,3 +32,14 @@ permalink: /phase1/
 - See paper figures for PSZ/operating curves and the aggregation protocol
 - Use `make` targets / scripts to export PSZ tables/figures (see docs/paper/generate_* scripts)
 
+<!-- BASELINE:BEGIN -->
+
+### Baseline Comparison (Static RAG vs geDIG)
+
+| Metric | Static RAG | geDIG |
+|---|---:|---:|
+| Acceptance | 0.360 | 0.380 |
+| FMR | 0.640 | 0.620 |
+| Latency P50 | 160 ms | 200 ms |
+
+<!-- BASELINE:END -->
