@@ -73,7 +73,7 @@ F = -0.42  (ΔEPC_norm=0.15,  ΔIG=0.57,  spike=True)
   - Demo GIF (seed0, short):
 
     <p align="center">
-      <img alt="Maze demo (seed0 short)" src="docs/images/maze_seed0_short.gif" width="560" />
+      <img alt="Maze demo (seed0 short)" src="docs/images/maze_seed0_recon.gif" width="560" />
     </p>
 
   - Interactive HTML (seed0):
@@ -137,16 +137,7 @@ python experiments/maze-query-hub-prototype/run_experiment_query.py \
 Empirical (reference): 25×25 / 150 steps → wall ≈ 42 s, avg_time_ms_eval ≈ 1.41 ms/step.
 - One‑Gauge control: smaller F implies an “insight‑like” event; AG/DG makes the decision robust
 
-## 📈 Pipeline (Mermaid)
-
-```mermaid
-flowchart LR
-  Q[Query] --> AG[AG (0-hop)]
-  AG -- uncertain --> RET[Retrieve (on-demand)]
-  RET --> DG[DG (multi-hop)]
-  DG -->|confirmed| ACC[Accept & Update]
-  AG -->|reject| REJ[Reject]
-```
+<!-- Pipeline overview is described in the paper; Mermaid is omitted for GitHub compatibility. -->
 
 ## License / Contact
 
