@@ -148,6 +148,23 @@ find data/cache -type f -mtime +7 -delete
 rm -rf data/temp/*
 ```
 
+### Retention (TTL) & Deletion Policy
+
+- Cache (`data/cache/`): delete files older than 7 days
+- Temp (`data/temp/`, `tmp/`): clear after each experiment batch
+- Logs (`data/logs/`, `results/logs/`): rotate weekly; keep last 4 weeks
+- Large artifacts (HTML viewers / step logs / SQLite):
+  - Attach to a GitHub Release (e.g., `v0.1-assets`) and remove from the main branch
+  - Keep only aggregated JSONs in `docs/paper/data/`
+- Shadow migration (`migration_mode: shadow`): keep the shadow copies ≤14 days; aggregates remain the single source of truth
+
+Recommended cron (example):
+```cron
+# Weekly cleanup (every Sunday 03:00)
+0 3 * * 0 find data/cache -type f -mtime +7 -delete
+0 3 * * 0 find results/logs -type f -mtime +28 -delete
+```
+
 ### Check disk usage
 ```bash
 du -sh data/*

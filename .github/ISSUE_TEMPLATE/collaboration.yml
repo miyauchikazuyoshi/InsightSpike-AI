@@ -1,0 +1,53 @@
+name: "Collaboration Proposal"
+description: "Propose a collaboration (theory / RAG / scaling / optimization / visualization)"
+title: "[Collaboration] <Focus Area> — <Short Pitch>"
+labels: ["Collaboration"]
+assignees: []
+body:
+  - type: dropdown
+    id: focus
+    attributes:
+      label: Focus Area
+      options:
+        - Theory (phase transitions / statistical mechanics)
+        - RAG benchmarking / multi-hop
+        - Scaling & optimization (systems)
+        - Visualization / demos / docs
+        - Neuroscience (FEP / consolidation)
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Contribution
+      description: 3–5 sentences on what you want to build or validate
+      placeholder: e.g., λ-scan study for critical behavior; compare against GraphRAG on HotpotQA…
+    validations:
+      required: true
+  - type: input
+    id: commitment
+    attributes:
+      label: Time Commitment (rough)
+      placeholder: 2–4 weeks, ~5 hrs/week
+  - type: textarea
+    id: resources
+    attributes:
+      label: Expected Resources
+      description: GPU/CPU, datasets, cloud credits (if any)
+  - type: textarea
+    id: milestones
+    attributes:
+      label: Milestone Sketch
+      description: list deliverables and rough dates
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation Plan
+      description: metrics, reproduction scripts, acceptance criteria
+  - type: textarea
+    id: links
+    attributes:
+      label: References / Links
+      description: repos, papers, prior work
+

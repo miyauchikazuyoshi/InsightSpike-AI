@@ -130,6 +130,17 @@ Internal modules may change between minors. If you need stability guarantees, op
   - v0.2: 50% (focus: core metrics, datastore, gating)
 - Use `make coverage` (added) to run with lightweight env flags.
 
+## Docs Internationalization (i18n)
+
+- Policy: English‑first documentation; Japanese (JP) pages are welcomed as supplemental aids.
+- PR tips for translations:
+  - Keep the English source canonical; update EN first, then mirror changes into JP.
+  - Place JP pages alongside EN where appropriate (e.g., `docs/ja/...`), or add JP sections to the same page with clear headings.
+  - Avoid diverging technical meaning; if a term is ambiguous, prefer the English technical term in parentheses.
+  - Screenshots/GIFs may be reused; text in images should have captions in EN.
+  - Add reviewers familiar with both languages when proposing nuanced theory translations.
+
+
 ## Contributing Guidelines
 
 ### Types of Contributions

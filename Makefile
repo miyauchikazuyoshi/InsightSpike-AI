@@ -142,6 +142,22 @@ maze-viz:
 	    python experiments/maze-navigation-enhanced/src/analysis/visualize_maze_run.py --size $(SIZE) --seed $(SEED) --strategy $(STRAT) --fast"
 
 # ------------------------------------------------------------
+# Local (no Docker) quick maze run
+# ------------------------------------------------------------
+# Usage examples:
+#  make maze-run-local SIZE=25 STEPS=300 SEED=0 OUT=results/maze-local
+#  make maze-run-local SIZE=25 STEPS=500 SEED=17 FAST=1 OUT=results/maze-local
+.PHONY: maze-run-local
+maze-run-local:
+	@mkdir -p $(or $(OUT),results/maze-local)
+	python experiments/maze-query-hub-prototype/run_experiment_query.py \
+	  --preset paper --maze-size $(or $(SIZE),25) --max-steps $(or $(STEPS),300) \
+	  --output $(or $(OUT),results/maze-local)/maze_s$(or $(SIZE),25)_t$(or $(STEPS),300)_seed$(or $(SEED),0)_summary.json \
+	  --step-log $(or $(OUT),results/maze-local)/maze_s$(or $(SIZE),25)_t$(or $(STEPS),300)_seed$(or $(SEED),0)_steps.json \
+	  --seed-start $(or $(SEED),0) --seeds 1
+	@echo "Local run complete → $(or $(OUT),results/maze-local)"
+
+# ------------------------------------------------------------
 # Local preset + calibration + stats (no Docker)
 # ------------------------------------------------------------
 .PHONY: maze-preset maze-calibrate maze-stats maze-suite
