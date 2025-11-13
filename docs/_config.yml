@@ -5,3 +5,14 @@ markdown: kramdown
 plugins:
   - jekyll-seo-tag
 
+# For GitHub Pages project site
+url: "https://miyauchikazuyoshi.github.io"
+baseurl: "/InsightSpike-AI"
+
+# Show pages in header navigation
+header_pages:
+  - index.md
+  - theory.md
+  - phase1.md
+  - tutorials/trace.md
+  - call-for-reviewers.md
