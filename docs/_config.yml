@@ -1,0 +1,7 @@
+title: "geDIG — InsightSpike-AI"
+description: "Unified Gauge Control for Dynamic Knowledge Graphs"
+theme: minima
+markdown: kramdown
+plugins:
+  - jekyll-seo-tag
+

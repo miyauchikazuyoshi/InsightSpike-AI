@@ -1,0 +1,26 @@
+name: Release (tag)
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  gh-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          prerelease: false
+          files: |
+            docs/paper/geDIG_onegauge_improved_v4.pdf
+            docs/paper/data/maze_25x25_*_s500.json
+          body_path: docs/releases/RELEASE_NOTES_v0.1.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

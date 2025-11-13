@@ -40,7 +40,8 @@
 \newcommand{\F}{\mathcal{F}}
 \newcommand{\gednorm}{\Delta\mathrm{EPC}_{\mathrm{norm}}}
 \newcommand{\ignorm}{\Delta\mathrm{IG}_{\mathrm{norm}}}
-\newcommand{\experimNote}[1]{\textcolor{red}{\textbf{[実験要更新: #1]}}}
+% Draft-time helper (rendered empty in final builds)
+\newcommand{\experimNote}[1]{}
 
 \title{動的知識グラフの状態を測る統一ゲージ・フレームワークの提案}
 \author{\texorpdfstring{\textit{\small ― Gauge what Knowledge Graph needs.}\\[0.3em]}{}% subtitle just under title
@@ -61,12 +62,32 @@
 本研究は、\textbf{理論の厳密性よりも運用可能性}を優先した\,\textit{最小の反証可能な仮説}として位置づける。コード・スクリプト・閾値分位の設定（burn‑in）・可視化を\,\textbf{再現経路として公開}し、読者が “いつ機能したか” を追跡できる実装（AG/DG時系列・ゲージ分布・Operating Curves）を提供する。Phase~2（\textit{オフライン再配線}）は設計スケッチに留め、数学的厳密化と大規模検証は今後の共同研究に委ねる。
 \end{abstract}
 
+\subsection*{用語と記号（早見表）}
+本稿で用いる主な記号は表\ref{tab:notation}にまとめる。特に、\,\textbf{情報利得}の構成は式\eqref{eq:ignorm_main}、\,\textbf{正規化エントロピー差}は式\eqref{eq:dh_norm}を参照されたい。詳細は §\ref{sec:gauge_theory}（統合指標 $\F$ の定義）に記す。
+
+\subsection*{短式と符号規約（要約）}
+本稿の既定の短式と符号は次の通りである（§\ref{sec:gauge_theory} の詳細を参照）。\\
+\noindent\textbf{短式}：$\displaystyle \F\;=\;\gednorm\; -\; \lambda\,\bigl(\Delta H_{\mathrm{norm}} + \gamma\,\Delta\mathrm{SP}_{\mathrm{rel}}\bigr)$。\\
+\noindent\textbf{符号規約}：$\Delta H_{\rm norm}{=}(H_{\rm after}{-}H_{\rm before})/\log K$（秩序化=低下で \emph{負}）、$\;\Delta\mathrm{SP}_{\rm rel}{=}(L_{\rm before}{-}L_{\rm after})/\max\{L_{\rm before},\varepsilon\}$（短縮で \emph{正}）。$\F$ は\,\textbf{小さいほど良い}（構造コストが低く、情報整理が進むほど小）。
+
 \subsection*{研究課題と仮説}
 \begin{itemize}[leftmargin=1.4em]
   \item \textbf{RQ1（同時制御）}: 単一ゲージ $\F$ と二段ゲート（AG/DG）で、探索（幅/深さ/バックトラック）と統合（受容/棄却/保留）および記憶操作（エビクション）を\emph{同時}に安定制御できるか。
   \item \textbf{RQ2（弁別）}: AG/DG により、\emph{真の洞察}（橋=短絡）と\emph{擬似洞察}（誤誘導/微小改善）を弁別できるか（汚染率$\downarrow$、pending$\to$confirmed 率$\uparrow$）。
   \item \textbf{RQ3（運用的整合）}: $\Delta\mathrm{IG}$（$=\,\Delta H_{\mathrm{norm}}+\gamma\,\Delta\mathrm{SP}_{\mathrm{rel}}$）と $\Delta\mathrm{MDL}$ の比例が、提示した仮定の下で実運用上の近似として\emph{一貫}して機能するか。
 \end{itemize}
+
+\paragraph{PSZ/SLO の定義と集計} 本稿の SLO として \textbf{PSZ（Perfect Scaling Zone）} を用いる。\\
+\noindent 目標は3指標の同時充足である：
+\begin{equation}
+  \mathrm{Acc}\;\ge 0.95,\quad \mathrm{FMR}\;\le 0.02,\quad P50_{\Delta \mathrm{lat}}\;\le \SI{200}{ms} \label{eq:psz_targets}
+\end{equation}
+ここで $P50_{\Delta \mathrm{lat}}$ は\,\emph{追加レイテンシ}の中央値（第2四分位）。各指標はスライディング窓幅 $W$（既定 \,$W{=}100$ クエリ）で算出し、分位は実測に基づく。\\
+\noindent \textbf{短欠の定義}. 3軸の目標違反度を無次元化して重ね合わせた短欠 $s_{\mathrm{PSZ}}$ を
+\begin{equation}
+  s_{\mathrm{PSZ}}\;=\;\max(0,\,0.95{-}\mathrm{Acc})\; +\; \max(0,\,\mathrm{FMR}{-}0.02)\; +\; \max\!\bigl(0,\,\tfrac{P50_{\Delta \mathrm{lat}}{-}\SI{200}{ms}}{\SI{200}{ms}}\bigr) \label{eq:psz_deficit}
+\end{equation}
+と定め、$s_{\mathrm{PSZ}}{=}0$ を達成境界とする（重みは等重み；運用要件に応じ変更可）。
 
 \noindent 成功基準の例: PSZ（受容$\ge$95\%, FMR$\le$2\%, 追加P50$\le$\SI{200}{ms}）準拠の操作点、迷路におけるステップ/冗長枝$\downarrow$、RAG における汚染率$\downarrow$・pending$\to$confirmed$\uparrow$。
 
@@ -164,7 +185,7 @@ Phase~1 は、RAG における\,\textbf{クエリ中心の評価と制御}を通
   \label{tab:static_dynamic_responsibility}
 \end{table}
 
-\experimNote{本表の代表値（平均/標準誤差）と seed 数（例: $n{=}16$ など）を確定反映すること。}
+
 
 \subsection{理論前提}\label{sec:graph_model_premise}
 \begin{table}[H]
@@ -2790,6 +2811,15 @@ Phase 1/2 は、覚醒/睡眠・海馬リプレイと\,\textbf{構造的に類�
   \item[MDL] Minimum Description Length（最小記述長）
   \item[RAG] Retrieval-Augmented Generation
 \end{description}
+
+\section{妥当性の脅威（Threats to Validity）}
+\label{sec:threats}
+\noindent 本研究の妥当性に対する主な脅威を整理する。\\
+\textbf{内的妥当性}. equal\,\mbox{-}resources を維持して比較したが、採点器・埋め込み器・プロンプト設計への依存は残る。閾値分位（AG/DG）の burn\,\mbox{-}in や滑動窓 $W$ の選択は発火率に影響しうるため、付録に感度分析を別掲する。\\
+\textbf{外的妥当性}. 迷路→RAG の写像は抽象原理のレベルで整合する一方、語彙/ドメイン差や知識分布の偏りにより効果が変動しうる。PSZ は運用 SLO であり、データ/環境を跨いだ到達保証ではない。\\
+\textbf{スケール}. 端点SSSP/増分BFS/距離キャッシュにより計算量を抑制したが、グラフ規模・密度に対する上限は残る。Phase~2 の大域再配線は設計段階であり、スケール検証は今後の課題である。\\
+\textbf{埋め込み依存}. $\Delta H$ の安定推定には埋め込み空間 $\Phi$ の性質（A1--A3）が効く。エンコーダ変更時は近傍保持率やノルム整合の診断を推奨する。\\
+\textbf{seed感度}. 本文では平均と分位（P50/P95）を報告したが、seed 間分散や CI も併記すべきである。代表表には SE/95\%CI を今後追記する。
 
 \bibliographystyle{plain}
 \bibliography{references}

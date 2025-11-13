@@ -242,6 +242,9 @@ experiments/rag-dynamic-db-v3-lite/external/graphrag/
 experiments/**/visualization/**
 results/**
 
+# Local Matplotlib cache (avoid top-level cache dir)
+mpl/
+
 
 # Migration and cleanup files
 prepare_push.sh
