@@ -52,6 +52,10 @@ Formal specification and theory background
 - Paper v5 (JA): `docs/paper/geDIG_onegauge_improved_v5.pdf`
 - Paper v4 (EN): `docs/paper/geDIG_onegauge_improved_v4_en.pdf`
 
+### 🗂️ Appendix (Long‑Term Notes)
+Exploratory notes on AGI foundations and governance
+- [Appendix README](./appendix/README.md) - Entry point to AGI/governance notes
+
 ### 🖼️ [Images](./images/)
 Documentation images and animations
 - [Animations](./images/animations/) - Animated demonstrations
