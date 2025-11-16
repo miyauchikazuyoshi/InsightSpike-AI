@@ -52,7 +52,8 @@ The system is designed for three main domains:
 The core insights can be summarized as:
 
 1. **Blockchain ≠ speculative asset.** Its natural role is a public registry of facts and commitments.  
-2. **Ownership and safety are not in conflict.** Well‑designed economic mechanisms can make safety profitable.  
+2. **Ownership and safety are not in conflict.** When resale, royalties, and revocation are wired into the same
+   infrastructure, safety becomes part of the same feedback loop that sustains creators economically.  
 3. **Neither pure centralization nor pure decentralization is viable.** A carefully governed semi‑decentralized layer is the practical optimum.
 
 ---
@@ -288,6 +289,14 @@ To ensure that safety mechanisms **do not** undermine legitimate economic activi
   - Makers earn more when artifacts are widely reused **within safe constraints**.  
   - Users benefit from genuine ownership (ability to resell/gift) rather than perpetual rent.
 
+In this design, **safety is not an external tax** imposed on the system; it is a byproduct of how value flows:
+
+- Dangerous capabilities require higher assurance and clearer provenance, which justifies slightly higher fees
+  and stricter gating.  
+- Benign capabilities flow with minimal friction, but still benefit from provenance and resale support.  
+- Makers and platforms gain financially when they keep artifacts inside the “safe reuse” region; pushing
+  artifacts into obviously abusive territory risks revocation and loss of revenue.
+
 ### 9. Compatibility with Existing Ecosystems
 
 - The model is intended to wrap, not replace, existing code hosting and package ecosystems (git, npm, PyPI, model hubs).  
@@ -400,9 +409,3 @@ The ultimate goal is not a proprietary product, but a **public infrastructure bl
 - Respects makers’ sovereignty and users’ rights.  
 - Tames the worst risks of AI and OSS capability externalization.  
 - Reclaims blockchain and cryptographic infrastructure as instruments of civic order, not speculation.
-
----
-
-_This English markdown is intentionally concise; for full detail and nuances,  
-refer to the original Japanese PDF (`maker_sovereignty_full_proposal (1).pdf`)._
-
