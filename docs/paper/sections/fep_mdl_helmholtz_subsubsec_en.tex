@@ -1,0 +1,36 @@
+% FEP–MDL bridge → Helmholtz mapping (in‑chapter subsubsection; exploratory)
+
+\subsubsection{From the FEP–MDL Bridge to Helmholtz Free Energy and “Knowledge Phase Transitions” (Exploratory Note)}
+\label{sec:fep_mdl_helmholtz_en}
+
+\paragraph{Scope and caveats}
+This is an exploratory note that re‑reads geDIG and the FEP–MDL bridge in the vocabulary of free energy. It is not a formal equivalence or a proof; the goal is to summarize structural correspondences and their implications succinctly. The paper’s main claims and experiments do not depend on this subsection.
+
+\paragraph{Objective (normalized notation)}
+With the paper’s notation, the geDIG objective can be written as
+\begin{equation}
+  F \;=\; \gednorm \; - \; \lambda\,\Bigl(\ignorm \; + \; \gamma\,\Delta\mathrm{SP}_{\mathrm{rel}}\Bigr),
+  \qquad (\lambda{>}0,\;\gamma{\ge}0),
+  \label{eq:gedig_obj_bridge_en}
+\end{equation}
+where $\gednorm$ denotes the normalized edit‑path cost, $\ignorm$ is \emph{treated here} as the normalized entropy decrease ($\Delta H_{\rm norm}$), and $\Delta\mathrm{SP}_{\mathrm{rel}}$ is the relative shortest‑path gain. Note: elsewhere in the paper we sometimes aggregate $\ignorm{=}\Delta H_{\rm norm}{+}\gamma\,\Delta\mathrm{SP}_{\rm rel}$. In this mapping we absorb the SP term into the structural side to avoid double‑counting; this is a bookkeeping choice, not a change of substance.
+
+\paragraph{Helmholtz mapping}
+Let $\eta{:=}\lambda\gamma$ and absorb SP on the structural side to avoid double‑counting. Then
+\begin{equation}
+  F \;=\; \underbrace{\Bigl(\gednorm \; - \; \eta\,\Delta\mathrm{SP}_{\mathrm{rel}}\Bigr)}_{U_{\mathrm{struct}}}
+      \; - \; \underbrace{\lambda}_{T_{\mathrm{eff}}}\,\underbrace{\ignorm}_{S_{\mathrm{info}}},
+  \label{eq:gedig_helmholtz_map_en}
+\end{equation}
+which is \emph{formally isomorphic} to $F_{\mathrm{Helmholtz}}{=}U{-}TS$. Here, $U_{\mathrm{struct}}$ is a structural energy, $S_{\mathrm{info}}$ an informational entropy, and $T_{\mathrm{eff}}{=}\lambda$ an effective temperature. This is a convenient correspondence for reading geDIG as a free‑energy minimization, not a physical identity claim.
+
+\paragraph{Energy landscape and “knowledge phase transitions”}
+Let the knowledge state be a graph $G$ and define
+\begin{equation}
+  F(G) \;=\; \gednorm(G) \; - \; \lambda\,\ignorm(G) \; - \; \eta\,\Delta\mathrm{SP}_{\mathrm{rel}}(G).
+  \label{eq:gedig_energy_landscape_en}
+\end{equation}
+As $(\lambda,\eta)$ (and representation capacity or data distribution) vary continuously, local minima $G^\star$ may swap discontinuously or exhibit singular curvature—an analogy to phase transitions. Examples include: (i) \emph{concept formation/splitting} as $\lambda$ increases; (ii) \emph{schema reorganization} with hub/subgraph replacement; (iii) \emph{insightful rewiring} where a surge in $\Delta\mathrm{SP}_{\mathrm{rel}}$ outweighs $\gednorm$; (iv) \emph{policy regime shifts} from exploration to shortcut‑heavy modes.
+
+\paragraph{Limitations and outlook}
+Rigorous phase diagrams (discontinuity/criticality) and micro–macro bridges (from local edits to macroscopic order parameters) are open problems. Nonetheless, reading geDIG as a single scalar $F$ over \emph{structure–information–reachability} provides a useful lens and a starting point for theoretical extensions and empirical phase‑diagram studies.

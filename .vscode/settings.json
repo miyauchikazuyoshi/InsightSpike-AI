@@ -1,0 +1,56 @@
+{
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        ".",
+        "-p",
+        "*test.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true,
+    "chat.sendElementsToChat.attachCSS": true,
+    "chat.sendElementsToChat.attachImages": true,
+    "chat.sendElementsToChat.enabled": true,
+    
+    "github.copilot.chat.defaultSystemMessage": "学術的で客観的な分析を提供してください。以下の原則に従ってください：\n\n1. **学術的表現**: 事実に基づく客観的な記述を使用\n2. **反証の考慮**: 仮説に対する反証可能性や限界を明示\n3. **検証可能性**: 主張には根拠やデータを併記\n4. **批判的思考**: 複数の視点や代替説明を検討\n5. **修飾語の抑制**: 「完全」「完璧」「素晴らしい」等の主観的表現を避ける\n6. **不確実性の明示**: 推定や仮定がある場合は明確に表記\n7. **再現性**: 他者が検証可能な形での説明\n\n例：\n❌ \"この手法は完璧に動作します！\"\n✅ \"この手法は対象データセットで精度X%を達成しましたが、異なるドメインでの汎化性能は検証が必要です。\"\n\n❌ \"絶対に正しい実装です\"\n✅ \"実装は仕様に準拠していますが、エッジケースでの動作は追加テストで確認する必要があります。\"",
+    
+    "github.copilot.advanced": {
+        "length": "long",
+        "temperature": 0.1
+    },
+    
+    "github.copilot.chat.localeOverride": "ja",
+    "github.copilot.enable": {
+        "*": true,
+        "markdown": true,
+        "python": true
+    },
+    "github.copilot.chat.welcomeMessage": "disable",
+    "git.ignoreLimitWarning": true,
+    
+    // Performance: reduce VS Code resource usage on large repos
+    "git.autofetch": false,
+    "search.exclude": {
+        "**/.git": true,
+        "**/.venv": true,
+        "**/.venv*/**": true,
+        "**/__pycache__/**": true,
+        "logs/**": true,
+        "results/**": true,
+        "data/**": true,
+        "test_results/**": true
+    },
+    "files.watcherExclude": {
+        "**/.git/**": true,
+        "**/.venv/**": true,
+        "**/.venv*/**": true,
+        "**/__pycache__/**": true,
+        "logs/**": true,
+        "results/**": true,
+        "data/**": true,
+        "test_results/**": true
+    },
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.indexing": false,
+    "chatgpt.openOnStartup": false
+}

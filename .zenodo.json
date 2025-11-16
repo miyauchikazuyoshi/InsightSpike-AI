@@ -1,0 +1,18 @@
+{
+  "title": "InsightSpike-AI: Brain-Inspired Multi-Agent Architecture for Insight Detection and Knowledge Restructuring",
+  "upload_type": "publication",
+  "publication_type": "article",
+  "description": "Release package for geDIG v4 paper (JA/EN PDFs) and lightweight reproduction scripts.",
+  "creators": [
+    { "name": "Miyauchi, Kazuyoshi", "affiliation": "InsightSpike-AI", "orcid": "0000-0000-0000-0000" }
+  ],
+  "keywords": ["geDIG", "knowledge graphs", "free energy", "insight detection", "RAG"],
+  "language": "eng",
+  "related_identifiers": [
+    { "relation": "isSupplementTo", "identifier": "https://github.com/miyauchikazuyoshi/InsightSpike-AI" }
+  ],
+  "access_right": "open",
+  "license": "Apache-2.0",
+  "notes": "Set via GitHub–Zenodo integration. Update metadata and ORCID before publishing."
+}
+

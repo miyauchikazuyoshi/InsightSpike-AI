@@ -1,1 +1,0 @@
-# Insight alignment tooling package

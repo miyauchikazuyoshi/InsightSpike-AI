@@ -1,117 +1,64 @@
-# geDIG (Generalized Differential Information Gain) Specification
+# geDIG (Generalized Differential Information Gain) — v4 One‑Gauge Spec
 
-## 正準定義 (Canonical Definition)
+このドキュメントは、論文 v4（One‑Gauge + 二段ゲート）および実装の現行仕様に整合する正準定義を示します。
 
-### 基本式
+## 正準ゲージ定義（論文 v4）
+
+- 記号対応
+  - ΔEPC_norm: 正規化済み編集パスコスト（構造コスト）。実装の `ged_norm_scheme` で規定。
+  - ΔH_norm: 固定分母（log K）でのエントロピー差（after − before）。
+  - ΔSP_rel: 相対最短路ゲイン（(L_before − L_after)/L_before）。
+  - λ: 情報温度（`lambda_weight`）。
+  - γ: SPゲイン重み（`sp_beta`）。
+
+- ゲージ（F）
 ```
-geDIG = GED - IG
-```
-
-- **GED (Generalized Edit Distance)**: グラフ編集距離の一般化
-- **IG (Information Gain)**: 情報利得
-
-### 詳細計算式
-
-#### GED計算
-```python
-GED = spatial_distance * 0.3 + 
-      temporal_distance * 0.3 + 
-      type_difference * 0.2 + 
-      outcome_difference * 0.2
+F = ΔEPC_norm − λ ( ΔH_norm + γ · ΔSP_rel )
 ```
 
-**各項の定義:**
-- `spatial_distance`: マンハッタン距離 / (height + width)
-- `temporal_distance`: |idx1 - idx2| / max(100, total_episodes)
-- `type_difference`: 0.3 if type1 != type2 else 0
-- `outcome_difference`: 0.2 if success1 != success2 else 0
+### 正規化と分母
+- ΔH_norm は `log K` で正規化（K は after の候補数）。K < 2 の場合は ε でガード。
+- ΔEPC_norm は上界で割る近似。論文プリセットでは `ged_norm_scheme = "candidate_base"` を既定（候補集合サイズに基づく上界）。
 
-#### IG計算
-```python
-IG = similarity * 0.5
+### 二段ゲート（AG/DG）
+- 0-hop: `g0 = ΔEPC_norm − λ·ΔH_norm`
+- multi-hop: `gmin = min_h { ΔEPC_norm − λ(ΔH_norm + γ·ΔSP_rel^(h)) }`
+- 受理規則（例）: AG が高い新規性を示し、かつ `min{g0, gmin} ≤ θ_DG` のとき採択。閾値は設定依存。
+
+## 実装マッピング（主要パラメータ）
+- `src/insightspike/algorithms/gedig_core.py`
+  - γ: `sp_beta`
+  - λ: `lambda_weight`
+  - ΔH_norm: `delta_h_norm`（after−before で負が秩序化）
+  - ΔSP_rel: `delta_sp_rel`
+  - 正規化戦略: `ig_norm_strategy`, `ged_norm_scheme`
+- `src/insightspike/implementations/layers/layer3_graph_reasoner.py`
+  - 合成IG: `_ig_norm = ΔH_norm + sp_beta * ΔSP_rel`
+  - プリセット適用（paper向け）: scope=`union`, eval=`fixed_before_pairs`
+- `src/insightspike/config/presets.py` の `paper()`
+  - `graph.sp_scope_mode = "union"`
+  - `graph.sp_eval_mode = "fixed_before_pairs"`
+  - `graph.ged_norm_scheme = "candidate_base"`
+  - `graph.ig_source_mode = "linkset"`
+  - `graph.lambda_weight = 1.0`, `graph.sp_beta = 1.0`
+  - `metrics.ig_denominator = "fixed_kstar"`, `metrics.use_local_normalization = True`
+
+## 関連アルゴリズム
+- 情報利得（ΔH）: `src/insightspike/algorithms/information_gain.py`
+- 構造コスト/改善: `src/insightspike/algorithms/graph_structure_analyzer.py`
+- ゲージ中核: `src/insightspike/algorithms/gedig_core.py`
+
+## PSZ 指標（動的 RAG）
+- 受理率/偽受理/レイテンシを集約: `src/insightspike/metrics/psz.py`
+
+## 互換ノート
+- 旧式スパイク検出（ΔGED/ΔIGしきい値）はレガシー互換のため残置: `src/insightspike/detection/eureka_spike.py`
+
+## 付録: 旧・教育用の簡易式（非推奨）
 ```
-
-- `similarity`: コサイン類似度 [0, 1]
-
-### 値域と解釈
-- **geDIG < 0**: 高い情報利得（IG > GED）→ 良好な学習
-- **geDIG = 0**: 編集距離と情報利得が均衡
-- **geDIG > 0**: 編集距離が大きい → 構造的な差異
-
-## ハイパーパラメータ
-
-| パラメータ名 | 記号 | 既定値 | 範囲 | 意味 |
-|------------|------|--------|------|------|
-| gedig_threshold | τ_gedig | 0.6 | [0.0, 1.0] | エッジ生成閾値 |
-| gedig_weight | w_gedig | 0.3 | [0.0, 1.0] | 評価時の重み |
-| spatial_weight | w_s | 0.3 | [0.0, 1.0] | 空間距離の重み |
-| temporal_weight | w_t | 0.3 | [0.0, 1.0] | 時間距離の重み |
-| type_weight | w_type | 0.2 | [0.0, 1.0] | タイプ差の重み |
-| outcome_weight | w_out | 0.2 | [0.0, 1.0] | 成果差の重み |
-| ig_factor | α_ig | 0.5 | [0.0, 1.0] | 情報利得の係数 |
-
-## 使用コンテキスト
-
-### 1. グラフエッジ生成時
-```python
-if gedig_value < gedig_threshold:
-    # エッジを生成
-    create_edge(node1, node2, weight=similarity, gedig=gedig_value)
+geDIG ≈ GED − IG
 ```
-
-### 2. エピソード評価時
-```python
-info_value = similarity - gedig_value
-# info_value > 0 なら価値のある関連
-```
-
-### 3. メッセージパッシング時
-```python
-propagation_weight = (1.0 - min(gedig, 1.0)) * decay_factor
-# geDIG値が低い（良い）ほど伝播が強い
-```
-
-### 4. 深度選択時
-```python
-if recent_gedig < -0.3:
-    depth = 5  # 深い推論
-elif recent_gedig < 0:
-    depth = 4
-elif recent_gedig < 0.3:
-    depth = 3
-elif recent_gedig < 0.5:
-    depth = 2
-else:
-    depth = 1  # 浅い推論
-```
-
-## スパイク検出での役割
-
-geDIG自体はスパイク検出の直接的な指標ではないが、グラフ構造の質を示す補助指標として使用される：
-
-- **良好な学習状態**: 平均geDIG < 0
-- **構造的な変化**: geDIG値の急激な変動
-- **収束の兆候**: geDIG値の安定化
-
-## 実装参照
-
-### メインコード
-- `/src/insightspike/implementations/layers/scalable_graph_builder.py`: _calculate_gedig()メソッド
-- `/experiments/pure-movement-episodic-memory/src/pure_memory_agent_optimized.py`: 迷路実験での実装
-
-### 評価での使用
-- エピソード間の関連性評価
-- グラフ構造の最適化
-- 検索深度の適応的調整
-
-## 注意事項
-
-1. **正規化の重要性**: 各距離項は必ず[0, 1]に正規化すること
-2. **重みの合計**: GEDの重み合計は1.0を維持
-3. **類似度の計算**: コサイン類似度を使用（ユークリッド距離ではない）
-4. **temporal_distanceの分母**: エピソード数が少ない初期は100を最小値として使用
+学習用途の近似式。実装/論文 v4 の正式ゲージとは異なるため、新規コードや評価では本ドキュメント冒頭の定義を使用してください。
 
 ## 更新履歴
-
-- 2025-08-08: 初版作成
-- 基準実装: pure_memory_agent_optimized.py (11x11迷路で60-80%成功率達成)
+- 2025-11-14: v4（One‑Gauge）に整合するよう全面更新。実装マッピングを追記。

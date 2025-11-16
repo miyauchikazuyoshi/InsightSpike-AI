@@ -1,274 +1,41 @@
-# ================================================================
-# InsightSpike-AI .gitignore (2025-09 Cleaned)
-# ================================================================
-
-# -------------------- Python & Development --------------------
-# Python cache and compiled files
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
 
-# Virtual environments (ALL variants)
+# Local envs
 .venv/
-.venv*/
-venv/
+.venv311/
+.venv_pdf/
 env/
-ENV/
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+# Logs and results
+logs/
+results/
+tmp/
+test_results/
+nohup.out
+None
 
-# Testing and coverage
-.pytest_cache/
-.coverage
-.coverage.*
-htmlcov/
-.tox/
-.nox/
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-
-# Code quality tools
-.ruff_cache/
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# -------------------- IDEs & Editors --------------------
-.vscode/
-.idea/
-.claude/
-*.swp
-*.swo
-*~
-
-# -------------------- OS-specific --------------------
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# -------------------- Frontend vendor & temp --------------------
-# Node package cache (not needed in repo)
+# Node / frontend
 node_modules/
 
-# Top-level temp workspace and one-off scripts
-tmp/
-tmp_*.js
-
-# -------------------- Environment & Secrets --------------------
-.env
-.env.*
-.secrets*
-.python-version
-
-# -------------------- InsightSpike Specific --------------------
-
-# Temporary and debug files
-logs/
-collect*.txt
-diag*.txt
-debug*.txt
-*.log
-*.tmp
-*.backup
-
-# Runtime artifacts
-pytest_*.xml
-importtime.log
-run_*.log
-tmp_*.log
-
-# Data directories (runtime generated)
-data/temp/
-data/cache/*
-!data/cache/.gitkeep
-data/logs/*
-!data/logs/.gitkeep
-data/models/*
-!data/models/.gitkeep
-data/embedding/*
-!data/embedding/.gitkeep
-data/index.faiss*
-
-# Experimental data (large files)
-data/*_experimental*
-data/*_test*
-data/*_debug*
-*_large.json
-*_detailed.json
-
-# Preserve important data files
-!data/insight_facts.db
-!data/unknown_learning.db
-!data/raw/test_sentences.txt
-!data/raw/indirect_knowledge.txt
-!data/processed/test_questions.json
-
-# -------------------- Experiments --------------------
-
-# Experiment outputs (generated)
-experiments/**/data_snapshots/**
-experiments/**/results/**
-experiments/**/outputs/**
-experiments/**/figures/**
-experiments/data_backups/**
-experiments_backup*/
-
-# Large experiment files
-experiments/*/data/**/*.arrow
-experiments/*/data/**/*GB*
-experiments/*/data/**/*_large*
-experiments/*/full_graphs/
-experiments/*/temp_graphs/
-
-# Preserve important experiment files (keep configs/docs only)
-!experiments/**/config.json
-!experiments/**/README.md
-
-# -------------------- Documentation --------------------
-
-# Generated reports and completion docs
-docs/reports/
-docs/archive/
-*_COMPLETION*.md
-*_REPORT*.md
-*COMPLETION_REPORT.md
-PROJECT_RESTRUCTURE*.md
-CLEANUP_PLAN.md
-PUSH_PREPARATION*.md
-OSS_PUBLICATION*.md
-
-# LaTeX build artifacts (root and docs)
+# LaTeX build artifacts
 *.aux
-*.fls
-*.fdb_latexmk
-*.xdv
+*.log
 *.out
+*.fdb_latexmk
+*.fls
+*.xdv
+texput.*
 
-# Archive directories
+# Experiment caches and models
+experiments/**/__pycache__/
+experiments/**/cache/
+experiments/**/results/
+experiments/**/data_snapshots/
+
+# Archived content (code/docs/experiments)
 archive/
-archive*/
-*_archive/
-legacy*/
-deprecated*/
 
-# -------------------- Build & CI --------------------
-
-# Build artifacts
-*.egg-info/
-build/
-dist/
-
-# Test results
-test_results_*.json
-validation_results/
-
-# -------------------- Jupyter & Notebooks --------------------
-
-# Jupyter Notebook checkpoints
-.ipynb_checkpoints
-
-# Experimental notebooks only
-notebooks/*_Debug*.ipynb
-notebooks/*_Test*.ipynb
-notebooks/*_Experiment*.ipynb
-
-# Preserve production notebooks
-!notebooks/Colab_Dependency_Investigation.ipynb
-!notebooks/InsightSpike_Bypass_Notebook.ipynb
-!notebooks/README.md
-
-# -------------------- Scripts & Tools --------------------
-
-# Low-priority/demo scripts
-scripts/archive/
-scripts/demo_*.py
-scripts/visualize_*.py
-scripts/create_*_gif*.py
-scripts/*.bak.*
-
-# Generated script data
-scripts/data/
-
-# -------------------- Legacy & Cleanup --------------------
-
-# Legacy config files
-# Makefile (track changes for reproducible builds)
-setup.py
-
-# Backup files
-*.bak
-*.bak.*
-*.bak.20*
-*_old_backup/
-
-# -------------------- Additional ignores (tidy-up) --------------------
-# LaTeX extra artifacts
-*.synctex.gz
-*.blg
-*.bbl
-# Limit PDFs ignore to paper builds
-docs/paper/*.pdf
-
-# Embedded external repos (avoid nested git)
-experiments/rag-dynamic-db-v3-lite/external/graphrag/
-
-# Experiment visualizations and top-level results (generated)
-experiments/**/visualization/**
-results/**
-
-# Local Matplotlib cache (avoid top-level cache dir)
-mpl/
-
-
-# Migration and cleanup files
-prepare_push.sh
-run_tests.sh
-PUSH_CHECKLIST.md
-
-# Work-in-progress files
-test_normalization_fix.py
-config_fixed.yaml
-
-# -------------------- Claude & Internal Development --------------------
-
-# Claude-specific local files
-CLAUDE.md
-
-# Internal development documentation (exclude from public repo)
-docs/development/
-docs/research/
-docs/images/*.zip
-
-# Preserve important public docs
-!docs/development/PUBLIC_API_CHANGE_PROCESS.md
-!docs/development/PUBLIC_API_SURFACE_2025_09.md
-
-# ================================================================
-# End of .gitignore
-# ================================================================
+# Misc
+.coverage
+.DS_Store

@@ -254,6 +254,14 @@ paper-ja:
 	cd docs/paper && xelatex -interaction=nonstopmode geDIG_onegauge_improved_v4.tex >/dev/null || true && \
 	  xelatex -interaction=nonstopmode geDIG_onegauge_improved_v4.tex >/dev/null || true
 
+# Latexmk variants (with BibTeX)
+.PHONY: paper-en-bib paper-ja-bib
+paper-en-bib:
+	cd docs/paper && latexmk -xelatex -bibtex -file-line-error -interaction=nonstopmode geDIG_onegauge_improved_v4_en.tex && latexmk -c
+
+paper-ja-bib:
+	cd docs/paper && latexmk -xelatex -bibtex -file-line-error -interaction=nonstopmode geDIG_onegauge_improved_v4.tex && latexmk -c
+
 # End-to-end: run paper, sweep PSZ, export assets, and compile PDFs
 exp23-all: exp23-paper exp23-psz-sweep exp23-export-figs exp23-export-tables paper-en paper-ja
 

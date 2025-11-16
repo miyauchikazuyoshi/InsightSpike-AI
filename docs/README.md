@@ -34,54 +34,23 @@ Understanding InsightSpike's design
 - [MainAgent Behavior](./architecture/mainagent_behavior.md) - Core agent behavior
 - [Multi-User Design](./architecture/multi_user_design.md) - Multi-user considerations
 
-### 🔬 [Research](./research/)
-Academic and theoretical foundations
-- [README](./research/README.md) - Research overview
-- [Dynamic RAG Advantages](./research/DYNAMIC_RAG_ADVANTAGES.md) - Benefits over traditional RAG
-- [Human Thinking Comparison](./research/HUMAN_THINKING_COMPARISON.md) - Cognitive parallels
-- [GeDIG Computing Revolution](./research/gedig_computing_revolution.md) - Core innovation
-- [Human-like Sequential Patterns](./research/human_like_sequential_patterns.md) - Sequential processing
-- [Insight vs Understanding](./research/insight_vs_understanding.md) - Key distinctions
-- [InsightSpike as GNN Transformer](./research/insightspike_as_gnn_transformer.md) - Technical perspective
-- [Transformer as Micro-GeDIG](./research/transformer_as_micro_gedig.md) - Theoretical connections
-- [Academic Experiments Roadmap](./research/academic_experiments_roadmap.md) - Research directions
-
-### 🛠️ [Development](./development/)
-Development plans and technical proposals
-- [Various development plans and proposals](./development/) - Active development documentation
-- [Done](./development/done/) - Completed development tasks
-
-### 📊 [Experiment Design](./experiment_design/)
-Experiment documentation and results
-- [Mathematical Experiments](./experiment_design/mathematical_experiments_design.md)
-- [Natural Language Experiments](./experiment_design/natural_language_experiments_design.md)
-- [Cross-Domain Experiments](./experiment_design/cross_domain_experiments_design.md)
+### 🧪 Experiments & Reproduction
+Entry points for reproducing the paper experiments
+- [Experiment Index](./EXPERIMENTS.md) - Where to find Maze / RAG experiments
+- [Maze Navigation Spec](./MAZE_NAV_SPEC.md) - Maze environment and agent spec
+- [Maze Metrics HOWTO](./HOWTO_maze_metrics.md) - How we compute maze metrics
+- [Phase‑1 Overview](./phase1.md) - Phase‑1 (online) experiment design summary
 
 ### 📈 [Diagrams](./diagrams/)
 Visual representations of system architecture
 - [README](./diagrams/README.md) - Available diagrams
 - Various system diagrams in PNG format
 
-### 🎭 [Demos](./demos/)
-Demonstration materials
-- Animation GIFs showing InsightSpike in action
-- Demo scripts and examples
-
-### 🔄 [Migration](./migration/)
-Upgrade and migration guides
-- [Migration Guide](./migration/MIGRATION_GUIDE.md) - Upgrading between versions
-
-### 🔍 [Technical Analysis](./technical-analysis/)
-In-depth technical analyses
-- [Configuration Analysis](./technical-analysis/configuration_analysis.md) - Config system deep dive
-
-### 📝 [Implementation Notes](./implementation_notes/)
-Technical implementation details
-- [README](./implementation_notes/README.md) - Implementation notes overview
-
-### 📊 [Reports](./reports/)
-Generated reports and analyses
-- (Directory for output reports)
+### 📄 Paper & Theory
+Formal specification and theory background
+- [geDIG Spec](./gedig_spec.md) - High‑level spec of the gauge
+- Paper v5 (JA): `docs/paper/geDIG_onegauge_improved_v5.pdf`
+- Paper v4 (EN): `docs/paper/geDIG_onegauge_improved_v4_en.pdf`
 
 ### 🖼️ [Images](./images/)
 Documentation images and animations
@@ -107,8 +76,9 @@ When contributing documentation:
 ## 🔗 Quick Links
 
 - [Main README](../README.md) - Project overview
-- [Contributing Guide](../CONTRIBUTING.md) - How to contribute
-- [License](../LICENSE) - License information
+- [Contributing Guide](./CONTRIBUTING.md) - How to contribute
+- [Code of Conduct](./CODE_OF_CONDUCT.md) - Community guidelines
+- [License](./LICENSE) - License information
 
 ---
 

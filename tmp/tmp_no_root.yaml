@@ -1,4 +1,0 @@
-environment: development
-pre_warm_models: false
-paths:
-  data_dir: data

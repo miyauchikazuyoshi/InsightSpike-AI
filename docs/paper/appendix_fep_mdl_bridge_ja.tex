@@ -1,0 +1,56 @@
+% 付録X：FEP–MDLブリッジからヘルムホルツ自由エネルギーと「知識の相転移」へ（探索的ノート）
+% この付録は探索的な位置づけであり、本文の主張や実験の妥当性は本付録に依存しない。
+
+\section*{付録X：FEP–MDLブリッジからヘルムホルツ自由エネルギーと「知識の相転移」へ（探索的ノート）}
+
+\subsection*{X.1 範囲と注意事項}
+本付録は、本文で導入した geDIG の目的関数と FEP–MDL ブリッジを、統計力学におけるヘルムホルツ自由エネルギーとの\,\emph{形式的同型性}の観点から再解釈し、そこから導かれる\textbf{「知識の相転移」}に関する仮説的な見方を述べる。以下は定理や証明ではなく、\,\emph{形の類似と構造対応}に基づく探索的示唆である。\;また「相転移」は物理学の狭義の概念ではなく、\,\emph{自由エネルギー地形の急激な再編成}としての一般化を含む。
+
+\subsection*{X.2 geDIG の目的関数と FEP–MDL ブリッジの復習}
+本文の geDIG は、構造コストと情報・到達性の利得のトレードオフを単一ゲージで表す：
+\begin{equation}\label{eq:gedig_objective}\tag{X.1}
+  F \,=\, \Delta \mathrm{EPC} \, - \, \lambda\,\bigl(\Delta H + \gamma\,\Delta\mathrm{SP}\bigr).
+\end{equation}
+ここで $\Delta\mathrm{EPC}$ は剪定・圧縮・再配線に伴う構造コスト増分，$\Delta H$ はエントロピー差（予測不確実性の減少や区別の獲得）,$\Delta\mathrm{SP}$ は到達性・経路効率の改善，$\lambda{>}0,\,\gamma{\ge}0$ は係数である。係数をまとめ直せば
+\begin{equation}\label{eq:gedig_objective_eta}\tag{X.2}
+  F \,=\, \Delta \mathrm{EPC} \, - \, \lambda\,\Delta H \, - \, \eta\,\Delta\mathrm{SP},\qquad \eta := \lambda\,\gamma.
+\end{equation}
+この読み替えは、FEP/MDL における「複雑さ/正則化」（構造側）と「精度/情報利得」（情報側）の分離に対応する。
+
+\subsection*{X.3 SP を構造項に含めたヘルムホルツ自由エネルギーとの同型写像}
+統計力学のヘルムホルツ自由エネルギーは
+\begin{equation}\label{eq:helmholtz}\tag{X.3}
+  F_{\mathrm{Helmholtz}} \,=\, U \, - \, T\,S
+\end{equation}
+で定義される。\;geDIG の式\,(\ref{eq:gedig_objective_eta}) を
+\begin{equation}\label{eq:gedig_helmholtz_map}\tag{X.4}
+  F \,=\, \underbrace{\bigl(\Delta\mathrm{EPC} - \eta\,\Delta\mathrm{SP}\bigr)}_{\displaystyle U_{\mathrm{struct}}}\; -\; \underbrace{\lambda}_{\displaystyle T_{\mathrm{eff}}}\;\underbrace{\Delta H}_{\displaystyle S_{\mathrm{info}}}
+\end{equation}
+と書くと，形式的に $F_{\mathrm{Helmholtz}}{=}U{-}TS$ と同型になる。ここで $U_{\mathrm{struct}}$ は\,\emph{構造エネルギー}（SPをエネルギー側に含める），$S_{\mathrm{info}}$ は\,\emph{情報エントロピー}，$T_{\mathrm{eff}}{=}\lambda$ は\,\emph{有効温度}と解釈できる。\;この写像は geDIG が物理的な熱力学系を記述するという主張ではなく，\,\emph{自由エネルギー最小化}の枠組みを geDIG に持ち込めることを示す。
+
+\subsection*{X.4 自由エネルギー地形と相転移：一般論から geDIG への写像}
+自由エネルギー地形 $F(x)$ の最小化において，制御パラメータ（温度，外場など）の連続変化により，\,\emph{一次相転移}（極小の入れ替わり），\,\emph{二次相転移}（曲率の特異挙動），\,\emph{臨界性}（スケール不変のゆらぎ）といった現象が知られている。\;geDIG の場合，状態空間を知識グラフ $G$ の空間として，
+\begin{equation}\label{eq:state_landscape}\tag{X.5}
+  F(G) \,=\, \Delta\mathrm{EPC}(G) \, - \, \lambda\,\Delta H(G) \, - \, \eta\,\Delta\mathrm{SP}(G)
+\end{equation}
+を定義すると，$\lambda,\eta$，表現容量，データ分布などの制御により，\,\emph{局所最小} $G^\star$ の不連続な入れ替わり（または性質の急激な変化）が起こり得る。これは，\,\emph{知識グラフの位相・構造の急再編}として観測され得る。
+
+\subsection*{X.5 仮説：geDIG による「知識の相転移」の記述}
+\textbf{仮説 X.1（知識の相転移）}.\;geDIG の目的関数 $F$ を最小化する知識状態 $G^\star$ は，制御パラメータの連続変化に対して，クラスタ構造・連結性・最短経路分布・モジュール分割などで\,\emph{不連続または特異な変化}を示しうる。これは物理系の相転移に類似した\,\emph{知識の相転移}として解釈できる可能性がある。\;例として：
+\begin{itemize}[leftmargin=1.6em]
+  \item \textbf{概念の形成・分化}: $\lambda$ を増やすことで $\Delta H$ の寄与が重み付けされ，意味クラスタが分岐する。
+  \item \textbf{スキーマの再編成}: ハブ/サブグラフの交代により最短路構造やモジュール性が急変する。
+  \item \textbf{インサイト的再構成}: ある再配線で $\Delta\mathrm{SP}$ が急増し，$\Delta H$ と合わせて $\Delta\mathrm{EPC}$ を上回って $F$ が大きく減少する瞬間。
+  \item \textbf{方策のレジームシフト}: 探索中心からショートカット多用への急転換（強化学習的文脈）。
+\end{itemize}
+
+\subsection*{X.6 相転移一般への拡張的な解釈}
+\textbf{仮説 X.2（相転移一般へのレンズとしての geDIG）}.\;構造を持つ情報系（知識グラフ，ネットワーク，表現モデルなど）が
+\begin{equation*}
+  F \,=\, \Delta\mathrm{EPC} \, - \, \lambda\,\Delta H \, - \, \eta\,\Delta\mathrm{SP}
+\end{equation*}
+の形の関数を持つとき，相転移的挙動は\,\emph{構造コスト} $\Delta\mathrm{EPC}$，\,\emph{構造ポテンシャル} $\Delta\mathrm{SP}$，\,\emph{情報エントロピー} $\Delta H$ のトレードオフ変化として記述できる可能性がある。
+
+\subsection*{X.7 限界と今後の課題}
+相転移の存在保証はない（相図構成には $\Delta\mathrm{EPC},\Delta H,\Delta\mathrm{SP}$ の形/正則性の仮定が必要）。\;ミクロ（局所更新則）からマクロ秩序変数（概念の明瞭さ，安定性，推論効率）を導くブリッジは未整備。\;制御パラメータを掃引した\,\emph{実験的相図}（不連続性・臨界挙動の検出）は重要な今後の課題である。\;それでもなお，geDIG の $F$ が\,\emph{構造・情報・到達性の三つ巴}を一つのスカラーで捉える枠組みを与えることは，知識構造の相転移に関する一般理論への有望な入口になりうる。
+

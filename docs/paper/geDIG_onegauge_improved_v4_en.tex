@@ -20,6 +20,10 @@
 \usepackage[a4paper,margin=1in]{geometry}
 \graphicspath{{figures/}{docs/paper/figures/}}
 
+% Relax line-breaking to reduce overfull/underfull hboxes
+\tolerance=2000
+\emergencystretch=3em
+
 % Build switch: ignore missing figures when compiling
 \makeatletter
 \newif\iffigs
@@ -47,6 +51,7 @@
 
 \begin{document}
 \maketitle
+\sloppy
 
 \begin{abstract}
 We address a missing but practical question in dynamic knowledge graphs (KG): \textbf{When should we accept and integrate a new episode?} We propose \textbf{geDIG}, a \textit{single-gauge} control framework ($\F$) that unifies \textit{normalized edit-path cost} ($\Delta$EPC; the cost of actually applied edits) and \textit{information gain} ($\Delta H$ for entropy decrease and $\Delta\mathrm{SP}$ for path shortening), and couples them with \textbf{two-stage gating}: \textit{AG} (0-hop novelty/error) and \textit{DG} (multi-hop compression/shortcuts).
@@ -77,8 +82,30 @@ where $\lambda$ sets the information temperature and $\gamma$ balances entropy v
 \end{itemize}
 
 \section{Design: One Gauge and Two-Stage Gating}
+\paragraph{Short form (this chapter)} For intuition in this chapter, we also use the short form
+\begin{equation}
+  \F = \gednorm - \lambda\,\ignorm,\qquad \ignorm = \Delta H_{\rm norm} + \gamma\,\Delta\mathrm{SP}_{\rm rel}.
+  \label{eq:F_short_intro_en}
+\end{equation}
+Interpretation: $\Delta$EPC is \emph{structural edit cost}, $\Delta H$ measures \emph{ordering} (entropy decrease), and $\Delta\mathrm{SP}_{\rm rel}$ measures \emph{reachability improvement} (path shortening). $\F$ balances these effects.
+
 \subsection{0-hop vs Multi-hop: FEP and MDL}
-0-hop evaluates draft wiring at the query hub (novelty/error; FEP-side), while multi-hop evaluates shortcuts/compression on induced subgraphs (MDL-side). Let $g_0 = \Delta\mathrm{EPC}_{\mathrm{norm}} - \lambda\,\Delta H_{\mathrm{norm}}$ and $g_{\min}=\min_h\{\Delta\mathrm{EPC}_{\mathrm{norm}}-\lambda(\Delta H_{\mathrm{norm}}+\gamma\,\Delta\mathrm{SP}_{\mathrm{rel}}^{(h)})\}$. AG fires if $g_0>\theta_{\mathrm{AG}}$; DG fires if $\min\{g_0,g_{\min}\}\le\theta_{\mathrm{DG}}$.
+0-hop evaluates draft wiring at the query hub (novelty/error; FEP-side), while multi-hop evaluates shortcuts/compression on induced subgraphs (MDL-side). Let $g_0 = \Delta\mathrm{EPC}_{\mathrm{norm}} - \lambda\,\Delta H_{\mathrm{norm}}$ and $g_{\min}=\min_h\{\Delta\mathrm{EPC}_{\mathrm{norm}}-\lambda(\Delta H_{\mathrm{norm}}+\gamma\,\Delta\mathrm{SP}_{\mathrm{rel}}^{(h)})\}$. AG fires if $g_0>\theta_{\mathrm{AG}}$; DG fires if $\min\{g_0,g_{\min}\}\le\theta_{\mathrm{DG}}$. In the minimal example (two nested squares with center $Q$; Fig.~\ref{fig:minimal_example_en}), 0-hop raises $\F$ (ambiguity) while 1-hop reveals shortcuts and lowers $\F$.
+
+\paragraph{Gating mechanism (overview)} Two-stage gating deepens exploration when \emph{ambiguous} ($g_0>\theta_{\rm AG}$; AG) and commits an update only when \emph{confirmed} by multi-hop gains ($\min\{g_0,g_{\min}\}\le\theta_{\rm DG}$; DG). Thresholds are percentile-calibrated (cf. Section~\ref{sec:common_setup_en}).
+
+\subsection{Implementation Alignment (Repo Mapping)}
+For reproducibility and traceability, we summarize the parameter mapping between this paper and the public repository (InsightSpike-AI):
+\begin{itemize}
+  \item $\lambda$ (information temperature) \Rightarrow \texttt{config.graph.lambda\_weight}
+  \item $\gamma$ (SP trade-off) \Rightarrow \texttt{config.graph.sp\_beta}
+  \item $\Delta H_{\mathrm{norm}}$ (after$-$before, log-$K$ denom) \Rightarrow \texttt{delta\_h\_norm} in \texttt{GeDIGCore}
+  \item $\Delta\mathrm{SP}_{\mathrm{rel}} = (L_b - L_a)/L_b$ \Rightarrow \texttt{delta\_sp\_rel} in \texttt{GeDIGCore}
+  \item $\Delta\mathrm{EPC}_{\mathrm{norm}}$ (candidate-base upper bound in paper preset) \Rightarrow \texttt{ged\_norm\_scheme = candidate\_base}
+  \item Scope/Eval switches used in paper preset: \texttt{sp\_scope\_mode=union}, \texttt{sp\_eval\_mode=fixed\_before\_pairs}
+  \item IG source: \texttt{ig\_source\_mode=linkset}; denominator: \texttt{metrics.ig\_denominator=fixed\_kstar}
+\end{itemize}
+These options are encapsulated by the \texttt{paper()} preset in \texttt{src/insightspike/config/presets.py} to minimize configuration drift.
 
 \subsection{Thermodynamic Reading (Metaphor)}
 We can read $\F$ as an operational free energy:
@@ -87,15 +114,98 @@ We can read $\F$ as an operational free energy:
 \end{equation}
 so $\F$ is isomorphic to $F$ by term rearrangement. The coefficient $\lambda$ plays the role of information temperature. We keep later references in the short form $\F=\gednorm-\lambda\,\ignorm$ to avoid redundancy.
 
+% Exploratory note: FEP–MDL bridge to Helmholtz mapping
+\input{sections/fep_mdl_helmholtz_subsubsec_en}
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[scale=0.75,
+    node/.style={circle,draw,minimum size=5mm,inner sep=0pt, font=\scriptsize},
+    lab/.style={font=\scriptsize}, pre/.style={font=\scriptsize,align=center}]
+    % Left: Before (double square, no Q)
+    \node[lab] at (0,2.8) {Before};
+    \node[node] (A0) at (0,1) {A};
+    \node[node] (B0) at (2,1) {B};
+    \node[node] (C0) at (2,-1) {C};
+    \node[node] (D0) at (0,-1) {D};
+      % remove AB edge in Before
+      \draw (B0)--(C0) (C0)--(D0) (D0)--(A0);
+    \node[node] (E0) at (-1,2) {E};
+    \node[node] (F0) at (3,2) {F};
+    \node[node] (G0) at (3,-2) {G};
+    \node[node] (H0) at (-1,-2) {H};
+    % (outer ring edges)
+    \draw (A0)--(E0) (B0)--(F0) (C0)--(G0) (D0)--(H0);
+
+    % Middle: 0-hop insert Q
+    \begin{scope}[xshift=5.2cm]
+      \node[lab] at (0,2.8) {0-hop (insert Q)};
+      \node[node, font=\scriptsize\bfseries] (A1) at (0,1) {A};
+      \node[node, font=\scriptsize\bfseries] (B1) at (2,1) {B};
+      \node[node, font=\scriptsize\bfseries] (C1) at (2,-1) {C};
+      \node[node, font=\scriptsize\bfseries] (D1) at (0,-1) {D};
+      % remove AB edge in 0-hop panel
+      \draw (B1)--(C1) (C1)--(D1) (D1)--(A1);
+      \node[node] (E1) at (-1,2) {E};
+      \node[node] (F1) at (3,2) {F};
+      \node[node] (G1) at (3,-2) {G};
+      \node[node] (H1) at (-1,-2) {H};
+      % (outer ring edges)
+      \draw (A1)--(E1) (B1)--(F1) (C1)--(G1) (D1)--(H1);
+      \node[node, fill=yellow!25] (Q1) at (1,0) {Q};
+      \draw[line width=0.9pt] (Q1)--(A1) (Q1)--(B1) (Q1)--(C1) (Q1)--(D1);
+    \end{scope}
+
+    % Right: 1-hop shortcuts
+    \begin{scope}[xshift=10.4cm]
+      \node[lab] at (0,2.8) {1-hop (shortcuts)};
+      \node[node, font=\scriptsize\bfseries] (A2) at (0,1) {A};
+      \node[node, font=\scriptsize\bfseries] (B2) at (2,1) {B};
+      \node[node, font=\scriptsize\bfseries] (C2) at (2,-1) {C};
+      \node[node, font=\scriptsize\bfseries] (D2) at (0,-1) {D};
+      % remove AB edge in 1-hop panel
+      \draw (B2)--(C2) (C2)--(D2) (D2)--(A2);
+      \node[node, font=\scriptsize\bfseries] (E2) at (-1,2) {E};
+      \node[node, font=\scriptsize\bfseries] (F2) at (3,2) {F};
+      \node[node, font=\scriptsize\bfseries] (G2) at (3,-2) {G};
+      \node[node, font=\scriptsize\bfseries] (H2) at (-1,-2) {H};
+      % (outer ring edges)
+      \draw (A2)--(E2) (B2)--(F2) (C2)--(G2) (D2)--(H2);
+      \node[node, fill=yellow!25] (Q2) at (1,0) {Q};
+      \draw[line width=0.9pt] (Q2)--(A2) (Q2)--(B2) (Q2)--(C2) (Q2)--(D2);
+      % Emphasize key edges
+      \draw[line width=1.3pt] (B2)--(C2);
+      \draw[line width=1.3pt] (C2)--(D2);
+      \draw[line width=1.3pt] (D2)--(A2);
+      \draw[line width=1.3pt] (A2)--(E2);
+      \draw[line width=1.3pt] (B2)--(F2);
+      \draw[line width=1.3pt] (D2)--(H2);
+      \draw[line width=1.3pt] (C2)--(G2);
+    \end{scope}
+  \end{tikzpicture}
+  \vspace{0.6ex}
+  \caption{Minimal example (two nested squares). Left: before insertion. Middle: 0-hop adds $Q$ (ambiguity increases \,$\Rightarrow$\, high $F$). Right: 1-hop reveals shortcuts (reachability improves \,$\Rightarrow$\, lower $F$; DG).}
+  \label{fig:minimal_example_en}
+\end{figure}
+
 \subsection{Evaluation Common Conditions}\label{sec:common_setup_en}
-\footnote{For quick reproduction, see Make targets (e.g., \texttt{make exp23-paper}, \texttt{make maze-suite}) and the smoke script \texttt{scripts/codex\_smoke.sh}.}
-We compare static and dynamic RAG under \emph{shared} conditions. Chapters only state their differences; definitions and resources live here.
+\footnote{For quick reproduction, see Make targets (e.g., \texttt{make exp23-paper}, \texttt{make maze-suite}) and the smoke script \texttt{scripts/codex\_smoke.sh}.} We compare static and dynamic RAG under \emph{shared} conditions. Conceptually, the static chapter measures \emph{what to fetch} (quality upper bounds), while the dynamic chapter focuses on \emph{when to accept} and the health of updates; chapters only state their differences, and common definitions/resources live here.\footnote{For an intuition of 0-hop vs multi-hop gating, see the minimal example in Fig.~\ref{fig:minimal_example_en}.}
 \begin{itemize}[leftmargin=1.6em]
   \item \textbf{Knowledge source / Retriever / LM}: same corpus, retriever, and generation settings (prompt, temperature, max tokens).
   \item \textbf{Measurements}: answer quality (EM/F1), faithfulness (citation/Path Faithfulness), latency (P50; measured). In dynamic runs we also report contamination (FMR; over accepted events), PSZ (Acc/FMR/P50 SLO) with shortfall $s_{PSZ}$, and zero-hop rate (ZSR; no AG firing).
   \item \textbf{Equal resources}: embedder/ANN/Top-$k$/LLM/temperature/tokens/HW/parallelism/measurement held constant; a compact table is provided in the supplement.
   \item \textbf{Splits and calibration}: train/val/test with gates calibrated on val and fixed on test.
 \end{itemize}
+
+\paragraph{PSZ shortfall (definition)} As a compact operating objective, we use the PSZ shortfall
+\begin{equation}
+  s_{\mathrm{PSZ}} \;=\; \max(0,\,0.95 {-} \mathrm{Acc})\; +\; \max(0,\, \mathrm{FMR} {-} 0.02)\; +\; \max\!\Bigl(0,\, \tfrac{\mathrm{P50} {-} 200\,\mathrm{ms}}{200\,\mathrm{ms}}\Bigr),
+  \label{eq:psz_shortfall_en}
+\end{equation}
+which summarizes how far a configuration is from the PSZ band (Acc$\ge$0.95, FMR$\le$0.02, P50$\le$200ms).
+
+\paragraph{Terminology note (evaluation terms)}
+\textbf{equal‑resources}: a controlled setting where embedder/ANN/Top‑$k$/LLM/temperature/tokens/HW/parallelism/measurement are held constant across systems.\;\textbf{no‑peeking}: a strict comparison regime that avoids using future data or references during evaluation.\;\textbf{SLO}: Service Level Objective (an operational target band; here PSZ is defined via Acc/FMR/P50 thresholds).
 
 \begin{figure}[H]
   \centering
@@ -135,26 +245,30 @@ We compare static and dynamic RAG under \emph{shared} conditions. Chapters only 
 \paragraph{Baselines (same conditions)} Greedy Novelty, $\varepsilon$-greedy, UCB1-like, Partially-Observed A*, and ablations (EPC-only / IG-only / no AG/DG / 0-hop only). Dijkstra/A* used as upper-bound diagnostics.
 
 \section{Experiment II: RAG Baselines (static only)}
-\paragraph{Summary} Under equal-resources, geDIG-soft (G1) improves EM/F1 by \experimNote{+2–5pt} over GT-RAG (B2), increases citation/path faithfulness by \experimNote{+5–10pt}, with comparable P50/P95 latency.
+\paragraph{Recall (short form)} We use the short form in this chapter as well (eq.~\ref{eq:F_short_intro_en}).
+\paragraph{Summary} Under equal-resource conditions, geDIG-soft (G1) improves answer quality (EM/F1) and citation/path faithfulness over the strongest static baseline while keeping P50/P95 latency comparable; see Section~\ref{sec:paper_scale_results} and Table~\ref{tab:rag_summary_en} for the 500-query lite suite.
 
 \paragraph{Baselines} B0: Flat RAG (SBERT, HNSW, Top-k), B1: GraphRAG (GNN), B2: Graph Transformer, G1: B2 + geDIG-soft (sigmoid$\,(\tau\F)$ for weighting/pruning/ordering). Static-only here; dynamic is in Experiment III. See Section~\ref{sec:common_setup_en} for common evaluation conditions and equal-resource assumptions.
 
 \paragraph{Dataset and Protocol} 50 domains (mix of single-domain, cross-domain 2/3-hop, analogical). Sources: HotpotQA/2Wiki + curated. Equal-resources table (embedder/ANN/Top-k/LLM/temp/tokens/HW/parallelism/measurement) fixed across methods. No-peeking: train (burn-in for thresholds) / val / test split; thresholds fixed on val.
 
 \section{Experiment III: Dynamic GRAG × geDIG}
-\paragraph{Summary} With geDIG-soft applied consistently to retrieval/integration/summarization (G2), Temporal Consistency improves by \experimNote{+5–10pt}, update lag remains comparable or lower, KG contamination (FMR) decreases, and PSZ points emerge.
+\paragraph{Recall (short form)} We use the short form in this chapter as well (eq.~\ref{eq:F_short_intro_en}).
+\paragraph{Summary} With geDIG-soft applied consistently to retrieval/integration/summarization (G2), Temporal Consistency improves, update lag remains comparable or lower, KG contamination (FMR) decreases, and operating points move closer to the PSZ band (though full PSZ attainment is not yet achieved).
 
 \paragraph{Dynamic Metrics} Temporal Consistency, update lag (ingest→available), KG contamination rate (FMR, rolling), 0-hop rejection, AG/DG rates (cf. Section~\ref{sec:common_setup_en}). PSZ: Acc\,$\ge$\,95\%, FMR\,$\le$\,2\%, extra P50\,$\le$\,200ms.
 
 \paragraph{Time-Series and Operating Curves} Plot $\Delta$EPC/$\Delta H$/\,$\Delta$SP/$\F$ with acceptance time-series (pending→confirmed, C-value), and Operating Curves (Acc–FMR–Latency) with PSZ band.
 
 \section{Experiment IV: Insight-Vector Alignment}
-\paragraph{Summary} Readout vectors from DG-confirmed subgraphs align with LLM answer embeddings: \experimNote{$\Delta s{=}{+}0.2x$, $p{<}0.0x$, $N{=}200$}. Baselines: random, Top-k, threshold, AG-selected.
+\paragraph{Summary} Readout vectors from DG-confirmed subgraphs align with LLM answer embeddings: on the 500-query lite run (support vs random), we observe $\Delta s{=}s_{\text{support}}{-}s_{\text{random}}\approx{+}0.021$ with sign-test $p\ll0.001$ and Cohen's $d\approx1.0$ ($N{=}124$). Baselines: random, Top-k, threshold, AG-selected.
 
 \section{FEP–MDL Bridge (operational proposition)}
-\paragraph{Definition} We call an operational correspondence a relation that (i) is proportional (not identical), (ii) has a bounded residual $O(1/N)$ under assumptions, and (iii) yields testable predictions. Under mild assumptions (normalization, bounded horizon, decomposable edits, stable entropy estimation), $\F\propto\Delta\mathrm{MDL}+O(1/N)$. The coefficient $\lambda\approx c_D/c_M$ anchors scales.
+\noindent\textit{Note}: This section provides a heuristic bridge to existing theory; the empirical results and main claims of this paper do not depend on it, and readers may safely skip it on a first pass.
 
-\paragraph{Implications} A single control signal justifies simultaneous control of structure edits and inference. EPC on the structure side and IG on the information side avoid double counting. Ablations corroborate the roles of $\Delta H$ and $\Delta$SP.
+\paragraph{Definition} We call an operational correspondence a relation that (i) is proportional (not identical), (ii) has a bounded residual $O(1/N)$ under assumptions, and (iii) yields testable predictions. In our case, Free Energy Principle (FEP) treatments minimise a variational free energy bound on surprise, while Minimum Description Length (MDL) minimises the sum of model and data code lengths. Under mild assumptions (normalization, bounded horizon, decomposable edits, stable entropy estimation), we map these objectives to our gauge via $\F\propto\Delta\mathrm{MDL}+O(1/N)$, with $\lambda\approx c_D/c_M$ acting as a scale-anchoring coefficient.
+
+\paragraph{Implications} A single control signal justifies simultaneous control of structure edits and inference: EPC on the structure side and IG on the information side avoid double counting, and the 0-hop vs multi-hop split corresponds heuristically to FEP-style error detection vs MDL-style compression. Ablations corroborate the roles of $\Delta H$ and $\Delta$SP.
 
 \section{Paper-Scale Results (Exp II--IV)}\label{sec:paper_scale_results}
 \paragraph{Setup (reproducible, lite).} We provide a self-contained experiments folder (Exp II--IV lite) that runs without external services. For SBERT-based runs, CPU wheels are used when available. Dataset: 500 queries across mixed domains with support/distractor episodes (JSONL); split into train/val/test (60/20/20). We calibrate $(\theta_{\mathrm{AG}},\theta_{\mathrm{DG}})$ on val (target AG$\approx$0.08, DG$\approx$0.04), then report on test.

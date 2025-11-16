@@ -1,0 +1,56 @@
+name: Paper Build
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'docs/paper/**'
+      - '.github/workflows/paper-build.yml'
+  pull_request:
+    paths:
+      - 'docs/paper/**'
+      - '.github/workflows/paper-build.yml'
+
+jobs:
+  build:
+    name: Build JA/EN PDFs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build JA PDF
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: geDIG_onegauge_improved_v4.tex
+          working_directory: docs/paper
+          latexmk_use_xelatex: true
+
+      - name: Build EN PDF
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: geDIG_onegauge_improved_v4_en.tex
+          working_directory: docs/paper
+          latexmk_use_xelatex: true
+
+      - name: Check LaTeX logs for refs/cites
+        run: |
+          bash scripts/check_latex_logs.sh \
+            docs/paper/geDIG_onegauge_improved_v4.log \
+            docs/paper/geDIG_onegauge_improved_v4_en.log
+
+      - name: Upload LaTeX logs (Artifacts)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-logs
+          path: |
+            docs/paper/*.log
+
+      - name: Upload PDFs (Artifacts)
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-pdfs
+          path: |
+            docs/paper/geDIG_onegauge_improved_v4.pdf
+            docs/paper/geDIG_onegauge_improved_v4_en.pdf

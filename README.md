@@ -21,6 +21,22 @@ Cloud/Lightweight defaults
 
 Docs / GitHub Pages: https://miyauchikazuyoshi.github.io/InsightSpike-AI
 
+## 🔁 Reproduce in 5 lines (paper preset, lite)
+
+```bash
+python -m experiments.exp2to4_lite.src.run_experiment \
+  --config experiments/exp2to4_lite/configs/exp23_paper.yaml
+python -m experiments.exp2to4_lite.run_exp23 \
+  --config experiments/exp2to4_lite/configs/exp23_paper.yaml
+python -m experiments.exp2to4_lite.src.alignment \
+  --results experiments/exp2to4_lite/results/exp23_paper_*.json \
+  --dataset experiments/exp2to4_lite/data/test_500.jsonl
+```
+
+Artifacts
+- PDFs: `docs/paper/geDIG_onegauge_improved_v4{_en}.pdf` (CI artifacts in “Paper Build”) 
+- arXiv pack: `bash scripts/pack_arxiv.sh both`
+
 ## 🎯 What We’re Building
 
 We aim to build a self‑updating RAG system that treats structural improvement in its own knowledge graph as an intrinsic reward, and autonomously updates itself. The geDIG gauge provides a principled decision for When to accept a graph update by balancing normalized edit‑path cost (structure) against information gain.
@@ -146,6 +162,60 @@ Empirical (reference): 25×25 / 150 steps → wall ≈ 42 s, avg_time_ms_eval �
 - One‑Gauge control: smaller F implies an “insight‑like” event; AG/DG makes the decision robust
 
 <!-- Pipeline overview is described in the paper; Mermaid is omitted for GitHub compatibility. -->
+
+## 📊 Experiment Highlights (v4-lite)
+
+### Maze (Query‑Hub, partial observability)
+
+Representative L3‑only results under the paper preset (same runs as Table~\\ref{tab:maze_results} / Table~\\ref{tab:maze_v4_main} in the paper):
+
+| Maze (max steps) | Seeds | geDIG success | Avg. steps | Edge compression (mem) |
+|------------------|-------|---------------|------------|-------------------------|
+| 15×15 (250)      | 100   | 1.00          | 69.0       | 0.95                    |
+| 25×25 (250)      | 60    | 1.00          | 352.3      | 0.99                    |
+| 51×51 (1500)     | 11    | 0.55          | 755.6      | 0.99                    |
+
+Raw aggregates live under `docs/paper/data/maze_*x*_*.json` and are produced by the Query‑Hub runners in `experiments/maze-query-hub-prototype/tools/`.
+
+### RAG (static vs dynamic, 500‑query lite)
+
+Paper‑preset lite run (`experiments/exp2to4_lite`, 500 queries, equal‑resources):
+
+| Method        | EM   | PER   | Acc   | FMR   | P50 (ms) |
+|--------------|------|-------|-------|-------|----------|
+| Static RAG   | 0.00 | 0.172 | 0.000 | 1.000 | 160      |
+| geDIG‑lite   | 0.25 | 0.421 | 0.374 | 0.626 | 240      |
+
+Here PER is the Path Equivalence Rate (answer+evidence), Acc and FMR are measured over accepted events, and P50 is measured latency. Full details and operating curves are in `docs/paper/geDIG_onegauge_improved_v4{_en}.pdf`.
+
+## 🌊 Phase Transitions & λ‑Scan（Outlook）
+
+The FEP–MDL bridge section in the paper suggests that the gauge
+
+\\[
+  \\mathcal{F} = \\Delta \\mathrm{EPC}_{\\mathrm{norm}} - \\lambda\\,(\\Delta H_{\\mathrm{norm}} + \\gamma\\,\\Delta \\mathrm{SP}_{\\mathrm{rel}})
+\\]
+
+can be read as an operational free energy, where λ plays the role of an information temperature.
+
+Hypothesis (to be tested in v5+):
+
+- There exists a critical λ\\_c at which the knowledge graph transitions from a sparse, tree‑like regime to an over‑connected or small‑world regime.
+- Around λ\\_c, we expect sharp changes in:
+  - success / regret,
+  - FMR and PSZ shortfall,
+  - edge compression and path‑length statistics,
+  - the empirical distribution of F (e.g., bimodality or heavy tails).
+
+Planned experiments:
+
+- λ‑scan on the maze Query‑Hub (15×15, 25×25, 51×51) with fixed AG/DG percentiles, tracking PSZ shortfall and structural metrics.
+- λ‑scan on the RAG lite suite (Exp II/III) under equal‑resources, checking whether λ\\_c aligns with PSZ‑like operating points.
+
+Status:
+
+- Not implemented in v4; currently framed as an outlook and collaboration topic (see “Theorist” role in Feedback & Collaboration).
+- Results will be folded into a v5 revision of the paper once we have a clean λ‑scan and phase‑transition‑style analysis.
 
 ## License / Contact
 

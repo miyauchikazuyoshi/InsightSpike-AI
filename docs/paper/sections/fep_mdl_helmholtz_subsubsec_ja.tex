@@ -1,0 +1,42 @@
+% FEP–MDL bridge → Helmholtz mapping（Chapter内のサブサブセクション）
+
+\subsubsection{FEP–MDLブリッジからヘルムホルツ自由エネルギーと「知識の相転移」へ（探索的ノート）}
+\label{sec:fep_mdl_helmholtz}
+
+\paragraph{範囲と注意}
+本節は、本文の geDIG と FEP–MDL ブリッジを \emph{自由エネルギー} の語彙で読み替える\,\emph{探索的}なノートである。厳密な同値主張や証明ではなく、形の同型性と構造対応から得られる示唆を簡潔に整理する。本文の主張・実験の妥当性は本節に依存しない。
+
+\paragraph{目的関数の再掲（表記統一）}
+本稿の表記に合わせ、目的関数を\,\emph{正規化記法}で示す：
+\begin{equation}
+  F \;=\; \gednorm \; - \; \lambda\,\Bigl(\ignorm \; + \; \gamma\,\Delta\mathrm{SP}_{\mathrm{rel}}\Bigr),
+  \qquad (\lambda{>}0,\;\gamma{\ge}0).
+ \label{eq:gedig_obj_bridge}
+\end{equation}
+ここで $\gednorm$ は正規化編集経路コスト，$\ignorm$ は\,\emph{本節では} 正規化エントロピー差（$\Delta H_{\rm norm}$）として扱う，$\Delta\mathrm{SP}_{\mathrm{rel}}$ は相対最短路ゲインである（正規化・上界の前提は本文に従う）。\;注: 本文では場面により $\ignorm{=}\Delta H_{\rm norm}{+}\gamma\,\Delta\mathrm{SP}_{\rm rel}$ と総括することがあるが，本節の写像では二重計上を避けるため SP 寄与を構造側に吸収する（表記上の再配分に過ぎない）。
+
+\paragraph{Helmholtz との同型写像}
+\eqref{eq:gedig_obj_bridge} を $\eta{:=}\lambda\gamma$ とおき、SP を構造側に含めて
+\begin{equation}
+  F \;=\; \underbrace{\Bigl(\gednorm \; - \; \eta\,\Delta\mathrm{SP}_{\mathrm{rel}}\Bigr)}_{U_{\mathrm{struct}}}
+      \; - \; \underbrace{\lambda}_{T_{\mathrm{eff}}}\,\underbrace{\ignorm}_{S_{\mathrm{info}}},
+  \label{eq:gedig_helmholtz_map_intext}
+\end{equation}
+と書くと、統計力学の $F_{\mathrm{Helmholtz}}{=}U{-}TS$ と\,\emph{形式的に同型}になる。すなわち、$U_{\mathrm{struct}}$ は\,\emph{構造エネルギー}、$S_{\mathrm{info}}$ は\,\emph{情報エントロピー}、$T_{\mathrm{eff}}{=}\lambda$ は\,\emph{有効温度}と解釈できる。これは物理的同一性の主張ではなく、自由エネルギー最小化の語彙で geDIG を読むための便宜的対応である。
+
+\paragraph{自由エネルギー地形と「知識の相転移」}
+知識状態をグラフ $G$ で表し、
+\begin{equation}
+  F(G) \;=\; \gednorm(G) \; - \; \lambda\,\ignorm(G) \; - \; \eta\,\Delta\mathrm{SP}_{\mathrm{rel}}(G)
+  \label{eq:gedig_energy_landscape}
+\end{equation}
+と定義すると、$\lambda,\eta$（および表現容量やデータ分布）の連続変化に伴い、\,\emph{局所最小} $G^\star$ が不連続に入れ替わる、あるいは曲率が特異な振る舞いを示す可能性がある。これを、本稿では\,\emph{知識構造の相転移}として読み替えることを提案する。例：
+\begin{itemize}[leftmargin=1.6em]
+  \item \textbf{概念の形成/分化}: $\lambda$ の増加で $\Delta H$ を重視し、意味クラスタが分岐。
+  \item \textbf{スキーマ再編}: ハブ/サブグラフの交代で最短路構造やモジュール性が急変。
+  \item \textbf{インサイト的再構成}: $\Delta\mathrm{SP}$ の急増が $\Delta\mathrm{EPC}$ を上回り、$F$ が大きく減少する瞬間。
+  \item \textbf{方策レジームシフト}: 探索中心からショートカット多用へ急転換（強化学習的読替）。
+\end{itemize}
+
+\paragraph{限界と今後}
+相図の厳密化（不連続/臨界の同定）やミクロ–マクロ橋渡し（局所更新則から秩序変数へ）は未解決課題である。本節は、\,\emph{構造・情報・到達性の三つ巴}を単一スカラ $F$ で捉える geDIG の読み替えとして、今後の理論拡張と実験的相図の足がかりを与える。

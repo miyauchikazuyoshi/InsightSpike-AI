@@ -1,7 +1,0 @@
-config_name,update_rate,updates_applied,high_novelty_updates,medium_novelty_updates,low_novelty_updates,final_nodes,final_edges,avg_gedig,std_gedig
-Target 30%,0.3684210526315789,7,0.0,2.0,5.0,20,30,0.8569210526315788,0.18012334831836285
-Target 35%,0.42105263157894735,8,2.0,1.0,5.0,21,30,0.843336842105263,0.17491737661724546
-Target 40%,0.47368421052631576,9,0.0,1.0,8.0,22,30,0.8092421052631579,0.16107616477531914
-STATIC Baseline,0.0,0,,,,13,29,,
-FREQUENCY Baseline,1.0,19,,,,32,32,,
-COSINE Baseline,1.0,19,,,,32,32,,

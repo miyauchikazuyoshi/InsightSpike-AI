@@ -38,6 +38,6 @@ How to engage:
 - Or DM on X (Twitter): @kazuyoshim5436
 
 ## Links
-- Theory: [theory]({{ site.baseurl }}/theory/)
+- Spec: [geDIG spec]({{ site.baseurl }}/gedig_spec/)
 - Phase‑1: [maze & RAG]({{ site.baseurl }}/phase1/)
 - Tutorial (trace): [trace a spike]({{ site.baseurl }}/tutorials/trace/)

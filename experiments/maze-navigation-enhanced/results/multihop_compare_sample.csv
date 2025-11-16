@@ -1,3 +1,0 @@
-variant,seed,mode,steps,mean_score,median_score,low_fraction,escalated_fraction,dead_end_fraction,shortcut_fraction,multihop_usage_rate,hop1_gain_delta_mean
-ultra50,111,single,119,0.5118024633408618,0.30927835051546393,0.16806722689075632,0.0,0.0,0.0,0.0,
-ultra50,111,escalation,119,0.5118024633408618,0.30927835051546393,0.16806722689075632,0.5966386554621849,0.0,0.0,0.0,

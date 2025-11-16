@@ -1,5 +1,0 @@
-environment: development
-pre_warm_models: false
-datastore:
-  type: filesystem
-  root_path: ./data/insight_store

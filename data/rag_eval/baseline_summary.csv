@@ -1,0 +1,5 @@
+method,acceptance,FMR,latency_ms
+Static,0.0000,1.0000,160.0
+Frequency,0.0000,1.0000,160.0
+Cosine,0.0000,1.0000,160.0
+geDIG-lite,0.3740,0.6260,240.0

@@ -1,5 +1,0 @@
-T-Junction Maze Test - 20250822_175442
-Success: True
-Steps: 27
-Path length: 29
-Unique positions: 17

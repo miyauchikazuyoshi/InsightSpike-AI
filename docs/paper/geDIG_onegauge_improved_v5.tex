@@ -133,6 +133,10 @@ RAG へ写すと、\textbf{FMR$\downarrow$（偽受理率の低減）}・\textbf
 \\
 \noindent\textit{図表の要点}\; 図\ref{fig:static_dynamic_pipeline} は、\,\textbf{静的RAG（単一ラウンド）}と\,\textbf{動的RAG（イベント駆動）}の処理フローを並置する。
 表\ref{tab:static_dynamic_responsibility} は、\,\emph{目的・判断基準・運用}の観点で\,\textbf{両者の責務分担}を簡潔に対比する（静的は品質上限評価、動的は受容タイミングと更新健全性の運用評価）。
+\\
+\noindent\textit{動機となる失敗例}\; 静的RAGでは、(i) 一度取り込んだ誤った知識が長期に温存され、後続クエリでも繰り返し参照される、(ii) 軽微な曖昧さにも反応して過剰に検索し、実質的な改善を伴わない高コストな更新を多数行う、といった失敗が起こり得る。
+前者は FMR の増大（誤マージ）として、後者は PSZ からの逸脱（余分な遅延と受容率の悪化）として現れる。
+geDIG は、こうした運用上の失敗を「いつ統合すべきか」という問いに還元し、AG/DG によるイベント駆動制御で抑制することを目指す。
 
 \subsection{評価指標と成功基準}
 静的/動的RAGの比較には、従来の正答率指標（EM/F1）や根拠整合性に加え、動的側特有の運用軸が必要である。
@@ -153,6 +157,19 @@ RAG へ写すと、\textbf{FMR$\downarrow$（偽受理率の低減）}・\textbf
 \noindent\textit{二段ゲートの直観}\; geDIG は $\F$ を 0\,\mbox{-}hop と multi\,\mbox{-}hop の二段階で評価する。
 0\,\mbox{-}hop のゲート AG（Attention Gate）は、仮配線直後の悪化（$g_0$ 高値）を捉え、$g_0>\theta_{\rm AG}$ のときにのみ検索・探索を深化させる。
 一方 multi\,\mbox{-}hop のゲート DG（Decision Gate）は、最短路の短縮など構造的ショートカットの出現で $g_{\min}$ が十分に低下した場合に $\min\{g_0,g_{\min}\}\le\theta_{\rm DG}$ を満たすかどうかを見て、受容/更新を確定する（閾値は分位校正; 詳細は \S\ref{sec:ag_dg_gate}, \S\ref{sec:eval_protocol}）。
+
+\subsection{指標の直観的な読み方}
+\noindent\textit{三つの観点}\; geDIG が扱う主な量は、(1) グラフ編集の「つらさ」を測る $\gednorm$、(2) 情報整理の「すっきり度」を測る $\Delta H_{\rm norm}$、(3) 経路の「回り道の減り具合」を測る $\Delta\mathrm{SP}_{\rm rel}$ である。
+これらを一つにまとめたものが $\F=\gednorm-\lambda(\Delta H_{\rm norm}+\gamma\,\Delta\mathrm{SP}_{\rm rel})$ であり、\textbf{$\F$ が小さいほど「少ない編集で、よく整理され、近道も増えた統合」}と読む。
+直観的には、$\gednorm$ は「グラフの健全性コスト」、$\Delta H_{\rm norm}$ は「情報の価値（驚きの減少）」、$\Delta\mathrm{SP}_{\rm rel}$ は「効率性（平均経路長の短縮）」に対応する。
+\\
+\noindent\textit{簡単な数値例（玩具）}\; 例えば、ある更新候補について $\gednorm=0.2$（ノード/エッジを少数だけ追加）、$\Delta H_{\rm norm}=0.5$（分布がかなりシャープになる）、$\Delta\mathrm{SP}_{\rm rel}=0.3$（平均最短路が30\%短縮）、$\lambda{=}1,\\gamma{=}0.5$ とすると、
+\[
+  \F \approx 0.2 - 1\times(0.5+0.5\times0.3)=0.2-0.65=-0.45
+\]
+となり、構造コストより利得が大きい「良い統合」と判定される。
+逆に $\gednorm{=}0.8,\\Delta H_{\rm norm}{=}0.1,\\Delta\mathrm{SP}_{\rm rel}{\approx}0$ のようなケースでは $\F{\approx}0.7$ と大きくなり、「高コストだがほとんど整理されない統合」として AG/DG が抑制する対象になる。
+このように、各指標の符号と大きさを「健康度・情報価値・効率性」の三つのレンズで読むと、後半の理論節（\S\ref{sec:gauge_theory}, \S\ref{sec:dual_fep_mdl}）との対応が掴みやすい。
 
 \subsection{本稿の貢献（正式版）}\label{sec:contributions_formal}
 本節に本稿の\,\textbf{正式な貢献}を示す。
@@ -997,6 +1014,11 @@ AG–DG は、\emph{エピソードを安定的に受け入れられる局所サ
   \F\;\propto\; \Delta\mathrm{MDL}\; +\; O(1/N)
 \end{equation*}
 が成り立つ（比例係数は $\lambda\approx c_{\!D}/c_{\!M}$：MDL の項比）。本節は詳細証明ではなく、以降の実験章で検証する\,\textbf{運用上の予測可能性}を与えるための定義づけである。
+
+\paragraph{読み方ガイド（何を主張し、何をしないか）}
+FEP–MDL ブリッジは、「$\F$ がどのような意味で自由エネルギー/MDL と整合しているか」を\,\textbf{操作的に整理するための節}であり、完全な理論同値や厳密な最適性を主張するものではない。
+読者は、(i) $\F$ が $\Delta\mathrm{MDL}$ に比例するという命題は（仮定付きの）\emph{設計上の指針}であり、(ii) 実験で検証するのは「ゲージ設計の方向付けが妥当かどうか」であって、FEP 全体の真偽ではない、という二点を念頭に置いて読めばよい。
+より実装寄りに読む場合は、本節を「なぜ構造項と情報項をこの分離で採ったのか」という\emph{設計理由のメモ}として理解し、詳細な変分推論の議論は付録と今後の理論研究に委ねてよい。
 \begin{comment}
 ここでは、0\,\mbox{-}hop/multi\,\mbox{-}hop の二重性と二段ゲート（AG/DG）が\,\textbf{FEP（自由エネルギー原理）とMDL（最小記述長）の対応}として\,\emph{操作的に整合}することだけを要点として述べる。すなわち、正規化・上界・比例吸収の仮定（B1–B4）の下で、
 \[\;\F\ \propto\ \Delta\mathrm{MDL}\;\]
@@ -1172,6 +1194,18 @@ MDL/FEP と本指標 $\F$ の対応を表\,\ref{tab:theory_mapping_summary} に�
 \end{algorithm}
 
 \paragraph{一般化可能性}\; 擬似コード中の環境依存な条件（例: 迷路での壁判定）は\,\emph{前処理/表現層}に留め、受容/探索/剪定の\,\textbf{判定基準そのものは $\F$ と AG/DG の規約で共通化}する。表現設計を差し替えれば、他ドメイン（RAG など）にも同一の制御原理を適用できる。
+
+\subsection{実装ガイダンス（Phase~1）}
+\noindent\textit{パラメータ $\lambda,\gamma$ の設定}\; 構造項と情報項のスケール合わせとしての $\lambda$ は、「備考: IG の近似性と $\lambda$ の解釈」で述べたように、まず分散同規模化による初期値 $\lambda_0:=\mathrm{Std}[\gednorm]/\max\{\mathrm{Std}[\ignorm],\varepsilon\}$ を求め、小さなグリッド $\{\tfrac{1}{2}\lambda_0,\lambda_0,2\lambda_0\}$ で PSZ 達成率と FMR/遅延を観察する。
+実運用では、一度決めた $\lambda$ をシステム全体で固定し、環境ごとに頻繁にチューニングしない（図\ref{fig:psz_operating_curves_lite_ja} および付録の $(\tau,\lambda)$ Operating Curves を参照）。$\gamma$ は $\Delta H$ と $\Delta\mathrm{SP}_{\rm rel}$ の寄与バランスを決める係数であり、迷路PoCでは $\gamma{\approx}0.5$ 前後の範囲で感度が低いことを確認している。
+\\
+\noindent\textit{類似度計算と Linkset 構成}\; 実装では、エピソード埋め込み $\phi(e)\in\mathbb{R}^d$ に対し、重み付きコサイン類似度に基づく Top-$k$ 取得で $S_{\mathrm{link}}$ を構成する（重みはタスク別の重みベクトル管理で付与; コード例: \texttt{src/insightspike/search/similarity\_search.py}）。
+検索時には C-value を使わず純粋な類似度のみで順位付けし、$\F$ と AG/DG はその上に載る「統合ゲージ」として用いる。
+これにより、既存のベクトルDBや ANN インデックスと容易に接続できる。
+\\
+\noindent\textit{バックトラックとエビクション}\; PoC 実装では、DG 発火時に「どこまで戻るか」は BFS/最短路に基づくグラフ上の分岐点復元で行い、受容済み/保留ノードの信頼度 $c_{\mathrm{confirmed}},c_{\mathrm{pending}}$ に応じて\emph{容量制約付きのエビクション}（低信頼かつ古いエピソードから優先的に削除）を行う。
+一般化された実装では、(i) バックトラックは「$\F$ が悪化し始めた直前のステップ」まで巻き戻す、(ii) エビクションは「AG/DG ログを参照した LRU＋低信頼度」規則で行う、という二段方針を採用すればよい。
+計算量の概算とボトルネックは表\ref{tab:complexity_summary} に整理しており、$H,k,M$ をこの表を見ながら P50/P95 遅延とトレードオフさせるのが安全な運用設計となる。
 
 % 反証可能な予測（重複セクション）は\S\ref{sec:ag_dg_gate} 内の段落に統合
 
