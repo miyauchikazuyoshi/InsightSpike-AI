@@ -41,6 +41,22 @@ Artifacts
 
 We aim to build a self‑updating RAG system that treats structural improvement in its own knowledge graph as an intrinsic reward, and autonomously updates itself. The geDIG gauge provides a principled decision for When to accept a graph update by balancing normalized edit‑path cost (structure) against information gain.
 
+### Why this RAG is “nice to have”
+
+- **Fewer pointless searches**: geDIG’s 0‑hop gate (AG) lets the system answer from its current graph when it is confident, and only fire retrieval when local structure looks ambiguous.  
+- **Safer, cleaner knowledge**: the multi‑hop gate (DG) only accepts updates when they create real structural shortcuts (ΔSP_rel) and information gain, reducing noisy merges and long‑term “knowledge pollution”.  
+- **Latency under control**: the same gauge that decides “When to update” also keeps extra hops and retrieval budget within PSZ/SLO bands (accuracy / FMR / P50).  
+- **Transparent decisions**: AG/DG logs and gauge traces make it possible to see _when_ the system decided to explore, backtrack, or update.
+
+### Why a Maze PoC for a RAG system?
+
+- The Maze environment is a **small, fully observable sandbox** where “good structure” has a clear ground truth: shortest paths.  
+- Each step in the maze is an analogue of a query:  
+  - AG detects “I’m probably going the wrong way” (dead‑ends / ambiguity).  
+  - DG commits only when a better route (structural shortcut) is actually found.  
+- This lets us measure, in a controlled setting, whether geDIG really reduces redundant exploration and backtracks intelligently.  
+- The **same F + AG/DG control logic** is then reused in the RAG pipeline, where the maze’s “cells” become documents/nodes and paths become multi‑hop reasoning chains.
+
 ## ⚡ Quick Start (≈30s)
 
 ```bash

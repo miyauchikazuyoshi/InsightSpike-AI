@@ -57,7 +57,7 @@
 
 本稿の新規性は次の3点に集約される。（i）\textbf{設計の単一化}: 静的RAGでは $\F$ を\,\emph{再ランキングの連続弱化}として用い、動的RAGでは\,\emph{更新ゲート}として用いることで、\textbf{“What を選ぶ” と “When 受容する”} を同一指標に束ねた。（ii）\textbf{運用の実装性}: Linkset固定・正規化上界・相対SPなどの\,\textit{固定尺}により、equal‑resources かつ\,\textit{no‑peeking} な比較で、P50/P95 の\,\textbf{遅延上限を守りながら} 0/多ホップの整合を実現する。（iii）\textbf{理論との橋渡し}: \textbf{FEP–MDL ブリッジ}を\,\textit{操作的命題}として提示し、$\F\propto\Delta\mathrm{MDL}{+}O(1/N)$ の関係（仮定下）と\,\textbf{自由エネルギー的な読み替え}を与える（過度な同値主張は避ける）。
 
-実験的には、\textbf{迷路PoC}と\textbf{RAG}の双方で検証する。迷路では、$\F$ の閾値分位（AG/DG）を用いた\,\textit{バックトラックの自動化}により、\textbf{冗長分岐の抑制とステップ削減}を示す。静的RAGでは、equal‑resources 下で\,\textbf{EM/F1 と根拠整合}の改善傾向を確認し、動的RAGでは、Acc/FMR/遅延（P50）から構成される\textbf{PSZ（Perfect Scaling Zone）} を\,\textit{SLO} として採用し、\textbf{PSZ短欠 $s_{\mathrm{PSZ}}$ の一貫した縮小}と\,\textbf{AG/DG 決定ログの可観測化}を提示する（PSZ帯への完全到達は現状未達）。さらに、アブレーションにより、$\Delta$EPC／$\Delta H$／$\Delta\mathrm{SP}$／0‑hop／multi‑hop／ゲートの\,\textbf{各構成要素が有意に寄与}することを示す。
+実験的には、\textbf{迷路PoC}と\textbf{RAG}の双方で検証する。迷路PoCは、言語要素を排した最小環境において、学習（エピソード統合）と推論（探索／バックトラック）を\textbf{同一のループ内で} geDIG が制御できるかを確かめるための\emph{非言語的な世界モデル実験}として位置づける。そのうえで、同じ $\F$ と AG/DG を RAG パイプラインに持ち込み、実運用環境での挙動を観察する。迷路では、$\F$ の閾値分位（AG/DG）を用いた\,\textit{バックトラックの自動化}により、\textbf{冗長分岐の抑制とステップ削減}を示す。静的RAGでは、equal‑resources 下で\,\textbf{EM/F1 と根拠整合}の改善傾向を確認し、動的RAGでは、Acc/FMR/遅延（P50）から構成される\textbf{PSZ（Perfect Scaling Zone）} を\,\textit{SLO} として採用し、\textbf{PSZ短欠 $s_{\mathrm{PSZ}}$ の一貫した縮小}と\,\textbf{AG/DG 決定ログの可観測化}を提示する（PSZ帯への完全到達は現状未達）。さらに、アブレーションにより、$\Delta$EPC／$\Delta H$／$\Delta\mathrm{SP}$／0‑hop／multi‑hop／ゲートの\,\textbf{各構成要素が有意に寄与}することを示す。
 
 本研究は、\textbf{理論の厳密性よりも運用可能性}を優先した\,\textit{最小の反証可能な仮説}として位置づける。コード・スクリプト・閾値分位の設定（burn‑in）・可視化を\,\textbf{再現経路として公開}し、読者が “いつ機能したか” を追跡できる実装（AG/DG時系列・ゲージ分布・Operating Curves）を提供する。Phase~2（\textit{オフライン再配線}）は設計スケッチに留め、数学的厳密化と大規模検証は今後の共同研究に委ねる。
 \end{abstract}
@@ -1247,7 +1247,7 @@ MDL/FEP と本指標 $\F$ の対応を表\,\ref{tab:theory_mapping_summary} に�
 \end{enumerate}
 
 \paragraph{原理検証としての位置づけ}
-本章は\textbf{探索効率}の検証を主眼とする\,\emph{PoC} であり、Dijkstra／A* は\,\emph{理想上限の参照枠}として扱う。確認対象は：（i）$\F{=}\Delta\mathrm{EPC}_{\mathrm{norm}}{-}\lambda\,\Delta\mathrm{IG}$ の\,\emph{実時間計算}、（ii）\,\emph{二段ゲート}（0\,\mbox{-}hop: 停滞検知, multi\,\mbox{-}hop: 短絡確認）の\,\emph{設計通りの挙動}、（iii）\,\emph{クエリ中心 multi\,\mbox{-}hop} による\,\emph{計算量と精度の管理}、の3点である（詳細アルゴリズムは付録参照）。
+本章は\textbf{探索効率}の検証を主眼とする\,\emph{PoC} であり、Dijkstra／A* は\,\emph{理想上限の参照枠}として扱う。\textbf{RAG そのものの性能評価ではなく}、\textbf{学習（エピソード統合）と推論（探索／バックトラック）を同時進行させる世界モデル更新ループ}が、完全に制御可能な環境で期待どおり動作するかを確かめるための最小実装である。確認対象は：（i）$\F{=}\Delta\mathrm{EPC}_{\mathrm{norm}}{-}\lambda\,\Delta\mathrm{IG}$ の\,\emph{実時間計算}、（ii）\,\emph{二段ゲート}（0\,\mbox{-}hop: 停滞検知, multi\,\mbox{-}hop: 短絡確認）の\,\emph{設計通りの挙動}、（iii）\,\emph{クエリ中心 multi\,\mbox{-}hop} による\,\emph{計算量と精度の管理}、の3点である（詳細アルゴリズムは付録参照）。
 
 \noindent 重要な限定: 迷路におけるエピソード表現（式\ref{eq:state_vec}）・クエリ（式\ref{eq:query_vec}）・重み（式\ref{eq:weights_vec}）は\textbf{迷路ドメインに特化}した設計である。他ドメイン（RAGなど）では表現設計が異なるが、\emph{統一ゲージによる評価・制御}（$\F$と2段階ゲート）は\textbf{同じ原理}で運用できることを次章で示す。
 
