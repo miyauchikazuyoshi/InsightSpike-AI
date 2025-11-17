@@ -77,8 +77,17 @@
   \item \textbf{RQ3（運用的整合）}: $\Delta\mathrm{IG}$（$=\,\Delta H_{\mathrm{norm}}+\gamma\,\Delta\mathrm{SP}_{\mathrm{rel}}$）と $\Delta\mathrm{MDL}$ の比例が、提示した仮定の下で実運用上の近似として\emph{一貫}して機能するか。
 \end{itemize}
 
-\paragraph{PSZ/SLO の定義と集計} 本稿の SLO として \textbf{PSZ（Perfect Scaling Zone）} を用いる。\\
-\noindent 目標は3指標の同時充足である：
+\subsection*{本稿の貢献（要約）}
+本稿の主な貢献を簡潔にまとめる：
+\begin{itemize}[leftmargin=1.6em]
+  \item \textbf{単一ゲージと二段ゲートによる「When」制御}: 正規化編集経路コスト $\gednorm$ と情報利得 $\ignorm$ を統合した単一スカラー $\F$ を定義し、0\,\mbox{-}hop の曖昧検知（AG）と multi\,\mbox{-}hop の確証（DG）から成る二段ゲートで、受容/保留/棄却と探索/バックトラックを\emph{同じ基準}で制御する枠組み geDIG を提示した。
+  \item \textbf{動的RAG向けの新しい運用指標と評価枠組み}: False Merge Rate（FMR）、Zero\,\mbox{-}Search Rate（ZSR）、および Acc/FMR/追加P50 遅延の目標帯 PSZ を導入し、$s_{\mathrm{PSZ}}$ による短欠を最小化するという\emph{動的 KG 更新に特化した評価基準}を提案した。
+  \item \textbf{MazeとRAGによる原理検証と実証}: 部分観測迷路における PoC 実験と、50ドメイン・500クエリ規模の RAG 実験の双方で、geDIG が冗長探索や偽受理を抑制しつつ、成功率・EM/F1・根拠整合を維持・改善する傾向を示し、アブレーションにより各構成要素の寄与を確認した。
+  \item \textbf{理論的な解釈（FEP--MDL ブリッジ）の操作的提示}: Free Energy Principle と MDL による読み替えを\emph{操作的命題}として整理し、$\F\propto\Delta\mathrm{MDL}{+}O(1/N)$ の対応を示した（詳細は後半節）。実装や運用には必須ではないが、設計の背景となる理論的直観を与える。
+\end{itemize}
+
+\paragraph{PSZ/SLO の定義と集計} 本稿の SLO として \textbf{PSZ（Perfect Scaling Zone）} を用いる。直感的には、「\emph{精度は十分高く（Acc$\ge95$\%）／誤った統合はほとんど起こらず（FMR$\le2$\%）／動的制御による追加遅延も許容範囲内（P50$\le$200ms）}」といった運用上の目標帯を意味する。\\
+\noindent 形式的には、目標は次の3指標の同時充足である：
 \begin{equation}
   \mathrm{Acc}\;\ge 0.95,\quad \mathrm{FMR}\;\le 0.02,\quad P50_{\Delta \mathrm{lat}}\;\le \SI{200}{ms} \label{eq:psz_targets}
 \end{equation}
@@ -92,12 +101,14 @@
 \noindent 成功基準の例: PSZ（受容$\ge$95\%, FMR$\le$2\%, 追加P50$\le$\SI{200}{ms}）準拠の操作点、迷路におけるステップ/冗長枝$\downarrow$、RAG における汚染率$\downarrow$・pending$\to$confirmed$\uparrow$。
 
 \section{はじめに}
-本稿は、洞察（insight）を「離散的エピソードが瞬時に連結される現象」とする作業仮説を採る。
-本仮説は海馬リプレイ（覚醒・睡眠期の順行・逆行再生）に関する先行研究と整合的である\,\cite{Buzsaki2015,Carr2011,Pfeiffer2013}。
-言い換えると、「ひらめき」の瞬間を、ばらばらだった経験や記憶が一気につながり直し「あ、こういうことか」と全体像が見える現象として捉える。
-この直観を\,\textbf{ナレッジグラフの更新アルゴリズムに適用できる}と仮説し、知識グラフ上の\,\textbf{構造統合}（EPC の抑制）と\,\textbf{情報整理}（エントロピーの減少）の\,\emph{同時発生}として操作化する。
-その上で、単一スカラー geDIG により\,\emph{検出と制御}を行う。
-ここで geDIG（ジーディグ）は \textit{graph edit Distance and Information Gain} の略であり、既存グラフに対する\,\textbf{編集経路コストの変化}と\,\textbf{情報利得（秩序化＋経路短縮）}を一つのゲージ $\F$ に束ね、静的/動的RAGの双方で「いつ受容するか（When）」を判定する枠組みである。
+本稿が扱う中心課題は、動的に成長する知識グラフにおいて\textbf{「いつ新しい知識を受け入れるか（When）」}という規範が欠落している点である。
+現行の Retrieval\,\mbox{-}Augmented Generation (RAG) は\,\textbf{何を取るか（What）}の最適化に長ける一方で、「どの更新を採用し、どの更新を見送るか」を決める明示的な基準を持たないため、知識汚染・冗長化・レイテンシ悪化のトレードオフが場当たり的になりやすい。
+本稿では、このギャップに対し、編集経路コストと情報利得を統合した\textbf{単一ゲージ $\F$ と二段ゲート（AG/DG）}を用いて、静的/動的RAGの双方で\,\emph{「いつ更新するか」を一貫した原理で制御}する枠組み geDIG を提案する。
+直観的には、0\,\mbox{-}hop（局所）では「ひとまず繋いでみた時点での悪化検知」、multi\,\mbox{-}hop では「少し先まで辿ったとき本当にショートカットになっているかの確認」として読み替えられる。
+洞察（insight）を「離散的エピソードが瞬時に連結される現象」とする作業仮説との対応や、海馬リプレイに関する先行研究\,\cite{Buzsaki2015,Carr2011,Pfeiffer2013} とのアナロジーは、後半の理論節（FEP--MDL ブリッジ）で\,\emph{操作的比喩}として簡潔に触れるに留める。
+実装や実験を理解するうえで、神経科学的な背景知識は前提としない。
+
+ここで geDIG（ジーディグ）は \textit{graph edit Distance and Information Gain} の略であり、既存グラフに対する\,\textbf{編集経路コストの変化}と\,\textbf{情報利得（秩序化＋経路短縮）}を一つのゲージ $\F$ に束ね、静的RAGでは\emph{再ランキングスコア}として、動的RAGでは\emph{更新ゲート}として「いつ受容するか（When）」を判定する枠組みである。
 
 \paragraph{用語の最小導入}
 本稿で用いる主要語を、序論時点で最小限だけ導入しておく：
