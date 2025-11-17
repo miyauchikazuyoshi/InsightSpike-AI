@@ -1132,32 +1132,14 @@ Helmholtz の自由エネルギー $\Delta F = \Delta U - T\,\Delta S$ に\,\emp
 
 なお、この対応は\,\emph{比喩}であり物理的同一性を主張しない。$\lambda$ は\,\emph{情報温度}としての尺度合わせ係数であり、$\F$ は\,\emph{尺度合わせとトレードオフ構造}を説明する操作的な自由エネルギーの読み替えである。
 
-\paragraph{誤差項と成立条件の解釈}
-残差の主因は（a）置換上界化による保守的バイアス、（b）エントロピー推定の有限標本誤差、（c）有限ホライズン $H$ による多ホップ切り詰めである。これらが支配的になる場合（例：巨大な編集コスト、急激な正規化定数の変動）には一ゲージ解釈は破綻する。運用上は分位値閾値（AG/DG）や頑健推定を併用し、$\varepsilon$ の影響を抑制する。
+\paragraph{FEP--MDL 対応（要約）}
+以上の仮定 (B1)--(B4) により、構造符号長とデータ符号長の変化は $\\gednorm$ と $\\ignorm$ に比例し、記述長の変化 $\\Delta L$ は
+\\[
+  \\Delta L \\approx c_{\\mathrm{ged}}\\,\\gednorm - c_{\\mathrm{ig}}\\,\\ignorm
+\\]
+と読める。比例係数 $\\lambda\\approx c_{\\mathrm{ig}}/c_{\\mathrm{ged}}$ を採用すれば、$\\F=\\gednorm-\\lambda\\ignorm$ は記述長変化 $\\Delta\\mathrm{MDL}$ に\\emph{比例する運用ゲージ}として解釈できる。より厳密な補題・証明スケッチや Helmholtz 自由エネルギーとの比喩的対応は、後半の FEP--MDL 節（\\S\\ref{sec:fep_mdl_bridge}）にまとめる。本節の理解に FEP/MDL の専門的な知識は必要なく、「構造コストと情報利得のトレードオフが MDL 的な圧縮原理と整合する」という程度の直観を持っておけば十分である。
 
-\begin{corollary}[multi\,\mbox{-}hop短絡による利得の寄与]
-仮定 (A1)・(A2) に加え、短絡形成時に $\Delta \mathrm{SP}_{\mathrm{rel}}(h)>0$ が成り立つとする。このとき multi-hop 評価は
-\[
-  F_h\;=\;\frac{C_{\mathrm{edit}}(h)}{C_{\max}}\; -\; \lambda\,\Big(\Delta H_{\mathrm{norm}} + \gamma\,\Delta \mathrm{SP}_{\mathrm{rel}}(h)\Big)
-\]
-と表され、$\gamma\,\Delta \mathrm{SP}_{\mathrm{rel}}(h)$ が情報利得側で\,\emph{負方向の補正}（コード長短縮）を与える。短絡が得られない場合（$\Delta \mathrm{SP}_{\mathrm{rel}}\approx 0$）にはこの寄与は消滅し、命題の 0-hop 解析と整合する。
-\end{corollary}
-
-\paragraph{FEP-MDL対応の操作的解釈}
-この命題により、以下の対応が成立する：
-\begin{itemize}
-  \item \textbf{0-hop評価 ($g_0$)}: FEP的な予測誤差・驚き検出 → ノルアドレナリン（NA）的注意の立ち上がり → 探索促進
-  \item \textbf{Multi-hop評価 ($g_{\min}$)}: MDL的な複雑さ削減・短絡検出 → （ドーパミン（DA）的）統合確定
-  \item \textbf{統合指標 ($\F$)}: 両者を単一スカラーで同時運転 → One\,\mbox{-}Gauge 制御
-\end{itemize}
-
-これにより、学習（記憶整理）と推論（探索意思決定）の同時制御が理論的に裏付けられる。
-
-これらの理論設計をどのようにアルゴリズムへ落とし込むか（ゲージ計算やゲート制御の手順）は、次章（\S\ref{sec:event_driven_control}）で詳細に扱う。
-
-\paragraph{理論枠組みの比較まとめ}
-\end{comment}
-MDL/FEP と本指標 $\F$ の対応を表\,\ref{tab:theory_mapping_summary} に整理する（詳細は本文参照）。
+MDL/FEP と本指標 $\\F$ の対応を表\\,\\ref{tab:theory_mapping_summary} に整理する（詳細は本文参照）。
 
 \begin{table}[H]
 \centering
