@@ -1,43 +1,48 @@
 ---
-layout: home
-title: geDIG — Unified Gauge Control
+title: InsightSpike-AI
+description: 外部公開ハブページ
 ---
 
-# geDIG — Unified Gauge Control for Dynamic Knowledge Graphs
+# InsightSpike-AI
 
-> A discrete free‑energy perspective bridging FEP, MDL, and information thermodynamics to govern When/What in dynamic knowledge graphs.
+AI/LLM を活用したプロジェクトのハブページです。はじめての方は「クイックスタート」へ。
 
-- Paper (PDF): [geDIG_onegauge_improved_v4.pdf](paper/geDIG_onegauge_improved_v4.pdf)
-- Quick start: `python examples/public_quick_start.py`
-- CLI: `python -m insightspike.cli.spike --help`
-- Smoke tests: `make codex-smoke`
+## クイックスタート
+- リポジトリ: [miyauchikazuyoshi/InsightSpike-AI](https://github.com/miyauchikazuyoshi/InsightSpike-AI)
+- ドキュメント（README）: [README.md](https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/README.md)
+- 相談・質問: [Discussions](https://github.com/miyauchikazuyoshi/InsightSpike-AI/discussions)
+- 不具合報告・要望: [Issues](https://github.com/miyauchikazuyoshi/InsightSpike-AI/issues)
 
-## What is geDIG?
+## できること
+- プロジェクトの概要
+- 使い方/セットアップ
+- デモ/サンプル
+- ロードマップ/貢献方法
 
-- Single gauge F: `F = ΔEPC_norm − λ (ΔH_norm + γ ΔSP_rel)`
-- Two‑stage gate: AG (0‑hop) → DG (multi‑hop)
-- Phase‑1 PoC: Maze + RAG under equal‑resources, with observable decision logs
+## セットアップ
+1. リポジトリをクローン
+2. 必要な依存をインストール
+3. 環境変数の設定（必要なら）
+4. 実行方法
 
-See Theory and Phase‑1 pages for sign conventions, PSZ/SLO, and reproduction.
+> 詳細は [README.md](https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/README.md) を参照
 
-## Reproduce (Maze 25×25, 500 steps)
+## デモ / サンプル
+- Notebook（例）: notebooks ディレクトリ（存在する場合）
+- サンプルコード（例）: examples ディレクトリ（存在する場合）
+- スクリーンショット / GIF（準備中）
 
-- L3 batch (60 seeds): `python scripts/run_maze_batch_and_update.py --mode l3 --seeds 60 --workers 4 --update-tex`
-- Eval batch (60 seeds): `python scripts/run_maze_batch_and_update.py --mode eval --seeds 60 --workers 4 --update-tex`
-- Aggregates land in `docs/paper/data/`; the 25×25 table updates automatically.
+## ロードマップ
+- [Project Board](https://github.com/miyauchikazuyoshi/InsightSpike-AI/projects)（利用していれば）
+- マイルストーン: [Milestones](https://github.com/miyauchikazuyoshi/InsightSpike-AI/milestones)
 
-## Call for Reviewers / Collaborators
+## コミュニティと貢献
+- Issue でバグ報告・提案をお願いします
+- PR 大歓迎です（ガイドライン: CONTRIBUTING.md 予定/準備中）
+- 行動規範: CODE_OF_CONDUCT.md（予定/準備中）
 
-We’re looking for collaborators on:
-- Information thermodynamics, Active Inference (FEP), MDL
-- Graph RAG, multi‑hop reasoning, dynamic knowledge bases
-- Phase‑2: offline rewiring (global consistency)
+## ライセンス
+- LICENSE:（準備中/選定中）
 
-How to engage:
-- Open an Issue with “Review” label, or PR small fixes
-- Or DM on X (Twitter): @kazuyoshim5436
-
-## Links
-- Spec: [geDIG spec]({{ site.baseurl }}/gedig_spec/)
-- Phase‑1: [maze & RAG]({{ site.baseurl }}/phase1/)
-- Tutorial (trace): [trace a spike]({{ site.baseurl }}/tutorials/trace/)
+---
+© 2025 InsightSpike-AI

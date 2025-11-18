@@ -1,18 +1,3 @@
-title: "geDIG — InsightSpike-AI"
-description: "Unified Gauge Control for Dynamic Knowledge Graphs"
-theme: minima
-markdown: kramdown
-plugins:
-  - jekyll-seo-tag
-
-# For GitHub Pages project site
-url: "https://miyauchikazuyoshi.github.io"
-baseurl: "/InsightSpike-AI"
-
-# Show pages in header navigation
-header_pages:
-  - index.md
-  - theory.md
-  - phase1.md
-  - tutorials/trace.md
-  - call-for-reviewers.md
+theme: jekyll-theme-cayman
+title: InsightSpike-AI
+description: "外部公開ハブページ"
