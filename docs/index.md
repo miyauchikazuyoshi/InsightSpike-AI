@@ -42,3 +42,4 @@ How to engage:
 - Spec: [geDIG spec]({{ site.baseurl }}/gedig_spec/)
 - Phase‑1: [maze & RAG]({{ site.baseurl }}/phase1/)
 - Tutorial (trace): [trace a spike]({{ site.baseurl }}/tutorials/trace/)
+- GitHub repo: [InsightSpike-AI](https://github.com/miyauchikazuyoshi/InsightSpike-AI)
