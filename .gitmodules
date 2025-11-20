@@ -1,0 +1,4 @@
+[submodule "experiments/rag-dynamic-db-v3-lite/external/graphrag"]
+	path = experiments/rag-dynamic-db-v3-lite/external/graphrag
+	url = https://github.com/microsoft/graphrag.git
+
