@@ -52,9 +52,10 @@ Formal specification and theory background
 - Paper v5 (JA): `docs/paper/geDIG_onegauge_improved_v5.pdf`
 - Paper v4 (EN): `docs/paper/geDIG_onegauge_improved_v4_en.pdf`
 
-### 🗂️ Appendix (Long‑Term Notes)
-Exploratory notes on AGI foundations and governance
-- [Appendix README](./appendix/README.md) - Entry point to AGI/governance notes
+### 🗂️ Research Notes (Long‑Term / AGI)
+Exploratory notes on AGI foundations, governance, and Phase‑2 ideas
+- [AGI / Governance Notes](./research-notes/appendix/README.md)
+- [Phase‑2 Offline Optimization (JA/EN)](./research-notes/appendix/phase2/phase2_offline_appendix_ja_en.md)
 
 ### 🖼️ [Images](./images/)
 Documentation images and animations
@@ -65,8 +66,11 @@ Documentation images and animations
 - **New Users**: Start with [Getting Started](./getting-started/)
 - **Users**: Check [User Guide](./user-guide/) for daily usage
 - **Developers**: See [API Reference](./api-reference/) and [Architecture](./architecture/)
-- **Researchers**: Explore [Research](./research/) for theoretical foundations
-- **Contributors**: Review [Development](./development/) for ongoing work
+- **Researchers**: Read the paper and theory docs:
+  - Paper v5 (JA): `docs/paper/geDIG_onegauge_improved_v5.pdf`
+  - Paper v4 (EN): `docs/paper/geDIG_onegauge_improved_v4_en.pdf`
+  - Gauge spec: [geDIG Spec](./gedig_spec.md)
+- **Contributors**: Review [CONTRIBUTING](./CONTRIBUTING.md) for ongoing work
 
 ## 📝 Documentation Standards
 

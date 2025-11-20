@@ -166,6 +166,26 @@
           </div>
         </div>
       </div>
+      <div class="card">
+        <h3>Early Patterns — Abstract Graph (seed 0)</h3>
+        <div class="legend">
+          <span class="graph">既存配線</span>
+          <span class="link">確定リンク</span>
+          <span class="cand">候補リンク</span>
+          <span class="shortcut">短絡候補</span>
+        </div>
+        <div class="dual-grid">
+          <canvas id="abstract-corridor" width="260" height="260"></canvas>
+          <canvas id="abstract-tjunction" width="260" height="260"></canvas>
+          <canvas id="abstract-deadend" width="260" height="260"></canvas>
+        </div>
+        <div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:8px;">
+          <button type="button" data-export-canvas="abstract-corridor">PNG保存: corridor</button>
+          <button type="button" data-export-canvas="abstract-tjunction">PNG保存: T字路</button>
+          <button type="button" data-export-canvas="abstract-deadend">PNG保存: dead end</button>
+        </div>
+        <div class="note">迷路序盤の代表例（corridor / T字路 / dead end）における抽象グラフのスナップショット。折りたたみ（shortcut）がいつ現れるかを視覚的に確認できます。</div>
+      </div>
       <div class="step-info" id="step-info"></div>
       <div class="card" id="debug-card" style="display:block;">
         <h3>Render Debug</h3>
@@ -836,17 +856,17 @@ window.addEventListener('error', (event) => {
 
     const DIR_LABELS_SHORT = { 0: 'N', 1: 'E', 2: 'S', 3: 'W' };
 
-    function drawAbstractGraph(abstractNodes, abstractEdges, rootKey, currentKey, queryKeySet) {
-      if (!graphAbstractCtx) {
+    function drawAbstractGraph(abstractNodes, abstractEdges, rootKey, currentKey, queryKeySet, ctxOverride) {
+      const ctx = ctxOverride || graphAbstractCtx;
+      if (!ctx) {
         return;
       }
-      clearCanvas(graphAbstractCtx);
+      clearCanvas(ctx);
       const hasNodes = abstractNodes && abstractNodes.size > 0;
       const hasEdges = abstractEdges && abstractEdges.length > 0;
       if (!hasNodes && !hasEdges && !rootKey) {
         return;
       }
-      const ctx = graphAbstractCtx;
       const width = ctx.canvas.width;
       const height = ctx.canvas.height;
       ctx.fillStyle = '#f8fafc';
@@ -1183,7 +1203,7 @@ window.addEventListener('error', (event) => {
 
       // Hovered node overlay (halo + label)
       try {
-        if (state.hoverNodeKey && positions.has(state.hoverNodeKey)) {
+        if (state.hoverNodeKey && positions.has(state.hoverNodeKey) && ctx === graphAbstractCtx) {
           const pos = positions.get(state.hoverNodeKey);
           // Halo
           ctx.save();
@@ -1218,6 +1238,15 @@ window.addEventListener('error', (event) => {
       } catch (_) {}
 
       try { window.__lastAbstractPositions = positions; } catch (_) {}
+      try {
+        window.__lastAbstractGraph = {
+          nodes: Array.from(abstractNodes || []),
+          edges: (abstractEdges || []).map(e => ({ a: e.a, b: e.b, status: e.status })),
+          rootKey: rootKey || null,
+          currentKey: currentKey || null,
+          queryKeys: Array.from(queryKeySet || []),
+        };
+      } catch (_) {}
     }
 
     function drawGraph(stepIdxOverride) {
@@ -2748,6 +2777,82 @@ window.addEventListener('error', (event) => {
       }
     }
 
+    let patternPanelsRendered = false;
+    function renderPatternPanelsOnce() {
+      if (patternPanelsRendered) return;
+      patternPanelsRendered = true;
+      try {
+        const records = getRecords();
+        if (!records.length) return;
+        const classify = (rec) => {
+          const moves = Array.isArray(rec.possible_moves) ? rec.possible_moves.length : null;
+          if (rec.is_dead_end) return 'dead_end';
+          if (moves !== null && moves >= 3) return 'tjunction';
+          if (moves === 2) return 'corridor';
+          return null;
+        };
+        const pickedIdx = { corridor: null, tjunction: null, dead_end: null };
+        records.forEach((rec, idx) => {
+          if (rec.step > 120) return; // 序盤だけを見る
+          const cls = classify(rec);
+          if (cls && pickedIdx[cls] === null) {
+            pickedIdx[cls] = idx;
+          }
+        });
+        const prevShowAll = state.showAllQueries;
+        state.showAllQueries = true;  // パターン用スナップショットは常に「Show all query nodes」で描画
+        const originalStep = state.step;
+        const panels = [
+          { id: 'abstract-corridor', idx: pickedIdx.corridor },
+          { id: 'abstract-tjunction', idx: pickedIdx.tjunction },
+          { id: 'abstract-deadend', idx: pickedIdx.dead_end },
+        ];
+        panels.forEach(p => {
+          if (p.idx === null || p.idx === undefined) return;
+          const canvas = document.getElementById(p.id);
+          if (!canvas) return;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return;
+          try {
+            drawGraph(p.idx);
+            const g = window.__lastAbstractGraph || null;
+            if (!g || !Array.isArray(g.nodes) || !Array.isArray(g.edges)) return;
+            const nodesSet = new Set(g.nodes || []);
+            const edgesArr = (g.edges || []).map(e => ({ a: e.a, b: e.b, status: e.status }));
+            const qKeys = new Set(g.queryKeys || []);
+            drawAbstractGraph(nodesSet, edgesArr, g.rootKey || null, g.currentKey || null, qKeys, ctx);
+          } catch (_) {}
+        });
+        state.step = originalStep;
+        state.showAllQueries = prevShowAll;
+        render();
+      } catch (_) {}
+    }
+
+    function installCanvasExportButtons() {
+      const buttons = document.querySelectorAll('[data-export-canvas]');
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-export-canvas');
+          if (!id) return;
+          const canvas = document.getElementById(id);
+          if (!canvas || !canvas.toDataURL) return;
+          try {
+            const dataUrl = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            const base = id.replace(/^abstract-/, '');
+            link.download = `maze_${base || id}.png`;
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          } catch (e) {
+            console.error('Failed to export canvas PNG', e);
+          }
+        });
+      });
+    }
+
     // populate meta tables
     if (runMeta) {
       const rows = [];
@@ -2769,6 +2874,8 @@ window.addEventListener('error', (event) => {
     updateControls();
     installAbstractHover();
     render();
+    renderPatternPanelsOnce();
+    installCanvasExportButtons();
   
 
 </script>

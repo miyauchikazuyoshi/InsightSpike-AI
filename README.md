@@ -21,22 +21,6 @@ Cloud/Lightweight defaults
 
 Docs / GitHub Pages: https://miyauchikazuyoshi.github.io/InsightSpike-AI
 
-## 🔁 Reproduce in 5 lines (paper preset, lite)
-
-```bash
-python -m experiments.exp2to4_lite.src.run_experiment \
-  --config experiments/exp2to4_lite/configs/exp23_paper.yaml
-python -m experiments.exp2to4_lite.run_exp23 \
-  --config experiments/exp2to4_lite/configs/exp23_paper.yaml
-python -m experiments.exp2to4_lite.src.alignment \
-  --results experiments/exp2to4_lite/results/exp23_paper_*.json \
-  --dataset experiments/exp2to4_lite/data/test_500.jsonl
-```
-
-Artifacts
-- PDFs: `docs/paper/geDIG_onegauge_improved_v4{_en}.pdf` (CI artifacts in “Paper Build”) 
-- arXiv pack: `bash scripts/pack_arxiv.sh both`
-
 ## 🎯 What We’re Building
 
 We aim to build a self‑updating RAG system that treats structural improvement in its own knowledge graph as an intrinsic reward, and autonomously updates itself. The geDIG gauge provides a principled decision for When to accept a graph update by balancing normalized edit‑path cost (structure) against information gain.
@@ -57,7 +41,7 @@ We aim to build a self‑updating RAG system that treats structural improvement 
 - This lets us measure, in a controlled setting, whether geDIG really reduces redundant exploration and backtracks intelligently.  
 - The **same F + AG/DG control logic** is then reused in the RAG pipeline, where the maze’s “cells” become documents/nodes and paths become multi‑hop reasoning chains.
 
-## ⚡ Quick Start (≈30s)
+## ⚡ RAG Quick Start (≈30s)
 
 ```bash
 python -m venv .venv && source .venv/bin/activate    # Windows: .venv\Scripts\activate
@@ -118,6 +102,22 @@ F = -0.42  (ΔEPC_norm=0.15,  ΔIG=0.57,  spike=True)
     - experiments/maze-query-hub-prototype/results/batch_25x25/paper25_25x25_s500_seed0_interactive.html
   - Interactive HTML (seed17):
     - experiments/maze-query-hub-prototype/results/batch_25x25/paper25_25x25_s300_seed17_interactive.html
+
+## 🔁 Reproduce in 5 lines (paper preset, lite)
+
+```bash
+python -m experiments.exp2to4_lite.src.run_experiment \
+  --config experiments/exp2to4_lite/configs/exp23_paper.yaml
+python -m experiments.exp2to4_lite.run_exp23 \
+  --config experiments/exp2to4_lite/configs/exp23_paper.yaml
+python -m experiments.exp2to4_lite.src.alignment \
+  --results experiments/exp2to4_lite/results/exp23_paper_*.json \
+  --dataset experiments/exp2to4_lite/data/test_500.jsonl
+```
+
+Artifacts
+- PDFs: `docs/paper/geDIG_onegauge_improved_v4{_en}.pdf` (CI artifacts in “Paper Build”) 
+- arXiv pack: `bash scripts/pack_arxiv.sh both`
 
 <p align="center">
   <img alt="Maze overview" src="docs/paper/figures/fig4_maze.png" width="640" />
@@ -238,7 +238,7 @@ Status:
 - License: Apache-2.0
 - Contact: miyauchikazuyoshi@gmail.com
 - X (Twitter): @kazuyoshim5436
-- Patents (JP): 2025-082988, 2025-082989
+- Patent applications (JP, pending): 2025-082988, 2025-082989
 
 ## Feedback & Collaboration
 

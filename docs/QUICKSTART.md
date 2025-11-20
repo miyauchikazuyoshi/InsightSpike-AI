@@ -75,15 +75,7 @@ F = -0.42  (ΔEPC_norm=0.15,  ΔIG=0.57,  spike=True)
 
 ## 3. 最短の実験実行
 
-迷路（小規模で高速）
-
-```bash
-python examples/maze50_experiment.py --size 15 --max-steps 1000 --verbosity 1
-```
-
-RAG（準備中）
-
-- 実験手順は EXPERIMENTS.md を参照してください（フェーズ整理中）。
+実験再現（Maze / RAG）の手順は `docs/EXPERIMENTS.md` を参照してください。
 
 ## トラブルシュート
 

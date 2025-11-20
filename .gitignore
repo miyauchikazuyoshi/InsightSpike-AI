@@ -15,6 +15,10 @@ test_results/
 nohup.out
 None
 
+# Paper temp / local notes
+docs/paper/_tmp/
+docs/paper/updates/
+
 # Node / frontend
 node_modules/
 
@@ -36,6 +40,15 @@ experiments/**/data_snapshots/
 # Archived content (code/docs/experiments)
 archive/
 
+# Caches
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
 # Misc
 .coverage
 .DS_Store
+**/.DS_Store
+*.sqlite
+*.db

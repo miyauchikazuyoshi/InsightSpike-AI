@@ -1,0 +1,20 @@
+% 25x25 maze (500 steps) summary (English version for arXiv v5)
+\begin{tabular}{lrr}
+\toprule
+Metric & Value (eval) & Value (L3) \\ 
+\midrule
+Success rate & 0.750 & 0.750 \\
+Avg. steps & 315.6 & 315.6 \\
+Avg. edges & 284.5 & 284.5 \\
+AG rate & 1.00 & 0.218 \;\footnotesize(mean over 60 seeds) \\
+DG rate & 0.348 & 0.925 \;\footnotesize(mean over 60 seeds) \\
+Mean $g_0$ & -0.1618 & -0.1618 \\
+Mean $g_{\min}$ & -0.2471 & -0.2471 \\
+Avg. eval time (ms) & 4196.6 & 3564.6 \\
+P95 eval time (ms) & 30468.7 & 25805.6 \\
+\bottomrule
+\end{tabular}
+\par\noindent\footnotesize Conditions: 25$\times$25 maze, max\_steps=500.\ 
+The L3 column reports means over 60 seeds with \texttt{use\_main\_l3=true}; 
+the Eval column is taken from the grid experiment (seed=0).\\
+

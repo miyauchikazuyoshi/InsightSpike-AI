@@ -7,13 +7,13 @@ Where outputs go
 - Tables: docs/paper/templates/*.tex (paper \input{}’s these if present)
 
 Scripts and expected inputs
-- A7 (R‑PSZ‑Scatter): docs/paper/fig_rag_psz_scatter.py
+- A7 (R‑PSZ‑Scatter): docs/paper/fig_scripts/fig_rag_psz_scatter.py
   - Input (optional): data/rag_eval/psz_points.csv
   - Columns: run_id, query_id, H, k, PER, acceptance, FMR, latency_ms
   - Env override: PSZ_INPUT=/path/to/your.csv
   - Output: figures/fig7_psz_scatter.{pdf,png}
 
-- A2 (M‑ROC): docs/paper/fig_maze_bridge_roc.py
+- A2 (M‑ROC): docs/paper/fig_scripts/fig_maze_bridge_roc.py
   - Input (optional): data/maze_eval/bridge_scores.csv
   - Columns: run_id, step, aggregator, score, y_true
     - aggregator ∈ {min, softmin:τ, sum} (e.g., "min", "softmin:0.5")
@@ -22,7 +22,7 @@ Scripts and expected inputs
   - Env override: BRIDGE_SCORES=/path/to/your.csv
   - Output: figures/fig_m_roc.pdf
 
-- A8 (Latency Summary): docs/paper/tab_latency_summary.py
+- A8 (Latency Summary): docs/paper/fig_scripts/tab_latency_summary.py
   - Inputs (optional):
     - data/latency/maze_latency.csv
     - data/latency/rag_latency.csv
@@ -30,53 +30,53 @@ Scripts and expected inputs
   - Env override: LAT_MAZE=..., LAT_RAG=...
   - Output: templates/tab_latency_summary.tex (auto \input{} in paper)
 
-- A1 (Event Alignment / M‑Causal): docs/paper/fig_maze_event_alignment.py
+- A1 (Event Alignment / M‑Causal): docs/paper/fig_scripts/fig_maze_event_alignment.py
   - Input (optional): data/maze_eval/event_alignment.csv
     - Wide form: run_id, t_from_NA, BT, accept, evict (0/1)
     - Long form: run_id, t_from_NA, event, value (0/1)
   - Env override: EVENT_ALIGN=/path/to/your.csv
   - Output: figures/fig_m_causal.{pdf,png}
 
-- A3 (Memory Growth / Mem‑Growth): docs/paper/fig_mem_growth.py
+- A3 (Memory Growth / Mem‑Growth): docs/paper/fig_scripts/fig_mem_growth.py
   - Input (optional): data/maze_eval/memory_growth.csv
     - Columns: run_id, size, step, nodes, edges, redundant_edge_ratio
   - Env override: MEM_GROWTH=/path/to/your.csv
   - Output: figures/fig_mem_growth.{pdf,png}
 
-- A5 (Steps CDF + effect size): docs/paper/fig_steps_cdf.py
+- A5 (Steps CDF + effect size): docs/paper/fig_scripts/fig_steps_cdf.py
   - Input (optional): data/maze_eval/steps_distribution.csv
     - Columns: run_id, method, steps, success
   - Env override: STEPS_DIST=/path/to/your.csv
   - Output: figures/fig_steps_cdf.{pdf,png}
 
-- A6 (Observation radius sensitivity): docs/paper/fig_obs_radius_sensitivity.py
+- A6 (Observation radius sensitivity): docs/paper/fig_scripts/fig_obs_radius_sensitivity.py
   - Input (optional): data/maze_eval/obs_radius_sensitivity.csv
     - Columns: radius, H, k, lambda, success_rate, steps_mean, bt_precision
   - Env override: OBS_SENS=/path/to/your.csv
   - Output: figures/fig_m_obs_sensitivity.{pdf,png}
 
-- A9 (IG robustness panel): docs/paper/fig_r_ig_robust.py
+- A9 (IG robustness panel): docs/paper/fig_scripts/fig_r_ig_robust.py
   - Input (optional): data/rag_eval/ig_robustness.csv
     - Columns: run_id, ig_def, H, k, PER, acceptance, FMR, latency_ms, rank_pos (optional)
   - Env override: IG_ROBUST=/path/to/your.csv
   - Output: figures/fig_r_ig_robust.{pdf,png}
 
-- A10 (Multi‑hop by type): docs/paper/fig_r_multihop_by_type.py
+- A10 (Multi‑hop by type): docs/paper/fig_scripts/fig_r_multihop_by_type.py
   - Input (optional): data/rag_eval/multihop_by_type.csv
   - Env override: HOP_BY_TYPE=/path/to/your.csv
   - Output: figures/fig_r_multihop_by_type.{pdf,png}
 
-- A11 (Operating curves τ×λ): docs/paper/fig_r_operating_curves.py
+- A11 (Operating curves τ×λ): docs/paper/fig_scripts/fig_r_operating_curves.py
   - Input (optional): data/rag_eval/tau_lambda_grid.csv
   - Env override: TAU_LAM=/path/to/your.csv
   - Output: figures/fig_r_operating_curves.{pdf,png}
 
-- A12 (Human acceptance reliability κ): docs/paper/fig_r_human_kappa.py
+- A12 (Human acceptance reliability κ): docs/paper/fig_scripts/fig_r_human_kappa.py
   - Input (optional): data/rag_eval/human_acceptance.csv
   - Env override: HUMAN_ACC=/path/to/your.csv
   - Output: figures/fig_r_human_kappa.{pdf,png}
 
-- A13 (Baseline comparison): docs/paper/fig_r_baseline_comparison.py
+- A13 (Baseline comparison): docs/paper/fig_scripts/fig_r_baseline_comparison.py
   - Input (optional): data/rag_eval/baseline_summary.csv
   - Env override: BASE_SUM=/path/to/your.csv
   - Output: figures/fig_r_baseline_comparison.{pdf,png}
@@ -84,9 +84,9 @@ Scripts and expected inputs
 Usage
 1) Drop your CSVs under data/* as above, or point the scripts via env vars.
 2) Run:
-   - python3 docs/paper/fig_rag_psz_scatter.py
-   - python3 docs/paper/fig_maze_bridge_roc.py
-   - python3 docs/paper/tab_latency_summary.py
+   - python3 docs/paper/fig_scripts/fig_rag_psz_scatter.py
+   - python3 docs/paper/fig_scripts/fig_maze_bridge_roc.py
+   - python3 docs/paper/fig_scripts/tab_latency_summary.py
 3) Rebuild the paper (XeLaTeX build recommended):
    - cd docs/paper && latexmk -xelatex -interaction=nonstopmode geDIG_paper_restructured_draft_xe.tex
 

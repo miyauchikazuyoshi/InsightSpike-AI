@@ -1,0 +1,320 @@
+% geDIG v5 (Japanese, compressed arXiv companion)
+% Base: geDIG_onegauge_improved_v5.tex
+\documentclass[ja=standard,xelatex]{bxjsarticle}
+\usepackage{amsmath,amssymb,graphicx,booktabs}
+\usepackage{amsthm}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,shapes.geometric}
+\usepackage{hyperref}
+\hypersetup{hidelinks,breaklinks=true}
+\usepackage[nameinlink]{cleveref}
+\usepackage{microtype}
+\usepackage{siunitx}
+\usepackage{enumitem}
+\usepackage[table]{xcolor}
+\usepackage{float}
+\graphicspath{{../figures/}{figures/}{../docs/paper/figures/}{docs/paper/figures/}}
+
+% ゆるめの改行設定
+\tolerance=2000
+\emergencystretch=3em
+
+% 図の有無トグル（英語圧縮版と合わせる）
+\makeatletter
+\newif\iffigs
+\figstrue
+\iffigs\else
+  \renewcommand{\includegraphics}[2][]{\rule{0pt}{0pt}}
+\fi
+\makeatother
+
+% 定理環境とマクロ
+\newtheorem{proposition}{命題}[section]
+\newtheorem{theorem}{定理}[section]
+\newtheorem{lemma}{補題}[section]
+\newtheorem{corollary}{系}[section]
+
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\gednorm}{\Delta\mathrm{EPC}_{\mathrm{norm}}}
+\newcommand{\ignorm}{\Delta\mathrm{IG}_{\mathrm{norm}}}
+\newcommand{\experimNote}[1]{} % 圧縮版では空
+
+\title{動的知識グラフの状態を測る統一ゲージ・フレームワーク\\[0.3em]
+  \large geDIG v5 圧縮版（日本語コンパニオン）}
+\author{宮内 和義\\[0.2em]
+  \small\texttt{miyauchikazuyoshi@gmail.com}}
+\date{v5 圧縮版草稿}
+
+\begin{document}
+\sloppy
+\maketitle
+
+\begin{abstract}
+本稿は、動的に成長する知識グラフ（KG）における「\textbf{いつ受け入れるか（When）}」の規範を与えるため、\textbf{単一ゲージ} $\F$ による統一制御フレームワーク geDIG を簡潔にまとめた圧縮版である。
+$\F$ は、\emph{正規化編集経路コスト} $\Delta\mathrm{EPC}_{\mathrm{norm}}$（実際に適用した編集列のコスト）と、\emph{情報利得}（シャノンエントロピー差 $\Delta H$ と経路短縮 $\Delta\mathrm{SP}$）からなる $\Delta\mathrm{IG}$ を束ね、0\,hop の曖昧検知ゲート（AG）と multi\,hop の洞察確証ゲート（DG）で、探索／統合／バックトラック／エビクションをイベント駆動で制御する。
+
+静的RAGでは $\F$ を\emph{連続弱化スコア}としてリトリーバに統合し、動的RAGでは\emph{更新ゲート}として用いることで、「What を取るか」と「When 受容するか」を同一指標で結ぶ。
+評価では、部分観測迷路 PoC と静的／動的RAGの両方で geDIG を検証し、equal-resources／no-peeking 条件のもとで、\textbf{EM/F1 と根拠整合の改善}、\textbf{探索ステップ削減}、および動的RAGにおける\textbf{PSZ（Perfect Scaling Zone; Acc/FMR/P50）短欠 $s_{\mathrm{PSZ}}$ の縮小}を示す。
+PSZ 帯（Acc$\ge95$\%, FMR$\le2$\%, 追加P50$\le200$\,ms）への完全到達は現状未達であることも率直に述べ、その理由（保守的なハイパパラメータ設定、実験規模の限界、ゲート設計の安定性優先）を整理する。
+
+理論面では、$\F=\gednorm-\lambda\ignorm$ を、最小記述長（MDL）および Free Energy Principle（FEP）と\emph{操作的に}対応づける命題 $\F\propto\Delta\mathrm{MDL}{+}O(1/N)$ を提示しつつ、厳密な同値主張は避ける。
+本稿は v5 日本語フル版の内容を圧縮し、英語圧縮版（arXiv 提出用）と読み味を揃えることを目的とする。
+\end{abstract}
+
+\subsection*{本稿の貢献（要約）}
+本稿の貢献を簡潔にまとめる：
+\begin{itemize}[leftmargin=1.6em]
+  \item \textbf{単一ゲージと二段ゲートによる When 制御}：構造編集（EPC）と情報整理（$\Delta H,\Delta\mathrm{SP}$）を一つのスカラー $\F$ に束ね、0\,hop／multi\,hop の二段ゲート（AG/DG）で受容・保留・巻き戻しを制御する設計を提示する。
+  \item \textbf{静的／動的RAGの単一フレームワーク化}：静的RAGでは $\F$ を連続弱化として、動的RAGでは更新ゲートとして用い、equal-resources／no-peeking 条件のもとで PSZ 指標（Acc/FMR/追加P50）を共通軸として評価する。
+  \item \textbf{FEP--MDL ブリッジの操作的整理}：$\F$ を MDL 風の「構造コスト－情報利得」関数として再解釈し、FEP/MDL/情報ボトルネック系との関係を「操作的対応」として整理する（厳密な証明ではなく、アブレーションと挙動の整合に基づく読み替え）。
+\end{itemize}
+
+\section{序論}
+
+大規模な知識グラフや長期ログを扱うシステムでは、「何を取得するか（What）」は多く議論されてきた一方で、「いつ受け入れるか／巻き戻すか（When）」の設計は十分に整理されていない。
+とくに動的RAGの文脈では、常に更新するのではなく、「更新を控える／保留する／巻き戻す」判断が長期的な汚染率や遅延に直結する。
+本研究では、この When の問題に対して、\textbf{単一ゲージ $\F$ と二段ゲート（AG/DG）} による統一制御を提案し、迷路 PoC と RAG 実験で動作を確認する。
+
+本稿は v5 日本語フル版の詳細な導出・補足データから、次の要素だけを抽出して構成する：
+\begin{itemize}[leftmargin=1.6em]
+  \item ゲージ $\F$ と AG/DG の設計と直感
+  \item 部分観測迷路 PoC と静的／動的RAG実験（代表図表）
+  \item FEP--MDL ブリッジの要点と関連研究の立ち位置
+  \item PSZ 未達の理由整理と今後のロードマップ（Phase~2 展望を含む）
+\end{itemize}
+証明スケッチや補足統計の多くはフル版に譲り、本稿では運用上の読み替えと代表的な図表に焦点を当てる。
+
+\section{背景と全体像}\label{sec:background_overview_ja}
+
+\subsection{静的RAGと動的RAG}
+
+静的RAGは「固定グラフ（あるいはコーパス）から何を取るか」を最適化する枠組みであり、GraphRAG 系の手法はコミュニティ検出や多ホップ経路探索を通じて、取得サブグラフの質を高めてきた。
+一方、動的RAGでは、ドキュメントやイベントが継続的に到着し、「\emph{いつグラフを書き換えるか}」「\emph{どこまで巻き戻すか}」という制御が必要となる。
+
+本稿では、静的RAGを「常に取得する、1ラウンドの静的評価」、動的RAGを「不確実なときだけ取得し、利得が確認されたときだけ更新する」枠組みとして対比させる。
+\cref{fig:static_dynamic_pipeline_ja,tab:static_dynamic_responsibility_ja} に、両者のパイプラインと責務の対比を示す。
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[
+    node distance=8mm,
+    >=Latex,
+    box/.style={rectangle,draw,rounded corners,align=center,minimum width=18mm,minimum height=6mm,font=\scriptsize}]
+    % Static
+    \node[box] (q1) {クエリ};
+    \node[box,right=of q1] (r1) {取得};
+    \node[box,right=of r1] (a1) {回答};
+    \draw[->] (q1) -- (r1);
+    \draw[->] (r1) -- (a1);
+    \node[above of=r1,yshift=-18mm,font=\small] {静的RAG（単一ラウンド）};
+    % Dynamic
+    \node[box,below=18mm of q1] (q2) {クエリ};
+    \node[box,right=of q2] (ag) {AG (0-hop)};
+    \node[box,right=of ag] (r2) {オンデマンド取得};
+    \node[box,right=of r2] (dg) {DG (multi-hop)};
+    \node[right=of dg] (a2) {回答/更新};
+    \draw[->] (q2) -- (ag);
+    \draw[->] (ag) -- node[above,font=\scriptsize]{不確実} (r2);
+    \draw[->] (r2) -- (dg);
+    \draw[->] (dg) -- (a2);
+    \node[above of=r2,yshift=-18mm,font=\small] {動的RAG（イベント駆動）};
+  \end{tikzpicture}
+  \caption{静的RAG（上）と動的RAG（下）のパイプラインの対比。動的RAGでは、AG が曖昧性が高い場合にのみ取得をトリガし、DG が利得が十分な場合にのみ更新を確定する。}
+  \label{fig:static_dynamic_pipeline_ja}
+\end{figure}
+
+\begin{table}[H]
+  \centering
+  \scriptsize
+  \begin{tabular}{p{22mm}p{54mm}p{54mm}}
+    \toprule
+    観点 & 静的RAG（本稿での役割） & 動的RAG（本稿での役割） \\
+    \midrule
+    目的 & 取得・要約の\textbf{品質上限}を測る & \textbf{受容のタイミング（When）}と\textbf{更新の健全性}を評価する \\
+    追加処理 & なし（1パス） & \textbf{AG}がオンデマンド取得をトリガし、\textbf{DG}が更新の成否を判断 \\
+    指標 & EM/F1、引用一致、P50 & \textbf{Acc/FMR/追加P50}（PSZ）、pending$\to$confirmed、Temporal Consistency \\
+    出力 & 回答＋引用 & 回答＋\textbf{更新ログ}（AG/DG, $\F$, 受容/棄却） \\
+    \bottomrule
+  \end{tabular}
+  \caption{静的RAGと動的RAGの責務の対比。}
+  \label{tab:static_dynamic_responsibility_ja}
+\end{table}
+
+\subsection{統一ゲージ $\F$ の概要}
+
+本稿で用いる統一ゲージは
+\[
+  \F \;=\; \gednorm - \lambda\,\ignorm,\qquad
+  \ignorm := \Delta H_{\mathrm{norm}} + \gamma\,\Delta\mathrm{SP}_{\mathrm{rel}}
+\]
+と定義される。
+ここで $\gednorm$ は編集経路コストの正規化版（構造側の負担）、$\ignorm$ は情報利得（エントロピー減少と経路短縮）であり、$\lambda,\gamma>0$ はトレードオフ係数である。
+0\,hop では「仮配線した直後」の評価 $g_0$ を、$h$\,hop ではマルチホップ誘導サブグラフ上の評価 $g^{(h)}$ を計算し、運用上は $b(t)=\min\{g_0,g_{\min}\}$ を用いる。
+
+FEP/MDL との関係は、\emph{操作的対応}として
+\[
+  \F \;\propto\; \Delta\mathrm{MDL} + O(1/N)
+\]
+と読むにとどめ、厳密な同値性は主張しない。
+圧縮版では、詳細な仮定（A1--A3, B1--B4）の列挙や証明スケッチはフル版に譲り、ゲージ設計と実験結果の対応だけを示す。
+
+\section{評価プロトコルと指標}\label{sec:eval_protocol_ja}
+
+\subsection{共通プロトコル（静的/動的）}
+
+静的RAGと動的RAGは、以下の共通条件のもとで比較する：
+\begin{itemize}[leftmargin=1.6em]
+  \item \textbf{equal-resources}: 埋め込み器、ANN 設定、Top\,$k$、LLM、温度、トークン上限、ハードウェア、並列度を固定し、1 クエリあたりの総リトリーブ数と計算バジェットを揃える。
+  \item \textbf{no-peeking}: 評価時にテスト集合や正解への参照を禁止し、バジェット外の追加閲覧も行わない。
+  \item \textbf{分割と校正}: クエリを train/valid/test に分割し、AG/DG しきい値 $(\theta_{\mathrm{AG}},\theta_{\mathrm{DG}})$ は valid の分位統計を用いて校正し、その後は固定する。
+\end{itemize}
+
+\subsection{PSZ と関連指標}
+
+動的RAGの評価には、Acc/FMR/追加P50 の3軸からなる運用帯域 PSZ（Perfect Scaling Zone）を用いる。
+目標帯は
+\[
+  \mathrm{Acc}\ge95\%,\quad \mathrm{FMR}\le2\%,\quad \mathrm{P50}_{\Delta\mathrm{lat}}\le200\,\mathrm{ms}
+\]
+とし、短欠 $s_{\mathrm{PSZ}}$ を
+\[
+  s_{\mathrm{PSZ}}
+  := \max(0,\,0.95-\mathrm{Acc})
+   + \max(0,\,\mathrm{FMR}-0.02)
+   + \max\!\Bigl(0,\,\frac{\mathrm{P50}_{\Delta\mathrm{lat}}-200\,\mathrm{ms}}{200\,\mathrm{ms}}\Bigr)
+\]
+で定義する。
+本稿では「PSZ を完全に満たす」ことではなく、「\emph{ベースラインよりも $s_{\mathrm{PSZ}}$ を一貫して縮小する}」ことを主な成功基準とする。
+Zero-Search Rate（ZSR; 0\,hop 即応答率）や Temporal Consistency も補助指標として用いる。
+
+\section{迷路 PoC：部分観測環境における制御}\label{sec:maze_short_ja}
+
+\subsection{実験概要}
+
+部分観測のグリッド迷路（15$\times$15, 25$\times$25, 50$\times$50）において、エージェントはローカルな $3\times3$ 視野のみを持ち、エピソード単位で「観測・行動・結果」を記録する。
+各ステップで、geDIG は 0\,hop 評価（仮配線）と multi\,hop 評価を通じて、次のいずれかを選ぶ：
+\begin{itemize}[leftmargin=1.6em]
+  \item 新たな分岐を探索する（AG が高い曖昧性を検知した場合）
+  \item 既知経路に沿ってゴールへ向かう
+  \item 行き止まりを検知してバックトラックし、一部のエッジをエビクションする（DG による洞察確証）
+\end{itemize}
+
+\subsection{代表結果}
+
+代表的な 25$\times$25 迷路（max steps=500）における集計を表\ref{tab:maze_25_s500_ja} に示す。
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{25$\times$25 迷路（max steps=500）の代表結果。L3 列は \textit{use\_main\_l3=true} の 60 seed 平均。}
+  \label{tab:maze_25_s500_ja}
+  \input{../figures/maze_25x25_s500_table.tex}
+\end{table}
+
+全体として、geDIG は成功率を維持しつつ、探索率と訪問重複率を大きく削減し、バックトラック長を短く保つ。
+AG/DG 発火率は 5--10\%／2--5\% 程度の安定した帯域に収まり、DG/AG 比も 0.3--0.5 の範囲に収束する。
+これらは、0\,hop による停滞の即時検知と、DG による「最近傍の未探索分岐への戻り」が、無駄歩きの抑制に寄与していることを示す。
+
+\section{実験 II：静的RAG（等資源比較）}\label{sec:rag_static_short_ja}
+
+\subsection{設定と指標}
+
+静的RAGでは、全手法で同一のコーパス／埋め込み器／ANN／LLM／プロンプト／温度／トークン上限を共有し、equal-resources 条件を満たす。
+評価指標は EM/F1・引用一致・Path Faithfulness・P50 を主とし、補助的に Recall@k やサブグラフ IoU などを用いる。
+
+\subsection{代表結果}
+
+代表的な 500 クエリの lite 設定では、平面RAG／GraphRAG 系ベースラインに対し、geDIG-soft（G1）は EM で約 +0.25、PER（Prompt Enhancement Rate）で大きな改善を示す。
+図\ref{fig:rag_static_performance_ja} に性能要約、表\ref{tab:rag_static_enrichment_ja} にプロンプト強化と関連指標を示す。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=.74\linewidth]{fig1_rag_performance.pdf}
+  \caption{静的RAG（lite 500 クエリ）の代表性能。geDIG-soft は EM/PER と根拠整合を改善しつつ、P50 遅延を静的GraphRAG と同程度に保つ。}
+  \label{fig:rag_static_performance_ja}
+\end{figure}
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{静的RAGにおけるプロンプト強化と関連指標（代表設定; $n{=}168$ クエリ）。}
+  \label{tab:rag_static_enrichment_ja}
+  \input{../figures/exp23_resources_table.tex}
+\end{table}
+
+\section{実験 III：動的RAGと PSZ}\label{sec:rag_dynamic_short_ja}
+
+\subsection{設定（Dynamic GRAG $\times$ geDIG）}
+
+動的RAGでは、時間付きエピソード列（ニュース／変更ログなど）を逐次受け取り、各エピソードに対して「仮配線→評価→受容/棄却」を行う。
+取得は DyG-RAG 風の時間一貫性を保ちつつ行い、その上に geDIG-soft による弱化と、AG/DG による受容判定を重ねる。
+
+\subsection{動的指標と結果}
+
+動的実験では、Acc/FMR/追加P50 のほか、ZSR、Temporal Consistency、更新ラグ（ingest$\to$available）、AG/DG 発火率を追跡する。
+\cref{fig:dynamic_operating_curves_ja} は、$(\theta_{\mathrm{AG}},\theta_{\mathrm{DG}})$ を掃引したときの PSZ 短欠 $s_{\mathrm{PSZ}}$ の挙動を示す。
+実験スケールは 500 クエリの lite 設定に限られるが、ベースラインと比較して $s_{\mathrm{PSZ}}$ が一貫して縮小していることが確認できる。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=.78\linewidth]{fig_r_operating_curves.pdf}
+  \caption{動的RAGにおける PSZ オペレーティングカーブ（lite 500 クエリ）。AG/DG しきい値を掃引すると、Acc/FMR/追加P50 のトレードオフ曲線が得られ、geDIG はベースラインより PSZ 近傍の帯域に近づく。}
+  \label{fig:dynamic_operating_curves_ja}
+\end{figure}
+
+\paragraph{なぜ PSZ をまだ完全には達成していないか}
+現状の動的実験では、PSZ 帯そのものへの完全到達はしていない。
+主な要因は、(i) $\lambda$ や $(\theta_{\mathrm{AG}},\theta_{\mathrm{DG}})$ を保守的にチューニングしていること、(ii) 実験規模とドメイン多様性が限定的であること、(iii) ゲート設計を PSZ 最適というより「安定性優先」に振っていることである。
+本稿では PSZ を SLO 的な目標帯として扱い、今後の大規模実験と自動ゲーティング（タイプ別しきい値や適応分位）によって、より PSZ に近い運用点を探索する余地があると位置づける。
+
+\section{アブレーションと FEP--MDL ブリッジ（概要）}\label{sec:fep_mdl_short_ja}
+
+アブレーション実験では、$\Delta$EPC のみ／IG のみ／$\Delta\mathrm{SP}$ を除去／AG/DG を無効化、といった変種を equal-resources 条件で比較した。
+結果として、いずれの変種も FMR や PSZ 指標のいずれかで悪化が見られ、\textbf{構造項・情報項・二段ゲートのいずれもが実際の挙動に寄与}していることが確認された（詳細な数値はフル版および英語フル版を参照）。
+
+FEP--MDL ブリッジについては、完全な証明スケッチは付録（日本語フル版および英語フル版の専用節）に譲り、本稿では次の読み替えだけを示す：
+\begin{itemize}[leftmargin=1.6em]
+  \item $\gednorm$ は「構造コスト」（モデル複雑度）の proxy、
+  \item $\ignorm$ は「情報利得」（データ適合）の proxy、
+  \item $\lambda$ は両者のスケールを揃える温度パラメータ、
+  \item $\F$ は MDL 風の「複雑度－適合度」の差分として読める。
+\end{itemize}
+これにより、「なぜ単一ゲージで構造と情報を同時に制御できるか」を直感的に説明する。
+
+\section{関連研究と妥当性の脅威（要約）}\label{sec:related_threats_short_ja}
+
+GraphRAG／DyG-RAG／KEDKG は、グラフベースの RAG を拡張し、経路取得や時間整合を改善するが、「いつグラフを書き換えるか」を単一スカラーで定式化してはいない。
+FEP や MDL／情報ボトルネックは、圧縮と予測の原理を与えるが、現実的な計算資源下でのグラフ編集規範には直接は落ちてこない。
+geDIG は、この間を埋める「制御レイヤ」の提案として位置づけられる。
+
+妥当性の脅威としては、(i) 採点器／埋め込み器／プロンプトへの依存、(ii) 迷路→RAG の写像の限界、(iii) 実験規模の制約、(iv) $\Phi$（埋め込み空間）の性質への依存、などがある。
+本稿では equal-resources／no-peeking／公開スクリプトにより、できる限り統制と再現性を確保したが、絶対値は設定に依存する。
+
+\section{Phase 2 展望とロードマップ}\label{sec:phase2_outlook_short_ja}
+
+Phase~1 はクエリ中心・オンラインの局所更新フェーズであり、Phase~2 は入力を遮断して大域再配線・圧縮を行うオフラインフェーズとして構想されている。
+圧縮版では詳細は割愛し、次のようなロードマップだけを示す：
+\begin{itemize}[leftmargin=1.6em]
+  \item \textbf{Phase~1 のスケールアップ}: 5k--10k クエリ規模、多様なドメインへの拡張、$\lambda$ や $(\theta_{\mathrm{AG}},\theta_{\mathrm{DG}})$ の系統的スキャン。
+  \item \textbf{Phase~2 の具体化}: エッジ特徴量ベクトル $\mathbf{f}(e)$ に基づくオフライン再配線・圧縮パイプラインの実装と、PSZ を維持したままの大域 GED/MDL 最適化の検討。
+  \item \textbf{Transformer 系の検証}: 代替埋め込み器／LLM や、内部注意構造との対応づけ実験を通じた「ゲージと内部表現」の関係の検証。
+  \item \textbf{他ドメインへの展開}: ソフトウェア工学・科学論文・企業内 KG など、異なる分布・運用要件を持つドメインへの適用。
+\end{itemize}
+これらは、\textbf{共同研究や共著を前提としたオープンな課題}として意図的に残してあり、理論の厳密化（FEP--MDL）と大規模実験の両面で協調を歓迎する。
+
+\section{結論}\label{sec:conclusion_short_ja}
+
+本稿では、動的知識グラフにおける「When」の問題に対し、正規化編集経路コストと情報利得を束ねた単一ゲージ $\F$ と、0\,hop／multi\,hop の二段ゲート（AG/DG）からなる geDIG を概説した。
+部分観測迷路 PoC と静的／動的RAGの実験から、geDIG が探索／統合／バックトラック／エビクションを一貫したロジックで制御しつつ、PSZ 指標でベースラインより良好な帯域に近づくことを示した。
+一方で、PSZ 帯の完全達成や Phase~2 の大域最適化、Transformer 内部表現との対応づけなど、開かれた課題も多い。
+
+本稿は、v5 日本語フル版および英語フル版への入り口としての圧縮版であり、詳細な証明スケッチや補足データはフル版を参照していただきたい。
+本研究は在野の独立研究として実施されたが、\textbf{再現・批判的検証・共同研究・共著}を歓迎する。
+
+\bibliographystyle{plain}
+\bibliography{../references}
+
+\end{document}
+

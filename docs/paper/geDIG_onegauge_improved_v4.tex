@@ -1686,24 +1686,6 @@ $\Delta$EPC only と比較して、geDIGは11.8\%のステップ削減を実現�
 
 \noindent\textit{再現のメモ}. 本所見は、$\lambda{=}1,\,\gamma{=}1$、Top\,L$=1$、linkset 正規化、$\theta_{\rm AG},\theta_{\rm DG}$ は $g_0/g_{\min}$ の経験分布に合わせた固定分位（例: $\theta_{\rm AG}{\approx}P_{0.9},\,\theta_{\rm DG}{\approx}P_{0.1}$）での\,\emph{代表例}である。スケールが変化しても、\,\textbf{$g_{\min}{<}g_0$ なら確証（DG）、$g_{\min}{\simeq}g_0$ なら見送り（AG/NA）}という\,\emph{操作的判定}は不変である（§\ref{sec:ag_dg_gate}）。
 
-\begin{figure}[H]
-  \centering
-  \IfFileExists{maze_25x25_panels/corridor_panel.png}{\begin{minipage}[t]{.32\linewidth}\centering\includegraphics[width=\linewidth]{maze_25x25_panels/corridor_panel.png}\\ 通常通路\end{minipage}}{\begin{minipage}[t]{.32\linewidth}\centering\fbox{Corridor}\end{minipage}}\hfill
-  \IfFileExists{maze_25x25_panels/t_junction_panel.png}{\begin{minipage}[t]{.32\linewidth}\centering\includegraphics[width=\linewidth]{maze_25x25_panels/t_junction_panel.png}\\ T字路\end{minipage}}{\begin{minipage}[t]{.32\linewidth}\centering\fbox{T\,junction}\end{minipage}}\hfill
-  \IfFileExists{maze_25x25_panels/dead_end_panel.png}{\begin{minipage}[t]{.32\linewidth}\centering\includegraphics[width=\linewidth]{maze_25x25_panels/dead_end_panel.png}\\ 行き止まり\end{minipage}}{\begin{minipage}[t]{.32\linewidth}\centering\fbox{Dead\,end}\end{minipage}}
-  \caption{迷路PoCにおける三態の代表挙動（query\,\mbox{-}hub）。通常通路は（クエリ＋未探索）の母集団で $\Delta H\approx0$・$g_{\min}{\simeq}g_0$，T字路は母集団拡大により $g_0\uparrow$・（本設定では）AGにより multi\,\mbox{-}hop 省略，行き止まりは multi\,\mbox{-}hop で短絡が顕在化し $g_{\min}{<}g_0$・DG確定。}
-  \label{fig:maze_three_qualitative}
-\end{figure}
-
-\begin{figure}[H]
-  \centering
-  \IfFileExists{maze_25x25_snapshots/maze_graph_seed0_step1_corridor.png}{\includegraphics[width=.48\linewidth]{maze_25x25_snapshots/maze_graph_seed0_step1_corridor.png}}{\fbox{corridor snapshot}}
-  \hfill
-  \IfFileExists{maze_25x25_snapshots/maze_graph_seed0_step16_tjunction.png}{\includegraphics[width=.48\linewidth]{maze_25x25_snapshots/maze_graph_seed0_step16_tjunction.png}}{\fbox{t-junction snapshot}}
-  \\
-  \vspace{0.6em}
-\IfFileExists{maze_25x25_snapshots/maze_graph_seed0_step0_deadend.png}{\includegraphics[width=.48\linewidth]{maze_25x25_snapshots/maze_graph_seed0_step0_deadend.png}}{\fbox{dead-end snapshot}}
-
 \paragraph{25$\times$25（500 step）の概要}\label{sec:maze_25x25_500}
 \noindent 最新の 25$\times$25 \;500\,step 実行の要約を表~\ref{tab:maze_25_s500} に示す（equal-resources, no\,peeking）。受容判定は分位ゲート（AG: $p{=}0.92$, DG: $p{=}0.08$）に基づく。成功率は 1.00、平均ステップは 276、DG 発火率は約 0.35 であった。評価時間（ms）は平均 0.63（L3\,: 0.95）、P95 は 2.87（L3\,: 4.71）。
 
@@ -1714,14 +1696,11 @@ $\Delta$EPC only と比較して、geDIGは11.8\%のステップ削減を実現�
   \small
   \input{figures/maze_25x25_s500_table.tex}
 \end{table}
-\caption{迷路（左）と対応グラフ（右）のスナップショット（25\,\mbox{$\times$}\,25; seed=0）。青＝確定エッジ、赤破線＝未確定候補。詳細は補遺のインタラクティブHTML参照。}
-  \label{fig:maze_graph_snapshots}
-\end{figure}
 
 \paragraph{インタラクティブ可視化（25\,$\times$\,25; 再現用）}
 補遺のインタラクティブHTML（25\,$\times$\,25, 120\,steps）では、\textbf{これまでの到達経路}と\textbf{未確定候補の可視化}を併せて確認できる（詳細なUI手順は補遺参照）。
 \noindent（UI操作の詳細は補遺のインタラクティブHTMLに記載）
-\noindent\textbf{代表挙動（25×25; 120steps）}: $\theta_{\rm AG}{=}{-}0.15$ で 0\,\mbox{-}hop の改善が大きい場面は AG により multi\,\mbox{-}hop を節約（$g_0$ が負域に集中）。\,一方、分岐が濃い区画では forced 候補（赤破線）が保持され、DG 閾値を下げると\,\textit{想起\,\mbox{-}\,確証\,\mbox{-}\,コミット}の連鎖が確認できる（図\,\ref{fig:maze_three_qualitative} のT字路に対応）。
+\noindent\textbf{代表挙動（25×25; 120steps）}: $\theta_{\rm AG}{=}{-}0.15$ で 0\,\mbox{-}hop の改善が大きい場面は AG により multi\,\mbox{-}hop を節約（$g_0$ が負域に集中）。\,一方、分岐が濃い区画では forced 候補（赤破線）が保持され、DG 閾値を下げると\,\textit{想起\,\mbox{-}\,確証\,\mbox{-}\,コミット}の連鎖が確認できる。
 
 \section{実験II: 静的RAG（ベースラインの確立）}
 \noindent\textit{再掲（短式）}\; 本章でも短式（式~\ref{eq:F_short_intro}）を用いる。

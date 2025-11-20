@@ -190,8 +190,8 @@ config.graph.neighbor_threshold = 0.6  # Fewer edges
 
 ## 🚀 Next Steps
 
-1. Try the [examples/layer1_bypass_demo.py](../../examples/layer1_bypass_demo.py)
-2. Run performance benchmarks with your data
-3. Experiment with different presets
-4. Monitor insight quality and adjust thresholds
+1. Run performance benchmarks with your data
+2. Experiment with different presets
+3. Monitor insight quality and adjust thresholds
+4. Explore archived demos under `archive/examples_legacy/` if you need older PoC scripts
 5. Share your results and feedback!

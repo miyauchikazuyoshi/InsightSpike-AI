@@ -1,9 +1,10 @@
 """
-Platform detection and dependency management.
+Platform namespace.
+
+Historically this package exposed dependency and platform helpers.
+Those experimental utilities have been removed as unused; the package
+remains as a placeholder to avoid breaking external imports of
+``insightspike.platform``.
 """
 
-from .dependency_resolver import *
-from .detector import *
-from .poetry_integration import *
-
-__all__ = ["get_platform_info", "DependencyResolver", "PoetryDependencyManager"]
+__all__: list[str] = []
