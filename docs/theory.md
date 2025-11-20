@@ -5,8 +5,8 @@ This page collects entry points for the theoretical side of InsightSpike-AI and 
 - **Japanese v5 paper (canonical):**  
   `docs/paper/geDIG_onegauge_improved_v5.pdf`
 
-- **English v4 paper (current EN public draft):**  
-  `docs/paper/geDIG_onegauge_improved_v4_en.pdf`
+- **English v5 paper (full, current EN public draft):**  
+  `docs/paper/arxiv_v5_en/geDIG_onegauge_improved_v5_full_en.pdf`
 
 - **Gauge specification:**  
   [geDIG Spec](./gedig_spec.md) — high‑level definition of the unified gauge and gates.
@@ -19,4 +19,3 @@ For implementation‑oriented readers, start with:
 - `README.md` (root) for motivation and PoC summary  
 - `docs/EXPERIMENTS.md` for reproduction entry points  
 - `docs/architecture/` for system design and data flow
-

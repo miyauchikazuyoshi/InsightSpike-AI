@@ -7,7 +7,8 @@ title: geDIG — Unified Gauge Control
 
 > A discrete free‑energy perspective bridging FEP, MDL, and information thermodynamics to govern When/What in dynamic knowledge graphs.
 
-- Paper (PDF): [geDIG_onegauge_improved_v4.pdf](paper/geDIG_onegauge_improved_v4.pdf)
+- Paper v5 (JA): [geDIG_onegauge_improved_v5.pdf](paper/geDIG_onegauge_improved_v5.pdf)
+- Paper v5 (EN, full): [geDIG_onegauge_improved_v5_full_en.pdf](paper/arxiv_v5_en/geDIG_onegauge_improved_v5_full_en.pdf)
 - Quick start: `python examples/public_quick_start.py`
 - CLI: `python -m insightspike.cli.spike --help`
 - Smoke tests: `make codex-smoke`
