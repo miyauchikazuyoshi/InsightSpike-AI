@@ -384,20 +384,14 @@ class ScalableGraphManager:
 
     def save_index(self, path: str):
         """Save FAISS index to disk."""
-        # Vector index persistence not implemented for all backends
-        logger.warning("Vector index persistence not implemented")
-            logger.info(f"Saved FAISS index to {path}")
+        # Vector index persistence is not implemented yet; stub for future extension.
+        logger.warning("Vector index persistence not implemented; skipping save_index call")
 
     def load_index(self, path: str):
         """Load FAISS index from disk."""
         try:
-            # Vector index loading not implemented
-            logger.warning("Vector index loading not implemented")
-            logger.info(f"Loaded FAISS index from {path}")
+            # Vector index loading is not implemented; keep this as a no-op stub.
+            logger.warning("Vector index loading not implemented; skipping load_index call")
         except Exception as e:
             logger.error(f"Failed to load FAISS index: {e}")
             self.vector_index = None
-
-
-# Add missing import
-import time
