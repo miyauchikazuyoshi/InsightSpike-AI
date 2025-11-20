@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>geDIG: The "When" of Knowledge | InsightSpike-AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -34,6 +47,9 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+        
+        /* MathJax Adjustment */
+        mjx-container { outline: none !important; }
         
         /* Graph Styles */
         #stage { 
@@ -86,6 +102,11 @@
             0% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0.8); border-color: #ef4444; }
             100% { box-shadow: inset 0 0 0 50px rgba(239, 68, 68, 0); border-color: transparent; }
         }
+        
+        /* Custom Range Slider */
+        input[type=range] { -webkit-appearance: none; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%; background: #22d3ee; margin-top: -5px; cursor: pointer; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #334155; border-radius: 2px; }
     </style>
 </head>
 <body class="antialiased selection:bg-cyan-500 selection:text-white">
@@ -116,20 +137,22 @@
     <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
             <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
-                Retrieval is solved.<br>
-                <span class="gradient-text">Adaptation is missing.</span>
+                Brain-Inspired Multi-Agent Architecture<br>
+                <span class="gradient-text">for "Spike of Insight"</span>
             </h1>
             <p class="mt-6 max-w-2xl mx-auto text-lg md:text-xl text-slate-400 leading-relaxed">
-                A unified control framework for Dynamic Knowledge Graphs.<br>
-                geDIG implements the autonomic nervous system of <strong>"when to learn and when to forget"</strong> into RAG using a single gauge $\mathcal{F} = \Delta EPC \times \Delta IG$.
+                Retrieval is solved. Adaptation is missing.<br>
+                geDIG implements the autonomic nervous system of <strong>"when to learn and when to forget"</strong> into RAG using a single gauge:
+                <br>
+                <span class="text-2xl text-white mt-2 block">$\mathcal{F} = \Delta EPC - \lambda \Delta IG$</span>
             </p>
             <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
                 <a href="#demo" class="px-8 py-4 rounded-full bg-accent hover:bg-cyan-400 text-bg font-bold transition shadow-[0_0_20px_rgba(34,211,238,0.3)] text-center">
-                    Start Interactive Simulation
+                    Try Interactive Demo
                 </a>
                 <a href="#resources" class="px-8 py-4 rounded-full border border-slate-600 hover:border-white hover:bg-white/5 transition font-medium flex items-center justify-center gap-2 group">
                     <svg class="w-5 h-5 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    Download Paper
+                    View Paper (Draft)
                 </a>
             </div>
             
@@ -385,27 +408,27 @@
     <section id="resources" class="py-24 bg-panel/30 border-t border-white/5">
         <div class="max-w-5xl mx-auto px-4">
             <div class="text-center mb-16">
-                <h2 class="text-3xl font-bold text-white">Downloads & Data</h2>
-                <p class="mt-2 text-slate-400">Draft papers and supplementary materials.</p>
+                <h2 class="text-3xl font-bold text-white">Downloads, Code & Reproducibility</h2>
+                <p class="mt-2 text-slate-400">Draft papers, code entrypoints, and maze reproduction commands.</p>
             </div>
 
-            <div class="grid md:grid-cols-2 gap-8">
+            <div class="grid md:grid-cols-2 gap-8 mb-10">
                 <div class="bg-bg border border-white/10 rounded-xl p-8 hover:border-accent/30 transition group">
                     <div class="flex items-start justify-between mb-6">
                         <div>
                             <h3 class="text-xl font-bold text-white group-hover:text-accent transition">Research Paper</h3>
                             <p class="text-sm text-slate-400 mt-2">"geDIG: Gauge what Knowledge Graph needs"</p>
-                            <span class="inline-block mt-3 text-xs bg-white/5 text-slate-400 px-2 py-1 rounded">v5.0 (Nov 2025)</span>
+                            <span class="inline-block mt-3 text-xs bg-white/5 text-slate-400 px-2 py-1 rounded">v5.0 Draft</span>
                         </div>
                         <svg class="w-8 h-8 text-slate-600 group-hover:text-accent transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
-                        <a href="./geDIG_onegauge_improved_v5.pdf" target="_blank" class="flex items-center justify-center gap-2 py-3 rounded-lg bg-white/5 hover:bg-accent hover:text-bg text-slate-300 font-bold text-sm transition">
-                            <span>JP Version</span>
+                        <a href="{{ site.baseurl }}/paper/geDIG_onegauge_improved_v5.pdf" target="_blank" class="flex items-center justify-center gap-2 py-3 rounded-lg bg-white/5 hover:bg-accent hover:text-bg text-slate-300 font-bold text-sm transition">
+                            <span>JA Version (v5)</span>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         </a>
-                        <a href="./geDIG_onegauge_improved_v5_en.pdf" target="_blank" class="flex items-center justify-center gap-2 py-3 rounded-lg border border-white/10 hover:border-white/40 text-slate-400 hover:text-white font-medium text-sm transition">
-                            <span>EN Version</span>
+                        <a href="{{ site.baseurl }}/paper/arxiv_v5_en/geDIG_onegauge_improved_v5_full_en.pdf" target="_blank" class="flex items-center justify-center gap-2 py-3 rounded-lg border border-white/10 hover:border-white/40 text-slate-400 hover:text-white font-medium text-sm transition">
+                            <span>EN Version (full v5)</span>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         </a>
                     </div>
@@ -423,11 +446,52 @@
                     <div class="space-y-3">
                         <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI" target="_blank" class="block text-sm text-accent hover:underline">View Repository</a>
                         <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/tree/main/experiments" target="_blank" class="block text-sm text-slate-400 hover:text-white hover:underline">Browse Experiments & Logs</a>
+                        <div class="mt-4 text-[11px] text-slate-400 font-mono">
+                            <p class="mb-1 text-slate-300 uppercase tracking-wider text-[10px]">CLI / Quick Start</p>
+                            <p><span class="text-slate-500">Quick start:</span> <code class="bg-black/40 px-1 py-0.5 rounded border border-white/5">python examples/public_quick_start.py</code></p>
+                            <p class="mt-1"><span class="text-slate-500">CLI:</span> <code class="bg-black/40 px-1 py-0.5 rounded border border-white/5">python -m insightspike.cli.spike --help</code></p>
+                            <p class="mt-1"><span class="text-slate-500">Smoke tests:</span> <code class="bg-black/40 px-1 py-0.5 rounded border border-white/5">make codex-smoke</code></p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-10 max-w-3xl mx-auto">
+            <div class="grid md:grid-cols-2 gap-8 mt-4 mb-10">
+                <div class="bg-bg border border-white/10 rounded-xl p-6">
+                    <p class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Reproduce (Maze 25×25, 500 steps)</p>
+                    <div class="space-y-2 font-mono text-[11px] text-slate-300">
+                        <p class="text-slate-400 mb-1">Phase-1 PoC: Maze + RAG under equal resources.</p>
+                        <p><span class="text-slate-500">L3 batch (60 seeds):</span></p>
+                        <p class="bg-black/40 px-2 py-1 rounded border border-white/5">python scripts/run_maze_batch_and_update.py --mode l3 --seeds 60 --workers 4 --update-tex</p>
+                        <p class="mt-2"><span class="text-slate-500">Eval batch (60 seeds):</span></p>
+                        <p class="bg-black/40 px-2 py-1 rounded border border-white/5">python scripts/run_maze_batch_and_update.py --mode eval --seeds 60 --workers 4 --update-tex</p>
+                        <p class="mt-2 text-[10px] text-slate-500">Aggregates land in <code class="bg-black/40 px-1 py-0.5 rounded border border-white/5">docs/paper/data/</code>; the 25×25 table updates automatically.</p>
+                    </div>
+                </div>
+                <div class="bg-bg border border-white/10 rounded-xl p-6">
+                    <p class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Call for Reviewers / Collaborators</p>
+                    <div class="text-sm text-slate-300 space-y-2">
+                        <p>We&rsquo;re looking for collaborators on:</p>
+                        <ul class="list-disc list-inside text-slate-400 text-[13px] space-y-1">
+                            <li>Information thermodynamics, Active Inference (FEP), MDL</li>
+                            <li>Graph RAG, multi-hop reasoning, dynamic knowledge bases</li>
+                            <li>Phase-2: offline rewiring (global consistency)</li>
+                        </ul>
+                        <p class="text-[13px] text-slate-400 mt-3">
+                            How to engage: open an Issue with &ldquo;Review&rdquo; label, PR small fixes, or DM on X (Twitter):
+                            <span class="font-mono text-slate-200">@kazuyoshim5436</span>.
+                        </p>
+                        <p class="text-[10px] text-slate-500 mt-2">
+                            See also:
+                            <a href="{{ site.baseurl }}/gedig_spec/" class="text-accent hover:underline">geDIG spec</a>,
+                            <a href="{{ site.baseurl }}/phase1/" class="text-accent hover:underline">Phase‑1 (maze &amp; RAG)</a>,
+                            <a href="{{ site.baseurl }}/tutorials/trace/" class="text-accent hover:underline">Trace a spike</a>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 max-w-3xl mx-auto">
                 <p class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Citation (BibTeX)</p>
                 <div class="bg-black/40 p-4 rounded-lg border border-white/5 font-mono text-xs text-slate-400 overflow-x-auto select-all">
 @article{miyauchi2025gedig,
@@ -447,6 +511,7 @@
             <div class="mb-8">
                 <p class="text-slate-500 font-medium">Kazuyoshi Miyauchi</p>
                 <p class="text-xs text-slate-600 mt-1">Independent AI Researcher</p>
+                <p class="text-[10px] text-slate-500 mt-2 uppercase tracking-[0.16em]">Certain aspects patent pending</p>
             </div>
             
             <div class="flex justify-center gap-10 mb-12">
@@ -464,7 +529,7 @@
                     <span class="text-xs text-slate-500 group-hover:text-slate-300">Email</span>
                 </a>
                 
-                <a href="https://github.com/miyauchikazuyoshi" target="_blank" class="group flex flex-col items-center gap-2">
+                <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI" target="_blank" class="group flex flex-col items-center gap-2">
                     <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 group-hover:text-white text-slate-400 transition">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path></svg>
                     </div>
