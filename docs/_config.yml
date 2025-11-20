@@ -11,7 +11,7 @@ baseurl: "/InsightSpike-AI"
 
 # Show pages in header navigation
 header_pages:
-  - index.md
+  - home.md
   - theory.md
   - phase1.md
   - tutorials/trace.md
