@@ -42,20 +42,40 @@ _PYG_AVAILABLE = _ilu.find_spec("torch_geometric") is not None
 # 多数のテストが import 時点で torch シンボルを参照し NameError になるため
 # 本物の torch が無い環境では最小限のスタブを差し込んで回避する。
 if not _TORCH_AVAILABLE:
-    import types, numpy as _np  # type: ignore
+    import types
+    try:
+        import numpy as _np  # type: ignore
+    except Exception:  # noqa: BLE001
+        _np = None  # type: ignore
+
+    def _build_fallback_tensor(shape, fill_value=0.0):
+        """Create a nested list matching the requested shape."""
+        if not shape:
+            return fill_value
+        return [_build_fallback_tensor(shape[1:], fill_value) for _ in range(shape[0])]
+
+    def _to_array(data, dtype=None):
+        if _np is not None:
+            return _np.array(data, dtype=_np.float32 if dtype is None else dtype)
+        return data
+
     torch_stub = types.ModuleType("torch")
     # dtypes
     torch_stub.long = int  # type: ignore
     torch_stub.float32 = float  # type: ignore
     # 基本テンソル生成 (numpy 配列を返す)
     def _empty(*shape, dtype=None):
-        return _np.empty(shape, dtype=_np.float32 if dtype is None else dtype)
+        if _np is not None:
+            return _np.empty(shape, dtype=_np.float32 if dtype is None else dtype)
+        return _build_fallback_tensor(shape, 0.0)
     def _zeros(*shape, dtype=None):
-        return _np.zeros(shape, dtype=_np.float32 if dtype is None else dtype)
+        if _np is not None:
+            return _np.zeros(shape, dtype=_np.float32 if dtype is None else dtype)
+        return _build_fallback_tensor(shape, 0.0)
     torch_stub.empty = _empty  # type: ignore
     torch_stub.zeros = _zeros  # type: ignore
     def _tensor(data, dtype=None):
-        return _np.array(data, dtype=_np.float32 if dtype is None else dtype)
+        return _to_array(data, dtype=dtype)
     torch_stub.tensor = _tensor  # type: ignore
     # no_grad コンテキスト (ダミー)
     class _NoGrad:

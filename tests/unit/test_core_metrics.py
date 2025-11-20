@@ -1,4 +1,9 @@
-import numpy as np
+import pytest
+
+try:
+    import numpy as np
+except Exception as exc:  # noqa: BLE001
+    pytest.skip(f"numpy not available for core metrics tests: {exc}", allow_module_level=True)
 import networkx as nx
 
 
