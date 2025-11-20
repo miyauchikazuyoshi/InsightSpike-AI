@@ -50,7 +50,7 @@ Visual representations of system architecture
 Formal specification and theory background
 - [geDIG Spec](./gedig_spec.md) - High‑level spec of the gauge
 - Paper v5 (JA): `docs/paper/geDIG_onegauge_improved_v5.pdf`
-- Paper v4 (EN): `docs/paper/geDIG_onegauge_improved_v4_en.pdf`
+- Paper v5 (EN, full): `docs/paper/arxiv_v5_en/geDIG_onegauge_improved_v5_full_en.pdf`
 
 ### 🗂️ Research Notes (Long‑Term / AGI)
 Exploratory notes on AGI foundations, governance, and Phase‑2 ideas
@@ -68,7 +68,7 @@ Documentation images and animations
 - **Developers**: See [API Reference](./api-reference/) and [Architecture](./architecture/)
 - **Researchers**: Read the paper and theory docs:
   - Paper v5 (JA): `docs/paper/geDIG_onegauge_improved_v5.pdf`
-  - Paper v4 (EN): `docs/paper/geDIG_onegauge_improved_v4_en.pdf`
+  - Paper v5 (EN, full): `docs/paper/arxiv_v5_en/geDIG_onegauge_improved_v5_full_en.pdf`
   - Gauge spec: [geDIG Spec](./gedig_spec.md)
 - **Contributors**: Review [CONTRIBUTING](./CONTRIBUTING.md) for ongoing work
 

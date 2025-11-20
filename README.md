@@ -2,7 +2,7 @@
 
 [![CI (Lite)](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci-lite.yml/badge.svg)](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci-lite.yml)
 [![CI (Unit)](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci-unit.yml/badge.svg)](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci-unit.yml)
-[![Paper](https://img.shields.io/badge/paper-PDF-blue)](docs/paper/geDIG_onegauge_improved_v4.pdf)
+[![Paper](https://img.shields.io/badge/paper-PDF-blue)](docs/paper/arxiv_v5_en/geDIG_onegauge_improved_v5_full_en.pdf)
 [![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-green)](https://miyauchikazuyoshi.github.io/InsightSpike-AI)
 
 > What if a knowledge graph could decide what to learn — and what to forget — on its own?
@@ -74,8 +74,9 @@ F = -0.42  (ΔEPC_norm=0.15,  ΔIG=0.57,  spike=True)
 
 ## 🔬 Proof‑of‑Concepts (PoC)
 
-- RAG (equal‑resources): Paper figures and operating curves showing movement toward PSZ under unified gating. See the PDF for protocols and aggregation scripts.
-  - Paper (v4 PDF): docs/paper/geDIG_onegauge_improved_v4.pdf
+- RAG (equal‑resources): Paper figures and operating curves showing movement toward PSZ under unified gating. See the v5 PDFs for protocols and aggregation scripts.
+  - Paper v5 (JA): docs/paper/geDIG_onegauge_improved_v5.pdf
+  - Paper v5 (EN, full): docs/paper/arxiv_v5_en/geDIG_onegauge_improved_v5_full_en.pdf
   - Pages overview: https://miyauchikazuyoshi.github.io/InsightSpike-AI
 
 - Maze (partial observability): query‑centric subgraph evaluation with AG (0‑hop) and DG (multi‑hop) to reduce redundant exploration.
@@ -116,8 +117,8 @@ python -m experiments.exp2to4_lite.src.alignment \
 ```
 
 Artifacts
-- PDFs: `docs/paper/geDIG_onegauge_improved_v4{_en}.pdf` (CI artifacts in “Paper Build”) 
-- arXiv pack: `bash scripts/pack_arxiv.sh both`
+- PDFs: `docs/paper/geDIG_onegauge_improved_v5.pdf` (JA), `docs/paper/arxiv_v5_en/geDIG_onegauge_improved_v5_full_en.pdf` (EN full) 
+- arXiv pack: `bash scripts/pack_arxiv_v5.sh both`
 
 <p align="center">
   <img alt="Maze overview" src="docs/paper/figures/fig4_maze.png" width="640" />
@@ -138,7 +139,7 @@ Artifacts
 - QUICKSTART.md — 5‑minute setup and shortest run
 - CONCEPTS.md — Terms and theory (ΔEPC/ΔIG, One‑Gauge, AG/DG, phases)
 - EXPERIMENTS.md — Entry points for Maze/RAG reproduction
-- Paper (v4 PDF): docs/paper/geDIG_onegauge_improved_v4.pdf
+- Papers v5: docs/paper/geDIG_onegauge_improved_v5.pdf (JA), docs/paper/arxiv_v5_en/geDIG_onegauge_improved_v5_full_en.pdf (EN full)
 - Figures: docs/paper/figures/
 
 ## 🧪 Minimal Public API Example

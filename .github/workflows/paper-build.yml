@@ -19,25 +19,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build JA PDF
+      - name: Build JA PDF (v5)
         uses: xu-cheng/latex-action@v3
         with:
-          root_file: geDIG_onegauge_improved_v4.tex
+          root_file: geDIG_onegauge_improved_v5.tex
           working_directory: docs/paper
           latexmk_use_xelatex: true
 
-      - name: Build EN PDF
+      - name: Build EN PDF (v5 full)
         uses: xu-cheng/latex-action@v3
         with:
-          root_file: geDIG_onegauge_improved_v4_en.tex
+          root_file: arxiv_v5_en/geDIG_onegauge_improved_v5_full_en.tex
           working_directory: docs/paper
           latexmk_use_xelatex: true
 
       - name: Check LaTeX logs for refs/cites
         run: |
           bash scripts/check_latex_logs.sh \
-            docs/paper/geDIG_onegauge_improved_v4.log \
-            docs/paper/geDIG_onegauge_improved_v4_en.log
+            docs/paper/geDIG_onegauge_improved_v5.log \
+            docs/paper/arxiv_v5_en/geDIG_onegauge_improved_v5_full_en.log
 
       - name: Upload LaTeX logs (Artifacts)
         if: always()
@@ -52,5 +52,5 @@ jobs:
         with:
           name: paper-pdfs
           path: |
-            docs/paper/geDIG_onegauge_improved_v4.pdf
-            docs/paper/geDIG_onegauge_improved_v4_en.pdf
+            docs/paper/geDIG_onegauge_improved_v5.pdf
+            docs/paper/arxiv_v5_en/geDIG_onegauge_improved_v5_full_en.pdf
