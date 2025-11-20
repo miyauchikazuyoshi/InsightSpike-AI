@@ -1,8 +1,14 @@
 import numpy as np
-import os, sys
+import os
+import sys
+from pathlib import Path
+import pytest
 
-# Add maze navigation src to path
-sys.path.insert(0, os.path.abspath("experiments/maze-navigation-enhanced/src"))
+maze_nav_src = Path("experiments/maze-navigation-enhanced/src")
+if not maze_nav_src.is_dir():
+    pytest.skip("maze-navigation-enhanced prototype not present; skipping simple-mode tests", allow_module_level=True)
+
+sys.path.insert(0, os.path.abspath(str(maze_nav_src)))
 from navigation.maze_navigator import MazeNavigator  # type: ignore
 
 
