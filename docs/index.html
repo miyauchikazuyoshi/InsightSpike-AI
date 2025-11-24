@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>geDIG: The "When" of Knowledge | InsightSpike-AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <script>
         MathJax = {
             tex: {
@@ -41,46 +42,115 @@
         }
     </script>
     <style>
-        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Inter', sans-serif; }
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+        }
+
         .gradient-text {
             background: linear-gradient(to right, #22d3ee, #3b82f6);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        
+
         /* MathJax Adjustment */
-        mjx-container { outline: none !important; }
-        
+        mjx-container {
+            outline: none !important;
+        }
+
         /* Graph Styles */
-        #stage { 
-            background: #020617; 
-            border-radius: 0.75rem; 
-            overflow: hidden; 
-            position: relative; 
-            box-shadow: inset 0 0 40px rgba(0,0,0,0.5); 
+        #stage {
+            background: #020617;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5);
             cursor: crosshair;
         }
-        svg { display: block; width: 100%; height: 100%; }
-        
-        .edge { stroke: #334155; stroke-width: 1; opacity: 0.3; transition: all 0.3s; }
-        .edge.hop1 { stroke: #22d3ee; opacity: 0.6; stroke-width: 1.5; }
-        .edge.hop2 { stroke: #34d399; opacity: 0.5; }
-        .edge.hop3 { stroke: #facc15; opacity: 0.4; }
-        .edge.added { stroke: #facc15; stroke-width: 2.5; opacity: 1; filter: drop-shadow(0 0 3px rgba(250, 204, 21, 0.5)); }
-        
-        .node { fill: #475569; transition: fill 0.3s, r 0.3s; }
-        .node.base { r: 3; }
-        .node.center { fill: #facc15; stroke: #fff; stroke-width: 2; r: 7; filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.6)); }
-        .node.hop0 { fill: #e2e8f0; stroke: #22d3ee; stroke-width: 1; r: 4; }
-        .node.hop1 { fill: #22d3ee; r: 4; }
-        .node.hop2 { fill: #34d399; r: 3.5; }
-        .node.hop3 { fill: #facc15; r: 3; }
+
+        svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .edge {
+            stroke: #334155;
+            stroke-width: 1;
+            opacity: 0.3;
+            transition: all 0.3s;
+        }
+
+        .edge.hop1 {
+            stroke: #22d3ee;
+            opacity: 0.6;
+            stroke-width: 1.5;
+        }
+
+        .edge.hop2 {
+            stroke: #34d399;
+            opacity: 0.5;
+        }
+
+        .edge.hop3 {
+            stroke: #facc15;
+            opacity: 0.4;
+        }
+
+        .edge.added {
+            stroke: #facc15;
+            stroke-width: 2.5;
+            opacity: 1;
+            filter: drop-shadow(0 0 3px rgba(250, 204, 21, 0.5));
+        }
+
+        .node {
+            fill: #475569;
+            transition: fill 0.3s, r 0.3s;
+        }
+
+        .node.base {
+            r: 3;
+        }
+
+        .node.center {
+            fill: #facc15;
+            stroke: #fff;
+            stroke-width: 2;
+            r: 7;
+            filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.6));
+        }
+
+        .node.hop0 {
+            fill: #e2e8f0;
+            stroke: #22d3ee;
+            stroke-width: 1;
+            r: 4;
+        }
+
+        .node.hop1 {
+            fill: #22d3ee;
+            r: 4;
+        }
+
+        .node.hop2 {
+            fill: #34d399;
+            r: 3.5;
+        }
+
+        .node.hop3 {
+            fill: #facc15;
+            r: 3;
+        }
 
         /* Custom Cursor Guide */
         #cursor-guide {
             pointer-events: none;
             position: absolute;
-            width: 12px; height: 12px;
+            width: 12px;
+            height: 12px;
             border: 2px solid rgba(255, 255, 255, 0.5);
             border-radius: 50%;
             transform: translate(-50%, -50%);
@@ -88,27 +158,72 @@
             opacity: 0;
             z-index: 10;
         }
-        #stage:hover #cursor-guide { opacity: 1; transform: translate(-50%, -50%) scale(1.5); }
+
+        #stage:hover #cursor-guide {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.5);
+        }
 
         /* Animations */
-        .insight-flash { animation: flash-green 1s ease-out; }
-        .ambiguity-flash { animation: flash-red 1s ease-out; }
-        
+        .insight-flash {
+            animation: flash-green 1s ease-out;
+        }
+
+        .ambiguity-flash {
+            animation: flash-red 1s ease-out;
+        }
+
         @keyframes flash-green {
-            0% { box-shadow: inset 0 0 0 0 rgba(16, 185, 129, 0.8); border-color: #10b981; }
-            100% { box-shadow: inset 0 0 0 50px rgba(16, 185, 129, 0); border-color: transparent; }
+            0% {
+                box-shadow: inset 0 0 0 0 rgba(16, 185, 129, 0.8);
+                border-color: #10b981;
+            }
+
+            100% {
+                box-shadow: inset 0 0 0 50px rgba(16, 185, 129, 0);
+                border-color: transparent;
+            }
         }
+
         @keyframes flash-red {
-            0% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0.8); border-color: #ef4444; }
-            100% { box-shadow: inset 0 0 0 50px rgba(239, 68, 68, 0); border-color: transparent; }
+            0% {
+                box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0.8);
+                border-color: #ef4444;
+            }
+
+            100% {
+                box-shadow: inset 0 0 0 50px rgba(239, 68, 68, 0);
+                border-color: transparent;
+            }
         }
-        
+
         /* Custom Range Slider */
-        input[type=range] { -webkit-appearance: none; background: transparent; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%; background: #22d3ee; margin-top: -5px; cursor: pointer; }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #334155; border-radius: 2px; }
+        input[type=range] {
+            appearance: none;
+            -webkit-appearance: none;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 14px;
+            width: 14px;
+            border-radius: 50%;
+            background: #22d3ee;
+            margin-top: -5px;
+            cursor: pointer;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #334155;
+            border-radius: 2px;
+        }
     </style>
 </head>
+
 <body class="antialiased selection:bg-cyan-500 selection:text-white">
 
     <nav class="fixed w-full z-50 bg-bg/90 backdrop-blur-md border-b border-white/10">
@@ -121,11 +236,20 @@
                 </div>
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-1">
-                        <a href="#demo" class="text-slate-300 hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition">Interactive Demo</a>
-                        <a href="#concept" class="text-slate-300 hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition">Concept</a>
-                        <a href="#resources" class="text-slate-300 hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition">Downloads</a>
-                        <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI" target="_blank" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full text-sm font-bold ml-4 transition border border-white/10 flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path></svg>
+                        <a href="#demo"
+                            class="text-slate-300 hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition">Interactive
+                            Demo</a>
+                        <a href="#concept"
+                            class="text-slate-300 hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition">Concept</a>
+                        <a href="#resources"
+                            class="text-slate-300 hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition">Downloads</a>
+                        <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI" target="_blank"
+                            class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full text-sm font-bold ml-4 transition border border-white/10 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd"
+                                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                                    clip-rule="evenodd"></path>
+                            </svg>
                             GitHub
                         </a>
                     </div>
@@ -142,31 +266,62 @@
             </h1>
             <p class="mt-6 max-w-2xl mx-auto text-lg md:text-xl text-slate-400 leading-relaxed">
                 Retrieval is solved. Adaptation is missing.<br>
-                geDIG implements the autonomic nervous system of <strong>"when to learn and when to forget"</strong> into RAG using a single gauge:
+                geDIG implements the autonomic nervous system of <strong>"when to learn and when to forget"</strong>
+                into RAG using a single gauge:
                 <br>
                 <span class="text-2xl text-white mt-2 block">$\mathcal{F} = \Delta EPC - \lambda \Delta IG$</span>
+                <span
+                    class="block mt-4 text-sm text-slate-400 font-normal max-w-lg mx-auto border-t border-white/10 pt-4">
+                    <span class="text-accent">Plain English:</span> A single scalar that decides: <em>"Does this new
+                        fact deserve a permanent place in the graph?"</em>
+                    <br>
+                    <span class="block mt-2">
+                        $\Delta EPC \approx$ "Rewiring Cost", $\Delta IG \approx$ "Path Shortening"
+                    </span>
+                </span>
+                <span
+                    class="block mt-4 text-xs text-slate-500 font-mono bg-white/5 inline-block px-3 py-1 rounded border border-white/5">
+                    <strong>Benchmark Result:</strong> On 25x25 Maze + RAG, geDIG reduced redundant exploration by
+                    <strong>40%</strong> while keeping FMR < 2%. </span>
             </p>
             <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
-                <a href="#demo" class="px-8 py-4 rounded-full bg-accent hover:bg-cyan-400 text-bg font-bold transition shadow-[0_0_20px_rgba(34,211,238,0.3)] text-center">
+                <a href="#demo"
+                    class="px-8 py-4 rounded-full bg-accent hover:bg-cyan-400 text-bg font-bold transition shadow-[0_0_20px_rgba(34,211,238,0.3)] text-center">
                     Try Interactive Demo
                 </a>
-                <a href="#resources" class="px-8 py-4 rounded-full border border-slate-600 hover:border-white hover:bg-white/5 transition font-medium flex items-center justify-center gap-2 group">
-                    <svg class="w-5 h-5 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <a href="#resources"
+                    class="px-8 py-4 rounded-full border border-slate-600 hover:border-white hover:bg-white/5 transition font-medium flex items-center justify-center gap-2 group">
+                    <svg class="w-5 h-5 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                        </path>
+                    </svg>
                     View Paper (Draft)
                 </a>
             </div>
-            
+
             <div class="mt-12 flex flex-wrap justify-center gap-2 text-xs text-slate-500 font-mono">
-                <span class="px-3 py-1 bg-panel rounded border border-white/5 hover:border-white/20 cursor-default">$\Delta EPC$ (Structure Cost)</span>
-                <span class="px-3 py-1 bg-panel rounded border border-white/5 hover:border-white/20 cursor-default">$\Delta H$ (Entropy)</span>
-                <span class="px-3 py-1 bg-panel rounded border border-white/5 hover:border-white/20 cursor-default">$\Delta SP$ (Shortcuts)</span>
-                <span class="px-3 py-1 bg-panel rounded border border-white/5 hover:border-white/20 cursor-default">FEP-MDL Bridge</span>
+                <span
+                    class="px-3 py-1 bg-panel rounded border border-white/5 hover:border-white/20 cursor-default">$\Delta
+                    EPC$ (Structure Cost)</span>
+                <span
+                    class="px-3 py-1 bg-panel rounded border border-white/5 hover:border-white/20 cursor-default">$\Delta
+                    H$ (Entropy)</span>
+                <span
+                    class="px-3 py-1 bg-panel rounded border border-white/5 hover:border-white/20 cursor-default">$\Delta
+                    SP$ (Shortcuts)</span>
+                <span
+                    class="px-3 py-1 bg-panel rounded border border-white/5 hover:border-white/20 cursor-default">FEP-MDL
+                    Bridge</span>
             </div>
         </div>
-        
+
         <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-30 pointer-events-none">
-            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl mix-blend-screen"></div>
-            <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-600/20 rounded-full blur-3xl mix-blend-screen"></div>
+            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl mix-blend-screen">
+            </div>
+            <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-600/20 rounded-full blur-3xl mix-blend-screen">
+            </div>
         </div>
     </section>
 
@@ -179,89 +334,138 @@
                         Visualizing "The Pulse"
                     </h2>
                     <p class="text-slate-400 mt-2 text-sm">
-                        Real-time simulation with <strong>full physics</strong>.<br>
-                        Click anywhere in the graph to inject a new query node and see if it triggers an Insight (DG) or Ambiguity (AG).
+                        Real-time simulation of the gauge $\mathcal{F}$ as the graph grows.<br>
+                        Click anywhere in the graph to inject a new query node and see if it triggers an Insight (DG) or
+                        Ambiguity (AG).
+                        <br>
+                        <span class="text-xs text-slate-500 mt-2 block">
+                            <strong>AG (Ambiguity Gauge):</strong> 0-hop error (High Cost). <br>
+                            <strong>DG (Discovery Gauge):</strong> Multi-hop shortcut (Insight Found).
+                        </span>
                     </p>
+                    <div class="mt-4 p-3 bg-white/5 rounded border border-white/10 text-xs text-slate-400">
+                        <strong class="text-slate-300 block mb-1">Observation Guide:</strong>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li><strong>Click near a cluster:</strong> $\Delta EPC$ is low, but $\Delta IG$ is also low.
+                                $\mathcal{F}$ stays high (Reject).</li>
+                            <li><strong>Click between clusters:</strong> If a shortcut is found, $\Delta SP$ spikes
+                                (negative cost), driving $\mathcal{F} < \theta$ (Insight!).</li>
+                        </ul>
+                    </div>
                 </div>
-                
+
                 <div class="flex gap-2 bg-bg/80 p-1.5 rounded-xl border border-white/10 shadow-lg backdrop-blur">
-                    <button onclick="playScenario('ambiguity')" class="flex flex-col items-start px-4 py-2 rounded-lg bg-white/5 hover:bg-danger/10 border border-transparent hover:border-danger/40 transition group min-w-[140px]">
+                    <button onclick="playScenario('ambiguity')"
+                        class="flex flex-col items-start px-4 py-2 rounded-lg bg-white/5 hover:bg-danger/10 border border-transparent hover:border-danger/40 transition group min-w-[140px]">
                         <span class="text-xs text-danger font-bold group-hover:text-red-400">Case 1: Ambiguity</span>
                         <span class="text-[10px] text-slate-500 group-hover:text-slate-300">High Cost (AG Fires)</span>
                     </button>
-                    <button onclick="playScenario('insight')" class="flex flex-col items-start px-4 py-2 rounded-lg bg-white/5 hover:bg-success/10 border border-transparent hover:border-success/40 transition group min-w-[140px]">
+                    <button onclick="playScenario('insight')"
+                        class="flex flex-col items-start px-4 py-2 rounded-lg bg-white/5 hover:bg-success/10 border border-transparent hover:border-success/40 transition group min-w-[140px]">
                         <span class="text-xs text-success font-bold group-hover:text-emerald-400">Case 2: Insight</span>
-                        <span class="text-[10px] text-slate-500 group-hover:text-slate-300">Shortcut Found (DG Fires)</span>
+                        <span class="text-[10px] text-slate-500 group-hover:text-slate-300">Shortcut Found (DG
+                            Fires)</span>
                     </button>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-2 bg-bg rounded-2xl border border-white/10 p-1 shadow-2xl relative group" id="vis-container">
+                <div class="lg:col-span-2 bg-bg rounded-2xl border border-white/10 p-1 shadow-2xl relative group"
+                    id="vis-container">
                     <div id="stage" class="aspect-video w-full border border-white/5">
-                        <svg id="svg" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet"><g id="edges"></g><g id="nodes"></g></svg>
+                        <svg id="svg" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet">
+                            <g id="edges"></g>
+                            <g id="nodes"></g>
+                        </svg>
                         <div id="cursor-guide"></div>
-                        <div id="status-overlay" class="absolute top-6 left-6 pointer-events-none transition-all opacity-0 transform -translate-y-2">
-                            <div class="bg-bg/90 backdrop-blur border border-white/20 px-4 py-2 rounded shadow-xl flex items-center gap-3">
+                        <div id="status-overlay"
+                            class="absolute top-6 left-6 pointer-events-none transition-all opacity-0 transform -translate-y-2">
+                            <div
+                                class="bg-bg/90 backdrop-blur border border-white/20 px-4 py-2 rounded shadow-xl flex items-center gap-3">
                                 <div id="status-dot" class="w-2 h-2 rounded-full bg-slate-500"></div>
                                 <span id="status-text" class="font-bold font-mono text-sm tracking-wide">IDLE</span>
                             </div>
                         </div>
                         <div class="absolute top-6 right-6 pointer-events-none text-right">
-                             <div class="text-[10px] text-slate-500 font-mono bg-bg/80 px-2 py-1 rounded">Click to Add Node</div>
+                            <div class="text-[10px] text-slate-500 font-mono bg-bg/80 px-2 py-1 rounded">Click to Add
+                                Node</div>
                         </div>
                     </div>
-                    <div class="flex flex-wrap gap-4 px-4 py-3 text-[10px] text-slate-400 border-t border-white/5 bg-panel/50 rounded-b-xl font-mono uppercase tracking-wider">
-                        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-slate-500"></span> Base Node</div>
-                        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-yellow-400 border-2 border-white"></span> Query</div>
-                        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cyan-400"></span> 1-hop (Ego)</div>
-                        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> 2-hop+ (Insight)</div>
+                    <div
+                        class="flex flex-wrap gap-4 px-4 py-3 text-[10px] text-slate-400 border-t border-white/5 bg-panel/50 rounded-b-xl font-mono uppercase tracking-wider">
+                        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-slate-500"></span>
+                            Base Node</div>
+                        <div class="flex items-center gap-2"><span
+                                class="w-3 h-3 rounded-full bg-yellow-400 border-2 border-white"></span> Query</div>
+                        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                            1-hop (Ego)</div>
+                        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                            2-hop+ (Insight)</div>
                     </div>
                 </div>
 
                 <div class="lg:col-span-1 space-y-4">
-                    <div class="bg-panel/80 backdrop-blur rounded-xl border border-white/10 p-6 h-full flex flex-col justify-between shadow-lg">
+                    <div
+                        class="bg-panel/80 backdrop-blur rounded-xl border border-white/10 p-6 h-full flex flex-col justify-between shadow-lg">
                         <div>
-                            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                            <h3
+                                class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                                    </path>
+                                </svg>
                                 Gauge Telemetry
                             </h3>
-                            
+
                             <div class="space-y-6">
                                 <div>
                                     <div class="flex justify-between text-xs mb-2">
                                         <span class="text-slate-400 font-medium">Structural Cost ($\Delta EPC$)</span>
                                         <span id="val-epc" class="font-mono font-bold text-slate-200">--</span>
                                     </div>
-                                    <div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden border border-white/5">
-                                        <div id="bar-epc" class="h-full bg-gradient-to-r from-red-500 to-pink-600 transition-all duration-500" style="width: 0%"></div>
+                                    <div
+                                        class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden border border-white/5">
+                                        <div id="bar-epc"
+                                            class="h-full bg-gradient-to-r from-red-500 to-pink-600 transition-all duration-500"
+                                            style="width: 0%"></div>
                                     </div>
-                                    <div class="text-[10px] text-slate-600 mt-1 text-right">wiring cost (normalized)</div>
+                                    <div class="text-[10px] text-slate-600 mt-1 text-right">wiring cost (normalized)
+                                    </div>
                                 </div>
-                                
+
                                 <div class="p-4 bg-slate-900/50 rounded-lg border border-white/5">
                                     <div class="flex justify-between text-xs mb-3">
                                         <span class="text-white font-bold">Information Gain ($\Delta IG$)</span>
                                         <span id="val-ig" class="font-mono font-bold text-success">--</span>
                                     </div>
-                                    <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden mb-4 border border-white/5">
-                                        <div id="bar-ig" class="h-full bg-gradient-to-r from-emerald-400 to-cyan-500 transition-all duration-500" style="width: 0%"></div>
+                                    <div
+                                        class="h-2 w-full bg-slate-800 rounded-full overflow-hidden mb-4 border border-white/5">
+                                        <div id="bar-ig"
+                                            class="h-full bg-gradient-to-r from-emerald-400 to-cyan-500 transition-all duration-500"
+                                            style="width: 0%"></div>
                                     </div>
-                                    
+
                                     <div class="grid grid-cols-2 gap-4 pt-2 border-t border-white/5">
                                         <div>
                                             <div class="flex justify-between text-[10px] mb-1 text-purple-300">
                                                 <span>Entropy ($\Delta H$)</span>
                                                 <span id="val-h" class="font-mono">--</span>
                                             </div>
-                                            <div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden"><div id="bar-h" class="h-full bg-purple transition-all duration-500" style="width: 0%"></div></div>
+                                            <div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+                                                <div id="bar-h" class="h-full bg-purple transition-all duration-500"
+                                                    style="width: 0%"></div>
+                                            </div>
                                         </div>
                                         <div>
                                             <div class="flex justify-between text-[10px] mb-1 text-orange-300">
                                                 <span>Shortcuts ($\Delta SP$)</span>
                                                 <span id="val-sp" class="font-mono">--</span>
                                             </div>
-                                            <div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden"><div id="bar-sp" class="h-full bg-orange transition-all duration-500" style="width: 0%"></div></div>
+                                            <div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+                                                <div id="bar-sp" class="h-full bg-orange transition-all duration-500"
+                                                    style="width: 0%"></div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -271,21 +475,29 @@
                         <div class="pt-6 border-t border-white/10">
                             <div class="flex justify-between items-baseline mb-2">
                                 <span class="text-sm font-bold text-white">Total Gauge ($\mathcal{F}$)</span>
-                                <span id="val-gedig" class="text-3xl font-bold font-mono text-slate-600 transition-colors">--</span>
+                                <span id="val-gedig"
+                                    class="text-3xl font-bold font-mono text-slate-600 transition-colors">--</span>
                             </div>
                             <div class="flex justify-between text-[10px] font-mono">
                                 <span class="text-slate-500">Threshold: &lt; 0.30</span>
-                                <span id="status-badge" class="px-2 py-0.5 rounded bg-slate-800 text-slate-500">IDLE</span>
+                                <span id="status-badge"
+                                    class="px-2 py-0.5 rounded bg-slate-800 text-slate-500">IDLE</span>
                             </div>
                         </div>
 
                         <div class="mt-4 pt-4 border-t border-white/5">
-                             <div class="flex justify-between text-xs mb-2">
+                            <div class="flex justify-between text-xs mb-2">
                                 <span class="text-slate-500">Manual Override</span>
-                                <button id="btnReset" class="text-accent hover:text-white transition text-[10px] uppercase tracking-wider">Reset Graph</button>
+                                <button id="btnReset"
+                                    class="text-accent hover:text-white transition text-[10px] uppercase tracking-wider">Reset
+                                    Graph</button>
                             </div>
-                            <button id="btnAddCenter" class="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded text-xs text-slate-300 font-bold transition flex items-center justify-center gap-2">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            <button id="btnAddCenter"
+                                class="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded text-xs text-slate-300 font-bold transition flex items-center justify-center gap-2">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4"></path>
+                                </svg>
                                 Auto-Place Node (Center)
                             </button>
                         </div>
@@ -309,8 +521,11 @@
                 <div class="grid md:grid-cols-2 gap-12 items-center">
                     <div class="order-2 md:order-1">
                         <div class="bg-panel border border-white/5 rounded-xl p-1 relative">
-                            <div class="aspect-[4/3] bg-bg rounded-lg relative overflow-hidden flex items-center justify-center">
-                                <div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_50%,rgba(255,0,0,0.2),transparent_70%)]"></div>
+                            <div
+                                class="aspect-[4/3] bg-bg rounded-lg relative overflow-hidden flex items-center justify-center">
+                                <div
+                                    class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_50%,rgba(255,0,0,0.2),transparent_70%)]">
+                                </div>
                                 <div class="text-center">
                                     <div class="text-danger font-mono font-bold text-lg mb-2">Static RAG</div>
                                     <div class="text-slate-500 text-xs">Always Retrieve -> Always Append</div>
@@ -320,6 +535,16 @@
                                         <div class="w-8 h-8 rounded-full bg-slate-700"></div>
                                     </div>
                                     <div class="mt-2 text-danger text-xs font-bold">Infinite Growth / Pollution</div>
+                                    <div class="mt-4 pt-4 border-t border-white/5 w-full px-4">
+                                        <div class="text-xs text-slate-500 mb-1">vs geDIG</div>
+                                        <div class="flex justify-between items-center text-[10px] font-mono">
+                                            <span class="text-slate-400">LLM $\to$ Retriever $\to$</span>
+                                            <span
+                                                class="px-1 py-0.5 rounded bg-accent/10 text-accent border border-accent/20">Gauge
+                                                $\mathcal{F}$</span>
+                                            <span class="text-slate-400">$\to$ [Accept/Reject]</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -328,7 +553,8 @@
                         <div class="text-accent font-mono text-sm mb-2">01. THE PROBLEM</div>
                         <h3 class="text-2xl font-bold text-white mb-4">Blind Accumulation</h3>
                         <p class="text-slate-400 leading-relaxed mb-4">
-                            Static RAG systems lack a norm for rejection. They accumulate noise, redundancies, and contradictions, leading to performance degradation over time (The "Context Window" trap).
+                            Static RAG systems lack a norm for rejection. They accumulate noise, redundancies, and
+                            contradictions, leading to performance degradation over time (The "Context Window" trap).
                         </p>
                     </div>
                 </div>
@@ -338,7 +564,8 @@
                         <div class="text-success font-mono text-sm mb-2">02. THE SOLUTION</div>
                         <h3 class="text-2xl font-bold text-white mb-4">One-Gauge Control ($\mathcal{F}$)</h3>
                         <p class="text-slate-400 leading-relaxed mb-4">
-                            We unified Structural Cost (Graph Edit Distance) and Information Gain (Entropy + Shortcuts) into a single scalar.
+                            We unified Structural Cost (Graph Edit Distance) and Information Gain (Entropy + Shortcuts)
+                            into a single scalar.
                         </p>
                         <ul class="space-y-3 text-slate-400 text-sm">
                             <li class="flex items-start gap-3">
@@ -356,53 +583,65 @@
                         </ul>
                     </div>
                     <div>
-                         <div class="bg-panel border border-white/5 rounded-xl p-1 relative">
-                            <div class="aspect-[4/3] bg-bg rounded-lg relative overflow-hidden flex items-center justify-center">
-                                <div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.2),transparent_70%)]"></div>
-                                <div class="text-3xl font-bold font-mono text-white">
-                                    $\mathcal{F} < \theta$
+                        <div class="bg-panel border border-white/5 rounded-xl p-1 relative">
+                            <div
+                                class="aspect-[4/3] bg-bg rounded-lg relative overflow-hidden flex items-center justify-center">
+                                <div
+                                    class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.2),transparent_70%)]">
                                 </div>
-                                <div class="absolute bottom-8 text-success text-xs font-bold uppercase tracking-widest">Accept</div>
-                                <div class="absolute top-8 text-danger text-xs font-bold uppercase tracking-widest">Reject</div>
+                                <div class="text-3xl font-bold font-mono text-white">
+                                    $\mathcal{F} < \theta$ </div>
+                                        <div
+                                            class="absolute bottom-8 text-success text-xs font-bold uppercase tracking-widest">
+                                            Accept</div>
+                                        <div
+                                            class="absolute top-8 text-danger text-xs font-bold uppercase tracking-widest">
+                                            Reject</div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="grid md:grid-cols-2 gap-12 items-center">
-                    <div class="order-2 md:order-1">
-                        <div class="bg-panel border border-white/5 rounded-xl p-8">
-                             <h4 class="text-white font-bold mb-4 border-b border-white/10 pb-2">FEP-MDL Bridge</h4>
-                             <div class="space-y-4 text-sm font-mono">
-                                <div class="flex justify-between">
-                                    <span class="text-slate-400">0-hop (AG)</span>
-                                    <span class="text-danger">Ambiguity / Error</span>
-                                    <span class="text-slate-500">→ FEP</span>
+                    <div class="grid md:grid-cols-2 gap-12 items-center">
+                        <div class="order-2 md:order-1">
+                            <div class="bg-panel border border-white/5 rounded-xl p-8">
+                                <h4 class="text-white font-bold mb-4 border-b border-white/10 pb-2">FEP-MDL Bridge</h4>
+                                <div class="space-y-4 text-sm font-mono">
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-400">0-hop (AG)</span>
+                                        <span class="text-danger">Ambiguity / Error</span>
+                                        <span class="text-slate-500">→ FEP</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-400">Multi-hop (DG)</span>
+                                        <span class="text-success">Compression / Insight</span>
+                                        <span class="text-slate-500">→ MDL</span>
+                                    </div>
+                                    <div class="text-center pt-4 text-xs text-slate-500 italic">
+                                        "Operational Correspondence"
+                                    </div>
                                 </div>
-                                <div class="flex justify-between">
-                                    <span class="text-slate-400">Multi-hop (DG)</span>
-                                    <span class="text-success">Compression / Insight</span>
-                                    <span class="text-slate-500">→ MDL</span>
-                                </div>
-                                <div class="text-center pt-4 text-xs text-slate-500 italic">
-                                    "Operational Correspondence"
-                                </div>
-                             </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="order-1 md:order-2">
-                        <div class="text-slate-500 font-mono text-sm mb-2">03. THEORETICAL BACKBONE</div>
-                        <h3 class="text-2xl font-bold text-white mb-4">Bridging FEP & MDL</h3>
-                        <p class="text-slate-400 leading-relaxed mb-4">
-                            geDIG operationally bridges the <strong>Free Energy Principle</strong> (minimizing surprise) and <strong>Minimum Description Length</strong> (maximizing compression).
-                        </p>
-                        <p class="text-slate-400 leading-relaxed">
-                            0-hop detects immediate prediction error (FEP), while Multi-hop validates global compression (MDL).
-                        </p>
+                        <div class="order-1 md:order-2">
+                            <div class="text-slate-500 font-mono text-sm mb-2">03. THEORETICAL BACKBONE</div>
+                            <h3 class="text-2xl font-bold text-white mb-4">Bridging FEP & MDL</h3>
+                            <p class="text-slate-400 leading-relaxed mb-4">
+                                geDIG provides an <strong>operational correspondence</strong> between the Free Energy
+                                Principle (minimizing surprise) and Minimum Description Length (maximizing compression).
+                            </p>
+                            <p class="text-slate-400 leading-relaxed">
+                                0-hop detects immediate prediction error (FEP), while Multi-hop validates global
+                                compression (MDL).
+                            </p>
+                            <p class="mt-4 text-xs text-slate-500 italic">
+                                *For readers familiar with FEP/MDL: This is an operational analogy, not a formal proof
+                                of equivalence.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
     </section>
 
     <section id="resources" class="py-24 bg-panel/30 border-t border-white/5">
@@ -416,20 +655,39 @@
                 <div class="bg-bg border border-white/10 rounded-xl p-8 hover:border-accent/30 transition group">
                     <div class="flex items-start justify-between mb-6">
                         <div>
-                            <h3 class="text-xl font-bold text-white group-hover:text-accent transition">Research Paper</h3>
+                            <span class="text-[10px] font-bold text-accent uppercase tracking-wider mb-1 block">For
+                                Researchers</span>
+                            <h3 class="text-xl font-bold text-white group-hover:text-accent transition">Research Paper
+                            </h3>
                             <p class="text-sm text-slate-400 mt-2">"geDIG: Gauge what Knowledge Graph needs"</p>
-                            <span class="inline-block mt-3 text-xs bg-white/5 text-slate-400 px-2 py-1 rounded">v5.0 Draft</span>
+                            <span class="inline-block mt-3 text-xs bg-white/5 text-slate-400 px-2 py-1 rounded">v5.0
+                                Draft</span>
                         </div>
-                        <svg class="w-8 h-8 text-slate-600 group-hover:text-accent transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <svg class="w-8 h-8 text-slate-600 group-hover:text-accent transition" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
-                        <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/docs/paper/geDIG_onegauge_improved_v5.pdf" target="_blank" class="flex items-center justify-center gap-2 py-3 rounded-lg bg-white/5 hover:bg-accent hover:text-bg text-slate-300 font-bold text-sm transition">
+                        <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/docs/paper/geDIG_onegauge_improved_v5.pdf"
+                            target="_blank"
+                            class="flex items-center justify-center gap-2 py-3 rounded-lg bg-white/5 hover:bg-accent hover:text-bg text-slate-300 font-bold text-sm transition">
                             <span>JA Version (v5)</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
                         </a>
-                        <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/docs/paper/arxiv_v5_en/geDIG_onegauge_improved_v5_full_en.pdf" target="_blank" class="flex items-center justify-center gap-2 py-3 rounded-lg border border-white/10 hover:border-white/40 text-slate-400 hover:text-white font-medium text-sm transition">
+                        <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/docs/paper/arxiv_v5_en/geDIG_onegauge_improved_v5_full_en.pdf"
+                            target="_blank"
+                            class="flex items-center justify-center gap-2 py-3 rounded-lg border border-white/10 hover:border-white/40 text-slate-400 hover:text-white font-medium text-sm transition">
                             <span>EN Version (full v5)</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
                         </a>
                     </div>
                 </div>
@@ -437,20 +695,37 @@
                 <div class="bg-bg border border-white/10 rounded-xl p-8 hover:border-white/30 transition group">
                     <div class="flex items-start justify-between mb-6">
                         <div>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">For
+                                Engineers</span>
                             <h3 class="text-xl font-bold text-white">Source Code</h3>
                             <p class="text-sm text-slate-400 mt-2">miyauchikazuyoshi/InsightSpike-AI</p>
-                            <p class="text-xs text-slate-500 mt-3">Brain-Inspired Multi-Agent Architecture for “Spike of Insight”</p>
+                            <p class="text-xs text-slate-500 mt-3">Brain-Inspired Multi-Agent Architecture for “Spike of
+                                Insight”</p>
                         </div>
-                        <svg class="w-8 h-8 text-slate-600 group-hover:text-white transition" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path></svg>
+                        <svg class="w-8 h-8 text-slate-600 group-hover:text-white transition" fill="currentColor"
+                            viewBox="0 0 24 24">
+                            <path fill-rule="evenodd"
+                                d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                                clip-rule="evenodd"></path>
+                        </svg>
                     </div>
                     <div class="space-y-3">
-                        <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI" target="_blank" class="block text-sm text-accent hover:underline">View Repository</a>
-                        <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/tree/main/experiments" target="_blank" class="block text-sm text-slate-400 hover:text-white hover:underline">Browse Experiments & Logs</a>
+                        <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI" target="_blank"
+                            class="block text-sm text-accent hover:underline">View Repository</a>
+                        <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/tree/main/experiments"
+                            target="_blank" class="block text-sm text-slate-400 hover:text-white hover:underline">Browse
+                            Experiments & Logs</a>
                         <div class="mt-4 text-[11px] text-slate-400 font-mono">
                             <p class="mb-1 text-slate-300 uppercase tracking-wider text-[10px]">CLI / Quick Start</p>
-                            <p><span class="text-slate-500">Quick start:</span> <code class="bg-black/40 px-1 py-0.5 rounded border border-white/5">python examples/public_quick_start.py</code></p>
-                            <p class="mt-1"><span class="text-slate-500">CLI:</span> <code class="bg-black/40 px-1 py-0.5 rounded border border-white/5">python -m insightspike.cli.spike --help</code></p>
-                            <p class="mt-1"><span class="text-slate-500">Smoke tests:</span> <code class="bg-black/40 px-1 py-0.5 rounded border border-white/5">make codex-smoke</code></p>
+                            <p><span class="text-slate-500">Quick start:</span> <code
+                                    class="bg-black/40 px-1 py-0.5 rounded border border-white/5">python examples/public_quick_start.py</code>
+                            </p>
+                            <p class="mt-1"><span class="text-slate-500">CLI:</span> <code
+                                    class="bg-black/40 px-1 py-0.5 rounded border border-white/5">python -m insightspike.cli.spike --help</code>
+                            </p>
+                            <p class="mt-1"><span class="text-slate-500">Smoke tests:</span> <code
+                                    class="bg-black/40 px-1 py-0.5 rounded border border-white/5">make codex-smoke</code>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -458,34 +733,56 @@
 
             <div class="grid md:grid-cols-2 gap-8 mt-4 mb-10">
                 <div class="bg-bg border border-white/10 rounded-xl p-6">
-                    <p class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Reproduce (Maze 25×25, 500 steps)</p>
+                    <p class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Reproduce (Maze 25×25, 500
+                        steps)</p>
                     <div class="space-y-2 font-mono text-[11px] text-slate-300">
                         <p class="text-slate-400 mb-1">Phase-1 PoC: Maze + RAG under equal resources.</p>
                         <p><span class="text-slate-500">L3 batch (60 seeds):</span></p>
-                        <p class="bg-black/40 px-2 py-1 rounded border border-white/5">python scripts/run_maze_batch_and_update.py --mode l3 --seeds 60 --workers 4 --update-tex</p>
+                        <p class="bg-black/40 px-2 py-1 rounded border border-white/5">python
+                            scripts/run_maze_batch_and_update.py --mode l3 --seeds 60 --workers 4 --update-tex</p>
                         <p class="mt-2"><span class="text-slate-500">Eval batch (60 seeds):</span></p>
-                        <p class="bg-black/40 px-2 py-1 rounded border border-white/5">python scripts/run_maze_batch_and_update.py --mode eval --seeds 60 --workers 4 --update-tex</p>
-                        <p class="mt-2 text-[10px] text-slate-500">Aggregates land in <code class="bg-black/40 px-1 py-0.5 rounded border border-white/5">docs/paper/data/</code>; the 25×25 table updates automatically.</p>
+                        <p class="bg-black/40 px-2 py-1 rounded border border-white/5">python
+                            scripts/run_maze_batch_and_update.py --mode eval --seeds 60 --workers 4 --update-tex</p>
+                        <p class="mt-2 text-[10px] text-slate-500">Aggregates land in <code
+                                class="bg-black/40 px-1 py-0.5 rounded border border-white/5">docs/paper/data/</code>;
+                            the 25×25 table updates automatically.</p>
                     </div>
                 </div>
                 <div class="bg-bg border border-white/10 rounded-xl p-6">
-                    <p class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Call for Reviewers / Collaborators</p>
+                    <p class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Call for Reviewers /
+                        Collaborators</p>
                     <div class="text-sm text-slate-300 space-y-2">
                         <p>We&rsquo;re looking for collaborators on:</p>
-                        <ul class="list-disc list-inside text-slate-400 text-[13px] space-y-1">
-                            <li>Information thermodynamics, Active Inference (FEP), MDL</li>
-                            <li>Graph RAG, multi-hop reasoning, dynamic knowledge bases</li>
-                            <li>Phase-2: offline rewiring (global consistency)</li>
+                        <ul class="list-disc list-inside text-slate-400 text-[13px] space-y-2">
+                            <li>
+                                <strong class="text-slate-300">Information thermodynamics / FEP:</strong><br>
+                                <span class="pl-4 block text-slate-500">Help formalize the free-energy mapping and check
+                                    for missing assumptions.</span>
+                            </li>
+                            <li>
+                                <strong class="text-slate-300">Graph RAG / Multi-hop:</strong><br>
+                                <span class="pl-4 block text-slate-500">Stress-test geDIG on your existing GraphRAG
+                                    benchmarks.</span>
+                            </li>
+                            <li>
+                                <strong class="text-slate-300">Phase-2 (Offline Rewiring):</strong><br>
+                                <span class="pl-4 block text-slate-500">Co-design offline "sleep phase" rewiring
+                                    experiments.</span>
+                            </li>
                         </ul>
-                        <p class="text-[13px] text-slate-400 mt-3">
-                            How to engage: open an Issue with &ldquo;Review&rdquo; label, PR small fixes, or DM on X (Twitter):
+                        <p class="text-[13px] text-slate-400 mt-4">
+                            How to engage: open an Issue with &ldquo;Review&rdquo; label, PR small fixes, or DM on X
+                            (Twitter):
                             <span class="font-mono text-slate-200">@kazuyoshim5436</span>.
                         </p>
-                        <p class="text-[10px] text-slate-500 mt-2">
+                        <p class="text-[10px] text-slate-500 mt-3">
                             See also:
-                            <a href="{{ site.baseurl }}/gedig_spec/" class="text-accent hover:underline">geDIG spec</a>,
-                            <a href="{{ site.baseurl }}/phase1/" class="text-accent hover:underline">Phase‑1 (maze &amp; RAG)</a>,
-                            <a href="{{ site.baseurl }}/tutorials/trace/" class="text-accent hover:underline">Trace a spike</a>.
+                            <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/docs/gedig_spec.md"
+                                class="text-accent hover:underline">geDIG spec</a>,
+                            <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/docs/phase1.md"
+                                class="text-accent hover:underline">Phase‑1 (maze &amp; RAG)</a>,
+                            <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/docs/tutorials/trace.md"
+                                class="text-accent hover:underline">Trace a spike</a>.
                         </p>
                     </div>
                 </div>
@@ -493,14 +790,15 @@
 
             <div class="mt-4 max-w-3xl mx-auto">
                 <p class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Citation (BibTeX)</p>
-                <div class="bg-black/40 p-4 rounded-lg border border-white/5 font-mono text-xs text-slate-400 overflow-x-auto select-all">
-@article{miyauchi2025gedig,
-  title={geDIG: Gauge what Knowledge Graph needs},
-  author={Miyauchi, Kazuyoshi},
-  year={2025},
-  journal={GitHub repository},
-  url={https://github.com/miyauchikazuyoshi/InsightSpike-AI}
-}
+                <div
+                    class="bg-black/40 p-4 rounded-lg border border-white/5 font-mono text-xs text-slate-400 overflow-x-auto select-all">
+                    @article{miyauchi2025gedig,
+                    title={geDIG: Gauge what Knowledge Graph needs},
+                    author={Miyauchi, Kazuyoshi},
+                    year={2025},
+                    journal={GitHub repository},
+                    url={https://github.com/miyauchikazuyoshi/InsightSpike-AI}
+                    }
                 </div>
             </div>
         </div>
@@ -511,32 +809,48 @@
             <div class="mb-8">
                 <p class="text-slate-500 font-medium">Kazuyoshi Miyauchi</p>
                 <p class="text-xs text-slate-600 mt-1">Independent AI Researcher</p>
-                <p class="text-[10px] text-slate-500 mt-2 uppercase tracking-[0.16em]">Certain aspects patent pending</p>
+                <p class="text-[10px] text-slate-500 mt-2 uppercase tracking-[0.16em]">Certain aspects patent pending
+                    (JP 2025-082988, 2025-082989)</p>
             </div>
-            
+
             <div class="flex justify-center gap-10 mb-12">
                 <a href="https://x.com/kazuyoshim5436" target="_blank" class="group flex flex-col items-center gap-2">
-                    <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 group-hover:text-white text-slate-400 transition">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    <div
+                        class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 group-hover:text-white text-slate-400 transition">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
                     </div>
                     <span class="text-xs text-slate-500 group-hover:text-slate-300">@kazuyoshim5436</span>
                 </a>
-                
+
                 <a href="mailto:miyauchikazuyoshi@gmail.com" class="group flex flex-col items-center gap-2">
-                    <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 group-hover:text-white text-slate-400 transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    <div
+                        class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 group-hover:text-white text-slate-400 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                            </path>
+                        </svg>
                     </div>
                     <span class="text-xs text-slate-500 group-hover:text-slate-300">Email</span>
                 </a>
-                
-                <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI" target="_blank" class="group flex flex-col items-center gap-2">
-                    <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 group-hover:text-white text-slate-400 transition">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path></svg>
+
+                <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI" target="_blank"
+                    class="group flex flex-col items-center gap-2">
+                    <div
+                        class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 group-hover:text-white text-slate-400 transition">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path fill-rule="evenodd"
+                                d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                                clip-rule="evenodd"></path>
+                        </svg>
                     </div>
                     <span class="text-xs text-slate-500 group-hover:text-slate-300">GitHub</span>
                 </a>
             </div>
-            
+
             <p class="text-[10px] text-slate-700">
                 &copy; 2025 Insight Spike-AI. All rights reserved.
             </p>
@@ -545,125 +859,128 @@
 
     <script>
         // --- UTILS ---
-        const rng=(()=>{let s=1234567;return()=> (s=(1103515245*s+12345)>>>0)/0xffffffff;})();
-        function randn(mu=0,sd=1){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return mu+sd*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
-        function rbfSim(p,q,s){const dx=p.x-q.x,dy=p.y-q.y;const d2=dx*dx+dy*dy;return Math.exp(-d2/(2*s*s))}
-        function toScreen(p){return{x:(p.x+3)/6*1000,y:(1-(p.y+1.5)/3)*700}}
-        function svgToGraph(sx, sy){ const rect = document.getElementById('stage').getBoundingClientRect(); const xRel = sx / rect.width; const yRel = sy / rect.height; return {x: (xRel * 6) - 3, y: (1 - yRel) * 3 - 1.5}; }
+        const rng = (() => { let s = 1234567; return () => (s = (1103515245 * s + 12345) >>> 0) / 0xffffffff; })();
+        function randn(mu = 0, sd = 1) { let u = 0, v = 0; while (u === 0) u = rng(); while (v === 0) v = rng(); return mu + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v) }
+        function rbfSim(p, q, s) { const dx = p.x - q.x, dy = p.y - q.y; const d2 = dx * dx + dy * dy; return Math.exp(-d2 / (2 * s * s)) }
+        function toScreen(p) { return { x: (p.x + 3) / 6 * 1000, y: (1 - (p.y + 1.5) / 3) * 700 } }
+        function svgToGraph(sx, sy) { const rect = document.getElementById('stage').getBoundingClientRect(); const xRel = sx / rect.width; const yRel = sy / rect.height; return { x: (xRel * 6) - 3, y: (1 - yRel) * 3 - 1.5 }; }
 
         // --- PARAMS ---
-        let SIGMA=0.9, THR=0.60, KHOP=3; 
-        let LAYOUT='clusters', R_DONUT=2.2, JITTER=0.25; 
-        let CMAX_MODE='nC2'; 
-        let LAMBDA=0.50;
-        let nodes=[], edges=[], addedEdges=new Set(), centerId=null;
+        let SIGMA = 0.9, THR = 0.60, KHOP = 3;
+        let LAYOUT = 'clusters', R_DONUT = 2.2, JITTER = 0.25;
+        let CMAX_MODE = 'nC2';
+        let LAMBDA = 0.50;
+        let nodes = [], edges = [], addedEdges = new Set(), centerId = null;
 
         // --- METRICS LOGIC ---
-        function ensureSet(x){ return (x instanceof Set)? x : new Set(); }
-        function key(a,b){ if(a==null||b==null)return `${a}-${b}`; return (a<b)? `${a}-${b}` : `${b}-${a}`; }
-        
-        function avgSPL(Ns,Es){
-            if(Ns.length<2) return NaN;
-            const adj=new Map(); Ns.forEach(n=>adj.set(n.id,[]));
-            for(const e of Es){ const a=adj.get(e.a), b=adj.get(e.b); if(a)a.push(e.b); if(b)b.push(e.a); }
-            const seen=new Set(), comps=[];
-            for(const n of Ns){ if(seen.has(n.id))continue; const q=[n.id]; const comp=new Set([n.id]); seen.add(n.id);
-                while(q.length){ const v=q.shift(); for(const w of adj.get(v)||[]){ if(!seen.has(w)){ seen.add(w); q.push(w); comp.add(w); } } }
+        function ensureSet(x) { return (x instanceof Set) ? x : new Set(); }
+        function key(a, b) { if (a == null || b == null) return `${a}-${b}`; return (a < b) ? `${a}-${b}` : `${b}-${a}`; }
+
+        function avgSPL(Ns, Es) {
+            if (Ns.length < 2) return NaN;
+            const adj = new Map(); Ns.forEach(n => adj.set(n.id, []));
+            for (const e of Es) { const a = adj.get(e.a), b = adj.get(e.b); if (a) a.push(e.b); if (b) b.push(e.a); }
+            const seen = new Set(), comps = [];
+            for (const n of Ns) {
+                if (seen.has(n.id)) continue; const q = [n.id]; const comp = new Set([n.id]); seen.add(n.id);
+                while (q.length) { const v = q.shift(); for (const w of adj.get(v) || []) { if (!seen.has(w)) { seen.add(w); q.push(w); comp.add(w); } } }
                 comps.push(comp);
             }
-            let total=0,weight=0;
-            for(const comp of comps){ if(comp.size<2) continue; const compArr=[...comp]; let tt=0,cc=0;
-                for(const s of compArr){ const dist=new Map(); dist.set(s,0); const q=[s];
-                    while(q.length){ const v=q.shift(); for(const w of adj.get(v)||[]){ if(!dist.has(w)){ dist.set(w,dist.get(v)+1); q.push(w); } } }
-                    for(const t of compArr){ if(t!==s && dist.has(t)){ tt+=dist.get(t); cc++; } }
+            let total = 0, weight = 0;
+            for (const comp of comps) {
+                if (comp.size < 2) continue; const compArr = [...comp]; let tt = 0, cc = 0;
+                for (const s of compArr) {
+                    const dist = new Map(); dist.set(s, 0); const q = [s];
+                    while (q.length) { const v = q.shift(); for (const w of adj.get(v) || []) { if (!dist.has(w)) { dist.set(w, dist.get(v) + 1); q.push(w); } } }
+                    for (const t of compArr) { if (t !== s && dist.has(t)) { tt += dist.get(t); cc++; } }
                 }
-                if(cc>0){ total += (tt/cc)*comp.size; weight += comp.size; }
+                if (cc > 0) { total += (tt / cc) * comp.size; weight += comp.size; }
             }
-            return weight>0? total/weight : NaN;
+            return weight > 0 ? total / weight : NaN;
         }
 
-        function nodesOfEgo(center,k,Ns,Es){
-            const adj=new Map(); Ns.forEach(n=>adj.set(n.id,[])); for(const e of Es){ const a=adj.get(e.a), b=adj.get(e.b); if(a)a.push(e.b); if(b)b.push(e.a); }
-            const dist=new Map(); dist.set(center,0); const q=[center];
-            while(q.length){ const v=q.shift(); if((dist.get(v)||0)>=k) continue; for(const w of adj.get(v)||[]){ if(!dist.has(w)){ dist.set(w, (dist.get(v)||0)+1); q.push(w); } } }
-            return new Set([...dist.entries()].map(([id])=>id));
+        function nodesOfEgo(center, k, Ns, Es) {
+            const adj = new Map(); Ns.forEach(n => adj.set(n.id, [])); for (const e of Es) { const a = adj.get(e.a), b = adj.get(e.b); if (a) a.push(e.b); if (b) b.push(e.a); }
+            const dist = new Map(); dist.set(center, 0); const q = [center];
+            while (q.length) { const v = q.shift(); if ((dist.get(v) || 0) >= k) continue; for (const w of adj.get(v) || []) { if (!dist.has(w)) { dist.set(w, (dist.get(v) || 0) + 1); q.push(w); } } }
+            return new Set([...dist.entries()].map(([id]) => id));
         }
 
-        function induced(ids,Ns,Es){ const set=new Set(ids); return { Ns:Ns.filter(n=>set.has(n.id)), Es:Es.filter(e=>set.has(e.a)&&set.has(e.b)) }; }
+        function induced(ids, Ns, Es) { const set = new Set(ids); return { Ns: Ns.filter(n => set.has(n.id)), Es: Es.filter(e => set.has(e.a) && set.has(e.b)) }; }
 
-        function angleEntropy(centerId, Ns, Es, binN=24){
-            const center = Ns.find(n=>n.id===centerId); if(!center) return null;
-            const targets = Ns.filter(n=>n.id!==centerId); if(targets.length===0) return 0;
-            const hist=new Array(binN).fill(0);
-            for(const q of targets){ const ang=Math.atan2(q.y-center.y,q.x-center.x); let k=Math.floor(((ang+Math.PI)/(2*Math.PI))*binN); if(k<0)k=0; if(k>=binN)k=binN-1; hist[k]++; }
-            const total=hist.reduce((a,b)=>a+b,0); let H=0; for(const c of hist){ if(c>0){ const p=c/total; H += -p*Math.log(p); } }
+        function angleEntropy(centerId, Ns, Es, binN = 24) {
+            const center = Ns.find(n => n.id === centerId); if (!center) return null;
+            const targets = Ns.filter(n => n.id !== centerId); if (targets.length === 0) return 0;
+            const hist = new Array(binN).fill(0);
+            for (const q of targets) { const ang = Math.atan2(q.y - center.y, q.x - center.x); let k = Math.floor(((ang + Math.PI) / (2 * Math.PI)) * binN); if (k < 0) k = 0; if (k >= binN) k = binN - 1; hist[k]++; }
+            const total = hist.reduce((a, b) => a + b, 0); let H = 0; for (const c of hist) { if (c > 0) { const p = c / total; H += -p * Math.log(p); } }
             return H;
         }
 
-        function neighborInfo(centerId, Ns, Es, sigma=SIGMA){
-            const center = Ns.find(n=>n.id===centerId); if(!center) return null;
-            const adj=new Map(); Ns.forEach(n=>adj.set(n.id,[])); for(const e of Es){ const a=adj.get(e.a), b=adj.get(e.b); if(a)a.push(e.b); if(b)b.push(e.a); }
+        function neighborInfo(centerId, Ns, Es, sigma = SIGMA) {
+            const center = Ns.find(n => n.id === centerId); if (!center) return null;
+            const adj = new Map(); Ns.forEach(n => adj.set(n.id, [])); for (const e of Es) { const a = adj.get(e.a), b = adj.get(e.b); if (a) a.push(e.b); if (b) b.push(e.a); }
             const nbrs = adj.get(centerId) || [];
-            if(nbrs.length===0) return 0;
-            const EPS=1e-9; let sum=0;
-            for(const nb of nbrs){ const q = Ns.find(n=>n.id===nb); if(!q) continue; const dx=center.x-q.x, dy=center.y-q.y; const sim=Math.exp(-(dx*dx+dy*dy)/(2*sigma*sigma)); sum += -Math.log(Math.max(sim, EPS)); }
+            if (nbrs.length === 0) return 0;
+            const EPS = 1e-9; let sum = 0;
+            for (const nb of nbrs) { const q = Ns.find(n => n.id === nb); if (!q) continue; const dx = center.x - q.x, dy = center.y - q.y; const sim = Math.exp(-(dx * dx + dy * dy) / (2 * sigma * sigma)); sum += -Math.log(Math.max(sim, EPS)); }
             return sum / nbrs.length;
         }
 
-        function gedNorm(subB, subA, mode){
-            const eKey=e=> (e && Number.isInteger(e.a) && Number.isInteger(e.b)) ? (e.a<e.b?`${e.a}-${e.b}`:`${e.b}-${e.a}`) : '';
-            const Eb=new Set(subB.Es.map(eKey).filter(Boolean)), Ea=new Set(subA.Es.map(eKey).filter(Boolean));
-            let diff=0; Ea.forEach(k=>{if(!Eb.has(k))diff++}); Eb.forEach(k=>{if(!Ea.has(k))diff++});
-            const GED=diff/2;
-            let Cmax=1;
-            if(mode==='nC2'){ const idSet=new Set([...subB.Ns.map(n=>n.id),...subA.Ns.map(n=>n.id)]); const n=idSet.size; Cmax = Math.max(1, n*(n-1)/2); }
-            else{ const unionE=new Set([...Eb,...Ea]); Cmax=Math.max(1, unionE.size); }
-            return GED/Cmax;
+        function gedNorm(subB, subA, mode) {
+            const eKey = e => (e && Number.isInteger(e.a) && Number.isInteger(e.b)) ? (e.a < e.b ? `${e.a}-${e.b}` : `${e.b}-${e.a}`) : '';
+            const Eb = new Set(subB.Es.map(eKey).filter(Boolean)), Ea = new Set(subA.Es.map(eKey).filter(Boolean));
+            let diff = 0; Ea.forEach(k => { if (!Eb.has(k)) diff++ }); Eb.forEach(k => { if (!Ea.has(k)) diff++ });
+            const GED = diff / 2;
+            let Cmax = 1;
+            if (mode === 'nC2') { const idSet = new Set([...subB.Ns.map(n => n.id), ...subA.Ns.map(n => n.id)]); const n = idSet.size; Cmax = Math.max(1, n * (n - 1) / 2); }
+            else { const unionE = new Set([...Eb, ...Ea]); Cmax = Math.max(1, unionE.size); }
+            return GED / Cmax;
         }
 
-        function topKNeighbors(pt, k=3){
-            const arr=nodes.filter(n=>n.kind==='base').map(n=>({id:n.id,s:rbfSim(pt,n,SIGMA)}));
-            arr.sort((a,b)=> b.s-a.s);
-            return arr.slice(0,k);
+        function topKNeighbors(pt, k = 3) {
+            const arr = nodes.filter(n => n.kind === 'base').map(n => ({ id: n.id, s: rbfSim(pt, n, SIGMA) }));
+            arr.sort((a, b) => b.s - a.s);
+            return arr.slice(0, k);
         }
 
         // --- GRAPH MANIPULATION ---
-        function resetGraph(){
-            nodes=[]; edges=[]; addedEdges=ensureSet(addedEdges); addedEdges.clear(); centerId=null;
-            const nBase=70;
-            if(LAYOUT==='clusters'){
-                const n1=30,n2=30,nz=10;
-                for(let i=0;i<n1;i++)nodes.push({id:nodes.length,x:randn(-1.5,0.4),y:randn(0.0,0.2),kind:'base'});
-                for(let i=0;i<n2;i++)nodes.push({id:nodes.length,x:randn( 1.5,0.4),y:randn(0.2,0.25),kind:'base'});
-                for(let i=0;i<nz;i++) nodes.push({id:nodes.length,x:rng()*6-3,y:(rng()*3)-1.5,kind:'base'});
-            }else if(LAYOUT==='donut'){
-                for(let i=0;i<nBase;i++){const th=rng()*Math.PI*2;const r=Math.max(0.1,R_DONUT+randn(0,JITTER));nodes.push({id:nodes.length,x:r*Math.cos(th),y:r*Math.sin(th),kind:'base'})}
-            }else{
-                for(let i=0;i<nBase;i++)nodes.push({id:nodes.length,x:rng()*6-3,y:(rng()*3)-1.5,kind:'base'});
+        function resetGraph() {
+            nodes = []; edges = []; addedEdges = ensureSet(addedEdges); addedEdges.clear(); centerId = null;
+            const nBase = 70;
+            if (LAYOUT === 'clusters') {
+                const n1 = 30, n2 = 30, nz = 10;
+                for (let i = 0; i < n1; i++)nodes.push({ id: nodes.length, x: randn(-1.5, 0.4), y: randn(0.0, 0.2), kind: 'base' });
+                for (let i = 0; i < n2; i++)nodes.push({ id: nodes.length, x: randn(1.5, 0.4), y: randn(0.2, 0.25), kind: 'base' });
+                for (let i = 0; i < nz; i++) nodes.push({ id: nodes.length, x: rng() * 6 - 3, y: (rng() * 3) - 1.5, kind: 'base' });
+            } else if (LAYOUT === 'donut') {
+                for (let i = 0; i < nBase; i++) { const th = rng() * Math.PI * 2; const r = Math.max(0.1, R_DONUT + randn(0, JITTER)); nodes.push({ id: nodes.length, x: r * Math.cos(th), y: r * Math.sin(th), kind: 'base' }) }
+            } else {
+                for (let i = 0; i < nBase; i++)nodes.push({ id: nodes.length, x: rng() * 6 - 3, y: (rng() * 3) - 1.5, kind: 'base' });
             }
             rebuildEdges();
             updateUI(null);
         }
 
-        function rebuildEdges(){
-            const base=nodes.filter(n=>n.kind==='base'); edges=[]; addedEdges=ensureSet(addedEdges); addedEdges.clear();
-            for(let i=0;i<base.length;i++)for(let j=i+1;j<base.length;j++){
-                if(rbfSim(base[i],base[j],SIGMA)>THR) edges.push({a:base[i].id,b:base[j].id});
+        function rebuildEdges() {
+            const base = nodes.filter(n => n.kind === 'base'); edges = []; addedEdges = ensureSet(addedEdges); addedEdges.clear();
+            for (let i = 0; i < base.length; i++)for (let j = i + 1; j < base.length; j++) {
+                if (rbfSim(base[i], base[j], SIGMA) > THR) edges.push({ a: base[i].id, b: base[j].id });
             }
-            if(centerId!=null){
-                const pt=nodes.find(n=>n.id===centerId);
-                if(pt){ topKNeighbors(pt,3).forEach(o=>{ if(o&&Number.isInteger(o.id)){ edges.push({a:centerId,b:o.id}); addedEdges.add(key(centerId,o.id)); } }); }
+            if (centerId != null) {
+                const pt = nodes.find(n => n.id === centerId);
+                if (pt) { topKNeighbors(pt, 3).forEach(o => { if (o && Number.isInteger(o.id)) { edges.push({ a: centerId, b: o.id }); addedEdges.add(key(centerId, o.id)); } }); }
             }
             draw();
         }
 
-        function addCenter(pt){
-            if(centerId!=null) return; // Only one query at a time for demo
-            const id=nodes.length; nodes.push({id,x:pt.x,y:pt.y,kind:'center'}); centerId=id;
-            
-            const kn=topKNeighbors(pt,3);
-            for(const o of kn){ if(o&&Number.isInteger(o.id)){ edges.push({a:id,b:o.id}); addedEdges.add(key(id,o.id)); } }
-            
+        function addCenter(pt) {
+            if (centerId != null) return; // Only one query at a time for demo
+            const id = nodes.length; nodes.push({ id, x: pt.x, y: pt.y, kind: 'center' }); centerId = id;
+
+            const kn = topKNeighbors(pt, 3);
+            for (const o of kn) { if (o && Number.isInteger(o.id)) { edges.push({ a: id, b: o.id }); addedEdges.add(key(id, o.id)); } }
+
             calculateMetricsFull(id);
             draw();
         }
@@ -692,28 +1009,28 @@
                 const SPLa = avgSPL(subA.Ns, subA.Es);
                 // Delta SP: Positive if path shortens
                 const dSPrel = (Number.isFinite(SPLb) && Number.isFinite(SPLa)) ? ((SPLb - SPLa) / Math.max(SPLb, 1e-6)) : 0;
-                
+
                 const gedBase = gedNorm(subB, subA, CMAX_MODE);
                 const gedn = gedBase; // Simplify for viz: EPC is mainly structure cost
 
                 // Delta H
                 let Hb, Ha;
-                if(k===0){ Hb = neighborInfo(rep, subB.Ns, subB.Es, SIGMA); Ha = neighborInfo(cid, subA.Ns, subA.Es, SIGMA); }
-                else     { Hb = angleEntropy(rep, subB.Ns, subB.Es, 24);  Ha = angleEntropy(cid, subA.Ns, subA.Es, 24); }
-                const dHn = (Hb!=null && Ha!=null)? ( (Hb-Ha) / Math.max(Hb,1e-6) ) : 0;
+                if (k === 0) { Hb = neighborInfo(rep, subB.Ns, subB.Es, SIGMA); Ha = neighborInfo(cid, subA.Ns, subA.Es, SIGMA); }
+                else { Hb = angleEntropy(rep, subB.Ns, subB.Es, 24); Ha = angleEntropy(cid, subA.Ns, subA.Es, 24); }
+                const dHn = (Hb != null && Ha != null) ? ((Hb - Ha) / Math.max(Hb, 1e-6)) : 0;
 
                 // IG = dH + dSP
                 const dIGn = dHn + dSPrel;
-                
+
                 const ge = gedn - LAMBDA * dIGn;
 
-                if(ge < minGeDIG) {
+                if (ge < minGeDIG) {
                     minGeDIG = ge;
                     bestK = k;
                     metrics = { gedn, dh: dHn, dsp: dSPrel, dign: dIGn, geDIG: ge };
                 }
             }
-            
+
             updateUI(metrics);
             showStatusBasedOnScore(metrics.geDIG);
         }
@@ -722,46 +1039,46 @@
         const gEdges = document.getElementById('edges'), gNodes = document.getElementById('nodes');
         const svgEl = document.getElementById('svg');
 
-        function draw(){
-            gEdges.innerHTML='';
-            
+        function draw() {
+            gEdges.innerHTML = '';
+
             // BFS for coloring
             let hopClass = new Map();
-            if(centerId!=null){
-                const adj=new Map(); nodes.forEach(n=>adj.set(n.id,[])); for(const e of edges){ const a=adj.get(e.a), b=adj.get(e.b); if(a)a.push(e.b); if(b)b.push(e.a); }
-                const dist=new Map(); dist.set(centerId,0); const q=[centerId];
-                while(q.length){ const v=q.shift(); if((dist.get(v)||0)>=3) continue; for(const w of adj.get(v)||[]){ if(!dist.has(w)){ dist.set(w, (dist.get(v)||0)+1); q.push(w); } } }
-                nodes.forEach(n=>{ const d=dist.get(n.id); if(d!=null) hopClass.set(n.id, 'hop'+d); });
+            if (centerId != null) {
+                const adj = new Map(); nodes.forEach(n => adj.set(n.id, [])); for (const e of edges) { const a = adj.get(e.a), b = adj.get(e.b); if (a) a.push(e.b); if (b) b.push(e.a); }
+                const dist = new Map(); dist.set(centerId, 0); const q = [centerId];
+                while (q.length) { const v = q.shift(); if ((dist.get(v) || 0) >= 3) continue; for (const w of adj.get(v) || []) { if (!dist.has(w)) { dist.set(w, (dist.get(v) || 0) + 1); q.push(w); } } }
+                nodes.forEach(n => { const d = dist.get(n.id); if (d != null) hopClass.set(n.id, 'hop' + d); });
             }
 
-            for(const e of edges){
-                const A=nodes[e.a],B=nodes[e.b]; if(!A||!B) continue;
-                const p=toScreen(A), q=toScreen(B);
-                const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
-                ln.setAttribute('x1',p.x); ln.setAttribute('y1',p.y); ln.setAttribute('x2',q.x); ln.setAttribute('y2',q.y);
-                
-                let cls='edge';
-                const da=hopClass.get(e.a), db=hopClass.get(e.b);
-                if(da && db) {
-                     // Color edge by min hop
-                     const ha = parseInt(da.replace('hop','')), hb = parseInt(db.replace('hop',''));
-                     cls += ' hop' + Math.min(ha,hb);
+            for (const e of edges) {
+                const A = nodes[e.a], B = nodes[e.b]; if (!A || !B) continue;
+                const p = toScreen(A), q = toScreen(B);
+                const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                ln.setAttribute('x1', p.x); ln.setAttribute('y1', p.y); ln.setAttribute('x2', q.x); ln.setAttribute('y2', q.y);
+
+                let cls = 'edge';
+                const da = hopClass.get(e.a), db = hopClass.get(e.b);
+                if (da && db) {
+                    // Color edge by min hop
+                    const ha = parseInt(da.replace('hop', '')), hb = parseInt(db.replace('hop', ''));
+                    cls += ' hop' + Math.min(ha, hb);
                 }
-                if(ensureSet(addedEdges).has(key(e.a,e.b))) cls+=' added';
-                
-                ln.setAttribute('class',cls);
+                if (ensureSet(addedEdges).has(key(e.a, e.b))) cls += ' added';
+
+                ln.setAttribute('class', cls);
                 gEdges.appendChild(ln);
             }
 
-            gNodes.innerHTML='';
-            nodes.forEach(n=>{
-                const P=toScreen(n);
-                const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
-                c.setAttribute('cx',P.x); c.setAttribute('cy',P.y);
-                let cls='node';
-                const hc=hopClass.get(n.id); if(hc) cls += ' '+hc; 
-                if(n.kind==='base') cls+=' base'; if(n.kind==='center') cls+=' center';
-                c.setAttribute('class',cls);
+            gNodes.innerHTML = '';
+            nodes.forEach(n => {
+                const P = toScreen(n);
+                const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                c.setAttribute('cx', P.x); c.setAttribute('cy', P.y);
+                let cls = 'node';
+                const hc = hopClass.get(n.id); if (hc) cls += ' ' + hc;
+                if (n.kind === 'base') cls += ' base'; if (n.kind === 'center') cls += ' center';
+                c.setAttribute('class', cls);
                 gNodes.appendChild(c);
             });
         }
@@ -772,7 +1089,7 @@
             const elH = document.getElementById('val-h');
             const elSp = document.getElementById('val-sp');
             const elGedig = document.getElementById('val-gedig');
-            
+
             const barEpc = document.getElementById('bar-epc');
             const barIg = document.getElementById('bar-ig');
             const barH = document.getElementById('bar-h');
@@ -792,14 +1109,14 @@
             elSp.textContent = m.dsp.toFixed(2);
             elGedig.textContent = m.geDIG.toFixed(3);
 
-            barEpc.style.width = `${Math.min(Math.max(m.gedn*100,0),100)}%`;
-            barIg.style.width = `${Math.min(Math.max(m.dign*100,0),100)}%`;
+            barEpc.style.width = `${Math.min(Math.max(m.gedn * 100, 0), 100)}%`;
+            barIg.style.width = `${Math.min(Math.max(m.dign * 100, 0), 100)}%`;
             // Normalize H/SP for visualization bars (approx scale)
-            barH.style.width = `${Math.min(Math.max(m.dh*100 + 20, 0), 100)}%`; 
-            barSp.style.width = `${Math.min(Math.max(m.dsp*100, 0), 100)}%`;
+            barH.style.width = `${Math.min(Math.max(m.dh * 100 + 20, 0), 100)}%`;
+            barSp.style.width = `${Math.min(Math.max(m.dsp * 100, 0), 100)}%`;
 
             // Text color logic
-            elGedig.className = "text-3xl font-bold font-mono transition-colors " + 
+            elGedig.className = "text-3xl font-bold font-mono transition-colors " +
                 (m.geDIG < 0.3 ? "text-success" : (m.geDIG > 0.5 ? "text-danger" : "text-warn"));
         }
 
@@ -809,26 +1126,26 @@
             const dot = document.getElementById('status-dot');
             const stage = document.getElementById('vis-container');
             const badge = document.getElementById('status-badge');
-            
+
             let type = 'warn', msg = 'PENDING';
             if (score < 0.3) { type = 'success'; msg = 'INSIGHT FOUND (DG)'; }
             else if (score > 0.5) { type = 'danger'; msg = 'AMBIGUITY (AG)'; }
-            
+
             // Overlay
             txt.textContent = msg;
-            txt.className = 'font-bold font-mono text-sm tracking-wide ' + (type==='success'?'text-success':(type==='danger'?'text-danger':'text-warn'));
-            dot.className = 'w-2 h-2 rounded-full ' + (type==='success'?'bg-success':(type==='danger'?'bg-danger':'bg-warn'));
-            
+            txt.className = 'font-bold font-mono text-sm tracking-wide ' + (type === 'success' ? 'text-success' : (type === 'danger' ? 'text-danger' : 'text-warn'));
+            dot.className = 'w-2 h-2 rounded-full ' + (type === 'success' ? 'bg-success' : (type === 'danger' ? 'bg-danger' : 'bg-warn'));
+
             overlay.style.opacity = '1';
             overlay.style.transform = 'translateY(0)';
-            
+
             stage.classList.remove('insight-active', 'ambiguity-active');
             void stage.offsetWidth;
-            if(type!=='warn') stage.classList.add(type==='success' ? 'insight-active' : 'ambiguity-active');
+            if (type !== 'warn') stage.classList.add(type === 'success' ? 'insight-active' : 'ambiguity-active');
 
             // Badge
             badge.textContent = msg;
-            badge.className = "px-2 py-0.5 rounded " + (type==='success'?'bg-success/20 text-success':(type==='danger'?'bg-danger/20 text-danger':'bg-warn/20 text-warn'));
+            badge.className = "px-2 py-0.5 rounded " + (type === 'success' ? 'bg-success/20 text-success' : (type === 'danger' ? 'bg-danger/20 text-danger' : 'bg-warn/20 text-warn'));
 
             setTimeout(() => {
                 overlay.style.opacity = '0';
@@ -842,19 +1159,19 @@
             centerId = null;
             if (type === 'ambiguity') {
                 LAYOUT = 'uniform'; resetGraph();
-                setTimeout(() => { addCenter({x: 0, y: 0}); }, 600);
+                setTimeout(() => { addCenter({ x: 0, y: 0 }); }, 600);
             } else if (type === 'insight') {
                 LAYOUT = 'donut'; resetGraph();
-                setTimeout(() => { addCenter({x: 0, y: 0}); }, 600);
+                setTimeout(() => { addCenter({ x: 0, y: 0 }); }, 600);
             }
         }
-        
+
         // Mouse Interaction
         const stage = document.getElementById('stage');
         const guide = document.getElementById('cursor-guide');
-        
+
         stage.addEventListener('mousemove', (e) => {
-            if(centerId !== null) { guide.style.opacity = 0; return; }
+            if (centerId !== null) { guide.style.opacity = 0; return; }
             const rect = stage.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
@@ -862,38 +1179,39 @@
             guide.style.top = y + 'px';
             guide.style.opacity = 1;
         });
-        
+
         stage.addEventListener('click', (e) => {
-            if(centerId !== null) return;
+            if (centerId !== null) return;
             const rect = stage.getBoundingClientRect();
             const p = svgToGraph(e.clientX - rect.left, e.clientY - rect.top); // Need svgToGraph
             addCenter(p);
         });
-        
-        function svgToGraph(sx, sy){ 
+
+        function svgToGraph(sx, sy) {
             const rect = stage.getBoundingClientRect(); // 100% width/height logic
             // Map screen (0..width, 0..height) to graph coords (-3..3, 1.5..-1.5)
             // Note: SVG viewBox is 1000x700
             // toScreen logic: x: (p.x+3)/6*1000
-            
+
             // Inverse:
             // sx_svg = sx / rect.width * 1000
             // sy_svg = sy / rect.height * 700
-            
+
             const svgX = (sx / rect.width) * 1000;
             const svgY = (sy / rect.height) * 700;
-            
+
             const gx = (svgX / 1000) * 6 - 3;
             const gy = (1 - (svgY / 700)) * 3 - 1.5;
-            return {x: gx, y: gy};
+            return { x: gx, y: gy };
         }
 
-        document.getElementById('btnReset').addEventListener('click', () => { LAYOUT='clusters'; resetGraph(); });
-        document.getElementById('btnAddCenter').addEventListener('click', () => addCenter({x:0, y:-0.2}));
+        document.getElementById('btnReset').addEventListener('click', () => { LAYOUT = 'clusters'; resetGraph(); });
+        document.getElementById('btnAddCenter').addEventListener('click', () => addCenter({ x: 0, y: -0.2 }));
 
         // Init
         resetGraph();
         setTimeout(() => playScenario('insight'), 1000);
     </script>
 </body>
+
 </html>
