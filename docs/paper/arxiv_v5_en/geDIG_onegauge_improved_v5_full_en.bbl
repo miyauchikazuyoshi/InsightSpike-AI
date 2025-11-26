@@ -1,0 +1,53 @@
+\begin{thebibliography}{1}
+
+\bibitem{dygrag2024}
+{Authors}.
+\newblock Dynamic graph-based retrieval-augmented generation.
+\newblock arXiv preprint, 2024.
+\newblock Preprint; DOI/URL to be updated.
+
+\bibitem{kedkg2024}
+{Authors}.
+\newblock Knowledge editing with dynamic knowledge graphs.
+\newblock arXiv preprint, 2024.
+\newblock Preprint; DOI/URL to be updated.
+
+\bibitem{Buzsaki2015}
+Gy{"o}rgy Buzs{\'a}ki.
+\newblock {\em Rhythms of the Brain}.
+\newblock Oxford University Press, 2011.
+
+\bibitem{Carr2011}
+Matthew~F Carr, Shantanu~P Jadhav, and Loren~M Frank.
+\newblock Hippocampal replay in the awake state: a neural substrate of spatial
+  memory.
+\newblock {\em Nature Neuroscience}, 14(2):147--153, 2011.
+
+\bibitem{Friston2010}
+Karl Friston.
+\newblock The free-energy principle: a unified brain theory?
+\newblock {\em Nature Reviews Neuroscience}, 11(2):127--138, 2010.
+
+\bibitem{gao2010survey}
+Xinbo Gao, Bing Xiao, Dacheng Tao, and Xuelong Li.
+\newblock A survey of graph edit distance.
+\newblock {\em Pattern Analysis and applications}, 13(1):113--129, 2010.
+
+\bibitem{graphrag2024}
+{Microsoft Research Team}.
+\newblock Graphrag: Retrieval-augmented generation via knowledge graphs.
+\newblock arXiv preprint, 2024.
+\newblock Whitepaper/technical report; DOI/URL to be updated.
+
+\bibitem{Pfeiffer2013}
+Brad~E Pfeiffer and David~J Foster.
+\newblock Hippocampal place-cell sequences depict future paths to remembered
+  goals.
+\newblock {\em Nature}, 497:74--79, 2013.
+
+\bibitem{Reimers2019}
+Nils Reimers and Iryna Gurevych.
+\newblock Sentence-bert: Sentence embeddings using siamese bert-networks.
+\newblock In {\em Proceedings of EMNLP-IJCNLP}, 2019.
+
+\end{thebibliography}

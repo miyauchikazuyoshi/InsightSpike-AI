@@ -194,7 +194,7 @@ Key metrics include:
 \subsection{Static vs dynamic RAG: pipelines}\label{sec:static_dynamic_pipelines}
 \begin{figure}[H]
   \centering
-  \begin{tikzpicture}[node distance=10mm,>=Stealth,rounded corners]
+  \begin{tikzpicture}[node distance=7mm,>=Stealth,rounded corners,scale=0.8,transform shape]
     % Static pipeline
     \node[draw,fill=gray!10,minimum width=26mm] (q1) {Query};
     \node[draw,fill=gray!10,minimum width=26mm,right=of q1] (r1) {Retrieve (Top-$k$)};
@@ -218,14 +218,14 @@ Key metrics include:
     \node[above of=r2,yshift=-18mm,font=\small] {Dynamic RAG (event-driven)};
     \node[below=6mm of r2,font=\scriptsize,text=green!50!black] {On-Demand + Confirm};
   \end{tikzpicture}
-  \caption{Static (single-round) vs dynamic (event-driven) RAG pipelines.
-  In dynamic RAG, retrieval happens only under uncertainty (AG), and updates are committed only when DG confirms a gain.}
+  \caption{Static (single-round) vs dynamic (event-driven) RAG pipelines.}
   \label{fig:static_dynamic_pipeline}
 \end{figure}
 
 \begin{table}[H]
   \centering
   \scriptsize
+  \resizebox{\textwidth}{!}{%
   \begin{tabular}{p{22mm}p{54mm}p{54mm}}
     \toprule
     Aspect & Static RAG (role in this work) & Dynamic RAG (role in this work) \\
@@ -236,6 +236,7 @@ Key metrics include:
     Output & Answer + citations & Answer + \textbf{update log} (AG/DG, F-values, accept / reject) \\
     \bottomrule
   \end{tabular}
+  }
   \caption{Static vs dynamic RAG responsibilities (corresponding to \cref{fig:static_dynamic_pipeline}).}
   \label{tab:static_dynamic_responsibility}
 \end{table}
@@ -388,6 +389,7 @@ Table~\ref{tab:maze_rag_mapping} summarizes the correspondence, including an abs
 \begin{table}[H]
   \centering
   \scriptsize
+  \resizebox{\textwidth}{!}{%
   \begin{tabular}{p{20mm}p{36mm}p{40mm}p{34mm}}
     \toprule
     Concept & Maze (PoC) & RAG (this paper) & Abstract (design) \\
@@ -401,6 +403,7 @@ Table~\ref{tab:maze_rag_mapping} summarizes the correspondence, including an abs
     Embedding & $\mathbf{v}\in\mathbb{R}^8$ & Sentence-BERT $\varphi:\text{text}\to\mathbb{R}^d$ & $\Phi$ \\
     \bottomrule
   \end{tabular}
+  }
   \caption{Correspondence between maze and RAG embedding spaces (including an abstract layer).
   While the concrete representations differ, transition definitions and evaluation / control via $\F$ and AG/DG are shared.}
   \label{tab:maze_rag_mapping}
@@ -436,10 +439,12 @@ In what follows we focus on measurable behavior of $\F$ and on operational predi
 \begin{figure}[H]
   \centering
   \begin{tikzpicture}[
-    node distance=58mm,
-    box/.style={rectangle,draw,rounded corners,align=center,minimum width=50mm,minimum height=10mm,font=\small},
-    note/.style={align=center,font=\scriptsize,text width=0.8\linewidth},
-    >=Latex]
+    node distance=42mm,
+    box/.style={rectangle,draw,rounded corners,align=center,minimum width=40mm,minimum height=10mm,font=\small},
+    note/.style={align=center,font=\scriptsize,text width=0.7\linewidth},
+    >=Latex,
+    scale=0.8,
+    transform shape]
     \node[box] (p1) {Phase 1 (Online / Awake)\\One-Gauge: 0-hop / multi-hop\\AG/DG control};
     \node[box,right=of p1] (p2) {Phase 2 (Offline / Sleep)\\Global optimization: compression / rewiring};
     \draw[->,line width=0.6pt,shorten >=2pt,shorten <=2pt]
@@ -448,8 +453,7 @@ In what follows we focus on measurable behavior of $\F$ and on operational predi
     \path let \p1=(p1), \p2=(p2) in coordinate (mid) at ($ (p1)!0.5!(p2) $);
     \node[note,below=10mm of mid] {Phase~1: real-time control under resource constraints\\Phase~2: offline search for globally better structure (under Phase~1 logs)};
   \end{tikzpicture}
-  \caption{Two-phase architecture (awake / sleep) as a design metaphor.
-  Phase~1 performs online control with the unified gauge $\F$; Phase~2 performs offline optimization for global structure.}
+  \caption{Two-phase architecture (awake / sleep) as a design metaphor.}
   \label{fig:two_phase_overview}
 \end{figure}
 
@@ -722,6 +726,7 @@ Table~\ref{tab:key_metrics_direction} summarizes the desired directions on each 
   \small
   \caption{Key metrics and desired directions (including PSZ-related targets).}
   \label{tab:key_metrics_direction}
+  \resizebox{\textwidth}{!}{%
   \begin{tabular}{lll}
     \toprule
     Metric & Definition / meaning & Desired direction \\
@@ -735,6 +740,7 @@ Table~\ref{tab:key_metrics_direction} summarizes the desired directions on each 
     Shortcut contribution $\Delta\mathrm{SP}_{\mathrm{rel}}$ & Relative path-length improvement & $\uparrow$ \\
     \bottomrule
   \end{tabular}
+  }
 \end{table}
 
 \section{Experiment III: dynamic acceptance (Dynamic GRAG $\times$ geDIG)}
@@ -924,6 +930,7 @@ These assumptions correspond to the embedding requirements (A1)--(A3) in \cref{s
   \small
   \caption{Correspondence between assumptions (B1--B4) and embedding requirements (A1--A3), summarized at a high level.}
   \label{tab:ba_mapping_en}
+  \resizebox{\textwidth}{!}{%
   \begin{tabular}{@{}l l l@{}}
     \toprule
     Assumption & Purpose & Supported by \\
@@ -934,6 +941,7 @@ These assumptions correspond to the embedding requirements (A1)--(A3) in \cref{s
     B4: Normalization stability & Absorbs drift in $C_{\max}$, $\log K$ & A2 (unit norms), A3 (smooth changes) \\
     \bottomrule
   \end{tabular}
+  }
 \end{table}
 
 \paragraph{Proposition (summary) and proof sketch}
@@ -980,6 +988,7 @@ In that sense it can be read as a concrete, graph-level implementation of compre
   \small
   \caption{High-level comparison with related approaches (performance / control / theory layers).}
   \label{tab:related_comparison_en}
+  \resizebox{\textwidth}{!}{%
   \begin{tabular}{lcccccc}
     \toprule
     Method & Dynamic KG & Structure detection & Single gauge & Joint learn/use & Insight events & Theory basis \\
@@ -992,6 +1001,7 @@ In that sense it can be read as a concrete, graph-level implementation of compre
     \textbf{geDIG} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & FEP--MDL (operational) \\
     \bottomrule
   \end{tabular}
+  }
 \end{table}
 
 \section{Threats to validity (summary)}
@@ -1079,5 +1089,8 @@ Phase~2 (offline rewiring) and larger-scale studies are intentionally left as op
 The author thanks collaborators and early readers for feedback on the Japanese v5 manuscript and on the experiment design, and the broader community for open-source tools and datasets that made this work possible.
 Any remaining errors or misinterpretations are the author's responsibility.
 We invite collaboration and feedback from the community: this work is conducted by an independent researcher and welcomes reproduction, critical examination, and joint research opportunities on both the theoretical and experimental sides.
+
+\bibliographystyle{plain}
+\bibliography{../references}
 
 \end{document}

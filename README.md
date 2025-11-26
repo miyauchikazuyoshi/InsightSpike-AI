@@ -20,6 +20,7 @@ Cloud/Lightweight defaults
 - For safe CLI in cloud: `INSIGHTSPIKE_LLM__PROVIDER=mock`, `INSIGHTSPIKE_LLM__MODEL=mock`
 
 Docs / GitHub Pages: https://miyauchikazuyoshi.github.io/InsightSpike-AI
+Note: The current code and presets are aligned with the v4 One‑Gauge spec; v5 paper text is newer and will be reconciled as updates land.
 
 ## 🎯 What We’re Building
 

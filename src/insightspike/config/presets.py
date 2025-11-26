@@ -321,6 +321,7 @@ class ConfigPresets:
             "production": ConfigPresets.production(),
             "research": ConfigPresets.research(),
             "cloud": ConfigPresets.cloud(),
+            "paper": ConfigPresets.paper(),
             # Alias for CLI convenience; testing → cloud (ultra-light)
             "testing": ConfigPresets.cloud(),
             "production_optimized": ConfigPresets.production_optimized(),
