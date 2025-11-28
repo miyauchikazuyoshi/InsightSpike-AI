@@ -122,6 +122,54 @@ Phase 2 を、NREM と REM に対応する二つのモードに分ける：
 - **Forgetting**: 干渉しやすい記憶や低価値な記憶を、意図的に忘却するメカニズム。  
 - **Multi-Agent Sleep**: 複数エージェント間での同期睡眠・知識共有。
 
+### 7. Transformer マッピングと自律学習ループ
+
+本アーキテクチャは、Transformer の内部動作と以下のように対応付けることができます。これにより、geDIG は単なる RAG 制御則ではなく、**自律的な表現学習ループ** として機能します。
+
+#### 7.1 マッピング仮説
+
+| geDIG Phase | Transformer Component | 役割 | 学習メカニズム |
+| :--- | :--- | :--- | :--- |
+| **Phase 1 (覚醒)** | **Attention (配線)** | 動的な「どこを見るべきか」の探索 | **Attention Training**<br>AG/DG ログによる正例（洞察）・負例（無駄足）エッジの収集 |
+| **Phase 2 (睡眠)** | **QKV (表現)** | 静的な「どう表現するか」の焼き込み | **QKV Training**<br>収集したエッジログを用いた対照学習 (Contrastive Learning) |
+
+#### 7.2 自律学習サイクル
+
+1.  **Phase 1 (Experience)**:
+    *   固定された QKV (Embedding) で推論・探索を行う。
+    *   DG が発火した（洞察が得られた）エッジを **Positive**、AG で探索したが無駄だったエッジを **Negative** としてログに蓄積する。
+2.  **Phase 2 (Consolidation)**:
+    *   蓄積した Positive/Negative ペアを用いて、Embedding モデル (QKV) を **Fine-tuning** する。
+    *   目的関数: Positive ペアの類似度を上げ、Negative ペアの類似度を下げる (Contrastive Loss)。
+3.  **Deploy (Evolution)**:
+    *   更新された QKV を用いてインデックスを再構築する。
+    *   次回の Phase 1 では、以前は「多ホップ推論」が必要だったパスが、「直感 (0-hop)」で繋がるようになる（**ショートカットの内部化**）。
+
+このサイクルにより、システムは外部教師なしで、自らの探索経験から表現を最適化し続けることが可能になります。
+
+### 8. 理論的再定義とインパクト
+
+#### 8.1 構造学習付き Q-Learning としての再定義
+
+geDIG Phase 2 は、強化学習における Q-Learning を「動的な状態空間」へと拡張したものとして再定義できます。
+
+*   **状態 $s$ / 行動 $a$**: ノード（エピソード）とエッジ（遷移）。
+*   **Q値 $Q(s,a)$**: エッジの重み $w_{ij}$（または類似度）。
+*   **報酬 $r$**: Phase 1 での DG 発火（洞察）やゴール到達ログ（遅延報酬）。
+*   **価値伝播**: Phase 2 のシグナル伝播（ゴールからの逆伝播）が $\gamma \max Q(s',a')$ に相当。
+
+**決定的な差分**: 通常の Q-Learning が固定されたテーブル上の値を更新するのに対し、geDIG は **Qテーブル（グラフ構造）自体のサイズと形状を動的に最適化（追加・剪定）** します。これは「構造可塑性（Structural Plasticity）」を備えた強化学習モデルです。
+
+#### 8.2 3つの未解決問題への統一解
+
+本研究は、以下の異なる分野の課題を単一原理 ($\mathcal{F} = \Delta EPC - \lambda \Delta IG$) で解決するポテンシャルを持ちます。
+
+1.  **RAG/LLM**: 「情報の代謝（忘却と構造化）」によるコンテキスト効率の解決。
+2.  **強化学習**: 「構造可塑性」による状態空間設計の自動化。
+3.  **Neuro-symbolic**: Phase 1（直感/NN）と Phase 2（論理/構造）のサイクルによる、記号とニューラルの滑らかな接続。
+
+---
+
 ---
 
 ## English Version
@@ -260,4 +308,50 @@ sleep:
 - **Dreaming**: generative replay of episodes based on the consolidated graph.  
 - **Forgetting**: active forgetting of interfering or low-value memories.  
 - **Multi-agent sleep**: synchronized sleep / consolidation across multiple agents.
+
+### 8. Transformer Mapping & Autonomous Learning Loop
+
+This architecture can be mapped to the internal mechanics of Transformers, positioning geDIG as an **autonomous representation learning loop**.
+
+#### 8.1 Mapping Hypothesis
+
+| geDIG Phase | Transformer Component | Role | Learning Mechanism |
+| :--- | :--- | :--- | :--- |
+| **Phase 1 (Wake)** | **Attention (Wiring)** | Dynamic exploration of "where to attend" | **Attention Training**<br>Collecting Positive (Insight) / Negative (Waste) edges via AG/DG logs |
+| **Phase 2 (Sleep)** | **QKV (Representation)** | Static consolidation of "how to represent" | **QKV Training**<br>Contrastive Learning using collected edge logs |
+
+#### 8.2 Autonomous Learning Cycle
+
+1.  **Phase 1 (Experience)**:
+    *   Perform inference/exploration with fixed QKV (Embedding).
+    *   Log edges where DG fired (insight gained) as **Positive**, and edges explored by AG but rejected as **Negative**.
+2.  **Phase 2 (Consolidation)**:
+    *   **Fine-tune** the Embedding model (QKV) using the accumulated Positive/Negative pairs.
+    *   Objective: Maximize similarity for Positive pairs, minimize for Negative pairs (Contrastive Loss).
+3.  **Deploy (Evolution)**:
+    *   Re-build the index using the updated QKV.
+    *   In the next Phase 1, paths that previously required "multi-hop inference" will be connected via "intuition (0-hop)" (**Internalization of Shortcuts**).
+
+This cycle allows the system to continuously optimize its representations from its own exploration experience, without external supervision.
+
+### 9. Theoretical Redefinition & Broader Impact
+
+#### 9.1 Redefinition as Q-Learning with Structural Plasticity
+
+geDIG Phase 2 can be redefined as an extension of Q-Learning to a "dynamic state space".
+
+*   **State $s$ / Action $a$**: Nodes (episodes) and Edges (transitions).
+*   **Q-value $Q(s,a)$**: Edge weight $w_{ij}$ (or similarity).
+*   **Reward $r$**: DG firing (insight) or goal achievement logs from Phase 1 (delayed reward).
+*   **Value Propagation**: Signal propagation in Phase 2 corresponds to $\gamma \max Q(s',a')$.
+
+**Crucial Difference**: While standard Q-Learning updates values on a fixed table, geDIG **dynamically optimizes the size and shape of the Q-table (graph structure)** itself (addition/pruning). This represents a Reinforcement Learning model with **Structural Plasticity**.
+
+#### 9.2 Unified Solution to Three Open Problems
+
+This research has the potential to solve challenges in three distinct fields with a single principle ($\mathcal{F} = \Delta EPC - \lambda \Delta IG$):
+
+1.  **RAG/LLM**: Solving context efficiency via "Information Metabolism (forgetting & structuring)".
+2.  **Reinforcement Learning**: Automating state space design via "Structural Plasticity".
+3.  **Neuro-symbolic**: Smoothly connecting symbols and neural networks via the Phase 1 (Intuition/NN) and Phase 2 (Logic/Structure) cycle.
 

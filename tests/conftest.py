@@ -27,6 +27,32 @@ src_path = str(Path(__file__).parent.parent / "src")
 if src_path not in sys.path:
     sys.path.insert(0, src_path)
 
+# --- Optional module availability (maze legacy deps) ---
+import importlib.util as _ilu
+
+def _safe_find_spec(name: str):
+    try:
+        return _ilu.find_spec(name)
+    except ModuleNotFoundError:  # pragma: no cover - defensive
+        return None
+
+_NAV_AVAILABLE = _safe_find_spec("navigation") is not None
+_MAZE_CORE_AVAILABLE = _safe_find_spec("core.eviction_policy") is not None  # legacy path
+
+# 依存欠如時に収集で失敗するテストをデフォルトで無視
+collect_ignore_glob = []  # pytest picks this up at collection time
+if not _NAV_AVAILABLE:
+    collect_ignore_glob.extend([
+        "tests/maze/*",
+        "tests/maze-query-hub-prototype/*",
+        "tests/test_macro_target_adaptive_p*.py",
+        "tests/test_macro_target_metrics.py",
+        "tests/test_maze_navigator_smoke.py",
+        "tests/unit/test_maze_simple_mode.py",
+    ])
+if not _MAZE_CORE_AVAILABLE:
+    collect_ignore_glob.append("tests/maze/test_eviction_policy.py")
+
 # 遅延 import 用ヘルパ (必要になった時点でのみ import)
 def _load_config_types():
     from insightspike.config.models import InsightSpikeConfig  # type: ignore
@@ -34,7 +60,6 @@ def _load_config_types():
     return InsightSpikeConfig, ConfigPresets
 
 # torch / torch_geometric 利用可否を早期判定 (テストskip用途)
-import importlib.util as _ilu
 _TORCH_AVAILABLE = _ilu.find_spec("torch") is not None
 _PYG_AVAILABLE = _ilu.find_spec("torch_geometric") is not None
 
