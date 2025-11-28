@@ -35,6 +35,43 @@ class GraphAnalyzer:
         except Exception:
             return 0
 
+    def _graph_metrics_config(self):
+        """Return metrics config from either dict or Pydantic config, if present."""
+        cfg = self.config
+        if not cfg:
+            return None
+
+        try:
+            if isinstance(cfg, dict):
+                graph_cfg = cfg.get("graph")
+            else:
+                graph_cfg = getattr(cfg, "graph", None)
+                if graph_cfg is None:
+                    if hasattr(cfg, "model_dump"):
+                        dumped = cfg.model_dump()
+                        graph_cfg = dumped.get("graph") if isinstance(dumped, dict) else None
+                    elif hasattr(cfg, "dict"):
+                        dumped = cfg.dict()
+                        graph_cfg = dumped.get("graph") if isinstance(dumped, dict) else None
+
+            if graph_cfg is None:
+                return None
+
+            if isinstance(graph_cfg, dict):
+                return graph_cfg.get("metrics")
+            if hasattr(graph_cfg, "metrics"):
+                return getattr(graph_cfg, "metrics")
+            if hasattr(graph_cfg, "model_dump"):
+                dumped_graph = graph_cfg.model_dump()
+                return dumped_graph.get("metrics") if isinstance(dumped_graph, dict) else None
+            if hasattr(graph_cfg, "dict"):
+                dumped_graph = graph_cfg.dict()
+                return dumped_graph.get("metrics") if isinstance(dumped_graph, dict) else None
+        except Exception:
+            return None
+
+        return None
+
     def calculate_metrics(
         self,
         current_graph: Any,  # Accept NetworkX or PyG Data
@@ -58,10 +95,9 @@ class GraphAnalyzer:
 
         try:
             kwargs = {}
-            if self.config and "graph" in self.config:
-                graph_config = self.config["graph"]
-                if "metrics" in graph_config:
-                    kwargs["config"] = {"metrics": graph_config["metrics"]}
+            metrics_config = self._graph_metrics_config()
+            if metrics_config is not None:
+                kwargs["config"] = {"metrics": metrics_config}
 
             # ΔGED (fall back to NX conversion if needed)
             try:

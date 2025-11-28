@@ -23,6 +23,26 @@ def test_graph_analyzer_defaults_with_none_prev():
     assert metrics["delta_ig"] == 0.0
 
 
+def test_graph_analyzer_handles_pydantic_config_without_membership():
+    from insightspike.config.models import InsightSpikeConfig
+    from insightspike.implementations.layers.layer3.analysis import GraphAnalyzer
+
+    cfg = InsightSpikeConfig()
+    ga = GraphAnalyzer(config=cfg)
+
+    def _dummy_ged(prev, curr, **kwargs):
+        # Config lookup should not raise TypeError for Pydantic configs
+        assert kwargs == {}
+        return -0.1
+
+    def _dummy_ig(prev, curr, **kwargs):
+        return 0.2
+
+    metrics = ga.calculate_metrics(current_graph="curr", previous_graph="prev", delta_ged_func=_dummy_ged, delta_ig_func=_dummy_ig)
+    assert metrics["delta_ged"] == -0.1
+    assert metrics["delta_ig"] == 0.2
+
+
 def test_reward_calculator_basic():
     from insightspike.implementations.layers.layer3.analysis import RewardCalculator
 
