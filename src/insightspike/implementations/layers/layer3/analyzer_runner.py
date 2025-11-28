@@ -71,6 +71,13 @@ def run_analysis(
         delta_ged_func=reasoner.delta_ged,
         delta_ig_func=reasoner.delta_ig,
     )
+    # Trace which SP engine was chosen (cached/core) and echo norm config for downstream checks
+    sp_engine = _select_sp_engine(getattr(reasoner, "config", None))
+    metrics["sp_engine"] = sp_engine
+    if "norm_spec" in context:
+        metrics["norm_spec"] = context["norm_spec"]
+    if "candidate_selection" in context:
+        metrics["candidate_selection"] = context["candidate_selection"]
 
     # Conflicts
     conflicts = reasoner.conflict_scorer.calculate_conflict(previous_graph, current_graph, context)
@@ -89,6 +96,7 @@ def run_analysis(
     reasoning_quality = graph_analyzer.assess_quality(metrics, conflicts)
 
     reasoner.previous_graph = current_graph
+    reasoner.current_graph = current_graph
 
     return {
         "graph": current_graph,
@@ -187,7 +195,7 @@ def handle_query_focal(
 
         centers = _determine_centers(current_graph)
         cfg = getattr(reasoner, "config", None)
-        sp_engine = _select_sp_engine(cfg)
+        sp_engine = _select_sp_engine(cfg, env_fallback=False)
         use_cached_sp = sp_engine in ("cached", "cached_incr")
 
         core = _get_gedig_core(use_cached_sp, cfg)
@@ -308,11 +316,22 @@ def _determine_centers(current_graph) -> List[int]:
         return []
 
 
-def _select_sp_engine(cfg) -> str:
+def _select_sp_engine(cfg, env_fallback: bool = True) -> str:
     try:
-        return str(os.getenv("INSIGHTSPIKE_SP_ENGINE", str(getattr(cfg.graph, "sp_engine", "core") or "core"))).lower()
+        cfg_engine = getattr(getattr(cfg, "graph", None) or {}, "sp_engine", None)
     except Exception:
-        return "core"
+        cfg_engine = None
+    if cfg_engine:
+        try:
+            return str(cfg_engine).lower()
+        except Exception:
+            pass
+    if env_fallback:
+        try:
+            return str(os.getenv("INSIGHTSPIKE_SP_ENGINE", "core")).lower()
+        except Exception:
+            return "core"
+    return "core"
 
 
 def _get_float(cfg, path: str, default):
