@@ -7,8 +7,13 @@ Simple test script to verify SQLiteDataStore functionality.
 
 import asyncio
 import os
+import importlib.util
+import pytest
 
 import numpy as np
+
+if importlib.util.find_spec("pytest_asyncio") is None:
+    pytest.skip("pytest_asyncio not available; skipping async datastore test", allow_module_level=True)
 
 from src.insightspike.implementations.datastore.sqlite_store import SQLiteDataStore
 

@@ -1,11 +1,14 @@
 import numpy as np
 import importlib.util, sys
 from pathlib import Path
+import pytest
 
 
 def _load_maze_navigator():
     root = Path(__file__).resolve().parent.parent
     target = root / 'experiments' / 'maze-navigation-enhanced' / 'src' / 'navigation' / 'maze_navigator.py'
+    if not target.exists():
+        pytest.skip("maze-navigation-enhanced sources are not available", allow_module_level=True)
     spec = importlib.util.spec_from_file_location('maze_navigator_dynamic', target)
     module = importlib.util.module_from_spec(spec)  # type: ignore
     assert spec and spec.loader

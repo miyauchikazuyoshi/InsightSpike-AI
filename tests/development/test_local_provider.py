@@ -1,5 +1,16 @@
 #!/usr/bin/env python3
 import os
+import importlib.util
+import pytest
+
+def _has_torch():
+    try:
+        return importlib.util.find_spec("torch") is not None
+    except Exception:
+        return False
+
+if not _has_torch():
+    pytest.skip("torch/transformers stack not available in this environment", allow_module_level=True)
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 

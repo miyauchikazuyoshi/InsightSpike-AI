@@ -135,6 +135,12 @@ class ConfigurableVectorIndex(VectorIndex):
         return self.index.ntotal
 
 
+# Backward compatibility alias for legacy tests
+class FAISSVectorIndex(ConfigurableVectorIndex):
+    """Alias to maintain compatibility with older FAISSVectorIndex references."""
+    pass
+
+
 class SQLiteDataStore(AsyncDataStore):
     """SQLite implementation of AsyncDataStore"""
 

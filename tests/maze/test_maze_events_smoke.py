@@ -1,5 +1,6 @@
 import os, sys
 import numpy as np
+import pytest
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 if ROOT not in sys.path:
@@ -7,6 +8,9 @@ if ROOT not in sys.path:
 EXP_PATH = os.path.abspath(os.path.join(ROOT, 'experiments', 'maze-navigation-enhanced', 'src'))
 if EXP_PATH not in sys.path:
     sys.path.insert(0, EXP_PATH)
+
+if not os.path.exists(EXP_PATH):
+    pytest.skip("maze-navigation-enhanced sources are not available", allow_module_level=True)
 
 from navigation.maze_navigator import MazeNavigator  # type: ignore
 from core.episode_manager import EpisodeManager  # type: ignore

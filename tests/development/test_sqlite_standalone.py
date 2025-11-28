@@ -18,6 +18,11 @@ from uuid import uuid4
 import aiosqlite
 import faiss
 import numpy as np
+import importlib.util
+import pytest
+
+if importlib.util.find_spec("pytest_asyncio") is None:
+    pytest.skip("pytest_asyncio not available; skipping async datastore test", allow_module_level=True)
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)

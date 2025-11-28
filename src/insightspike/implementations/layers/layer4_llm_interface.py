@@ -19,19 +19,23 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from ...core.vector_integrator import VectorIntegrator
 
+def _safe_find_spec(mod_name: str):
+    """importlib.util.find_spec が ValueError などを投げても None を返す安全版。"""
+    try:
+        return importlib.util.find_spec(mod_name)
+    except Exception:
+        return None
+
 if TYPE_CHECKING:
     from ...config.models import InsightSpikeConfig, LLMConfig
 
 logger = logging.getLogger(__name__)
 
 # Optional dependency availability flags (lazy imported when needed)
-OPENAI_AVAILABLE = importlib.util.find_spec("openai") is not None
-ANTHROPIC_AVAILABLE = importlib.util.find_spec("anthropic") is not None
-OLLAMA_AVAILABLE = importlib.util.find_spec("ollama") is not None
-TRANSFORMERS_AVAILABLE = (
-    importlib.util.find_spec("transformers") is not None
-    and importlib.util.find_spec("torch") is not None
-)
+OPENAI_AVAILABLE = _safe_find_spec("openai") is not None
+ANTHROPIC_AVAILABLE = _safe_find_spec("anthropic") is not None
+OLLAMA_AVAILABLE = _safe_find_spec("ollama") is not None
+TRANSFORMERS_AVAILABLE = _safe_find_spec("transformers") is not None and _safe_find_spec("torch") is not None
 
 if not OPENAI_AVAILABLE:
     logger.debug("OpenAI package not available (lazy load skipped)")

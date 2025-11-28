@@ -30,11 +30,18 @@ print("   ✓ MainAgent created", flush=True)
 
 print("3. Adding knowledge...", flush=True)
 result1 = agent.add_knowledge("Energy is the capacity to do work.")
-print(f"   ✓ Added: Episode {result1.get('episode_id', 'N/A')}", flush=True)
+episode_id = result1.get("episode_id") if isinstance(result1, dict) else getattr(result1, "episode_id", "N/A")
+print(f"   ✓ Added: Episode {episode_id}", flush=True)
 
 print("4. Processing question...", flush=True)
 result2 = agent.process_question("What is energy?")
-print(f"   ✓ Response: {result2.get('response', 'No response')[:50]}...", flush=True)
-print(f"   ✓ Has spike: {result2.get('has_spike', False)}", flush=True)
+response_text = getattr(result2, "response", None)
+if response_text is None and isinstance(result2, dict):
+    response_text = result2.get("response")
+print(f"   ✓ Response: {(response_text or 'No response')[:50]}...", flush=True)
+has_spike = getattr(result2, "has_spike", None)
+if has_spike is None and isinstance(result2, dict):
+    has_spike = result2.get("has_spike", False)
+print(f"   ✓ Has spike: {bool(has_spike)}", flush=True)
 
 print("\n✅ All tests passed!", flush=True)

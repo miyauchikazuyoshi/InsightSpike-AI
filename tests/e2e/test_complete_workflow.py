@@ -158,6 +158,8 @@ class TestCLIWorkflow:
 
     def test_cli_basic_workflow(self, test_data_dir):
         """Test basic CLI workflow: embed -> query -> stats."""
+        repo_root = Path(__file__).resolve().parents[2]
+        src_path = repo_root / "src"
         # Create test knowledge file
         knowledge_file = test_data_dir / "knowledge.txt"
         knowledge_file.write_text(
@@ -180,7 +182,7 @@ Multiple layers work together for intelligence.
             ],
             capture_output=True,
             text=True,
-            env={**os.environ, "INSIGHTSPIKE_DATA_DIR": str(test_data_dir)},
+            env={**os.environ, "INSIGHTSPIKE_DATA_DIR": str(test_data_dir), "PYTHONPATH": str(src_path)},
         )
 
         assert result.returncode == 0
@@ -197,7 +199,7 @@ Multiple layers work together for intelligence.
             ],
             capture_output=True,
             text=True,
-            env={**os.environ, "INSIGHTSPIKE_DATA_DIR": str(test_data_dir)},
+            env={**os.environ, "INSIGHTSPIKE_DATA_DIR": str(test_data_dir), "PYTHONPATH": str(src_path)},
         )
 
         assert result.returncode == 0
@@ -208,7 +210,7 @@ Multiple layers work together for intelligence.
             [sys.executable, "-m", "insightspike.cli.spike", "stats"],
             capture_output=True,
             text=True,
-            env={**os.environ, "INSIGHTSPIKE_DATA_DIR": str(test_data_dir)},
+            env={**os.environ, "INSIGHTSPIKE_DATA_DIR": str(test_data_dir), "PYTHONPATH": str(src_path)},
         )
 
         assert result.returncode == 0
@@ -217,6 +219,8 @@ Multiple layers work together for intelligence.
 
     def test_cli_config_workflow(self, test_data_dir):
         """Test CLI configuration management workflow."""
+        repo_root = Path(__file__).resolve().parents[2]
+        src_path = repo_root / "src"
         config_file = test_data_dir / "custom_config.json"
 
         # Export default config
@@ -231,6 +235,7 @@ Multiple layers work together for intelligence.
             ],
             capture_output=True,
             text=True,
+            env={**os.environ, "PYTHONPATH": str(src_path)},
         )
 
         assert result.returncode == 0
@@ -258,6 +263,7 @@ Multiple layers work together for intelligence.
             ],
             capture_output=True,
             text=True,
+            env={**os.environ, "PYTHONPATH": str(src_path)},
         )
 
         assert result.returncode == 0

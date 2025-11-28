@@ -9,8 +9,19 @@ Test real LLM provider integrations.
 import os
 import sys
 from pathlib import Path
+import importlib.util
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+
+def _has_torch():
+    try:
+        return importlib.util.find_spec("torch") is not None
+    except Exception:
+        return False
+
+if not _has_torch():
+    pytest.skip("torch/transformers stack not available in this environment", allow_module_level=True)
 
 from src.insightspike.config.models import LLMConfig
 from src.insightspike.providers import MockProvider, ProviderFactory
