@@ -235,6 +235,15 @@ Status:
 - Not implemented in v4; currently framed as an outlook and collaboration topic (see “Theorist” role in Feedback & Collaboration).
 - Results will be folded into a v5 revision of the paper once we have a clean λ‑scan and phase‑transition‑style analysis.
 
+### Transformer geDIG Validation (Thermodynamic Inference)
+New experiments validate that **Transformer inference is a thermodynamic process of minimizing free energy ($F$).**
+
+1. **Inference as Cooling**: Free energy ($F$) decreases through layers (L0: $-0.34$ → L1: $-0.27$ → L2: $-0.24$), suggesting a phase transition from "exploration" (gas) to "structure" (crystal).
+2. **Functional Specialization**: Attention heads within the same layer exhibit diverse thermodynamic states (Explorative vs Structural), quantifying their roles.
+3. **Structure vs Noise**: Real attention consistently outperforms random baselines ($\Delta F \approx 0.11$), quantifying the "work" done by pre-training.
+
+For details, see [experiments/transformer_gedig/REPORT.md](experiments/transformer_gedig/REPORT.md).
+
 ## License / Contact
 
 - License: Apache-2.0
