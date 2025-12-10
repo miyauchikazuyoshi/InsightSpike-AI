@@ -87,6 +87,7 @@ class GeDIGResult:
     version: str = "refactor_phaseA"
     spike: bool = False
     linkset_metrics: Optional["LinksetMetrics"] = None
+    ged_min_proxy: float = 0.0
 
     @property
     def has_spike(self) -> bool:  # backward compat
@@ -134,6 +135,8 @@ class GeDIGCore:
         # Local normalization for decision-time control
         use_local_normalization: bool = False,
         local_norm_mode: str = 'layer1',  # initial: Cmax_local^(0) = 1 + K (Layer1 candidates)
+        # Optional diagnostic: estimate GED_min proxy (path compression delta)
+        enable_ged_min_diag: bool = False,
         # Performance guards for SP gain
         sp_node_cap: int = 200,
         sp_pair_samples: int = 400,
@@ -215,6 +218,12 @@ class GeDIGCore:
             self._ig_nonneg = os.environ.get('MAZE_GEDIG_IG_NONNEG', '0').strip() not in ("0","false","False","")
         except Exception:
             self._ig_nonneg = False
+        try:
+            env_ged_min = os.environ.get('INSIGHTSPIKE_GED_MIN_DIAG', '')
+            if env_ged_min.strip() and env_ged_min.strip().lower() not in ("0","false","no","off"):
+                self.enable_ged_min_diag = True
+        except Exception:
+            pass
         self.mu = mu
         self.warmup_steps = warmup_steps
         self.use_refactored_reward = use_refactored_reward
@@ -223,6 +232,7 @@ class GeDIGCore:
         self.tau_s = tau_s
         self.tau_i = tau_i
         self.use_multihop_sp_gain = use_multihop_sp_gain
+        self.enable_ged_min_diag = bool(enable_ged_min_diag)
         self.sp_norm_mode = sp_norm_mode
         self.sp_beta = float(max(0.0, sp_beta))
         self.use_local_normalization = use_local_normalization
@@ -296,6 +306,7 @@ class GeDIGCore:
         l1_candidates = kwargs.get('l1_candidates')  # Optional Layer1 candidate count (int)
         k_star = kwargs.get('k_star')
         ig_fixed_den = kwargs.get('ig_fixed_den')
+        force_sp_gain_eval = bool(kwargs.get('force_sp_gain_eval', False))
 
         if l1_candidates is None and k_star is not None:
             l1_candidates = k_star
@@ -332,6 +343,14 @@ class GeDIGCore:
         if features_now is None:
             features_now = self._extract_features(g2)
         query_vector = kwargs.get('query_vector')
+
+        # Optional GED_min-style proxy: relative shortening of average SP
+        ged_min_proxy = 0.0
+        if self.enable_ged_min_diag:
+            try:
+                ged_min_proxy = float(self._compute_ged_min_proxy(g1, g2))
+            except Exception:
+                ged_min_proxy = 0.0
 
         # Local normalization (decision-time) denominator
         cmax_local: float | None = None
@@ -400,6 +419,11 @@ class GeDIGCore:
             struct_cost_eff = float(ged_result.get('structural_cost', delta_ged_norm))
             delta_h_norm = float(ig_result['ig_value'])
             delta_sp_rel = 0.0
+            if force_sp_gain_eval or self.enable_ged_min_diag:
+                try:
+                    delta_sp_rel = float(self._compute_sp_gain_norm(g1, g2, mode=self.sp_norm_mode))
+                except Exception:
+                    delta_sp_rel = 0.0
             sp_contrib = 0.0
             if self.use_multihop_sp_gain and self.sp_beta:
                 sp_contrib = self.sp_beta * delta_sp_rel
@@ -462,6 +486,7 @@ class GeDIGCore:
                 computation_time=time.time() - start_time,
                 version="onegauge_v1",
                 hop_results={0: hop0},
+                ged_min_proxy=ged_min_proxy,
             )
 
         if linkset_metrics is not None:
@@ -1191,6 +1216,44 @@ class GeDIGCore:
         if self._ig_count < 2:
             return 0.0
         return self._ig_m2 / (self._ig_count - 1)
+
+    def _compute_ged_min_proxy(self, g_before: nx.Graph, g_after: nx.Graph) -> float:
+        """Approximate GED_min via relative average shortest-path shortening.
+
+        Uses undirected graphs and the largest connected component to avoid inf.
+        Returns (ASP_before - ASP_after) / max(ASP_before, 1).
+        """
+        def _avg_sp(g: nx.Graph) -> float:
+            if g.number_of_nodes() < 2:
+                return 0.0
+            und = g.to_undirected()
+            if not nx.is_connected(und):
+                # use largest component for a stable finite estimate
+                comp = max(nx.connected_components(und), key=len)
+                und = und.subgraph(comp).copy()
+                if und.number_of_nodes() < 2:
+                    return 0.0
+            try:
+                return float(nx.average_shortest_path_length(und))
+            except Exception:
+                return 0.0
+
+        asp_before = _avg_sp(g_before)
+        asp_after = _avg_sp(g_after)
+        if asp_before <= 0.0:
+            asp_gain = 0.0
+        else:
+            asp_gain = float((asp_before - asp_after) / max(asp_before, 1.0))
+
+        if asp_gain > 0.0:
+            return asp_gain
+
+        # Fallback proxy: edge densification (normalized)
+        e_before = g_before.number_of_edges()
+        e_after = g_after.number_of_edges()
+        if e_after != e_before:
+            return float((e_after - e_before) / max(e_before, 1.0))
+        return 0.0
 
     def _compute_ig_z(self, ig_raw: float) -> float:
         if self._ig_count < 2:

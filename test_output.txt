@@ -1,0 +1,30 @@
+[1m============================= test session starts ==============================[0m
+platform darwin -- Python 3.11.13, pytest-8.4.2, pluggy-1.6.0 -- /Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/tests
+configfile: pytest.ini
+plugins: asyncio-1.2.0, anyio-4.9.0, cov-7.0.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+[1mcollecting ... [0mcollected 2 items
+
+tests/scenarios/test_core_logic.py::test_scenario_a_insight_moment 
+[Scenario A] F=-0.197, dEPC=0.200, dIG=0.200
+[31mFAILED[0m
+tests/scenarios/test_core_logic.py::test_scenario_b_noise_filter 
+[Scenario B] F=0.292, dEPC=0.400, dIG=0.000
+[32mPASSED[0m
+
+=================================== FAILURES ===================================
+[31m[1m________________________ test_scenario_a_insight_moment ________________________[0m
+[1m[31mtests/scenarios/test_core_logic.py[0m:57: in test_scenario_a_insight_moment
+    [0m[94massert[39;49;00m res.spike [95mis[39;49;00m [94mTrue[39;49;00m, [33m"[39;49;00m[33mShould accept the shortcut A->D[39;49;00m[33m"[39;49;00m[90m[39;49;00m
+[1m[31mE   AssertionError: Should accept the shortcut A->D[0m
+[1m[31mE   assert False is True[0m
+[1m[31mE    +  where False = GeDIGResult(gedig_value=-0.19737532022490406, ged_value=0.2, ig_value=0.20000000000000007, raw_ged=1.0, ged_norm_den=5.0, ig_raw=0.20000000000000007, ig_norm_den=0.6931471805599453, ig_z_score=0.0, delta_ged_norm=0.2, delta_sp_rel=0.20000000000000007, delta_h_norm=0.0, structural_cost=0.0, structural_improvement=0.07777777777777783, information_integration=0.20000000000000007, entropy_before=2.1303844451904297, entropy_after=2.1385915279388428, ig_delta=0.008207082748413086, variance_reduction=0.008207082748413086, hop0_reward=-0.1, aggregate_reward=-0.1, reward=-0.1, hop_results={0: HopResult(hop=0, ged=0.2, ig=0.20000000000000007, gedig=-0.19737532022490406, struct_cost=0.2, node_count=4, edge_count=4, sp=0.20000000000000007, h_component=0.0, ged_raw=1.0, ged_den=5.0, entropy_before=2.1303844451904297, entropy_after=2.1385915279388428, ig_delta=0.008207082748413086, ig_den=0.6931471805599453, variance_reduction=0.008207082748413086)}, computation_time=0.0028569698333740234, focal_nodes=None, version='onegauge_v1', spike=False, linkset_metrics=LinksetMetrics(delta_ged_norm=0.3333333333333333, delta_h_norm=0.9999999999985575, delta_sp_rel=0.0, gedig_value=-0.4282608226218257, raw_ged=1.0, ged_norm_den=3.0, ig_norm_den=0.6931471805599453, entropy_before=-1.000088900581841e-12, entropy_after=0.6931471805579453, ig_delta=0.9999999999985575, before_size=1, after_size=2, query_similarity=1.0, pos_w_before=1, pos_w_after=2, topw_before=[1.0], topw_after=[1.0, 1.0]), ged_min_proxy=0.0).spike[0m
+------------------------------ Captured log call -------------------------------
+[32mINFO    [0m insightspike.algorithms.gedig_core:gedig_core.py:277 GeDIGCore initialized: multihop=False max_hops=3 spectral=False
+[36m[1m=========================== short test summary info ============================[0m
+[31mFAILED[0m tests/scenarios/test_core_logic.py::[1mtest_scenario_a_insight_moment[0m - AssertionError: Should accept the shortcut A->D
+assert False is True
+ +  where False = GeDIGResult(gedig_value=-0.19737532022490406, ged_value=0.2, ig_value=0.20000000000000007, raw_ged=1.0, ged_norm_den=5.0, ig_raw=0.20000000000000007, ig_norm_den=0.6931471805599453, ig_z_score=0.0, delta_ged_norm=0.2, delta_sp_rel=0.20000000000000007, delta_h_norm=0.0, structural_cost=0.0, structural_improvement=0.07777777777777783, information_integration=0.20000000000000007, entropy_before=2.1303844451904297, entropy_after=2.1385915279388428, ig_delta=0.008207082748413086, variance_reduction=0.008207082748413086, hop0_reward=-0.1, aggregate_reward=-0.1, reward=-0.1, hop_results={0: HopResult(hop=0, ged=0.2, ig=0.20000000000000007, gedig=-0.19737532022490406, struct_cost=0.2, node_count=4, edge_count=4, sp=0.20000000000000007, h_component=0.0, ged_raw=1.0, ged_den=5.0, entropy_before=2.1303844451904297, entropy_after=2.1385915279388428, ig_delta=0.008207082748413086, ig_den=0.6931471805599453, variance_reduction=0.008207082748413086)}, computation_time=0.0028569698333740234, focal_nodes=None, version='onegauge_v1', spike=False, linkset_metrics=LinksetMetrics(delta_ged_norm=0.3333333333333333, delta_h_norm=0.9999999999985575, delta_sp_rel=0.0, gedig_value=-0.4282608226218257, raw_ged=1.0, ged_norm_den=3.0, ig_norm_den=0.6931471805599453, entropy_before=-1.000088900581841e-12, entropy_after=0.6931471805579453, ig_delta=0.9999999999985575, before_size=1, after_size=2, query_similarity=1.0, pos_w_before=1, pos_w_after=2, topw_before=[1.0], topw_after=[1.0, 1.0]), ged_min_proxy=0.0).spike
+[31m========================= [31m[1m1 failed[0m, [32m1 passed[0m[31m in 6.30s[0m[31m ==========================[0m

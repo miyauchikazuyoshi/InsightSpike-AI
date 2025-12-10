@@ -278,6 +278,8 @@ class StepRecord:
     sp_after: float = 0.0
     structural_cost: float = 0.0
     structural_improvement: float = 0.0
+    ged_min_proxy: float = 0.0
+    lambda_weight: float = 1.0
     g0: float = 0.0
     gmin: float = 0.0
     best_hop: int = 0
@@ -474,6 +476,10 @@ class QueryHubConfig:
     eval_per_hop_on_ag: bool = False
     # DG fire: commit chosen multi-hop edges as a BFS-like shortcut in one step
     dg_bfs_shortcut: bool = False
+    # Force SP gain evaluation at hop0 (diagnostic)
+    force_sp_gain_eval: bool = False
+    # Force SP gain evaluation at hop0 (diagnostic)
+    force_sp_gain_eval: bool = False
 
 
 @dataclass
@@ -2209,6 +2215,29 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
             ]
         structural_cost_val = float(delta_ged)
         structural_impr_val = float(-delta_ged)
+        # Compute GED_min proxy using snapshot graphs (pre/after commit, before env.step)
+        ged_min_proxy_val = 0.0
+        if bool(getattr(core, 'enable_ged_min_diag', False) or getattr(config, 'force_sp_gain_eval', False)):
+            try:
+                gp = nx.Graph()
+                for n in graph_nodes_pre_snapshot:
+                    gp.add_node(tuple(n))
+                for e in graph_edges_pre_snapshot:
+                    if len(e) == 2:
+                        gp.add_edge(tuple(e[0]), tuple(e[1]))
+                ga = nx.Graph()
+                for n in graph_nodes_eval_snapshot:
+                    ga.add_node(tuple(n))
+                for e in graph_edges_eval_snapshot:
+                    if len(e) == 2:
+                        ga.add_edge(tuple(e[0]), tuple(e[1]))
+                ged_min_proxy_val = float(core._compute_ged_min_proxy(gp, ga))
+            except Exception:
+                ged_min_proxy_val = 0.0
+        # If forced SP evaluation is requested, propagate the proxy into delta_sp fields
+        if bool(getattr(config, 'force_sp_gain_eval', False)):
+            delta_sp = float(ged_min_proxy_val)
+            delta_sp_min = float(ged_min_proxy_val)
 
         # Build debug payload for hop0 post-eval
         try:
@@ -2980,6 +3009,7 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                 delta_h_min=float(delta_h_min),
                 structural_cost=float(structural_cost_val),
                 structural_improvement=float(structural_impr_val),
+                ged_min_proxy=float(ged_min_proxy_val),
                 # profiling
                 ring_Rr=int(Rr),
                 ring_Rc=int(Rc),
@@ -3009,6 +3039,7 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                 g0=float(g0),
                 gmin=float(gmin),
                 best_hop=best_hop,
+                lambda_weight=float(config.gedig.get("lambda_weight", 1.0)),
                 is_dead_end=bool(obs.is_dead_end),
                 is_dead_end_pre=bool(deadend_pre),
                 reward=float(reward),
@@ -3088,16 +3119,18 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                     # Build a lightweight JSON list of steps so far
                     _steps = []
                     for rec in step_records:
-                        _steps.append({
-                            "seed": rec.seed,
-                            "step": rec.step,
-                            "position": list(rec.position),
-                            "action": rec.action,
-                            "candidate_selection": rec.candidate_selection,
-                            "delta_ged": rec.delta_ged,
-                            "delta_ig": rec.delta_ig,
-                            "delta_ged_min": rec.delta_ged_min,
-                            "delta_ig_min": rec.delta_ig_min,
+                            _steps.append({
+                                "seed": rec.seed,
+                                "step": rec.step,
+                                "position": list(rec.position),
+                                "action": rec.action,
+                                "ged_min_proxy": rec.ged_min_proxy,
+                                "lambda_weight": float(getattr(rec, 'lambda_weight', config.gedig.get("lambda_weight", 1.0))),
+                                "candidate_selection": rec.candidate_selection,
+                                "delta_ged": rec.delta_ged,
+                                "delta_ig": rec.delta_ig,
+                                "delta_ged_min": rec.delta_ged_min,
+                                "delta_ig_min": rec.delta_ig_min,
                             "delta_sp": rec.delta_sp,
                             "delta_sp_min": rec.delta_sp_min,
                             "delta_h": rec.delta_h,
@@ -3145,6 +3178,8 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
         "success": success,
         "steps": len(step_records),
         "edges": graph.number_of_edges(),
+        "lambda_weight": float(config.gedig.get("lambda_weight", 1.0)),
+        "ged_min_series": [rec.ged_min_proxy for rec in step_records],
         "k_star_series": [rec.candidate_selection["k_star"] for rec in step_records],
         "g0_series": [rec.g0 for rec in step_records],
         "gmin_series": [rec.gmin for rec in step_records],
@@ -3203,6 +3238,7 @@ def aggregate(runs: List[MazeSummary]) -> Dict[str, float]:
     sp_min_values: List[float] = []
     best_hops: List[int] = []
     eval_times: List[float] = []
+    ged_min_values: List[float] = []
     psz_samples: List[Dict[str, float]] = []
     for run in runs:
         g0_values.extend(float(v) for v in run.get("g0_series", []))
@@ -3210,6 +3246,7 @@ def aggregate(runs: List[MazeSummary]) -> Dict[str, float]:
         k_values.extend(float(v) for v in run.get("k_star_series", []))
         sp_values.extend(float(v) for v in run.get("delta_sp_series", []))
         sp_min_values.extend(float(v) for v in run.get("delta_sp_min_series", []))
+        ged_min_values.extend(float(v) for v in run.get("ged_min_series", []))
         best_hops.extend(int(h) for h in run.get("multihop_best_hop", []))
         eval_times.extend(float(t) for t in run.get("eval_time_ms_series", []))
         # Build PSZ samples from accepted flags and eval times (per-step)
@@ -3269,6 +3306,7 @@ def aggregate(runs: List[MazeSummary]) -> Dict[str, float]:
         "avg_k_star": _mean(k_values),
         "avg_delta_sp": _mean(sp_values),
         "avg_delta_sp_min": _mean(sp_min_values),
+        "avg_ged_min_proxy": _mean(ged_min_values),
         "best_hop_mean": _mean([float(h) for h in best_hops]) if best_hops else 0.0,
         "best_hop_hist_0": float(hop_hist[0]),
         "best_hop_hist_1": float(hop_hist[1]),
@@ -3307,6 +3345,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--cand-radius", type=float, default=1.0)
     parser.add_argument("--link-radius", type=float, default=0.05)
     parser.add_argument("--lambda-weight", type=float, default=1.0)
+    parser.add_argument("--lambda-sweep", type=float, nargs="+", default=None, help="Optional list of lambda values to sweep; overrides --lambda-weight when set")
     parser.add_argument("--max-hops", type=int, default=10)
     parser.add_argument("--decay-factor", type=float, default=0.7)
     parser.add_argument("--adaptive-hops", action="store_true")
@@ -3344,6 +3383,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--sp-allpairs", dest="sp_allpairs", action="store_true", help="Force SP evaluation to use ALL-PAIRS average (no fixed-before-pairs) [diagnostic]")
     parser.add_argument("--sp-allpairs-exact", dest="sp_allpairs_exact", action="store_true", help="Greedy exact ALL-PAIRS on evaluation subgraph with incremental 2-BFS update per candidate")
     parser.add_argument("--sp-exact-stable-nodes", dest="sp_exact_stable_nodes", action="store_true", help="Keep evaluation SA node set monotonically growing across steps to improve APSP reuse (off by default)")
+    parser.add_argument("--force-sp-gain-eval", action="store_true", help="Force SP gain evaluation at hop0 (diagnostic; combines with GED_min diag)")
     parser.add_argument("--sp-signed", dest="sp_signed", action="store_true", help="Treat ΔSP as signed (no clamp) in reporting and diagnostics")
     parser.add_argument("--sp-report-best-hop", dest="sp_report_best_hop", action="store_true", help="Report delta_sp as best-hop value instead of hop0")
     parser.add_argument("--sp-pair-samples", type=int, default=400, help="Fixed-pair sampling size for SP (before graph)")
@@ -3437,128 +3477,152 @@ def main() -> None:
     }
     selector_params["r_cand"] = selector_params["theta_cand"]
     selector_params["r_link"] = selector_params["theta_link"]
-    # Enforce lambda=1.0 as fixed per spec
-    args.lambda_weight = 1.0
-    gedig_params = {
-        "lambda_weight": args.lambda_weight,
-        "max_hops": args.max_hops,
-        "decay_factor": args.decay_factor,
-        "adaptive_hops": args.adaptive_hops,
-        "sp_beta": args.sp_beta,
-        "sp_scope_mode": args.sp_scope,
-        "sp_hop_expand": args.sp_hop_expand,
-        "sp_boundary_mode": args.sp_boundary,
-        "ig_hop_apply": str(args.ig_hop_apply),
-    }
-    config = QueryHubConfig(
-        maze_size=args.maze_size,
-        maze_type=args.maze_type,
-        max_steps=args.max_steps,
-        selector=selector_params,
-        gedig=gedig_params,
-        linkset_mode=bool(args.linkset_mode),
-        linkset_base=str(args.linkset_base),
-        theta_ag=float(args.theta_ag),
-        theta_dg=float(args.theta_dg),
-        top_link=int(args.top_link),
-        link_autowire_all=bool(getattr(args, 'link_autowire_all', False)),
-        commit_budget=int(args.commit_budget),
-        commit_from=str(args.commit_from),
-        norm_base=str(args.norm_base),
-        action_policy=str(args.action_policy),
-        action_temp=float(args.action_temp),
-        anti_backtrack=bool(args.anti_backtrack),
-        anchor_recent_q=int(args.anchor_recent_q),
-        sp_cache=bool(args.sp_cache),
-        sp_cache_mode=str(args.sp_cache_mode),
-        sp_cand_topk=int(args.sp_cand_topk),
-        sp_eval_allpairs=bool(getattr(args, 'sp_allpairs', False)),
-        sp_eval_allpairs_exact=bool(getattr(args, 'sp_allpairs_exact', False)),
-        sp_exact_stable_nodes=bool(getattr(args, 'sp_exact_stable_nodes', False)),
-        sp_signed=bool(getattr(args, 'sp_signed', False)),
-        sp_report_best_hop=bool(getattr(args, 'sp_report_best_hop', False)),
-        sp_pair_samples=int(args.sp_pair_samples),
-        eval_all_hops=bool(args.eval_all_hops),
-        ged_hop0_const=bool(args.ged_hop0_const),
-        gh_mode=str(args.gh_mode),
-        pre_eval=bool(args.pre_eval),
-        snapshot_mode=str(args.snapshot_mode),
-        timeline_to_graph=bool(getattr(args, 'timeline_to_graph', False)),
-        add_next_q=bool(getattr(args, 'add_next_q', False)),
-        persist_sqlite_path=(str(args.persist_graph_sqlite).strip() or None),
-        persist_namespace=str(args.persist_namespace),
-        persist_forced_candidates=bool(getattr(args, 'persist_forced_candidates', False)),
-        link_forced_as_base=bool(getattr(args, 'link_forced_as_base', True)),
-        persist_timeline_edges=bool(getattr(args, 'persist_timeline_edges', False)),
-        dg_commit_policy=str(args.dg_commit_policy),
-        dg_commit_all_linkset=bool(getattr(args, 'dg_commit_all_linkset', False)),
-        skip_mh_on_deadend=bool(getattr(args, 'skip_mh_on_deadend', False)),
-        snapshot_level=str(args.snapshot_level),
-        ring_ellipse=bool(getattr(args, 'ring_ellipse', False)),
-        layer1_prefilter=bool(getattr(args, 'layer1_prefilter', True)),
-        l1_cap=int(getattr(args, 'l1_cap', 16)),
-        ag_auto=bool(getattr(args, 'ag_auto', False)),
-        ag_window=int(getattr(args, 'ag_window', 30)),
-        ag_quantile=float(getattr(args, 'ag_quantile', 0.9)),
-        verbose=bool(getattr(args, 'verbose', False)),
-        sp_ds_sqlite=(str(getattr(args, 'sp_ds_sqlite', '')).strip() or None),
-        sp_ds_namespace=str(getattr(args, 'sp_ds_namespace', 'maze_query_hub_sp')),
-        checkpoint_interval=int(getattr(args, 'checkpoint_interval', 0)),
-        checkpoint_path=(str(getattr(args, 'step_log', '')).strip() or None),
-        post_sp_diagnostics=bool(getattr(args, 'post_sp_diagnostics', True)),
-        steps_ultra_light=bool(getattr(args, 'steps_ultra_light', False)),
-        maze_snapshot_out=(str(getattr(args, 'maze_snapshot_out', '')).strip() or None),
-        force_per_hop=bool(getattr(args, 'force_per_hop', False)),
-        eval_per_hop_on_ag=bool(getattr(args, 'eval_per_hop_on_ag', False)),
-        dg_bfs_shortcut=bool(getattr(args, 'dg_bfs_shortcut', False)),
-    )
+    lambda_values = list(getattr(args, 'lambda_sweep', []) or [])
+    if not lambda_values:
+        lambda_values = [float(args.lambda_weight)]
+    lambda_values = [float(v) for v in lambda_values]
+    multi_lambda = len(lambda_values) > 1
 
-    runs: List[MazeSummary] = []
-    all_steps: List[StepLog] = []
-    maze_data: Dict[str, Any] = {}
+    output_base = Path(args.output)
+    step_log_base = Path(args.step_log) if args.step_log else None
 
-    for offset in range(args.seeds):
-        seed = args.seed_start + offset
-        artifacts = run_episode_query(seed=seed, config=config)
-        runs.append(artifacts.summary)
-        maze_data[str(seed)] = artifacts.maze_snapshot
-        # Append this seed's step records as we go (not only the last seed)
-        for record in artifacts.steps:
-            minimal = bool(getattr(args, 'log_minimal', False) or getattr(args, 'steps_ultra_light', False))
-            if minimal:
-                # Minimal logging: keep UIに必要な基本値は残す（g0/gminに加えΔEPC/ΔIGも出力）
+    def _lambda_suffix(val: float) -> str:
+        return str(val).replace(".", "p").replace("-", "m")
+
+    for lambda_weight in lambda_values:
+        suffix = _lambda_suffix(lambda_weight) if multi_lambda else None
+        out_path = output_base
+        step_path = step_log_base
+        if multi_lambda:
+            out_path = output_base.with_name(f"{output_base.stem}_lambda{suffix}{output_base.suffix or '.json'}")
+            if step_log_base:
+                step_path = step_log_base.with_name(f"{step_log_base.stem}_lambda{suffix}{step_log_base.suffix or '.json'}")
+
+        gedig_params = {
+            "lambda_weight": float(lambda_weight),
+            "max_hops": args.max_hops,
+            "decay_factor": args.decay_factor,
+            "adaptive_hops": args.adaptive_hops,
+            "sp_beta": args.sp_beta,
+            "sp_scope_mode": args.sp_scope,
+            "sp_hop_expand": args.sp_hop_expand,
+            "sp_boundary_mode": args.sp_boundary,
+            "ig_hop_apply": str(args.ig_hop_apply),
+        }
+        config = QueryHubConfig(
+            maze_size=args.maze_size,
+            maze_type=args.maze_type,
+            max_steps=args.max_steps,
+            selector=selector_params,
+            gedig=gedig_params,
+            linkset_mode=bool(args.linkset_mode),
+            linkset_base=str(args.linkset_base),
+            theta_ag=float(args.theta_ag),
+            theta_dg=float(args.theta_dg),
+            top_link=int(args.top_link),
+            link_autowire_all=bool(getattr(args, 'link_autowire_all', False)),
+            commit_budget=int(args.commit_budget),
+            commit_from=str(args.commit_from),
+            norm_base=str(args.norm_base),
+            action_policy=str(args.action_policy),
+            action_temp=float(args.action_temp),
+            anti_backtrack=bool(args.anti_backtrack),
+            anchor_recent_q=int(args.anchor_recent_q),
+            sp_cache=bool(args.sp_cache),
+            sp_cache_mode=str(args.sp_cache_mode),
+            sp_cand_topk=int(args.sp_cand_topk),
+            sp_eval_allpairs=bool(getattr(args, 'sp_allpairs', False)),
+            sp_eval_allpairs_exact=bool(getattr(args, 'sp_allpairs_exact', False)),
+            sp_exact_stable_nodes=bool(getattr(args, 'sp_exact_stable_nodes', False)),
+            sp_signed=bool(getattr(args, 'sp_signed', False)),
+            sp_report_best_hop=bool(getattr(args, 'sp_report_best_hop', False)),
+            sp_pair_samples=int(args.sp_pair_samples),
+            eval_all_hops=bool(args.eval_all_hops),
+            ged_hop0_const=bool(args.ged_hop0_const),
+            gh_mode=str(args.gh_mode),
+            pre_eval=bool(args.pre_eval),
+            snapshot_mode=str(args.snapshot_mode),
+            timeline_to_graph=bool(getattr(args, 'timeline_to_graph', False)),
+            add_next_q=bool(getattr(args, 'add_next_q', False)),
+            persist_sqlite_path=(str(args.persist_graph_sqlite).strip() or None),
+            persist_namespace=str(args.persist_namespace),
+            persist_forced_candidates=bool(getattr(args, 'persist_forced_candidates', False)),
+            link_forced_as_base=bool(getattr(args, 'link_forced_as_base', True)),
+            persist_timeline_edges=bool(getattr(args, 'persist_timeline_edges', False)),
+            dg_commit_policy=str(args.dg_commit_policy),
+            dg_commit_all_linkset=bool(getattr(args, 'dg_commit_all_linkset', False)),
+            skip_mh_on_deadend=bool(getattr(args, 'skip_mh_on_deadend', False)),
+            snapshot_level=str(args.snapshot_level),
+            ring_ellipse=bool(getattr(args, 'ring_ellipse', False)),
+            layer1_prefilter=bool(getattr(args, 'layer1_prefilter', True)),
+            l1_cap=int(getattr(args, 'l1_cap', 16)),
+            ag_auto=bool(getattr(args, 'ag_auto', False)),
+            ag_window=int(getattr(args, 'ag_window', 30)),
+            ag_quantile=float(getattr(args, 'ag_quantile', 0.9)),
+            verbose=bool(getattr(args, 'verbose', False)),
+            sp_ds_sqlite=(str(getattr(args, 'sp_ds_sqlite', '')).strip() or None),
+            sp_ds_namespace=str(getattr(args, 'sp_ds_namespace', 'maze_query_hub_sp')),
+            checkpoint_interval=int(getattr(args, 'checkpoint_interval', 0)),
+            checkpoint_path=(str(step_path) if step_path else None),
+            post_sp_diagnostics=bool(getattr(args, 'post_sp_diagnostics', True)),
+            steps_ultra_light=bool(getattr(args, 'steps_ultra_light', False)),
+            maze_snapshot_out=(str(getattr(args, 'maze_snapshot_out', '')).strip() or None),
+            force_per_hop=bool(getattr(args, 'force_per_hop', False)),
+            eval_per_hop_on_ag=bool(getattr(args, 'eval_per_hop_on_ag', False)),
+            dg_bfs_shortcut=bool(getattr(args, 'dg_bfs_shortcut', False)),
+            force_sp_gain_eval=bool(getattr(args, 'force_sp_gain_eval', False)),
+        )
+
+        runs: List[MazeSummary] = []
+        all_steps: List[StepLog] = []
+        maze_data: Dict[str, Any] = {}
+
+        for offset in range(args.seeds):
+            seed = args.seed_start + offset
+            artifacts = run_episode_query(seed=seed, config=config)
+            runs.append(artifacts.summary)
+            maze_data[str(seed)] = artifacts.maze_snapshot
+            # Append this seed's step records as we go (not only the last seed)
+            for record in artifacts.steps:
+                minimal = bool(getattr(args, 'log_minimal', False) or getattr(args, 'steps_ultra_light', False))
+                if minimal:
+                    # Minimal logging: keep UIに必要な基本値は残す（g0/gminに加えΔEPC/ΔIGも出力）
+                    all_steps.append({
+                        "seed": record.seed,
+                        "step": record.step,
+                        "position": list(record.position),
+                        "action": record.action,
+                        "ged_min_proxy": record.ged_min_proxy,
+                        "lambda_weight": float(getattr(record, 'lambda_weight', gedig_params["lambda_weight"])),
+                        # geDIG core metrics
+                        "g0": record.g0,
+                        "gmin": record.gmin,
+                        "delta_ged": record.delta_ged,
+                        "delta_ig": record.delta_ig,
+                        "delta_ged_min": record.delta_ged_min,
+                        "delta_ig_min": record.delta_ig_min,
+                        "delta_sp": record.delta_sp,
+                        "delta_sp_min": record.delta_sp_min,
+                        "best_hop": record.best_hop,
+                        # gating
+                        "ag_fire": bool(getattr(record, 'ag_fire', False)),
+                        "dg_fire": bool(getattr(record, 'dg_fire', False)),
+                        "theta_ag": float(getattr(record, 'theta_ag', 0.0)),
+                        # topology context
+                        "possible_moves": getattr(record, 'possible_moves', []),
+                        "is_dead_end": bool(getattr(record, 'is_dead_end', False)),
+                        # perf
+                        "time_ms_candidates": getattr(record, 'time_ms_candidates', 0.0),
+                        "time_ms_eval": getattr(record, 'time_ms_eval', 0.0),
+                    })
+                    continue
                 all_steps.append({
                     "seed": record.seed,
                     "step": record.step,
                     "position": list(record.position),
                     "action": record.action,
-                    # geDIG core metrics
-                    "g0": record.g0,
-                    "gmin": record.gmin,
-                    "delta_ged": record.delta_ged,
-                    "delta_ig": record.delta_ig,
-                    "delta_ged_min": record.delta_ged_min,
-                    "delta_ig_min": record.delta_ig_min,
-                    "delta_sp": record.delta_sp,
-                    "delta_sp_min": record.delta_sp_min,
-                    "best_hop": record.best_hop,
-                    # gating
-                    "ag_fire": bool(getattr(record, 'ag_fire', False)),
-                    "dg_fire": bool(getattr(record, 'dg_fire', False)),
-                    "theta_ag": float(getattr(record, 'theta_ag', 0.0)),
-                    # topology context
-                    "possible_moves": getattr(record, 'possible_moves', []),
-                    "is_dead_end": bool(getattr(record, 'is_dead_end', False)),
-                    # perf
-                    "time_ms_candidates": getattr(record, 'time_ms_candidates', 0.0),
-                    "time_ms_eval": getattr(record, 'time_ms_eval', 0.0),
-                })
-                continue
-            all_steps.append({
-                    "seed": record.seed,
-                    "step": record.step,
-                    "position": list(record.position),
-                    "action": record.action,
+                    "ged_min_proxy": record.ged_min_proxy,
+                    "lambda_weight": float(getattr(record, 'lambda_weight', gedig_params["lambda_weight"])),
                     "candidate_selection": record.candidate_selection,
                     "delta_ged": record.delta_ged,
                     "delta_ig": record.delta_ig,
@@ -3666,105 +3730,105 @@ def main() -> None:
                     "ds_edges_saved": getattr(record, 'ds_edges_saved', []),
                 })
 
-    summary = aggregate(runs)
-    output_payload = {
-        "config": {
-            "maze_size": args.maze_size,
-            "maze_type": args.maze_type,
-            "max_steps": args.max_steps,
-            "seeds": args.seeds,
-            "seed_start": args.seed_start,
-            "selector": selector_params,
-            "gedig": gedig_params,
-            "graph_mode": "query_hub",
-            "sequence": {"gh_mode": args.gh_mode, "pre_eval": bool(args.pre_eval), "snapshot_mode": args.snapshot_mode},
-            "theta_ag": float(args.theta_ag),
-            "theta_dg": float(args.theta_dg),
-            "action_policy": str(args.action_policy),
-            "action_temp": float(args.action_temp),
-            # Also expose whether main L3 lite path was used (query-centric hop0)
-            "use_main_l3": bool(getattr(args, 'use_main_l3', False)),
-            "sp_cache_mode": str(getattr(args, 'sp_cache_mode', 'core')),
-        },
-        "summary": summary,
-        "runs": runs,
-        "maze_data": maze_data,
-    }
+        summary = aggregate(runs)
+        summary["lambda_weight"] = float(lambda_weight)
+        output_payload = {
+            "config": {
+                "maze_size": args.maze_size,
+                "maze_type": args.maze_type,
+                "max_steps": args.max_steps,
+                "seeds": args.seeds,
+                "seed_start": args.seed_start,
+                "selector": selector_params,
+                "gedig": gedig_params,
+                "graph_mode": "query_hub",
+                "sequence": {"gh_mode": args.gh_mode, "pre_eval": bool(args.pre_eval), "snapshot_mode": args.snapshot_mode},
+                "theta_ag": float(args.theta_ag),
+                "theta_dg": float(args.theta_dg),
+                "action_policy": str(args.action_policy),
+                "action_temp": float(args.action_temp),
+                # Also expose whether main L3 lite path was used (query-centric hop0)
+                "use_main_l3": bool(getattr(args, 'use_main_l3', False)),
+                "sp_cache_mode": str(getattr(args, 'sp_cache_mode', 'core')),
+            },
+            "summary": summary,
+            "runs": runs,
+            "maze_data": maze_data,
+        }
 
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(output_payload, indent=2), encoding="utf-8")
-    # Optional: write recommended thresholds next to summary
-    try:
-        if bool(getattr(args, 'write_recommendations', False)):
-            rec = {
-                "theta_dg_recommended": float(summary.get("rec_theta_dg_p95", 0.0)),
-                # Heuristic: use g0_p90 as AG目安（大きいg0の上位10%を弾く）
-                "theta_ag_recommended": float(summary.get("g0_p90", 0.0)),
-            }
-            rec_path = args.output.with_name(args.output.stem + "_recommend.json")
-            rec_path.write_text(json.dumps(rec, indent=2), encoding="utf-8")
-    except Exception:
-        pass
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(output_payload, indent=2), encoding="utf-8")
+        # Optional: write recommended thresholds next to summary
+        try:
+            if bool(getattr(args, 'write_recommendations', False)):
+                rec = {
+                    "theta_dg_recommended": float(summary.get("rec_theta_dg_p95", 0.0)),
+                    # Heuristic: use g0_p90 as AG目安（大きいg0の上位10%を弾く）
+                    "theta_ag_recommended": float(summary.get("g0_p90", 0.0)),
+                }
+                rec_path = out_path.with_name(out_path.stem + "_recommend.json")
+                rec_path.write_text(json.dumps(rec, indent=2), encoding="utf-8")
+        except Exception:
+            pass
 
-    if args.step_log:
-        args.step_log.parent.mkdir(parents=True, exist_ok=True)
-        args.step_log.write_text(json.dumps(all_steps, indent=2), encoding="utf-8")
+        if step_path:
+            step_path.parent.mkdir(parents=True, exist_ok=True)
+            step_path.write_text(json.dumps(all_steps, indent=2), encoding="utf-8")
 
-    # Optional console hint for DG/AG threshold suggestions (paper-aligned)
-    try:
-        rec_dg = summary.get("rec_theta_dg_p95")
-        if isinstance(rec_dg, (int, float)):
-            print(f"[recommend] theta_dg ≈ p95(gmin) = {float(rec_dg):.4f}")
-    except Exception:
-        pass
-    print(json.dumps(summary, indent=2))
+        # Optional console hint for DG/AG threshold suggestions (paper-aligned)
+        try:
+            rec_dg = summary.get("rec_theta_dg_p95")
+            if isinstance(rec_dg, (int, float)):
+                print(f"[lambda={lambda_weight}] recommend theta_dg ≈ p95(gmin) = {float(rec_dg):.4f}")
+        except Exception:
+            pass
+        print(f"[lambda={lambda_weight}] summary:")
+        print(json.dumps(summary, indent=2))
 
-    # Optional: auto rerun once with suggested thresholds (guarded by env)
-    try:
-        import os, sys, shlex, subprocess
-        if bool(getattr(args, 'auto_rerun_with_suggested', False)):
-            ok = os.getenv('INSIGHTSPIKE_AUTORERUN_OK', '').strip().lower() in ('1','true','yes','on')
-            if ok:
-                theta_dg_s = summary.get('rec_theta_dg_p95')
-                theta_ag_s = summary.get('g0_p90')
-                if isinstance(theta_dg_s, (int, float)):
-                    new_argv = [sys.executable, sys.argv[0]]
-                    # filter out flags that should not carry into rerun
-                    skip_next = False
-                    for i, tok in enumerate(sys.argv[1:]):
-                        if skip_next:
-                            skip_next = False
-                            continue
-                        if tok in ('--auto-rerun-with-suggested','--write-recommendations'):
-                            continue
-                        if tok in ('--theta-dg','--theta-ag','--output','--step-log'):
-                            skip_next = True
-                            continue
-                        new_argv.append(tok)
-                    # add overridden thresholds
-                    new_argv += ['--theta-dg', f"{float(theta_dg_s):.6f}"]
-                    if isinstance(theta_ag_s, (int, float)):
-                        new_argv += ['--theta-ag', f"{float(theta_ag_s):.6f}"]
-                    # redirect outputs to *_rerun.json
-                    try:
-                        out_path = Path(args.output)
-                        new_out = out_path.with_name(out_path.stem + '_rerun.json')
-                        new_argv += ['--output', str(new_out)]
-                    except Exception:
-                        pass
-                    try:
-                        if args.step_log:
-                            step_path = Path(args.step_log)
-                            new_step = step_path.with_name(step_path.stem + '_rerun.json')
-                            new_argv += ['--step-log', str(new_step)]
-                    except Exception:
-                        pass
-                    print('[autorun] Rerunning with suggested thresholds:', ' '.join(shlex.quote(a) for a in new_argv))
-                    subprocess.run(new_argv, check=False)
-            else:
-                print('[autorun] Skipped (set INSIGHTSPIKE_AUTORERUN_OK=1 to enable)')
-    except Exception as _e:
-        print('[autorun] Failed to schedule rerun:', _e)
+        # Optional: auto rerun once with suggested thresholds (guarded by env)
+        try:
+            import os, sys, shlex, subprocess
+            if bool(getattr(args, 'auto_rerun_with_suggested', False)):
+                ok = os.getenv('INSIGHTSPIKE_AUTORERUN_OK', '').strip().lower() in ('1','true','yes','on')
+                if ok:
+                    theta_dg_s = summary.get('rec_theta_dg_p95')
+                    theta_ag_s = summary.get('g0_p90')
+                    if isinstance(theta_dg_s, (int, float)):
+                        new_argv = [sys.executable, sys.argv[0]]
+                        # filter out flags that should not carry into rerun
+                        skip_next = False
+                        for i, tok in enumerate(sys.argv[1:]):
+                            if skip_next:
+                                skip_next = False
+                                continue
+                            if tok in ('--auto-rerun-with-suggested','--write-recommendations'):
+                                continue
+                            if tok in ('--theta-dg','--theta-ag','--output','--step-log'):
+                                skip_next = True
+                                continue
+                            new_argv.append(tok)
+                        # add overridden thresholds
+                        new_argv += ['--theta-dg', f"{float(theta_dg_s):.6f}"]
+                        if isinstance(theta_ag_s, (int, float)):
+                            new_argv += ['--theta-ag', f"{float(theta_ag_s):.6f}"]
+                        # redirect outputs to *_rerun.json
+                        try:
+                            new_out = out_path.with_name(out_path.stem + '_rerun.json')
+                            new_argv += ['--output', str(new_out)]
+                        except Exception:
+                            pass
+                        try:
+                            if step_path:
+                                new_step = step_path.with_name(step_path.stem + '_rerun.json')
+                                new_argv += ['--step-log', str(new_step)]
+                        except Exception:
+                            pass
+                        print('[autorun] Rerunning with suggested thresholds:', ' '.join(shlex.quote(a) for a in new_argv))
+                        subprocess.run(new_argv, check=False)
+                else:
+                    print('[autorun] Skipped (set INSIGHTSPIKE_AUTORERUN_OK=1 to enable)')
+        except Exception as _e:
+            print('[autorun] Failed to schedule rerun:', _e)
 
 
 if __name__ == "__main__":

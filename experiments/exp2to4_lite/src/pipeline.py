@@ -117,6 +117,7 @@ def run_experiment(cfg: ExperimentConfig) -> Path:
                     "ag": float(result.gate_state.ag),
                     "dg": float(result.gate_state.dg),
                     "gedig_value": getattr(result.gate_state.result, "gedig_value", 0.0),
+                    "ged_min_proxy": getattr(result.gate_state.result, "ged_min_proxy", 0.0),
                     "backend": getattr(gedig_controller, "backend", "lite"),
                 }
                 gate_logs.append(log_entry)
@@ -175,6 +176,7 @@ def run_experiment(cfg: ExperimentConfig) -> Path:
             "name": cfg.name,
             "dataset": str(cfg.dataset_path),
             "num_queries": len(dataset),
+            "lambda_weight": float(cfg.gedig.lambda_weight),
         },
         "results": {},
     }
@@ -194,6 +196,7 @@ def run_experiment(cfg: ExperimentConfig) -> Path:
             "gate_logs": summary.gate_logs,
             "per_samples": summary.per_samples,
             "zsr": summary.zsr,
+            "lambda_weight": float(cfg.gedig.lambda_weight),
         }
 
     result_path = _save_results(cfg.output_dir, cfg.name, output_payload)

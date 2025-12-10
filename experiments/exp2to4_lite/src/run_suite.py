@@ -81,26 +81,45 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Run paper-scale suite with calibration and test")
     ap.add_argument("--config", type=Path, required=True, help="Suite config (uses dataset train/val/test if present)")
     ap.add_argument("--calibrate", action="store_true", help="Run theta_ag/theta_dg calibration on val set")
+    ap.add_argument("--lambda-weight", type=float, default=None, help="Override geDIG lambda_weight for a single run")
+    ap.add_argument("--lambda-sweep", type=float, nargs="+", default=None, help="List of lambda values to sweep; overrides config when set")
     args = ap.parse_args()
 
     _env_cloud_safe()
     cfg = load_config(args.config)
 
-    # If split is provided, we respect it; else run on single dataset.
-    if args.calibrate and cfg.dataset_val_path:
-        ag_tgt = cfg.target_ag_rate or 0.08
-        dg_tgt = cfg.target_dg_rate or 0.04
-        best_ag, best_dg, best_val_path = calibrate_theta(cfg, cfg.dataset_val_path, ag_tgt, dg_tgt)
-        print(f"Calibrated theta on val: theta_ag={best_ag}, theta_dg={best_dg}\nVal result: {best_val_path}")
-        cfg = replace(cfg, gedig=replace(cfg.gedig, theta_ag=best_ag, theta_dg=best_dg))
+    # Build lambda list (single override or sweep, else config value)
+    if args.lambda_sweep:
+        lambda_values = [float(v) for v in args.lambda_sweep]
+    elif args.lambda_weight is not None:
+        lambda_values = [float(args.lambda_weight)]
+    else:
+        lambda_values = [float(cfg.gedig.lambda_weight)]
 
-    # Choose test or default dataset
-    run_cfg = cfg
-    if cfg.dataset_test_path:
-        run_cfg = replace(cfg, dataset_path=cfg.dataset_test_path)
+    def run_once(cfg_in: ExperimentConfig, lambda_weight: float) -> None:
+        cfg_l = replace(cfg_in, gedig=replace(cfg_in.gedig, lambda_weight=lambda_weight))
+        name_suffix = f"_lambda{str(lambda_weight).replace('.', 'p')}" if len(lambda_values) > 1 else ""
+        cfg_named = replace(cfg_l, name=cfg_l.name + name_suffix)
 
-    out = run_experiment(run_cfg)
-    print(f"Test run complete: {out}")
+        # If split is provided, we respect it; else run on single dataset.
+        cfg_cal = cfg_named
+        if args.calibrate and cfg_named.dataset_val_path:
+            ag_tgt = cfg_named.target_ag_rate or 0.08
+            dg_tgt = cfg_named.target_dg_rate or 0.04
+            best_ag, best_dg, best_val_path = calibrate_theta(cfg_named, cfg_named.dataset_val_path, ag_tgt, dg_tgt)
+            print(f"[lambda={lambda_weight}] Calibrated theta on val: theta_ag={best_ag}, theta_dg={best_dg}\nVal result: {best_val_path}")
+            cfg_cal = replace(cfg_named, gedig=replace(cfg_named.gedig, theta_ag=best_ag, theta_dg=best_dg))
+
+        # Choose test or default dataset
+        run_cfg = cfg_cal
+        if cfg_cal.dataset_test_path:
+            run_cfg = replace(cfg_cal, dataset_path=cfg_cal.dataset_test_path)
+
+        out = run_experiment(run_cfg)
+        print(f"[lambda={lambda_weight}] Test run complete: {out}")
+
+    for lam in lambda_values:
+        run_once(cfg, lam)
 
 
 if __name__ == "__main__":

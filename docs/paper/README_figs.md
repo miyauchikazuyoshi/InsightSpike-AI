@@ -6,6 +6,39 @@ Where outputs go
 - Figures: docs/paper/figures/*.pdf (paper already searches here)
 - Tables: docs/paper/templates/*.tex (paper \input{}’s these if present)
 
+## Lambda/phase figures (v5 outlook)
+
+- Template: `scripts/paper_templates/fig_lambda_phase_template.py`
+- Inputs: aggregated JSONs from lambda sweeps
+  - Maze example: `results/maze-lambda/maze15_s80_agg.json`
+  - RAG example: `results/rag-lambda/agg.json`
+- Commands:
+  ```
+  # Maze
+  python scripts/paper_templates/fig_lambda_phase_template.py \
+    --agg results/maze-lambda/maze15_s80_agg.json \
+    --kind maze \
+    --out docs/paper/figures/fig_lambda_maze.png
+
+  # RAG
+  python scripts/paper_templates/fig_lambda_phase_template.py \
+    --agg results/rag-lambda/agg.json \
+    --kind rag \
+    --out docs/paper/figures/fig_lambda_rag.png
+  ```
+- Requires matplotlib in your (venv) environment.
+
+## Phase-transition placeholder
+- Template: `scripts/paper_templates/fig_phase_transition_template.py`
+- Input: CSV or JSON with columns (lambda, success_rate, fmr, psz_shortfall, ged_min_proxy). If absent, synthetic data are used.
+- Command:
+  ```
+  python scripts/paper_templates/fig_phase_transition_template.py \
+    --input results/phase_transition.csv \
+    --out docs/paper/figures/fig_phase_transition.png
+  ```
+  (Use `--input` pointing to your sweep CSV/JSON; omit to get a synthetic placeholder.)
+
 Scripts and expected inputs
 - A7 (R‑PSZ‑Scatter): docs/paper/fig_scripts/fig_rag_psz_scatter.py
   - Input (optional): data/rag_eval/psz_points.csv
