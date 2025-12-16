@@ -1,0 +1,51 @@
+This is BibTeX, Version 0.99d (TeX Live 2025)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: geDIG_onegauge_improved_v6.aux
+The style file: plain.bst
+Database file #1: references.bib
+Warning--to sort, need author or key in tgrag2025temporal
+Warning--to sort, need author or key in tobugraph2024
+Warning--empty author in tobugraph2024
+Warning--empty author in tgrag2025temporal
+You've used 29 entries,
+            2118 wiz_defined-function locations,
+            660 strings with 10040 characters,
+and the built_in function-call counts, 10131 in all, are:
+= -- 932
+> -- 630
+< -- 5
++ -- 255
+- -- 222
+* -- 704
+:= -- 1721
+add.period$ -- 97
+call.type$ -- 29
+change.case$ -- 195
+chr.to.int$ -- 0
+cite$ -- 33
+duplicate$ -- 347
+empty$ -- 729
+format.name$ -- 222
+if$ -- 2069
+int.to.chr$ -- 0
+int.to.str$ -- 29
+missing$ -- 24
+newline$ -- 158
+num.names$ -- 54
+pop$ -- 239
+preamble$ -- 1
+purify$ -- 167
+quote$ -- 0
+skip$ -- 250
+stack$ -- 0
+substring$ -- 396
+swap$ -- 71
+text.length$ -- 5
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 114
+warning$ -- 4
+while$ -- 75
+width$ -- 31
+write$ -- 323
+(There were 4 warnings)

@@ -24,10 +24,16 @@ class GeDIGConfig:
     max_hops: int = 3
     decay_factor: float = 0.7
     sp_beta: float = 0.2
+    sp_scope_mode: str = "auto"
+    sp_hop_expand: int = 0
+    sp_eval_mode: str = "connected"
+    sp_pair_samples: int = 400
+    sp_use_sampling: bool = True
     theta_ag: float = 8.0
     theta_dg: float = 0.6
     ig_mode: str = "raw"
     spike_mode: str = "and"
+    entropy_tau: float = 1.0
 
 
 @dataclass
@@ -93,10 +99,16 @@ def load_config(path: Path) -> ExperimentConfig:
         max_hops=int(gedig_section.get("max_hops", 3)),
         decay_factor=float(gedig_section.get("decay_factor", 0.7)),
         sp_beta=float(gedig_section.get("sp_beta", 0.2)),
+        sp_scope_mode=str(gedig_section.get("sp_scope_mode", "auto")),
+        sp_hop_expand=int(gedig_section.get("sp_hop_expand", 0)),
+        sp_eval_mode=str(gedig_section.get("sp_eval_mode", "connected")),
+        sp_pair_samples=int(gedig_section.get("sp_pair_samples", 400)),
+        sp_use_sampling=bool(gedig_section.get("sp_use_sampling", True)),
         theta_ag=float(gedig_section.get("theta_ag", 8.0)),
         theta_dg=float(gedig_section.get("theta_dg", 0.6)),
         ig_mode=str(gedig_section.get("ig_mode", "raw")),
         spike_mode=str(gedig_section.get("spike_mode", "and")),
+        entropy_tau=float(gedig_section.get("entropy_tau", 1.0)),
     )
 
     cfg = ExperimentConfig(

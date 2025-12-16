@@ -24,10 +24,16 @@ gedig:
   max_hops: 3
   decay_factor: 0.7
   sp_beta: 0.2
+  sp_scope_mode: auto      # auto | union
+  sp_hop_expand: 0         # 評価範囲を (hop+expand) に拡張
+  sp_eval_mode: connected  # connected | fixed_before_pairs
+  sp_pair_samples: 400     # SPペアのサンプリング数（0で全対）
+  sp_use_sampling: true    # Trueならサンプリング、Falseなら全対
   theta_ag: 8.0            # g0 高値に合わせて再調整
   theta_dg: 0.6            # gmin が 0.6 を下回るとDG
   ig_mode: raw             # raw | z | norm
   spike_mode: and          # threshold | and | or
+  entropy_tau: 1.0         # geDIG ΔH の温度（環境変数でも上書き可）
 
 psz:
   acceptance_threshold: 0.6

@@ -104,9 +104,18 @@ class GeDIGStrategy(BaseStrategy):
             hits = retriever.retrieve(current_query, top_k=self.top_k)
             retrieved_docs = [hit.document for hit in hits]
             graph_before, feat_before = memory.export_for_gedig()
-            memory.update_from_retrieval(current_query, hits, query_embedding=retriever.get_last_query_embedding())
+            # Update memory and retain query embedding for linkset IG construction
+            query_embedding = retriever.get_last_query_embedding()
+            memory.update_from_retrieval(current_query, hits, query_embedding=query_embedding)
             graph_after, feat_after = memory.export_for_gedig()
-            gate_state = self.controller.evaluate(graph_before, graph_after, feat_before, feat_after)
+            linkset_info = self._build_linkset_info(hits, query_embedding)
+            gate_state = self.controller.evaluate(
+                graph_before,
+                graph_after,
+                feat_before,
+                feat_after,
+                linkset_info=linkset_info,
+            )
             iteration_states.append(gate_state)
             g_history.append(gate_state.g0)
             ag_history.append(float(gate_state.ag))
@@ -165,6 +174,51 @@ class GeDIGStrategy(BaseStrategy):
             "answer_template": template,
         }
         return StrategyResult(answer=answer, retrieved_docs=all_docs, gate_state=gate_state, steps=steps, metadata=metadata)
+
+    def _build_linkset_info(self, hits: List[RetrievalHit], query_embedding) -> Dict[str, object]:
+        """Construct a minimal linkset_info payload for geDIGCore (hop0 ΔH via linkset)."""
+        # Use all retrieved hits as candidate_pool; top-1 as S_link (base)
+        candidate_pool = []
+        s_link = []
+        for idx, hit in enumerate(hits):
+            w = float(max(hit.score, 1e-6))
+            entry = {
+                "index": hit.document.doc_id,
+                "origin": "retrieval",
+                "similarity": w,
+                "distance": float(1.0 / w),
+                "weighted_distance": float(1.0 / w),
+                "vector": hit.document.embedding.tolist() if hit.document.embedding is not None else None,
+            }
+            candidate_pool.append(entry)
+            if idx == 0:
+                s_link.append(entry)
+
+        # Query entry uses embedding if available; fallback to scalar sim=1.0
+        q_sim = float(candidate_pool[0]["similarity"]) if candidate_pool else 1.0
+        query_entry = {
+            "index": "query",
+            "origin": "query",
+            "similarity": q_sim,
+            "distance": 0.0,
+            "weighted_distance": 0.0,
+            "vector": query_embedding.tolist() if query_embedding is not None else None,
+        }
+
+        # Decision: treat top-1 as chosen
+        decision = {
+            "origin": "retrieval",
+            "index": s_link[0]["index"] if s_link else None,
+            "similarity": s_link[0]["similarity"] if s_link else None,
+        }
+
+        return {
+            "s_link": s_link,
+            "candidate_pool": candidate_pool,
+            "decision": decision,
+            "query_entry": query_entry,
+            "base_mode": "link",
+        }
 
     def _compose_answer(self, query: str, docs: List[Document]) -> tuple[str, str]:
         if not docs:

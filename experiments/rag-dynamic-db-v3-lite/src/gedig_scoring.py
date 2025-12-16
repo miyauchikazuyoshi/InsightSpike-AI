@@ -83,10 +83,16 @@ class GeDIGController:
         max_hops: int,
         decay_factor: float,
         sp_beta: float,
+        sp_scope_mode: str,
+        sp_hop_expand: int,
+        sp_eval_mode: str,
+        sp_pair_samples: int,
+        sp_use_sampling: bool,
         ig_mode: str,
         spike_mode: str,
         theta_ag: float,
         theta_dg: float,
+        entropy_tau: float = 1.0,
     ) -> None:
         self.theta_ag = theta_ag
         self.theta_dg = theta_dg
@@ -100,9 +106,18 @@ class GeDIGController:
                 max_hops=max_hops,
                 decay_factor=decay_factor,
                 sp_beta=sp_beta,
+                sp_scope_mode=sp_scope_mode,
+                sp_hop_expand=sp_hop_expand,
+                sp_eval_mode=sp_eval_mode,
+                sp_pair_samples=sp_pair_samples,
+                sp_use_sampling=sp_use_sampling,
                 lambda_weight=lambda_weight,
                 ig_mode=ig_mode,
                 spike_detection_mode=spike_mode,
+                linkset_mode=True,
+                ig_source_mode="linkset",
+                ig_hop_apply="all",
+                entropy_tau=float(entropy_tau),
             )
         else:
             self.core = None  # type: ignore[assignment]
@@ -114,6 +129,7 @@ class GeDIGController:
         features_before: np.ndarray,
         features_after: np.ndarray,
         focal_nodes: Optional[Dict[str, str]] = None,
+        linkset_info: Optional[Dict[str, object]] = None,
     ) -> GeDIGGateState:
         if HAVE_TORCH_BACKEND and self.core is not None:
             result = self.core.calculate(
@@ -122,6 +138,7 @@ class GeDIGController:
                 features_prev=features_before,
                 features_now=features_after,
                 focal_nodes=focal_nodes,
+                linkset_info=linkset_info,
             )
             hop_results = result.hop_results or {}
             hop_values = [hop.gedig for hop in hop_results.values()]

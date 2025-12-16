@@ -117,6 +117,7 @@ class GeDIGCore:
         ig_mode: str = 'raw',  # 'raw' | 'z' | 'norm'
         ig_norm_strategy: str = 'before',
         ig_delta_mode: str = 'after_before',  # ignored (fixed to 'after_before')
+        entropy_tau: float = 1.0,  # softmax temperature for entropy; tau=1 keeps legacy behavior
         mu: float = 0.5,
         warmup_steps: int = 10,
         use_refactored_reward: bool = True,
@@ -211,6 +212,14 @@ class GeDIGCore:
                 self.ig_norm_strategy = str(env_norm).lower()
         except Exception:
             pass
+        # Entropy temperature (tau). tau=1 -> legacy weights/sum. tau != 1 -> p ∝ w^(1/tau).
+        try:
+            ent_tau_env = os.environ.get('MAZE_GEDIG_ENTROPY_TAU') or os.environ.get('INSIGHTSPIKE_ENTROPY_TAU')
+            if ent_tau_env:
+                entropy_tau = float(ent_tau_env)
+        except Exception:
+            pass
+        self.entropy_tau = float(entropy_tau) if entropy_tau > 0 else 1.0
         # IG delta orientation is fixed to after_before (no knob to flip sign)
         self.ig_delta_mode = 'after_before'
         # IG non-negative clamp (treat negative IG as 0 = no information gain)
@@ -632,19 +641,32 @@ class GeDIGCore:
         def _weights(items: List[Dict[str, Any]]) -> List[float]:
             ws = [item.get('similarity', 0.0) or 0.0 for item in items]
             return [float(w) for w in ws if w > 0.0]
-        def _entropy_from_weights(weights: List[float]) -> float:
+        def _entropy_from_weights(weights: List[float], tau: float = 1.0) -> float:
             if not weights:
                 return 0.0
-            total = sum(weights)
-            if total <= 0:
+            # tau=1 -> legacy normalization (p = w/sum w)
+            # tau!=1 -> p ∝ w^(1/tau)  (softmax over log w / tau)
+            if tau <= 0 or not math.isfinite(tau):
+                tau = 1.0
+            if abs(tau - 1.0) < 1e-9:
+                total = sum(weights)
+                if total <= 0:
+                    return 0.0
+                probabilities = [w / total for w in weights]
+            else:
+                powered = [math.pow(w, 1.0 / tau) for w in weights if w > 0.0]
+                total = sum(powered)
+                if total <= 0:
+                    return 0.0
+                probabilities = [w / total for w in powered]
+            if not probabilities:
                 return 0.0
-            probabilities = [w / total for w in weights]
             return -sum(p * math.log(p + 1e-12) for p in probabilities)
 
         ws_before = _weights(before_list)
         ws_after = _weights(after_list)
-        H_before = _entropy_from_weights(ws_before)
-        H_after = _entropy_from_weights(ws_after)
+        H_before = _entropy_from_weights(ws_before, tau=self.entropy_tau)
+        H_after = _entropy_from_weights(ws_after, tau=self.entropy_tau)
         # Paper-consistent normalization: log K with K = |after|
         # Guard: if K < 2, denominator approaches 0 -> clamp with epsilon
         K = max(0, len(after_list))

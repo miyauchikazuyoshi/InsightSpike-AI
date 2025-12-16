@@ -34,3 +34,8 @@ Open `tmp/trace_steps.json` and look for fields:
 
 See the paper for formal definitions and the PSZ/SLO criteria.
 
+## 4) 温度とSPサンプリングを試す
+- ΔH 温度ノブ: `INSIGHTSPIKE_ENTROPY_TAU=0.5`（デフォルト1.0で互換）
+- SP サンプリング: `gedig.sp_pair_samples`（YAML）または `INSIGHTSPIKE_SP_PAIR_SAMPLES`（ENV）で調整。`sp_use_sampling=false` で全対。
+
+迷路・RAGとも SP は無向・重みなし平均最短経路差分。温度は Linkset Shannon（softmax）に効き、スコープ/サンプリングは ΔSP の計算範囲に効きます。

@@ -29,7 +29,9 @@ metrics: { delta_ged, delta_ig, delta_h, delta_sp, g0, gmin, sp_engine, norm_spe
 
 ## Scope/Boundary knobs
 - `graph.sp_scope_mode`: auto | union
-- `graph.sp_boundary_mode`: induced | trim | nodes
+- `graph.sp_eval_mode`: connected | fixed_before_pairs
+- `graph.sp_pair_samples`: sampling size (0 = all-pairs)
+- `graph.sp_use_sampling`: true/false (all-pairs vs sampling)
 
 ## NormSpec contract
 - Source of truth: WakeSleep SphereSearchConfig (intuitive radii)

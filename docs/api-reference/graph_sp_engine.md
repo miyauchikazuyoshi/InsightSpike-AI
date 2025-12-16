@@ -39,6 +39,7 @@ INSIGHTSPIKE_SP_ENDP_SSSP_WINDOW=1
 INSIGHTSPIKE_SP_GAIN_EPS=0.0005
 INSIGHTSPIKE_SP_SOURCES_CAP=64
 INSIGHTSPIKE_SP_SOURCES_FOCUS=near
+INSIGHTSPIKE_ENTROPY_TAU=1.0      # ΔH softmax温度（geDIG, τ=1が互換）
 ```
 
 ## Context interface (L1/L2 → L3)
@@ -79,3 +80,14 @@ context = {
 - `sp_pair_samples`: 80 (small graphs), 200 (mid)
 - `sp_sources_cap`: 64
 - `sp_sources_focus`: near
+
+## RAG v3-lite quick knobs（config `gedig`）
+```yaml
+gedig:
+  entropy_tau: 1.0           # ΔH softmax温度（τ=1で従来互換）
+  sp_scope_mode: auto        # auto | union
+  sp_eval_mode: connected    # connected | fixed_before_pairs
+  sp_pair_samples: 400       # SPサンプル数（0で全対）
+  sp_use_sampling: true      # falseで全対SSSP
+```
+※ 同等の環境変数（INSIGHTSPIKE_ENTROPY_TAU, INSIGHTSPIKE_SP_PAIR_SAMPLES など）でも上書き可能。

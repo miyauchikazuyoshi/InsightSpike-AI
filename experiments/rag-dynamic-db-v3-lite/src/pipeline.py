@@ -46,10 +46,16 @@ def _init_gedig_controller(cfg: GeDIGConfig) -> GeDIGController:
         max_hops=cfg.max_hops,
         decay_factor=cfg.decay_factor,
         sp_beta=cfg.sp_beta,
+        sp_scope_mode=cfg.sp_scope_mode,
+        sp_hop_expand=cfg.sp_hop_expand,
+        sp_eval_mode=cfg.sp_eval_mode,
+        sp_pair_samples=cfg.sp_pair_samples,
+        sp_use_sampling=cfg.sp_use_sampling,
         ig_mode=cfg.ig_mode,
         spike_mode=cfg.spike_mode,
         theta_ag=cfg.theta_ag,
         theta_dg=cfg.theta_dg,
+        entropy_tau=cfg.entropy_tau,
     )
 
 

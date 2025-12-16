@@ -43,6 +43,10 @@ This directory contains Mermaid diagrams illustrating the InsightSpike-AI archit
    - Spatial search: Added O(log n) position indexing
    - Memory: Efficient dual storage (vectors + norms)
 
+### SP / geDIG 温度ノブの反映メモ（2025-12）
+- RAG v3-lite で SP 評価スコープ・サンプリング、ΔH softmax 温度（`entropy_tau`）を YAML で切り替え可能に。  
+- 既存の図は変更不要だが、SP Flow (`sp_flow.svg`) を参照するとスコープ/サンプリングの位置づけが把握しやすい。
+
 ## 🚀 Previous Updates (2025-07-28)
 
 ### Query Storage Feature Implementation

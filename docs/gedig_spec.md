@@ -104,6 +104,7 @@ F = ΔEPC_norm − λ ( ΔH_norm + γ · ΔSP_rel )
   - λ: `lambda_weight`
   - ΔH_norm: `delta_h_norm`（after−before で負が秩序化）
   - ΔSP_rel: `delta_sp_rel`
+  - ΔH 温度: `entropy_tau`（τ=1が従来互換、ENV: `INSIGHTSPIKE_ENTROPY_TAU`）
   - 正規化戦略: `ig_norm_strategy`, `ged_norm_scheme`
 - `src/insightspike/implementations/layers/layer3_graph_reasoner.py`
   - 合成IG: `_ig_norm = ΔH_norm + sp_beta * ΔSP_rel`

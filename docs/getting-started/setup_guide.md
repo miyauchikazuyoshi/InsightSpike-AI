@@ -102,3 +102,16 @@ embedding:
   dimension: 384
   device: cpu  # or "cuda" for GPU
 ```
+
+### RAG v3-lite (geDIG) quick knobs
+
+`experiments/rag-dynamic-db-v3-lite/configs/experiment_geDIG_vs_baselines.yaml` で調整できる主要パラメータ:
+```yaml
+gedig:
+  entropy_tau: 1.0        # ΔH softmax温度（1で従来互換）
+  sp_scope_mode: auto     # auto | union
+  sp_eval_mode: connected # connected | fixed_before_pairs
+  sp_pair_samples: 400    # SPサンプル数（0=全対）
+  sp_use_sampling: true   # falseで全対SSSP
+```
+環境変数でも上書き可（例: `INSIGHTSPIKE_ENTROPY_TAU=0.5`）。SPは無向・重みなし平均最短経路差分で、ノブは評価範囲とサンプリング強度を切り替えます。
