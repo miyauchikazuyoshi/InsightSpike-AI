@@ -1,0 +1,17 @@
+[
+  {"alpha": 0.0, "seed": 42, "final_accuracy": 0.8640, "final_gedig": {"f_mean": -0.4479}},
+  {"alpha": 0.0, "seed": 123, "final_accuracy": 0.8540, "final_gedig": {"f_mean": -0.4518}},
+  {"alpha": 0.0, "seed": 456, "final_accuracy": 0.8620, "final_gedig": {"f_mean": -0.4434}},
+  {"alpha": 0.001, "seed": 42, "final_accuracy": 0.8660, "final_gedig": {"f_mean": -0.4459}},
+  {"alpha": 0.001, "seed": 123, "final_accuracy": 0.8580, "final_gedig": {"f_mean": -0.4513}},
+  {"alpha": 0.001, "seed": 456, "final_accuracy": 0.8660, "final_gedig": {"f_mean": -0.4445}},
+  {"alpha": 0.01, "seed": 42, "final_accuracy": 0.8700, "final_gedig": {"f_mean": -0.4502}},
+  {"alpha": 0.01, "seed": 123, "final_accuracy": 0.8560, "final_gedig": {"f_mean": -0.4558}},
+  {"alpha": 0.01, "seed": 456, "final_accuracy": 0.8620, "final_gedig": {"f_mean": -0.4489}},
+  {"alpha": 0.1, "seed": 42, "final_accuracy": 0.8700, "final_gedig": {"f_mean": -0.4621}},
+  {"alpha": 0.1, "seed": 123, "final_accuracy": 0.8480, "final_gedig": {"f_mean": -0.4698}},
+  {"alpha": 0.1, "seed": 456, "final_accuracy": 0.8600, "final_gedig": {"f_mean": -0.4655}},
+  {"alpha": 1.0, "seed": 42, "final_accuracy": 0.8020, "final_gedig": {"f_mean": -0.5102}},
+  {"alpha": 1.0, "seed": 123, "final_accuracy": 0.7720, "final_gedig": {"f_mean": -0.5187}},
+  {"alpha": 1.0, "seed": 456, "final_accuracy": 0.7940, "final_gedig": {"f_mean": -0.5145}}
+]
