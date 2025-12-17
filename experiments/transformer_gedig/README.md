@@ -40,6 +40,16 @@ This directory contains a lightweight framework to validate whether Transformer 
    - Track performance (perplexity/accuracy) alongside geDIG metrics; look for inflection points (d²/d(step)² peaks) aligned with performance jumps.
    - Optionally add geDIG regularization during training to see whether structural changes align with improved accuracy.
 
+5) Phase 5 (causal verification via F-regularization) **NEW**
+   - **Goal**: Demonstrate causality, not just correlation. If minimizing F improves performance, F is causally relevant.
+   - **Method**: L_total = L_CE + α·F_mean during fine-tuning
+   - **α sweep**: [0, 0.001, 0.01, 0.1, 1.0] with multiple seeds
+   - **Success criteria**:
+     - α > 0 outperforms baseline (α=0)
+     - Optimal α exists (not monotonic)
+     - Final F is lower for regularized models
+   - **Implication**: If successful, this proves F is not just a post-hoc descriptor but a trainable objective.
+
 ## Implementation notes
 - Pad/causal masks must be applied before graph building. 
 - For long sequences, sample SP pairs (e.g., 200) to bound cost. Largest component for ASP.
@@ -54,6 +64,18 @@ This directory contains a lightweight framework to validate whether Transformer 
 - `extract_and_score.py`: extract attention, compute geDIG per layer/head, compare to baselines. Default: percentile threshold only (top10%), bert-base-uncased + gpt2, 32 short texts, 6 layers.
 - `lambda_scan.py`: λ sweep on a model/dataset with percentile threshold; emits `lambda_scan.json` (+ `lambda_phase.{json,csv}` helper).
 - `intervene_eval.py`: apply attention edits and log ΔF/精度（SST2ミニ）. 強介入・単一層介入のサマリ: `intervene_summary.json`, `fig_intervention_summary.png`, `report_interventions.md`.
+- `train_f_regularized.py`: **Phase 5** F-regularized fine-tuning experiment. Implements differentiable geDIG and custom loss. Usage:
+  ```bash
+  # Quick smoke test
+  bash run_f_reg_smoke.sh
+
+  # Full α sweep (recommended)
+  python train_f_regularized.py --alpha-sweep --alphas "0,0.001,0.01,0.1,1.0" --seeds "42,123,456"
+
+  # Single α run
+  python train_f_regularized.py --alpha 0.1 --train-samples 2000 --epochs 5
+  ```
+- `plot_f_reg_results.py`: Generate plots and summary table from F-reg experiment results.
 - Plotting: reuse `scripts/paper_templates/fig_lambda_phase_template.py` and `fig_phase_transition_template.py` with produced agg JSON/CSV.
 
 ## Smoke status (current)
@@ -63,3 +85,8 @@ This directory contains a lightweight framework to validate whether Transformer 
 - Phase 3: 強介入（全層）・単一層中強度の評価済み。精度は最大で ~53–56% まで低下、F_mean も大幅低下。サマリ: `intervene_summary.json`, `fig_intervention_summary.png`, `report_interventions.md`.
 - Phase 4: DistilBERTミニ学習のチェックポイント解析。精度は0.54→0.77と上昇、F_meanはほぼ一定。CLSアンカーのサブグラフFは hop1 で精度と強い正相関（corr≈0.97）。図: `fig_phase4_checkpoints.png`, `fig_phase4_hopcorr.png`.
 - Grokking toy (mod加算): 現行ハイパラでは汎化せず、val Acc ≈0.09–0.27。`results/transformer_gedig/grokking_mod_add/run_summary.json`。
+- Phase 5 (F-regularization): **READY TO RUN**. Script: `train_f_regularized.py`.
+  - Differentiable geDIG implementation complete
+  - α sweep over [0, 0.001, 0.01, 0.1, 1.0] with 3 seeds
+  - Expected runtime: ~30min on GPU for full sweep
+  - Quick smoke test: `bash run_f_reg_smoke.sh` (~5min)
