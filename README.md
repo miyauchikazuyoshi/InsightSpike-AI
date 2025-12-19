@@ -22,6 +22,14 @@ Cloud/Lightweight defaults
 Docs / GitHub Pages: https://miyauchikazuyoshi.github.io/InsightSpike-AI
 Note: The current code and presets are aligned with the v4 One‑Gauge spec; v5 paper text is newer and will be reconciled as updates land.
 
+## 🔰 For Beginners: Start Here
+If the math below looks scary, don't worry! We have created two friendly resources to help you understand the core concepts without equations.
+
+1.  **[The Intuitive "No-Math" Guide](docs/concepts/intuition.md)** ([日本語](docs/concepts/intuition_ja.md)): Explains geDIG using a simple "Mental Map" analogy.
+2.  **[Insight Sandbox](examples/playground.py)**: An interactive visual playground.
+    *   Run it: `pip install streamlit && streamlit run examples/playground.py`
+
+
 ## 🎯 What We’re Building
 
 We aim to build a self‑updating RAG system that treats structural improvement in its own knowledge graph as an intrinsic reward, and autonomously updates itself. The geDIG gauge provides a principled decision for When to accept a graph update by balancing normalized edit‑path cost (structure) against information gain.

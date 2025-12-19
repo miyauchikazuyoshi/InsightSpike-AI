@@ -23,5 +23,14 @@ python examples/public_quick_start.py
 python examples/hello_insight.py
 ```
 
+## 🎮 Interactive Playground (Streamlit)
+
+Visualize the "Spike" decision in real-time:
+
+```bash
+pip install streamlit
+streamlit run examples/playground.py
+```
+
 より詳しい説明・トラブルシュート・実験の入口は `docs/QUICKSTART.md` を参照してください。
 
