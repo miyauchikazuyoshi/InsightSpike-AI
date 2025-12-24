@@ -12,9 +12,9 @@ from insightspike.public import create_agent, quick_demo, InsightAppWrapper
 
 ### InsightAppWrapper(...)
 - High-level wrapper for local knowledge apps (Streamlit-friendly)
-- Parameters: provider, model, api_base, api_key, data_dir, temperature
+- Parameters: provider, model, api_base, api_key, data_dir, temperature, max_cycles
 - Methods:
-  - ask(question: str) -> str
+  - ask(question: str, max_cycles: Optional[int] = None) -> str
   - learn(text: str) -> bool
   - get_recent_episodes(limit: int = 5) -> List[Dict[str, Any]]
   - get_graph_networkx(max_nodes: int = 50, min_similarity: float = 0.65, top_k: int = 3, force_connect: bool = True) -> networkx.Graph | None

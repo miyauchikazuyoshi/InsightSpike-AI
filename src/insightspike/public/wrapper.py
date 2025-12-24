@@ -32,7 +32,8 @@ class InsightAppWrapper:
         api_base: Optional[str] = "http://localhost:11434/v1",
         api_key: str = "ollama",
         data_dir: str = "data/local_app",
-        temperature: float = 0.7
+        temperature: float = 0.7,
+        max_cycles: int = 2,
     ):
         """
         Initialize the local application wrapper.
@@ -46,6 +47,7 @@ class InsightAppWrapper:
             temperature: Generation temperature
         """
         self.data_dir = data_dir
+        self.max_cycles = max(1, int(max_cycles or 1))
         
         # Ensure data directory exists
         os.makedirs(data_dir, exist_ok=True)
@@ -107,17 +109,19 @@ class InsightAppWrapper:
                 return False
         return False
 
-    def ask(self, question: str) -> str:
+    def ask(self, question: str, max_cycles: Optional[int] = None) -> str:
         """
         Ask a question to the agent.
         
         Args:
             question: The user's query
+            max_cycles: Optional override for reasoning cycles
             
         Returns:
             The text response
         """
-        response_obj = self.agent.process_question(question)
+        cycles = self.max_cycles if max_cycles is None else max(1, int(max_cycles))
+        response_obj = self.agent.process_question(question, max_cycles=cycles)
         
         # Auto-save after interaction if configured or simple heuristic
         # self.save() 

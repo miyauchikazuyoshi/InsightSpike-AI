@@ -19,7 +19,7 @@ quick_demo()
 ```python
 app = InsightAppWrapper(provider="mock")
 app.learn("geDIG is a graph distance signal.")
-answer = app.ask("What is geDIG?")
+answer = app.ask("What is geDIG?", max_cycles=1)
 ```
 
 ## 1. EnvironmentState (from insightspike.core.interfaces.generic_interfaces)

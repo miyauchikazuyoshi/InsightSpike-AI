@@ -144,6 +144,14 @@ with st.sidebar:
         model = st.text_input("Model", value="mistral" if provider == "ollama" else "gpt-3.5-turbo")
         api_base = st.text_input("API Base", value="http://localhost:11434/v1" if provider == "ollama" else "")
         api_key = st.text_input("API Key", value="ollama", type="password")
+        max_cycles = st.slider(
+            "Reasoning cycles",
+            1,
+            5,
+            2,
+            help="Lower is faster; higher may improve depth.",
+            key="max_cycles",
+        )
 
     with st.expander("Quick Guide", expanded=True):
         st.markdown(
@@ -162,7 +170,8 @@ with st.sidebar:
                         provider=provider, 
                         model=model, 
                         api_base=api_base, 
-                        api_key=api_key
+                        api_key=api_key,
+                        max_cycles=st.session_state.max_cycles,
                     )
                     st.success("Core Online")
                     st.rerun()
@@ -208,7 +217,10 @@ with tab1:
         with st.chat_message("assistant", avatar="🧠"):
             with st.spinner("Thinking..."):
                 try:
-                    response = st.session_state.app.ask(prompt)
+                    response = st.session_state.app.ask(
+                        prompt,
+                        max_cycles=st.session_state.max_cycles,
+                    )
                     st.markdown(response)
                     st.session_state.messages.append({"role": "assistant", "content": response})
                 except Exception as e:
