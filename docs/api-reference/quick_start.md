@@ -103,6 +103,18 @@ A: The Earth orbits around the Sun...
 === Demo Complete ===
 ```
 
+## Local App Wrapper (InsightAppWrapper)
+
+Use the Streamlit-friendly wrapper for a minimal chat/ingest workflow:
+
+```python
+from insightspike.public import InsightAppWrapper
+
+app = InsightAppWrapper(provider="mock")
+app.learn("geDIG is a graph distance signal.")
+answer = app.ask("What is geDIG?")
+```
+
 ## Import Paths
 
 These functions are exported at the package level for convenience:

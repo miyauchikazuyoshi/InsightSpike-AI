@@ -26,7 +26,7 @@ flowchart TB
     %% GED Calculations
     subgraph "📐 Structure Analysis (GED)"
         SimpleGED[Simple GED<br/>Node/Edge Count]
-        NormalizedGED[Normalized GED<br/>Scale-invariant [-1,1]]
+        NormalizedGED[Normalized GED<br/>Scale-invariant -1 to 1]
         AdvancedGED[Advanced GED<br/>NetworkX-based]
     end
     
@@ -61,7 +61,7 @@ flowchart TB
     subgraph "🧮 geDIG Calculation"
         GeDIGCalc[GeDIGCalculator<br/>gedig_calculator.py]
         BasicGeDIG[Basic geDIG<br/>ΔGED − λ·IG]
-        MultiHopGeDIG[Multi-hop geDIG<br/>Σ(weighted)]
+        MultiHopGeDIG[Multi-hop geDIG<br/>Σ weighted]
     end
     
     %% Output

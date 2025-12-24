@@ -23,7 +23,7 @@ flowchart TD
     %% 4-Layer Architecture
     MainAgent --> Layer1[📥 Layer 1: Input Processing]
     Layer1 --> Layer2[🔍 Layer 2: Memory Retrieval]
-    Layer2 --> Layer3[🧮 Layer 3: Graph Reasoning\n(GeDIGCore advanced, query-centric k-hop)]
+    Layer2 --> Layer3[🧮 Layer 3: Graph Reasoning\nGeDIGCore advanced, query-centric k-hop]
     Layer3 --> Layer4[🤖 Layer 4: LLM Provider]
     
     %% Layer Details
@@ -34,7 +34,7 @@ flowchart TD
     Layer2 --> VectorRetrieval[Vector Retrieval]
     Layer2 --> MemoryDB[🗃️ Memory Database]
     
-    Layer3 --> GraphAnalysis[Graph Analysis\n(ΔGED/ΔIG by GeDIGCore)]
+    Layer3 --> GraphAnalysis[Graph Analysis\nΔGED/ΔIG by GeDIGCore]
     Layer3 --> QueryCentric[Query-Centric Local Eval\nTop-K centers, r-hop]
     Layer3 --> ConceptMapping[Concept Mapping]
     Layer3 --> GraphDB[🕸️ Graph Database]

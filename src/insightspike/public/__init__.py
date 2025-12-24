@@ -49,10 +49,13 @@ def create_datastore(kind: str = "filesystem", **kwargs):
     return _DSFactory.create(k, **kwargs)
 
 
+from .wrapper import InsightAppWrapper  # noqa: F401
+
 __all__ = [
     "create_agent",
     "quick_demo",
     "load_config",
     "get_config_summary",
     "create_datastore",
+    "InsightAppWrapper",
 ]

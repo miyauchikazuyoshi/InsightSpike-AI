@@ -5,7 +5,28 @@ The stable, user‑facing entry points are exposed via `insightspike.public`.
 ## Imports
 
 ```python
-from insightspike.public import create_agent, quick_demo
+from insightspike.public import create_agent, quick_demo, InsightAppWrapper
+```
+
+## Classes
+
+### InsightAppWrapper(...)
+- High-level wrapper for local knowledge apps (Streamlit-friendly)
+- Parameters: provider, model, api_base, api_key, data_dir, temperature
+- Methods:
+  - ask(question: str) -> str
+  - learn(text: str) -> bool
+  - get_recent_episodes(limit: int = 5) -> List[Dict[str, Any]]
+  - get_graph_networkx(max_nodes: int = 50, min_similarity: float = 0.65, top_k: int = 3, force_connect: bool = True) -> networkx.Graph | None
+  - get_stats() -> Dict[str, Any]
+  - save() -> bool
+  - reset() -> None
+
+Example:
+```python
+app = InsightAppWrapper(provider="mock")
+app.learn("geDIG is a graph distance signal.")
+answer = app.ask("What is geDIG?")
 ```
 
 ## Functions

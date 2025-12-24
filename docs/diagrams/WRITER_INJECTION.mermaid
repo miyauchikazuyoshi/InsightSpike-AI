@@ -2,7 +2,6 @@ flowchart LR
   A[GeDIG AB Logger] -- set_writer(fh) --> W[(file-like)]
   A -- record(pure,full) --> Q{buffer}
   Q -- export_csv --> W
-  subgraph Fallback path
-    H[MainAgent.export_gedig_ab_csv] --> H1[create_csv_writer(path)] --> W
+  subgraph "Fallback path"
+    H[MainAgent.export_gedig_ab_csv] --> H1[create_csv_writer path] --> W
   end
-

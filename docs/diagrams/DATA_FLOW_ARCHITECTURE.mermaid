@@ -129,10 +129,10 @@ flowchart TB
         Write[Write Operations]
         
         Read --> ReadEp[load_episodes<br/>Read episodes.json]
-        Read --> ReadIdx[search<br/>O(1) Vector Search ⚡NEW]
+        Read --> ReadIdx[search<br/>O1 Vector Search ⚡NEW]
         Read --> ReadGraph[load_graph<br/>Load NetworkX/PyG]
         Read --> ReadQueries[load_queries<br/>Read queries.json]
-        Read --> ReadSpatial[spatial_search<br/>O(log n) Position ⚡NEW]
+        Read --> ReadSpatial[spatial_search<br/>O log n Position ⚡NEW]
         
         Write --> WriteEp[save_episodes<br/>Write episodes.json]
         Write --> WriteIdx[add_episode<br/>Update Index ⚡NEW]

@@ -66,6 +66,10 @@ src/insightspike/
 │   │   └── __init__.py
 │   └── __init__.py
 │
+├── public/                    # Public API surface (stable)
+│   ├── __init__.py            # Re-exports and helpers
+│   └── wrapper.py             # InsightAppWrapper for local apps
+│
 ├── metrics/                   # Metric calculations
 │   ├── graph_metrics.py      # Graph analysis metrics
 │   └── __init__.py
@@ -74,6 +78,13 @@ src/insightspike/
     ├── file_utils.py         # File operations
     ├── embedding_utils.py    # Embedding helpers
     └── __init__.py
+```
+
+## 🧩 Top-Level Apps
+
+```
+apps/
+└── knowledge_app.py           # Streamlit UI for the local knowledge app
 ```
 
 ## 🏗️ Architecture Principles

@@ -5,13 +5,21 @@ Based on the actual implementation, here are the correct constructors and method
 ## Quick Start Functions
 
 ```python
-from insightspike import create_agent, quick_demo
+from insightspike.public import create_agent, quick_demo, InsightAppWrapper
 
 # Create agent with minimal configuration
 agent = create_agent(provider="openai")  # or "mock", "anthropic"
 
 # Run interactive demo
 quick_demo()
+```
+
+## Local App Wrapper (InsightAppWrapper)
+
+```python
+app = InsightAppWrapper(provider="mock")
+app.learn("geDIG is a graph distance signal.")
+answer = app.ask("What is geDIG?")
 ```
 
 ## 1. EnvironmentState (from insightspike.core.interfaces.generic_interfaces)

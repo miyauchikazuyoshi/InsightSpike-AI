@@ -39,6 +39,8 @@ def get_llm_provider(config=None, safe_mode: bool = False):  # type: ignore
                 return True
             def generate_response_detailed(self, ctx, question):  # type: ignore
                 return {"response": "", "success": True, "confidence": 0.0}
+            def generate_response(self, *a, **k):
+                return {"response": "", "success": True}
         return _FallbackLLM()
 
 # Optional: detailed import tracer (Task1). Enables slow-import logging to pinpoint hang.
@@ -558,6 +560,10 @@ class MainAgent:
                             return True
                         def generate(self_inner, *a, **k):
                             return {"text": "[fallback-llm-response]", "raw": "[fallback-llm-response]"}
+                        def generate_response(self_inner, *a, **k):
+                            return {"response": "[fallback-llm-response]", "success": True}
+                        def generate_response_detailed(self_inner, *a, **k):
+                            return {"response": "[fallback-llm-response]", "success": True}
                     self.l4_llm = _FallbackLLM()
 
             # Initialize provider if it exposes initialize
@@ -661,57 +667,61 @@ class MainAgent:
         # Save query (Phase1b: QueryRecorder 経由)
         try:
             if self.query_recorder:
-                start_time = getattr(self, '_query_start_time', time.time())
-                processing_time = time.time() - start_time
-
-                # spike episode id
-                spike_episode_id = None
-                if result.spike_detected and hasattr(self.l2_memory, 'episodes') and self.l2_memory.episodes:
-                    spike_episode_id = f"episode_{len(self.l2_memory.episodes) - 1}"
-
-                # query embedding
-                query_vec = None
-                for res in results:
-                    if getattr(res, 'graph_analysis', None) and res.graph_analysis.get('query_vector') is not None:
-                        query_vec = res.graph_analysis['query_vector']
-                        break
-                if query_vec is None and hasattr(self, 'l1_embedder'):
-                    query_vec = self.l1_embedder.get_embedding(question)
-
-                rec = self.query_recorder.build_record(
-                    text=question,
-                    response=result.response,
-                    has_spike=result.spike_detected,
-                    spike_episode_id=spike_episode_id,
-                    query_vec=query_vec,
-                    processing_time=processing_time,
-                    total_cycles=len(results),
-                    converged=convergence_reached,
-                    reasoning_quality=result.reasoning_quality,
-                    retrieved_doc_count=len(result.retrieved_documents),
-                    llm_provider=(self.l4_llm.__class__.__name__ if self.l4_llm else 'unknown'),
-                )
-                if self.query_recorder.save([rec]):
-                    result.query_id = rec.id
-                    logger.debug(f"Saved query {rec.id} (has_spike={result.spike_detected})")
-                    # track last id for AB logging correlation
-                    self._last_query_id = rec.id
-
-                    # graph augmentation
-                    if (hasattr(self.l2_memory, 'add_query_to_graph') and result.graph_analysis.get('graph') is not None):
-                        retrieved_episode_ids = [str(doc['index']) for doc in result.retrieved_documents if 'index' in doc]
-                        self.l2_memory.add_query_to_graph(
-                            graph=result.graph_analysis['graph'],
-                            query_id=rec.id,
-                            query_text=question,
-                            query_vec=query_vec,
-                            has_spike=result.spike_detected,
-                            spike_episode_id=spike_episode_id,
-                            retrieved_episode_ids=retrieved_episode_ids,
-                            metadata=rec.metadata,
-                        )
+                recorder_datastore = getattr(self.query_recorder, "datastore", None)
+                if not recorder_datastore or not hasattr(recorder_datastore, "save_queries"):
+                    logger.debug("QueryRecorder datastore not configured; skipping query persistence")
                 else:
-                    logger.warning("QueryRecorder save failed")
+                    start_time = getattr(self, '_query_start_time', time.time())
+                    processing_time = time.time() - start_time
+
+                    # spike episode id
+                    spike_episode_id = None
+                    if result.spike_detected and hasattr(self.l2_memory, 'episodes') and self.l2_memory.episodes:
+                        spike_episode_id = f"episode_{len(self.l2_memory.episodes) - 1}"
+
+                    # query embedding
+                    query_vec = None
+                    for res in results:
+                        if getattr(res, 'graph_analysis', None) and res.graph_analysis.get('query_vector') is not None:
+                            query_vec = res.graph_analysis['query_vector']
+                            break
+                    if query_vec is None and hasattr(self, 'l1_embedder'):
+                        query_vec = self.l1_embedder.get_embedding(question)
+
+                    rec = self.query_recorder.build_record(
+                        text=question,
+                        response=result.response,
+                        has_spike=result.spike_detected,
+                        spike_episode_id=spike_episode_id,
+                        query_vec=query_vec,
+                        processing_time=processing_time,
+                        total_cycles=len(results),
+                        converged=convergence_reached,
+                        reasoning_quality=result.reasoning_quality,
+                        retrieved_doc_count=len(result.retrieved_documents),
+                        llm_provider=(self.l4_llm.__class__.__name__ if self.l4_llm else 'unknown'),
+                    )
+                    if self.query_recorder.save([rec]):
+                        result.query_id = rec.id
+                        logger.debug(f"Saved query {rec.id} (has_spike={result.spike_detected})")
+                        # track last id for AB logging correlation
+                        self._last_query_id = rec.id
+
+                        # graph augmentation
+                        if (hasattr(self.l2_memory, 'add_query_to_graph') and result.graph_analysis.get('graph') is not None):
+                            retrieved_episode_ids = [str(doc['index']) for doc in result.retrieved_documents if 'index' in doc]
+                            self.l2_memory.add_query_to_graph(
+                                graph=result.graph_analysis['graph'],
+                                query_id=rec.id,
+                                query_text=question,
+                                query_vec=query_vec,
+                                has_spike=result.spike_detected,
+                                spike_episode_id=spike_episode_id,
+                                retrieved_episode_ids=retrieved_episode_ids,
+                                metadata=rec.metadata,
+                            )
+                    else:
+                        logger.warning("QueryRecorder save failed")
             else:
                 logger.debug("QueryRecorder not available; skipping query persistence")
         except Exception as e:  # pragma: no cover

@@ -110,6 +110,7 @@ class LLMProviderRegistry:
                 temperature=config.llm.temperature,
                 max_tokens=config.llm.max_tokens,
                 api_key=config.llm.api_key,
+                api_base=config.llm.api_base,
                 system_prompt=config.llm.system_prompt,
             )
         else:
@@ -242,6 +243,7 @@ class L4LLMInterface:
                 temperature=config.llm.temperature,
                 max_tokens=config.llm.max_tokens,
                 api_key=config.llm.api_key,
+                api_base=config.llm.api_base,
                 system_prompt=config.llm.system_prompt,
             )
         elif isinstance(config, LLMConfig):
@@ -255,6 +257,7 @@ class L4LLMInterface:
                 temperature=llm_config.get("temperature", 0.7),
                 max_tokens=llm_config.get("max_tokens", 1000),
                 api_key=llm_config.get("api_key", None),
+                api_base=llm_config.get("api_base", None),
             )
             # Copy additional config attributes
             for attr in ["prompt_style", "branching_threshold", "branching_min_branches", "branching_max_gap"]:

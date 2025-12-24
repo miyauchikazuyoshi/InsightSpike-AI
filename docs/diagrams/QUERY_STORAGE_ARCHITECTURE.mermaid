@@ -12,8 +12,8 @@ flowchart TB
     
     %% Processing Layer
     subgraph "⚙️ Query Processing"
-        MainAgent[MainAgent<br/>process_question()]
-        AdaptiveProc[AdaptiveProcessor<br/>process()]
+        MainAgent[MainAgent<br/>process_question]
+        AdaptiveProc[AdaptiveProcessor<br/>process]
         
         subgraph "Processing Metadata"
             StartTime[Start Time Tracking]
@@ -43,7 +43,7 @@ flowchart TB
             TotalCycles[total_cycles]
             ReasoningQuality[reasoning_quality]
             DocCount[retrieved_doc_count]
-            ExplorationPath[exploration_path<br/>(Adaptive only)]
+            ExplorationPath[exploration_path<br/>Adaptive only]
         end
     end
     
@@ -60,7 +60,7 @@ flowchart TB
     subgraph "🕸️ Graph Integration"
         direction TB
         
-        QueryNode[Query Node<br/>type="query"]
+        QueryNode[Query Node<br/>type=query]
         
         subgraph "Edge Types"
             QuerySpike[query_spike<br/>Query → Generated Episode]
@@ -74,8 +74,8 @@ flowchart TB
     subgraph "📊 Query Analysis"
         direction LR
         
-        Statistics[get_query_statistics()]
-        RecentQueries[get_recent_queries()]
+        Statistics[get_query_statistics]
+        RecentQueries[get_recent_queries]
         
         subgraph "Analysis Metrics"
             SpikeRate[Spike Generation Rate]
@@ -131,12 +131,12 @@ flowchart TB
     classDef process fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
     classDef storage fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
     classDef backend fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    classDef graph fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    classDef graphLayer fill:#fce4ec,stroke:#c2185b,stroke-width:2px
     classDef analysis fill:#e0f2f1,stroke:#00897b,stroke-width:2px
     
     class User,CLI,API,Adaptive entry
     class MainAgent,AdaptiveProc,StartTime,Embedding,CycleTracking,QualityScore process
     class QueryID,QueryText,QueryVec,HasSpike,SpikeEpisodeID,Response,Metadata storage
     class FileSystem,SQLite,Memory backend
-    class QueryNode,QuerySpike,QueryRetrieval,KnowledgeGraph graph
+    class QueryNode,QuerySpike,QueryRetrieval,KnowledgeGraph graphLayer
     class Statistics,RecentQueries,SpikeRate,AvgProcessTime,ProviderPerf,ComplexityAnalysis analysis

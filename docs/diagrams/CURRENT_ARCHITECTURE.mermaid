@@ -1,4 +1,4 @@
-%% InsightSpike-AI Current Architecture (2025-01)
+%% InsightSpike-AI Current Architecture (2025-09)
 %% Simplified, production-ready implementation
 
 flowchart TB
@@ -7,6 +7,7 @@ flowchart TB
         CLI[CLI Commands<br/>spike.py]
         API[Python API]
         Notebook[Jupyter Notebooks]
+        StreamlitApp[Streamlit Knowledge App<br/>apps/knowledge_app.py]
     end
     
     %% Application Layer
@@ -16,6 +17,7 @@ flowchart TB
         CLIApp[CLI Application<br/>Typer + Rich]
         Config[Configuration<br/>Pydantic Models]
         DependencyFactory[Dependency Factory<br/>Agent Creation]
+        AppWrapper[InsightAppWrapper<br/>public/wrapper.py]
     end
     
     %% Core Agent
@@ -42,7 +44,7 @@ flowchart TB
         end
         
         subgraph "Layer 3: Graph Reasoner (Optional)"
-            L3_Graph[Graph Analysis<br/>(GeDIGCore advanced,<br/>query-centric k-hop)]
+            L3_Graph[Graph Analysis<br/>GeDIGCore advanced<br/>query-centric k-hop]
             L3_Spike[Spike Detection<br/>ΔGED/ΔIG]
         end
         
@@ -65,6 +67,8 @@ flowchart TB
     CLI --> CLIApp
     API --> MainAgent
     Notebook --> MainAgent
+    StreamlitApp --> AppWrapper
+    AppWrapper --> MainAgent
     
     CLIApp --> CompositionRoot
     CompositionRoot --> Config
@@ -94,8 +98,8 @@ flowchart TB
     classDef layer fill:#fff3e0,stroke:#f57c00,stroke-width:2px
     classDef storage fill:#fce4ec,stroke:#c2185b,stroke-width:2px
     
-    class CLI,API,Notebook interface
-    class CompositionRoot,CLIApp,Config,DependencyFactory app
+    class CLI,API,Notebook,StreamlitApp interface
+    class CompositionRoot,CLIApp,Config,DependencyFactory,AppWrapper app
     class MainAgent,DataStore,CycleResult agent
     class L1_Error,L1_Uncertainty,L2_Memory,L2_Episodes,L2_Queries,L2_Rewards,L3_Graph,L3_Spike,L4_LLM,L4_Prompt layer
     class ConfigFiles,Database,Embeddings,QueryStore storage

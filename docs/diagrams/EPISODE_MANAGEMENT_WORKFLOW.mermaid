@@ -8,7 +8,7 @@ flowchart TD
     B --> C[Calculate Vector Similarity<br/>FAISS Search ≥ 0.85?]
     C --> D[Check Graph Connection<br/>Edge Weight > 0.5?]
     D --> E[Calculate Content Overlap<br/>Word Overlap ≥ 0.7?]
-    E --> F{Should Integrate?<br/>Sim ≥ 0.85 OR<br/>(Sim ≥ 0.75 + Graph Connection)}
+    E --> F{Should Integrate?<br/>Sim ≥ 0.85 OR<br/>Sim ≥ 0.75 + Graph Connection}
     
     %% Integration Path
     F -->|Yes| G[INTEGRATE with Graph Weight]

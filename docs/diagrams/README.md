@@ -5,7 +5,8 @@ This directory contains Mermaid diagrams illustrating the InsightSpike-AI archit
 ## 🧠 Architecture Diagrams
 
 ### Core System Architecture
-- **CURRENT_ARCHITECTURE.mermaid** - ⚡ **LATEST** Current simplified architecture with query storage (2025-01)
+- **CURRENT_ARCHITECTURE.mermaid** - ⚡ **LATEST** Current simplified architecture with query storage and Streamlit app wrapper (2025-09)
+- **CURRENT_ARCHITECTURE.svg** - Rendered export of the latest architecture diagram
 - **QUERY_STORAGE_ARCHITECTURE.mermaid** - ⚡ **NEW** Query storage and analysis system
 - **CONFIG_SYSTEM.mermaid** - ⚡ **NEW** Pydantic-based configuration system
 - **CLI_ARCHITECTURE.mermaid** - ⚡ **NEW** CLI dependency injection with Typer Context

@@ -52,6 +52,7 @@ class ProviderFactory:
     if OpenAIProvider:
         PROVIDERS["openai"] = OpenAIProvider
         PROVIDERS["gpt"] = OpenAIProvider  # Alias
+        PROVIDERS["ollama"] = OpenAIProvider  # Alias for local LLM (OpenAI compatible)
 
     if AnthropicProvider:
         PROVIDERS["anthropic"] = AnthropicProvider

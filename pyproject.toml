@@ -179,6 +179,8 @@ spike = "insightspike.__main__:run_app"
 markers = [
     "integration: marks tests as integration tests",
     "slow: marks tests as slow",
+    "e2e: marks tests as end-to-end tests",
+    "requires_gpu: marks tests that require GPU",
     "performance: marks performance/benchmark tests",
     "reproducibility: marks tests verifying reproducibility of results",
     "benchmark: marks micro/throughput benchmark style tests",
@@ -190,6 +192,14 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = "-v --strict-markers --tb=short --color=yes -p no:asyncio"
+log_cli = false
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)s] %(message)s"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
 
 [tool.coverage.run]
 source = ["src/insightspike"]

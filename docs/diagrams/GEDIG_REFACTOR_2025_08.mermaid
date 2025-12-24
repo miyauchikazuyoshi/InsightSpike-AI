@@ -6,9 +6,9 @@ graph TD
   C -->|compute| IG[Entropy Variance IG]
   IG --> STATS[Welford Stats]
   STATS --> C
-  C --> REWARD[Reward Layer\n(hop0 / aggregate)]
+  C --> REWARD[Reward Layer\nhop0 / aggregate]
   C -->|optional| MH[Multi-hop Engine]
-  C --> LOG[GeDIGLogger\n(Rotating CSV)]
+  C --> LOG[GeDIGLogger\nRotating CSV]
   subgraph FeatureFlag
     F --> LEGACY[(Legacy Path)]
     F --> REFACTORED[(Refactored Path)]

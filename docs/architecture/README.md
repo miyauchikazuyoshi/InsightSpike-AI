@@ -58,6 +58,9 @@ res = agent.process_question("Your question here")
 print(res.get("response", getattr(res, "response", "")))
 ```
 
+### Local Knowledge App (Streamlit)
+The Streamlit UI in `apps/knowledge_app.py` uses `insightspike.public.InsightAppWrapper` for chat, ingest, and graph visualization.
+
 Notes:
 - Top‑level imports should use `insightspike.public` (CI enforced)
 - geDIG calculations must go through `algorithms.gedig.selector.compute_gedig` (STRICT guard available)
@@ -68,6 +71,7 @@ Notes:
 - **Graph-based reasoning** with PyTorch Geometric for insight detection
 - **Flexible vector search** - FAISS optional, NumPy backend available
 - **DataStore abstraction** - Filesystem, SQLite, or custom backends
+- **Local knowledge app** - Streamlit UI built on `InsightAppWrapper`
 - **Message passing** - Question-aware graph enhancement
 - **Query persistence** - Full history tracking with analysis capabilities
 - **Production-ready** with caching, error handling, and monitoring

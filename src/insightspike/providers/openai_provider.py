@@ -29,30 +29,38 @@ class OpenAIProvider:
             if isinstance(config, dict):
                 # Dict config
                 self.api_key = config.get("api_key")
+                self.base_url = config.get("api_base")
                 self.model = config.get("model_name", "gpt-3.5-turbo")
                 self.temperature = config.get("temperature", 0.7)
                 self.max_tokens = config.get("max_tokens", 1000)
             else:
                 # Pydantic config
                 self.api_key = config.api_key
+                self.base_url = config.api_base
                 self.model = config.model or "gpt-3.5-turbo"
                 self.temperature = getattr(config, "temperature", 0.7)
                 self.max_tokens = getattr(config, "max_tokens", 1000)
         else:
             # Use environment variable
             self.api_key = os.getenv("OPENAI_API_KEY")
+            self.base_url = os.getenv("OPENAI_API_BASE")
             self.model = "gpt-3.5-turbo"
             self.temperature = 0.7
             self.max_tokens = 1000
 
         if not self.api_key:
-            raise ValueError(
-                "OpenAI API key not found. Set OPENAI_API_KEY environment variable "
-                "or provide it in config"
-            )
+            # For local providers (via OpenAI protocol), API key might be dummy
+            if not self.base_url:
+                 raise ValueError(
+                    "OpenAI API key not found. Set OPENAI_API_KEY environment variable "
+                    "or provide it in config"
+                 )
+            # If base_url is set (e.g. local), we can tolerate missing key if strictly needed
+            if not self.api_key:
+                self.api_key = "dummy"
 
         # Initialize client
-        self.client = openai.OpenAI(api_key=self.api_key)
+        self.client = openai.OpenAI(api_key=self.api_key, base_url=self.base_url)
 
     def generate(self, prompt: str, **kwargs) -> str:
         """Generate response from OpenAI"""

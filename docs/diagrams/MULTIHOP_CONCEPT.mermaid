@@ -22,7 +22,7 @@ graph TB
         
         %% Arrow
         Arrow1[" "]
-        Initial Knowledge State --> Arrow1
+        A1 --> Arrow1
         
         %% After Insight
         subgraph "After Insight Discovery"
@@ -51,7 +51,7 @@ graph TB
             style I fill:#ffeb3b,stroke:#f57f17,stroke-width:4px
         end
         
-        Arrow1 --> After Insight Discovery
+        Arrow1 --> I
     end
     
     %% Hop Analysis
@@ -88,19 +88,19 @@ graph TB
             style H3 fill:#c5cae9
         end
         
-        Hop 0 --> Hop 1
-        Hop 1 --> Hop 2
-        Hop 2 --> Hop 3
+        H0 --> H1
+        H1 --> H2
+        H2 --> H3
     end
     
     %% Interpretation
     subgraph "🧠 Interpretation by Hop Level"
         direction TB
         
-        Int0[Hop 0: "What changed?"<br/>→ New unifying concept]
-        Int1[Hop 1: "What does it connect?"<br/>→ Links math, physics, chemistry]
-        Int2[Hop 2: "How far does it reach?"<br/>→ Affects fundamental understanding]
-        Int3[Hop 3: "What's the full impact?"<br/>→ Reorganizes knowledge structure]
+        Int0[Hop 0: What changed?<br/>→ New unifying concept]
+        Int1[Hop 1: What does it connect?<br/>→ Links math, physics, chemistry]
+        Int2[Hop 2: How far does it reach?<br/>→ Affects fundamental understanding]
+        Int3[Hop 3: What is the full impact?<br/>→ Reorganizes knowledge structure]
         
         Int0 --> Int1
         Int1 --> Int2
