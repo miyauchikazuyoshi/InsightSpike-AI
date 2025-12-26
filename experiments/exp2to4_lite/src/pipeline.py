@@ -68,14 +68,17 @@ def _save_results(output_dir: Path, experiment_name: str, payload: Dict) -> Path
 def run_experiment(cfg: ExperimentConfig) -> Path:
     dataset = load_dataset(cfg.dataset_path, limit=cfg.max_queries)
     embedder = Embedder(cfg.embedding_model, normalize=cfg.normalize_embeddings, cache_dir=str(cfg.embedding_cache) if cfg.embedding_cache else None)
-    retriever = _init_retriever(cfg, embedder)
+    global_retriever: HybridRetriever | None = None
 
-    # Build corpus
-    corpus: Dict[str, Tuple[str, Dict[str, str]]] = {}
-    for sample in dataset:
-        for doc in sample.documents:
-            corpus[doc.doc_id] = (doc.text, doc.metadata)
-    retriever.add_corpus((doc_id, text, metadata) for doc_id, (text, metadata) in corpus.items())
+    if cfg.retrieval_scope != "per_query":
+        global_retriever = _init_retriever(cfg, embedder)
+        # Build corpus
+        corpus: Dict[str, Tuple[str, Dict[str, str]]] = {}
+        for sample in dataset:
+            for doc in sample.documents:
+                corpus[doc.doc_id] = (doc.text, doc.metadata)
+        if corpus:
+            global_retriever.add_corpus((doc_id, text, metadata) for doc_id, (text, metadata) in corpus.items())
 
     gedig_controller = _init_gedig_controller(cfg.gedig)
 
@@ -92,6 +95,15 @@ def run_experiment(cfg: ExperimentConfig) -> Path:
 
         for sample in dataset:
             memory = GraphMemory()
+            if cfg.retrieval_scope == "per_query":
+                retriever = _init_retriever(cfg, embedder)
+                docs = [(doc.doc_id, doc.text, doc.metadata) for doc in sample.documents]
+                if docs:
+                    retriever.add_corpus(docs)
+            else:
+                if global_retriever is None:
+                    raise RuntimeError("Global retriever is not initialized")
+                retriever = global_retriever
             strategy = build_strategy(
                 strategy_type=baseline_cfg.type,
                 params=baseline_cfg.params,
@@ -177,6 +189,7 @@ def run_experiment(cfg: ExperimentConfig) -> Path:
             "dataset": str(cfg.dataset_path),
             "num_queries": len(dataset),
             "lambda_weight": float(cfg.gedig.lambda_weight),
+            "retrieval_scope": cfg.retrieval_scope,
         },
         "results": {},
     }

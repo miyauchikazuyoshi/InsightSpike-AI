@@ -8,6 +8,8 @@
 - RAG（Dynamic KG for QA; v3-lite ベース）:  
   - 実験コード: `experiments/rag-dynamic-db-v3-lite/`, `experiments/exp2to4_lite/`  
   - 補足ドキュメント: `docs/paper/` 内の RAG 実験節、および `experiments/exp2to4_lite/README.md`
+- RAG（クロスジャンル QA データセット）:  
+  - 実験コード: `experiments/rag_cross_genre/`
 
 より詳しい設計・プロトコルは `docs/paper/geDIG_onegauge_improved_v5.{tex,pdf}` と `docs/README.md` から辿れるドキュメントを参照してください。
 

@@ -47,6 +47,7 @@ class ExperimentConfig:
     retrieval_bm25_weight: float
     retrieval_embedding_weight: float
     retrieval_expansion_hops: int
+    retrieval_scope: str
     gedig: GeDIGConfig
     baselines: List[BaselineConfig]
     psz_acceptance_threshold: float
@@ -115,6 +116,7 @@ def load_config(path: Path) -> ExperimentConfig:
         retrieval_bm25_weight=float(retrieval.get("bm25_weight", 0.5)),
         retrieval_embedding_weight=float(retrieval.get("embedding_weight", 0.5)),
         retrieval_expansion_hops=int(retrieval.get("expansion_hops", 1)),
+        retrieval_scope=str(retrieval.get("scope", "global")),
         gedig=gedig,
         baselines=baselines,
         psz_acceptance_threshold=float(psz.get("acceptance_threshold", 0.6)),

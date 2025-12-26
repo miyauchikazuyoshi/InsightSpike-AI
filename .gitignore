@@ -36,6 +36,7 @@ experiments/**/__pycache__/
 experiments/**/cache/
 experiments/**/results/
 experiments/**/data_snapshots/
+experiments/rag_cross_genre/
 
 # Archived content (code/docs/experiments)
 archive/
