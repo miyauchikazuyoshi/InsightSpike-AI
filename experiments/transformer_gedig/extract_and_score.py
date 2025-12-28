@@ -118,6 +118,7 @@ def extract_attentions(
     torch_dtype: Optional[torch.dtype] = None,
     device_map: Optional[str] = None,
     trust_remote_code: bool = False,
+    attn_implementation: Optional[str] = None,
 ) -> Tuple[List[np.ndarray], List[np.ndarray]]:
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=trust_remote_code)
     model_kwargs = {"output_attentions": True, "trust_remote_code": trust_remote_code}
@@ -125,7 +126,16 @@ def extract_attentions(
         model_kwargs["torch_dtype"] = torch_dtype
     if device_map:
         model_kwargs["device_map"] = device_map
-    model = AutoModel.from_pretrained(model_name, **model_kwargs)
+    if attn_implementation and attn_implementation != "auto":
+        model_kwargs["attn_implementation"] = attn_implementation
+    try:
+        model = AutoModel.from_pretrained(model_name, **model_kwargs)
+    except TypeError as exc:
+        if "attn_implementation" in str(exc):
+            model_kwargs.pop("attn_implementation", None)
+            model = AutoModel.from_pretrained(model_name, **model_kwargs)
+        else:
+            raise
     if not device_map:
         model.to(device)
     model.eval()
@@ -196,6 +206,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--dtype", default="auto", choices=["auto", "float16", "bfloat16", "float32"], help="Model dtype override.")
     p.add_argument("--device-map", default=None, help="Device map for large models (e.g., auto).")
     p.add_argument("--trust-remote-code", action="store_true", help="Allow models that require trust_remote_code.")
+    p.add_argument(
+        "--attn-implementation",
+        default="auto",
+        choices=["auto", "eager", "sdpa", "flash_attention_2"],
+        help="Attention implementation override for compatible models.",
+    )
     # subgraph options
     p.add_argument("--enable-subgraph", action="store_true", help="Compute geDIG on anchor ego subgraphs.")
     p.add_argument("--subgraph-hops", type=str, default="0,1,2,3,4", help="Comma-separated hop distances for ego graphs.")
@@ -215,6 +231,7 @@ def main() -> None:
     device_map = args.device_map
     if device_map in ("", "none", "null"):
         device_map = None
+    attn_impl = args.attn_implementation
     configs = [
         {"lambda_param": 0.5, "gamma": 0.5, "threshold": 0.0, "use_percentile": True, "pct": args.percentile},
     ]
@@ -233,6 +250,7 @@ def main() -> None:
                 torch_dtype=torch_dtype,
                 device_map=device_map,
                 trust_remote_code=args.trust_remote_code,
+                attn_implementation=attn_impl,
             )
         except Exception as exc:  # pragma: no cover
             print(f"[warn] failed to load/extract for {model_name}: {exc}")
