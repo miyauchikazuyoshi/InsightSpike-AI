@@ -10,7 +10,7 @@ import argparse
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Tuple, Sequence
+from typing import Dict, List, Tuple, Sequence, Optional
 
 import networkx as nx
 import numpy as np
@@ -98,15 +98,44 @@ class GeDIGCalculator:
         return float(H / max_H) if max_H > 0 else 0.0
 
 
-def extract_attentions(model_name: str, texts: List[str], max_len: int = 512) -> Tuple[List[np.ndarray], List[np.ndarray]]:
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModel.from_pretrained(model_name, output_attentions=True)
+def _resolve_dtype(dtype_str: str) -> Optional[torch.dtype]:
+    if not dtype_str or dtype_str == "auto":
+        return None
+    if dtype_str == "float16":
+        return torch.float16
+    if dtype_str == "bfloat16":
+        return torch.bfloat16
+    if dtype_str == "float32":
+        return torch.float32
+    raise ValueError(f"Unsupported dtype: {dtype_str}")
+
+
+def extract_attentions(
+    model_name: str,
+    texts: List[str],
+    max_len: int = 512,
+    device: str = "cpu",
+    torch_dtype: Optional[torch.dtype] = None,
+    device_map: Optional[str] = None,
+    trust_remote_code: bool = False,
+) -> Tuple[List[np.ndarray], List[np.ndarray]]:
+    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=trust_remote_code)
+    model_kwargs = {"output_attentions": True, "trust_remote_code": trust_remote_code}
+    if torch_dtype is not None:
+        model_kwargs["torch_dtype"] = torch_dtype
+    if device_map:
+        model_kwargs["device_map"] = device_map
+    model = AutoModel.from_pretrained(model_name, **model_kwargs)
+    if not device_map:
+        model.to(device)
     model.eval()
     layers: List[List[np.ndarray]] = []
     masks: List[np.ndarray] = []
     tokens: List[List[str]] = []
     for text in texts:
         inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=max_len)
+        target_device = next(model.parameters()).device
+        inputs = {k: v.to(target_device) for k, v in inputs.items()}
         with torch.no_grad():
             outputs = model(**inputs)
         attns = outputs.attentions  # tuple of (batch, heads, seq, seq)
@@ -163,6 +192,10 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--threshold", type=float, default=0.01, help="Fixed threshold when not using percentile.")
     p.add_argument("--include-fixed-threshold", action="store_true", help="Also run a fixed threshold config (otherwise percentile only).")
     p.add_argument("--out", type=Path, default=Path("results/transformer_gedig/score_smoke.json"), help="Output JSON path.")
+    p.add_argument("--device", default="auto", choices=["auto", "cpu", "cuda"], help="Device for model execution.")
+    p.add_argument("--dtype", default="auto", choices=["auto", "float16", "bfloat16", "float32"], help="Model dtype override.")
+    p.add_argument("--device-map", default=None, help="Device map for large models (e.g., auto).")
+    p.add_argument("--trust-remote-code", action="store_true", help="Allow models that require trust_remote_code.")
     # subgraph options
     p.add_argument("--enable-subgraph", action="store_true", help="Compute geDIG on anchor ego subgraphs.")
     p.add_argument("--subgraph-hops", type=str, default="0,1,2,3,4", help="Comma-separated hop distances for ego graphs.")
@@ -175,6 +208,13 @@ def main() -> None:
     args = parse_args()
     texts = load_texts(max_count=args.text_count, max_len=args.text_max_len)
     model_names = args.models or ["bert-base-uncased", "gpt2"]
+    device = args.device
+    if device == "auto":
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+    torch_dtype = _resolve_dtype(args.dtype)
+    device_map = args.device_map
+    if device_map in ("", "none", "null"):
+        device_map = None
     configs = [
         {"lambda_param": 0.5, "gamma": 0.5, "threshold": 0.0, "use_percentile": True, "pct": args.percentile},
     ]
@@ -185,7 +225,15 @@ def main() -> None:
     for model_name in model_names:
         model_label = Path(model_name).name
         try:
-            layers, masks, tokens = extract_attentions(model_name, texts, max_len=args.attn_max_len)
+            layers, masks, tokens = extract_attentions(
+                model_name,
+                texts,
+                max_len=args.attn_max_len,
+                device=device,
+                torch_dtype=torch_dtype,
+                device_map=device_map,
+                trust_remote_code=args.trust_remote_code,
+            )
         except Exception as exc:  # pragma: no cover
             print(f"[warn] failed to load/extract for {model_name}: {exc}")
             continue
