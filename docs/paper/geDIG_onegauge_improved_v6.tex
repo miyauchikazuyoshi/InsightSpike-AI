@@ -169,6 +169,38 @@ geDIG は、こうした運用上の失敗を「いつ統合すべきか」と�
 0\,\mbox{-}hop のゲート AG（Attention Gate）は、仮配線直後の悪化（$g_0$ 高値）を捉え、$g_0>\theta_{\rm AG}$ のときにのみ検索・探索を深化させる。
 一方 multi\,\mbox{-}hop のゲート DG（Decision Gate）は、最短路の短縮など構造的ショートカットの出現で $g_{\min}$ が十分に低下した場合に $\min\{g_0,g_{\min}\}\le\theta_{\rm DG}$ を満たすかどうかを見て、受容/更新を確定する（閾値は分位校正; 詳細は \S\ref{sec:ag_dg_gate}, \S\ref{sec:eval_protocol}）。
 
+\subsection{なぜ構造と確率の同時評価が必要か}\label{sec:why_both}
+従来手法は、類似度（確率的指標）またはグラフ構造のいずれか一方のみを評価する（表\ref{tab:structure_probability_comparison}）。
+BM25 や Contriever は文書間の類似度スコアのみで検索を打ち切るため、「高スコアだが冗長な情報」を排除できない。
+一方、GraphRAG はグラフ構造を活用するが、「構造は整っているが不確実性が残る」状態を検知できない。
+
+\begin{table}[t]
+\centering
+\caption{従来手法との比較：評価対象}
+\label{tab:structure_probability_comparison}
+\small
+\begin{tabular}{lcc}
+\toprule
+手法 & 確率（類似度） & 構造（グラフ） \\
+\midrule
+BM25 / Contriever & $\checkmark$ & -- \\
+GraphRAG & -- & $\checkmark$ \\
+\textbf{geDIG} & $\checkmark$ & $\checkmark$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+geDIG の核心は、\textbf{構造変化のコスト}（$\gednorm$）と\textbf{確率的な情報利得}（$\ignorm$）の\textbf{収支}を単一スカラーで評価する点にある。
+直感的には、「新しいエッジを張る構造的コストに見合うだけの不確実性削減が得られるか？」という問いに答える。
+この収支計算により、以下の判断が可能になる：
+\begin{itemize}[leftmargin=1.6em]
+    \item 構造コスト大・情報利得小 $\to$ 検索不要（冗長）
+    \item 構造コスト小・情報利得大 $\to$ 検索有効（統合）
+    \item 構造コスト大・情報利得大 $\to$ 探索継続（AG発火）
+\end{itemize}
+この「いつ」の判断は、構造と確率を\textbf{同時に}見なければ下せない。
+これが geDIG の本質的な新規性である。
+
 \subsection{指標の直観的な読み方}
 \noindent\textit{三つの観点}\; geDIG が扱う主な量は、(1) グラフ編集の「つらさ」を測る $\gednorm$、(2) 分布変化（秩序化/均質化の方向）を測る $\Delta H_{\rm norm}$、(3) 経路の「回り道の減り具合」を測る $\Delta\mathrm{SP}_{\rm rel}$ である。
 これらを一つにまとめたものが $\F=\gednorm-\lambda(\Delta H_{\rm norm}+\gamma\,\Delta\mathrm{SP}_{\rm rel})$ であり、\textbf{$\F$ が小さいほど「少ない編集で、情報利得（$\Delta\mathrm{IG}$）が大きい統合」}と読む。

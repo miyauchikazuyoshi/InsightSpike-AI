@@ -110,6 +110,76 @@ class HybridWeightsConfig(BaseModel):
             return values
 
 
+class StructuralSimilarityConfig(BaseModel):
+    """Structural similarity evaluation for analogy detection.
+
+    Enables detection of structural patterns across different domains,
+    similar to how word2vec captures "king - queen ≈ man - woman".
+    """
+
+    # Enable/disable
+    enabled: bool = Field(
+        default=False,
+        description="Enable structural similarity evaluation for analogy detection"
+    )
+
+    # Method selection
+    method: Literal["signature", "spectral", "wl_kernel", "motif"] = Field(
+        default="signature",
+        description="Similarity method: signature (hop-growth), spectral (eigenvalues), wl_kernel, motif"
+    )
+
+    # Signature method parameters
+    max_signature_hops: int = Field(
+        default=3, ge=1, le=5,
+        description="Maximum hops for signature extraction"
+    )
+    include_triangles: bool = Field(
+        default=True,
+        description="Include triangle count in signature"
+    )
+    include_clustering: bool = Field(
+        default=True,
+        description="Include clustering coefficient in signature"
+    )
+    include_density: bool = Field(
+        default=True,
+        description="Include density in signature"
+    )
+
+    # Spectral method parameters
+    spectral_k: int = Field(
+        default=10, ge=1, le=50,
+        description="Top-k eigenvalues for spectral comparison"
+    )
+
+    # WL kernel parameters
+    wl_iterations: int = Field(
+        default=5, ge=1, le=10,
+        description="Weisfeiler-Lehman iterations"
+    )
+
+    # Analogy detection thresholds
+    analogy_threshold: float = Field(
+        default=0.7, ge=0.0, le=1.0,
+        description="Minimum similarity to trigger analogy detection"
+    )
+    analogy_weight: float = Field(
+        default=0.3, ge=0.0, le=1.0,
+        description="Weight for analogy bonus in IG calculation"
+    )
+    cross_domain_only: bool = Field(
+        default=True,
+        description="Only reward cross-domain analogies"
+    )
+
+    # Domain attribute for cross-domain detection
+    domain_attribute: str = Field(
+        default="domain",
+        description="Node attribute name for domain classification"
+    )
+
+
 class GraphConfig(BaseModel):
     """Graph processing & spike detection"""
 
@@ -202,6 +272,12 @@ class GraphConfig(BaseModel):
         ge=0.1,
         le=10.0,
         description="Temperature parameter for exploration-exploitation balance",
+    )
+
+    # Structural similarity for analogy detection
+    structural_similarity: StructuralSimilarityConfig = Field(
+        default_factory=StructuralSimilarityConfig,
+        description="Configuration for structural similarity evaluation"
     )
 
 

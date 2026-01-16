@@ -6,6 +6,7 @@ __pycache__/
 .venv311/
 .venv_pdf/
 env/
+.env
 
 # Logs and results
 logs/

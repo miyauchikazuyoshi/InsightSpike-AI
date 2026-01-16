@@ -1,0 +1,209 @@
+%%
+%% JSAI2026 Content - Merged Option (Maze + Transformer) - Final 4 Page Version
+%%
+
+\title{
+\jtitle{Transformerは熱力学的推論を行うか？\\：geDIGゲージによる構造相転移の観測と制御}
+\etitle{Does Transformer Perform Thermodynamic Inference?\\: Observation and Control of Structural Phase Transitions via geDIG Gauge}
+}
+
+\jaddress{宮内 和義（独立研究者），所在地：日本，E-mail: miyauchikazuyoshi@gmail.com}
+
+\author{%
+\jname{宮内 和義\first}
+\ename{Kazuyoshi Miyauchi}
+}
+
+\affiliate{
+\jname{\first{}独立研究者}
+\ename{Independent Researcher}
+}
+
+\begin{abstract}
+Dynamic knowledge acquisition entails a fundamental trade-off: exploring new information vs. integrating verified structures. We propose \textbf{geDIG}, a unified gauge bridging the Free Energy Principle (FEP) and Minimum Description Length (MDL) to quantify this trade-off as $\F = \gednorm - \lambda(\Delta H_{\mathrm{norm}} + \gamma \Delta \mathrm{SP}_{\mathrm{rel}})$. This paper demonstrates that $\F$ governs structural optimization across scales. (1) \textbf{Macro}: In a partial-observation maze task, a geDIG-driven agent autonomously switches between exploration (Attention Gate) and integration (Decision Gate), achieving 98\% success with 95\% graph compression. (2) \textbf{Micro}: Applying $\F$ to Transformer attention reveals a thermodynamic ``phase transition'' from entropic interaction to structured sparsity across layers. Furthermore, introducing F-regularization in fine-tuning causally improves performance (+0.33\%), suggesting geDIG as a design principle for next-generation, thermodynamically efficient architectures.
+\end{abstract}
+
+\begin{document}
+\maketitle
+
+%% ===========================================
+\section{はじめに}
+%% ===========================================
+
+知能システムにおいて，新しい情報を「いつ」構造として受け入れ，「いつ」探索を続けるべきか（When問題）は，マクロなエージェント行動からミクロな内部推論に至るまで共通の課題である．
+RAG（検索拡張生成）は「何を取るか（What）」の最適化に成功したが，情報の統合タイミングはヒューリスティックに依存している\cite{lewis2020rag}．
+一方，Transformer\cite{vaswani2017}は固定的な層計算を行うが，その内部で情報がどう構造化され，いつ「理解」が完了するのかはブラックボックスのままである．
+
+本研究では，自由エネルギー原理（FEP）\cite{friston2010}と最小記述長（MDL）\cite{grunwald2007}を操作的に橋渡しする統一ゲージ \textbf{geDIG} (graph edit Distance and Information Gain) を提案する．
+本稿の目的は，このゲージがマクロな探索（迷路）からミクロな推論（Attention）まで，一貫した「構造化の原理」として機能することを示すことである．
+具体的には以下の3点を貢献とする：
+\begin{enumerate}
+    \item 構造コストと情報利得のトレードオフを単一スカラー化したgeDIGの定式化
+    \item 迷路環境における探索・統合の自律スイッチングの実証
+    \item Transformer内部における構造相転移の発見と，正則化による因果的介入
+\end{enumerate}
+
+%% ===========================================
+\section{geDIG：統一ゲージの定義}
+%% ===========================================
+
+geDIGは，「構造を変えるコスト」と「それによって得られる情報の質」の収支を単一スカラー $\F$ で評価する．
+
+\begin{equation}
+\F = \gednorm - \lambda \left( \Delta H_{\mathrm{norm}} + \gamma \cdot \Delta \mathrm{SP}_{\mathrm{rel}} \right)
+\label{eq:gedig}
+\end{equation}
+
+ここで各項は以下に対応する（表\ref{tab:gedig_terms}）．
+\begin{itemize}
+\item $\gednorm$：正規化グラフ編集距離．ノードやエッジの追加コストであり，MDLにおけるモデル記述長 $L(M)$ の増分に相当する．
+\item $\Delta H_{\mathrm{norm}}$：シャノンエントロピーの差分（負の利得）．FEPにおける「驚き（変分自由エネルギー）」の最小化に対応し，分布が先鋭化（秩序化）するほど $\F$ を下げる．
+\item $\Delta \mathrm{SP}_{\mathrm{rel}}$：平均最短路長の相対短縮率．グラフ上のショートカット形成による効率化を表し，MDLにおけるデータ記述長 $L(D|M)$ の圧縮に相当する．
+\end{itemize}
+
+パラメータ $\lambda, \gamma$ は「情報温度」として機能し，構造の複雑さと情報の圧縮率のバランスを決定する．
+
+\begin{table}[t]
+\centering
+\caption{geDIG構成項の理論的対応}
+\label{tab:gedig_terms}
+\small
+\begin{tabular}{llll}
+\toprule
+項 & 物理的意味 & FEP/MDL対応 & 役割 \\
+\midrule
+$\gednorm$ & 構造仕事 & $L(M)$ 増分 & コスト（抑制） \\
+$\Delta H$ & エントロピー & 自由エネルギー & 秩序化（負） \\
+$\Delta \mathrm{SP}$ & 経路短縮 & $L(D|M)$ 圧縮 & 効率化（正） \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{AG/DG 二段ゲート制御}
+この $\F$ を用いて，エージェントは以下の2つのゲートを事象駆動的（Event-Driven）に制御する．
+\begin{enumerate}
+\item \textbf{AG (Attention Gate)}: 0-hop（直近）での評価．$g_0 = \F|_{\mathrm{local}} > \theta_{\mathrm{AG}}$ のとき，局所的な「違和感・未知」を検知し，探索モード（Exploration）を起動する．
+\item \textbf{DG (Decision Gate)}: Multi-hop（数理推論）での評価．$g_{\min} = \min_h \F^{(h)} < \theta_{\mathrm{DG}}$ のとき，大域的な「近道・洞察」を発見したとみなし，統合モード（Integration）としてエッジを確定する．
+\end{enumerate}
+
+この機構により，システムは常に探索し続けるのではなく，「わからないときだけ調べ（AG）」，「わかったときだけ覚える（DG）」という自律的な振る舞いを獲得する（図\ref{fig:agdg_flow}）．
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.9\columnwidth]{figs/agdg_flow.pdf}
+\caption{AG/DG制御フロー．0-hopで「違和感」を検知して探索し，Multi-hopで「近道」を発見して統合する．}
+\label{fig:agdg_flow}
+\end{figure}
+
+%% ===========================================
+\section{検証I：迷路による原理検証（マクロ）}
+%% ===========================================
+
+まず，物理的な「構造探索」の典型例として，部分観測迷路（15$\times$15〜51$\times$51）を用いた検証を行った．
+エージェントは自身の周囲1マスしか見えず，移動しながら内部グラフ（メンタルマップ）を構築する．
+比較対象として，Random Walk，Greedy DFS（全探索），およびgeDIGエージェントを設定した．
+
+\subsection{結果：探索と統合の自律制御}
+geDIGエージェントは，AG/DGのダイナミクスのみで迷路探索に成功した．
+\begin{itemize}
+    \item \textbf{成功率}: 15$\times$15迷路において，Random Walkが0.45，Greedyが0.92に対し，geDIGは \textbf{0.98} を達成した．
+    \item \textbf{グラフ圧縮}: 特筆すべきは保持するグラフのサイズである．geDIGは直線通路などの冗長なノードをDG条件で棄却し，交差点や行き止まりといった「トポロジー的骨格」のみを記憶した．結果，全訪問ノードに対する保持ノードの圧縮率は \textbf{95\%} に達した（図\ref{fig:graph_snapshot}）．
+\end{itemize}
+
+時系列解析からは，行き止まりに遭遇した瞬間にAGが発火（探索開始）し，ループを閉じて既知の経路に合流した瞬間にDGが発火（統合）する様子が確認された．
+これは，設計者が「行き止まりなら戻れ」とルールを書かずとも，$\F$ の最小化という原理だけで適切な振る舞いが創発することを示している．
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\columnwidth]{figs/graph_snapshot_25x25.pdf}
+\caption{迷路におけるグラフ形成（25$\times$25）．空間のトポロジー的に重要な分岐点のみが構造化されている．}
+\label{fig:graph_snapshot}
+\end{figure}
+
+%% ===========================================
+\section{検証II：Transformerの熱力学的解釈（ミクロ）}
+%% ===========================================
+
+次に，このマクロな原理が，現代の深層学習モデル（Transformer）の内部でも成立しているかを検証した．
+Attention行列 $A_{ij}$ を有向グラフの隣接行列と見なし，閾値処理（上位10\%）を行ってグラフ化し，その $\F$ 値を計測した．
+対象モデルは BERT, GPT-2, Llama 3 などの代表的なLLMである．
+
+\subsection{観測1：層別の構造相転移}
+図\ref{fig:layer_f}にBERTの層別F値分布を示す．
+ベースラインとしてランダム行列（同密度）のF値を算出したところ，実Attentionは有意に低い（$\Delta F \approx 0.11$）値を示した．これは学習済みモデルがランダムな接続ではなく，意味のある構造的接続を獲得していることを定量的に裏付ける．
+
+さらに重要な発見は，深さ方向の推移である．
+\begin{itemize}
+    \item \textbf{Layer 0-1}: F値が高く（$-0.34$），エントロピーが高い．これは迷路における「探索相（Exploration）」に対応する．
+    \item \textbf{Layer 2-3}: F値が急激に低下し（$-0.24$），構造化が進む．
+    \item \textbf{Layer 4+}: 低い値で安定する．これは「構造相（Structure）」への\textbf{相転移}と解釈できる．
+\end{itemize}
+この結果は，Transformerが層を重ねるごとに情報を「探索」から「結晶化」へと移行させていることを示唆する．
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\columnwidth]{figs/layer_wise_f.png}
+\caption{層別のF値分布（BERT）．浅層での高エントロピー状態から，深層での低F状態（構造化）への相転移が見られる．}
+\label{fig:layer_f}
+\end{figure}
+
+\subsection{観測2：ヘッドの機能分化}
+同一層内でもヘッドごとにF値のばらつきが見られた．
+一部のヘッドは極めて低いF値（強い構造化，文法処理など）を示し，他方は高いF値（広範な探索）を示した．
+これはAttention Headが均質なコピーではなく，**「探索担当」と「統合担当」のマルチエージェント**として機能分化していることを熱力学的に裏付けるものである．
+
+\subsection{観測3：F正則化による因果的介入}
+以上の観測は相関関係に過ぎない．$\F$ が真に計算効率や性能に関与しているなら，この値を直接最適化することで性能が変化するはずである．
+DistilBERTを用いたSST-2感情分析タスクのFine-tuningにおいて，損失関数にF項による正則化を追加した．
+\[ L_{\mathrm{total}} = L_{\mathrm{CE}} + \alpha \cdot \F \]
+実験の結果（図\ref{fig:f_reg}），微弱な正則化（$\alpha=0.001$）を与えた場合に，ベースライン（$\alpha=0$）に比べてTest Accuracyが 86.00\% $\to$ \textbf{86.33\%} へと改善した．
+一方で，強すぎる正則化（$\alpha=1.0$）は構造を固定化しすぎ，性能を悪化させた．
+この逆U字型の特性は，適切な「構造化圧」を与えることで，モデルの汎化性能を引き出せる可能性（因果性）を示している．
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.75\columnwidth]{figs/f_reg_alpha_accuracy.png}
+\caption{F正則化強度 $\alpha$ と精度の関係．微弱な介入が性能を改善する一方，過剰な介入は阻害する．}
+\label{fig:f_reg}
+\end{figure}
+
+%% ===========================================
+\section{関連研究}
+%% ===========================================
+
+\subsection{Adaptive Computation Time}
+推論コストを動的に制御する試みとして，DeeBERT\cite{xin2020deebert}やPonderNet\cite{banino2021pondernet}がある．
+これらはエントロピーや分類信頼度を停止基準とするが，モデル内部の「構造獲得」自体を評価指標にはしていない．
+geDIGはグラフ構造としての成熟度（F値）を基準とする点で新規性があり，特に生成タスクのような信頼度定義が難しい場面での応用が期待される．
+
+\subsection{Free Energy Principle in AI}
+FEPをAIに応用する研究は強化学習分野で盛んだが，Transformerのような静的モデルの内部解析に適用した例は少ない．
+本研究は，Attention機構自体を「能動的推論を行うエージェント群」とみなす新たな視点を提供する．
+
+%% ===========================================
+\section{考察とおわりに}
+%% ===========================================
+
+本研究では，マクロ（迷路）とミクロ（Attention）という異なるスケールにおいて，geDIGゲージ $\F$ が共通の「構造化原理」として機能することを示した．
+
+\paragraph{Transformerは熱力学的推論を行うか？}
+我々の観測結果はYesを示唆している．Attention層は単なる行列演算ではなく，入力情報の不確実性（エントロピー）を減じ，意味的な近道（最短路）を発見・固定化する熱力学的プロセスとして解釈できる．
+
+\paragraph{次世代アーキテクチャへの展望}
+現在のTransformerは，情報が既に構造化された後（Layer 4以降）も，固定的に最終層まで計算を続けている．
+geDIGに基づけば，$\F$ がある閾値を下回って安定した時点で計算を打ち切る \textbf{Dynamic Depth (Early Exit)} や，推論していない時間にキャッシュを再構築する \textbf{Sleep Phase} の導入が可能になる．
+本研究で提案した統一ゲージは，そのような「計算資源を自律的・適応的に配分する次世代AI」の基礎理論となりうると考える．
+
+%% ===========================================
+%% 参考文献
+%% ===========================================
+\begin{thebibliography}{99}
+\bibitem{friston2010} Friston, K.: The free-energy principle: a unified brain theory?, Nat. Rev. Neurosci., 11, 127--138 (2010).
+\bibitem{grunwald2007} Gr\"{u}nwald, P.~D.: The Minimum Description Length Principle, MIT Press (2007).
+\bibitem{vaswani2017} Vaswani, A., et al.: Attention Is All You Need, NeurIPS (2017).
+\bibitem{lewis2020rag} Lewis, P., et al.: Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks, NeurIPS (2020).
+\bibitem{xin2020deebert} Xin, J., et al.: DeeBERT: Dynamic Early Exiting for Accelerating BERT Inference, ACL (2020).
+\bibitem{banino2021pondernet} Banino, A., et al.: PonderNet: Learning to Ponder, ICML (2021).
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,51 @@
+# Baseline Configurations for HotpotQA Benchmark
+
+experiment:
+  seed: 42
+
+data:
+  path: "data/hotpotqa_sample_100.jsonl"
+
+output:
+  results_dir: "results/"
+
+bm25_gpt:
+  name: "BM25 + GPT-4o-mini"
+  retrieval:
+    method: "bm25"
+    top_k: 5
+  llm:
+    model: "gpt-4o-mini"
+    temperature: 0.0
+    max_tokens: 256
+
+closed_book_gpt:
+  name: "Closed-book GPT-4o-mini"
+  llm:
+    model: "gpt-4o-mini"
+    temperature: 0.0
+    max_tokens: 256
+
+contriever_gpt:
+  name: "Contriever + GPT-4o-mini"
+  retrieval:
+    method: "contriever"
+    model: "facebook/contriever"
+    top_k: 5
+    device: "auto"
+    max_length: 256
+    batch_size: 16
+  llm:
+    model: "gpt-4o-mini"
+    temperature: 0.0
+    max_tokens: 256
+
+static_graphrag:
+  name: "Static GraphRAG"
+  retrieval:
+    top_k: 5
+    window: 1
+  llm:
+    model: "gpt-4o-mini"
+    temperature: 0.0
+    max_tokens: 256

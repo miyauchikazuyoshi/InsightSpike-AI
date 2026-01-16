@@ -152,6 +152,8 @@ class GeDIGCore:
         ig_source_mode: str = 'graph',   # 'graph' | 'linkset' | 'hybrid'
         ig_hop_apply: str = 'all',       # 'hop0' | 'all' (apply linkset IG to which hops)
         ged_norm_scheme: str = 'edges_after', # 'edges_after' | 'candidate_base'
+        # Structural similarity for analogy detection
+        structural_similarity_config: Optional[Dict[str, Any]] = None,
     ) -> None:
         self.node_cost = node_cost
         self.edge_cost = edge_cost
@@ -283,11 +285,27 @@ class GeDIGCore:
         self.monitor = None  # type: ignore  # set by attach_monitor
         # Deprecation: warn once when graph-IG path is used (linkset_info absent)
         self._graph_ig_warned = False
+
+        # Structural similarity for analogy detection
+        self._ss_evaluator = None
+        self._ss_config = structural_similarity_config or {}
+        if self._ss_config.get('enabled', False):
+            try:
+                from .structural_similarity import StructuralSimilarityEvaluator
+                from ..config.models import StructuralSimilarityConfig
+                ss_cfg = StructuralSimilarityConfig(**self._ss_config)
+                self._ss_evaluator = StructuralSimilarityEvaluator(ss_cfg)
+                logger.info("Structural similarity evaluator enabled: method=%s", ss_cfg.method)
+            except Exception as e:
+                logger.warning("Failed to initialize structural similarity evaluator: %s", e)
+                self._ss_evaluator = None
+
         logger.info(
-            "GeDIGCore initialized: multihop=%s max_hops=%s spectral=%s",
+            "GeDIGCore initialized: multihop=%s max_hops=%s spectral=%s structural_sim=%s",
             self.enable_multihop,
             self.max_hops,
             self.enable_spectral,
+            self._ss_evaluator is not None,
         )
 
     # ------------ Public API ------------
@@ -833,6 +851,26 @@ class GeDIGCore:
                 combined_ig = 0.0 + sp_multiplier * delta_sp_rel
             else:
                 combined_ig = delta_h_norm + sp_multiplier * delta_sp_rel
+
+            # Structural similarity bonus for analogy detection
+            analogy_bonus = 0.0
+            if self._ss_evaluator is not None:
+                try:
+                    center_node = list(focal_nodes)[0] if focal_nodes else None
+                    analogy_bonus = self._ss_evaluator.compute_analogy_bonus(
+                        sub_g1, sub_g2,
+                        center1=center_node,
+                        center2=center_node,
+                    )
+                    if analogy_bonus > 0:
+                        combined_ig += analogy_bonus
+                        logger.debug(
+                            "[ANALOGY] hop=%d bonus=%.4f combined_ig=%.4f",
+                            hop, analogy_bonus, combined_ig
+                        )
+                except Exception as e:
+                    logger.warning("Structural similarity evaluation failed: %s", e)
+
             ig_for_lambda = combined_ig
             if str(self.ig_mode).lower() in ('norm', 'normalized'):
                 ig_for_lambda = float(np.tanh(max(0.0, ig_for_lambda)))

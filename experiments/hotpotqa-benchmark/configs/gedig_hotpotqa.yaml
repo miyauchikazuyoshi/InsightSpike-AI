@@ -1,0 +1,46 @@
+# geDIG Configuration for HotpotQA Benchmark
+
+experiment:
+  name: "gedig_hotpotqa"
+  seed: 42
+
+data:
+  path: "data/hotpotqa_sample_100.jsonl"
+
+gedig:
+  lambda: 1.0           # Information temperature
+  gamma: 1.0            # Shortest-path weight
+  theta_ag: 0.4         # AG threshold
+  theta_dg: 0.0         # DG threshold
+  max_hops: 3           # Maximum hops for multi-hop evaluation
+  max_expansions: 1     # Max AG-driven retrieval expansions
+  expansion_seeds: 2    # Number of top facts to expand with
+  tfidf_dim: 64         # TF-IDF hash dimension (0 to disable)
+
+retrieval:
+  top_k: 5              # Top-k documents to retrieve
+  method: "bm25"        # bm25 (closed-world per example)
+
+llm:
+  model: "gpt-4o-mini"
+  temperature: 0.0
+  max_tokens: 256
+
+evaluation:
+  metrics:
+    - "em"
+    - "f1"
+    - "supporting_facts_em"
+    - "supporting_facts_f1"
+    - "latency"
+
+output:
+  save_predictions: true
+  save_graphs: true
+  results_dir: "results/"
+
+tuning:
+  enable: false
+  sample_size: 100
+  ag_percentile: 50
+  dg_percentile: 30

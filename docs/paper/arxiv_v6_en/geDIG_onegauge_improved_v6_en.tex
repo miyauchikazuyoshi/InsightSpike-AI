@@ -126,7 +126,39 @@ Neuroscientific background knowledge is not assumed for understanding implementa
 
 Here, geDIG stands for \textit{graph edit Distance and Information Gain}, and is a framework that bundles \textbf{change in edit-path cost} to the existing graph and \textbf{information gain (entropy difference + path shortening)} into a single gauge $\F$, judging ``When to accept'' as a \emph{re-ranking score} in static RAG and an \emph{update gate} in dynamic RAG.
 
+% -----------------------------------------------------------
+\subsection{Why Simultaneous Evaluation of Structure and Probability is Necessary}\label{sec:why_both}
 
+Existing methods evaluate either similarity (probabilistic measure) or graph structure, but not both (Table~\ref{tab:structure_probability_comparison}).
+BM25 and Contriever use only similarity scores to decide when to stop retrieval, and thus cannot exclude ``high-score but redundant information.''
+On the other hand, GraphRAG leverages graph structure but cannot detect situations where ``structure is organized but uncertainty remains.''
+
+\begin{table}[t]
+\centering
+\caption{Comparison with existing methods: evaluation targets}
+\label{tab:structure_probability_comparison}
+\small
+\begin{tabular}{lcc}
+\toprule
+Method & Probability (similarity) & Structure (graph) \\
+\midrule
+BM25 / Contriever & $\checkmark$ & -- \\
+GraphRAG & -- & $\checkmark$ \\
+\textbf{geDIG} & $\checkmark$ & $\checkmark$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The core of geDIG is evaluating the \textbf{balance} between \textbf{structural change cost} ($\gednorm$) and \textbf{probabilistic information gain} ($\ignorm$) as a single scalar.
+Intuitively, it answers the question: ``Is the uncertainty reduction worth the structural cost of adding a new edge?''
+This balance calculation enables the following decisions:
+\begin{itemize}[leftmargin=1.6em]
+    \item High structural cost, low information gain $\to$ Retrieval unnecessary (redundant)
+    \item Low structural cost, high information gain $\to$ Retrieval effective (integration)
+    \item High structural cost, high information gain $\to$ Continue exploration (AG fires)
+\end{itemize}
+This ``When'' decision \textbf{cannot be made without simultaneously considering both structure and probability}.
+This is the essential novelty of geDIG.
 
 % -----------------------------------------------------------
 \subsection{Operational Correspondence of Two-Stage Gates (AG/DG)}
