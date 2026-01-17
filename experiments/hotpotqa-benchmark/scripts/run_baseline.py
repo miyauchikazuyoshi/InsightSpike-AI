@@ -27,7 +27,9 @@ from src.evaluator import EvaluationResult, HotpotQAEvaluator, exact_match, f1_s
 METHOD_CONFIG_KEY = {
     "bm25": "bm25_gpt",
     "closed_book": "closed_book_gpt",
+    "colbert": "colbert_gpt",
     "contriever": "contriever_gpt",
+    "dpr": "dpr_gpt",
     "static_graphrag": "static_graphrag",
 }
 
@@ -153,6 +155,37 @@ def get_baseline(method: str, method_config: dict):
             max_length=retrieval_cfg.get("max_length", 256),
             batch_size=retrieval_cfg.get("batch_size", 16),
         )
+    if method == "dpr":
+        from baselines.dpr_gpt import DPRGPTBaseline
+
+        return DPRGPTBaseline(
+            question_model=retrieval_cfg.get(
+                "question_model", "facebook/dpr-question_encoder-single-nq-base"
+            ),
+            context_model=retrieval_cfg.get(
+                "context_model", "facebook/dpr-ctx_encoder-single-nq-base"
+            ),
+            top_k=retrieval_cfg.get("top_k", 5),
+            llm_model=llm_cfg.get("model", "gpt-4o-mini"),
+            temperature=llm_cfg.get("temperature", 0.0),
+            max_tokens=llm_cfg.get("max_tokens", 256),
+            device=retrieval_cfg.get("device", "auto"),
+            max_length=retrieval_cfg.get("max_length", 256),
+            batch_size=retrieval_cfg.get("batch_size", 16),
+        )
+    if method == "colbert":
+        from baselines.colbert_gpt import ColBERTGPTBaseline
+
+        return ColBERTGPTBaseline(
+            model=retrieval_cfg.get("model", "colbert-ir/colbertv2.0"),
+            top_k=retrieval_cfg.get("top_k", 5),
+            llm_model=llm_cfg.get("model", "gpt-4o-mini"),
+            temperature=llm_cfg.get("temperature", 0.0),
+            max_tokens=llm_cfg.get("max_tokens", 256),
+            device=retrieval_cfg.get("device", "auto"),
+            max_length=retrieval_cfg.get("max_length", 256),
+            batch_size=retrieval_cfg.get("batch_size", 8),
+        )
     if method == "static_graphrag":
         from baselines.static_graphrag import StaticGraphRAGBaseline
 
@@ -169,7 +202,14 @@ def get_baseline(method: str, method_config: dict):
 def main():
     parser = argparse.ArgumentParser(description="Run baseline on HotpotQA")
     parser.add_argument("--method", type=str, required=True,
-                        choices=["bm25", "closed_book", "contriever", "static_graphrag"],
+                        choices=[
+                            "bm25",
+                            "closed_book",
+                            "colbert",
+                            "contriever",
+                            "dpr",
+                            "static_graphrag",
+                        ],
                         help="Baseline method to run")
     parser.add_argument(
         "--config",

@@ -15,6 +15,9 @@ python scripts/run_gedig.py --data data/hotpotqa_sample_100.jsonl
 python scripts/run_baseline.py --method bm25 --data data/hotpotqa_sample_100.jsonl
 # closed-book（質問のみ）ベースライン
 python scripts/run_baseline.py --method closed_book --data data/hotpotqa_sample_100.jsonl
+# DPR / ColBERT
+python scripts/run_baseline.py --method dpr --data data/hotpotqa_sample_100.jsonl
+python scripts/run_baseline.py --method colbert --data data/hotpotqa_sample_100.jsonl
 
 # 4. フル実験
 python scripts/run_gedig.py --data data/hotpotqa_distractor_dev.jsonl
@@ -91,7 +94,7 @@ hotpotqa-benchmark/
 
 ```bash
 pip install rank-bm25 openai transformers datasets pyyaml
-# Optional (Contriever/GPU + figure generation)
+# Optional (Contriever/DPR/ColBERT + GPU + figure generation)
 pip install torch matplotlib
 ```
 

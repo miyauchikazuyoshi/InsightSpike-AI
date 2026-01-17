@@ -40,6 +40,35 @@ contriever_gpt:
     temperature: 0.0
     max_tokens: 256
 
+dpr_gpt:
+  name: "DPR + GPT-4o-mini"
+  retrieval:
+    method: "dpr"
+    question_model: "facebook/dpr-question_encoder-single-nq-base"
+    context_model: "facebook/dpr-ctx_encoder-single-nq-base"
+    top_k: 5
+    device: "auto"
+    max_length: 256
+    batch_size: 16
+  llm:
+    model: "gpt-4o-mini"
+    temperature: 0.0
+    max_tokens: 256
+
+colbert_gpt:
+  name: "ColBERT v2 + GPT-4o-mini"
+  retrieval:
+    method: "colbert"
+    model: "colbert-ir/colbertv2.0"
+    top_k: 5
+    device: "auto"
+    max_length: 256
+    batch_size: 8
+  llm:
+    model: "gpt-4o-mini"
+    temperature: 0.0
+    max_tokens: 256
+
 static_graphrag:
   name: "Static GraphRAG"
   retrieval:
