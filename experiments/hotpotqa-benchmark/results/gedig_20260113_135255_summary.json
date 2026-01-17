@@ -1,0 +1,26 @@
+{
+  "method": "gedig",
+  "data": "data/hotpotqa_sample_500.jsonl",
+  "count": 500,
+  "timestamp": "20260113_135255",
+  "parameters": {
+    "lambda_weight": 1.0,
+    "theta_ag": 0.4,
+    "theta_dg": 0.0,
+    "top_k": 5
+  },
+  "em": 0.292,
+  "f1": 0.4434,
+  "precision": 0.4407,
+  "recall": 0.5447,
+  "sf_em": 0.0,
+  "sf_f1": 0.2543,
+  "sf_precision": 0.1896,
+  "sf_recall": 0.4036,
+  "latency_p50_ms": 788.89,
+  "latency_p95_ms": 1316.36,
+  "ag_fire_rate": 0.0,
+  "dg_fire_rate": 1.0,
+  "avg_gedig_score": 0.0,
+  "avg_graph_edges": 5.286
+}

@@ -1,0 +1,16 @@
+{
+  "method": "bm25",
+  "data": "data/hotpotqa_sample_100.jsonl",
+  "count": 10,
+  "timestamp": "20260113_131705",
+  "em": 0.5,
+  "f1": 0.5582,
+  "precision": 0.535,
+  "recall": 0.7,
+  "sf_em": 0.0,
+  "sf_f1": 0.2365,
+  "sf_precision": 0.18,
+  "sf_recall": 0.3583,
+  "latency_p50_ms": 1455.32,
+  "latency_p95_ms": 42108.05
+}

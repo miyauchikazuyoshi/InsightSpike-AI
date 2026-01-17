@@ -1,0 +1,31 @@
+{
+  "method": "bm25",
+  "data": "data/hotpotqa_distractor_dev.jsonl",
+  "count": 7371,
+  "timestamp": "20260115_201605",
+  "config": "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/hotpotqa-benchmark/configs/baselines.yaml",
+  "parameters": {
+    "name": "BM25 + GPT-4o-mini",
+    "retrieval": {
+      "method": "bm25",
+      "top_k": 5
+    },
+    "llm": {
+      "model": "gpt-4o-mini",
+      "temperature": 0.0,
+      "max_tokens": 256
+    }
+  },
+  "em": 0.366,
+  "f1": 0.5227,
+  "precision": 0.5192,
+  "recall": 0.6102,
+  "sf_em": 0.0001,
+  "sf_f1": 0.3497,
+  "sf_precision": 0.3024,
+  "sf_recall": 0.4582,
+  "latency_p50_ms": 819.76,
+  "latency_p95_ms": 18532.36,
+  "incomplete": true,
+  "expected_count": 7405
+}

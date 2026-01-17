@@ -38,6 +38,8 @@ experiments/**/cache/
 experiments/**/results/
 experiments/**/data_snapshots/
 experiments/rag_cross_genre/
+!experiments/hotpotqa-benchmark/results/
+!experiments/hotpotqa-benchmark/results/**
 
 # Archived content (code/docs/experiments)
 archive/
