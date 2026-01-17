@@ -170,7 +170,7 @@ If this principle is fundamental, we might be able to design AI that **knows whe
 
 **Try it in your browser right now!**
 
-👉 **[geDIG Demo on Hugging Face](https://huggingface.co/spaces/miyauchikazuyoshi/gedig-demo)**
+👉 **[geDIG Demo on Hugging Face](https://huggingface.co/spaces/miyaukaz/gedig-demo)**
 
 - Experience geDIG's decision-making on sample questions
 - Visualize BM25 vs geDIG comparison

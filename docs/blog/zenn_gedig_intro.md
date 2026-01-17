@@ -176,7 +176,7 @@ geDIGは単なるアルゴリズムではなく、**設計原理**です。
 
 **ブラウザで今すぐ試せます！**
 
-👉 **[geDIG Demo on Hugging Face](https://huggingface.co/spaces/miyauchikazuyoshi/gedig-demo)**
+👉 **[geDIG Demo on Hugging Face](https://huggingface.co/spaces/miyaukaz/gedig-demo)**
 
 - サンプル質問でgeDIGの判断を体験
 - BM25との比較を可視化
