@@ -3,7 +3,8 @@
 > **目標**: geDIGを「知性の設計原理」として学術的・実用的に認知させる
 
 **作成日**: 2026-01-16
-**ステータス**: Draft
+**最終更新**: 2026-01-17
+**ステータス**: Phase 1（実験完了・拡散継続） / Phase 2 準備中
 **著者**: miyauchikazuyoshi
 
 ---
@@ -30,18 +31,19 @@ geDIG（graph edit Distance + Information Gain）は、動的知識グラフの�
 |------|------|------|
 | geDIGコアアルゴリズム | ✅ 実装済み | `src/insightspike/algorithms/gedig_core.py` |
 | Maze PoC | ✅ 動作 | 15×15で成功率98%、可視化あり |
-| RAG実験（lite） | ⚠️ 限定的 | 500クエリ、mock LLM |
+| HotPotQAフル実験 | ✅ 完走 | dev 7,405件 + baselines |
 | 論文 v6 | ⚠️ ドラフト | 日英両方、図表一部欠損 |
 | 理論的枠組み | ✅ 整備 | FEP-MDL対応 |
+| Streamlitデモ | ✅ 作成済み | `apps/hotpotqa_demo.py` / `spaces/gedig-demo/` |
 
 ### 課題（Weaknesses）
 
-| 課題 | 深刻度 | 対策 |
-|------|--------|------|
-| スケーラビリティ不足 | 高 | 51×51で成功率55% → アルゴリズム改善 |
-| 強いベースラインとの比較なし | 高 | GraphRAG, ColBERT等と比較 |
-| 「刺さるデモ」がない | 中 | インタラクティブデモ作成 |
-| HotPotQA実験が未完成 | 高 | Phase 1で完成させる |
+| 課題 | 深刻度 | 対策 | 状態 |
+|------|--------|------|------|
+| スケーラビリティ不足 | 高 | 51×51で成功率55% → アルゴリズム改善 | 未着手 |
+| 強いベースラインとの比較が限定的 | 高 | ColBERT/DPR等を追加 | 🔄 部分対応 (BM25/Contriever/Static GraphRAG) |
+| デモの公開・導線が弱い | 中 | Spaces公開 + README/LP導線 | 🔄 進行中 |
+| HotPotQA結果の再現性/要約整備 | 中 | 実行手順・差分分析の標準化 | 🔄 進行中 |
 
 ---
 
@@ -85,6 +87,12 @@ secondary:
 - [ ] FMR が閾値法より **50%以上**低い
 - [ ] P50 latency が **500ms以下**
 
+#### 現状（2026-01-17）
+
+- dev 7,405件で geDIG は BM25 に対して **EM +0.9pt / F1 +1.5pt**
+- static_graphrag が最良（F1 0.5594）。差分分析が次の焦点
+- 目標（+5%以上）には未達。改善余地の特定が優先
+
 ### 1.2 インタラクティブデモ
 
 **目的**: 「見ればわかる」状態を作る
@@ -107,6 +115,12 @@ secondary:
 | Backend | FastAPI | 既存コードとの統合が容易 |
 | 可視化 | Plotly / D3.js | グラフ構造の表示 |
 | デプロイ | Hugging Face Spaces | 無料、共有しやすい |
+
+#### 現状（2026-01-17）
+
+- ローカルデモ: `apps/hotpotqa_demo.py`
+- Spaces用: `spaces/gedig-demo/`（デプロイ先/手順は別途）
+- Gradio試作: `spaces/gedig-demo/app_gradio.py`（未デプロイ）
 
 #### 画面構成案
 
@@ -177,13 +191,25 @@ Title: 「RAGの『いつ更新するか』問題を解く ― geDIG入門」
 | Medium | 英語 | 中 |
 | dev.to | 英語 | 低 |
 
+#### 現状（2026-01-17）
+
+- 日本語/英語の下書き作成済み: `docs/blog/`
+- 公開はこれから（Zenn/Qiita/Medium/dev.to）
+
 ### Phase 1 成果物チェックリスト
 
-- [ ] `experiments/hotpotqa-benchmark/results/` に結果JSON
-- [ ] `apps/demo/` にStreamlitアプリ
-- [ ] Hugging Face Spacesにデプロイ済みデモ
-- [ ] 技術ブログ記事（日本語）公開
-- [ ] README.mdにデモへのリンク追加
+- [x] `experiments/hotpotqa-benchmark/results/` に結果JSON → ✅ dev 7,405件 + baselines
+- [x] `apps/hotpotqa_demo.py` にStreamlitアプリ
+- [ ] Hugging Face Spacesにデプロイ済みデモ → `spaces/gedig-demo/`（未デプロイ）
+- [ ] 技術ブログ記事（日本語）公開 → 下書き完成（`docs/blog/`）
+- [ ] README.mdにデモへのリンク追加 → 要確認/未対応
+
+#### 補足（リポジトリ内の実体）
+
+- Streamlitローカル版: `apps/hotpotqa_demo.py`
+- Spaces配信用: `spaces/gedig-demo/`
+- Gradio試作: `spaces/gedig-demo/app_gradio.py`
+- 直近結果: `experiments/hotpotqa-benchmark/results/`
 
 ---
 
@@ -289,8 +315,8 @@ geDIG適用:
 
 ### Phase 2 成果物チェックリスト
 
-- [ ] 「5分でわかるgeDIG」スライド
-- [ ] FEP/MDL対応ドキュメント
+- [x] 「5分でわかるgeDIG」スライド → ✅ `docs/concepts/gedig_in_5_minutes.md` (日英)
+- [x] FEP/MDL対応ドキュメント → ✅ `docs/concepts/universal_principle_hypothesis.md` (日英)
 - [ ] コード補完PoCの動作デモ
 - [ ] Transformer分析レポート
 - [ ] 介入実験の結果
@@ -449,7 +475,7 @@ docs/
 
 ```
 2026年
-├── 1月: 計画策定 ✅
+├── 1月: 計画策定 ✅ / HotPotQA完走 / デモv1作成
 ├── 2月: HotPotQA実験完成、デモv1
 ├── 3月: JSAI投稿、ブログ公開
 ├── 4月: フィードバック収集、改善
@@ -465,7 +491,7 @@ docs/
 
 ---
 
-## 直近2週間の詳細タスク
+## 直近4週間の詳細タスク
 
 ### Week 1 (2026-01-16 〜 01-22)
 
@@ -484,6 +510,24 @@ docs/
 | Day 3-4 | Streamlitデモ骨子 | `apps/demo/app.py` |
 | Day 5-6 | 比較可視化実装 | デモ画面完成 |
 | Day 7 | ブログ記事ドラフト | `draft_blog.md` |
+
+### Week 3 (2026-01-30 〜 02-05)
+
+| 日 | タスク | 成果物 |
+|----|--------|--------|
+| Day 1-2 | HotPotQAの差分分析（勝ち/負け） | エラー分析ノート |
+| Day 3-4 | Spacesデプロイ + README導線 | 公開URL・リンク |
+| Day 5-6 | 日本語ブログ公開（Zenn/Qiita） | 公開URL |
+| Day 7 | 結果の1枚サマリ作成 | `docs/blog/` or `docs/design/` |
+
+### Week 4 (2026-02-06 〜 02-12)
+
+| 日 | タスク | 成果物 |
+|----|--------|--------|
+| Day 1-2 | 強いベースライン追加計画 | 実験計画メモ |
+| Day 3-4 | デモ改善（可視化/UX） | v1.1 |
+| Day 5-6 | 英語ブログ公開（Medium/dev.to） | 公開URL |
+| Day 7 | Phase 2着手（コード補完PoC） | PoC設計メモ |
 
 ---
 
@@ -510,5 +554,5 @@ docs/
 
 ---
 
-**Document Version**: 1.0
-**Last Updated**: 2026-01-16
+**Document Version**: 1.2
+**Last Updated**: 2026-01-17
