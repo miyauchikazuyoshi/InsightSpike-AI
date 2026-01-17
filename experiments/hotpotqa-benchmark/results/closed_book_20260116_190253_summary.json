@@ -1,0 +1,25 @@
+{
+  "method": "closed_book",
+  "data": "experiments/hotpotqa-benchmark/data/hotpotqa_distractor_dev.jsonl",
+  "count": 7405,
+  "timestamp": "20260116_190253",
+  "config": "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/hotpotqa-benchmark/configs/baselines.yaml",
+  "parameters": {
+    "name": "Closed-book GPT-4o-mini",
+    "llm": {
+      "model": "gpt-4o-mini",
+      "temperature": 0.0,
+      "max_tokens": 256
+    }
+  },
+  "em": 0.2204,
+  "f1": 0.3511,
+  "precision": 0.3465,
+  "recall": 0.43,
+  "sf_em": 0.0,
+  "sf_f1": 0.0,
+  "sf_precision": 0.0,
+  "sf_recall": 0.0,
+  "latency_p50_ms": 769.83,
+  "latency_p95_ms": 10034.88
+}

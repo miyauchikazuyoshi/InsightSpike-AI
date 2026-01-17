@@ -1,0 +1,33 @@
+{
+  "method": "contriever",
+  "data": "experiments/hotpotqa-benchmark/data/hotpotqa_distractor_dev.jsonl",
+  "count": 7405,
+  "timestamp": "20260117_024211",
+  "config": "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/hotpotqa-benchmark/configs/baselines.yaml",
+  "parameters": {
+    "name": "Contriever + GPT-4o-mini",
+    "retrieval": {
+      "method": "contriever",
+      "model": "facebook/contriever",
+      "top_k": 5,
+      "device": "auto",
+      "max_length": 256,
+      "batch_size": 16
+    },
+    "llm": {
+      "model": "gpt-4o-mini",
+      "temperature": 0.0,
+      "max_tokens": 256
+    }
+  },
+  "em": 0.2747,
+  "f1": 0.4216,
+  "precision": 0.4163,
+  "recall": 0.5126,
+  "sf_em": 0.0001,
+  "sf_f1": 0.1656,
+  "sf_precision": 0.1229,
+  "sf_recall": 0.2642,
+  "latency_p50_ms": 2787.84,
+  "latency_p95_ms": 19642.07
+}

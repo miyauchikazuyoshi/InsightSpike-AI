@@ -34,6 +34,18 @@ python scripts/generate_latest_comparison.py
 python scripts/generate_latest_figures.py --input results/latest_comparison.csv
 ```
 
+## Latest Full Dev Results (hotpotqa_distractor_dev.jsonl)
+
+| method | EM | F1 | SF-F1 | count | timestamp |
+| --- | --- | --- | --- | --- | --- |
+| closed_book | 0.2204 | 0.3511 | 0.0 | 7405 | 20260116_190253 |
+| bm25 | 0.3662 | 0.5229 | 0.3497 | 7405 | 20260115_210922 |
+| static_graphrag | 0.3893 | 0.5594 | 0.3497 | 7405 | 20260116_075326 |
+| gedig | 0.3749 | 0.5375 | 0.3043 | 7405 | 20260115_115335 |
+| contriever | 0.2747 | 0.4216 | 0.1656 | 7405 | 20260117_024211 |
+
+最新の比較は `results/latest_comparison.md` を参照。
+
 Note: closed-book runs over the full dev set may hit OpenAI daily request limits.
 If that happens, rerun after the limit resets (the partial JSONL can be reused for analysis).
 
