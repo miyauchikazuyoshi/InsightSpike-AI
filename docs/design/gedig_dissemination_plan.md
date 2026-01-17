@@ -92,6 +92,7 @@ secondary:
 - dev 7,405件で geDIG は BM25 に対して **EM +0.9pt / F1 +1.5pt**
 - static_graphrag が最良（F1 0.5594）。差分分析が次の焦点
 - 目標（+5%以上）には未達。改善余地の特定が優先
+- 差分分析ノート作成: `docs/design/hotpotqa_error_analysis.md`
 
 ### 1.2 インタラクティブデモ
 
