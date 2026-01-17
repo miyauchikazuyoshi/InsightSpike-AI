@@ -93,6 +93,7 @@ secondary:
 - static_graphrag が最良（F1 0.5594）。差分分析が次の焦点
 - 目標（+5%以上）には未達。改善余地の特定が優先
 - 差分分析ノート作成: `docs/design/hotpotqa_error_analysis.md`
+- ケーススタディ抽出: `docs/design/hotpotqa_case_studies.md`
 
 ### 1.2 インタラクティブデモ
 
@@ -120,7 +121,7 @@ secondary:
 #### 現状（2026-01-17）
 
 - ローカルデモ: `apps/hotpotqa_demo.py`
-- Spaces公開: https://huggingface.co/spaces/miyaukaz/gedig-demo
+- Spaces公開: https://huggingface.co/spaces/miyaukaz/gedig-demo （RUNNING確認済み）
 - Gradio試作: `spaces/gedig-demo/app_gradio.py`（未デプロイ）
 
 #### 画面構成案
@@ -517,9 +518,9 @@ docs/
 | 日 | タスク | 成果物 |
 |----|--------|--------|
 | Day 1-2 | HotPotQAの差分分析（勝ち/負け） | エラー分析ノート |
-| Day 3-4 | Spacesデプロイ + README導線 | 公開URL・リンク |
-| Day 5-6 | 日本語ブログ公開（Zenn/Qiita） | 公開URL |
-| Day 7 | 結果の1枚サマリ作成 | `docs/blog/` or `docs/design/` |
+| Day 3-4 | ケーススタディ抽出 | `docs/design/hotpotqa_case_studies.md` |
+| Day 5-6 | Spacesデプロイ + README導線 | 公開URL・リンク |
+| Day 7 | 日本語ブログ公開（Zenn/Qiita） | 公開URL |
 
 ### Week 4 (2026-02-06 〜 02-12)
 
@@ -555,5 +556,5 @@ docs/
 
 ---
 
-**Document Version**: 1.3
+**Document Version**: 1.4
 **Last Updated**: 2026-01-17
