@@ -4,7 +4,7 @@
 set -e
 
 SPACE_NAME="gedig-demo"
-USERNAME="miyauchikazuyoshi"
+USERNAME="miyaukaz"
 
 echo "🚀 Deploying geDIG Demo to Hugging Face Spaces"
 echo ""
@@ -19,12 +19,17 @@ echo ""
 echo "Creating Space: $USERNAME/$SPACE_NAME"
 
 # Create the space using Python (more reliable)
-python3 << 'EOF'
+PYTHON_BIN="${PYTHON_BIN:-../../.venv/bin/python}"
+if [ ! -x "$PYTHON_BIN" ]; then
+    PYTHON_BIN="python3"
+fi
+
+"$PYTHON_BIN" << 'EOF'
 from huggingface_hub import HfApi, create_repo
 import os
 
 api = HfApi()
-username = "miyauchikazuyoshi"
+username = "miyaukaz"
 space_name = "gedig-demo"
 repo_id = f"{username}/{space_name}"
 

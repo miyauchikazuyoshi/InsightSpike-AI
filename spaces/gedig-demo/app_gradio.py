@@ -51,8 +51,8 @@ SAMPLE_QUESTIONS = [
 ]
 
 BENCHMARK_RESULTS = {
-    "bm25": {"em": 0.366, "f1": 0.523, "latency": 820},
-    "gedig": {"em": 0.375, "f1": 0.538, "latency": 873}
+    "bm25": {"em": 0.3662, "f1": 0.5229, "latency": 820},
+    "gedig": {"em": 0.3749, "f1": 0.5375, "latency": 873}
 }
 
 
@@ -118,7 +118,7 @@ def process_question(question_idx):
 |--------|-----|-----|
 | BM25 | 36.6% | 52.3% |
 | **geDIG** | **37.5%** | **53.8%** |
-| Improvement | +2.4% | +2.9% |
+| Improvement | +0.9% | +1.5% |
 """
 
     # Formula breakdown

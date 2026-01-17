@@ -29,6 +29,7 @@ If the math below looks scary, don't worry! We have created friendly resources t
 2.  **[The Intuitive "No-Math" Guide](docs/concepts/intuition.md)** ([日本語](docs/concepts/intuition_ja.md)): Explains geDIG using a simple "Mental Map" analogy.
 3.  **[Insight Sandbox](examples/playground.py)**: An interactive visual playground.
     *   Run it: `pip install streamlit && streamlit run examples/playground.py`
+4.  **[Live Demo (HotPotQA)](https://huggingface.co/spaces/miyaukaz/gedig-demo)**: Try geDIG vs BM25 in your browser.
 
 ### 🔬 For Researchers
 -   **[Universal Principle Hypothesis](docs/concepts/universal_principle_hypothesis.md)** ([日本語](docs/concepts/universal_principle_hypothesis_ja.md)): Is geDIG a fundamental design principle shared by all adaptive systems?

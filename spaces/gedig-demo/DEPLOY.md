@@ -89,5 +89,5 @@ The Space will automatically rebuild.
 
 After deployment:
 ```
-https://huggingface.co/spaces/miyauchikazuyoshi/gedig-demo
+https://huggingface.co/spaces/miyaukaz/gedig-demo
 ```

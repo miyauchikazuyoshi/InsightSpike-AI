@@ -66,8 +66,8 @@ SAMPLE_QUESTIONS = [
 
 # Simulated benchmark results
 BENCHMARK_RESULTS = {
-    "bm25": {"em": 0.366, "f1": 0.523, "latency": 820},
-    "gedig": {"em": 0.375, "f1": 0.538, "latency": 873, "ag_rate": 0.546, "dg_rate": 0.815}
+    "bm25": {"em": 0.3662, "f1": 0.5229, "latency": 820},
+    "gedig": {"em": 0.3749, "f1": 0.5375, "latency": 873, "ag_rate": 0.546, "dg_rate": 0.815}
 }
 
 def simulate_gedig_evaluation(question: str, context: list) -> dict:
