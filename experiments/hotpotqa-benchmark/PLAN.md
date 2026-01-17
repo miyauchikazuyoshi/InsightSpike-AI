@@ -88,7 +88,8 @@ Phase 1-5: 本実験 (JSAI後 1-2ヶ月)
 | BM25 + GPT-4o-mini | 古典検索 + LLM | 必須 |
 | Contriever + GPT-4o-mini | Dense retriever | 必須 |
 | Static GraphRAG | グラフ構築済み、更新なし | 必須 |
-| ColBERT v2 | 高精度retriever | あれば良い |
+| ColBERT v2 | 高精度retriever | 追加予定 |
+| DPR (facebook/dpr) | Dense retriever | 追加予定 |
 | Self-RAG | 自己反省型RAG | あれば良い |
 
 ### 実装方針
@@ -122,8 +123,24 @@ Phase 1-5: 本実験 (JSAI後 1-2ヶ月)
 - [ ] BM25ベースライン実装
 - [ ] Contrieverベースライン実装
 - [ ] Static GraphRAG設定
+- [ ] ColBERT v2 実装（再ランキング含む）
+- [ ] DPR 実装（bi-encoder）
 - [ ] 共通評価インターフェース設計
 - [ ] サンプル100件で動作確認
+
+#### 追加ベースライン計画（2026-02）
+
+```
+ColBERT v2:
+  - 取得ライブラリ: colbert-ai/colbert (PyPI)
+  - 役割: high-precision reranker
+  - 手順: BM25 top-k → ColBERT rerank → LLM
+
+DPR:
+  - 取得ライブラリ: transformers (facebook/dpr-ctx_encoder)
+  - 役割: dense retriever baseline
+  - 手順: 文書埋め込み + cosine → top-k → LLM
+```
 
 ### 成果物
 - `baselines/bm25_gpt.py`

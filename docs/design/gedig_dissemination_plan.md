@@ -42,7 +42,7 @@ geDIG（graph edit Distance + Information Gain）は、動的知識グラフの�
 |------|--------|------|------|
 | スケーラビリティ不足 | 高 | 51×51で成功率55% → アルゴリズム改善 | 未着手 |
 | 強いベースラインとの比較が限定的 | 高 | ColBERT/DPR等を追加 | 🔄 部分対応 (BM25/Contriever/Static GraphRAG) |
-| デモの公開・導線が弱い | 中 | Spaces公開 + README/LP導線 | 🔄 進行中 |
+| デモの公開・導線が弱い | 中 | Spaces公開 + README/LP導線 | ✅ 解決 |
 | HotPotQA結果の再現性/要約整備 | 中 | 実行手順・差分分析の標準化 | 🔄 進行中 |
 
 ---
@@ -120,7 +120,7 @@ secondary:
 #### 現状（2026-01-17）
 
 - ローカルデモ: `apps/hotpotqa_demo.py`
-- Spaces用: `spaces/gedig-demo/`（デプロイ先/手順は別途）
+- Spaces公開: https://huggingface.co/spaces/miyaukaz/gedig-demo
 - Gradio試作: `spaces/gedig-demo/app_gradio.py`（未デプロイ）
 
 #### 画面構成案
@@ -201,9 +201,9 @@ Title: 「RAGの『いつ更新するか』問題を解く ― geDIG入門」
 
 - [x] `experiments/hotpotqa-benchmark/results/` に結果JSON → ✅ dev 7,405件 + baselines
 - [x] `apps/hotpotqa_demo.py` にStreamlitアプリ
-- [ ] Hugging Face Spacesにデプロイ済みデモ → `spaces/gedig-demo/`（未デプロイ）
+- [x] Hugging Face Spacesにデプロイ済みデモ → https://huggingface.co/spaces/miyaukaz/gedig-demo
 - [ ] 技術ブログ記事（日本語）公開 → 下書き完成（`docs/blog/`）
-- [ ] README.mdにデモへのリンク追加 → 要確認/未対応
+- [x] README.mdにデモへのリンク追加
 
 #### 補足（リポジトリ内の実体）
 
