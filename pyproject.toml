@@ -35,13 +35,13 @@ classifiers = [
 
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.10,<3.14"
 
 # Core ML dependencies - optimized for Colab and local compatibility
 # CUDA auto-detection: PyTorch will automatically use GPU when available
-torch = { version = "2.2.2", optional = true }
-torchvision = { version = "0.17.2", optional = true }
-torchaudio = { version = "2.2.2", optional = true }
+torch = { version = "^2.8.0", optional = true }
+torchvision = { version = "^0.23.0", optional = true }
+torchaudio = { version = "^2.8.0", optional = true }
 torch-geometric = { version = "^2.4.0", optional = true }  # Requires torch >=2.2,<2.5
 torch-scatter = { version = "^2.1.2", optional = true }
 torch-sparse = { version = "^0.6.18", optional = true }
@@ -64,14 +64,12 @@ hnswlib = "^0.8.0"
 
 # Vector search - CPU version (GPU version can be added optionally)
 
-jupyter = { version = "^1.0", optional = true }
 pandas = { version = "^2.0", optional = true }
 seaborn = "^0.12.0"
 
 imageio = "^2.34.0"
 toml = "^0.10.2"
 psutil = "^5.9.0"
-notebook = { version = "^7.4.4", optional = true }
 
 # LLM providers - lightweight local models
 accelerate = { version = "^0.25.0", optional = true }
@@ -91,7 +89,7 @@ optional = true
 pytest = "^7.4.0"
 pytest-cov = "^4.1.0"
 pytest-asyncio = "^0.21.0"
-black = "^23.0.0"
+black = "^24.3.0"
 isort = "^5.12.0"
 flake8 = "^6.0.0"
 mypy = "^1.5.0"
@@ -106,7 +104,7 @@ optional = true
 pytest = "^7.4.0"
 pytest-cov = "^4.1.0"
 pytest-asyncio = "^0.21.0"
-black = "^23.0.0"
+black = "^24.3.0"
 isort = "^5.12.0"
 flake8 = "^6.0.0"
 
@@ -143,7 +141,7 @@ llm = ["transformers", "accelerate", "sentencepiece", "bitsandbytes", "einops"]
 # 近似近傍探索エンジン
 retrieval = ["faiss-cpu", "hnswlib"]
 # Notebook / データサイエンス補助
-notebook = ["jupyter", "pandas", "seaborn", "notebook"]
+notebook = ["pandas", "seaborn"]
 # OpenAI SDK 連携
 openai = ["openai"]
 # 全機能をまとめてインストール
@@ -164,10 +162,8 @@ full = [
     "einops",
     "faiss-cpu",
     "hnswlib",
-    "jupyter",
     "pandas",
     "seaborn",
-    "notebook",
     "openai"
 ]
 
