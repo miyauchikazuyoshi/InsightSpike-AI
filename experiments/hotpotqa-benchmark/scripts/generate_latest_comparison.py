@@ -9,7 +9,15 @@ import json
 from pathlib import Path
 
 
-DEFAULT_METHODS = ["closed_book", "bm25", "static_graphrag", "gedig", "contriever"]
+DEFAULT_METHODS = [
+    "closed_book",
+    "bm25",
+    "contriever",
+    "dpr",
+    "colbert",
+    "static_graphrag",
+    "gedig",
+]
 
 
 def normalize_data_name(path: str | None) -> str:

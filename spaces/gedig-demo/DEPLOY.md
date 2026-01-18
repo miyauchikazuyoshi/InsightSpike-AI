@@ -14,9 +14,9 @@
    - **Owner**: your username
    - **Space name**: `gedig-demo`
    - **License**: Apache 2.0
-   - **SDK**: Streamlit
+   - **SDK**: Gradio
 4. Upload files:
-   - `app.py`
+   - `app_gradio.py`
    - `requirements.txt`
    - `README.md`
 5. The Space will automatically build and deploy
@@ -48,7 +48,7 @@ api = HfApi()
 api.create_repo(
     repo_id="YOUR_USERNAME/gedig-demo",
     repo_type="space",
-    space_sdk="streamlit",
+    space_sdk="gradio",
     private=False
 )
 
@@ -83,7 +83,7 @@ The Space will automatically rebuild.
 
 - **Build fails**: Check the logs in the "Logs" tab
 - **App crashes**: Ensure all imports are in `requirements.txt`
-- **Slow startup**: Streamlit caches are built on first run
+- **Slow startup**: Gradio builds on first run
 
 ## Expected URL
 

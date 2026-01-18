@@ -3,7 +3,7 @@
 > **目標**: geDIGを「知性の設計原理」として学術的・実用的に認知させる
 
 **作成日**: 2026-01-16
-**最終更新**: 2026-01-17
+**最終更新**: 2026-01-18
 **ステータス**: Phase 1（実験完了・拡散継続） / Phase 2 準備中
 **著者**: miyauchikazuyoshi
 
@@ -34,16 +34,32 @@ geDIG（graph edit Distance + Information Gain）は、動的知識グラフの�
 | HotPotQAフル実験 | ✅ 完走 | dev 7,405件 + baselines |
 | 論文 v6 | ⚠️ ドラフト | 日英両方、図表一部欠損 |
 | 理論的枠組み | ✅ 整備 | FEP-MDL対応 |
-| Streamlitデモ | ✅ 作成済み | `apps/hotpotqa_demo.py` / `spaces/gedig-demo/` |
+| デモアプリ（Streamlit/Gradio） | ✅ 作成済み | `apps/hotpotqa_demo.py` / `spaces/gedig-demo/`（Gradio切替済み） |
 
 ### 課題（Weaknesses）
 
 | 課題 | 深刻度 | 対策 | 状態 |
 |------|--------|------|------|
 | スケーラビリティ不足 | 高 | 51×51で成功率55% → アルゴリズム改善 | 未着手 |
-| 強いベースラインとの比較が限定的 | 高 | ColBERT/DPR等を追加 | 🔄 部分対応 (BM25/Contriever/Static GraphRAG) |
+| 強いベースラインとの比較が限定的 | 高 | ColBERT/DPR等を追加 | ✅ DPR/ColBERT dev 7,405件完走（BM25/Contriever/Static GraphRAG完了） |
 | デモの公開・導線が弱い | 中 | Spaces公開 + README/LP導線 | ✅ 解決 |
 | HotPotQA結果の再現性/要約整備 | 中 | 実行手順・差分分析の標準化 | 🔄 進行中 |
+
+### 直近レビュー（2026-01-18）
+
+**指摘**
+- 構造エンリッチの署名解釈と役割判定が不一致（hub/triangle等の意味ズレ）
+- アナロジーボーナスが明示プロトタイプ無しでも発火し得る（誤検出リスク）
+- IGとInsightへの二重加算でスパイク判定が過剰になる可能性
+- AG呼称（Attention/Ambiguity）の表記ゆれ
+- 検証が例示スクリプト中心で、回帰を担保するテストが不足
+
+**改善方針**
+- 構造エンリッチはモチーフ署名へ統一し、役割判定と整合（対応済）
+- アナロジー検出はデフォルトで「プロトタイプ指定」「クロスドメインのみ」を前提（対応済）
+- 追加ブーストはIG側に限定（Insightへの直接加算は停止）（対応済）
+- AG表記はAmbiguity Gateに統一（注意書きで補足）（対応済）
+- 例示の動作確認に加え、単体テストを追加検討（未着手）
 
 ---
 
@@ -94,6 +110,8 @@ secondary:
 - 目標（+5%以上）には未達。改善余地の特定が優先
 - 差分分析ノート作成: `docs/design/hotpotqa_error_analysis.md`
 - ケーススタディ抽出: `docs/design/hotpotqa_case_studies.md`
+- DPRベースライン（dev 7,405件）: EM 0.3483 / F1 0.5091 / SF-F1 0.3235
+- ColBERTベースライン（dev 7,405件）: EM 0.3618 / F1 0.5258 / SF-F1 0.3663
 
 ### 1.2 インタラクティブデモ
 
@@ -121,8 +139,8 @@ secondary:
 #### 現状（2026-01-17）
 
 - ローカルデモ: `apps/hotpotqa_demo.py`
-- Spaces公開: https://huggingface.co/spaces/miyaukaz/gedig-demo （RUNNING確認済み）
-- Gradio試作: `spaces/gedig-demo/app_gradio.py`（未デプロイ）
+- Spaces公開: https://huggingface.co/spaces/miyaukaz/gedig-demo （Gradio切替済み、RUNNING確認済み）
+- Gradioデモ: `spaces/gedig-demo/app_gradio.py`（デプロイ済み）
 
 #### 画面構成案
 
@@ -195,15 +213,16 @@ Title: 「RAGの『いつ更新するか』問題を解く ― geDIG入門」
 
 #### 現状（2026-01-17）
 
-- 日本語/英語の下書き作成済み: `docs/blog/`
-- 公開はこれから（Zenn/Qiita/Medium/dev.to）
+- ✅ **Zenn公開済み** (2026-01-17)
+- 英語版（Medium）: 下書き完成、アカウント作成待ち
+- Qiita/dev.to: 未着手
 
 ### Phase 1 成果物チェックリスト
 
 - [x] `experiments/hotpotqa-benchmark/results/` に結果JSON → ✅ dev 7,405件 + baselines
 - [x] `apps/hotpotqa_demo.py` にStreamlitアプリ
-- [x] Hugging Face Spacesにデプロイ済みデモ → https://huggingface.co/spaces/miyaukaz/gedig-demo
-- [ ] 技術ブログ記事（日本語）公開 → 下書き完成（`docs/blog/`）
+- [x] Hugging Face Spacesにデプロイ済みデモ → https://huggingface.co/spaces/miyaukaz/gedig-demo（Gradio切替済み）
+- [x] 技術ブログ記事（日本語）公開 → ✅ Zenn公開済み (2026-01-17)
 - [x] README.mdにデモへのリンク追加
 
 #### 補足（リポジトリ内の実体）
@@ -556,5 +575,5 @@ docs/
 
 ---
 
-**Document Version**: 1.4
-**Last Updated**: 2026-01-17
+**Document Version**: 1.8
+**Last Updated**: 2026-01-18

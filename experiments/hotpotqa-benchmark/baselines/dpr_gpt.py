@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import time
+import warnings
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -73,8 +74,24 @@ class DPRGPTBaseline(BaseRAG):
             self.context_model
         )
 
-        self.question_encoder = DPRQuestionEncoder.from_pretrained(self.question_model)
-        self.context_encoder = DPRContextEncoder.from_pretrained(self.context_model)
+        torch_version = torch.__version__.split("+", 1)[0]
+        version_parts = torch_version.split(".")
+        major = int(version_parts[0]) if version_parts else 0
+        minor = int(version_parts[1]) if len(version_parts) > 1 else 0
+        supports_weights_only = (major, minor) >= (2, 6)
+        if not supports_weights_only:
+            warnings.warn(
+                "Torch <2.6 detected; loading DPR weights with weights_only=False. "
+                "Upgrade torch>=2.6 or use a DPR model with safetensors for safer loading.",
+                RuntimeWarning,
+            )
+
+        self.question_encoder = DPRQuestionEncoder.from_pretrained(
+            self.question_model, weights_only=supports_weights_only
+        )
+        self.context_encoder = DPRContextEncoder.from_pretrained(
+            self.context_model, weights_only=supports_weights_only
+        )
 
         self.question_encoder.to(self.device)
         self.context_encoder.to(self.device)

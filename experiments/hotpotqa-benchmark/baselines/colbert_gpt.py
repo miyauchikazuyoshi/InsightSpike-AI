@@ -62,7 +62,27 @@ class ColBERTGPTBaseline(BaseRAG):
             self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-        self.model = AutoModel.from_pretrained(self.model_name)
+        try:
+            self.model = AutoModel.from_pretrained(
+                self.model_name, use_safetensors=True
+            )
+        except Exception as exc:
+            error_text = []
+            current = exc
+            while current:
+                error_text.append(str(current))
+                current = current.__cause__ or current.__context__
+            error_blob = " ".join(error_text)
+            if "No space left on device" in error_blob or "Not enough free disk space" in error_blob:
+                raise RuntimeError(
+                    "Failed to download ColBERT weights due to low disk space. "
+                    "Free up space or set HF_HOME/HF_HUB_CACHE to a drive with "
+                    "at least 1 GB free."
+                ) from exc
+            raise RuntimeError(
+                "Failed to load ColBERT weights. Use a model with safetensors "
+                "or upgrade torch to >=2.6."
+            ) from exc
         self.model.to(self.device)
         self.model.eval()
         self._torch = torch

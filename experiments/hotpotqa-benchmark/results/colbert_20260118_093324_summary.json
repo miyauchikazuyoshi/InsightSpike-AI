@@ -1,0 +1,33 @@
+{
+  "method": "colbert",
+  "data": "experiments/hotpotqa-benchmark/data/hotpotqa_distractor_dev.jsonl",
+  "count": 7405,
+  "timestamp": "20260118_093324",
+  "config": "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/hotpotqa-benchmark/configs/baselines.yaml",
+  "parameters": {
+    "name": "ColBERT v2 + GPT-4o-mini",
+    "retrieval": {
+      "method": "colbert",
+      "model": "colbert-ir/colbertv2.0",
+      "top_k": 5,
+      "device": "auto",
+      "max_length": 256,
+      "batch_size": 8
+    },
+    "llm": {
+      "model": "gpt-4o-mini",
+      "temperature": 0.0,
+      "max_tokens": 256
+    }
+  },
+  "em": 0.3618,
+  "f1": 0.5258,
+  "precision": 0.5226,
+  "recall": 0.6151,
+  "sf_em": 0.0001,
+  "sf_f1": 0.3663,
+  "sf_precision": 0.272,
+  "sf_recall": 0.5843,
+  "latency_p50_ms": 4424.76,
+  "latency_p95_ms": 17659.0
+}

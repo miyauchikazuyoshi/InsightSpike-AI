@@ -155,6 +155,14 @@ class StructuralSimilarityEvaluator:
             return bonus
         return 0.0
 
+    def extract_motif_signature(
+        self,
+        g: nx.Graph,
+        center: Optional[str] = None,
+    ) -> np.ndarray:
+        """Expose motif signature for downstream structural annotation."""
+        return self._extract_motif_signature(g, center)
+
     # =========================================================================
     # Signature Method (Default)
     # =========================================================================

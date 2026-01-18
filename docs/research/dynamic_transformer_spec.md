@@ -33,7 +33,7 @@
 ### 3.1 Phase 1: Awake (Dynamic Routing / Exploration)
 *   **動作:** 推論（Inference）および探索。
 *   **Attention:**
-    *   既存のエッジ（Strong Attention）だけでなく、**AG (Attention Gate)** を開いて未知のノードへの接続（Weak Attention）を試行する。
+    *   既存のエッジ（Strong Attention）だけでなく、**AG (Ambiguity Gate)** を開いて未知のノードへの接続（Weak Attention）を試行する（Transformer文脈ではAttention Gate表記もある）。
     *   これは「全結合 Attention」の一部を動的に計算することに相当する。
 *   **学習:**
     *   DG (Decision Gate) が発火（洞察を獲得）した場合、そのパスを **「短期記憶 (Short-term Edge)」** として一時保存する。
@@ -61,3 +61,30 @@
 1.  **Step 1:** `EdgeAttributes` に QKV ベクトルを追加する。
 2.  **Step 2:** `SignalPropagator` を Attention 機構に置き換える（単純な減衰ではなく、内積による活性伝播）。
 3.  **Step 3:** Phase 2 (Sleep) での「エッジ → FFN」蒸留ロジックを実装する。
+
+## 6. 構造的発見とゲート戦略 (Structural Discovery & Gating)
+
+### 6.1 構造類似性による「閃き (Eureka)」
+*   **概要**: 異なるドメイン間で「構造的類似性（Structural Analogy）」を発見し、知識移転を行うメカニズム。
+*   **実装**: `StructureEnricher` がノードに構造的役割（Hub, Cluster Core等）を付与し、`ImprovedGEDIGCalculator` が類似度を情報利得（Analogy Bonus）として評価する。
+*   **例**: 「太陽系（Astronomy）」と「原子モデル（Quantum Physics）」の構造的一致を検出し、Insight Scoreをスパイクさせる。
+
+### 6.2 2段階ゲート戦略 (Two-Stage Gating)
+計算コストと脳の機能局在（海馬/大脳皮質）に基づき、処理を以下の2段階に分ける。
+
+1.  **Phase 1: Awake (Lightweight Exploration)**
+    *   **AG (Ambiguity Gate)**: ベクトル類似度のみで高速に接続・探索する。
+    *   **DG (Decision Gate)**: Raw IG（単純なエントロピー減少）のみで判定し、短期記憶に保存する。
+    *   *役割*: 「面白そうな情報の収集」
+
+2.  **Phase 2: Sleep (Deep Structural Analysis)**
+    *   **Action**: 短期記憶に対して `StructureEnricher` を適用し、詳細な構造解析を行う。
+    *   **Discovery**: 既知のプロトタイプ（長期記憶）との構造類似性を計算。
+    *   **Consolidation**: アナロジーが発見された場合、そのパスをFFN（直感）として強力に焼き付ける（重み強化）。
+    *   *役割*: 「情報の構造化・抽象化・意味づけ」
+
+### 6.3 構造的意味の分離 (Structural Disambiguation)
+*   同じ単語（Token）でも、構造的役割によって意味を分離・区別する。
+    *   **Apple A (Fruit)**: Role=`LEAF`, Cluster=`Food`
+    *   **Apple B (Tech)**: Role=`HUB`, Cluster=`Technology`
+*   これにより、単純なEmbedding（意味ベクトル）だけでは区別できない「文脈的役割」を、ノード属性としてシステムが保持できる。
