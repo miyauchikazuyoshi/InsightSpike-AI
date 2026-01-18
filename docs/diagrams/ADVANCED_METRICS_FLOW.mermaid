@@ -13,7 +13,7 @@ flowchart TB
     %% Configuration
     subgraph "⚙️ Configuration"
         ConfigYAML[config.yaml]
-        MetricsFlags[Metrics Flags<br/>use_normalized_ged<br/>use_entropy_variance_ig<br/>use_multihop_gedig]
+        MetricsFlags[Metrics Flags<br/>use_normalized_ged<br/>use_entropy_variance_ig<br/>use_multihop_gedig<br/>use_structural_similarity]
     end
     
     %% Metrics Selector
@@ -35,6 +35,7 @@ flowchart TB
         SimpleIG[Simple IG<br/>Cosine Similarity]
         LocalIGV2[Local IG V2<br/>Surprise + Diffusion]
         EntropyVarianceIG[Entropy Variance IG<br/>Shannon Entropy]
+        AnalogyBonus[Analogy Bonus<br/>prototype + cross-domain<br/>default off]
     end
     
     %% Query-Centric & Multi-hop Analysis
@@ -80,6 +81,7 @@ flowchart TB
     
     ConfigYAML --> MetricsFlags
     MetricsFlags --> MetricsSelector
+    MetricsFlags -->|structural_similarity=true| AnalogyBonus
     
     MetricsSelector --> GEDMethod
     MetricsSelector --> IGMethod
@@ -101,6 +103,7 @@ flowchart TB
     SimpleIG --> GeDIGCalc
     LocalIGV2 --> GeDIGCalc
     EntropyVarianceIG --> GeDIGCalc
+    AnalogyBonus --> GeDIGCalc
     
     %% Multi-hop branch
     MetricsFlags -->|query_centric=true| QueryCenters
@@ -146,7 +149,7 @@ flowchart TB
     class ConfigYAML,MetricsFlags config
     class MetricsSelector,GEDMethod,IGMethod selector
     class SimpleGED,NormalizedGED,AdvancedGED ged
-    class SimpleIG,LocalIGV2,EntropyVarianceIG ig
+    class SimpleIG,LocalIGV2,EntropyVarianceIG,AnalogyBonus ig
     class MultiHopCalc,Hop0,Hop1,Hop2,HopN,WeightedSum multihop
     class GeDIGCalc,BasicGeDIG,MultiHopGeDIG calc
     class Result,SpikeDetection,Insight,NoInsight output

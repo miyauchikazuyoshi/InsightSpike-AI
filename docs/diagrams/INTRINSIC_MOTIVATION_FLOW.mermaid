@@ -40,16 +40,19 @@ flowchart TD
             BaseReward[Base: ΔIG - 0.5×ΔGED]
             NoveltyReward[Novelty: ΔIG - 0.5×Conflict]
             StructureReward[Structure: Graph Quality]
+            AnalogyBonus[Analogy Bonus<br/>prototype + cross-domain]
         end
         
         MetricsCalc --> BaseReward
         MetricsCalc --> NoveltyReward
         MetricsCalc --> StructureReward
+        MetricsCalc --> AnalogyBonus
         
         TotalReward[🎯 Total Intrinsic Reward]
         BaseReward --> TotalReward
         NoveltyReward --> TotalReward
         StructureReward --> TotalReward
+        AnalogyBonus --> TotalReward
     end
     
     %% Spike Detection and Memory Updates

@@ -531,6 +531,7 @@ index/                 # Integrated Vector-Graph Index (NEW)
 - **geDIG**: Graph Edit Distance + Information Gain
   - Detects structural changes in knowledge
   - Identifies "Eureka" moments
+  - Optional analogy bonus (prototype + cross-domain; default off) adds to IG
   
 - **Similarity Entropy**: Information-theoretic complexity
   - Measures knowledge diversity

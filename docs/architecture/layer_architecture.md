@@ -40,6 +40,7 @@
   - Build similarity graphs
   - Calculate geDIG (GED + IG)
   - Detect "Eureka spikes"
+  - Optional: Structural analogy bonus (prototype + cross-domain; default off)
   - **NEW**: Auto-register high-quality insights
   - Note: IG is Linkset‑First (paper‑aligned). When invoking the Core directly, pass `linkset_info`; otherwise a deprecated graph‑IG fallback will emit a warning.
 - **Core Innovation**: Mathematical insight modeling

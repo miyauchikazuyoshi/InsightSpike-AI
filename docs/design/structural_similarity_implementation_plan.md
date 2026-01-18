@@ -14,6 +14,7 @@
 - クエリ中心のhop展開時に、サブグラフの**構造パターン**を抽出
 - 異なるドメイン間で高い構造類似度を持つ場合、**アナロジーボーナス**をIGに加算
 - Word2Vecの「king - queen ≈ man - woman」のグラフ構造版を実現
+- 運用上は**プロトタイプ指定＋クロスドメイン前提**でアナロジーを判定（デフォルト無効）
 
 ### 1.3 期待効果
 - 単なる情報検索ではなく、**創発的な洞察**を評価可能に
@@ -135,6 +136,10 @@ class StructuralSimilarityConfig(BaseModel):
     domain_attribute: str = Field(default="domain")
 ```
 
+**運用ガード**
+- アナロジーボーナスは、**prototype_graph が明示されている場合のみ**付与する。
+- デフォルトは `enabled=False` かつ `cross_domain_only=True` とし、実験時のみ緩和する。
+
 ### 4.2 StructuralSimilarityEvaluator
 
 ```python
@@ -200,10 +205,11 @@ else:
     self._ss_evaluator = None
 
 # _calculate_multihop 内、combined_ig 計算後に追加
-if self._ss_evaluator is not None:
+# prototype_graph / prototype_center は外部メモリやコンテキストから注入される前提
+if self._ss_evaluator is not None and prototype_graph is not None:
     ss_result = self._ss_evaluator.evaluate(
-        sub_g1, sub_g2,
-        center1=list(focal_nodes)[0] if focal_nodes else None,
+        prototype_graph, sub_g2,
+        center1=prototype_center,
         center2=list(focal_nodes)[0] if focal_nodes else None,
     )
     if ss_result.is_analogy:
@@ -330,7 +336,13 @@ def test_gedig_with_structural_similarity_enabled():
     """構造類似度有効時のgeDIG計算"""
     config = {"structural_similarity": {"enabled": True}}
     core = GeDIGCore(**config)
-    result = core.calculate(g_prev, g_now, ...)
+    # proto/center は既知構造のテンプレート（例: 太陽系）
+    result = core.calculate(
+        g_prev,
+        g_now,
+        ...,
+        analogy_context={"prototype_graph": proto, "prototype_center": center},
+    )
     assert "analogy_bonus" in result.metadata
 
 def test_analogy_bonus_increases_ig():
