@@ -76,6 +76,26 @@ Key symbols are summarized in \cref{tab:notation}.
 For the definitions of \textbf{Information Gain} and \textbf{Normalized Entropy Difference}, see \cref{eq:ignorm_main} and \cref{eq:dh_norm} respectively.
 Details are provided in \cref{sec:gauge_theory} (Definition of Unified Gauge $\F$).
 
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Notation (core symbols).}
+  \label{tab:notation}
+  \begin{tabular}{@{}ll@{}}
+  \toprule
+  Symbol & Meaning \\
+  \midrule
+  $\F$ & unified gauge (lower is better) \\
+  $\gednorm$ & normalized edit-path cost \\
+  $\ignorm$ & normalized information gain ($\Delta H_{\mathrm{norm}} + \gamma \Delta \mathrm{SP}_{\mathrm{rel}}$) \\
+  $\Delta H_{\mathrm{norm}}$ & normalized entropy difference \\
+  $\Delta \mathrm{SP}_{\mathrm{rel}}$ & relative shortest-path shortening \\
+  $\theta_{\mathrm{AG}}, \theta_{\mathrm{DG}}$ & AG/DG thresholds (quantile-calibrated) \\
+  $H, k$ & max hops / beam width \\
+  \bottomrule
+  \end{tabular}
+\end{table}
+
 \subsection*{Short Forms and Sign Conventions}
 We use the following short forms and sign conventions (see \cref{sec:gauge_theory}):\\
 \noindent\textbf{Short form}: $\F=\gednorm-\lambda\bigl(\Delta H_{\mathrm{norm}}+\gamma\,\Delta\mathrm{SP}_{\mathrm{rel}}\bigr)$.\\
@@ -129,6 +149,24 @@ Neuroscientific background knowledge is not assumed for understanding implementa
 Here, geDIG stands for \textit{graph edit Distance and Information Gain}, and is a framework that bundles \textbf{change in edit-path cost} to the existing graph and \textbf{information gain (entropy difference + path shortening)} into a single gauge $\F$, judging ``When to accept'' as a \emph{re-ranking score} in static RAG and an \emph{update gate} in dynamic RAG.
 
 % -----------------------------------------------------------
+\subsection{Definition of Unified Gauge \texorpdfstring{$\F$}{F}}
+\label{sec:gauge_theory}
+We define the normalized information gain and entropy difference used throughout the paper.
+\begin{equation}
+  \ignorm = \Delta H_{\mathrm{norm}} + \gamma \Delta \mathrm{SP}_{\mathrm{rel}},\qquad \gamma>0
+  \label{eq:ignorm_main}
+\end{equation}
+\begin{equation}
+  \Delta H_{\mathrm{norm}} = \frac{H_{\text{after}} - H_{\text{before}}}{\log K}
+  \label{eq:dh_norm}
+\end{equation}
+We then define the unified gauge as
+\begin{equation}
+  \F = \gednorm - \lambda \ignorm.
+  \label{eq:f_main}
+\end{equation}
+Here $\Delta \mathrm{SP}_{\mathrm{rel}}$ denotes the relative shortening of mean shortest paths, and smaller $\F$ indicates a better trade-off between structure cost and information gain.
+
 \subsection{Why Simultaneous Evaluation of Structure and Probability is Necessary}\label{sec:why_both}
 
 Existing methods evaluate either similarity (probabilistic measure) or graph structure, but not both (Table~\ref{tab:structure_probability_comparison}).
@@ -356,9 +394,45 @@ This allows easy connection with existing vector DBs and ANN indexes.
 In generalized implementation, (i) backtrack rewinds to "step immediately before $\F$ began to worsen", (ii) eviction adopts two-stage policy of "LRU + low confidence" referencing AG/DG logs.
 Rough estimate of computational complexity and bottlenecks are summarized in Table~\ref{tab:complexity_summary}, and trading off $H,k,M$ with P50/P95 latency while looking at this table becomes safe operational design.
 
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Complexity summary (typical).}
+  \label{tab:complexity_summary}
+  \begin{tabular}{@{}p{3.8cm}p{5.2cm}p{5.6cm}@{}}
+  \toprule
+  Component & Method (typical) & Complexity \\
+  \midrule
+  $\Delta \mathrm{SP}_{\mathrm{rel}}$ & sampled BFS on induced subgraph & $\mathcal{O}(|\mathcal{P}|(N_h+E_h))$ per hop \\
+  $\Delta H_{\mathrm{norm}}$ & weight normalization + entropy & $\mathcal{O}(K)$ \\
+  $\gednorm$ & incremental edit-cost sum & $\mathcal{O}(\#\text{ops})$ \\
+  \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Embedding Space Requirements}
+\label{sec:phi_requirements}
+We assume the embedding space $\Phi$ used for similarity and entropy estimation satisfies the following minimal conditions:
+\begin{itemize}[leftmargin=*]
+  \item (A1) semantic gradient preservation: similarity reflects meaning.
+  \item (A2) norm normalization: comparable scales across domains.
+  \item (A3) local smoothness: small input changes yield small embedding changes.
+\end{itemize}
+These assumptions stabilize $\Delta H_{\mathrm{norm}}$ and $\Delta \mathrm{SP}_{\mathrm{rel}}$ across tasks.
+
 % Falsifiable predictions (duplicate section) integrated into paragraph in \S\ref{sec:ag_dg_gate}
 
 % -----------------------------------------------------------
+\section{Evaluation Protocol (Common)}
+\label{sec:eval_protocol}
+We use a shared protocol across experiments to ensure reproducibility and fair comparison.
+\paragraph{Equal-resources protocol}\label{sec:equal_resources}
+All methods are evaluated with the same embedding model, ANN index, top-$k$, LLM parameters, and hardware budget; no future data or labels are used at test time (no-peeking).
+\paragraph{PSZ metrics}\label{sec:psz_metrics}
+We report Acc, FMR, and additional P50 latency, and the PSZ shortfall $s_{\mathrm{PSZ}}$ defined in \cref{eq:psz_targets,eq:psz_deficit}.
+\paragraph{PSZ calibration}\label{sec:psz_calibration}
+AG/DG thresholds are calibrated by sweeping quantiles on a held-out slice and selecting the setting that minimizes $s_{\mathrm{PSZ}}$ under the equal-resources constraint.
+
 \section{Proof of Concept: Unified Metric Control in Partial Observation Maze}
 \label{sec:maze_experiment}
 
@@ -416,7 +490,7 @@ Notably, \textbf{compression rate is very high ($>90\%$)}, indicating that $\F$-
     \end{tabular}
 \end{table}
 
-\subsection{Qualitative Analysis: How $\F$ Behaves}
+\subsection{Qualitative Analysis: How \texorpdfstring{$\F$}{F} Behaves}
 We analyzed the behavior of $\F$, AG, DG in specific topological structures.
 
 \paragraph{Scenario 1: Straight Corridor (Redundancy)}
@@ -531,7 +605,7 @@ Table~\ref{tab:rag_static_result} summarizes the results.
     \end{tabular}
 \end{table}
 
-\section{Experiment III: Dynamic Acceptance (Dynamic GRAG $\times$ geDIG)}
+\section{Experiment III: Dynamic Acceptance (Dynamic GRAG \texorpdfstring{$\times$}{x} geDIG)}
 \label{sec:dynamic_rag_experiment}
 
 \subsection{Objective: Breaking the Trade-off with geDIG}
@@ -615,6 +689,13 @@ This experiment verifies this hypothesis (Phase 5: Causal Validation).
 \subsection{Contribution of Each Term}
 To verify the necessity of the unified gauge $\F = \gednorm - \lambda(\Delta H + \gamma \Delta \mathrm{SP})$, we conducted ablation studies (Table~\ref{tab:exp23_ablation_lite_ja}).
 
+\begin{table}[H]
+  \centering
+  \caption{Ablation summary (equal resources).}
+  \label{tab:exp23_ablation_lite_ja}
+  \input{../figures/exp23_ablation_table.tex}
+\end{table}
+
 \begin{itemize}
     \item \textbf{EPC Only}: FMR spikes ($+15\%$). Without information gain regularizer, it acts like a naive crawler, accepting trash.
     \item \textbf{IG Only}: Acceptance drops ($0\%$). Without structural cost, it waits infinitely for ``better gain'', leading to paralysis.
@@ -626,6 +707,7 @@ To verify the necessity of the unified gauge $\F = \gednorm - \lambda(\Delta H +
 
 \section{FEP--MDL Bridge (Operational Proposition)}
 \label{sec:fep_mdl_bridge}
+\label{sec:dual_fep_mdl}
 
 \noindent\textit{Note}: For the exploratory note on Helmholtz free energy and ``Knowledge Phase Transition'', see Appendix.
 
@@ -738,7 +820,7 @@ Future work will scale this to Phase 2 (Offline) and Transformer internal integr
 The author thanks the open-source community and the AI assistants that supported the theoretical formulation. Theoretical and experimental reviews are welcome.
 
 \bibliographystyle{plain}
-% \bibliography{references} % Already included in main file structure usually
+\bibliography{../references}
 
 \appendix
 
@@ -898,5 +980,3 @@ poetry run python -m experiments.exp2to4_lite.src.export_tables_tex
 \end{verbatim}
 
 \end{document}
-
-
