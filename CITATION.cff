@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite as below."
+title: "InsightSpike-AI: Brain-inspired Multi-Agent Discovery"
+version: "0.7-Eureka"
+doi: "10.48550/arXiv.XXXX.XXXXX"
+authors:
+  - family-names: "Miyauchi"
+    given-names: "Kazuyoshi"
+date-released: 2025-05-XX

@@ -189,7 +189,10 @@ maze-suite: maze-preset maze-calibrate maze-stats
 # ------------------------------------------------------------
 # One-click reproduction helpers
 # ------------------------------------------------------------
-.PHONY: reproduce-maze reproduce-rag
+# Default LLM provider for reproducibility (override with LLM_PROVIDER=openai)
+LLM_PROVIDER ?= mock
+
+.PHONY: reproduce-maze reproduce-rag reproduce-maze15 reproduce-hotpotqa reproduce-analogy
 
 reproduce-maze:
 	@echo "[maze] preset→calibration→stats (25x25, seeds=32)"
@@ -199,6 +202,50 @@ reproduce-rag:
 	@echo "[rag] lightweight k, tau calibration on subset"
 	PYTHONPATH=experiments/rag-dynamic-db-v3/src \
 	python experiments/rag-dynamic-db-v3/src/calibrate_k_tau.py --subset 100 || true
+
+reproduce-maze15:
+	@mkdir -p docs/paper/data
+	@echo "[maze15] L3-only paper preset (15x15, steps=250, seeds=12)"
+	INSIGHTSPIKE_PRESET=paper PYTHONPATH=src \
+	python experiments/maze-query-hub-prototype/tools/run_paper_l3_only.py \
+	  --maze-size 15 --max-steps 250 --seeds 12 \
+	  --out-root experiments/maze-query-hub-prototype/results/l3_only \
+	  --namespace l3only_15x15_s250 \
+	  --maze-snapshot-out docs/paper/data/maze_15x15.json
+	python experiments/maze-query-hub-prototype/tools/export_paper_maze.py \
+	  --summary experiments/maze-query-hub-prototype/results/l3_only/_15x15_s250_l3only_summary.json \
+	  --steps experiments/maze-query-hub-prototype/results/l3_only/_15x15_s250_l3only_steps.json \
+	  --out-json docs/paper/data/maze_15x15_l3_s250.json \
+	  --out-csv docs/paper/data/maze_15x15_l3_s250.csv \
+	  --compression-base mem
+
+reproduce-hotpotqa:
+	@if [ ! -f experiments/hotpotqa-benchmark/data/hotpotqa_sample_100.jsonl ]; then \
+	  echo "[hotpotqa] Missing data: experiments/hotpotqa-benchmark/data/hotpotqa_sample_100.jsonl"; \
+	  echo "[hotpotqa] Run: python experiments/hotpotqa-benchmark/scripts/download_data.py"; \
+	  exit 1; \
+	fi
+	@if [ "$(LLM_PROVIDER)" = "openai" ] && [ -z "$$OPENAI_API_KEY" ]; then \
+	  echo "[hotpotqa] OPENAI_API_KEY is not set (LLM_PROVIDER=openai)"; \
+	  exit 1; \
+	fi
+	@mkdir -p docs/paper/data
+	@echo "[hotpotqa] geDIG sample run (provider=$(LLM_PROVIDER))"
+	INSIGHTSPIKE_LLM_PROVIDER=$(LLM_PROVIDER) LLM_PROVIDER=$(LLM_PROVIDER) \
+	python experiments/hotpotqa-benchmark/scripts/run_gedig.py \
+	  --data experiments/hotpotqa-benchmark/data/hotpotqa_sample_100.jsonl \
+	  --output experiments/hotpotqa-benchmark/results \
+	  --limit 100
+	@LATEST=$$(ls -1t experiments/hotpotqa-benchmark/results/gedig_*_summary.json | head -n1); \
+	  cp $$LATEST docs/paper/data/hotpotqa_sample_summary.json; \
+	  echo "[hotpotqa] Summary -> docs/paper/data/hotpotqa_sample_summary.json"
+
+reproduce-analogy:
+	@mkdir -p docs/paper/data
+	@echo "[analogy] Cross-domain QA (SS enabled/disabled)"
+	INSIGHTSPIKE_LITE_MODE=1 python -m experiments.structural_similarity.cross_domain_qa.qa_evaluation
+	@cp experiments/structural_similarity/cross_domain_qa/results/comparison_results.json \
+	  docs/paper/data/analogy_comparison.json
 
 .PHONY: rag-figs
 rag-figs:

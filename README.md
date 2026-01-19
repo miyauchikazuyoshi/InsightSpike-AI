@@ -5,6 +5,12 @@
 [![Paper](https://img.shields.io/badge/paper-PDF-blue)](docs/paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf)
 [![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-green)](https://miyauchikazuyoshi.github.io/InsightSpike-AI)
 
+## 3つの入口
+
+- **Try (30秒)**: `python examples/public_quick_start.py`（mock / no API）
+- **Understand (5分)**: [5分でわかるgeDIG](docs/concepts/gedig_in_5_minutes.md) / [直感的ガイド](docs/concepts/intuition.md)
+- **Reproduce (1コマンド)**: `make reproduce-maze15` / `make reproduce-hotpotqa` / `make reproduce-analogy`
+
 ---
 
 ## なぜアインシュタインは、アマチュアの独立研究者として、相対論を発見できたのか？
@@ -108,6 +114,16 @@ geDIGは3つのレベルすべてをカバーする統一フレームワーク�
 ---
 
 ## 検証結果
+
+### 再現コマンド一覧
+
+| Experiment | Claim | Metric | Reproduce | Artifacts |
+|---|---|---:|---|---|
+| Maze (15×15) | AG/DG gating improves exploration | success=98% | `make reproduce-maze15` | `docs/paper/data/maze_15x15_l3_s250.json` |
+| HotpotQA | Dynamic RAG improves EM | EM +3.5pt | `make reproduce-hotpotqa` | `docs/paper/data/hotpotqa_sample_summary.json` |
+| Cross-domain analogy | Structural similarity improves QA | F1 +60% | `make reproduce-analogy` | `docs/paper/data/analogy_comparison.json` |
+
+詳細は [実験カード一覧](docs/experiments/index.md) を参照。
 
 ### 科学史の再現
 
@@ -232,7 +248,9 @@ geDIGはこれらを操作的に橋渡しする。
 - [直感的ガイド](docs/concepts/intuition.md) / [日本語](docs/concepts/intuition_ja.md)
 - [論文 (v6)](docs/paper/geDIG_onegauge_improved_v6.pdf)
 - [同型発見の設計書](docs/design/level3_isomorphism_discovery.md)
-- [実験結果](docs/experiments/structural_similarity_results.md)
+- [実験カード一覧](docs/experiments/index.md)
+- [構造類似度 実験結果](docs/experiments/structural_similarity_results.md)
+- [Version Matrix](docs/version_matrix.md)
 
 ---
 

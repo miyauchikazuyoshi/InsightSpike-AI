@@ -385,14 +385,17 @@
                 <div class="flex gap-2 bg-bg/80 p-1.5 rounded-xl border border-white/10 shadow-lg backdrop-blur">
                     <button onclick="playScenario('ambiguity')"
                         class="flex flex-col items-start px-4 py-2 rounded-lg bg-white/5 hover:bg-danger/10 border border-transparent hover:border-danger/40 transition group min-w-[140px]">
-                        <span class="text-xs text-danger font-bold group-hover:text-red-400">Case 1: Ambiguity</span>
-                        <span class="text-[10px] text-slate-500 group-hover:text-slate-300">High Cost (AG Fires)</span>
+                        <span class="text-xs text-danger font-bold group-hover:text-red-400">Case 1: Ambiguity
+                            Gate</span>
+                        <span class="text-[10px] text-slate-500 group-hover:text-slate-300">Phase 1: Exploration Needed
+                            (Awake)</span>
                     </button>
                     <button onclick="playScenario('insight')"
                         class="flex flex-col items-start px-4 py-2 rounded-lg bg-white/5 hover:bg-success/10 border border-transparent hover:border-success/40 transition group min-w-[140px]">
-                        <span class="text-xs text-success font-bold group-hover:text-emerald-400">Case 2: Insight</span>
-                        <span class="text-[10px] text-slate-500 group-hover:text-slate-300">Shortcut Found (DG
-                            Fires)</span>
+                        <span class="text-xs text-success font-bold group-hover:text-emerald-400">Case 2: Decision
+                            Gate</span>
+                        <span class="text-[10px] text-slate-500 group-hover:text-slate-300">Phase 2: Insight Found
+                            (Sleep)</span>
                     </button>
                 </div>
             </div>
@@ -626,76 +629,78 @@
                                             class="absolute top-8 text-danger text-xs font-bold uppercase tracking-widest">
                                             Reject</div>
                                 </div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="grid md:grid-cols-2 gap-12 items-start">
-                    <div>
-                        <div class="text-slate-500 font-mono text-sm mb-2">03. WHY BOTH</div>
-                        <h3 class="text-2xl font-bold text-white mb-4">Why Probability + Graph, Together</h3>
-                        <p class="text-slate-400 leading-relaxed">
-                            Similarity alone stops too early; structure alone cannot tell if uncertainty remains.
-                            geDIG evaluates both to decide when to integrate.
-                        </p>
-                        <div class="mt-6 bg-bg border border-white/10 rounded-xl p-4">
-                            <div class="text-[11px] text-slate-500 uppercase tracking-wider mb-3">Quick Comparison
+                    <div class="grid md:grid-cols-2 gap-12 items-start">
+                        <div>
+                            <div class="text-slate-500 font-mono text-sm mb-2">03. WHY BOTH</div>
+                            <h3 class="text-2xl font-bold text-white mb-4">Why Probability + Graph, Together</h3>
+                            <p class="text-slate-400 leading-relaxed">
+                                Similarity alone stops too early; structure alone cannot tell if uncertainty remains.
+                                geDIG evaluates both to decide when to integrate.
+                            </p>
+                            <div class="mt-6 bg-bg border border-white/10 rounded-xl p-4">
+                                <div class="text-[11px] text-slate-500 uppercase tracking-wider mb-3">Quick Comparison
+                                </div>
+                                <table class="w-full text-left text-xs text-slate-400">
+                                    <thead class="text-[11px] uppercase tracking-wider text-slate-500">
+                                        <tr>
+                                            <th class="py-2">Method</th>
+                                            <th class="py-2">Probability</th>
+                                            <th class="py-2">Graph</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-white/5">
+                                        <tr>
+                                            <td class="py-2 text-slate-300">BM25 / Contriever</td>
+                                            <td class="py-2 text-success">Yes</td>
+                                            <td class="py-2 text-slate-500">No</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2 text-slate-300">GraphRAG</td>
+                                            <td class="py-2 text-slate-500">No</td>
+                                            <td class="py-2 text-success">Yes</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2 text-slate-300 font-bold">geDIG</td>
+                                            <td class="py-2 text-success font-bold">Yes</td>
+                                            <td class="py-2 text-success font-bold">Yes</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
-                            <table class="w-full text-left text-xs text-slate-400">
-                                <thead class="text-[11px] uppercase tracking-wider text-slate-500">
-                                    <tr>
-                                        <th class="py-2">Method</th>
-                                        <th class="py-2">Probability</th>
-                                        <th class="py-2">Graph</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-white/5">
-                                    <tr>
-                                        <td class="py-2 text-slate-300">BM25 / Contriever</td>
-                                        <td class="py-2 text-success">Yes</td>
-                                        <td class="py-2 text-slate-500">No</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-2 text-slate-300">GraphRAG</td>
-                                        <td class="py-2 text-slate-500">No</td>
-                                        <td class="py-2 text-success">Yes</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-2 text-slate-300 font-bold">geDIG</td>
-                                        <td class="py-2 text-success font-bold">Yes</td>
-                                        <td class="py-2 text-success font-bold">Yes</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        </div>
+                        <div>
+                            <details class="group bg-bg border border-white/10 rounded-xl p-4">
+                                <summary
+                                    class="cursor-pointer text-sm font-semibold text-slate-200 flex items-center justify-between">
+                                    <span>Rationale in the paper (expand)</span>
+                                    <span class="text-[11px] text-slate-500 group-open:hidden">Details</span>
+                                    <span class="text-[11px] text-slate-500 hidden group-open:inline">Close</span>
+                                </summary>
+                                <div class="mt-3 text-xs text-slate-400 leading-relaxed space-y-3">
+                                    <p>
+                                        geDIG measures structural cost (graph edit distance) and probabilistic gain
+                                        (entropy reduction + shortcut effect) in one gauge. This blocks false positives
+                                        that look structured but stay uncertain, and avoids redundant retrievals that
+                                        look
+                                        probable but add no structure.
+                                    </p>
+                                    <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/raw/main/docs/paper/geDIG_onegauge_improved_v6.pdf"
+                                        target="_blank" class="text-accent hover:underline">See the full explanation
+                                        (PDF,
+                                        §Why Both)</a>
+                                </div>
+                            </details>
                         </div>
                     </div>
-                    <div>
-                        <details class="group bg-bg border border-white/10 rounded-xl p-4">
-                            <summary
-                                class="cursor-pointer text-sm font-semibold text-slate-200 flex items-center justify-between">
-                                <span>Rationale in the paper (expand)</span>
-                                <span class="text-[11px] text-slate-500 group-open:hidden">Details</span>
-                                <span class="text-[11px] text-slate-500 hidden group-open:inline">Close</span>
-                            </summary>
-                            <div class="mt-3 text-xs text-slate-400 leading-relaxed space-y-3">
-                                <p>
-                                    geDIG measures structural cost (graph edit distance) and probabilistic gain
-                                    (entropy reduction + shortcut effect) in one gauge. This blocks false positives
-                                    that look structured but stay uncertain, and avoids redundant retrievals that look
-                                    probable but add no structure.
-                                </p>
-                                <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/raw/main/docs/paper/geDIG_onegauge_improved_v6.pdf"
-                                    target="_blank" class="text-accent hover:underline">See the full explanation (PDF,
-                                    §Why Both)</a>
-                            </div>
-                        </details>
-                    </div>
-                </div>
 
-                <div class="grid md:grid-cols-2 gap-12 items-center">
-                    <div class="order-2 md:order-1">
-                        <div class="bg-panel border border-white/5 rounded-xl p-8">
-                            <h4 class="text-white font-bold mb-4 border-b border-white/10 pb-2">FEP-MDL Bridge</h4>
+                    <div class="grid md:grid-cols-2 gap-12 items-center">
+                        <div class="order-2 md:order-1">
+                            <div class="bg-panel border border-white/5 rounded-xl p-8">
+                                <h4 class="text-white font-bold mb-4 border-b border-white/10 pb-2">FEP-MDL Bridge</h4>
                                 <div class="space-y-4 text-sm font-mono">
                                     <div class="flex justify-between">
                                         <span class="text-slate-400">0-hop (AG)</span>
@@ -712,13 +717,13 @@
                                     </div>
                                 </div>
                             </div>
-                    </div>
-                    <div class="order-1 md:order-2">
-                        <div class="text-slate-500 font-mono text-sm mb-2">04. THEORETICAL BACKBONE</div>
-                        <h3 class="text-2xl font-bold text-white mb-4">Bridging FEP & MDL</h3>
-                        <p class="text-slate-400 leading-relaxed mb-4">
-                            geDIG provides an <strong>operational correspondence</strong> between the Free Energy
-                            Principle (minimizing surprise) and Minimum Description Length (maximizing compression).
+                        </div>
+                        <div class="order-1 md:order-2">
+                            <div class="text-slate-500 font-mono text-sm mb-2">04. THEORETICAL BACKBONE</div>
+                            <h3 class="text-2xl font-bold text-white mb-4">Bridging FEP & MDL</h3>
+                            <p class="text-slate-400 leading-relaxed mb-4">
+                                geDIG provides an <strong>operational correspondence</strong> between the Free Energy
+                                Principle (minimizing surprise) and Minimum Description Length (maximizing compression).
                             </p>
                             <p class="text-slate-400 leading-relaxed">
                                 0-hop detects immediate prediction error (FEP), while Multi-hop validates global
@@ -742,19 +747,24 @@
             </div>
 
             <!-- HF Demo Card -->
-            <div class="mb-10 bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-xl p-8 hover:border-purple-500/50 transition group">
+            <div
+                class="mb-10 bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-xl p-8 hover:border-purple-500/50 transition group">
                 <div class="flex flex-col md:flex-row items-center justify-between gap-6">
                     <div class="flex-1">
-                        <span class="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-1 block">Interactive</span>
+                        <span
+                            class="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-1 block">Interactive</span>
                         <h3 class="text-2xl font-bold text-white mb-2">Live Demo with Knowledge Graph Visualization</h3>
                         <p class="text-slate-400 text-sm mb-4">
                             See geDIG in action on HotPotQA questions. Watch how the knowledge graph evolves
                             before and after retrieval, and understand why geDIG accepts or rejects new information.
                         </p>
                         <ul class="text-xs text-slate-400 space-y-1 mb-4">
-                            <li class="flex items-center gap-2"><span class="text-purple-400">✓</span> Before/After Knowledge Graph comparison</li>
-                            <li class="flex items-center gap-2"><span class="text-purple-400">✓</span> Real-time F-score calculation</li>
-                            <li class="flex items-center gap-2"><span class="text-purple-400">✓</span> AG/DG gate status visualization</li>
+                            <li class="flex items-center gap-2"><span class="text-purple-400">✓</span> Before/After
+                                Knowledge Graph comparison</li>
+                            <li class="flex items-center gap-2"><span class="text-purple-400">✓</span> Real-time F-score
+                                calculation</li>
+                            <li class="flex items-center gap-2"><span class="text-purple-400">✓</span> AG/DG gate status
+                                visualization</li>
                         </ul>
                     </div>
                     <div class="flex-shrink-0">
@@ -763,7 +773,9 @@
                             <span class="text-2xl">🧠</span>
                             Try on Hugging Face
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
+                                </path>
                             </svg>
                         </a>
                     </div>

@@ -217,6 +217,31 @@ Title: 「RAGの『いつ更新するか』問題を解く ― geDIG入門」
 - 英語版（Medium）: 下書き完成、アカウント作成待ち
 - Qiita/dev.to: 未着手
 
+### 1.4 再現性・導線整備（Repository UX）
+
+**目的**: 実験の強さが一発で伝わり、第三者が再現できる状態を固定する
+
+#### 入口（README）
+- 「Try / Understand / Reproduce」の3導線を固定
+- Repro Table 追加（Experiment / Claim / Metric / Reproduce / Artifacts）
+
+#### 再現基盤（Makefile + 出力）
+- `make reproduce-maze15 / reproduce-hotpotqa / reproduce-analogy`
+- デフォルトは no-network（mock provider）。外部LLMは明示上書き
+- 生成物は `docs/paper/data/` に集約、rawは `experiments/*/results`
+- Dataset未配置時はエラーで取得方法を案内
+
+#### 実験カード
+- `docs/experiments/index.md` + 各実験カード（maze/hotpotqa/analogy ほか）
+- テンプレ: Claim / Setup / Run / Metrics / Outputs / Limitations
+
+#### 最小アブレーション
+- Full geDIG / AG only / DG only / F without ΔSP
+
+#### 成果固定化
+- `docs/version_matrix.md` 追加（paper vs code の差分表）
+- Releaseタグ（v0.1.0） + ルート `CITATION.cff` 整備
+
 ### Phase 1 成果物チェックリスト
 
 - [x] `experiments/hotpotqa-benchmark/results/` に結果JSON → ✅ dev 7,405件 + baselines
@@ -224,6 +249,15 @@ Title: 「RAGの『いつ更新するか』問題を解く ― geDIG入門」
 - [x] Hugging Face Spacesにデプロイ済みデモ → https://huggingface.co/spaces/miyaukaz/gedig-demo（Gradio切替済み）
 - [x] 技術ブログ記事（日本語）公開 → ✅ Zenn公開済み (2026-01-17)
 - [x] README.mdにデモへのリンク追加
+- [x] README冒頭の入口ブロック（Try/Understand/Reproduce）
+- [x] README Repro Table（再現コマンド列付き）
+- [x] `docs/experiments/` 実験カード（index + 主要3件）
+- [x] Makefile `reproduce-*` ターゲット追加
+- [x] 再現コマンドの no-network デフォルト化
+- [x] 生成物の `docs/paper/data/` 集約（集計のみ）
+- [ ] 主要実験のアブレーション表（AG/DG/F）
+- [x] `docs/version_matrix.md` 作成
+- [ ] Release v0.1.0（pending）+ ルート `CITATION.cff`（done）
 
 #### 補足（リポジトリ内の実体）
 
@@ -575,5 +609,5 @@ docs/
 
 ---
 
-**Document Version**: 1.8
-**Last Updated**: 2026-01-18
+**Document Version**: 1.9
+**Last Updated**: 2026-01-19

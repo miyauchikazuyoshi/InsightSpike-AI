@@ -123,6 +123,26 @@ class GeDIGHotpotQAAdapter:
 
         return self.client
 
+    def _mock_llm_enabled(self) -> bool:
+        provider = (os.getenv("LLM_PROVIDER") or os.getenv("INSIGHTSPIKE_LLM_PROVIDER") or "").strip().lower()
+        return provider in {"mock", "offline", "none"}
+
+    def _mock_answer(self, question: str, context: list[str]) -> str:
+        if not context:
+            return "Unknown"
+        q_tokens = set(self._tokenize_for_features(question))
+        best_sentence = context[0]
+        best_score = -1
+        for sent in context:
+            tokens = set(self._tokenize_for_features(sent))
+            score = len(q_tokens & tokens)
+            if score > best_score:
+                best_score = score
+                best_sentence = sent
+        if best_score <= 0:
+            return "Unknown"
+        return best_sentence.strip()
+
     def _tokenize(self, text: str) -> list[str]:
         return text.lower().split()
 
@@ -404,6 +424,8 @@ class GeDIGHotpotQAAdapter:
 
     def _generate_answer(self, question: str, context: list[str]) -> str:
         """Generate answer using LLM."""
+        if self._mock_llm_enabled():
+            return self._mock_answer(question, context)
         client = self._get_llm_client()
 
         context_str = "\n".join(f"- {sent}" for sent in context)
