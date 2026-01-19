@@ -1,0 +1,194 @@
+% 図1: 閃きの階層レベル
+% Level 3 → Level 2 → Level 1 の階層構造
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    level/.style={rectangle, draw, rounded corners, align=center, minimum width=50mm, minimum height=12mm, font=\small},
+    arrow/.style={->, >=Latex, thick},
+    note/.style={font=\scriptsize, text=gray}
+]
+
+% Level 3: Isomorphism Discovery
+\node[level, fill=blue!20] (L3) at (0, 4) {
+    \textbf{Level 3: 同型発見}\\
+    $T^* = \arg\min_T \mathrm{GED}(T(G_1), G_2)$
+};
+\node[note, right=5mm of L3] {Einstein: ローレンツ変換};
+
+% Level 2: Analogy Detection
+\node[level, fill=green!20] (L2) at (0, 2) {
+    \textbf{Level 2: アナロジー検出}\\
+    $\mathrm{SS}(G_1, G_2) > \theta$
+};
+\node[note, right=5mm of L2] {Bohr: 太陽系 $\approx$ 原子};
+
+% Level 1: Pattern Matching
+\node[level, fill=yellow!20] (L1) at (0, 0) {
+    \textbf{Level 1: パターンマッチ}\\
+    $\mathrm{sim}(a, b) = \cos(\phi(a), \phi(b))$
+};
+\node[note, right=5mm of L1] {要素の類似性検出};
+
+% Arrows
+\draw[arrow] (L1) -- (L2);
+\draw[arrow] (L2) -- (L3);
+
+% Labels on arrows
+\node[note] at (-1.5, 1) {構造化};
+\node[note] at (-1.5, 3) {変換発見};
+
+% geDIG coverage
+\draw[dashed, thick, blue!60] (-3.2, -0.8) rectangle (3.2, 2.8);
+\node[font=\footnotesize, text=blue!60] at (2.5, -0.5) {geDIG Phase 1};
+
+\end{tikzpicture}
+\caption{閃きの三階層モデル。Level 1は要素間の類似性、Level 2は構造間のアナロジー、Level 3は構造を同型にする変換の発見を表す。現在のgeDIGはLevel 1-2をカバーし、Level 3は将来課題である。}
+\label{fig:insight_levels}
+\end{figure}
+
+
+% 図2: 分子設計AIとの対応
+% Scaffold Hopping と Theory Unification の並列比較
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    box/.style={rectangle, draw, rounded corners, align=center, minimum width=28mm, minimum height=15mm, font=\small},
+    arrow/.style={->, >=Latex, thick},
+    label/.style={font=\footnotesize, text=gray}
+]
+
+% Left side: Molecular Design
+\node[font=\bfseries] at (-3, 4.5) {分子設計AI};
+
+\node[box, fill=red!10] (mol1) at (-3, 3) {分子A\\(元の骨格)};
+\node[box, fill=red!20] (mol2) at (-3, 0.5) {分子B\\(新しい骨格)};
+\draw[arrow, red!70] (mol1) -- node[left, label] {GED\\(原子追加/削除)} (mol2);
+
+\node[label] at (-3, -1) {\textbf{同じ薬効}};
+\node[font=\scriptsize] at (-3, -1.5) {Scaffold Hopping};
+
+% Right side: Knowledge Discovery
+\node[font=\bfseries] at (3, 4.5) {geDIG (GED-Insight)};
+
+\node[box, fill=blue!10] (th1) at (3, 3) {理論A\\(既存の構造)};
+\node[box, fill=blue!20] (th2) at (3, 0.5) {理論B\\(新しい構造)};
+\draw[arrow, blue!70] (th1) -- node[right, label] {GED\\(概念追加/削除)} (th2);
+
+\node[label] at (3, -1) {\textbf{同じ説明力}};
+\node[font=\scriptsize] at (3, -1.5) {Theory Unification};
+
+% Central correspondence
+\draw[<->, dashed, thick, gray] (-0.5, 3) -- node[above, font=\footnotesize] {数学的同型} (0.5, 3);
+\draw[<->, dashed, thick, gray] (-0.5, 0.5) -- node[above, font=\footnotesize] {} (0.5, 0.5);
+
+% Bottom summary
+\node[draw, rounded corners, fill=gray!10, minimum width=80mm, minimum height=10mm, font=\small] at (0, -2.5) {
+    分子グラフのトポロジカル探索 $\Leftrightarrow$ 知識グラフのトポロジカル探索
+};
+
+\end{tikzpicture}
+\caption{分子設計AIとgeDIGの数学的対応。創薬における Scaffold Hopping（同じ薬効を持つ異構造分子の発見）と、知識における Theory Unification（同じ説明力を持つ異構造理論の発見）は、GED最小化という同一の数学的枠組みで記述できる。}
+\label{fig:molecular_correspondence}
+\end{figure}
+
+
+% 図3: アインシュタインの相対論の構造的理解
+% 電磁気学と古典力学の統合
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    theory/.style={ellipse, draw, align=center, minimum width=35mm, minimum height=20mm, font=\small},
+    transform/.style={rectangle, draw, rounded corners, fill=yellow!30, align=center, minimum width=40mm, font=\small},
+    arrow/.style={->, >=Latex, thick}
+]
+
+% Two conflicting theories
+\node[theory, fill=red!15] (em) at (-3, 2) {電磁気学\\(Maxwell方程式)};
+\node[theory, fill=blue!15] (cm) at (3, 2) {古典力学\\(Newton方程式)};
+
+% Conflict
+\draw[<->, thick, red, dashed] (em) -- node[above, font=\footnotesize, text=red] {矛盾} (cm);
+
+% Transformation (Insight)
+\node[transform] (lorentz) at (0, -0.5) {\textbf{ローレンツ変換}\\$T^* = \arg\min_T \mathrm{GED}(T(G_1), G_2)$};
+
+% Arrows to transformation
+\draw[arrow] (em) -- (lorentz);
+\draw[arrow] (cm) -- (lorentz);
+
+% Unified theory
+\node[theory, fill=green!20] (sr) at (0, -3) {特殊相対論\\(統一された時空構造)};
+
+% Arrow from transformation to unified
+\draw[arrow, thick] (lorentz) -- node[right, font=\footnotesize] {同型化} (sr);
+
+% Labels
+\node[font=\scriptsize, text=gray] at (-4.5, 0) {入力: 2つの構造};
+\node[font=\scriptsize, text=gray] at (4.5, -0.5) {発見: 変換$T^*$};
+\node[font=\scriptsize, text=gray] at (0, -4.2) {出力: 統一理論};
+
+% Box around the insight
+\draw[dashed, thick, orange] (-2.5, -1.2) rectangle (2.5, 0.2);
+\node[font=\footnotesize, text=orange] at (2, 0.5) {\textbf{= 閃きの実体}};
+
+\end{tikzpicture}
+\caption{アインシュタインの相対論の構造的理解。電磁気学と古典力学という矛盾する2つの理論構造を、ローレンツ変換という最小編集操作で同型にした。この変換の発見こそが「閃き」の計算的実体である。}
+\label{fig:einstein_insight}
+\end{figure}
+
+
+% 図4: geDIGのロードマップ（拡張版）
+% Phase 1 → ... → Level 3 Insight Discovery
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance=10mm,
+    phase/.style={rectangle, draw, rounded corners, align=center, minimum width=22mm, minimum height=12mm, font=\scriptsize},
+    done/.style={phase, fill=green!20},
+    current/.style={phase, fill=yellow!20},
+    future/.style={phase, fill=gray!10},
+    arrow/.style={->, >=Latex}
+]
+
+% Row 1: Current achievements
+\node[done] (p1) {Phase 1\\When制御\\(Maze/RAG)};
+\node[done, right=of p1] (ss) {構造類似度\\Level 2\\(F1 +60\%)};
+\node[current, right=of ss] (embed) {埋め込み統一\\Phase 6};
+\node[future, right=of embed] (offline) {オフライン再配線\\Phase 2};
+
+% Row 2: Future
+\node[future, below=15mm of p1] (attn) {注意グラフ\\解析};
+\node[future, below=15mm of ss] (layer) {層ゲート\\制御};
+\node[future, below=15mm of embed] (iso) {\textbf{Level 3}\\同型発見};
+\node[future, below=15mm of offline] (world) {世界モデル\\統合};
+
+% Arrows
+\draw[arrow] (p1) -- (ss);
+\draw[arrow] (ss) -- (embed);
+\draw[arrow] (embed) -- (offline);
+
+\draw[arrow] (p1) -- (attn);
+\draw[arrow] (ss) -- (layer);
+\draw[arrow] (embed) -- (iso);
+\draw[arrow] (offline) -- (world);
+
+\draw[arrow] (attn) -- (layer);
+\draw[arrow] (layer) -- (iso);
+\draw[arrow] (iso) -- (world);
+
+% Labels
+\node[font=\footnotesize, text=gray] at (-2, 0.8) {達成済み};
+\node[font=\footnotesize, text=gray] at (-2, -2) {将来課題};
+
+% Highlight Level 3
+\draw[thick, orange, dashed] ([xshift=-3mm, yshift=3mm]iso.north west) rectangle ([xshift=3mm, yshift=-3mm]iso.south east);
+\node[font=\scriptsize, text=orange] at ([yshift=-8mm]iso.south) {本論文の最終目標};
+
+\end{tikzpicture}
+\caption{geDIGの発展ロードマップ。Phase 1（When制御）と構造類似度（Level 2アナロジー検出）は達成済み。Level 3（同型発見）の実現が本論文の最終目標であり、「理論を発見するAI」への道を開く。}
+\label{fig:gedig_roadmap_extended}
+\end{figure}

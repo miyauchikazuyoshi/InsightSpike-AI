@@ -1,0 +1,333 @@
+{
+  "metrics": {
+    "total_examples": 200,
+    "baseline_accuracy": 0.105,
+    "ss_accuracy": 0.065,
+    "bridge_detection_rate": 1.0,
+    "avg_bridge_similarity": 0.9988899475336075,
+    "accuracy_when_bridge_detected": 0.065,
+    "delta_accuracy": -0.039999999999999994
+  },
+  "sample_results": [
+    {
+      "example_id": "5a86458b5542991e771815ec",
+      "question": "What is the population of the city where the Akademisches Kunstmuseum is?",
+      "gold_docs": [
+        "Akademisches Kunstmuseum",
+        "Bonn"
+      ],
+      "predicted_docs": [
+        "Bonn",
+        "Akademisches Kunstmuseum"
+      ],
+      "bridge_detected": true,
+      "bridge_similarity": 0.9608245491981506,
+      "doc_retrieval_correct": true,
+      "used_ss": true
+    },
+    {
+      "example_id": "5a7a9b9a5542990198eaf160",
+      "question": "When was the Chinese American electronic musician and singer who collaborated on the album I Remember born?",
+      "gold_docs": [
+        "I Remember (AlunaGeorge album)",
+        "Zhu (musician)"
+      ],
+      "predicted_docs": [
+        "Zhu (musician)",
+        "Elysia Crampton Presents: Demon City"
+      ],
+      "bridge_detected": true,
+      "bridge_similarity": 0.9999250769615173,
+      "doc_retrieval_correct": false,
+      "used_ss": true
+    },
+    {
+      "example_id": "5ac2659b55429963665199a1",
+      "question": "How many laps did Harry Prowell run during the 10,000 metres race at the 1967 Pan American Games?",
+      "gold_docs": [
+        "10,000 metres",
+        "Harry Prowell"
+      ],
+      "predicted_docs": [
+        "Ross MacKenzie (athlete)",
+        "Brian MacLaren"
+      ],
+      "bridge_detected": true,
+      "bridge_similarity": 0.9999936819076538,
+      "doc_retrieval_correct": false,
+      "used_ss": true
+    },
+    {
+      "example_id": "5ac2758b55429963665199c3",
+      "question": "The organization that Nicolae Titulescu served two terms as president was founded on what date?",
+      "gold_docs": [
+        "Nicolae Titulescu",
+        "League of Nations"
+      ],
+      "predicted_docs": [
+        "Frank Jackson (Alabama)",
+        "Gheorghe T\u0103t\u0103rescu"
+      ],
+      "bridge_detected": true,
+      "bridge_similarity": 0.9994688630104065,
+      "doc_retrieval_correct": false,
+      "used_ss": true
+    },
+    {
+      "example_id": "5a8a575a554299515336136e",
+      "question": "Rynella is an unincorporated community named after the daughters of a conservationist who presided of the maker of a brand of hot sauce made from vinegar, salt and what kind of peppers? ",
+      "gold_docs": [
+        "Rynella, Louisiana",
+        "Tabasco sauce"
+      ],
+      "predicted_docs": [
+        "Louisiana Hot Sauce",
+        "Texas Pete"
+      ],
+      "bridge_detected": true,
+      "bridge_similarity": 0.9954291582107544,
+      "doc_retrieval_correct": false,
+      "used_ss": true
+    },
+    {
+      "example_id": "5adf75e35542993344016c98",
+      "question": "What American horror film directed by Sidney J. Furie was based off an alleged haunting which occurred in 1974 at Culver City, California?",
+      "gold_docs": [
+        "The Entity",
+        "Doris Bither case"
+      ],
+      "predicted_docs": [
+        "The Entity",
+        "The Snake Woman"
+      ],
+      "bridge_detected": true,
+      "bridge_similarity": 0.9999381899833679,
+      "doc_retrieval_correct": false,
+      "used_ss": true
+    },
+    {
+      "example_id": "5abaee845542996606241696",
+      "question": "On February 25, 2017 tony Harrison lost the the International Boxing Federation light middleweight world title to a boxer from what state?",
+      "gold_docs": [
+        "Jarrett Hurd",
+        "Tony Harrison (boxer)"
+      ],
+      "predicted_docs": [
+        "Guy Waters",
+        "Andre Thysse"
+      ],
+      "bridge_detected": true,
+      "bridge_similarity": 0.9999993443489075,
+      "doc_retrieval_correct": false,
+      "used_ss": true
+    },
+    {
+      "example_id": "5ac3bab155429939154138fb",
+      "question": "The House of Hanover held the British throne until after Victoria's death, when it was past to the dynasty that ruled which duchy?",
+      "gold_docs": [
+        "House of Saxe-Coburg and Gotha",
+        "House of Hanover"
+      ],
+      "predicted_docs": [
+        "House of Saxe-Coburg and Gotha",
+        "List of consorts of Tuscany"
+      ],
+      "bridge_detected": true,
+      "bridge_similarity": 0.9999707341194153,
+      "doc_retrieval_correct": false,
+      "used_ss": true
+    },
+    {
+      "example_id": "5abdff775542993f32c2a082",
+      "question": "At what theater is the composer and lyricist for the musical Big Fish a residential artist?",
+      "gold_docs": [
+        "Andrew Lippa",
+        "Big Fish (musical)"
+      ],
+      "predicted_docs": [
+        "Hidden Expedition",
+        "Mystery Case Files: Escape From Ravenhearst"
+      ],
+      "bridge_detected": true,
+      "bridge_similarity": 0.999972403049469,
+      "doc_retrieval_correct": false,
+      "used_ss": true
+    },
+    {
+      "example_id": "5a728dc65542992359bc30ef",
+      "question": "What fellow Turkish footballer did Darko Kova\u010devi\u0107 form an offensive partnership with during his tenure at Real Sociedad?",
+      "gold_docs": [
+        "Darko Kova\u010devi\u0107",
+        "Nihat Kahveci"
+      ],
+      "predicted_docs": [
+        "Lippo Hertzka",
+        "C.D. Real Sociedad"
+      ],
+      "bridge_detected": true,
+      "bridge_similarity": 0.999950647354126,
+      "doc_retrieval_correct": false,
+      "used_ss": true
+    },
+    {
+      "example_id": "5ae694a15542991bbc976141",
+      "question": "Why is Minister Pool important to Black Country and the West Midlands in England?",
+      "gold_docs": [
+        "Lichfield Cathedral",
+        "Minster Pool"
+      ],
+      "predicted_docs": [
+        "Walsall",
+        "Tipton"
+      ],
+      "bridge_detected": true,
+      "bridge_similarity": 0.9999925494194031,
+      "doc_retrieval_correct": false,
+      "used_ss": true
+    },
+    {
+      "example_id": "5add016e5542992c1e3a250b",
+      "question": "What made the man who abolished the Consell in 1718 resume the throne?",
+      "gold_docs": [
+        "Gran i General Consell",
+        "Philip V of Spain"
+      ],
+      "predicted_docs": [
+        "Mehmed VI",
+        "Prince Hridayendra of Nepal"
+      ],
+      "bridge_detected": true,
+      "bridge_similarity": 0.999978244304657,
+      "doc_retrieval_correct": false,
+      "used_ss": true
+    },
+    {
+      "example_id": "5ac3090d5542990b17b154fc",
+      "question": "Operalia, The World Opera Competition helped launch the career of an operatic soprano of what nationality?",
+      "gold_docs": [
+        "Operalia, The World Opera Competition",
+        "Sonya Yoncheva"
+      ],
+      "predicted_docs": [
+        "Guanqun Yu",
+        "Bogdan Volkov"
+      ],
+      "bridge_detected": true,
+      "bridge_similarity": 0.9999582171440125,
+      "doc_retrieval_correct": false,
+      "used_ss": true
+    },
+    {
+      "example_id": "5a7133565542994082a3e65c",
+      "question": "What Kentucky county has a population of 60,316 and features the Lake Louisvilla neighborhood?",
+      "gold_docs": [
+        "Lake Louisvilla, Louisville",
+        "Oldham County, Kentucky"
+      ],
+      "predicted_docs": [
+        "Lake Louisvilla, Louisville",
+        "Oldham County, Kentucky"
+      ],
+      "bridge_detected": true,
+      "bridge_similarity": 0.9999837875366211,
+      "doc_retrieval_correct": true,
+      "used_ss": true
+    },
+    {
+      "example_id": "5ae7edee554299540e5a56ad",
+      "question": "The Church of the Guanche People was founded in the city that is on the most populated island of what larger area?",
+      "gold_docs": [
+        "Church of the Guanche People",
+        "Tenerife"
+      ],
+      "predicted_docs": [
+        "Loppa Church",
+        "Karls\u00f8y Church"
+      ],
+      "bridge_detected": true,
+      "bridge_similarity": 0.999983549118042,
+      "doc_retrieval_correct": false,
+      "used_ss": true
+    },
+    {
+      "example_id": "5ac079e9554299294b218fff",
+      "question": "What organization does Rosyth Dockyard and Queen Elizabeth-class aircraft carrier have in common?",
+      "gold_docs": [
+        "Queen Elizabeth-class aircraft carrier",
+        "Rosyth Dockyard"
+      ],
+      "predicted_docs": [
+        "HMS Prince of Wales (R09)",
+        "List of sunken aircraft carriers"
+      ],
+      "bridge_detected": true,
+      "bridge_similarity": 0.9998123049736023,
+      "doc_retrieval_correct": false,
+      "used_ss": true
+    },
+    {
+      "example_id": "5ab6ba045542995eadef007e",
+      "question": "Dorian Gray is the main character of what philosophical novel whose editor feared the story was indecent, and deleted roughly five hundred words before publication?",
+      "gold_docs": [
+        "Dorian Gray (disambiguation)",
+        "The Picture of Dorian Gray"
+      ],
+      "predicted_docs": [
+        "The Picture of Dorian Gray",
+        "The Picture of Dorian Gray (1910 film)"
+      ],
+      "bridge_detected": true,
+      "bridge_similarity": 0.9999685287475586,
+      "doc_retrieval_correct": false,
+      "used_ss": true
+    },
+    {
+      "example_id": "5a7a15d35542996a35c170c4",
+      "question": "In what city does a Christian minister who won the singles title with Jan Kodes in the 1970 French Open currently reside?",
+      "gold_docs": [
+        "Margaret Court",
+        "1970 French Open"
+      ],
+      "predicted_docs": [
+        "1970 French Open",
+        "Samantha Stosur career statistics"
+      ],
+      "bridge_detected": true,
+      "bridge_similarity": 0.9999898672103882,
+      "doc_retrieval_correct": false,
+      "used_ss": true
+    },
+    {
+      "example_id": "5abbcfaf5542993f40c73ba9",
+      "question": "Nicole Gordon won a silver medal with Sara Petersen int he women's doubles at a competition held in what city?",
+      "gold_docs": [
+        "2002 Commonwealth Games",
+        "Nicole Gordon (badminton)"
+      ],
+      "predicted_docs": [
+        "Nicole Gordon (badminton)",
+        "Marion O'Brien"
+      ],
+      "bridge_detected": true,
+      "bridge_similarity": 0.9999715685844421,
+      "doc_retrieval_correct": false,
+      "used_ss": true
+    },
+    {
+      "example_id": "5ade8b2655429975fa854eff",
+      "question": "What is the nickname of this American retired airline captain celebrated for his water landing with Jeffrey Skiles, after a bird strike and being unable to reach an airport?",
+      "gold_docs": [
+        "US Airways Flight 1549",
+        "Chesley Sullenberger"
+      ],
+      "predicted_docs": [
+        "Chesley Sullenberger",
+        "Sita Air Flight 601"
+      ],
+      "bridge_detected": true,
+      "bridge_similarity": 0.9995171427726746,
+      "doc_retrieval_correct": false,
+      "used_ss": true
+    }
+  ]
+}

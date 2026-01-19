@@ -1,0 +1,1224 @@
+{
+  "metadata": {
+    "name": "Cross-Domain Analogy QA",
+    "version": "1.0",
+    "description": "QA dataset requiring analogical reasoning across domains",
+    "num_domain_pairs": 5,
+    "total_examples": 18
+  },
+  "domain_pairs": [
+    {
+      "name": "solar_atom",
+      "source_domain": "astronomy",
+      "target_domain": "physics",
+      "structure_type": "hub_spoke",
+      "source_graph": {
+        "nodes": [
+          {
+            "id": "sun",
+            "domain": "astronomy",
+            "role": "hub",
+            "properties": {
+              "mass": "large",
+              "type": "star",
+              "position": "center"
+            }
+          },
+          {
+            "id": "mercury",
+            "domain": "astronomy",
+            "role": "spoke",
+            "properties": {
+              "distance": "close",
+              "size": "small"
+            }
+          },
+          {
+            "id": "venus",
+            "domain": "astronomy",
+            "role": "spoke",
+            "properties": {
+              "distance": "close",
+              "size": "medium"
+            }
+          },
+          {
+            "id": "earth",
+            "domain": "astronomy",
+            "role": "spoke",
+            "properties": {
+              "distance": "medium",
+              "size": "medium",
+              "has_life": true
+            }
+          },
+          {
+            "id": "mars",
+            "domain": "astronomy",
+            "role": "spoke",
+            "properties": {
+              "distance": "medium",
+              "size": "small"
+            }
+          },
+          {
+            "id": "jupiter",
+            "domain": "astronomy",
+            "role": "spoke",
+            "properties": {
+              "distance": "far",
+              "size": "large"
+            }
+          }
+        ],
+        "edges": [
+          {
+            "source": "sun",
+            "target": "mercury",
+            "relation": "orbits",
+            "properties": {
+              "force": "gravity",
+              "motion": "elliptical"
+            }
+          },
+          {
+            "source": "sun",
+            "target": "venus",
+            "relation": "orbits",
+            "properties": {
+              "force": "gravity",
+              "motion": "elliptical"
+            }
+          },
+          {
+            "source": "sun",
+            "target": "earth",
+            "relation": "orbits",
+            "properties": {
+              "force": "gravity",
+              "motion": "elliptical"
+            }
+          },
+          {
+            "source": "sun",
+            "target": "mars",
+            "relation": "orbits",
+            "properties": {
+              "force": "gravity",
+              "motion": "elliptical"
+            }
+          },
+          {
+            "source": "sun",
+            "target": "jupiter",
+            "relation": "orbits",
+            "properties": {
+              "force": "gravity",
+              "motion": "elliptical"
+            }
+          }
+        ]
+      },
+      "target_graph_complete": {
+        "nodes": [
+          {
+            "id": "nucleus",
+            "domain": "physics",
+            "role": "hub",
+            "properties": {
+              "mass": "large",
+              "charge": "positive",
+              "position": "center"
+            }
+          },
+          {
+            "id": "e1",
+            "domain": "physics",
+            "role": "spoke",
+            "properties": {
+              "shell": "1",
+              "energy": "low"
+            }
+          },
+          {
+            "id": "e2",
+            "domain": "physics",
+            "role": "spoke",
+            "properties": {
+              "shell": "1",
+              "energy": "low"
+            }
+          },
+          {
+            "id": "e3",
+            "domain": "physics",
+            "role": "spoke",
+            "properties": {
+              "shell": "2",
+              "energy": "medium"
+            }
+          },
+          {
+            "id": "e4",
+            "domain": "physics",
+            "role": "spoke",
+            "properties": {
+              "shell": "2",
+              "energy": "medium"
+            }
+          }
+        ],
+        "edges": [
+          {
+            "source": "nucleus",
+            "target": "e1",
+            "relation": "orbits",
+            "properties": {
+              "force": "electromagnetic",
+              "motion": "orbital"
+            }
+          },
+          {
+            "source": "nucleus",
+            "target": "e2",
+            "relation": "orbits",
+            "properties": {
+              "force": "electromagnetic",
+              "motion": "orbital"
+            }
+          },
+          {
+            "source": "nucleus",
+            "target": "e3",
+            "relation": "orbits",
+            "properties": {
+              "force": "electromagnetic",
+              "motion": "orbital"
+            }
+          },
+          {
+            "source": "nucleus",
+            "target": "e4",
+            "relation": "orbits",
+            "properties": {
+              "force": "electromagnetic",
+              "motion": "orbital"
+            }
+          }
+        ]
+      },
+      "target_graph_incomplete": {
+        "nodes": [
+          {
+            "id": "nucleus",
+            "domain": "physics",
+            "role": "hub",
+            "properties": {
+              "mass": "large",
+              "charge": "positive",
+              "position": "center"
+            }
+          },
+          {
+            "id": "e1",
+            "domain": "physics",
+            "role": "spoke",
+            "properties": {
+              "shell": "1",
+              "energy": "low"
+            }
+          },
+          {
+            "id": "e2",
+            "domain": "physics",
+            "role": "spoke",
+            "properties": {
+              "shell": "1",
+              "energy": "low"
+            }
+          }
+        ],
+        "edges": [
+          {
+            "source": "nucleus",
+            "target": "e1",
+            "relation": "associated_with",
+            "properties": {
+              "force": "electromagnetic"
+            }
+          },
+          {
+            "source": "nucleus",
+            "target": "e2",
+            "relation": "associated_with",
+            "properties": {
+              "force": "electromagnetic"
+            }
+          }
+        ]
+      },
+      "num_examples": 5
+    },
+    {
+      "name": "company_military",
+      "source_domain": "business",
+      "target_domain": "military",
+      "structure_type": "hierarchy",
+      "source_graph": {
+        "nodes": [
+          {
+            "id": "ceo",
+            "domain": "business",
+            "role": "root",
+            "level": 0,
+            "properties": {
+              "authority": "highest",
+              "responsibility": "strategy"
+            }
+          },
+          {
+            "id": "vp_sales",
+            "domain": "business",
+            "role": "middle",
+            "level": 1,
+            "properties": {
+              "authority": "high",
+              "responsibility": "sales"
+            }
+          },
+          {
+            "id": "vp_engineering",
+            "domain": "business",
+            "role": "middle",
+            "level": 1,
+            "properties": {
+              "authority": "high",
+              "responsibility": "engineering"
+            }
+          },
+          {
+            "id": "manager_a",
+            "domain": "business",
+            "role": "middle",
+            "level": 2
+          },
+          {
+            "id": "manager_b",
+            "domain": "business",
+            "role": "middle",
+            "level": 2
+          },
+          {
+            "id": "employee_1",
+            "domain": "business",
+            "role": "leaf",
+            "level": 3
+          },
+          {
+            "id": "employee_2",
+            "domain": "business",
+            "role": "leaf",
+            "level": 3
+          }
+        ],
+        "edges": [
+          {
+            "source": "ceo",
+            "target": "vp_sales",
+            "relation": "commands"
+          },
+          {
+            "source": "ceo",
+            "target": "vp_engineering",
+            "relation": "commands"
+          },
+          {
+            "source": "vp_sales",
+            "target": "manager_a",
+            "relation": "commands"
+          },
+          {
+            "source": "vp_engineering",
+            "target": "manager_b",
+            "relation": "commands"
+          },
+          {
+            "source": "manager_a",
+            "target": "employee_1",
+            "relation": "commands"
+          },
+          {
+            "source": "manager_b",
+            "target": "employee_2",
+            "relation": "commands"
+          }
+        ]
+      },
+      "target_graph_complete": {
+        "nodes": [
+          {
+            "id": "general",
+            "domain": "military",
+            "role": "root",
+            "level": 0,
+            "properties": {
+              "authority": "highest",
+              "responsibility": "strategy"
+            }
+          },
+          {
+            "id": "colonel_a",
+            "domain": "military",
+            "role": "middle",
+            "level": 1
+          },
+          {
+            "id": "colonel_b",
+            "domain": "military",
+            "role": "middle",
+            "level": 1
+          },
+          {
+            "id": "captain_a",
+            "domain": "military",
+            "role": "middle",
+            "level": 2
+          },
+          {
+            "id": "captain_b",
+            "domain": "military",
+            "role": "middle",
+            "level": 2
+          },
+          {
+            "id": "soldier_1",
+            "domain": "military",
+            "role": "leaf",
+            "level": 3
+          },
+          {
+            "id": "soldier_2",
+            "domain": "military",
+            "role": "leaf",
+            "level": 3
+          }
+        ],
+        "edges": [
+          {
+            "source": "general",
+            "target": "colonel_a",
+            "relation": "commands"
+          },
+          {
+            "source": "general",
+            "target": "colonel_b",
+            "relation": "commands"
+          },
+          {
+            "source": "colonel_a",
+            "target": "captain_a",
+            "relation": "commands"
+          },
+          {
+            "source": "colonel_b",
+            "target": "captain_b",
+            "relation": "commands"
+          },
+          {
+            "source": "captain_a",
+            "target": "soldier_1",
+            "relation": "commands"
+          },
+          {
+            "source": "captain_b",
+            "target": "soldier_2",
+            "relation": "commands"
+          }
+        ]
+      },
+      "target_graph_incomplete": {
+        "nodes": [
+          {
+            "id": "general",
+            "domain": "military",
+            "role": "root",
+            "level": 0
+          },
+          {
+            "id": "colonel_a",
+            "domain": "military",
+            "role": "unknown",
+            "level": 1
+          },
+          {
+            "id": "soldier_1",
+            "domain": "military",
+            "role": "leaf",
+            "level": 3
+          }
+        ],
+        "edges": [
+          {
+            "source": "general",
+            "target": "colonel_a",
+            "relation": "related_to"
+          }
+        ]
+      },
+      "num_examples": 5
+    },
+    {
+      "name": "blood_river",
+      "source_domain": "biology",
+      "target_domain": "geography",
+      "structure_type": "branching",
+      "source_graph": {
+        "nodes": [
+          {
+            "id": "heart",
+            "domain": "biology",
+            "role": "source",
+            "properties": {
+              "function": "pump",
+              "flow_direction": "outward"
+            }
+          },
+          {
+            "id": "aorta",
+            "domain": "biology",
+            "role": "main_trunk",
+            "properties": {
+              "size": "large",
+              "carries": "oxygenated_blood"
+            }
+          },
+          {
+            "id": "artery_1",
+            "domain": "biology",
+            "role": "branch",
+            "properties": {
+              "size": "medium"
+            }
+          },
+          {
+            "id": "artery_2",
+            "domain": "biology",
+            "role": "branch",
+            "properties": {
+              "size": "medium"
+            }
+          },
+          {
+            "id": "arteriole_1a",
+            "domain": "biology",
+            "role": "branch",
+            "properties": {
+              "size": "small"
+            }
+          },
+          {
+            "id": "arteriole_1b",
+            "domain": "biology",
+            "role": "branch",
+            "properties": {
+              "size": "small"
+            }
+          },
+          {
+            "id": "capillary_1",
+            "domain": "biology",
+            "role": "terminal",
+            "properties": {
+              "size": "tiny"
+            }
+          }
+        ],
+        "edges": [
+          {
+            "source": "heart",
+            "target": "aorta",
+            "relation": "flows_to"
+          },
+          {
+            "source": "aorta",
+            "target": "artery_1",
+            "relation": "branches_to"
+          },
+          {
+            "source": "aorta",
+            "target": "artery_2",
+            "relation": "branches_to"
+          },
+          {
+            "source": "artery_1",
+            "target": "arteriole_1a",
+            "relation": "branches_to"
+          },
+          {
+            "source": "artery_1",
+            "target": "arteriole_1b",
+            "relation": "branches_to"
+          },
+          {
+            "source": "arteriole_1a",
+            "target": "capillary_1",
+            "relation": "branches_to"
+          }
+        ]
+      },
+      "target_graph_complete": {
+        "nodes": [
+          {
+            "id": "source",
+            "domain": "geography",
+            "role": "source",
+            "properties": {
+              "type": "spring",
+              "flow_direction": "downstream"
+            }
+          },
+          {
+            "id": "main_river",
+            "domain": "geography",
+            "role": "main_trunk",
+            "properties": {
+              "size": "large",
+              "carries": "water"
+            }
+          },
+          {
+            "id": "tributary_1",
+            "domain": "geography",
+            "role": "branch"
+          },
+          {
+            "id": "tributary_2",
+            "domain": "geography",
+            "role": "branch"
+          },
+          {
+            "id": "stream_1a",
+            "domain": "geography",
+            "role": "branch"
+          },
+          {
+            "id": "stream_1b",
+            "domain": "geography",
+            "role": "branch"
+          },
+          {
+            "id": "delta_outlet",
+            "domain": "geography",
+            "role": "terminal"
+          }
+        ],
+        "edges": [
+          {
+            "source": "source",
+            "target": "main_river",
+            "relation": "flows_to"
+          },
+          {
+            "source": "main_river",
+            "target": "tributary_1",
+            "relation": "branches_to"
+          },
+          {
+            "source": "main_river",
+            "target": "tributary_2",
+            "relation": "branches_to"
+          },
+          {
+            "source": "tributary_1",
+            "target": "stream_1a",
+            "relation": "branches_to"
+          },
+          {
+            "source": "tributary_1",
+            "target": "stream_1b",
+            "relation": "branches_to"
+          },
+          {
+            "source": "stream_1a",
+            "target": "delta_outlet",
+            "relation": "flows_to"
+          }
+        ]
+      },
+      "target_graph_incomplete": {
+        "nodes": [
+          {
+            "id": "source",
+            "domain": "geography",
+            "role": "source"
+          },
+          {
+            "id": "main_river",
+            "domain": "geography",
+            "role": "main_trunk"
+          },
+          {
+            "id": "tributary_1",
+            "domain": "geography",
+            "role": "unknown"
+          }
+        ],
+        "edges": [
+          {
+            "source": "source",
+            "target": "main_river",
+            "relation": "flows_to"
+          }
+        ]
+      },
+      "num_examples": 3
+    },
+    {
+      "name": "supply_nerve",
+      "source_domain": "logistics",
+      "target_domain": "biology",
+      "structure_type": "chain",
+      "source_graph": {
+        "nodes": [
+          {
+            "id": "supplier",
+            "domain": "logistics",
+            "role": "origin",
+            "function": "produce"
+          },
+          {
+            "id": "manufacturer",
+            "domain": "logistics",
+            "role": "processor",
+            "function": "transform"
+          },
+          {
+            "id": "distributor",
+            "domain": "logistics",
+            "role": "relay",
+            "function": "forward"
+          },
+          {
+            "id": "retailer",
+            "domain": "logistics",
+            "role": "relay",
+            "function": "forward"
+          },
+          {
+            "id": "customer",
+            "domain": "logistics",
+            "role": "destination",
+            "function": "consume"
+          }
+        ],
+        "edges": [
+          {
+            "source": "supplier",
+            "target": "manufacturer",
+            "relation": "supplies",
+            "properties": {
+              "delay": "variable"
+            }
+          },
+          {
+            "source": "manufacturer",
+            "target": "distributor",
+            "relation": "ships",
+            "properties": {
+              "delay": "variable"
+            }
+          },
+          {
+            "source": "distributor",
+            "target": "retailer",
+            "relation": "delivers",
+            "properties": {
+              "delay": "variable"
+            }
+          },
+          {
+            "source": "retailer",
+            "target": "customer",
+            "relation": "sells",
+            "properties": {
+              "delay": "variable"
+            }
+          }
+        ]
+      },
+      "target_graph_complete": {
+        "nodes": [
+          {
+            "id": "stimulus",
+            "domain": "biology",
+            "role": "origin",
+            "function": "trigger"
+          },
+          {
+            "id": "sensory_neuron",
+            "domain": "biology",
+            "role": "processor",
+            "function": "encode"
+          },
+          {
+            "id": "interneuron",
+            "domain": "biology",
+            "role": "relay",
+            "function": "process"
+          },
+          {
+            "id": "motor_neuron",
+            "domain": "biology",
+            "role": "relay",
+            "function": "transmit"
+          },
+          {
+            "id": "muscle",
+            "domain": "biology",
+            "role": "destination",
+            "function": "respond"
+          }
+        ],
+        "edges": [
+          {
+            "source": "stimulus",
+            "target": "sensory_neuron",
+            "relation": "activates"
+          },
+          {
+            "source": "sensory_neuron",
+            "target": "interneuron",
+            "relation": "signals"
+          },
+          {
+            "source": "interneuron",
+            "target": "motor_neuron",
+            "relation": "signals"
+          },
+          {
+            "source": "motor_neuron",
+            "target": "muscle",
+            "relation": "triggers"
+          }
+        ]
+      },
+      "target_graph_incomplete": {
+        "nodes": [
+          {
+            "id": "stimulus",
+            "domain": "biology",
+            "role": "origin"
+          },
+          {
+            "id": "sensory_neuron",
+            "domain": "biology",
+            "role": "unknown"
+          },
+          {
+            "id": "muscle",
+            "domain": "biology",
+            "role": "destination"
+          }
+        ],
+        "edges": [
+          {
+            "source": "stimulus",
+            "target": "sensory_neuron",
+            "relation": "connected"
+          }
+        ]
+      },
+      "num_examples": 2
+    },
+    {
+      "name": "sns_epidemic",
+      "source_domain": "social",
+      "target_domain": "epidemiology",
+      "structure_type": "network",
+      "source_graph": {
+        "nodes": [
+          {
+            "id": "influencer",
+            "domain": "social",
+            "role": "hub",
+            "followers": 10000
+          },
+          {
+            "id": "user_a",
+            "domain": "social",
+            "role": "node",
+            "followers": 500
+          },
+          {
+            "id": "user_b",
+            "domain": "social",
+            "role": "node",
+            "followers": 300
+          },
+          {
+            "id": "user_c",
+            "domain": "social",
+            "role": "node",
+            "followers": 200
+          },
+          {
+            "id": "user_d",
+            "domain": "social",
+            "role": "leaf",
+            "followers": 50
+          },
+          {
+            "id": "user_e",
+            "domain": "social",
+            "role": "leaf",
+            "followers": 30
+          }
+        ],
+        "edges": [
+          {
+            "source": "influencer",
+            "target": "user_a",
+            "relation": "follows"
+          },
+          {
+            "source": "influencer",
+            "target": "user_b",
+            "relation": "follows"
+          },
+          {
+            "source": "user_a",
+            "target": "user_c",
+            "relation": "follows"
+          },
+          {
+            "source": "user_a",
+            "target": "user_d",
+            "relation": "follows"
+          },
+          {
+            "source": "user_b",
+            "target": "user_e",
+            "relation": "follows"
+          },
+          {
+            "source": "user_c",
+            "target": "user_d",
+            "relation": "follows"
+          }
+        ]
+      },
+      "target_graph_complete": {
+        "nodes": [
+          {
+            "id": "patient_zero",
+            "domain": "epidemiology",
+            "role": "hub",
+            "contacts": 50
+          },
+          {
+            "id": "infected_a",
+            "domain": "epidemiology",
+            "role": "node",
+            "contacts": 20
+          },
+          {
+            "id": "infected_b",
+            "domain": "epidemiology",
+            "role": "node",
+            "contacts": 15
+          },
+          {
+            "id": "infected_c",
+            "domain": "epidemiology",
+            "role": "node",
+            "contacts": 10
+          },
+          {
+            "id": "infected_d",
+            "domain": "epidemiology",
+            "role": "leaf",
+            "contacts": 5
+          },
+          {
+            "id": "infected_e",
+            "domain": "epidemiology",
+            "role": "leaf",
+            "contacts": 3
+          }
+        ],
+        "edges": [
+          {
+            "source": "patient_zero",
+            "target": "infected_a",
+            "relation": "infects"
+          },
+          {
+            "source": "patient_zero",
+            "target": "infected_b",
+            "relation": "infects"
+          },
+          {
+            "source": "infected_a",
+            "target": "infected_c",
+            "relation": "infects"
+          },
+          {
+            "source": "infected_a",
+            "target": "infected_d",
+            "relation": "infects"
+          },
+          {
+            "source": "infected_b",
+            "target": "infected_e",
+            "relation": "infects"
+          },
+          {
+            "source": "infected_c",
+            "target": "infected_d",
+            "relation": "infects"
+          }
+        ]
+      },
+      "target_graph_incomplete": {
+        "nodes": [
+          {
+            "id": "patient_zero",
+            "domain": "epidemiology",
+            "role": "hub"
+          },
+          {
+            "id": "infected_a",
+            "domain": "epidemiology",
+            "role": "unknown"
+          }
+        ],
+        "edges": [
+          {
+            "source": "patient_zero",
+            "target": "infected_a",
+            "relation": "contact"
+          }
+        ]
+      },
+      "num_examples": 3
+    }
+  ],
+  "examples": [
+    {
+      "id": "solar_atom_001",
+      "question": "How do electrons move around the nucleus?",
+      "answer": "Electrons orbit around the nucleus in orbital paths",
+      "source_domain": "astronomy",
+      "target_domain": "physics",
+      "structure_type": "hub_spoke",
+      "source_fact": "Planets orbit around the sun in elliptical paths due to gravity",
+      "target_context": "Electrons are associated with the nucleus through electromagnetic force",
+      "difficulty": "easy",
+      "requires_analogy": true
+    },
+    {
+      "id": "solar_atom_002",
+      "question": "What keeps electrons bound to the nucleus?",
+      "answer": "Electromagnetic force keeps electrons bound to the nucleus",
+      "source_domain": "astronomy",
+      "target_domain": "physics",
+      "structure_type": "hub_spoke",
+      "source_fact": "Gravity keeps planets bound to the sun",
+      "target_context": "There is a force between the nucleus and electrons",
+      "difficulty": "easy",
+      "requires_analogy": true
+    },
+    {
+      "id": "solar_atom_003",
+      "question": "Where is most of the atom's mass concentrated?",
+      "answer": "Most of the atom's mass is concentrated in the nucleus at the center",
+      "source_domain": "astronomy",
+      "target_domain": "physics",
+      "structure_type": "hub_spoke",
+      "source_fact": "Most of the solar system's mass is concentrated in the sun at the center",
+      "target_context": "The atom has a nucleus and electrons",
+      "difficulty": "medium",
+      "requires_analogy": true
+    },
+    {
+      "id": "solar_atom_004",
+      "question": "If electrons are like planets, what property would they share in terms of motion?",
+      "answer": "Like planets orbiting the sun, electrons would orbit the nucleus",
+      "source_domain": "astronomy",
+      "target_domain": "physics",
+      "structure_type": "hub_spoke",
+      "source_fact": "Planets orbit around the sun",
+      "target_context": "Electrons exist around the nucleus",
+      "difficulty": "medium",
+      "requires_analogy": true
+    },
+    {
+      "id": "solar_atom_005",
+      "question": "By analogy with the solar system, what can we infer about the relative size of the nucleus compared to electron positions?",
+      "answer": "The nucleus is very small compared to the total size of the atom, similar to how the sun is small compared to the solar system",
+      "source_domain": "astronomy",
+      "target_domain": "physics",
+      "structure_type": "hub_spoke",
+      "source_fact": "The sun is at the center with planets at various distances, making the solar system mostly empty space",
+      "target_context": "The atom has a central nucleus with electrons somewhere around it",
+      "difficulty": "hard",
+      "requires_analogy": true
+    },
+    {
+      "id": "company_military_001",
+      "question": "In a military hierarchy, who does a colonel report to?",
+      "answer": "A colonel reports to a general, similar to how a VP reports to a CEO",
+      "source_domain": "business",
+      "target_domain": "military",
+      "structure_type": "hierarchy",
+      "source_fact": "VPs report directly to the CEO in a company hierarchy",
+      "target_context": "The military has generals, colonels, and soldiers",
+      "difficulty": "easy",
+      "requires_analogy": true
+    },
+    {
+      "id": "company_military_002",
+      "question": "How are orders transmitted in a military structure?",
+      "answer": "Orders flow from top (general) down through intermediate ranks (colonel, captain) to soldiers",
+      "source_domain": "business",
+      "target_domain": "military",
+      "structure_type": "hierarchy",
+      "source_fact": "Instructions flow from CEO through VPs and managers to employees",
+      "target_context": "The military has a chain of command",
+      "difficulty": "medium",
+      "requires_analogy": true
+    },
+    {
+      "id": "company_military_003",
+      "question": "If a company has CEO -> VP -> Manager -> Employee, what is the analogous structure in military?",
+      "answer": "General -> Colonel -> Captain -> Soldier",
+      "source_domain": "business",
+      "target_domain": "military",
+      "structure_type": "hierarchy",
+      "source_fact": "Company hierarchy: CEO at top, then VPs, then Managers, then Employees",
+      "target_context": "Military has ranks including general, colonel, captain, soldier",
+      "difficulty": "medium",
+      "requires_analogy": true
+    },
+    {
+      "id": "company_military_004",
+      "question": "What happens if a captain is removed from the chain of command?",
+      "answer": "Communication between colonel and soldiers is disrupted, similar to removing a manager",
+      "source_domain": "business",
+      "target_domain": "military",
+      "structure_type": "hierarchy",
+      "source_fact": "If a manager is removed, communication between VP and employees breaks",
+      "target_context": "Captains are between colonels and soldiers",
+      "difficulty": "hard",
+      "requires_analogy": true
+    },
+    {
+      "id": "company_military_005",
+      "question": "By analogy with corporate span of control, how many subordinates might a colonel typically have?",
+      "answer": "A colonel might have 2-5 direct reports (captains), similar to a VP having 2-5 managers",
+      "source_domain": "business",
+      "target_domain": "military",
+      "structure_type": "hierarchy",
+      "source_fact": "A VP typically manages 2-5 managers directly",
+      "target_context": "Colonels command captains",
+      "difficulty": "hard",
+      "requires_analogy": true
+    },
+    {
+      "id": "blood_river_001",
+      "question": "How does a river system distribute water across a landscape?",
+      "answer": "A river branches into smaller tributaries and streams, similar to how blood vessels branch into arteries and capillaries",
+      "source_domain": "biology",
+      "target_domain": "geography",
+      "structure_type": "branching",
+      "source_fact": "Blood flows from the heart through the aorta, then branches into arteries, arterioles, and capillaries",
+      "target_context": "Rivers have a main channel and tributaries",
+      "difficulty": "medium",
+      "requires_analogy": true
+    },
+    {
+      "id": "blood_river_002",
+      "question": "What happens to the size of river channels as they branch?",
+      "answer": "River channels get smaller as they branch, just like blood vessels get smaller from aorta to capillaries",
+      "source_domain": "biology",
+      "target_domain": "geography",
+      "structure_type": "branching",
+      "source_fact": "Blood vessels decrease in diameter: aorta (large) -> arteries (medium) -> capillaries (tiny)",
+      "target_context": "Rivers branch into tributaries",
+      "difficulty": "easy",
+      "requires_analogy": true
+    },
+    {
+      "id": "blood_river_003",
+      "question": "If a main river is blocked, what happens to the downstream flow?",
+      "answer": "Downstream branches lose water supply, similar to tissue losing blood if an artery is blocked",
+      "source_domain": "biology",
+      "target_domain": "geography",
+      "structure_type": "branching",
+      "source_fact": "If an artery is blocked, tissues downstream don't receive blood",
+      "target_context": "Rivers supply water to downstream areas",
+      "difficulty": "hard",
+      "requires_analogy": true
+    },
+    {
+      "id": "supply_nerve_001",
+      "question": "How does a signal travel from stimulus to muscle response?",
+      "answer": "Signal travels through a chain: stimulus -> sensory neuron -> interneuron -> motor neuron -> muscle",
+      "source_domain": "logistics",
+      "target_domain": "biology",
+      "structure_type": "chain",
+      "source_fact": "Products flow: supplier -> manufacturer -> distributor -> retailer -> customer",
+      "target_context": "Nerves connect stimuli to muscle responses",
+      "difficulty": "medium",
+      "requires_analogy": true
+    },
+    {
+      "id": "supply_nerve_002",
+      "question": "What happens if an interneuron is damaged?",
+      "answer": "The signal chain is broken, preventing the muscle from receiving the signal, like a broken supply chain link",
+      "source_domain": "logistics",
+      "target_domain": "biology",
+      "structure_type": "chain",
+      "source_fact": "If the distributor fails, products don't reach retailers or customers",
+      "target_context": "Interneurons are part of the neural pathway",
+      "difficulty": "hard",
+      "requires_analogy": true
+    },
+    {
+      "id": "sns_epidemic_001",
+      "question": "How does a disease spread through a population?",
+      "answer": "Disease spreads through contact networks, similar to how viral content spreads through social connections",
+      "source_domain": "social",
+      "target_domain": "epidemiology",
+      "structure_type": "network",
+      "source_fact": "Viral content spreads from influencers to followers, then to their followers",
+      "target_context": "Diseases spread from infected to susceptible individuals",
+      "difficulty": "easy",
+      "requires_analogy": true
+    },
+    {
+      "id": "sns_epidemic_002",
+      "question": "Who should be vaccinated first to stop an epidemic?",
+      "answer": "People with many contacts (hubs) should be vaccinated first, like targeting influencers to stop viral spread",
+      "source_domain": "social",
+      "target_domain": "epidemiology",
+      "structure_type": "network",
+      "source_fact": "Blocking or removing influencer accounts can stop viral content spread",
+      "target_context": "Some people have more contacts than others",
+      "difficulty": "hard",
+      "requires_analogy": true
+    },
+    {
+      "id": "sns_epidemic_003",
+      "question": "Why might some infected people spread disease to more others?",
+      "answer": "People with more contacts (super-spreaders) infect more, like influencers reaching more followers",
+      "source_domain": "social",
+      "target_domain": "epidemiology",
+      "structure_type": "network",
+      "source_fact": "Influencers with more followers spread content to more people",
+      "target_context": "Not all infected people spread equally",
+      "difficulty": "medium",
+      "requires_analogy": true
+    }
+  ]
+}

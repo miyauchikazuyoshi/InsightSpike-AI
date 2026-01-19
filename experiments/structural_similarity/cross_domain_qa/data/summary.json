@@ -1,0 +1,22 @@
+{
+  "total_examples": 18,
+  "by_difficulty": {
+    "easy": 5,
+    "medium": 7,
+    "hard": 6
+  },
+  "by_structure": {
+    "hub_spoke": 5,
+    "hierarchy": 5,
+    "branching": 3,
+    "chain": 2,
+    "network": 3
+  },
+  "by_domain_pair": {
+    "astronomy_physics": 5,
+    "business_military": 5,
+    "biology_geography": 3,
+    "logistics_biology": 2,
+    "social_epidemiology": 3
+  }
+}

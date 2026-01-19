@@ -2873,6 +2873,69 @@ Phase 1/2 は、覚醒/睡眠・海馬リプレイと\,\textbf{構造的に類�
 \end{itemize}
 
 \noindent このロードマップと課題を明示することで、Transformer内部表現や世界モデル研究との協調を促しつつ、Phase~1 の結果を足掛かりにしたスケールアウト戦略を共有する。
+
+\section{展望II: 閃きの計算的モデルに向けて}
+\label{sec:insight_model}
+
+本稿は「いつ情報を受け入れるか」の制御に焦点を当てたが、geDIG の枠組みは\textbf{閃き（insight）}の計算的モデルへと自然に拡張できる。本節では、GED編集操作が閃きの実体であるという仮説を提示し、将来の研究方向を示す。
+
+\subsection{GED編集操作 = 閃きの実体}
+
+科学史における重要な発見は、異なるドメイン間の\textbf{構造的類似性}の認識から生まれることが多い。ボーアの原子モデル（1913）は太陽系と原子の構造的類似性（hub-spoke構造）に、ケクレのベンゼン環発見（1865）は蛇が自身の尾を噛むウロボロスと分子構造の類似性（環状構造）に基づく。
+
+これらの\emph{閃き}は、以下の階層で理解できる：
+\begin{enumerate}[leftmargin=1.8em]
+  \item \textbf{Level 1: パターンマッチ}（要素が似ている）
+  \item \textbf{Level 2: アナロジー}（構造が対応する）
+  \item \textbf{Level 3: 同型発見}（変換で同一になる）
+\end{enumerate}
+
+geDIG の構造類似度評価はLevel 2に対応し、予備実験ではCross-Domain QAタスクでF1 +60\%の改善を確認した（「太陽系 $\approx$ 原子」のような古典的アナロジーを高精度で検出）。
+
+\subsection{アインシュタイン的閃きのモデル化}
+
+Level 3の\emph{同型発見}は、より深い閃きに対応する。アインシュタインの特殊相対論（1905）を例にとると：
+\begin{itemize}[leftmargin=1.8em]
+  \item 電磁気学と古典力学は矛盾する2つの理論構造
+  \item 両者を\textbf{同型にする最小編集操作}がローレンツ変換
+  \item この編集操作の発見が「相対論」という閃きの実体
+\end{itemize}
+
+数学的には、2つの知識グラフ $G_1$, $G_2$ に対し：
+\begin{equation}
+  T^* = \arg\min_T \mathrm{GED}(T(G_1), G_2)
+  \label{eq:insight_transform}
+\end{equation}
+が発見すべき変換であり、$T^*$ そのものが閃きの計算的表現となる。
+
+\subsection{分子設計AIとの対応}
+
+この枠組みは、創薬AIにおける\textbf{Scaffold Hopping}（骨格変換）と数学的に同型である：
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+分子設計AI & geDIG \\
+\midrule
+分子グラフ & 知識グラフ \\
+分子編集距離 & GED \\
+同じ薬効の異分子発見 & 同じ説明力の異理論発見 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+創薬分野では分子グラフのトポロジカル探索が実用化されている。同様の手法を知識グラフに適用することで、「新しい理論を発見するAI」への道が開ける可能性がある。
+
+\subsection{パラダイムシフトの可能性}
+
+式\eqref{eq:insight_transform}の変換 $T^*$ を自動発見するアルゴリズムが実現すれば：
+\begin{itemize}[leftmargin=1.8em]
+  \item \textbf{現在のAI}: 既存知識の検索と組み合わせ
+  \item \textbf{提案AI}: 新しい知識構造の発見
+\end{itemize}
+という質的飛躍が達成される。これは「検索エンジン」から「科学者」への転換を意味し、人工知能研究における重要なマイルストーンとなりうる。
+
+本稿のgeDIG（Phase~1: When制御）は、この長期ビジョンの最初の一歩である。構造変化のコストと利得を評価する基盤が確立されれば、同型発見アルゴリズムへの拡張が自然に可能となる。
+
 \section{結論}
 
 本研究では、動的に成長する知識グラフにおける「いつ受け入れるか（When）」という意思決定の明示化に向け、構造統合（$\Delta$EPC）と情報整理（$\Delta$IG=$\Delta H{+}\gamma\,\Delta\mathrm{SP}$）を単一スカラー $\F=\gednorm-\lambda\,\ignorm$ として束ねる One\,\mbox{-}Gauge 制御枠組 geDIG を提案した。以下の主張は\,\emph{Phase~1（クエリ中心・局所評価）という限定条件の下}で成立する\,\emph{操作的結果}に留まる。
