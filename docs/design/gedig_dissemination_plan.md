@@ -103,7 +103,7 @@ secondary:
 - [ ] FMR が閾値法より **50%以上**低い
 - [ ] P50 latency が **500ms以下**
 
-#### 現状（2026-01-17）
+#### 現状（2026-01-19）
 
 - dev 7,405件で geDIG は BM25 に対して **EM +0.9pt / F1 +1.5pt**
 - static_graphrag が最良（F1 0.5594）。差分分析が次の焦点
@@ -112,6 +112,8 @@ secondary:
 - ケーススタディ抽出: `docs/design/hotpotqa_case_studies.md`
 - DPRベースライン（dev 7,405件）: EM 0.3483 / F1 0.5091 / SF-F1 0.3235
 - ColBERTベースライン（dev 7,405件）: EM 0.3618 / F1 0.5258 / SF-F1 0.3663
+- mock(dev500)の閾値スイープ完了: ag/dg 発火は 0.27〜0.91 まで調整可能、F1は 0.0629 / SF-F1は 0.3405 が上限
+- 実LLM(dev200, tuned ag30/dg30): EM 0.4050 / F1 0.5541 / SF-F1 0.3094（theta_ag≈0.0856）
 
 ### 1.2 インタラクティブデモ
 
@@ -238,6 +240,7 @@ Title: 「RAGの『いつ更新するか』問題を解く ― geDIG入門」
 #### 最小アブレーション
 - Full geDIG / AG only / DG only / F without ΔSP
   - 進捗: Maze/HotpotQA/Analogy のフルスケールを反映（AnalogyはSS on/offのみ）
+  - 追加検証: Maze 25x25, max_steps=120 (seeds=3) は成功率 0% で難化が効いている
 
 #### 成果固定化
 - `docs/version_matrix.md` 追加（paper vs code の差分表）
