@@ -16,18 +16,21 @@ make reproduce-analogy
 - F1 mean, exact match, analogy detection rate
 - Breakdown by difficulty and structure type
 
-## Ablation (planned)
+## Ablation
 AG/DG gating is not used in this synthetic QA; ablation focuses on SS on/off.
 
-| Variant | Intent | Status |
-|---|---|---|
-| Structural similarity on | `ss_enabled=True` (default) | baseline |
-| Structural similarity off | `ss_enabled=False` | TODO |
-| Analogy weight off | `analogy_weight=0` (config) | TODO |
+Latest run (comparison_results.json, summarized in `docs/paper/data/analogy_ablation.json`).
+
+| Variant | F1 mean | Exact match | Analogy detection | Notes |
+|---|---:|---:|---:|---|
+| Structural similarity on | 0.6603 | 0.1667 | 1.00 | `ss_enabled=True` |
+| Structural similarity off | 0.0617 | 0.0000 | 0.00 | `ss_enabled=False` |
+| Analogy weight off | - | - | - | N/A |
 
 ## Expected outputs
 - `experiments/structural_similarity/cross_domain_qa/results/comparison_results.json`
 - `docs/paper/data/analogy_comparison.json`
+- `docs/paper/data/analogy_ablation.json`
 
 ## Known limitations
 - Synthetic dataset with template-based answer transfer.

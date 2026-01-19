@@ -1,0 +1,43 @@
+{
+  "experiment": "analogy_ablation",
+  "variants": {
+    "ss_on": {
+      "total_examples": 18,
+      "exact_match": 0.16666666666666666,
+      "f1_mean": 0.6602631255022036,
+      "f1_std": 0.2298312475224527,
+      "analogy_detection_rate": 1.0,
+      "source_knowledge_used_rate": 1.0,
+      "f1_easy": 0.7286360698125405,
+      "em_easy": 0.2,
+      "f1_medium": 0.7228677754993544,
+      "em_medium": 0.2857142857142857,
+      "f1_hard": 0.5302469135802469,
+      "em_hard": 0.0,
+      "f1_hub_spoke": 0.8310948310948311,
+      "f1_hierarchy": 0.6952380952380952,
+      "f1_branching": 0.538961038961039,
+      "f1_chain": 0.46842105263157896,
+      "f1_network": 0.5664488017429193
+    },
+    "ss_off": {
+      "total_examples": 18,
+      "exact_match": 0.0,
+      "f1_mean": 0.061676572099688715,
+      "f1_std": 0.08295662376991259,
+      "analogy_detection_rate": 0.0,
+      "source_knowledge_used_rate": 0.0,
+      "f1_easy": 0.028571428571428574,
+      "em_easy": 0.0,
+      "f1_medium": 0.05266106442577031,
+      "em_medium": 0.0,
+      "f1_hard": 0.0997822839928103,
+      "em_hard": 0.0,
+      "f1_hub_spoke": 0.13866055513114336,
+      "f1_hierarchy": 0.02222222222222222,
+      "f1_branching": 0.03174603174603174,
+      "f1_chain": 0.10526315789473684,
+      "f1_network": 0.0
+    }
+  }
+}

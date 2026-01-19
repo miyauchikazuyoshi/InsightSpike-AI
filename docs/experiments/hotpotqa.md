@@ -18,20 +18,23 @@ make reproduce-hotpotqa
 - EM/F1, SF-F1, latency
 - Gate fire rates (initial/final)
 
-## Ablation (planned)
+## Ablation
 Note: AG/DG only affect expansion; answer generation is unconditional.
 
-| Variant | Intent | Status |
-|---|---|---|
-| Full geDIG (AG+DG+F) | Default thresholds and expansions | baseline |
-| AG only | Force expansion (lower `--theta-ag`, raise `--max-expansions`) | TODO |
-| DG only | Disable expansion (`--max-expansions 0`) | TODO |
-| F without ΔSP | Align with geDIG core config (TBD) | TODO |
+Mock LLM run (dev=7,405, no-network).
+
+| Variant | EM | F1 | SF-F1 | ag_fire_rate | dg_fire_rate | Notes |
+|---|---:|---:|---:|---:|---:|---|
+| Full geDIG (AG+DG+F) | 0.0005 | 0.0610 | 0.3497 | 0.00 | 0.1236 | default thresholds |
+| AG only | 0.0004 | 0.0604 | 0.2106 | 1.00 | 0.0000 | `--theta-ag -1 --theta-dg -10 --max-expansions 2` |
+| DG only | 0.0005 | 0.0610 | 0.3497 | 0.00 | 0.1236 | `--max-expansions 0` |
+| F without ΔSP | - | - | - | - | - | N/A (SP term not used in this adapter) |
 
 ## Expected outputs
 - `experiments/hotpotqa-benchmark/results/gedig_*.jsonl`
 - `experiments/hotpotqa-benchmark/results/gedig_*_summary.json`
 - `docs/paper/data/hotpotqa_sample_summary.json`
+- `docs/paper/data/hotpotqa_ablation_dev_mock.json`
 
 ## Known limitations
 - Mock runs are not comparable to paper numbers; use a real LLM for full eval.

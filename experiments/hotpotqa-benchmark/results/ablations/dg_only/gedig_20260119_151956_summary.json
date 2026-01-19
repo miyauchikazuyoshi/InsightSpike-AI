@@ -1,0 +1,40 @@
+{
+  "method": "gedig",
+  "data": "experiments/hotpotqa-benchmark/data/hotpotqa_sample_100.jsonl",
+  "count": 100,
+  "timestamp": "20260119_151956",
+  "config": "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/hotpotqa-benchmark/configs/gedig_hotpotqa.yaml",
+  "parameters": {
+    "lambda_weight": 1.0,
+    "theta_ag": 0.4,
+    "theta_dg": 0.0,
+    "top_k": 5,
+    "max_expansions": 0,
+    "max_hops": 3,
+    "gamma": 1.0,
+    "llm_model": "gpt-4o-mini",
+    "llm_temperature": 0.0,
+    "llm_max_tokens": 256,
+    "expansion_seeds": 2,
+    "tfidf_dim": 64
+  },
+  "tuning": {
+    "enabled": false
+  },
+  "em": 0.0,
+  "f1": 0.0673,
+  "precision": 0.0419,
+  "recall": 0.3087,
+  "sf_em": 0.0,
+  "sf_f1": 0.3675,
+  "sf_precision": 0.276,
+  "sf_recall": 0.5723,
+  "latency_p50_ms": 5.63,
+  "latency_p95_ms": 6.66,
+  "ag_fire_rate": 0.0,
+  "dg_fire_rate": 0.14,
+  "final_ag_fire_rate": 0.0,
+  "final_dg_fire_rate": 0.14,
+  "avg_gedig_score": 0.13046275625362325,
+  "avg_graph_edges": 5.82
+}

@@ -1,0 +1,52 @@
+{
+  "experiment": "maze_15x15_ablation_fullscale",
+  "config": {
+    "maze_size": 15,
+    "max_steps": 250,
+    "seeds": 12,
+    "max_hops": 3,
+    "preset": "paper"
+  },
+  "variants": {
+    "full": {
+      "success_rate": 1.0,
+      "avg_steps": 92.66666666666667,
+      "avg_edges": 68.58333333333333,
+      "g0_mean": -0.2914960985636256,
+      "gmin_mean": -0.31310170176129937,
+      "best_hop_mean": 0.023381294964028777,
+      "ag_rate": 0.05665467625899281,
+      "dg_rate": 0.966726618705036
+    },
+    "ag_only": {
+      "success_rate": 1.0,
+      "avg_steps": 92.66666666666667,
+      "avg_edges": 68.58333333333333,
+      "g0_mean": -0.2914960985636256,
+      "gmin_mean": -0.31310170176129937,
+      "best_hop_mean": 0.023381294964028777,
+      "ag_rate": 0.05665467625899281,
+      "dg_rate": 0.966726618705036
+    },
+    "dg_only": {
+      "success_rate": 1.0,
+      "avg_steps": 92.66666666666667,
+      "avg_edges": 68.58333333333333,
+      "g0_mean": -0.2914960985636256,
+      "gmin_mean": -0.5828822513295769,
+      "best_hop_mean": 0.2931654676258993,
+      "ag_rate": 1.0,
+      "dg_rate": 0.966726618705036
+    },
+    "no_sp": {
+      "success_rate": 1.0,
+      "avg_steps": 92.66666666666667,
+      "avg_edges": 68.58333333333333,
+      "g0_mean": -0.2914960985636256,
+      "gmin_mean": -0.31310170176129937,
+      "best_hop_mean": 0.023381294964028777,
+      "ag_rate": 0.05665467625899281,
+      "dg_rate": 0.966726618705036
+    }
+  }
+}
