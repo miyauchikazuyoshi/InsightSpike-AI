@@ -1,7 +1,9 @@
 % geDIG v6 (English)
 % Base: Japanese v6 one-gauge paper (geDIG_onegauge_improved_v6.tex)
 % This file mirrors the v6 structure and updates the v5 English draft.
-\pdfoutput=1
+\ifdefined\pdfoutput
+  \pdfoutput=1
+\fi
 \documentclass[12pt]{article}
 
 \usepackage[utf8]{inputenc}
@@ -683,12 +685,12 @@ geDIG is unique in that it controls \textbf{dynamic structure} (editing/wiring) 
 \toprule
 Method & Layer & Dynamic KG & Structure Detect & Single Gauge & Learning/Inference & Insight Event & Theory \\
 \midrule
-GraphRAG & Performance & \checkmark & $\triangle$ & $\times$ & $\times$ & $\times$ & - \\
-DyG-RAG & Performance & \checkmark & $\triangle$ & $\times$ & $\triangle$ & $\times$ & - \\
-KEDKG & Performance & \checkmark & $\times$ & $\times$ & $\triangle$ & $\times$ & - \\
-FEP/Active Inf. & Theory & $\times$ & $\times$ & \checkmark & \checkmark & $\triangle$ & FEP \\
-MDL/IB & Theory & $\times$ & $\triangle$ & \checkmark & \times & $\triangle$ & MDL \\
-\textbf{geDIG} & Control & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & FEP-MDL \\
+GraphRAG & Performance & $\checkmark$ & $\triangle$ & $\times$ & $\times$ & $\times$ & - \\
+DyG-RAG & Performance & $\checkmark$ & $\triangle$ & $\times$ & $\triangle$ & $\times$ & - \\
+KEDKG & Performance & $\checkmark$ & $\times$ & $\times$ & $\triangle$ & $\times$ & - \\
+FEP/Active Inf. & Theory & $\times$ & $\times$ & $\checkmark$ & $\checkmark$ & $\triangle$ & FEP \\
+MDL/IB & Theory & $\times$ & $\triangle$ & $\checkmark$ & $\times$ & $\triangle$ & MDL \\
+\textbf{geDIG} & Control & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & FEP-MDL \\
 \bottomrule
 \end{tabular}
 }
@@ -817,21 +819,33 @@ geDIG shifts the curve towards the Perfect Scaling Zone (High Acc, Low FMR), alb
 
 \begin{figure}[H]
   \centering
-  \missingfigure[figcolor=white]{Operating Curves (Please insert `exp23_paper_20251104_052644_psz_curve.png`)}
+  \IfFileExists{../figures/exp23_paper_20251104_052644_psz_curve.png}{
+    \includegraphics[width=\linewidth]{../figures/exp23_paper_20251104_052644_psz_curve.png}
+  }{
+    \fbox{\parbox[c][0.35\textheight][c]{0.9\linewidth}{Operating Curves figure missing.}}
+  }
   \caption{Operating Curves (Acceptance vs FMR). PSZ band is Acc$\ge$0.95, FMR$\le$0.02. geDIG approaches optimal zone.}
   \label{fig:psz_operating_curves_lite_ja}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-  \missingfigure[figcolor=white]{Latency vs Accept (Please insert `exp23_paper_20251104_052644_latency_curve.png`)}
+  \IfFileExists{../figures/exp23_paper_20251104_052644_latency_curve.png}{
+    \includegraphics[width=\linewidth]{../figures/exp23_paper_20251104_052644_latency_curve.png}
+  }{
+    \fbox{\parbox[c][0.35\textheight][c]{0.9\linewidth}{Latency vs Acceptance figure missing.}}
+  }
   \caption{Latency vs Acceptance. Target P50 $\le$ 200ms.}
   \label{fig:latency_vs_accept_lite_ja}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-  \missingfigure[figcolor=white]{Gating Time-series (Please insert `exp23_paper_20251104_052644_gating_timeseries.png`)}
+  \IfFileExists{../figures/exp23_paper_20251104_052644_gating_timeseries.png}{
+    \includegraphics[width=\linewidth]{../figures/exp23_paper_20251104_052644_gating_timeseries.png}
+  }{
+    \fbox{\parbox[c][0.35\textheight][c]{0.9\linewidth}{Gating time-series figure missing.}}
+  }
   \label{fig:gating_timeseries_lite_ja}
 \end{figure}
 \section{Note on Thermodynamic Analogy (FEP--MDL)}\label{sec:thermodynamic_analogy}
@@ -884,8 +898,5 @@ poetry run python -m experiments.exp2to4_lite.src.export_tables_tex
 \end{verbatim}
 
 \end{document}
-
-
-
 
 
