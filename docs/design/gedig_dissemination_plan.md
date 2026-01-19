@@ -241,7 +241,7 @@ Title: 「RAGの『いつ更新するか』問題を解く ― geDIG入門」
 #### 最小アブレーション
 - Full geDIG / AG only / DG only / F without ΔSP
   - 進捗: Maze/HotpotQA/Analogy のフルスケールを反映（AnalogyはSS on/offのみ）
-  - 追加検証: Maze 25x25, max_steps=120 (seeds=3) / max_steps=250 (seeds=1) は成功率 0% で難化が効いている
+  - 追加検証: Maze 25x25, max_steps=120 (seeds=3) は成功率 0%、max_steps=250 (seeds=3) は成功率 33%
 
 #### 成果固定化
 - `docs/version_matrix.md` 追加（paper vs code の差分表）
