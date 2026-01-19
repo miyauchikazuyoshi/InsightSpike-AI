@@ -114,6 +114,7 @@ secondary:
 - ColBERTベースライン（dev 7,405件）: EM 0.3618 / F1 0.5258 / SF-F1 0.3663
 - mock(dev500)の閾値スイープ完了: ag/dg 発火は 0.27〜0.91 まで調整可能、F1は 0.0629 / SF-F1は 0.3405 が上限
 - 実LLM(dev200, tuned ag30/dg30): EM 0.4050 / F1 0.5541 / SF-F1 0.3094（theta_ag≈0.0856）
+- 実LLM(dev500, tuned ag30/dg30): EM 0.3800 / F1 0.5370 / SF-F1 0.3049（theta_ag≈0.0859）
 
 ### 1.2 インタラクティブデモ
 
@@ -240,7 +241,7 @@ Title: 「RAGの『いつ更新するか』問題を解く ― geDIG入門」
 #### 最小アブレーション
 - Full geDIG / AG only / DG only / F without ΔSP
   - 進捗: Maze/HotpotQA/Analogy のフルスケールを反映（AnalogyはSS on/offのみ）
-  - 追加検証: Maze 25x25, max_steps=120 (seeds=3) は成功率 0% で難化が効いている
+  - 追加検証: Maze 25x25, max_steps=120 (seeds=3) / max_steps=250 (seeds=1) は成功率 0% で難化が効いている
 
 #### 成果固定化
 - `docs/version_matrix.md` 追加（paper vs code の差分表）

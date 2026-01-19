@@ -40,12 +40,13 @@ Mock LLM run (dev=500, tune_size=200).
 | 50/30 | 0.2855 | 0.0859 | 0.460 | 0.300 | 0.0616 | 0.3242 | 9.53 |
 | 70/50 | 0.2881 | 0.2855 | 0.274 | 0.540 | 0.0629 | 0.3405 | 8.01 |
 
-## Real LLM (small)
-OpenAI run (dev=200, tuned on all 200).
+## Real LLM
+OpenAI run (dev=200/500, tuned on 200).
 
-| EM | F1 | SF-F1 | ag_fire_rate | dg_fire_rate | theta_ag | theta_dg | Notes |
-|---:|---:|---:|---:|---:|---:|---:|---|
-| 0.4050 | 0.5541 | 0.3094 | 0.700 | 0.300 | 0.0856 | 0.0856 | `LLM_PROVIDER=openai`, model=`gpt-4o-mini` |
+| Dev size | EM | F1 | SF-F1 | ag_fire_rate | dg_fire_rate | theta_ag | theta_dg | Notes |
+|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| 200 | 0.4050 | 0.5541 | 0.3094 | 0.700 | 0.300 | 0.0856 | 0.0856 | `LLM_PROVIDER=openai`, model=`gpt-4o-mini` |
+| 500 | 0.3800 | 0.5370 | 0.3049 | 0.700 | 0.300 | 0.0859 | 0.0859 | `LLM_PROVIDER=openai`, model=`gpt-4o-mini` |
 
 ## Expected outputs
 - `experiments/hotpotqa-benchmark/results/gedig_*.jsonl`
@@ -54,6 +55,7 @@ OpenAI run (dev=200, tuned on all 200).
 - `experiments/hotpotqa-benchmark/results/real_llm/*`
 - `docs/paper/data/hotpotqa_sample_summary.json`
 - `docs/paper/data/hotpotqa_ablation_dev_mock.json`
+- `docs/paper/data/hotpotqa_real_llm_dev500_summary.json`
 
 ## Known limitations
 - Mock runs are not comparable to paper numbers; use a real LLM for full eval.
