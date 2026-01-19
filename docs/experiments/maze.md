@@ -17,6 +17,16 @@ make reproduce-maze15
 - `success_rate`, `avg_steps`, `avg_edges`, `g0_mean`, `gmin_mean`
 - Gate fire rates (`ag_rate`, `dg_rate`) and compression metrics
 
+## Ablation (planned)
+See `experiments/maze-query-hub-prototype/ABLATION_PLAN.md` for detailed variants.
+
+| Variant | Intent | Status |
+|---|---|---|
+| Full geDIG (AG+DG+F) | Paper preset default | baseline |
+| AG only | Disable DG commits (`--dg-commit-policy never`) | TODO |
+| DG only | Suppress AG expansion (set `--theta-ag` high) | TODO |
+| F without ΔSP | Remove SP contribution (`--sp-beta 0`) | TODO |
+
 ## Expected outputs
 - `experiments/maze-query-hub-prototype/results/l3_only/*_summary.json`
 - `experiments/maze-query-hub-prototype/results/l3_only/*_steps.json`

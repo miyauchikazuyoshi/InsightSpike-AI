@@ -18,6 +18,16 @@ make reproduce-hotpotqa
 - EM/F1, SF-F1, latency
 - Gate fire rates (initial/final)
 
+## Ablation (planned)
+Note: AG/DG only affect expansion; answer generation is unconditional.
+
+| Variant | Intent | Status |
+|---|---|---|
+| Full geDIG (AG+DG+F) | Default thresholds and expansions | baseline |
+| AG only | Force expansion (lower `--theta-ag`, raise `--max-expansions`) | TODO |
+| DG only | Disable expansion (`--max-expansions 0`) | TODO |
+| F without ΔSP | Align with geDIG core config (TBD) | TODO |
+
 ## Expected outputs
 - `experiments/hotpotqa-benchmark/results/gedig_*.jsonl`
 - `experiments/hotpotqa-benchmark/results/gedig_*_summary.json`

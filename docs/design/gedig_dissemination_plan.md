@@ -237,6 +237,7 @@ Title: 「RAGの『いつ更新するか』問題を解く ― geDIG入門」
 
 #### 最小アブレーション
 - Full geDIG / AG only / DG only / F without ΔSP
+  - 進捗: 実験カードにテンプレ追加済み（数値は未取得）
 
 #### 成果固定化
 - `docs/version_matrix.md` 追加（paper vs code の差分表）
@@ -255,7 +256,7 @@ Title: 「RAGの『いつ更新するか』問題を解く ― geDIG入門」
 - [x] Makefile `reproduce-*` ターゲット追加
 - [x] 再現コマンドの no-network デフォルト化
 - [x] 生成物の `docs/paper/data/` 集約（集計のみ）
-- [ ] 主要実験のアブレーション表（AG/DG/F）
+- [ ] 主要実験のアブレーション表（AG/DG/F） ※テンプレ追加済み、数値は未取得
 - [x] `docs/version_matrix.md` 作成
 - [ ] Release v0.1.0（pending）+ ルート `CITATION.cff`（done）
 
