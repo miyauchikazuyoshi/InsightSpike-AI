@@ -19,6 +19,7 @@
 \usepackage[nameinlink]{cleveref}
 \usepackage{microtype}
 \usepackage{siunitx}
+\usepackage{array}
 \usepackage{enumitem}
 \usepackage[table]{xcolor}
 \usepackage{float}
@@ -106,7 +107,7 @@ Smaller $\F$ is \textbf{better} (lower structural cost and larger $\Delta\mathrm
 \subsection*{Research Questions and Hypotheses}
 \begin{itemize}[leftmargin=1.4em]
   \item \textbf{RQ1 (Simultaneous Control)}: Can a single gauge $\F$ and two-stage gates (AG/DG) simultaneously and stably control exploration (width/depth/backtracking) and integration (accept/reject/hold) as well as memory operations (eviction)?
-  \item \textbf{RQ2 (Discrimination)}: Can AG/DG discriminate between \emph{true insights} (bridges/shortcuts) and \emph{pseudo-insights} (misdirection/marginal improvement), thereby reducing contamination rate ($\downarrow$) and increasing the pending$\to$confirmed rate ($\uparrow$)?
+  \item \textbf{RQ2 (Discrimination)}: Can AG/DG separate \emph{true insights} (bridges/shortcuts) from \emph{pseudo-insights} (misdirection or marginal improvement), reducing contamination and raising the pending-to-confirmed rate?
   \item \textbf{RQ3 (Operational Alignment)}: Does the proportionality $\Delta\mathrm{IG}$ ($=\,\Delta H_{\mathrm{norm}}+\gamma\,\Delta\mathrm{SP}_{\mathrm{rel}}$) $\propto \Delta\mathrm{MDL}$ function consistently as an operational approximation under the proposed assumptions?
   \item \textbf{H1 (Thermodynamic Inference)}: Real Transformer attention produces lower geDIG F than random/uniform baselines, validating that inference is a thermodynamic process of minimizing free energy. (New in v6)
 \end{itemize}
@@ -252,7 +253,7 @@ This AG/DG correspondence should be interpreted as \emph{operational corresponde
 By this two-stage gate, \textbf{ambiguity detection and shortcut evaluation are chained in the same step}, triggering discovery of beneficial bridge structures in real-time while suppressing wasteful exploration.
 
 \paragraph{Hyperparameter Calibration and Drift Mitigation}\label{sec:hyperparam_drift}
-\textbf{Objective}\; Operate $\theta_{\mathrm{AG}},\theta_{\mathrm{DG}},\lambda,\,H,\,k$ \emph{stably and reproducibly} without relying on excessive manual tuning.
+We keep $\theta_{\mathrm{AG}},\theta_{\mathrm{DG}},\lambda,\,H,\,k$ \emph{stable and reproducible} without excessive manual tuning.
 \begin{description}[leftmargin=1.6em]
   \item[Quantile Calibration of Thresholds] \; AG is automatically set by the upper quantile of $g_0$ (e.g., $q_{1-\alpha}$), and DG by the lower quantile of $b(t)$ on AG frames (e.g., $q_{\beta}$):
   \[
@@ -265,7 +266,7 @@ By this two-stage gate, \textbf{ambiguity detection and shortcut evaluation are 
     \lambda_0 := \frac{\mathrm{Std}[\gednorm]}{\max\{\mathrm{Std}[\ignorm],\,\varepsilon\}}\,;\quad \text{grid validation with } \lambda\in\{\tfrac{1}{2}\lambda_0,\lambda_0,2\lambda_0\}.
   \]
   When adopting MDL correspondence (\S\ref{sec:fep_mdl_bridge}), anchor as $\lambda\approx c_D/c_M$ and fine-tune with a small grid.
-  \item[Determination Procedure for $\lambda$] \; In practice, determined by: (1) Measure $\sigma_{\mathrm{EPC}}{=}\mathrm{Std}[\gednorm], \sigma_{\mathrm{IG}}{=}\mathrm{Std}[\ignorm]$ with pilot $N{\approx}100$, (2) Set initial value $\lambda_0{=}\sigma_{\mathrm{EPC}}/\max\{\sigma_{\mathrm{IG}},\varepsilon\}$ ($\varepsilon{=}10^{-6}$), (3) Compare grid $\{\tfrac{1}{2}\lambda_0,\lambda_0,2\lambda_0\}$, (4) Select $\lambda$ maximizing PSZ compliance (Acc/FMR/P50), (5) Fix for all subsequent experiments (prevent drift). This interpretation corresponds to discrete system approximation of information thermodynamic temperature ($\beta{=}1/k_BT$).
+  \item[Determination Procedure for $\lambda$] \; In practice: measure $\sigma_{\mathrm{EPC}}{=}\mathrm{Std}[\gednorm]$ and $\sigma_{\mathrm{IG}}{=}\mathrm{Std}[\ignorm]$ with pilot $N{\approx}100$. Set $\lambda_0{=}\sigma_{\mathrm{EPC}}/\max\{\sigma_{\mathrm{IG}},\varepsilon\}$ ($\varepsilon{=}10^{-6}$), compare $\{\tfrac{1}{2}\lambda_0,\lambda_0,2\lambda_0\}$, select $\lambda$ maximizing PSZ compliance (Acc/FMR/P50), and fix it for subsequent experiments (prevent drift). This corresponds to a discrete approximation of information temperature ($\beta{=}1/k_BT$).
   \item[Handling $\gamma$] \; $\gamma$ is an \emph{allocation coefficient within the same dimension} for $\Delta H$ and $\Delta\mathrm{SP}_{\mathrm{rel}}$, chosen from a \emph{low-dimensional grid} with default $\gamma\in\{0.0,0.5,1.0\}$. For RAG, default is $\gamma{=}1.0$ (path shortening fully counted on information side), and for Maze, $\gamma{\in}[0.5,1.0]$ is recommended. Under \emph{equal-resources}, report sensitivity of PSZ and contamination rate, allowing only \emph{initial grid} upon domain change.
   \item[Alignment with Compute Budget] \; $H$ and $k$ prioritize keeping P95 latency \emph{within budget} (e.g., P95 $\le$ \SI{350}{ms}). Choose minimal configuration satisfying $O(k^H)$ with $H$ in 1--3 and $k$ in 8--64. Use concurrently with PSZ metrics (\S\ref{sec:psz_metrics}), tolerating no FMR increase.
   \item[Cooldown and Backoff] \; To prevent thrashing from continuous AG/DG firing, introduce \emph{re-firing cooldown} (e.g., 3--5 steps) and \emph{exponential backoff} (narrowing candidate width or $\beta\downarrow$) upon DG failure.
@@ -336,7 +337,7 @@ Correspondence between MDL/FEP and this index $\F$ is organized in Table~\ref{ta
 \centering
 \small
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{@{}p{0.20\linewidth}p{0.26\linewidth}p{0.26\linewidth}p{0.26\linewidth}@{}}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.20\linewidth}>{\raggedright\arraybackslash}p{0.26\linewidth}>{\raggedright\arraybackslash}p{0.26\linewidth}>{\raggedright\arraybackslash}p{0.26\linewidth}@{}}
 \toprule
 Framework & Structural Cost Component & Information/Accuracy Component & Objective (Trade-off) \\
 \midrule
@@ -383,10 +384,10 @@ Exploration strategy, candidate branching, backtracking, and memory eviction are
 \paragraph{Generalizability}\; Environment-dependent conditions in pseudo-code (e.g., wall check in maze) are kept in \emph{preprocessing/representation layer}, while \textbf{decision criteria for acceptance/exploration/pruning themselves are commonized by $\F$ and AG/DG rules}. By replacing representation design, the same control principle can be applied to other domains (RAG, etc.).
 
 \subsection{Implementation Guidance (Phase~1)}
-\noindent\textit{Setting parameters $\lambda,\gamma$}\; As scale alignment of structure and information terms, $\lambda$ is first determined by initial value $\lambda_0:=\mathrm{Std}[\gednorm]/\max\{\mathrm{Std}[\ignorm],\varepsilon\}$ via variance balancing as stated in "Note: IG approximation and $\lambda$ interpretation", and PSZ achievement rate and FMR/latency are observed with small grid $\{\tfrac{1}{2}\lambda_0,\lambda_0,2\lambda_0\}$.
-In actual operation, once decided $\lambda$ is fixed for the entire system and not tuned frequently per environment (see Fig.\ref{fig:psz_operating_curves_lite_ja} and $(\tau,\lambda)$ Operating Curves in Appendix). $\gamma$ is a coefficient determining balance of contribution between $\Delta H$ and $\Delta\mathrm{SP}_{\rm rel}$, confirmed to have low sensitivity around range $\gamma{\approx}0.5$ in maze PoC.
+\noindent We set $\lambda$ and $\gamma$ as follows. $\lambda$ is determined by variance balancing with $\lambda_0:=\mathrm{Std}[\gednorm]/\max\{\mathrm{Std}[\ignorm],\varepsilon\}$ and a small grid $\{\tfrac{1}{2}\lambda_0,\lambda_0,2\lambda_0\}$ evaluated by PSZ and latency.
+Once chosen, $\lambda$ is fixed for the entire system (see Fig.\ref{fig:psz_operating_curves_lite_ja} and $(\tau,\lambda)$ curves in the Appendix). $\gamma$ balances $\Delta H$ and $\Delta\mathrm{SP}_{\rm rel}$ and shows low sensitivity around $\gamma{\approx}0.5$ in the maze PoC.
 \\
-\noindent\textit{Similarity calculation and Linkset construction}\; In implementation, $S_{\mathrm{link}}$ is constructed by Top-$k$ acquisition based on weighted cosine similarity for episode embedding $\phi(e)\in\mathbb{R}^d$ (weights assigned by task-specific weight vector management; code example: \texttt{src/insightspike/search/similarity\_search.py}).
+\noindent\textit{Similarity calculation and Linkset construction}\; In implementation, $S_{\mathrm{link}}$ is formed by top-$k$ retrieval under weighted cosine similarity in the episode embedding space $\phi(e)\in\mathbb{R}^d$. Weights are assigned by task-specific vectors; code example: \texttt{src/insightspike/search/\allowbreak similarity\_search.py}.
 During retrieval, ranking is done purely by similarity without using C-value, and $\F$ and AG/DG are used as "integration gauge" on top of it.
 This allows easy connection with existing vector DBs and ANN indexes.
 \\
@@ -399,7 +400,7 @@ Rough estimate of computational complexity and bottlenecks are summarized in Tab
   \small
   \caption{Complexity summary (typical).}
   \label{tab:complexity_summary}
-  \begin{tabular}{@{}p{3.8cm}p{5.2cm}p{5.6cm}@{}}
+  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.8cm}>{\raggedright\arraybackslash}p{5.2cm}>{\raggedright\arraybackslash}p{5.6cm}@{}}
   \toprule
   Component & Method (typical) & Complexity \\
   \midrule
@@ -545,7 +546,7 @@ The maze experiment confirmed that:
     \item \textbf{Compression is evident}: 95\% compression indicates it accurately captures the topological skeleton.
     \item \textbf{Scalable}: Performance holds from $15{\times}15$ to $25{\times}25$ (and preliminarily $50{\times}50$).
 \end{enumerate}
-This justifies proceeding to the RAG experiment, mapping ``Dead-end'' to ``Unknown/Hallucination'' and ``Shortcut'' to ``Insight/Logical Connection''.
+This justifies proceeding to the RAG experiment. We map ``Dead-end'' to ``Unknown/Hallucination'' and ``Shortcut'' to ``Insight/Logical Connection''.
 
 % -----------------------------------------------------------
 \section{Experiment II: Static RAG (Baseline Establishment)}
@@ -726,7 +727,7 @@ FEP frames agent behavior as minimizing \emph{variational free energy} (upper bo
 
 \paragraph{Operational Meaning}
 \begin{itemize}[leftmargin=*]
-    \item \textbf{Justification of Single Control}: Learning (structure edit) and Inference (search/compression) are theoretically unified as minimizing $\F$.
+    \item \textbf{Justification of Single Control}: Learning and inference are unified by minimizing $\F$.
     \item \textbf{Interpretation of $\lambda$}: $\lambda \approx c_{\mathrm{ig}}/c_{\mathrm{ged}}$ corresponds to \emph{information temperature} ($kT$). It balances the trade-off between structural complexity and information gain.
     \item \textbf{Orthogonality}: $\Delta$EPC measures structure cost, $\Delta$IG measures information gain. Separating them avoids double counting.
 \end{itemize}
