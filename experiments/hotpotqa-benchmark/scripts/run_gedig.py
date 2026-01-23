@@ -26,6 +26,35 @@ from src.evaluator import EvaluationResult, HotpotQAEvaluator, exact_match, f1_s
 from src.hotpotqa_adapter import GeDIGHotpotQAAdapter
 
 
+def _load_dotenv(paths: list[Path]) -> None:
+    for path in paths:
+        if not path.exists():
+            continue
+        try:
+            with path.open("r", encoding="utf-8") as handle:
+                for raw in handle:
+                    line = raw.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if line.startswith("export "):
+                        line = line[len("export ") :].strip()
+                    if "=" not in line:
+                        continue
+                    key, value = line.split("=", 1)
+                    key = key.strip()
+                    value = value.strip()
+                    if (
+                        len(value) >= 2
+                        and value[0] == value[-1]
+                        and value[0] in {"'", '"'}
+                    ):
+                        value = value[1:-1]
+                    if key and key not in os.environ:
+                        os.environ[key] = value
+        except OSError:
+            continue
+
+
 def set_seed(seed: int) -> None:
     os.environ["PYTHONHASHSEED"] = str(seed)
     random.seed(seed)
@@ -158,12 +187,38 @@ def main():
     parser.add_argument("--tune-ag-percentile", type=float, default=None, help="AG percentile")
     parser.add_argument("--tune-dg-percentile", type=float, default=None, help="DG percentile")
     parser.add_argument(
+        "--max-retries",
+        type=int,
+        default=None,
+        help="Retry count for LLM rate limit/connection errors (0 disables retries)",
+    )
+    parser.add_argument(
+        "--retry-wait",
+        type=float,
+        default=None,
+        help="Base seconds to wait before retrying LLM call",
+    )
+    parser.add_argument(
+        "--retry-backoff",
+        type=float,
+        default=None,
+        help="Backoff multiplier for LLM retries",
+    )
+    parser.add_argument(
+        "--retry-max-wait",
+        type=float,
+        default=None,
+        help="Maximum seconds to wait between LLM retries",
+    )
+    parser.add_argument(
         "--resume-from",
         type=Path,
         default=None,
         help="Resume from an existing JSONL file (skips processed ids)",
     )
     args = parser.parse_args()
+
+    _load_dotenv([EXPERIMENT_DIR / ".env", REPO_ROOT / ".env"])
 
     config = load_yaml(args.config) if args.config else {}
     data_cfg = config.get("data", {})
@@ -193,6 +248,32 @@ def main():
     llm_model = llm_cfg.get("model", "gpt-4o-mini")
     llm_temperature = llm_cfg.get("temperature", 0.0)
     llm_max_tokens = llm_cfg.get("max_tokens", 256)
+    llm_retry_max = (
+        args.max_retries
+        if args.max_retries is not None
+        else llm_cfg.get("max_retries")
+    )
+    if llm_retry_max is None:
+        llm_retry_max = 3
+    llm_retry_wait = (
+        args.retry_wait if args.retry_wait is not None else llm_cfg.get("retry_wait")
+    )
+    if llm_retry_wait is None:
+        llm_retry_wait = 10.0
+    llm_retry_backoff = (
+        args.retry_backoff
+        if args.retry_backoff is not None
+        else llm_cfg.get("retry_backoff")
+    )
+    if llm_retry_backoff is None:
+        llm_retry_backoff = 2.0
+    llm_retry_max_wait = (
+        args.retry_max_wait
+        if args.retry_max_wait is not None
+        else llm_cfg.get("retry_max_wait")
+    )
+    if llm_retry_max_wait is None:
+        llm_retry_max_wait = 120.0
     gamma = gedig_cfg.get("gamma", 1.0)
 
     set_seed(int(seed))
@@ -228,6 +309,7 @@ def main():
                 f"max_expansions={max_expansions}",
                 f"expansion_seeds={expansion_seeds}",
                 f"tfidf_dim={tfidf_dim}",
+                f"llm_retries={llm_retry_max}",
             ]
         )
     )
@@ -255,6 +337,10 @@ def main():
         tfidf_dim=tfidf_dim,
         llm_temperature=llm_temperature,
         llm_max_tokens=llm_max_tokens,
+        llm_retry_max=llm_retry_max,
+        llm_retry_wait=llm_retry_wait,
+        llm_retry_backoff=llm_retry_backoff,
+        llm_retry_max_wait=llm_retry_max_wait,
     )
     adapter.setup(examples)
 
@@ -415,6 +501,10 @@ def main():
             "llm_model": llm_model,
             "llm_temperature": llm_temperature,
             "llm_max_tokens": llm_max_tokens,
+            "llm_retry_max": llm_retry_max,
+            "llm_retry_wait": llm_retry_wait,
+            "llm_retry_backoff": llm_retry_backoff,
+            "llm_retry_max_wait": llm_retry_max_wait,
             "expansion_seeds": expansion_seeds,
             "tfidf_dim": tfidf_dim,
         },
