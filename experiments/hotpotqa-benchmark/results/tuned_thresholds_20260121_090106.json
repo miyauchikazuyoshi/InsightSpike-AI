@@ -1,0 +1,9 @@
+{
+  "ag_percentile": 50,
+  "data_path": "/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/hotpotqa-benchmark/data/hotpotqa_distractor_dev.jsonl",
+  "dg_percentile": 30,
+  "sample_size": 200,
+  "seed": 42,
+  "theta_ag": 0.08840864132386297,
+  "theta_dg": 0.08516008678251168
+}

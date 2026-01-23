@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from .data_loader import HotpotQAExample
 
 _TOKEN_RE = re.compile(r"[a-z0-9']+")
+_RETRY_AFTER_RE = re.compile(r"try again in ([0-9]+(?:\\.[0-9]+)?)s", re.IGNORECASE)
 
 
 @dataclass
@@ -65,6 +66,10 @@ class GeDIGHotpotQAAdapter:
         tfidf_dim: int = 64,
         llm_temperature: float = 0.0,
         llm_max_tokens: int = 256,
+        llm_retry_max: int = 3,
+        llm_retry_wait: float = 10.0,
+        llm_retry_backoff: float = 2.0,
+        llm_retry_max_wait: float = 120.0,
     ):
         self.lambda_weight = lambda_weight
         self.gamma = gamma
@@ -75,6 +80,10 @@ class GeDIGHotpotQAAdapter:
         self.llm_model = llm_model
         self.llm_temperature = llm_temperature
         self.llm_max_tokens = llm_max_tokens
+        self.llm_retry_max = max(0, int(llm_retry_max))
+        self.llm_retry_wait = max(0.0, float(llm_retry_wait))
+        self.llm_retry_backoff = max(1.0, float(llm_retry_backoff))
+        self.llm_retry_max_wait = max(0.0, float(llm_retry_max_wait))
         self.max_expansions = max(0, int(max_expansions))
         self.expansion_seeds = max(0, int(expansion_seeds))
         self.tfidf_dim = max(0, int(tfidf_dim))
@@ -142,6 +151,68 @@ class GeDIGHotpotQAAdapter:
         if best_score <= 0:
             return "Unknown"
         return best_sentence.strip()
+
+    def _get_status_code(self, exc: Exception) -> int | None:
+        status = getattr(exc, "status_code", None)
+        if isinstance(status, int):
+            return status
+        status = getattr(exc, "status", None)
+        if isinstance(status, int):
+            return status
+        response = getattr(exc, "response", None)
+        if response is not None:
+            status = getattr(response, "status_code", None)
+            if isinstance(status, int):
+                return status
+        return None
+
+    def _extract_retry_after(self, exc: Exception) -> float | None:
+        message = str(exc)
+        match = _RETRY_AFTER_RE.search(message)
+        if match:
+            try:
+                return float(match.group(1))
+            except ValueError:
+                return None
+        response = getattr(exc, "response", None)
+        headers = getattr(response, "headers", None) if response is not None else None
+        if headers:
+            for key in ("retry-after", "Retry-After"):
+                value = headers.get(key)
+                if value:
+                    try:
+                        return float(value)
+                    except ValueError:
+                        return None
+        return None
+
+    def _is_retryable_llm_error(self, exc: Exception) -> bool:
+        status = self._get_status_code(exc)
+        if status in (408, 429) or (status is not None and 500 <= status < 600):
+            return True
+        message = str(exc).lower()
+        retry_markers = (
+            "rate limit",
+            "rate_limit",
+            "rpd",
+            "429",
+            "too many requests",
+            "connection error",
+            "timeout",
+            "timed out",
+            "temporarily unavailable",
+            "service unavailable",
+        )
+        return any(marker in message for marker in retry_markers)
+
+    def _retry_wait_seconds(self, exc: Exception, attempt: int) -> float:
+        retry_after = self._extract_retry_after(exc)
+        if retry_after is not None:
+            return max(0.0, retry_after)
+        wait_s = self.llm_retry_wait * (self.llm_retry_backoff ** max(attempt - 1, 0))
+        if self.llm_retry_max_wait > 0:
+            wait_s = min(wait_s, self.llm_retry_max_wait)
+        return max(0.0, wait_s)
 
     def _tokenize(self, text: str) -> list[str]:
         return text.lower().split()
@@ -389,15 +460,93 @@ class GeDIGHotpotQAAdapter:
             # Fallback: return neutral values
             return 0.0, 0.0, False, True
 
+    def _clean_entity_fragment(self, text: str) -> str:
+        cleaned = text.strip().strip(" ?.,;:\"'()[]{}")
+        if not cleaned:
+            return ""
+        tokens = cleaned.split()
+        if len(tokens) > 8:
+            cleaned = " ".join(tokens[-8:])
+        if len(cleaned) < 3:
+            return ""
+        return cleaned
+
+    def _extract_entity_queries(self, question: str) -> list[str]:
+        entities: list[str] = []
+        for match in re.findall(r'"([^"]+)"', question):
+            cleaned = self._clean_entity_fragment(match)
+            if cleaned:
+                entities.append(cleaned)
+
+        if " or " in question.lower():
+            parts = re.split(r"\bor\b", question, flags=re.IGNORECASE)
+            for part in parts:
+                cleaned = self._clean_entity_fragment(part)
+                if cleaned:
+                    entities.append(cleaned)
+        elif " both " in question.lower() and " and " in question.lower():
+            parts = re.split(r"\band\b", question, flags=re.IGNORECASE)
+            for part in parts:
+                cleaned = self._clean_entity_fragment(part)
+                if cleaned:
+                    entities.append(cleaned)
+
+        deduped = []
+        seen = set()
+        for ent in entities:
+            key = ent.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append(ent)
+        return deduped
+
     def _build_expansion_queries(
-        self, question: str, retrieved: list[tuple[str, int, str, float]]
+        self,
+        question: str,
+        retrieved: list[tuple[str, int, str, float]],
+        question_type: str | None = None,
     ) -> list[str]:
         if self.expansion_seeds <= 0:
             return [question]
-        queries = []
+        max_queries = max(4, self.expansion_seeds * 4 + 4)
+        seen: set[str] = set()
+        queries: list[str] = []
+
+        def add_query(query: str) -> None:
+            if len(queries) >= max_queries:
+                return
+            cleaned = " ".join(query.split())
+            if not cleaned:
+                return
+            key = cleaned.lower()
+            if key in seen:
+                return
+            seen.add(key)
+            queries.append(cleaned)
+
+        add_query(question)
+
+        question_is_comparison = (
+            (question_type or "").lower() == "comparison"
+            or " or " in question.lower()
+            or " both " in question.lower()
+        )
+        if question_is_comparison:
+            for ent in self._extract_entity_queries(question):
+                add_query(ent)
+
         for title, _, text, _ in retrieved[: self.expansion_seeds]:
-            snippet = text[:80]
-            queries.append(f"{question} {title} {snippet}")
+            title = title.strip()
+            snippet = text.strip()[:80]
+            if title:
+                add_query(title)
+                add_query(f"{question} {title}")
+            if snippet:
+                if title:
+                    add_query(f"{title} {snippet}")
+                add_query(f"{question} {title} {snippet}")
+
         return queries or [question]
 
     def score_example(self, example: HotpotQAExample) -> tuple[float, float]:
@@ -438,14 +587,31 @@ Question: {question}
 
 Answer (be concise, just give the answer):"""
 
-        response = client.chat.completions.create(
-            model=self.llm_model,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=self.llm_temperature,
-            max_tokens=self.llm_max_tokens,
-        )
-
-        return response.choices[0].message.content.strip()
+        attempts = 0
+        while True:
+            try:
+                response = client.chat.completions.create(
+                    model=self.llm_model,
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=self.llm_temperature,
+                    max_tokens=self.llm_max_tokens,
+                )
+                return response.choices[0].message.content.strip()
+            except Exception as exc:
+                if (
+                    self.llm_retry_max <= 0
+                    or not self._is_retryable_llm_error(exc)
+                    or attempts >= self.llm_retry_max
+                ):
+                    raise
+                attempts += 1
+                wait_s = self._retry_wait_seconds(exc, attempts)
+                print(
+                    f"\n[warn] LLM error, retry {attempts}/{self.llm_retry_max} "
+                    f"in {wait_s:.1f}s: {exc}"
+                )
+                if wait_s:
+                    time.sleep(wait_s)
 
     def process(self, example: HotpotQAExample) -> GeDIGResult:
         """Process a single question using geDIG-guided retrieval.
@@ -492,7 +658,9 @@ Answer (be concise, just give the answer):"""
             expansions += 1
             retrieval_k = min(len(corpus), self.top_k * (expansions + 1))
             expanded: list[tuple[str, int, str, float]] = []
-            for query in self._build_expansion_queries(example.question, retrieved):
+            for query in self._build_expansion_queries(
+                example.question, retrieved, example.question_type
+            ):
                 expanded.extend(self._retrieve(query, corpus, bm25, retrieval_k))
             before_count = len(retrieved)
             retrieved = self._merge_retrieved(retrieved, expanded)

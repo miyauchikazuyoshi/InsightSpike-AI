@@ -5,7 +5,7 @@ hotpotqa_distractor_dev.jsonl,contriever,0.2747,0.4216,0.1656,7405,20260117_0242
 hotpotqa_distractor_dev.jsonl,dpr,0.3483,0.5091,0.3235,7405,20260118_093251,False
 hotpotqa_distractor_dev.jsonl,colbert,0.3618,0.5258,0.3663,7405,20260118_093324,False
 hotpotqa_distractor_dev.jsonl,static_graphrag,0.3893,0.5594,0.3497,7405,20260116_075326,False
-hotpotqa_distractor_dev.jsonl,gedig,0.3749,0.5375,0.3043,7405,20260115_115335,False
+hotpotqa_distractor_dev.jsonl,gedig,0.3841,0.5539,0.2736,7405,20260122_100418,False
 hotpotqa_sample_100.jsonl,closed_book,0.29,0.4139,0.0,100,20260113_211550,False
 hotpotqa_sample_100.jsonl,bm25,0.38,0.5462,0.3675,100,20260113_153149,False
 hotpotqa_sample_100.jsonl,contriever,0.27,0.4081,0.1575,100,20260113_154022,False

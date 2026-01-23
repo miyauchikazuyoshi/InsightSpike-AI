@@ -9,7 +9,7 @@
 | dpr | 0.3483 | 0.5091 | 0.3235 | 7405 | 20260118_093251 | False |
 | colbert | 0.3618 | 0.5258 | 0.3663 | 7405 | 20260118_093324 | False |
 | static_graphrag | 0.3893 | 0.5594 | 0.3497 | 7405 | 20260116_075326 | False |
-| gedig | 0.3749 | 0.5375 | 0.3043 | 7405 | 20260115_115335 | False |
+| gedig | 0.3841 | 0.5539 | 0.2736 | 7405 | 20260122_100418 | False |
 
 ## hotpotqa_sample_100.jsonl
 | method | em | f1 | sf_f1 | count | timestamp | incomplete |
