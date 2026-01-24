@@ -1,0 +1,8 @@
+lambda_weight,ag_percentile,dg_percentile,em,f1,sf_f1,count,summary_path
+0.7,50.0,30.0,0.376,0.529,0.3188,500,/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/hotpotqa-benchmark/results/gedig_20260121_184612_summary.json
+0.7,55.0,30.0,0.37,0.5265,0.3258,500,/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/hotpotqa-benchmark/results/gedig_20260121_185308_summary.json
+1.0,45.0,30.0,0.386,0.5456,0.2931,500,/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/hotpotqa-benchmark/results/gedig_20260121_192759_summary.json
+1.0,55.0,30.0,0.384,0.5465,0.3064,500,/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/hotpotqa-benchmark/results/gedig_20260121_204007_summary.json
+1.3,45.0,30.0,0.392,0.5509,0.2931,500,/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/hotpotqa-benchmark/results/gedig_20260121_215203_summary.json
+1.3,50.0,30.0,0.386,0.5451,0.2966,500,/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/hotpotqa-benchmark/results/gedig_20260121_230354_summary.json
+1.3,55.0,30.0,0.384,0.5381,0.3048,500,/Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/hotpotqa-benchmark/results/gedig_20260122_001558_summary.json
