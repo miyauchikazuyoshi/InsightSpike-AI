@@ -40,6 +40,7 @@ experiments/**/data_snapshots/
 experiments/rag_cross_genre/
 !experiments/hotpotqa-benchmark/results/
 !experiments/hotpotqa-benchmark/results/**
+pruned_model/
 
 # Archived content (code/docs/experiments)
 archive/
