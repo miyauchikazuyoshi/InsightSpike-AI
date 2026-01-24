@@ -320,6 +320,7 @@ geDIG の核心は、\textbf{構造変化のコスト}（$\gednorm$）と\textbf
     $\theta_{\mathrm{AG}},\,\theta_{\mathrm{DG}}$ & 分位ベースのしきい値（AG/DG） \\
     $\gednorm$ & 正規化編集経路コスト（normalized edit‑path cost；Phase~1） \\
     $\ignorm$ & 正規化IG差分（$\Delta H_{\mathrm{norm}}{+}\gamma\,\Delta \mathrm{SP}_{\mathrm{rel}}$） \\
+    $\ignorm^{+}$ & 拡張IG差分（$\ignorm{+}\beta\,\Delta\mathrm{SS}$；\S\ref{sec:structural_similarity_extension}） \\
     $c(\cdot)$ & edit cost function（編集操作の単価） \\
     $C_{\mathrm{edit}}$ & 編集経路コスト（$\sum c(o)$） \\
     $N_{\mathrm{edit}}$ & 編集回数（運用ログ用） \\
@@ -331,6 +332,8 @@ geDIG の核心は、\textbf{構造変化のコスト}（$\gednorm$）と\textbf
     $\alpha$ & ディリクレ平滑化の擬似カウント（例: $\alpha{=}0.5$） \\
     $\lambda$ & 構造–情報のトレードオフ比（$\F$内の係数） \\
     $\gamma$ & IG項内の配分係数（$\Delta H$と$\Delta\mathrm{SP}_{\mathrm{rel}}$の重み） \\
+    $\beta$ & 構造類似度項の重み係数（$\ignorm^{+}$内；\S\ref{sec:structural_similarity_extension}） \\
+    $\Delta\mathrm{SS}$ & 構造類似度変化（局所パターン間のGED類似度） \\
     $C_{\max}$ & 上界（例: $c_{\mathrm{node}}{+}|S_{\mathrm{link}}|c_{\mathrm{edge}}$） \\
     $c_{\mathrm{confirmed}}$ & 確定ノードの信頼度（更新確定） \\
     $c_{\mathrm{pending}}$ & 保留ノードの信頼度（後続で昇格/廃棄） \\
@@ -440,6 +443,36 @@ $\F$ は\textbf{小さいほど良い}（構造コストが低く、$\Delta\math
   \mathbf{v} = [\,\text{文脈},\; \text{操作},\; \text{アフォーダンス},\; \text{顕著性},\; \text{帰結},\; \text{目標}\,]
 \end{equation}
 の最小分解（迷路：式(\ref{eq:state_vec})、RAG：文脈=クエリ/ノード埋め込み、操作=検索/統合、アフォーダンス=類似度・可用性、顕著性=頻度/重要度、帰結=受容/誤統合指標、目標=回答適合性）に対応づけられる。\,\textbf{統一性は表現ではなく評価・制御（$\F$, AG/DG）にある}点に留意する。
+
+\paragraph{発展: 構造類似度 $\Delta\mathrm{SS}$ の導入}\label{sec:structural_similarity_extension}
+情報利得 $\ignorm$ の構成要素として、エントロピー変化（$\Delta H$）と経路短縮（$\Delta\mathrm{SP}$）に加え、\textbf{構造類似度}（Structural Similarity; SS）を導入する拡張が考えられる：
+\begin{equation}
+\ignorm^{+}\;=\;\Delta H_{\mathrm{norm}}\; +\; \gamma\,\Delta \mathrm{SP}_{\mathrm{rel}}\; +\; \beta\,\Delta \mathrm{SS},\qquad \beta\ge 0,\label{eq:ignorm_extended}
+\end{equation}
+ここで $\Delta\mathrm{SS}$ は、グラフ構造間の類似度変化を測る項である。具体的には、グラフ編集距離に基づく正規化類似度として：
+\begin{equation}
+\mathrm{SS}(G_1, G_2)\;=\;1 - \frac{\mathrm{GED}(G_1, G_2)}{\max(|G_1|, |G_2|)}
+\end{equation}
+を用い、$\Delta\mathrm{SS}$ は統合前後での「目標構造」への類似度変化を表す。
+
+\noindent\textit{適用条件}: 構造類似度が有効に機能するのは、\textbf{局所構造が大域的な意味と相関する}場合に限られる。例えば：
+\begin{itemize}[leftmargin=1.6em]
+  \item \textbf{知識グラフ}: 「革命」と「感情」が同じ5段階構造を持つ場合、両者は意味的にも関連している（Cross-domain QA で F1 +60\%）。
+  \item \textbf{科学史}: 太陽系と原子が同じ「中心-周回」構造を持つことが、ボーアの原子モデル発見につながった。
+\end{itemize}
+逆に、迷路のように局所パターン（T字路など）と大域的な正解（ゴールへの経路）が相関しない場合、$\Delta\mathrm{SS}$ は有効に機能しない。この\textbf{適用条件の識別}自体が、geDIG を新しいドメインへ適用する際の重要な設計判断となる。
+
+\paragraph{メタ階層性への展望}\label{sec:meta_hierarchy}
+構造類似度は単なる評価指標にとどまらない。発見された\textbf{構造パターン自体を特徴量として抽出}することで、より高次の抽象化が可能となる：
+\begin{align*}
+\text{Level 1:} \quad & \text{要素の類似性} \quad \mathrm{sim}(a, b) = \cos(\phi(a), \phi(b)) \\
+\text{Level 2:} \quad & \text{構造の類似性} \quad \mathrm{SS}(G_1, G_2) \\
+\text{Level 3:} \quad & \text{構造パターンの類似性} \quad \mathrm{SS}(\mathrm{Pattern}_1, \mathrm{Pattern}_2) \\
+& \vdots
+\end{align*}
+例えば、geDIG が「革命 $\approx$ 感情」と「学習 $\approx$ 遺伝子発現」という2つのアナロジーを発見した場合、両者に共通する「5段階プロセス」という\textbf{メタパターン}を抽出できる。このメタパターン間の構造類似度を評価することで、さらに高次の抽象化（例：「段階的変化」という普遍パターン）へと自動的に到達する。
+
+この階層的抽象化は、\S\ref{sec:rag_limited_reasoning} で述べた\textbf{再帰的洞察ベクトル（RIA）}と接続する。RIA は洞察ベクトル $\mathbf{h}^{(t)}$ を再帰的に利用してプロンプト/検索を強化するが、構造類似度のメタ階層化は、この再帰プロセスに\textbf{抽象度の自動的上昇}という方向性を与える。すなわち、geDIG は単に知識を蓄積するだけでなく、\textbf{知識の構造を抽象化し、その抽象構造をさらに構造化する}という自己組織化的な発展が可能となる。
 
 \subsection{ドメイン非依存性の設計原則}
 \label{sec:domain_agnostic_principles}
