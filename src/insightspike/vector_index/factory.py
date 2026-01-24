@@ -47,6 +47,14 @@ class FaissIndexWrapper(VectorIndexInterface):
         if index_type == "Flat":
             # Using IndexFlatIP for inner product (similar to cosine for normalized vectors)
             self.index = faiss.IndexFlatIP(dimension)
+        elif index_type == "HNSW":
+            # HNSW for fast approximate search
+            # M: number of connections per node (higher = better recall but slower)
+            # efConstruction: depth of search during build (default 40 in faiss)
+            M = kwargs.get("M", 32)
+            self.index = faiss.IndexHNSWFlat(dimension, M, faiss.METRIC_INNER_PRODUCT)
+            # Default efConstruction is usually fine, but can be tuned
+            # self.index.hnsw.efConstruction = kwargs.get("efConstruction", 40)
         else:
             # Default to flat index
             self.index = faiss.IndexFlatIP(dimension)
