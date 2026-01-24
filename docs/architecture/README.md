@@ -76,7 +76,19 @@ Notes:
 - **Query persistence** - Full history tracking with analysis capabilities
 - **Production-ready** with caching, error handling, and monitoring
 
-## 🔄 Recent Updates (August 2025)
+## 🔄 Recent Updates (January 2026)
+
+### ⚡ High-Velocity Architecture (Flash-geDIG)
+*   **[Flash-geDIG Library](flash_gedig_spec.md)** - GPU-native, differentiable implementation of structural metrics.
+    *   **Zero-Copy**: No CPU transfer, pure Tensor operations.
+    *   **Approximation**: Matrix powers $A^k$ for SP, Soft Thresholding for EPC.
+    *   **End-to-End**: Fully differentiable, usable as a loss function.
+*   **[Neuro-Pruning Tool](../design/neuro_pruning_spec.md)** - Structural lobotomy for Transformers.
+    *   **Diagnosis**: Measures "Structural Fitness" (F-score) of every attention head.
+    *   **Action**: Prunes bottom $N$% low-structure heads ("Chaos removal").
+    *   **Result**: 10% pruning achieved with <1% accuracy drop on BERT-base.
+
+## 🔄 Previous Updates (August 2025)
 
 ### C-Value System & Weight Vectors ⚡ **NEW**
 - **C-value (Confidence) System** - Episodes track confidence through selection and repetition

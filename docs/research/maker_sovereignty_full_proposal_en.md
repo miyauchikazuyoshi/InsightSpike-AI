@@ -34,9 +34,12 @@ To address these, the proposal argues for a layered design:
 - **Economic layer:** _Resale royalties + cost sharing_  
   - True resale, gifting, and secondary markets are restored for digital goods.  
   - Sustainable incentives are built in: the more safely and widely a work is reused, the more the maker benefits.
-- **Ideational / institutional layer:** _“Administrative blockchain”_  
-  - Blockchains are repositioned as neutral public registries, analogous to land registries, mints, or notary systems.  
+- **Ideational / institutional layer:** _"Administrative blockchain"_
+  - Blockchains are repositioned as neutral public registries, analogous to land registries, mints, or notary systems.
   - Instead of permissionless casinos or fully centralized silos, a semi‑decentralized registry anchors provenance and rights.
+- **Governance layer:** _Wiki‑based consensus_ (§5.1)
+  - Transforms "who decides?" into "how do we decide?" through transparent, contribution‑based governance.
+  - Steward roles with emergency powers, earned through sustained contribution, enable rapid response while maintaining accountability.
 
 The target outcome is **maker sovereignty**:
 
@@ -51,10 +54,11 @@ The system is designed for three main domains:
 
 The core insights can be summarized as:
 
-1. **Blockchain ≠ speculative asset.** Its natural role is a public registry of facts and commitments.  
+1. **Blockchain ≠ speculative asset.** Its natural role is a public registry of facts and commitments.
 2. **Ownership and safety are not in conflict.** When resale, royalties, and revocation are wired into the same
-   infrastructure, safety becomes part of the same feedback loop that sustains creators economically.  
+   infrastructure, safety becomes part of the same feedback loop that sustains creators economically.
 3. **Neither pure centralization nor pure decentralization is viable.** A carefully governed semi‑decentralized layer is the practical optimum.
+4. **"Who decides?" → "How do we decide?"** Wiki‑style governance transforms political conflict over control into procedural design for transparent consensus, where authority is earned through contribution rather than granted by fiat.
 
 ---
 
@@ -225,8 +229,68 @@ The proposal advocates a **semi‑decentralized** model:
 
 In this model:
 
-- The registry is not owned by a single corporate actor.  
+- The registry is not owned by a single corporate actor.
 - But it is also not an ungoverned, permissionless Wild West.
+
+### 5.1 Wiki‑Based Governance Model
+
+A key question for semi‑decentralization is: **"Who decides?"** Rather than answering this politically (governments, corporations, DAOs), we propose transforming it into a procedural question: **"How do we reach consensus?"**
+
+The Wikipedia model offers a proven template for decentralized, transparent governance at scale:
+
+#### Why Wikipedia Works
+
+| Property | Mechanism |
+|----------|-----------|
+| Neutrality | NPOV (Neutral Point of View) policy |
+| Transparency | Full edit history publicly visible |
+| Distributed editing | Anyone can participate |
+| Dispute resolution | Graduated escalation process |
+| Trust building | Permissions earned through sustained contribution |
+
+#### Applying the Wiki Model to the Registry
+
+```
+Maker Sovereignty Registry (Wiki‑style Governance)
+
+1. Registration
+   - Maker submits artifact + self‑assessed risk profile
+   - Submission is publicly visible
+
+2. Community Review
+   - Domain experts evaluate risk classification
+   - Discussion threads are public and archived
+
+3. Consensus Formation
+   - Low risk: Auto‑approve after minimal review
+   - Medium risk: Requires reviewer consensus
+   - High risk: Broad community consensus + conditional approval
+
+4. Emergency Response
+   - Designated stewards can issue immediate revocation
+   - Post‑hoc review validates or reverses the decision
+
+5. Full Audit Trail
+   - Every decision is traceable
+   - Appeals process available
+```
+
+#### Addressing Wiki Model Limitations
+
+| Challenge | Mitigation |
+|-----------|------------|
+| **Speed** (AI safety may require immediate action) | Steward class with emergency revocation power; decisions reviewed post‑hoc |
+| **Expertise** (AI risk assessment requires specialists) | Weighted voting for verified domain experts; specialist working groups |
+| **Edit wars** (endless disputes over "dangerous or not") | Pre‑agreed rubrics and classification criteria; binding arbitration for edge cases |
+
+#### Transforming "Who" into "How"
+
+The Wiki model shifts the governance question:
+
+- **Traditional framing:** "Who controls the registry?" → Political conflict
+- **Wiki framing:** "What process produces legitimate decisions?" → Procedural design
+
+This does not eliminate politics, but it **contains** political conflict within a transparent, auditable process where power is earned through contribution rather than granted by fiat.
 
 ---
 
@@ -371,10 +435,16 @@ The proposal is intentionally ambitious and faces several challenges:
   - Defining interoperable token and license formats across ecosystems.  
   - Coordinating multiple registry operators across jurisdictions.
 
-- **Governance**
-  - Who operates the registry infrastructure?  
-  - How are policies decided and updated?  
-  - How can abuse by powerful actors be prevented?
+- **Governance** _(partially addressed by Wiki model in §5.1)_
+  - The Wiki‑based governance model (§5.1) addresses "how decisions are made" through transparent, contribution‑based consensus.
+  - Remaining challenges:
+    - **Bootstrapping:** Who are the initial stewards? How is the founding community seeded?
+    - **Jurisdictional fragmentation:** Different regions may fork the registry with incompatible policies.
+    - **Capture resistance:** Ensuring that well‑resourced actors cannot dominate through volume of contributions.
+  - Proposed mitigations:
+    - Term limits and rotation for steward roles.
+    - Geographic and institutional diversity requirements for core decisions.
+    - Transparent funding disclosure for all major contributors.
 
 - **Privacy**
   - Balancing provenance transparency with user privacy rights.  

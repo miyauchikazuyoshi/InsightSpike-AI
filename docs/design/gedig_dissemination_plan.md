@@ -3,7 +3,7 @@
 > **目標**: geDIGを「知性の設計原理」として学術的・実用的に認知させる
 
 **作成日**: 2026-01-16
-**最終更新**: 2026-01-19
+**最終更新**: 2026-01-19（英語v6 PDFの修正＋HotPotQA分析/アブレーション計画を追記）
 **ステータス**: Phase 1（実験完了・拡散継続） / Phase 2 準備中
 **著者**: miyauchikazuyoshi
 
@@ -32,7 +32,7 @@ geDIG（graph edit Distance + Information Gain）は、動的知識グラフの�
 | geDIGコアアルゴリズム | ✅ 実装済み | `src/insightspike/algorithms/gedig_core.py` |
 | Maze PoC | ✅ 動作 | 15×15で成功率98%、可視化あり |
 | HotPotQAフル実験 | ✅ 完走 | dev 7,405件 + baselines |
-| 論文 v6 | ⚠️ ドラフト | 日英両方、図表一部欠損 |
+| 論文 v6 | ⚠️ ドラフト | 英語PDFビルド復旧・参照/図/ブックマーク修正済み、図表一部欠損は残る |
 | 理論的枠組み | ✅ 整備 | FEP-MDL対応 |
 | デモアプリ（Streamlit/Gradio） | ✅ 作成済み | `apps/hotpotqa_demo.py` / `spaces/gedig-demo/`（Gradio切替済み） |
 
@@ -60,6 +60,10 @@ geDIG（graph edit Distance + Information Gain）は、動的知識グラフの�
 - 追加ブーストはIG側に限定（Insightへの直接加算は停止）（対応済）
 - AG表記はAmbiguity Gateに統一（注意書きで補足）（対応済）
 - 例示の動作確認に加え、単体テストを追加検討（未着手）
+
+**直近進捗（2026-01-19）**
+- 英語v6 PDFのビルド不具合を解消し、参照/図/ブックマーク警告を解消
+- 迷路の図（軌跡/ゲージログ）を実験ログから生成して差し替え
 
 ---
 
@@ -103,18 +107,51 @@ secondary:
 - [ ] FMR が閾値法より **50%以上**低い
 - [ ] P50 latency が **500ms以下**
 
-#### 現状（2026-01-19）
+#### 現状（2026-01-22）
 
-- dev 7,405件で geDIG は BM25 に対して **EM +0.9pt / F1 +1.5pt**
-- static_graphrag が最良（F1 0.5594）。差分分析が次の焦点
-- 目標（+5%以上）には未達。改善余地の特定が優先
-- 差分分析ノート作成: `docs/design/hotpotqa_error_analysis.md`
-- ケーススタディ抽出: `docs/design/hotpotqa_case_studies.md`
+- dev 7,405件で geDIG は BM25 に対して **EM +1.8pt / F1 +3.1pt**
+- static_graphrag が最良（F1 0.5594）。geDIG は F1 -0.55pt で僅差
+- 目標（+5%以上）には未達。SF-F1 の落ち込みが課題
+- 差分分析ノート更新: `docs/design/hotpotqa_error_analysis.md`
+- ケーススタディ更新: `docs/design/hotpotqa_case_studies.md`
 - DPRベースライン（dev 7,405件）: EM 0.3483 / F1 0.5091 / SF-F1 0.3235
 - ColBERTベースライン（dev 7,405件）: EM 0.3618 / F1 0.5258 / SF-F1 0.3663
 - mock(dev500)の閾値スイープ完了: ag/dg 発火は 0.27〜0.91 まで調整可能、F1は 0.0629 / SF-F1は 0.3405 が上限
 - 実LLM(dev200, tuned ag30/dg30): EM 0.4050 / F1 0.5541 / SF-F1 0.3094（theta_ag≈0.0856）
 - 実LLM(dev500, tuned ag30/dg30): EM 0.3800 / F1 0.5370 / SF-F1 0.3049（theta_ag≈0.0859）
+- 実LLM(dev 7,405, theta_ag=0.0859/0.0859): EM 0.3792 / F1 0.5430 / SF-F1 0.2925（AG/DG初期発火 68.35%/31.65%、avg geDIG 0.2687、avg edges 11.5）
+- 実LLM(dev 7,405, lambda=1.2, ag40/dg30, max_exp=2, tune_size=500): EM 0.3841 / F1 0.5539 / SF-F1 0.2736（AG/DG最終発火 60.88%/28.80%、avg edges 16.9）
+- 実LLM AG only は再開中（resume: `experiments/hotpotqa-benchmark/results/gedig_20260120_103151.jsonl`、6,333/7,405処理済み）
+- OpenAI RPD制限は継続的に発生（429）。完走は可能だが実行時間が伸びる
+- DG only + ablation集計はAG完走後に自動実行（log: `experiments/hotpotqa-benchmark/results/hotpotqa_ablation_chain.log`）
+- 差分分析/ケーススタディに「失敗モードのラベル付け手順」を追記（進行中）
+
+#### 次の分析タスク（差分分析/ケーススタディ）
+- static_graphrag 負け上位ケースの supporting facts 再現率を確認
+- `initial_ag_fired` / `dg_fired` / `graph_edges` を抽出し、取得不足/誤統合/生成誤りに分類
+- bridge / comparison 別の誤り傾向と閾値感度を整理
+
+#### フルスケール・アブレーション計画（HotPotQA）
+- 対象データ: `experiments/hotpotqa-benchmark/data/hotpotqa_distractor_dev.jsonl`
+- 変種: Full geDIG / AG only / DG only（F without ΔSP はアダプタ未対応）
+- 予定出力: `docs/paper/data/hotpotqa_ablation_dev_full.json`
+
+例:
+```bash
+poetry run python experiments/hotpotqa-benchmark/scripts/run_gedig.py \
+  --data experiments/hotpotqa-benchmark/data/hotpotqa_distractor_dev.jsonl \
+  --output experiments/hotpotqa-benchmark/results
+
+# AG only
+poetry run python experiments/hotpotqa-benchmark/scripts/run_gedig.py \
+  --data experiments/hotpotqa-benchmark/data/hotpotqa_distractor_dev.jsonl \
+  --theta-ag -1 --theta-dg -10 --max-expansions 2
+
+# DG only
+poetry run python experiments/hotpotqa-benchmark/scripts/run_gedig.py \
+  --data experiments/hotpotqa-benchmark/data/hotpotqa_distractor_dev.jsonl \
+  --max-expansions 0
+```
 
 ### 1.2 インタラクティブデモ
 
@@ -261,8 +298,11 @@ Title: 「RAGの『いつ更新するか』問題を解く ― geDIG入門」
 - [x] 再現コマンドの no-network デフォルト化
 - [x] 生成物の `docs/paper/data/` 集約（集計のみ）
 - [ ] 主要実験のアブレーション表（AG/DG/F） ※quick-run反映済み、本番スケール未取得
+- [ ] HotPotQA 差分分析の失敗モード整理（取得/統合/生成）
+- [ ] HotPotQA フルスケール・アブレーション（real LLM）
 - [x] `docs/version_matrix.md` 作成
 - [ ] Release v0.1.0（pending）+ ルート `CITATION.cff`（done）
+- [x] 英語v6 PDFのビルド修正（参照/図/ブックマーク警告解消）
 
 #### 補足（リポジトリ内の実体）
 
@@ -378,7 +418,7 @@ geDIG適用:
 - [x] 「5分でわかるgeDIG」スライド → ✅ `docs/concepts/gedig_in_5_minutes.md` (日英)
 - [x] FEP/MDL対応ドキュメント → ✅ `docs/concepts/universal_principle_hypothesis.md` (日英)
 - [ ] コード補完PoCの動作デモ
-- [ ] Transformer分析レポート
+- [x] Transformer分析レポート
 - [ ] 介入実験の結果
 
 ---
@@ -404,7 +444,7 @@ geDIG適用:
 
 ```
 2026年:
-  Q1: JSAI 2026 投稿（Maze + RAG結果）
+  Q1: JSAI 2026 投稿（Maze + RAG結果） ✅ 完了
   Q2: 結果を受けてフィードバック収集
   Q3: NeurIPS Workshop 投稿準備
   Q4: Workshop投稿 or AAAI準備
@@ -490,7 +530,7 @@ docs/
 
 ### Phase 3 成果物チェックリスト
 
-- [ ] JSAI 2026 論文投稿
+- [x] JSAI 2026 論文投稿
 - [ ] PyPIパッケージ公開
 - [ ] ドキュメントサイト公開
 - [ ] GitHub Star 100+
