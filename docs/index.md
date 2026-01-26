@@ -1,25 +1,34 @@
 ---
 layout: default
-title: geDIG - AIに閃きを与える
+title: geDIG - Structure IS Probability
 ---
 
 <div align="center">
 
 <br>
 
-# ⚡ geDIG
+# Structure IS Probability
 
 <h2 style="font-weight: normal; color: #666;">
-AIが「閃く」瞬間を、数式にした
+What if structural optimization and probabilistic inference<br>
+are the same operation?
 </h2>
 
 <br>
 
-**「検索するAI」から「発見するAI」へ**
+<div style="font-size: 1.4em; font-family: 'Times New Roman', serif; letter-spacing: 0.05em;">
+
+**F = ΔEPC − λΔIG**
+
+</div>
+
+<p style="color: #888; font-size: 0.9em;">
+One equation. From mazes to multi-hop QA.
+</p>
 
 <br>
 
-[GitHub](https://github.com/miyauchikazuyoshi/InsightSpike-AI) ・ [論文](paper/geDIG_onegauge_improved_v6.pdf) ・ [デモを試す](#始める)
+[Paper](paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf) ・ [GitHub](https://github.com/miyauchikazuyoshi/InsightSpike-AI) ・ [Demo](https://huggingface.co/spaces/miyaukaz/gedig-demo)
 
 ---
 
@@ -27,227 +36,217 @@ AIが「閃く」瞬間を、数式にした
 
 <br>
 
-## 🎯 一言で
-
-> **創薬AIが「同じ薬効の異なる分子」を発見するように、**
-> **geDIGは「同じ説明力の異なる理論」を発見する。**
-
-<br>
-
----
-
-## 💡 起源
-
-<div align="center">
-
-*1905年、スイス・ベルン。*
-
-*特許庁の審査官だった26歳の青年が、*
-*電磁気学と古典力学という矛盾する2つの理論を統一した。*
-
-*彼の名はアルベルト・アインシュタイン。*
-
-</div>
-
-<br>
-
-**なぜ彼は、アカデミアの外部から、世紀の発見ができたのか？**
-
-私たちの仮説：
-
-彼は2つの理論の**構造的パターン**を認識し、それらを**同型にする最小の変換**を発見した。
-
-その変換が**ローレンツ変換**であり、**相対論**という「閃き」の計算的実体である。
-
-<br>
-
----
-
-## 🧮 核心の方程式
-
-<div align="center">
-
-<h3>T* = argmin<sub>T</sub> GED(T(G₁), G₂)</h3>
-
-<p><i>2つの知識構造を同型にする最小変換を発見せよ。</i></p>
-<p><i>その変換こそが「閃き」である。</i></p>
-
-</div>
-
-<br>
-
-### 人間の脳の秘密
-
-人間は**構造**と**確率**を等価に扱っている：
-
-```
-「AとBは構造が似ている」
-         ↓
-「AとBは関係がある確率が高い」
-```
-
-だから私たちは：
-- 🌞 太陽系を見て → ⚛️ 原子を理解する
-- 💧 水の流れを見て → ⚡ 電気を理解する
-- 🐍 蛇の輪を見て → 💎 ベンゼン環を発見する
-
-**この変換を数式化したのが geDIG。**
-
-<br>
-
----
-
-## 🔮 AIが発見した「閃き」
-
-16の異なるドメインから、アルゴリズムが**自動発見**した意外なアナロジー：
-
-<br>
-
-<div align="center">
-
-| | 発見 | 意味 |
-|:---:|:---|:---|
-| 🔥 | **革命 ≈ 感情** | 社会革命は「集団的感情反応」 |
-| 💻 | **コンパイラ ≈ 岩石サイクル** | どちらも「段階的変形」 |
-| 🦠 | **免疫系 ≈ 情報拡散** | ウイルスとバイラルは同じ構造 |
-| 🧬 | **遺伝子発現 ≈ 学習** | 分子と認知で同じプロセス |
-| 📖 | **革命 ≈ 物語** | 革命はフライタークのピラミッド |
-
-</div>
-
-<br>
-
-<div align="center">
-
-**🚨 これらは誰も教えていない。**
-
-**アルゴリズムが構造から発見した。**
-
-</div>
-
-<br>
-
----
-
-## 📊 検証結果
-
-<br>
-
-### 科学史の再現
-
-| 発見 | 年 | 構造類似度 | 検出 |
-|:---|:---:|:---:|:---:|
-| ボーアの原子モデル | 1913 | 0.995 | ✅ |
-| ケクレのベンゼン環 | 1865 | 0.967 | ✅ |
-| ダーウィンの自然選択 | 1859 | 0.985 | ✅ |
-
-<br>
-
-### 性能
-
-| 指標 | 結果 |
-|:---|:---|
-| Cross-Domain QA | **F1 +60%** (0.06 → 0.66) |
-| 実世界シナリオ | **7/7 成功** |
-| スケーラビリティ | **1000ノード / 5.5秒** |
-
-<br>
-
----
-
-## 🧬 創薬AIとの接続
+## The Insight
 
 <div align="center">
 
 ```
-┌─────────────────┐         ┌─────────────────┐
-│   創薬AI        │         │   geDIG         │
-├─────────────────┤         ├─────────────────┤
-│ 分子グラフ      │ ←───→  │ 知識グラフ      │
-│ 分子編集距離    │ ←───→  │ GED             │
-│ 同じ薬効        │ ←───→  │ 同じ説明力      │
-│ 異なる分子      │ ←───→  │ 異なる理論      │
-├─────────────────┤         ├─────────────────┤
-│ Scaffold        │ ←───→  │ Theory          │
-│ Hopping         │         │ Unification     │
-└─────────────────┘         └─────────────────┘
+Selecting by STRUCTURE          Selecting by PROBABILITY
+        │                               │
+   Graph Topology               Distribution over States
+   Nodes & Edges                    P(x)
+   Edge Cost (EPC)                  Entropy (H)
+        │                               │
+        └───────────┬───────────────────┘
+                    │
+            F-minimization
+            governs both
+                    │
+                    ▼
+        Selection by structure
+                 =
+        Selection by probability
 ```
-
-**同じ数学。異なる応用。**
 
 </div>
 
 <br>
 
+**This equivalence explains:**
+
+| Phenomenon | Structure View | Probability View |
+|:-----------|:---------------|:-----------------|
+| Learning | Graph rewiring | Distribution update |
+| Insight | Structural isomorphism | Sudden entropy collapse |
+| Forgetting | Edge pruning | Probability decay |
+| Intuition | Consolidated path (FFN) | High-confidence shortcut |
+
+<br>
+
 ---
 
-## 🚀 始める
+## Why This Matters
+
+<br>
+
+<div align="center">
+
+| Domain | Application | Status |
+|:-------|:------------|:-------|
+| **AI** | Adaptive RAG, Dynamic Gating | ✅ Demonstrated |
+| **Cognition** | Episodic memory, Insight | ✅ Modeled |
+
+</div>
+
+<br>
+
+We believe this framework may extend to other domains (neuroscience, economics), but these are **hypotheses to be tested**, not claims.
+
+<br>
+
+---
+
+## The Mechanism: AG/DG Gating
+
+Two gates govern all intelligent processing:
+
+<div align="center">
+
+```
+Input
+  │
+  ▼
+┌─────────────────────────┐
+│  AG (Ambiguity Gate)    │
+│  "Is this surprising?"  │
+│                         │
+│  Prediction ≠ Input     │
+│  → Fire                 │
+└───────────┬─────────────┘
+            │ Yes
+            ▼
+      [ Process ]
+            │
+            ▼
+┌─────────────────────────┐
+│  DG (Decision Gate)     │
+│  "Does F decrease?"     │
+│                         │
+│  ΔF < 0 → Update        │
+│  ΔF ≥ 0 → Reject        │
+└───────────┬─────────────┘
+            │ Yes
+            ▼
+   [ Structure Update ]
+```
+
+</div>
+
+<br>
+
+**AG** = What to attend to (Precision weighting)
+
+**DG** = What to learn (Model selection)
+
+<br>
+
+---
+
+## Proof: It Works
+
+<br>
+
+<div align="center">
+
+| Experiment | Domain | Result |
+|:-----------|:-------|:-------|
+| **Dynamic Gating** | 15×15 Maze | 60% → **98%** success |
+| **Adaptive RAG** | HotpotQA | **+3.5pt** Exact Match |
+| **Analogy Discovery** | Cross-domain KG | **+60%** F1 |
+
+</div>
+
+<br>
+
+All three experiments use **the same F-gauge**. No task-specific tuning.
+
+<br>
+
+---
+
+## Theoretical Connections
+
+<br>
+
+<div align="center">
+
+| Framework | Mapping to geDIG |
+|:----------|:-----------------|
+| **FEP** (Free Energy Principle) | Model complexity ↔ EPC, Prediction error ↔ IG |
+| **MDL** (Minimum Description Length) | Code length ↔ EPC, Compression ↔ IG |
+| **Helmholtz Free Energy** | F = U − TS ↔ F = ΔEPC − λΔIG |
+| **Active Inference** | Precision weighting ↔ AG/DG gating |
+
+</div>
+
+<br>
+
+geDIG provides an **operational bridge** — turning abstract principles into computable graph algorithms.
+
+<br>
+
+---
+
+## Get Started
 
 ```bash
 git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
 cd InsightSpike-AI
 poetry install
 
-# AIに「閃かせる」
-poetry run python experiments/isomorphism_discovery/novel_analogy_discovery.py
-```
+# Run the maze experiment
+make reproduce-maze15
 
-**30秒で、AIが新しいアナロジーを発見する。**
+# Run HotpotQA benchmark
+make reproduce-hotpotqa
+```
 
 <br>
 
 ---
 
-## 🎯 3つのレベル
+## Resources
 
-```
-┌─────────────────────────────────────────────────┐
-│  Level 3: 同型発見          【アインシュタイン】│
-│  T* = argmin GED(T(G₁), G₂)                     │
-│  「矛盾を解消する変換の発見」                   │
-└─────────────────────┬───────────────────────────┘
-                      │
-┌─────────────────────┴───────────────────────────┐
-│  Level 2: アナロジー検出           【ボーア】   │
-│  SS(G₁, G₂) > θ                                 │
-│  「異ドメイン間の構造対応」                     │
-└─────────────────────┬───────────────────────────┘
-                      │
-┌─────────────────────┴───────────────────────────┐
-│  Level 1: パターンマッチ           【通常RAG】  │
-│  sim(a,b) = cos(φ(a), φ(b))                     │
-│  「要素の類似性」                               │
-└─────────────────────────────────────────────────┘
-```
+<br>
 
-**geDIGは全レベルをカバーする統一フレームワーク。**
+| Type | Link |
+|:-----|:-----|
+| 📄 **Paper (English)** | [geDIG v6 (PDF)](paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf) |
+| 📄 **Paper (日本語)** | [geDIG v6 (PDF)](paper/geDIG_onegauge_improved_v6.pdf) |
+| 💻 **GitHub** | [InsightSpike-AI](https://github.com/miyauchikazuyoshi/InsightSpike-AI) |
+| 🎮 **Demo** | [HuggingFace Space](https://huggingface.co/spaces/miyaukaz/gedig-demo) |
+| 💬 **Discussion** | [Active Inference Institute Discord](https://discord.gg/activeInference) |
 
 <br>
 
 ---
 
-## 🤝 コラボレーション募集
+## Open Questions
 
-「閃きの計算論的モデル」という野心的な目標に向けて：
+We are exploring whether this framework extends beyond AI:
 
-| 役割 | 貢献 |
-|:---|:---|
-| 🧠 **認知科学者** | 人間の閃きとの対応検証 |
-| 💊 **分子設計AI研究者** | Scaffold Hoppingとの統合 |
-| 🔬 **理論物理学者** | FEP-MDLの数学的厳密化 |
-| 💻 **MLエンジニア** | 大規模知識グラフでの検証 |
+| Domain | Hypothesis | Status |
+|:-------|:-----------|:-------|
+| Cognition | Episodic memory as AG/DG graph construction | Testing |
+| Neuroscience | Synaptic plasticity follows F-gradient | Hypothesis |
+| Economics | Market equilibria as F-minima | Hypothesis |
+
+These are **open research questions**, not claims. We welcome critical feedback.
 
 <br>
 
 ---
 
-## 📚 リソース
+## Collaboration
 
-- 📂 [GitHub Repository](https://github.com/miyauchikazuyoshi/InsightSpike-AI)
-- 📄 [論文 (v6)](paper/geDIG_onegauge_improved_v6.pdf)
-- 📖 [5分でわかるgeDIG](concepts/gedig_in_5_minutes.md)
-- 🔧 [同型発見の設計書](design/level3_isomorphism_discovery.md)
-- 📊 [実験結果](experiments/structural_similarity_results.md)
+We are looking for collaborators to test and challenge the **"Structure = Probability"** hypothesis:
+
+| Role | Contribution |
+|:-----|:-------------|
+| 🧠 **Cognitive Scientists** | Human insight experiments |
+| 🔬 **Neuroscientists** | Synaptic plasticity validation |
+| 💻 **ML Engineers** | Large-scale experiments |
+| 🔍 **Critics** | Find where this breaks down |
 
 <br>
 
@@ -257,7 +256,7 @@ poetry run python experiments/isomorphism_discovery/novel_analogy_discovery.py
 
 <br>
 
-## 📬 連絡先
+## Contact
 
 **Email**: miyauchikazuyoshi@gmail.com
 
@@ -269,12 +268,12 @@ poetry run python experiments/isomorphism_discovery/novel_analogy_discovery.py
 
 <br>
 
-> *「創薬AIが分子の同型を探すように、geDIGは理論の同型を探す。*
-> *その編集操作こそが閃きの実体である。」*
+> *"Structure and probability are two views of the same reality.*
+> *F-minimization is the lens that unifies them."*
 
 <br>
 
-**Apache-2.0** | 特許出願中 (JP 2025-082988, 2025-082989)
+**Apache-2.0** | Patent Pending (JP 2025-082988, 2025-082989)
 
 <br>
 
@@ -282,7 +281,7 @@ poetry run python experiments/isomorphism_discovery/novel_analogy_discovery.py
 
 <br>
 
-**geDIG** — *The moment AI has an insight.*
+**geDIG** — *Where Structure Meets Probability.*
 
 <br>
 
