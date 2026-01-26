@@ -40,6 +40,11 @@
 - Updated plans: UNUSED_LOGIC_REFACTORING_PLAN_2025_09.md and CODE_ENHANCEMENT_PROPOSAL.md to reflect current implementation status (selector guard, Query-as-Node, visualization stub).
 
 
+## [0.1.0] - 2026-01-26
+
+### Changed
+- Version alignment to 0.1.0 across package metadata, CLI output, and docs.
+
 ## [0.9.0] - 2024-07-24
 
 ### Added

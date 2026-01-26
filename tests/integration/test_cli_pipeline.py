@@ -46,7 +46,7 @@ class TestCLIPipeline:
         
         assert result["success"]
         assert "InsightSpike AI" in result["stdout"]
-        assert "0.8.0" in result["stdout"]
+        assert "0.1.0" in result["stdout"]
         
     def test_embed_and_query_pipeline(self):
         """Test embedding documents and querying"""

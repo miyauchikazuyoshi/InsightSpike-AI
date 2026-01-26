@@ -17,7 +17,7 @@ app = typer.Typer(
 def version():
     """Show version information"""
     print("InsightSpike AI")
-    print("Version: 0.8.0")
+    print("Version: 0.1.0")
     print("Brain-inspired AI for insight detection")
 
 @app.command()
