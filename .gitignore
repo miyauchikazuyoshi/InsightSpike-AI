@@ -27,6 +27,7 @@ node_modules/
 *.aux
 *.log
 *.out
+*.dvi
 *.fdb_latexmk
 *.fls
 *.xdv
