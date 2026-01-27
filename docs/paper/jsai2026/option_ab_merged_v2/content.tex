@@ -25,7 +25,7 @@
 }
 
 \begin{abstract}
-Dynamic knowledge acquisition entails a fundamental trade-off: exploring new information vs. integrating verified structures. We propose \textbf{geDIG}, a unified metric bridging the Free Energy Principle (FEP) and Minimum Description Length (MDL) to quantify this trade-off as $\F = \gednorm - \lambda(\Delta H_{\mathrm{norm}} + \gamma \Delta \mathrm{SP}_{\mathrm{rel}})$. This paper demonstrates that $\F$ governs structural optimization across two scales with causal evidence. (1) \textbf{Macro}: In a partial-observation maze task, a geDIG-driven agent autonomously switches between exploration and integration, achieving 98\% success rate with 95\% memory compression. (2) \textbf{Micro}: In Transformer attention, we observe a thermodynamic ``phase transition'' from entropic interaction to structured sparsity across layers ($p < 0.001$), and F-regularization causally improves performance (+0.33\%, $p < 0.05$). These results suggest geDIG as a unified principle governing when to explore and when to integrate, applicable from agent navigation to neural computation.
+Dynamic knowledge acquisition entails a fundamental trade-off: exploring new information vs. integrating verified structures. We propose \textbf{geDIG}, a unified metric bridging the Free Energy Principle (FEP) and Minimum Description Length (MDL) to quantify this trade-off as $\F = \gednorm - \lambda(\Delta H_{\mathrm{norm}} + \gamma \Delta \mathrm{SP}_{\mathrm{rel}})$. This paper demonstrates that $\F$ governs structural optimization across two scales with causal evidence. (1) \textbf{Macro}: In a partial-observation maze task, a geDIG-driven agent autonomously switches between exploration and integration, achieving 98\% success rate while rejecting 98\% of candidate edges (edge-compression). (2) \textbf{Micro}: In Transformer attention, we observe a thermodynamic ``phase transition'' from entropic interaction to structured sparsity across layers ($p < 0.001$), and F-regularization causally improves performance (+0.33\%, $p < 0.05$). These results suggest geDIG as a unified principle governing when to explore and when to integrate, applicable from agent navigation to neural computation.
 \end{abstract}
 
 \begin{document}
@@ -121,8 +121,8 @@ $\Delta \mathrm{SP}$ & 経路短縮 & --- & $L(D|M)$圧縮 & 効率 \\
 まず，物理的な「構造探索」の典型例として，部分観測迷路（15$\times$15）を用いた検証を行った．
 エージェントは自身の周囲1マスしか見えず，移動しながら内部グラフ（メンタルマップ）を構築する．
 具体的には，各候補行動（次セル）を位置・相対移動・通行可否・訪問回数・ゴール等からなる8次元特徴ベクトルで表し，クエリベクトルとの距離に基づく重み付き分布から$\F$を評価する．
-パラメータは $\lambda=1.0, \gamma=0.5, \theta_{\mathrm{AG}}=0.05, \theta_{\mathrm{DG}}=1.2$，最大ステップ数は250とした．
-比較対象として，Random Walk，Greedy DFS（全探索），およびgeDIGエージェントを設定した．
+パラメータは $\lambda=1.0, \gamma=1.0, \theta_{\mathrm{AG}}=0.4, \theta_{\mathrm{DG}}=0.0$，最大ステップ数は250とした．
+比較対象として，(i) Random Walk（各ステップで可能行動から一様ランダムに選択し，直前の逆向きは回避），(ii) Greedy DFS（訪問済みセルを全保持し，未訪問近傍を優先するオンラインDFS），(iii) geDIGエージェントを設定した．
 
 \begin{figure}[h]
 \centering
@@ -152,23 +152,24 @@ geDIGエージェントは，AG/DGのダイナミクスのみで迷路探索に�
 
 \begin{table}[t]
 \centering
-\caption{迷路ナビゲーション結果（15$\times$15, $n=12$ seeds）}
+\caption{迷路ナビゲーション結果（15$\times$15, $n=100$ seeds, max\_steps=250）}
 \label{tab:maze_results}
 \small
 \begin{tabular}{lccc}
 \toprule
 手法 & 成功率 & 平均ステップ & 圧縮率 \\
 \midrule
-Random Walk & $0.45 \pm 0.12$ & $210 \pm 45$ & 0\% \\
-Greedy DFS & $0.92 \pm 0.05$ & $85 \pm 12$ & 0\% \\
-\textbf{geDIG} & $\mathbf{0.98 \pm 0.03}$ & $\mathbf{69 \pm 8}$ & \textbf{95\%} \\
+Random Walk & $0.75 \pm 0.08$ & $105.8 \pm 63.9$ & 0\% \\
+Greedy DFS & $0.99 \pm 0.03$ & $82.1 \pm 30.8$ & 0\% \\
+\textbf{geDIG} & $\mathbf{0.98 \pm 0.03}$ & $\mathbf{89.6 \pm 44.8}$ & \textbf{98\%} \\
 \bottomrule
-\multicolumn{4}{l}{\scriptsize 平均ステップは成功エピソードのみで集計} \\
-\multicolumn{4}{l}{\scriptsize geDIG vs Greedy: 同一seed（同一迷路）での成功/失敗をペアにしたMcNemar検定（$p < 0.05$）} \\
+\multicolumn{4}{l}{\scriptsize 成功率はWilson 95\% CIの半幅（$\pm$），平均ステップは成功エピソードのみの平均$\pm$標準偏差} \\
+\multicolumn{4}{l}{\scriptsize 圧縮率は候補エッジに対するコミットエッジの棄却率（edge-compression: $1-|E_{\mathrm{commit}}|/|E_{\mathrm{cand}}|$）} \\
+\multicolumn{4}{l}{\scriptsize geDIG vs Random Walk: 同一seedでの成功/失敗をペアにしたMcNemar検定（$p < 10^{-5}$）} \\
 \end{tabular}
 \end{table}
 
-geDIGは成功率・効率の両面でGreedy DFSを上回り，かつ圧縮率95\%という圧倒的なメモリ効率を達成した（図\ref{fig:maze_process}）．
+geDIGはRandom Walkを成功率・効率の両面で上回り，Greedy DFSと同等の成功率を維持しながら，候補エッジの大半を棄却する高い圧縮率（98\%）を達成した（図\ref{fig:maze_process}）．
 これは，geDIGが「必要なトポロジー骨格」のみを選択的に記憶することを示す．
 この構築されるグラフは，O'Keefeらが提唱した認知地図\cite{okeefe1978}や，認知科学におけるエピソード記憶の計算論的定義に対応する．
 本モデルでは，AGが「驚き（未知）」を検知した地点をノードとし，DGが「理解（因果）」を確定した経路をエッジとして保存する．
@@ -185,7 +186,7 @@ geDIGは成功率・効率の両面でGreedy DFSを上回り，かつ圧縮率95
   \includegraphics[width=0.9\linewidth]{figs/maze_graph_abstract.png}
   \centerline{(b) 抽象化された内部表現}
 \end{minipage}
-\caption{迷路探索における実空間と内部表現の対応．(a) 実際の迷路空間における探索軌跡．(b) geDIGが構築するエピソード記憶グラフの概念図．直線通路は圧縮され，分岐点（意思決定点，青）と経路（エッジ）のみが保持される．この抽象化により圧縮率95\%を達成．}
+\caption{迷路探索における実空間と内部表現の対応．(a) 実際の迷路空間における探索軌跡．(b) geDIGが構築するエピソード記憶グラフの概念図．直線通路は圧縮され，分岐点（意思決定点，青）と経路（エッジ）のみが保持される．候補エッジに対するコミットエッジの棄却率（edge-compression）は98\%に達した．}
 \label{fig:maze_process}
 \end{figure}
 
