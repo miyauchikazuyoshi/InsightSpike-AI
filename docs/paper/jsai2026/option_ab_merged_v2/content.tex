@@ -123,6 +123,7 @@ $\Delta \mathrm{SP}$ & 経路短縮 & --- & $L(D|M)$圧縮 & 効率 \\
 具体的には，各候補行動（次セル）を位置・相対移動・通行可否・訪問回数・ゴール等からなる8次元特徴ベクトルで表し，クエリベクトルとの距離に基づく重み付き分布から$\F$を評価する．
 パラメータは $\lambda=1.0, \gamma=1.0, \theta_{\mathrm{AG}}=0.4, \theta_{\mathrm{DG}}=0.0$，最大ステップ数は15$\times$15で250，25$\times$25で500とした．
 比較対象として，(i) Random Walk（各ステップで可能行動から一様ランダムに選択し，直前の逆向きは回避），(ii) Greedy DFS（訪問済みセルを全保持し，未訪問近傍を優先するオンラインDFS），(iii) geDIGエージェントを設定した．
+また，記憶効率の指標として圧縮率を定義する：各ステップで生成される候補エッジ総数$|E_{\mathrm{cand}}|$（観測近傍＋想起候補）を全て記憶する素朴方式に対し，DGでコミットしたエッジ総数$|E_{\mathrm{commit}}|$の棄却率 $1-|E_{\mathrm{commit}}|/|E_{\mathrm{cand}}|$ を圧縮率とした（geDIGのみ定義）．
 
 \begin{figure}[h]
 \centering
@@ -157,21 +158,21 @@ geDIGエージェントは，AG/DGのダイナミクスのみで迷路探索に�
 \small
 \begin{tabular}{lccc}
 \toprule
-手法 & 成功率 & 平均ステップ & 圧縮率 \\
+手法 & 成功率 & 平均ステップ & 圧縮率$^\dagger$ \\
 \midrule
 \multicolumn{4}{l}{\textbf{15$\times$15} ($n=100$, max\_steps=250)} \\
-Random Walk & $0.75 \pm 0.08$ & $105.8 \pm 63.9$ & 0\% \\
-Greedy DFS & $0.99 \pm 0.03$ & $82.1 \pm 30.8$ & 0\% \\
+Random Walk & $0.75 \pm 0.08$ & $105.8 \pm 63.9$ & -- \\
+Greedy DFS & $0.99 \pm 0.03$ & $82.1 \pm 30.8$ & -- \\
 \textbf{geDIG} & $\mathbf{0.98 \pm 0.03}$ & $\mathbf{89.6 \pm 44.8}$ & \textbf{98\%} \\
 \midrule
 \multicolumn{4}{l}{\textbf{25$\times$25} ($n=60$, max\_steps=500)} \\
-Random Walk & $0.40 \pm 0.12$ & $242.2 \pm 143.7$ & 0\% \\
-Greedy DFS & $0.95 \pm 0.06$ & $242.2 \pm 106.9$ & 0\% \\
+Random Walk & $0.40 \pm 0.12$ & $242.2 \pm 143.7$ & -- \\
+Greedy DFS & $0.95 \pm 0.06$ & $242.2 \pm 106.9$ & -- \\
 \textbf{geDIG} & $\mathbf{0.75 \pm 0.11}$ & $\mathbf{254.1 \pm 125.4}$ & \textbf{99\%} \\
 \bottomrule
-\multicolumn{4}{l}{\scriptsize 成功率はWilson 95\% CIの半幅（$\pm$），平均ステップは成功エピソードのみの平均$\pm$標準偏差} \\
-\multicolumn{4}{l}{\scriptsize 圧縮率は候補エッジに対するコミットエッジの棄却率（edge-compression: $1-|E_{\mathrm{commit}}|/|E_{\mathrm{cand}}|$）} \\
-\multicolumn{4}{l}{\scriptsize geDIG vs Random Walk: 同一seedでの成功/失敗をペアにしたMcNemar検定（15$\times$15: $p < 10^{-5}$, 25$\times$25: $p < 0.001$）} \\
+\multicolumn{4}{p{0.95\columnwidth}}{\scriptsize 成功率はWilson 95\% CIの半幅（$\pm$），平均ステップは成功エピソードのみの平均$\pm$標準偏差} \\
+\multicolumn{4}{p{0.95\columnwidth}}{\scriptsize $^\dagger$圧縮率はgeDIGのみ定義：各ステップで生成される候補エッジ総数$|E_{\mathrm{cand}}|$を全て記憶する素朴方式と比べ，コミットしたエッジ$|E_{\mathrm{commit}}|$の棄却率として $1-|E_{\mathrm{commit}}|/|E_{\mathrm{cand}}|$} \\
+\multicolumn{4}{p{0.95\columnwidth}}{\scriptsize geDIG vs Random Walk: 同一seedでの成功/失敗をペアにしたMcNemar検定（15$\times$15: $p < 10^{-5}$, 25$\times$25: $p < 0.001$）} \\
 \end{tabular}
 \end{table}
 
