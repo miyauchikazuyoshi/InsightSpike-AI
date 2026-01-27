@@ -156,9 +156,23 @@ def extract_attentions(
     return layers, masks, tokens
 
 
-def load_texts(max_count: int = 8, max_len: int = 120) -> List[str]:
+def load_texts(dataset: str, max_count: int = 8, max_len: int = 120) -> List[str]:
+    """
+    Load short texts for attention probing.
+
+    Notes:
+    - Keep this deterministic (take the first filtered examples) so plots are reproducible.
+    - Use a cached dataset if available; fall back to a small synthetic set when offline.
+    """
     try:
-        ds = load_dataset("wikitext", "wikitext-2-raw-v1", split="train[:200]")
+        if dataset == "sst2":
+            # GLUE/SST-2: use the sentence field.
+            ds = load_dataset("glue", "sst2", split="train[:5000]")
+            texts = [t.strip() for t in ds["sentence"] if t and t.strip() and len(t) < max_len]
+            return texts[:max_count]
+
+        # Default: wikitext short samples.
+        ds = load_dataset("wikitext", "wikitext-2-raw-v1", split="train[:2000]")
         texts = [t.strip() for t in ds["text"] if t.strip() and len(t) < max_len]
         return texts[:max_count]
     except Exception:
@@ -193,10 +207,17 @@ def build_baselines(seq_len: int) -> Dict[str, np.ndarray]:
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Compute geDIG F for transformer attentions (smoke run).")
+    p.add_argument("--dataset", default="wikitext", choices=["wikitext", "sst2"], help="Text source dataset.")
     p.add_argument("--text-count", type=int, default=16, help="Number of short texts to sample.")
     p.add_argument("--text-max-len", type=int, default=120, help="Max characters of input text.")
     p.add_argument("--model", action="append", dest="models", help="Model names or checkpoint paths; repeatable.")
     p.add_argument("--layer-cap", type=int, default=4, help="Max layers per model (prefix).")
+    p.add_argument(
+        "--head-agg",
+        default="none",
+        choices=["none", "mean"],
+        help="Aggregate attention heads before computing geDIG (mean reduces cost and matches paper's layer-wise analysis).",
+    )
     p.add_argument("--attn-max-len", type=int, default=256, help="Max tokens for tokenizer truncation.")
     p.add_argument("--percentile", type=float, default=0.90, help="Percentile threshold when use_percentile.")
     p.add_argument("--threshold", type=float, default=0.01, help="Fixed threshold when not using percentile.")
@@ -222,7 +243,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    texts = load_texts(max_count=args.text_count, max_len=args.text_max_len)
+    texts = load_texts(args.dataset, max_count=args.text_count, max_len=args.text_max_len)
     model_names = args.models or ["bert-base-uncased", "gpt2"]
     device = args.device
     if device == "auto":
@@ -241,19 +262,30 @@ def main() -> None:
     records: List[Dict[str, object]] = []
     for model_name in model_names:
         model_label = Path(model_name).name
+        # Load model/tokenizer once per model, then stream texts to avoid keeping
+        # all attentions in memory (important when probing many sequences).
         try:
-            layers, masks, tokens = extract_attentions(
-                model_name,
-                texts,
-                max_len=args.attn_max_len,
-                device=device,
-                torch_dtype=torch_dtype,
-                device_map=device_map,
-                trust_remote_code=args.trust_remote_code,
-                attn_implementation=attn_impl,
-            )
+            tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=args.trust_remote_code)
+            model_kwargs = {"output_attentions": True, "trust_remote_code": args.trust_remote_code}
+            if torch_dtype is not None:
+                model_kwargs["torch_dtype"] = torch_dtype
+            if device_map:
+                model_kwargs["device_map"] = device_map
+            if attn_impl and attn_impl != "auto":
+                model_kwargs["attn_implementation"] = attn_impl
+            try:
+                model = AutoModel.from_pretrained(model_name, **model_kwargs)
+            except TypeError as exc:
+                if "attn_implementation" in str(exc):
+                    model_kwargs.pop("attn_implementation", None)
+                    model = AutoModel.from_pretrained(model_name, **model_kwargs)
+                else:
+                    raise
+            if not device_map:
+                model.to(device)
+            model.eval()
         except Exception as exc:  # pragma: no cover
-            print(f"[warn] failed to load/extract for {model_name}: {exc}")
+            print(f"[warn] failed to load model/tokenizer for {model_name}: {exc}")
             continue
 
         for cfg in configs:
@@ -264,17 +296,52 @@ def main() -> None:
                 use_percentile=cfg["use_percentile"],
                 percentile=cfg["pct"] if cfg["pct"] is not None else 0.9,
             )
-            for doc_id, (layer_attns, mask) in enumerate(zip(layers, masks)):
-                for layer_idx, attn_layer in enumerate(layer_attns[: args.layer_cap]):  # limit layers for speed
-                    heads = attn_layer.shape[0]
-                    for head_idx in range(heads):
-                        metrics = gedig.compute_F(attn_layer[head_idx], mask)
-                        seq_len = attn_layer.shape[-1]
-                        baselines = build_baselines(seq_len)
-                        baseline_F = {k: gedig.compute_F(v, mask)["F"] for k, v in baselines.items()}
+            for doc_id, text in enumerate(texts):
+                inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=args.attn_max_len)
+                target_device = next(model.parameters()).device
+                inputs = {k: v.to(target_device) for k, v in inputs.items()}
+                with torch.no_grad():
+                    outputs = model(**inputs)
+                attns = outputs.attentions  # tuple of (batch, heads, seq, seq)
+                valid = inputs["attention_mask"][0].bool().cpu().numpy()
+                tokens = tokenizer.convert_ids_to_tokens(inputs["input_ids"][0])
+
+                for layer_idx, attn_layer_t in enumerate(attns[: args.layer_cap]):  # limit layers for speed
+                    attn_layer = attn_layer_t[0].detach().cpu().numpy()  # (heads, seq, seq)
+                    seq_len = attn_layer.shape[-1]
+
+                    # Baselines are layer/head independent. Compute once per (doc, layer, cfg).
+                    baselines = build_baselines(seq_len)
+                    baseline_F = {k: gedig.compute_F(v, valid)["F"] for k, v in baselines.items()}
+
+                    if args.head_agg == "mean":
+                        attn_mean = attn_layer.mean(axis=0)
+                        metrics = gedig.compute_F(attn_mean, valid)
                         rec = {
                             "doc_id": doc_id,
-                            "text": texts[doc_id],
+                            "text": text,
+                            "model": model_label,
+                            "model_path": model_name,
+                            "layer": layer_idx,
+                            "head": -1,
+                            "head_agg": "mean",
+                            "lambda_param": cfg["lambda_param"],
+                            "gamma": cfg["gamma"],
+                            "threshold": cfg["threshold"],
+                            "use_percentile": cfg["use_percentile"],
+                            "percentile": cfg["pct"],
+                            **metrics,
+                            **{f"baseline_F_{k}": v for k, v in baseline_F.items()},
+                        }
+                        records.append(rec)
+                        continue
+
+                    heads = attn_layer.shape[0]
+                    for head_idx in range(heads):
+                        metrics = gedig.compute_F(attn_layer[head_idx], valid)
+                        rec = {
+                            "doc_id": doc_id,
+                            "text": text,
                             "model": model_label,
                             "model_path": model_name,
                             "layer": layer_idx,
@@ -297,13 +364,12 @@ def main() -> None:
                             else:
                                 anchor_idxs.append(0)
                                 if args.anchor_tokens:
-                                    toks = tokens[doc_id]
-                                    for i, tok in enumerate(toks):
+                                    for i, tok in enumerate(tokens):
                                         for pat in args.anchor_tokens:
                                             if pat.lower() in tok.lower():
                                                 anchor_idxs.append(i)
-                            anchor_idxs = sorted(set([i for i in anchor_idxs if i < mask.shape[0] and mask[i]]))
-                            G = gedig._build_graph(attn_layer[head_idx][np.ix_(mask, mask)])
+                            anchor_idxs = sorted(set([i for i in anchor_idxs if i < valid.shape[0] and valid[i]]))
+                            G = gedig._build_graph(attn_layer[head_idx][np.ix_(valid, valid)])
                             hops = [int(x) for x in args.subgraph_hops.split(",") if x != ""]
                             for anchor in anchor_idxs:
                                 for hop in hops:
@@ -320,13 +386,13 @@ def main() -> None:
                                     sub_metrics = gedig.compute_F(sub_attn, sub_mask)
                                     rec_sub = {
                                         "doc_id": doc_id,
-                                        "text": texts[doc_id],
+                                        "text": text,
                                         "model": model_label,
                                         "model_path": model_name,
                                         "layer": layer_idx,
                                         "head": head_idx,
                                         "anchor_idx": anchor,
-                                        "anchor_token": tokens[doc_id][anchor] if anchor < len(tokens[doc_id]) else "",
+                                        "anchor_token": tokens[anchor] if anchor < len(tokens) else "",
                                         "hop": hop,
                                         "subgraph": True,
                                         "lambda_param": cfg["lambda_param"],

@@ -70,22 +70,22 @@ def add_arrow(ax, *, x1: float, y1: float, x2: float, y2: float, color: str = "#
 
 def main() -> None:
     # Column-width-friendly figure size (inches). 3.3in ~= 84mm.
-    fig, ax = plt.subplots(figsize=(3.3, 1.45))
+    fig, ax = plt.subplots(figsize=(3.3, 1.35))
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
     ax.axis("off")
 
     # Layout (normalized coords)
-    top_y = 0.62
-    h = 0.30
-    gap = 0.02
+    top_y = 0.64
+    h = 0.28
+    gap = 0.025
     w = (1.0 - 5 * gap) / 4.0
     x0 = gap
 
-    b1 = add_box(ax, x=x0 + 0 * (w + gap), y=top_y, w=w, h=h, text="observe\n(local view)")
-    b2 = add_box(ax, x=x0 + 1 * (w + gap), y=top_y, w=w, h=h, text="candidate\n$S_{link}/S_{cand}$")
-    b3 = add_box(ax, x=x0 + 2 * (w + gap), y=top_y, w=w, h=h, text="g0 eval\n(AG gate)")
-    b4 = add_box(ax, x=x0 + 3 * (w + gap), y=top_y, w=w, h=h, text="gmin eval\n(DG gate)")
+    b1 = add_box(ax, x=x0 + 0 * (w + gap), y=top_y, w=w, h=h, text="observe\n(local view)", fontsize=7)
+    b2 = add_box(ax, x=x0 + 1 * (w + gap), y=top_y, w=w, h=h, text="candidate\nS_link/S_cand", fontsize=7)
+    b3 = add_box(ax, x=x0 + 2 * (w + gap), y=top_y, w=w, h=h, text="g0 eval\n(AG)", fontsize=7)
+    b4 = add_box(ax, x=x0 + 3 * (w + gap), y=top_y, w=w, h=h, text="gmin eval\n(DG)", fontsize=7)
 
     # Arrows between top boxes
     for left, right in [(b1, b2), (b2, b3), (b3, b4)]:
@@ -101,8 +101,8 @@ def main() -> None:
 
     # Commit box
     blue = "#1f77b4"
-    commit_w = 0.40
-    commit_h = 0.26
+    commit_w = 0.42
+    commit_h = 0.24
     commit_x = 0.52 - commit_w / 2
     commit_y = 0.18
     commit = add_box(
@@ -115,7 +115,7 @@ def main() -> None:
         fc="#e8f3ff",
         ec=blue,
         lw=1.8,
-        fontsize=10,
+        fontsize=8,
         text_color=blue,
     )
 
@@ -132,7 +132,7 @@ def main() -> None:
         )
 
     # Legend
-    ax.text(0.82, 0.14, "AG: ambiguity\nDG: shortcut", ha="left", va="bottom", fontsize=8, color="#555555")
+    ax.text(0.80, 0.14, "AG: ambiguity\nDG: shortcut", ha="left", va="bottom", fontsize=7, color="#555555")
 
     out_pdf = HERE / "agdg_flow.pdf"
     out_png = HERE / "agdg_flow.png"
@@ -145,4 +145,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
