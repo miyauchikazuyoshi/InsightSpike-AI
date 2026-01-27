@@ -163,7 +163,8 @@ Random Walk & $0.45 \pm 0.12$ & $210 \pm 45$ & 0\% \\
 Greedy DFS & $0.92 \pm 0.05$ & $85 \pm 12$ & 0\% \\
 \textbf{geDIG} & $\mathbf{0.98 \pm 0.03}$ & $\mathbf{69 \pm 8}$ & \textbf{95\%} \\
 \bottomrule
-\multicolumn{4}{l}{\scriptsize geDIG vs Greedy: $p < 0.05$, McNemar test} \\
+\multicolumn{4}{l}{\scriptsize 平均ステップは成功エピソードのみで集計} \\
+\multicolumn{4}{l}{\scriptsize geDIG vs Greedy: 同一seed（同一迷路）での成功/失敗をペアにしたMcNemar検定（$p < 0.05$）} \\
 \end{tabular}
 \end{table}
 
@@ -196,7 +197,8 @@ geDIGは成功率・効率の両面でGreedy DFSを上回り，かつ圧縮率95
 Attention行列 $A_{ij}$ を有向グラフの隣接行列と見なし，閾値処理（上位10\%）を行ってグラフ化し，その $\F$ 値を計測した．
 対象モデルは BERT\cite{devlin2019}（12層）のうち前半6層（Layer 0--5）である（計算量の都合で層を制限）．
 SST-2データセットから抽出した1,000シーケンスを入力とし，各層のAttention Weightを平均化して評価した．
-なお，本解析では$\F$の生値ではなく，完全ランダム（Null仮説）からの差$\Delta \F$（ベースラインからの乖離）を主要な解釈対象とする．
+各入力シーケンスを1サンプルとし，各層の$\F$はヘッド平均で集約した．
+なお，本解析では$\F$の生値ではなく，完全ランダム（Null仮説）からの差$\Delta \F$（ベースラインからの乖離）を主要な解釈対象とする．これは閾値処理や系列長により$\F$の絶対スケールが変化し得るためである．
 閾値は5\%〜20\%の範囲で変化させても同様の傾向が確認された．
 
 \subsection{観測1：層別の構造相転移}
@@ -252,6 +254,7 @@ $\alpha$ & Test Accuracy (\%) & 95\% CI \\
 0.1 & 84.12 & [83.8, 84.4] \\
 \bottomrule
 \multicolumn{3}{l}{\scriptsize $^*$ $p < 0.05$ vs Baseline (paired $t$-test)} \\
+\multicolumn{3}{l}{\scriptsize 95\% CIはseed間の平均に対する$t$分布CI（$n=5$）} \\
 \multicolumn{3}{l}{\scriptsize +0.33\%はSoTA差(7\%)の約5\%に相当} \\
 \end{tabular}
 \end{table}
