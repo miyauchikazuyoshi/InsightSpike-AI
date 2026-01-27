@@ -1,0 +1,20 @@
+{
+  "source": "experiments/maze-query-hub-prototype/results/batch_25x25/paper25_25x25_s500_eval_seed*_summary.json",
+  "maze_size": 25,
+  "maze_type": "dfs",
+  "max_steps": 500,
+  "seed_start": 0,
+  "seeds": 60,
+  "k_success": 45,
+  "success_rate": 0.75,
+  "success_ci95_wilson": [
+    0.6276792992295218,
+    0.8422347746994333
+  ],
+  "success_ci95_half": 0.10727773773495575,
+  "mean_steps_all": 315.6,
+  "mean_steps_success": 254.13333333333333,
+  "std_steps_success": 125.37536368115475,
+  "n_success_steps": 45,
+  "mean_edges_success": 246.37777777777777
+}
