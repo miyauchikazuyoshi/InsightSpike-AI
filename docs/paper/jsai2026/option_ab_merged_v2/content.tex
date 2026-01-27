@@ -167,10 +167,10 @@ Greedy DFS & $0.99 \pm 0.03$ & $82.1 \pm 30.8$ & 0\% \\
 \multicolumn{4}{l}{\textbf{25$\times$25} ($n=60$, max\_steps=500)} \\
 Random Walk & $0.40 \pm 0.12$ & $242.2 \pm 143.7$ & 0\% \\
 Greedy DFS & $0.95 \pm 0.06$ & $242.2 \pm 106.9$ & 0\% \\
-\textbf{geDIG} & $\mathbf{0.75 \pm 0.11}$ & $\mathbf{254.1 \pm 125.4}$ & -- \\
+\textbf{geDIG} & $\mathbf{0.75 \pm 0.11}$ & $\mathbf{254.1 \pm 125.4}$ & \textbf{99\%} \\
 \bottomrule
 \multicolumn{4}{l}{\scriptsize 成功率はWilson 95\% CIの半幅（$\pm$），平均ステップは成功エピソードのみの平均$\pm$標準偏差} \\
-\multicolumn{4}{l}{\scriptsize 圧縮率は候補エッジに対するコミットエッジの棄却率（edge-compression: $1-|E_{\mathrm{commit}}|/|E_{\mathrm{cand}}|$，25$\times$25は未計測のため --）} \\
+\multicolumn{4}{l}{\scriptsize 圧縮率は候補エッジに対するコミットエッジの棄却率（edge-compression: $1-|E_{\mathrm{commit}}|/|E_{\mathrm{cand}}|$）} \\
 \multicolumn{4}{l}{\scriptsize geDIG vs Random Walk: 同一seedでの成功/失敗をペアにしたMcNemar検定（15$\times$15: $p < 10^{-5}$, 25$\times$25: $p < 0.001$）} \\
 \end{tabular}
 \end{table}

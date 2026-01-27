@@ -1,0 +1,432 @@
+{
+  "note": "Computed by streaming steps.json from batch_25x25 (eval, 25x25, max_steps=500, seeds=60).",
+  "source_glob": "experiments/maze-query-hub-prototype/results/batch_25x25/paper25_25x25_s500_eval_seed*_steps.json",
+  "seeds": 60,
+  "total_steps": 18936,
+  "total_committed_edges": 17068,
+  "total_candidate_edges": 2529592,
+  "edge_compression": 0.9932526668332284,
+  "edge_compression_base": "mem",
+  "per_seed": [
+    {
+      "seed": 0,
+      "steps": 276,
+      "committed_edges": 285,
+      "cand_edges": 31624,
+      "edge_compression": 0.9909878573235518
+    },
+    {
+      "seed": 10,
+      "steps": 180,
+      "committed_edges": 175,
+      "cand_edges": 12021,
+      "edge_compression": 0.9854421429165627
+    },
+    {
+      "seed": 11,
+      "steps": 352,
+      "committed_edges": 368,
+      "cand_edges": 49350,
+      "edge_compression": 0.9925430597771023
+    },
+    {
+      "seed": 12,
+      "steps": 120,
+      "committed_edges": 122,
+      "cand_edges": 6243,
+      "edge_compression": 0.9804581130866571
+    },
+    {
+      "seed": 13,
+      "steps": 500,
+      "committed_edges": 472,
+      "cand_edges": 91175,
+      "edge_compression": 0.9948231423087469
+    },
+    {
+      "seed": 14,
+      "steps": 492,
+      "committed_edges": 407,
+      "cand_edges": 76703,
+      "edge_compression": 0.9946938190162053
+    },
+    {
+      "seed": 15,
+      "steps": 452,
+      "committed_edges": 408,
+      "cand_edges": 73471,
+      "edge_compression": 0.9944467885288073
+    },
+    {
+      "seed": 16,
+      "steps": 500,
+      "committed_edges": 392,
+      "cand_edges": 83716,
+      "edge_compression": 0.9953175020306751
+    },
+    {
+      "seed": 17,
+      "steps": 364,
+      "committed_edges": 375,
+      "cand_edges": 49000,
+      "edge_compression": 0.9923469387755102
+    },
+    {
+      "seed": 18,
+      "steps": 212,
+      "committed_edges": 234,
+      "cand_edges": 21798,
+      "edge_compression": 0.9892650701899257
+    },
+    {
+      "seed": 19,
+      "steps": 212,
+      "committed_edges": 232,
+      "cand_edges": 21475,
+      "edge_compression": 0.9891967403958091
+    },
+    {
+      "seed": 1,
+      "steps": 368,
+      "committed_edges": 381,
+      "cand_edges": 55237,
+      "edge_compression": 0.9931024494451183
+    },
+    {
+      "seed": 20,
+      "steps": 148,
+      "committed_edges": 163,
+      "cand_edges": 9952,
+      "edge_compression": 0.983621382636656
+    },
+    {
+      "seed": 21,
+      "steps": 312,
+      "committed_edges": 317,
+      "cand_edges": 36076,
+      "edge_compression": 0.9912129947887792
+    },
+    {
+      "seed": 22,
+      "steps": 204,
+      "committed_edges": 221,
+      "cand_edges": 17572,
+      "edge_compression": 0.9874231732301388
+    },
+    {
+      "seed": 23,
+      "steps": 304,
+      "committed_edges": 267,
+      "cand_edges": 32066,
+      "edge_compression": 0.9916734235638994
+    },
+    {
+      "seed": 24,
+      "steps": 232,
+      "committed_edges": 200,
+      "cand_edges": 16792,
+      "edge_compression": 0.9880895664602192
+    },
+    {
+      "seed": 25,
+      "steps": 60,
+      "committed_edges": 69,
+      "cand_edges": 1800,
+      "edge_compression": 0.9616666666666667
+    },
+    {
+      "seed": 26,
+      "steps": 108,
+      "committed_edges": 114,
+      "cand_edges": 5295,
+      "edge_compression": 0.9784702549575071
+    },
+    {
+      "seed": 27,
+      "steps": 408,
+      "committed_edges": 384,
+      "cand_edges": 61142,
+      "edge_compression": 0.9937195381243662
+    },
+    {
+      "seed": 28,
+      "steps": 444,
+      "committed_edges": 404,
+      "cand_edges": 69135,
+      "edge_compression": 0.9941563607434729
+    },
+    {
+      "seed": 29,
+      "steps": 132,
+      "committed_edges": 152,
+      "cand_edges": 8135,
+      "edge_compression": 0.9813153042409343
+    },
+    {
+      "seed": 2,
+      "steps": 192,
+      "committed_edges": 218,
+      "cand_edges": 17919,
+      "edge_compression": 0.9878341425302751
+    },
+    {
+      "seed": 30,
+      "steps": 64,
+      "committed_edges": 69,
+      "cand_edges": 2036,
+      "edge_compression": 0.9661100196463654
+    },
+    {
+      "seed": 31,
+      "steps": 500,
+      "committed_edges": 401,
+      "cand_edges": 79919,
+      "edge_compression": 0.9949824196999462
+    },
+    {
+      "seed": 32,
+      "steps": 500,
+      "committed_edges": 446,
+      "cand_edges": 77385,
+      "edge_compression": 0.9942366091619823
+    },
+    {
+      "seed": 33,
+      "steps": 292,
+      "committed_edges": 306,
+      "cand_edges": 33286,
+      "edge_compression": 0.9908069458631257
+    },
+    {
+      "seed": 34,
+      "steps": 136,
+      "committed_edges": 167,
+      "cand_edges": 9507,
+      "edge_compression": 0.9824339960029452
+    },
+    {
+      "seed": 35,
+      "steps": 500,
+      "committed_edges": 453,
+      "cand_edges": 80463,
+      "edge_compression": 0.9943700831438053
+    },
+    {
+      "seed": 36,
+      "steps": 500,
+      "committed_edges": 367,
+      "cand_edges": 80322,
+      "edge_compression": 0.9954308906650731
+    },
+    {
+      "seed": 37,
+      "steps": 92,
+      "committed_edges": 98,
+      "cand_edges": 3911,
+      "edge_compression": 0.9749424699565329
+    },
+    {
+      "seed": 38,
+      "steps": 260,
+      "committed_edges": 254,
+      "cand_edges": 25584,
+      "edge_compression": 0.9900719199499687
+    },
+    {
+      "seed": 39,
+      "steps": 392,
+      "committed_edges": 361,
+      "cand_edges": 50014,
+      "edge_compression": 0.9927820210341104
+    },
+    {
+      "seed": 3,
+      "steps": 116,
+      "committed_edges": 126,
+      "cand_edges": 6810,
+      "edge_compression": 0.9814977973568282
+    },
+    {
+      "seed": 40,
+      "steps": 108,
+      "committed_edges": 114,
+      "cand_edges": 5633,
+      "edge_compression": 0.9797621161015445
+    },
+    {
+      "seed": 41,
+      "steps": 500,
+      "committed_edges": 273,
+      "cand_edges": 67248,
+      "edge_compression": 0.9959403997144897
+    },
+    {
+      "seed": 42,
+      "steps": 244,
+      "committed_edges": 264,
+      "cand_edges": 24103,
+      "edge_compression": 0.9890470065966892
+    },
+    {
+      "seed": 43,
+      "steps": 360,
+      "committed_edges": 336,
+      "cand_edges": 46838,
+      "edge_compression": 0.9928263375891371
+    },
+    {
+      "seed": 44,
+      "steps": 144,
+      "committed_edges": 154,
+      "cand_edges": 10353,
+      "edge_compression": 0.9851250845165652
+    },
+    {
+      "seed": 45,
+      "steps": 500,
+      "committed_edges": 433,
+      "cand_edges": 87031,
+      "edge_compression": 0.9950247612919535
+    },
+    {
+      "seed": 46,
+      "steps": 368,
+      "committed_edges": 270,
+      "cand_edges": 46978,
+      "edge_compression": 0.9942526288901188
+    },
+    {
+      "seed": 47,
+      "steps": 292,
+      "committed_edges": 308,
+      "cand_edges": 36810,
+      "edge_compression": 0.9916327085031241
+    },
+    {
+      "seed": 48,
+      "steps": 500,
+      "committed_edges": 414,
+      "cand_edges": 92431,
+      "edge_compression": 0.9955209832199154
+    },
+    {
+      "seed": 49,
+      "steps": 500,
+      "committed_edges": 406,
+      "cand_edges": 70610,
+      "edge_compression": 0.9942501062172496
+    },
+    {
+      "seed": 4,
+      "steps": 184,
+      "committed_edges": 199,
+      "cand_edges": 14448,
+      "edge_compression": 0.9862264673311185
+    },
+    {
+      "seed": 50,
+      "steps": 180,
+      "committed_edges": 207,
+      "cand_edges": 15027,
+      "edge_compression": 0.986224795368337
+    },
+    {
+      "seed": 51,
+      "steps": 500,
+      "committed_edges": 326,
+      "cand_edges": 72330,
+      "edge_compression": 0.9954928798562146
+    },
+    {
+      "seed": 52,
+      "steps": 476,
+      "committed_edges": 398,
+      "cand_edges": 72954,
+      "edge_compression": 0.9945445074978754
+    },
+    {
+      "seed": 53,
+      "steps": 492,
+      "committed_edges": 373,
+      "cand_edges": 70016,
+      "edge_compression": 0.9946726462522852
+    },
+    {
+      "seed": 54,
+      "steps": 500,
+      "committed_edges": 394,
+      "cand_edges": 81702,
+      "edge_compression": 0.9951775966316614
+    },
+    {
+      "seed": 55,
+      "steps": 500,
+      "committed_edges": 426,
+      "cand_edges": 78204,
+      "edge_compression": 0.9945527083013657
+    },
+    {
+      "seed": 56,
+      "steps": 500,
+      "committed_edges": 378,
+      "cand_edges": 85794,
+      "edge_compression": 0.9955940974893349
+    },
+    {
+      "seed": 57,
+      "steps": 444,
+      "committed_edges": 356,
+      "cand_edges": 60759,
+      "edge_compression": 0.9941407857272173
+    },
+    {
+      "seed": 58,
+      "steps": 316,
+      "committed_edges": 276,
+      "cand_edges": 33284,
+      "edge_compression": 0.9917077274366062
+    },
+    {
+      "seed": 59,
+      "steps": 216,
+      "committed_edges": 229,
+      "cand_edges": 21889,
+      "edge_compression": 0.9895381241719585
+    },
+    {
+      "seed": 5,
+      "steps": 232,
+      "committed_edges": 222,
+      "cand_edges": 21737,
+      "edge_compression": 0.9897869991259144
+    },
+    {
+      "seed": 6,
+      "steps": 200,
+      "committed_edges": 226,
+      "cand_edges": 17936,
+      "edge_compression": 0.9873996431757359
+    },
+    {
+      "seed": 7,
+      "steps": 192,
+      "committed_edges": 208,
+      "cand_edges": 17136,
+      "edge_compression": 0.9878618113912232
+    },
+    {
+      "seed": 8,
+      "steps": 64,
+      "committed_edges": 70,
+      "cand_edges": 2058,
+      "edge_compression": 0.9659863945578231
+    },
+    {
+      "seed": 9,
+      "steps": 500,
+      "committed_edges": 400,
+      "cand_edges": 79349,
+      "edge_compression": 0.9949589786890825
+    }
+  ]
+}
