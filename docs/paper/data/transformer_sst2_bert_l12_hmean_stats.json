@@ -1,0 +1,127 @@
+{
+  "baseline_random_mean": -0.5126959532894992,
+  "layer_summary": [
+    {
+      "layer": 0,
+      "mean_F": -0.5125054480244807,
+      "median_F": -0.5013008831536363,
+      "n": 200,
+      "std_F": 0.053000279129211854
+    },
+    {
+      "layer": 1,
+      "mean_F": -0.48217792676724647,
+      "median_F": -0.4832541303551855,
+      "n": 200,
+      "std_F": 0.03672097419454142
+    },
+    {
+      "layer": 2,
+      "mean_F": -0.4800976058992015,
+      "median_F": -0.471904211649496,
+      "n": 200,
+      "std_F": 0.027713712425839723
+    },
+    {
+      "layer": 3,
+      "mean_F": -0.5116196432004108,
+      "median_F": -0.49781632986355284,
+      "n": 200,
+      "std_F": 0.038523802477539594
+    },
+    {
+      "layer": 4,
+      "mean_F": -0.46158688938713655,
+      "median_F": -0.4610174577557147,
+      "n": 200,
+      "std_F": 0.03553484698285974
+    },
+    {
+      "layer": 5,
+      "mean_F": -0.44129513973088463,
+      "median_F": -0.44041477631056775,
+      "n": 200,
+      "std_F": 0.037345070143048616
+    },
+    {
+      "layer": 6,
+      "mean_F": -0.4466047303407538,
+      "median_F": -0.4467510561177212,
+      "n": 200,
+      "std_F": 0.03701513288521722
+    },
+    {
+      "layer": 7,
+      "mean_F": -0.44995253171478317,
+      "median_F": -0.4490096996151272,
+      "n": 200,
+      "std_F": 0.03588140332693326
+    },
+    {
+      "layer": 8,
+      "mean_F": -0.439485301385384,
+      "median_F": -0.4401960208870094,
+      "n": 200,
+      "std_F": 0.035624021878739136
+    },
+    {
+      "layer": 9,
+      "mean_F": -0.46583610965280925,
+      "median_F": -0.46092695582912857,
+      "n": 200,
+      "std_F": 0.037920334921251644
+    },
+    {
+      "layer": 10,
+      "mean_F": -0.44727038358017635,
+      "median_F": -0.4437527753967986,
+      "n": 200,
+      "std_F": 0.04332954698874921
+    },
+    {
+      "layer": 11,
+      "mean_F": -0.43927550305526547,
+      "median_F": -0.43576842900538887,
+      "n": 200,
+      "std_F": 0.040618977582403806
+    }
+  ],
+  "source": {
+    "command": "poetry run python experiments/transformer_gedig/extract_and_score.py --dataset sst2 --text-count 200 --text-max-len 120 --model bert-base-uncased --layer-cap 12 --head-agg mean --attn-max-len 128 --out results/transformer_gedig/score_sst2_bert_l12_hmean.json",
+    "dataset": "glue/sst2",
+    "gamma": 0.5,
+    "head_agg": "mean",
+    "lambda": 0.5,
+    "max_tokens": 128,
+    "model": "bert-base-uncased",
+    "n_texts": 200,
+    "percentile": 0.9,
+    "split": "train",
+    "threshold_mode": "percentile"
+  },
+  "tests": {
+    "layer_0_1_vs_10_11_per_doc_mean": {
+      "cohen_d_paired": 2.3067192644514876,
+      "df": 199,
+      "early_layers": [
+        0,
+        1
+      ],
+      "late_layers": [
+        10,
+        11
+      ],
+      "mean_diff": 0.054068744078142716,
+      "n": 200,
+      "p_value": 8.482255189523731e-82,
+      "paired_t": 32.62193668374584
+    },
+    "real_vs_random_baseline_per_doc_mean": {
+      "df": 199,
+      "mean_diff": 0.047887018894621575,
+      "n": 200,
+      "p_value": 1.2120293396484995e-61,
+      "paired_t": 24.367859291036016
+    }
+  }
+}
