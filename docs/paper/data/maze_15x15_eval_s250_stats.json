@@ -1,0 +1,25 @@
+{
+  "source_summary": "experiments/maze-query-hub-prototype/results/paper_grid/_15x15_s250_eval_summary.json",
+  "n": 100,
+  "k_success": 98,
+  "success_rate": 0.98,
+  "success_ci95_wilson": [
+    0.929988209271456,
+    0.9944980324498376
+  ],
+  "success_ci95_half": 0.032254911589190804,
+  "mean_steps_all": 92.8,
+  "mean_steps_success": 89.59183673469387,
+  "std_steps_success": 44.78490097515582,
+  "n_success_steps": 98,
+  "edge_compression_base": "mem",
+  "edge_compression": 0.9826949514816413,
+  "oracle_bfs": {
+    "maze_size": 15,
+    "seeds": 100,
+    "seed_start": 0,
+    "baseline_success_rate": 0.99,
+    "baseline_avg_steps": 48.04040404040404,
+    "method": "bfs"
+  }
+}
