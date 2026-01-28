@@ -165,6 +165,12 @@ $$F = \Delta\text{EPC}_{\text{norm}} - \lambda(\Delta H_{\text{norm}} + \gamma \
 - 生データ：`results/transformer_gedig/score_abs_tau0.01_l12.json` ほか  
   0.02/0.05/0.1/0.2 も同ディレクトリにあり。
 
+### Memo. 統合的な実験設計案（EPC×IG）
+
+- **2軸スイープ（τ × λ）**：τでEPCを、λでIGの重みを動かし、Accuracy/F/EPC/H/SPのPareto面またはヒートマップを作る  
+- **EPC固定診断 vs EPC可変診断の同一データ比較**：percentile（EPC固定）とabsolute（EPC可変）を同じ入力で並べ、どこが変わるかを明確化  
+- **因果テストの統合**：各τ条件でトップエッジ削除/ノイズ注入を行い、ΔFとΔAccuracyの関係を示す（EPCが動いても因果が保たれるかを確認）
+
 ---
 
 ## 6. 発表時間配分（4分想定）
