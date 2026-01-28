@@ -8,11 +8,11 @@
 %%
 
 \title{
-\jtitle{Transformerは熱力学的推論を行うか？\\---geDIGによる構造相転移の観測と制御---}
-\etitle{Does Transformer Perform Thermodynamic Inference?\\--- Observing and Controlling Structural Phase Transitions via geDIG ---}
+\jtitle{動的知識グラフの探索・統合を制御する統一ゲージの提案\\---\textit{Gauge what Knowledge Graph needs.}---}
+\etitle{A Unified Gauge for Controlling Exploration and Integration in Dynamic Knowledge Graphs\\--- \textit{Gauge what Knowledge Graph needs.} ---}
 }
 
-\jaddress{宮内 和義（独立研究者），所在地：日本，E-mail: miyauchikazuyoshi@gmail.com}
+\jaddress{{\small miyauchikazuyoshi@gmail.com}}
 
 \author{%
 \jname{宮内 和義\first}
@@ -25,31 +25,42 @@
 }
 
 \begin{abstract}
-Dynamic knowledge acquisition entails a fundamental trade-off: exploring new information vs. integrating verified structures. We propose \textbf{geDIG}, a unified metric bridging the Free Energy Principle (FEP) and Minimum Description Length (MDL) to quantify this trade-off as $\F = \gednorm - \lambda(\Delta H_{\mathrm{norm}} + \gamma \Delta \mathrm{SP}_{\mathrm{rel}})$. This paper demonstrates that $\F$ governs structural optimization across two scales with causal evidence. (1) \textbf{Macro}: In a partial-observation maze task, a geDIG-driven agent autonomously switches between exploration and integration, achieving 98\% success rate while rejecting 98\% of candidate edges (edge-compression). (2) \textbf{Micro}: In Transformer attention, we observe a thermodynamic ``phase transition'' from entropic interaction to structured sparsity across layers ($p < 0.001$), and F-regularization causally improves performance (+0.33 percentage points, $p=0.038$). These results suggest geDIG as a unified principle governing when to explore and when to integrate, applicable from agent navigation to neural computation.
+Dynamic knowledge graphs face a fundamental ``When'' problem: when to accept new information as structure, and when to continue exploration. While existing approaches such as GraphRAG optimize \emph{what} to retrieve, they lack a principled criterion for \emph{when} to integrate. We propose \textbf{geDIG}, a unified gauge that operationally aligns the Free Energy Principle (FEP) and Minimum Description Length (MDL), quantifying this trade-off as $\F = \gednorm - \lambda(\Delta H_{\mathrm{norm}} + \gamma \Delta \mathrm{SP}_{\mathrm{rel}})$. We validate geDIG on two instantiations of dynamic knowledge graphs. (1) \textbf{Spatial KG (Maze)}: An agent building a cognitive map achieves 98\% success rate while rejecting 98\% of candidate edges. (2) \textbf{Semantic KG (Transformer)}: Attention matrices, viewed as token-relation graphs, exhibit a consistent transition from exploration to structure across layers ($p < 10^{-80}$), and F-regularization causally improves performance (+0.33pp, $p=0.038$). These results suggest geDIG as a general-purpose gauge for controlling when to explore and when to integrate in dynamic knowledge graphs.
 \end{abstract}
 
 \begin{document}
+\begingroup
+% jsaiac.sty renders the title block via tabular; default tabcolsep (=6pt)
+% adds 12pt padding and can trigger Overfull \hbox warnings. Keep it local.
+\setlength{\tabcolsep}{0pt}
 \maketitle
+\endgroup
 
 %% ===========================================
 \section{はじめに}
 %% ===========================================
 
-知能システムにおいて，新しい情報を「いつ」構造として受け入れ，「いつ」探索を続けるべきか（When問題）は，マクロなエージェント行動からミクロな内部推論に至るまで共通の課題である．
-Transformer\cite{vaswani2017}は固定的な層計算を行うが，その内部で情報がどう構造化され，いつ「理解」が完了するのかはブラックボックスのままである．
-本研究では，自由エネルギー原理（FEP）\cite{friston2010}と最小記述長（MDL）\cite{grunwald2007}を操作的に橋渡しする統一評価関数 \textbf{geDIG} (graph edit Distance and Information Gain) を提案する．
-本稿の目的は，この評価関数がマクロな探索（迷路）からミクロな推論（Attention）まで，一貫した「構造化の原理」として機能することを因果的証拠とともに示すことである．
-具体的には以下の3点を貢献とする：
+動的知識グラフ（Dynamic Knowledge Graph）において，新しい情報を「いつ」構造として受け入れ，「いつ」探索を続けるべきか——この\textbf{When問題}は未解決の基本課題である．
+GraphRAG\cite{edge2024}やSelf-RAG\cite{asai2023}は「何を（What）」検索するかを最適化したが，「いつ（When）」統合するかはヒューリスティックに依存している．
+本研究では，自由エネルギー原理（FEP）\cite{friston2010}と最小記述長（MDL）\cite{grunwald2007}を操作的に橋渡しする統一評価関数 \textbf{geDIG} (graph edit Distance and Information Gain) を提案し，この問題に原理的な解を与える．
+
+geDIGの核心的仮説は，「\textbf{構造コストと伸展利得のトレードオフ}を単一スカラーで評価すれば，知識グラフの種類によらず，探索と統合を統一的に制御できる」というものである．
+本稿では，この仮説を2種類の動的知識グラフで検証する：
+\begin{itemize}
+    \item \textbf{空間的KG（迷路）}：エージェントが構築する認知地図
+    \item \textbf{意味的KG（Transformer）}：Attention行列が表現するトークン間関係グラフ
+\end{itemize}
+本稿の貢献は以下の3点である：
 \begin{enumerate}
-    \item 構造コストと多様化利得のトレードオフを単一スカラー化したgeDIGの定式化
-    \item 迷路（マクロ）およびTransformer（ミクロ）における構造相転移の実証
+    \item 構造コストと伸展利得のトレードオフを単一スカラー化したgeDIGの定式化
+    \item 2種類のKG（迷路・Transformer）における構造相転移の実証
     \item F正則化による因果的介入実験
 \end{enumerate}
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figs/academic_orion_radar.png}
-\caption{geDIGによる二段階構造化．AG（内側軌道，青）は0-hop評価で自由エネルギーが高い状態（$g_0>\theta_{\mathrm{AG}}$）を検知し探索を起動する．探索により候補分布が広がると$\Delta H>0$（多様化）が得られ，$\F$が低下する．DG（外側軌道，赤）はMulti-hop評価で経路短縮（$\Delta \mathrm{SP} > 0$）を発見し，$g_{\min}<\theta_{\mathrm{DG}}$のときエッジを確定する．}
+\caption{geDIGによる二段階構造化．AG（内側軌道，青）は0-hop評価で自由エネルギーが高い状態（$g_0>\theta_{\mathrm{AG}}$）を検知し探索を起動する．探索により候補分布が広がると$\Delta H>0$（伸展利得）が得られ，$\F$が低下する．DG（外側軌道，赤）はMulti-hop評価で経路短縮（$\Delta \mathrm{SP} > 0$）を発見し，$g_{\min}<\theta_{\mathrm{DG}}$のときエッジを確定する．}
 \label{fig:radar_insight}
 \end{figure}
 
@@ -67,9 +78,31 @@ geDIGは，「構造を変えるコスト」と「それによって得られる
 ここで各項は以下に対応する（表\ref{tab:gedig_terms}）．
 \begin{itemize}
 \item $\gednorm$：正規化EPC (Edge Placement Cost)．グラフ編集距離（GED）の局所近似であり，MDLにおけるモデル記述長 $L(M)$ の増分に相当する．$\Delta$は常に更新前$G_{t-1}$と更新後$G_t$の差分を表す．
-\item $\Delta H_{\mathrm{norm}}$：シャノンエントロピーの差分（多様化利得）．候補集合に対する重み付き分布$p$のエントロピー$H(p)$の変化として定義し，本稿では$\Delta H := H_{\mathrm{after}}-H_{\mathrm{before}}$（after-before）を採用する．$\Delta H>0$は候補分布の均質化（optionalityの増大）を表し，探索圧として$\F$を下げる（温度項）．
+\item $\Delta H_{\mathrm{norm}}$：シャノンエントロピーの差分（エントロピー増分；伸展利得, Extension Gain）．候補集合に対する重み付き分布$p$のエントロピー$H(p)$の変化として定義し，本稿では$\Delta H := H_{\mathrm{after}}-H_{\mathrm{before}}$（after-before）を採用する．$\Delta H>0$は候補分布の均質化（optionalityの増大）を表し，探索圧として$\F$を下げる（温度項）．
 \item $\Delta \mathrm{SP}_{\mathrm{rel}}$：平均最短路長の相対短縮率．グラフ上のショートカット形成による効率化を表し，MDLにおけるデータ記述長 $L(D|M)$ の圧縮に相当する．
 \end{itemize}
+
+\paragraph{$\Delta\mathrm{EPC}_{\mathrm{norm}}$（$\gednorm$）の具体形}
+再現性のため，本稿の実装で用いた局所GED近似を明記する．
+更新前後のグラフ$G_{\mathrm{before}}=(V_b,E_b)$，$G_{\mathrm{after}}=(V_a,E_a)$に対し，編集操作はノード/エッジの挿入・削除のみとし，
+\begin{equation}
+\mathrm{GED}(G_b,G_a) := c_V\cdot \bigl||V_a|-|V_b|\bigr| + c_E\cdot \bigl(|E_b\setminus E_a|+|E_a\setminus E_b|\bigr)
+\end{equation}
+で近似する．これを正規化定数$C_{\max}$で割り，
+\begin{equation}
+\Delta\mathrm{EPC}_{\mathrm{norm}} \equiv \gednorm := \mathrm{GED}(G_b,G_a)/C_{\max}
+\end{equation}
+とする．迷路（検証I）では，クエリ近傍の$k$-hop局所部分グラフ上で評価し，$C_{\max}=c_V+c_E\max(1,|S_{\mathrm{link}}|)$（候補台固定）を用いた．
+Attention（検証II）では$|V|$が系列長$L$で固定されるため，$c_V=0$かつ$C_{\max}=L^2$とすると$\gednorm$はエッジ密度$|E|/L^2$に一致する．
+
+\paragraph{$\Delta \mathrm{SP}_{\mathrm{rel}}$の計算と計算量}
+$\Delta \mathrm{SP}_{\mathrm{rel}}$は「近道」の寄与を測るため，平均最短路長$L(\cdot)$の相対短縮として
+\begin{equation}
+\Delta \mathrm{SP}_{\mathrm{rel}} := \max\!\left(0, \frac{L(G_{\mathrm{before}})-L(G_{\mathrm{after}})}{L(G_{\mathrm{before}})}\right)
+\end{equation}
+で定義する（$L(\cdot)$は最大連結成分上，または固定サンプルのノードペアに対する平均）．
+迷路のmulti-hop評価（DG）では，全点対最短路（APSP）を毎回計算せず，固定ペア（既定400組）に対する距離をキャッシュし，追加エッジにより改善し得る距離のみをSSSPで増分更新することで計算量を抑えた．
+Transformer解析では，層ごとのトークン関係グラフに対して同様の指標を算出し，スケール依存性を避けるためランダムベースラインからの差$\Delta\F$として解釈する．
 
 候補集合に付与された重み$w_i$（類似度）から確率分布$p$を
 \begin{equation}
@@ -92,11 +125,12 @@ H(p) = -\sum_i p_i \log p_i
 項 & 意味 & FEP & MDL & 役割 \\
 \midrule
 $\gednorm$ & 構造変更 & 複雑さ & $L(M)$増 & 抑制 \\
-$\Delta H$ & 多様性（optionality） & 探索圧 & --- & 拡散 \\
+$\Delta H$ & 伸展利得（optionality） & 探索圧 & --- & 拡散 \\
 $\Delta \mathrm{SP}$ & 経路短縮 & --- & $L(D|M)$圧縮 & 効率 \\
 \bottomrule
 \end{tabular}
 \end{table}
+\noindent\textbf{注記：}表\ref{tab:gedig_terms}のFEP/MDL対応は，本稿で扱うグラフ操作に対して「同型のトレードオフ構造」を与える操作的対応であり，厳密な上界・下界を与える形式的導出は今後の課題である．
 
 \subsection{AG/DG 二段ゲート制御}
 この $\F$ を用いて，エージェントは以下の2つのゲートを事象駆動的（Event-Driven）に制御する．
@@ -104,6 +138,7 @@ $\Delta \mathrm{SP}$ & 経路短縮 & --- & $L(D|M)$圧縮 & 効率 \\
 \item \textbf{AG (Attention Gate)}: 0-hop（直近）での評価．$g_0 = \F|_{\mathrm{local}} > \theta_{\mathrm{AG}}$ のとき，局所的な「違和感・未知」を検知し，探索モード（Exploration）を起動する．
 \item \textbf{DG (Decision Gate)}: Multi-hop（数理推論）での評価．$g_{\min} = \min_h \F^{(h)} < \theta_{\mathrm{DG}}$ のとき，大域的な「近道・洞察」を発見したとみなし，統合モード（Integration）としてエッジを確定する．
 \end{enumerate}
+ここで$h$はDGにおけるルックアヘッド深さ（hop）であり，実装では候補エッジを貪欲に追加しながら$h=0,1,\dots,H$（最大$H=\texttt{max\_hops}$）の各段階で$g(h)$を計測し，その最小値を$g_{\min}$として用いる．
 
 この機構により，システムは常に探索し続けるのではなく，「わからないときだけ調べ（AG）」，「わかったときだけ覚える（DG）」という自律的な振る舞いを獲得する（図\ref{fig:agdg_flow}）．
 
@@ -115,11 +150,20 @@ $\Delta \mathrm{SP}$ & 経路短縮 & --- & $L(D|M)$圧縮 & 効率 \\
 \end{figure}
 
 %% ===========================================
-\section{検証I：迷路による原理検証（マクロ）}
+\section{検証I：空間的KGとしての迷路探索}
 %% ===========================================
 
-まず，物理的な「構造探索」の典型例として，部分観測迷路（15$\times$15および25$\times$25）を用いた検証を行った．
-エージェントは自身の周囲1マスしか見えず，移動しながら内部グラフ（メンタルマップ）を構築する．
+\paragraph{KGとしての定式化}
+部分観測迷路におけるエージェントの認知地図は，動的知識グラフの一形態である．
+ノードは訪問した位置，エッジは移動可能な接続を表し，探索に伴いグラフが動的に成長する．
+エージェントは周囲1マスしか見えないため，「見えた通路を全て記憶する」か「重要な分岐点のみ記憶する」かの選択を迫られる．
+
+\paragraph{仮説}
+geDIGのAG/DGゲートにより，エージェントは(1) 高い成功率を維持しつつ，(2) 候補エッジの大半を棄却する効率的な記憶構築が可能である．
+すなわち，「いつ探索し，いつ構造化するか」をgeDIGが自律制御できる．
+
+\paragraph{実験設定}
+15$\times$15および25$\times$25の迷路を用いた．
 具体的には，各候補行動（次セル）を位置・相対移動・通行可否・訪問回数・ゴール等からなる8次元特徴ベクトルで表し，クエリベクトルとの距離に基づく重み付き分布から$\F$を評価する．
 パラメータは $\lambda=1.0, \gamma=1.0, \theta_{\mathrm{AG}}=0.4, \theta_{\mathrm{DG}}=0.0$，最大ステップ数は15$\times$15で250，25$\times$25で500とした．
 比較対象として，(i) Random Walk（各ステップで可能行動から一様ランダムに選択し，直前の逆向きは回避），(ii) Greedy DFS（訪問済みセルを全保持し，未訪問近傍を優先するオンラインDFS），(iii) geDIGエージェントを設定した．
@@ -199,19 +243,28 @@ Greedy DFS & $0.95 \pm 0.06$ & $242.2 \pm 106.9$ & -- \\
 \end{figure}
 
 %% ===========================================
-\section{検証II：Transformerの熱力学的解釈（ミクロ）}
+\section{検証II：意味的KGとしてのTransformer}
 %% ===========================================
 
-次に，このマクロな原理が，Transformerの内部でも成立しているかを検証した．
-Attention行列 $A_{ij}$ を有向グラフの隣接行列と見なし，閾値処理（上位10\%）を行ってグラフ化し，その $\F$ 値を計測した．
-対象モデルは BERT\cite{devlin2019}（12層）のうち前半6層（Layer 0--5）である（計算量の都合で層を制限）．
-SST-2データセットから抽出した1,000シーケンスを入力とし，各層のAttention Weightを平均化して評価した．
+\paragraph{KGとしての定式化}
+TransformerのAttention行列$A_{ij}$は，トークン$i$からトークン$j$への「関係の強さ」を表す．
+これを閾値処理（上位10\%）してグラフ化すると，動的に変化するトークン間関係グラフ——すなわち意味的KG——が得られる．
+各層でこのグラフ構造が変化することは，情報の「探索」から「統合」への遷移を表している可能性がある．
+
+\paragraph{仮説}
+学習済みTransformerは，geDIG的な構造化を自発的に行っている．
+具体的には，(1) 浅層では高エントロピーな探索状態（多様なトークン関係），(2) 深層では低エントロピーな構造状態（特定トークンへの集中）への相転移が観測されるはずである．
+さらに，$\F$を直接最適化すれば性能が変化する（因果的証拠）．
+
+\paragraph{実験設定}
+対象モデルは BERT\cite{devlin2019}（12層）である．
 SST-2（train）から短文200件を抽出し，各入力シーケンスを1サンプルとした．
 各層の$\F$はヘッド平均のAttention行列から算出した（$\lambda=0.5, \gamma=0.5$, 系列長は最大128 token, 閾値は上位10\%）．
 なお，本解析では$\F$の生値ではなく，完全ランダム（Null仮説）からの差$\Delta \F$（ベースラインからの乖離）を主要な解釈対象とする．これは閾値処理や系列長により$\F$の絶対スケールが変化し得るためである．
 閾値は5\%〜20\%の範囲で変化させても同様の傾向が確認された．
 
 \subsection{観測1：層別の構造相転移}
+本稿でいう「相転移」は，臨界点や秩序変数の存在を主張するものではなく，層方向に沿った探索相$\to$構造相の\textbf{レジーム変化}を便宜上そう呼ぶ．
 図\ref{fig:layer_f}にBERTの層別F値分布を示す．
 学習済みモデルのAttention重みは，ランダム行列（同密度）に比べて$\F$が有意に高い値（0に近い）を示した（paired $t(199)=24.4$, $p < 10^{-60}$, $n=200$）．
 
@@ -240,6 +293,11 @@ Layer 0-1とLayer 10-11の差は統計的に有意である（paired $t(199)=32.
 以上の観測は相関関係に過ぎない．$\F$ が真に性能に関与しているなら，この値を直接最適化することで性能が変化するはずである．
 DistilBERTを用いたSST-2タスクのFine-tuningにおいて，損失関数にF項による正則化を追加した：
 $L_{\mathrm{total}} = L_{\mathrm{CE}} + \alpha \cdot \F$．
+\paragraph{実装詳細（再現性）}
+モデルは\texttt{distilbert-base-uncased}，SST-2（train 1000 / validation 500），最大長128，epoch=3，batch=16，AdamW（lr=$2\times10^{-5}$，weight\_decay=0.01）で学習した．
+$\F$は\textbf{post-softmaxのAttention重み}から各層・各ヘッドで算出し，層平均を損失に加えた．
+エッジ抽出の閾値処理は非微分なtop-$k$の代わりに，各ヘッドの90パーセンタイルを中心としたsigmoidによる\textbf{soft-threshold}（温度0.1）で近似し，密度（EPC）とエントロピーは微分可能に計算した．
+$\Delta\mathrm{SP}_{\mathrm{rel}}$はsoft adjacencyの有限長（$\le4$）パワーに基づく到達度 proxy で近似した（閾値の勾配は安定化のため近似上固定）．
 
 実験の結果（表\ref{tab:f_reg}），微弱な正則化（$\alpha=0.001$）でベースラインから有意に改善した（paired $t$-test, $p=0.038$, $n=3$ seeds）．
 加えて，3/3 seedsで一貫した改善（+0.2〜0.4pp）が観測された．
@@ -280,52 +338,27 @@ $\alpha$ & Accuracy (\%, mean $\pm$ std) & $\Delta$ (pp) \\
 %% ===========================================
 \section{関連研究}
 %% ===========================================
-\subsection{知識グラフとRAG}
-GraphRAG\cite{edge2024}やSelf-RAG\cite{asai2023}は，知識を明示的なグラフ構造として扱うことで検索精度を向上させた．
-一方，GNN\cite{kipf2017}は確率的な埋め込み空間でグラフを処理する．
-従来，これら「構造的アプローチ」と「確率的アプローチ」は別系統として発展してきたが，geDIGは構造コスト（GED）と多様化利得（エントロピー）を単一スカラーで統合し，両者を等価に扱う枠組みを提供する．
-
-\subsection{自由エネルギー原理とMDL}
-Fristonの自由エネルギー原理（FEP）\cite{friston2010}は予測誤差最小化を，MDL\cite{grunwald2007}は記述長最小化を原理とする．
-両者は「複雑さと適合度のトレードオフ」という点で数学的に対応する\cite{tishby2000}．
-geDIGは，この対応をグラフ編集距離\cite{bunke1997}を介して操作可能にした点に新規性がある．
+本研究の理論的基盤は，Fristonの自由エネルギー原理（FEP）\cite{friston2010}とGr\"{u}nwaldの最小記述長（MDL）\cite{grunwald2007}である．
+両者は「複雑さと適合度のトレードオフ」という点で数学的に対応し\cite{tishby2000}，geDIGはこの対応をグラフ編集距離\cite{bunke1997}で操作可能にした．
+また，GNN\cite{kipf2017}は確率的埋め込みでグラフを処理するが，geDIGは構造コストと情報利得を明示的に分離・統合する点で異なる．
+認知地図の概念\cite{okeefe1978}は空間的KGとしての迷路実験の理論的背景を与える．
 
 %% ===========================================
 \section{考察とおわりに}
 %% ===========================================
 
-本研究では，マクロ（迷路）とミクロ（Attention）という異なるスケールにおいて，geDIG評価関数 $\F$ が共通の「構造化原理」として機能することを示した．
-両実験に共通するのは，エントロピー優勢な探索相から，経路短縮や重み集中を伴う構造相へと遷移するダイナミクスが，geDIGゲージ$\F$の変化として観測される点である（表\ref{tab:unified}）．
-迷路では時間軸に沿って，Transformerでは層方向に沿って，同一の構造化ダイナミクスが観測された．
-特にF正則化実験により，$\F$とモデル性能の因果関係を実証した．
+本研究では，2種類の動的KG——空間的KG（迷路）と意味的KG（Attention）——において，geDIG評価関数 $\F$ が共通の「構造化原理」として機能することを示した．
+両者に共通するのは，高エントロピーな探索相から低エントロピーな構造相への相転移である：迷路では時間軸に沿って未知領域の拡張から経路の確定へ，Transformerでは層方向に沿ってLayer 0-1の多様なヘッド活性化からLayer 10-11の特定ヘッドへの集中へと遷移する．
+F正則化実験により，この$\F$とモデル性能の因果関係を実証した．
 
-\begin{table}[t]
-\centering
-\caption{マクロ・ミクロにおける構造相転移の対応}
-\label{tab:unified}
-\scriptsize
-\begin{tabular}{@{}lll@{}}
-\toprule
- & 迷路（マクロ） & Transformer（ミクロ） \\
-\midrule
-探索相 & 未知領域の拡張 & Layer 0-1（高エントロピー） \\
-構造相 & 経路の確定・圧縮 & Layer 10-11（低エントロピー） \\
-AG的挙動 & 分岐点で探索継続 & 多様なヘッド活性化 \\
-DG的挙動 & ショートカット発見 & 特定ヘッドへの集中 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\paragraph{Transformerの熱力学的解釈}
-我々の観測結果は，Attention機構が入力情報の不確実性（エントロピー）を減じ，意味的な近道（最短路）を発見・固定化する熱力学的プロセスであることを示唆している．
+\paragraph{geDIGと自由エネルギー}
+geDIGの式 $\F = \gednorm - \lambda(\Delta H_{\mathrm{norm}} + \gamma \cdot \Delta \mathrm{SP}_{\mathrm{rel}})$ は，熱力学の自由エネルギー $F = E - TS$ と同型のトレードオフ構造を持つ：構造変更コスト$\gednorm$がエネルギー$E$に，伸展利得$\lambda \Delta H$が温度$\times$エントロピー$TS$に対応する．
+この対応に基づけば，Transformerの層別$\F$推移は「高温（探索）から低温（構造化）への冷却過程」として解釈できる．
+実際，Attention機構が入力情報の不確実性を減じ，意味的な近道を発見・固定化するダイナミクスは，熱力学的なアニーリング過程と整合する．
 
 \paragraph{今後の展望}
-geDIGは異分野間の構造同型性発見にも応用可能である．
-概念実証として，手動構築した「太陽系」と「原子モデル」のグラフに構造類似度を算出したところ，$SS=0.995$という高い値を得た．
-これは1913年のボーア・モデル発見における「惑星軌道$\approx$電子軌道」という類推を計算論的に再現したものと解釈できる．
-認知科学者のGentnerは，類推の本質を「関係構造の類似性」と論じた\cite{gentner1983}．
-geDIGは，この「関係構造の発見」をエネルギー最小化として自動実行できる可能性を示している．
-自動的な知識グラフ構築と組み合わせた検証は今後の課題である．
+geDIGの応用として，GraphRAG\cite{edge2024}やSelf-RAG\cite{asai2023}などの構造化RAGにおける「いつ検索し，いつ構造化するか」の自律制御が挙げられる．
+現行のRAGは検索タイミングをヒューリスティックに決定しているが，geDIGのAG/DGゲートを導入することで，知識統合の意思決定を原理的に制御できる可能性がある．
 
 %% ===========================================
 %% 参考文献
