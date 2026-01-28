@@ -57,12 +57,8 @@ geDIGの核心的仮説は，「\textbf{構造コストと伸展利得のトレ�
     \item F正則化による因果的介入実験
 \end{enumerate}
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=\linewidth]{figs/academic_orion_radar.png}
-\caption{geDIGによる二段階構造化．AG（内側軌道，青）は0-hop評価で自由エネルギーが高い状態（$g_0>\theta_{\mathrm{AG}}$）を検知し探索を起動する．探索により候補分布が広がると$\Delta H>0$（伸展利得）が得られ，$\F$が低下する．DG（外側軌道，赤）はMulti-hop評価で経路短縮（$\Delta \mathrm{SP} > 0$）を発見し，$g_{\min}<\theta_{\mathrm{DG}}$のときエッジを確定する．}
-\label{fig:radar_insight}
-\end{figure}
+% NOTE: The page limit is strict (4 pages). Keep the conceptual illustration
+% minimal; the AG/DG control-flow figure suffices for this version.
 
 %% ===========================================
 \section{geDIG：統一評価関数の定義}
@@ -301,7 +297,7 @@ $\Delta\mathrm{SP}_{\mathrm{rel}}$はsoft adjacencyの有限長（$\le4$）パ�
 
 実験の結果（表\ref{tab:f_reg}），微弱な正則化（$\alpha=0.001$）でベースラインから有意に改善した（paired $t$-test, $p=0.038$, $n=3$ seeds）．
 加えて，3/3 seedsで一貫した改善（+0.2〜0.4pp）が観測された．
-一方で，過剰な正則化（$\alpha \geq 0.1$）は性能を悪化させた（図\ref{fig:f_reg}）．
+一方で，過剰な正則化（$\alpha \geq 0.1$）は性能を悪化させた（表\ref{tab:f_reg}）．
 この逆U字型の特性は，適切な「構造化圧」がモデルの汎化性能を引き出すことを因果的に示している．
 
 注目すべきは，微弱な正則化（$\alpha=0.001$）でも有意な改善が見られた点である．
@@ -328,12 +324,8 @@ $\alpha$ & Accuracy (\%, mean $\pm$ std) & $\Delta$ (pp) \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.65\columnwidth]{figs/f_reg_alpha_accuracy.png}
-\caption{F正則化強度$\alpha$とSST-2精度の関係（DistilBERT, $n=3$ seeds, エラーバーは標準偏差）．微弱な正則化（$\alpha=0.001$）で精度が86.00\%$\to$86.33\%に改善（$p=0.038$）．過剰な正則化（$\alpha \geq 0.1$）は構造を固定化しすぎ性能を悪化させる．この逆U字特性は適切な構造化圧の存在を示す．}
-\label{fig:f_reg}
-\end{figure}
+% NOTE: Removed the alpha-sweep plot to satisfy the 4-page limit. The numeric
+% result is fully reported in Table~\ref{tab:f_reg}.
 
 %% ===========================================
 \section{関連研究}
