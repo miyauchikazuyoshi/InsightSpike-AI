@@ -157,6 +157,14 @@ $$F = \Delta\text{EPC}_{\text{norm}} - \lambda(\Delta H_{\text{norm}} + \gamma \
 
 「ただし“IGしか見ていない”と言い切るより、**『EPCを“固定予算”として制御した上で、IG側の振る舞いを診断している』**と言うのが安全です。もしEPC側も含めたトレードオフを強く主張したいなら、密度を固定しない抽出（絶対閾値や密度スイープ）で$F$の分解（EPC/H/SP）を追加すると筋が通ります。」
 
+### Memo. 固定閾値（Absolute τ）スイープの補助実験（ablation）
+
+- 位置づけ：論文本体（percentileでEPC固定）に対する **アブレーション補強**。EPCを動かしたときの$F$分解を確認。
+- 実行条件：BERT base, L=12, wikitext, n=8, head\_agg=mean, absolute threshold τ を掃引。
+- 図（1枚）：`results/transformer_gedig/fig_abs_threshold_sweep_l12.png`
+- 生データ：`results/transformer_gedig/score_abs_tau0.01_l12.json` ほか  
+  0.02/0.05/0.1/0.2 も同ディレクトリにあり。
+
 ---
 
 ## 6. 発表時間配分（4分想定）
