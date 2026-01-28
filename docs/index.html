@@ -244,6 +244,32 @@
             background: #334155;
             border-radius: 2px;
         }
+
+        /* Hero "slime mold" background */
+        #slime-bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.35;
+            /* Make the trails feel organic rather than neon UI */
+            filter: saturate(1.1) contrast(1.05);
+            mix-blend-mode: screen;
+        }
+
+        .slime-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background:
+                radial-gradient(900px 420px at 50% 35%, rgba(16, 185, 129, 0.20), rgba(2, 6, 23, 0) 60%),
+                radial-gradient(700px 300px at 20% 30%, rgba(34, 211, 238, 0.14), rgba(2, 6, 23, 0) 60%),
+                radial-gradient(700px 300px at 80% 70%, rgba(250, 204, 21, 0.10), rgba(2, 6, 23, 0) 55%),
+                linear-gradient(to bottom, rgba(2, 6, 23, 0.20), rgba(2, 6, 23, 0.85));
+        }
     </style>
 </head>
 
@@ -282,6 +308,10 @@
     </nav>
 
     <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+        <!-- Organic "slime mold" growth background -->
+        <canvas id="slime-bg" aria-hidden="true"></canvas>
+        <div class="slime-overlay" aria-hidden="true"></div>
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
             <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
                 Brain-Inspired Multi-Agent Architecture<br>
@@ -345,12 +375,6 @@
             </div>
         </div>
 
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-30 pointer-events-none">
-            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl mix-blend-screen">
-            </div>
-            <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-600/20 rounded-full blur-3xl mix-blend-screen">
-            </div>
-        </div>
     </section>
 
     <section id="demo" class="py-10 bg-panel/30 border-y border-white/5 backdrop-blur-sm">
@@ -1354,6 +1378,199 @@
         // Init
         resetGraph();
         setTimeout(() => playScenario('insight'), 1000);
+    </script>
+
+    <script>
+        // Hero background: lightweight "slime mold" (Physarum-style) trail simulation.
+        // Purely visual; uses a small offscreen buffer for performance.
+        (() => {
+            const canvas = document.getElementById('slime-bg');
+            if (!canvas) return;
+
+            const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+            if (prefersReduced) return;
+
+            const ctx = canvas.getContext('2d', { alpha: true });
+            if (!ctx) return;
+
+            let cssW = 1, cssH = 1, dpr = 1;
+            let simW = 0, simH = 0;
+            let trail = null;
+            let trailNext = null;
+            let img = null;
+            let imgData = null;
+            let imgBuf = null;
+            let agents = [];
+            let foods = [];
+            let raf = 0;
+
+            const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+            const rnd = (a = 0, b = 1) => a + Math.random() * (b - a);
+
+            function sample(arr, x, y) {
+                x = Math.floor(x);
+                y = Math.floor(y);
+                if (x < 0 || y < 0 || x >= simW || y >= simH) return 0;
+                return arr[y * simW + x];
+            }
+
+            function deposit(arr, x, y, v) {
+                x = Math.floor(x);
+                y = Math.floor(y);
+                if (x < 0 || y < 0 || x >= simW || y >= simH) return;
+                arr[y * simW + x] += v;
+            }
+
+            function resize() {
+                const rect = canvas.getBoundingClientRect();
+                cssW = Math.max(1, rect.width);
+                cssH = Math.max(1, rect.height);
+                dpr = window.devicePixelRatio || 1;
+                canvas.width = Math.floor(cssW * dpr);
+                canvas.height = Math.floor(cssH * dpr);
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+                // Keep the simulation grid small; scale up to the hero size.
+                const targetW = clamp(Math.floor(cssW / 6), 160, 320);
+                const targetH = clamp(Math.floor(cssH / 6), 90, 200);
+                if (targetW === simW && targetH === simH) return;
+                simW = targetW;
+                simH = targetH;
+
+                trail = new Float32Array(simW * simH);
+                trailNext = new Float32Array(simW * simH);
+
+                img = document.createElement('canvas');
+                img.width = simW;
+                img.height = simH;
+                imgBuf = img.getContext('2d', { willReadFrequently: true });
+                imgData = imgBuf.createImageData(simW, simH);
+
+                // Seed "food" points: gives the blob something to connect.
+                const pad = 12;
+                foods = [
+                    { x: rnd(pad, simW - pad), y: rnd(pad, simH - pad) },
+                    { x: rnd(pad, simW - pad), y: rnd(pad, simH - pad) },
+                    { x: rnd(pad, simW - pad), y: rnd(pad, simH - pad) },
+                ];
+
+                // Agents spawn near foods to quickly form veins.
+                const N = Math.floor(clamp(simW * simH / 26, 700, 1400));
+                agents = new Array(N).fill(0).map(() => {
+                    const f = foods[Math.floor(Math.random() * foods.length)];
+                    return {
+                        x: f.x + rnd(-6, 6),
+                        y: f.y + rnd(-6, 6),
+                        a: rnd(0, Math.PI * 2),
+                    };
+                });
+            }
+
+            function step() {
+                if (!trail) return;
+
+                // Agent parameters (tuned for "veiny" growth, not full coverage).
+                const sensorDist = 7.5;
+                const sensorAng = 0.55;
+                const turn = 0.28;
+                const speed = 1.0;
+                const depositAmt = 0.65;
+                const foodBoost = 3.0;
+
+                // Food sources continuously emit trail.
+                for (const f of foods) {
+                    for (let k = 0; k < 10; k++) {
+                        const ang = rnd(0, Math.PI * 2);
+                        const r = rnd(0, 4);
+                        deposit(trail, f.x + Math.cos(ang) * r, f.y + Math.sin(ang) * r, foodBoost);
+                    }
+                }
+
+                for (const p of agents) {
+                    const fx = p.x + Math.cos(p.a) * sensorDist;
+                    const fy = p.y + Math.sin(p.a) * sensorDist;
+                    const lx = p.x + Math.cos(p.a + sensorAng) * sensorDist;
+                    const ly = p.y + Math.sin(p.a + sensorAng) * sensorDist;
+                    const rx = p.x + Math.cos(p.a - sensorAng) * sensorDist;
+                    const ry = p.y + Math.sin(p.a - sensorAng) * sensorDist;
+
+                    const fwd = sample(trail, fx, fy);
+                    const left = sample(trail, lx, ly);
+                    const right = sample(trail, rx, ry);
+
+                    if (left > fwd && left > right) p.a += turn;
+                    else if (right > fwd && right > left) p.a -= turn;
+                    else if (fwd < 0.02 && Math.random() < 0.18) p.a += rnd(-0.7, 0.7);
+
+                    p.x += Math.cos(p.a) * speed;
+                    p.y += Math.sin(p.a) * speed;
+
+                    // Wrap edges (keeps flow continuous).
+                    if (p.x < 0) p.x = simW - 1;
+                    if (p.x >= simW) p.x = 0;
+                    if (p.y < 0) p.y = simH - 1;
+                    if (p.y >= simH) p.y = 0;
+
+                    deposit(trail, p.x, p.y, depositAmt);
+                }
+
+                // Diffuse + decay (single blur pass).
+                const keep = 0.68;
+                const spread = 0.08;
+                for (let y = 0; y < simH; y++) {
+                    const ym = (y - 1 + simH) % simH;
+                    const yp = (y + 1) % simH;
+                    for (let x = 0; x < simW; x++) {
+                        const xm = (x - 1 + simW) % simW;
+                        const xp = (x + 1) % simW;
+                        const i = y * simW + x;
+                        const c = trail[i];
+                        const n = trail[ym * simW + x] + trail[yp * simW + x] + trail[y * simW + xm] + trail[y * simW + xp];
+                        trailNext[i] = c * keep + n * spread;
+                    }
+                }
+                // Swap buffers
+                const tmp = trail; trail = trailNext; trailNext = tmp;
+
+                // Render to image buffer.
+                const d = imgData.data;
+                for (let i = 0; i < simW * simH; i++) {
+                    const v = clamp(trail[i] / 10, 0, 1);
+                    const g = Math.pow(v, 0.55);
+                    const r = 18 + g * 90;
+                    const gg = 24 + g * 235;
+                    const b = 30 + g * 110;
+                    const a = Math.floor(clamp(g * 255, 0, 220));
+                    const j = i * 4;
+                    d[j + 0] = r;
+                    d[j + 1] = gg;
+                    d[j + 2] = b;
+                    d[j + 3] = a;
+                }
+                imgBuf.putImageData(imgData, 0, 0);
+
+                ctx.clearRect(0, 0, cssW, cssH);
+                ctx.drawImage(img, 0, 0, cssW, cssH);
+            }
+
+            let lastT = 0;
+            function loop(t) {
+                if (document.hidden) {
+                    raf = requestAnimationFrame(loop);
+                    return;
+                }
+                // Cap FPS to keep CPU usage reasonable on laptops.
+                if (t - lastT > 33) { // ~30fps
+                    lastT = t;
+                    step();
+                }
+                raf = requestAnimationFrame(loop);
+            }
+
+            resize();
+            window.addEventListener('resize', () => resize(), { passive: true });
+            raf = requestAnimationFrame(loop);
+        })();
     </script>
 </body>
 
