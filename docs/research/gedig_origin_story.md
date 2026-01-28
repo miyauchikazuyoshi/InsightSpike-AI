@@ -1,7 +1,7 @@
 # geDIGの起源：閃くAIを作るまでの思考の軌跡
-# Origin of geDIG: The Journey to Building an AI That Has Insights
+## Origin of geDIG: The Journey to Building an AI That Has Insights
 
-*Created: 2026-01-28*
+<small>Created: 2026-01-28</small>
 
 ---
 
@@ -13,7 +13,8 @@
 
 これがgeDIGの出発点だった。
 
-現在のAIは膨大な知識を持ち、人間の問いに答えることができる。しかし、**知らないことを発見する**ことはできない。既存のパターンを組み合わせることはできても、根本的に新しい構造を生み出すことはない。
+現在のAIは推論能力が格段に向上し、膨大な知識を使って人間の問いに答えられる。  
+しかし、推論が強くなっても、**知らないことを発見する**のは別問題だ。矛盾や違和感から出発して、知識の接続構造そのものを更新する――そういう「閃き」は、まだ簡単には出てこない。
 
 では、アインシュタインは何をしたのか？
 
@@ -41,6 +42,8 @@
 アインシュタインも湯川も、既存の知識を「再配置」したのではない。知識の**トポロジーそのものを変えた**。
 
 ここでいう**トポロジー**とは、概念ノードと関係エッジからなる知識グラフの接続構造を指す。**再構成**とは、同じ語彙の再結合ではなく、矛盾の説明可能性を増やすようにエッジ集合そのものを更新する操作である。LLMの「パターン合成」とは、この点で質的に異なる。
+
+---
 
 ### 実験設計から理論へ
 
@@ -98,6 +101,8 @@ F = ΔEPC - λ·ΔIG
 
 **F < 0 のとき、閃きが起きる**。
 
+> <small>注：実装/論文では、0-hop の `g0` と multi-hop の `g_min` を計算し、分位で校正した閾値 `θ_AG` / `θ_DG` でイベントを判定する（詳細: [`docs/gedig_spec.md`](../gedig_spec.md)）。ここでは直感のため、`θ_DG = 0` の簡約形で書いている。</small>
+
 構造コストより情報利得が上回る瞬間——それが「あ、わかった！」の正体。
 
 ### 熱力学との対応
@@ -119,8 +124,10 @@ geDIGの式を基本則として受け入れると、システム設計が自然
 
 #### AG/DG二段ゲート
 
-- **AG（Anomaly Gate）**：0-hopで「何かおかしい」を検知（F > θ_AG）
-- **DG（Discovery Gate）**：multi-hopで「本当にショートカットか」を確認（F < θ_DG）
+- **AG（Anomaly Gate）**：0-hop の `g0` が高いとき、「今の知識ではまだ曖昧だ」と判断して探索を開く（`g0 > θ_AG`）
+- **DG（Discovery Gate）**：multi-hop の最良値 `g_min` が十分小さいとき、「このショートカットは筋が良い」と判断して採用する（`min{g0, g_min} ≤ θ_DG`）
+
+> <small>注：論文では AG=Ambiguity/Attention Gate、DG=Decision Gate と呼ぶ場合がある（役割は同じで、呼び方だけが文脈依存）。</small>
 
 ![AG/DG Orbit](ag_dg_orbit.png)
 
@@ -139,7 +146,7 @@ geDIGの式を基本則として受け入れると、システム設計が自然
 
 NAが「何かおかしい」を検知し、DAが「正しかった、覚えよう」を確定する。これはまさにAG→DGの流れ。
 
-注：NA/DA対応は、現段階では**実装上の設計比喩（computational analogy）**であり、生理学的同一性を主張するものではない。
+> <small>注：NA/DA対応は、現段階では**実装上の設計比喩（computational analogy）**であり、生理学的同一性を主張するものではない。</small>
 
 #### 二相アーキテクチャ
 
@@ -154,6 +161,8 @@ geDIGはこの設計を自然に要求した。Fが常に計算されるなら�
 
 geDIGの式から、脳と同じアーキテクチャが自然に導出された。これは偶然だろうか？　それとも、**知性の必然的構造**なのか？
 
+---
+
 ### 迷路から始める
 
 壮大な仮説を立てたが、検証なしでは科学ではない。
@@ -167,9 +176,11 @@ geDIGの式から、脳と同じアーキテクチャが自然に導出された
 
 **仮説**：移動エピソードの類似度を用いて知識グラフへ受け入れる記憶を選定し、Fの値に応じて知識グラフに蓄えられた記憶の探索範囲を動的に拡張・収縮することで、効率的な経路発見が可能。
 
-**結果**：「探索ステップ数」「無駄枝の剪定率」「最短路到達率」において、geDIGの予測と実際の探索行動が一貫して対応した。15×15、25×25、51×51——スケールが変わっても、この対応は維持された。成功率はベースライン60%に対し98%を達成。
+**結果**：「探索ステップ数」「無駄枝の剪定率」「最短路到達率」において、geDIGの予測と実際の探索行動が一貫して対応した。15×15、25×25、51×51——スケールが変わっても、この対応は維持された。成功率はランダム探索などのベースラインより大幅に改善し、まず15×15では98%に到達した。25×25、51×51へもスケールさせながら検証を続けている。
 
 > 📂 **実験詳細**: [`experiments/maze-query-hub-prototype/`](https://github.com/miyauchikazuyoshi/InsightSpike-AI/tree/main/experiments/maze-query-hub-prototype)
+
+---
 
 ### Transformerへの拡張
 
@@ -181,18 +192,34 @@ Attentionパターンを「意味的知識グラフ」として解釈し、geDIG
 - DG（Discovery Gate）：有効な再構成の確認
 
 **仮説**：
-- H1: 実際のTransformer Attentionは、ランダム/一様/局所ベースラインよりも低いFを示す
-- H2: 深い層ほどFが低下する（構造化が進む）
+- H1: 実際のTransformer Attentionは、ランダム/一様/局所ベースラインとは異なるFの統計を示す
+- H2: 深い層ほど、Fとその内訳（ΔEPC, ΔH, ΔSP）の傾向が変わる
 - H3: Attentionへの介入（スパース化/ノイズ付加）は、ΔFに応じて下流タスク性能を変化させる
 
-**結果**：
-- F_real < F_random（p<0.001, Cohen's d>0.5）を確認
-- 層ごとのF低下傾向（Spearman ρ<−0.3）を観測
-- F正則化による学習でベースラインを上回る性能を達成
+**結果（途中経過）**：
+- 閾値設計（percentile/absolute）に敏感で、ベースラインとの順位が入れ替わるケースがあることを確認
+- 介入実験で、ΔFと下流性能の連動が観測された
+- F正則化は「弱く入れると僅かに改善、強く入れると悪化」という最適点を持つ（例: DistilBERT/SST-2で +0.33pt）
 
-Attentionをグラフ化した際の「編集イベント」と「予測改善（ΔIG）」の対応を観測し、Transformerの推論過程がgeDIGの力学に従うことを確認した。
+Attentionをグラフとして表現した際の「編集イベント」と「予測改善（ΔIG）」の対応を観測し、Transformerの推論過程に対して、geDIGが介入可能なレンズになり得る手応えを得た。
 
 > 📂 **実験詳細**: [`experiments/transformer_gedig/`](https://github.com/miyauchikazuyoshi/InsightSpike-AI/tree/main/experiments/transformer_gedig)
+
+---
+
+### 現在地（できていること／これから）
+
+読み物としてここまで書いたが、現状と残タスクも残しておく。
+
+**今できていること**
+- 基礎設計（ゲージ/ゲートの正準定義）：[`docs/gedig_spec.md`](../gedig_spec.md)
+- AG/DGゲートの動作検証（Phase 1 / 迷路PoC）：[`docs/phase1.md`](../phase1.md) / [`experiments/maze-query-hub-prototype/`](../../experiments/maze-query-hub-prototype/)
+
+**現在設計中、実装が必要なもの**
+- 睡眠層（Phase 2 / Offline Optimization）：[`docs/research/phase2/phase2_offline_appendix_ja_en.md`](phase2/phase2_offline_appendix_ja_en.md)
+- 意味空間の醸成（動的なベクトル空間）：[`docs/research/self_organizing_world_model.md`](self_organizing_world_model.md)
+
+---
 
 ### 理論の自己言及性
 
@@ -202,13 +229,13 @@ geDIGには特異な性質がある：
 
 私がgeDIGに至ったプロセス：
 - 複数の知識領域（AI、物理学、情報理論）
-- 矛盾の検出（現在のAIは閃けない）
+- 矛盾の検出（推論は強いが、「違和感→構造更新」は弱い）
 - トポロジカル再構成（構造-情報トレードオフ）
 - F < 0 の達成（「これだ」という納得）
 
 geDIGは、自身の誕生過程を自身で説明できる。
 
-注：これは正しさの証明ではなく、認知過程の記述としても同じレンズが使えるという意味での**自己整合性**である。
+> <small>注：これは正しさの証明ではなく、認知過程の記述としても同じレンズが使えるという意味での**自己整合性**である。</small>
 
 これは良い理論の特徴でもある：
 - 相対性理論は、相対論を発見する物理学者にも適用される
@@ -254,7 +281,8 @@ geDIGが完成すれば、この実験に挑戦できる：
 
 This was the starting point of geDIG.
 
-Current AI systems possess vast knowledge and can answer human questions. However, they cannot **discover what they don't know**. They can combine existing patterns, but they cannot generate fundamentally new structures.
+Modern AI systems have made dramatic progress in reasoning and can answer human questions using vast knowledge.  
+Yet even strong reasoning does not automatically yield **discovery**. Starting from contradictions and anomalies—and updating the structure of knowledge itself—still does not come easily.
 
 So what did Einstein actually do?
 
@@ -282,6 +310,8 @@ This is the essence of insight. **Memories that should never connect tunnel thro
 Both Einstein and Yukawa did not merely "rearrange" existing knowledge. They **changed the topology of knowledge itself**.
 
 Here, **topology** refers to the connectivity structure of a knowledge graph composed of concept nodes and relation edges. **Reconstruction** is not mere recombination of the same vocabulary, but an operation that updates the edge set itself to increase the explainability of contradictions. This is qualitatively different from the "pattern synthesis" of LLMs.
+
+---
 
 ### From Experimental Design to Theory
 
@@ -339,6 +369,8 @@ F = ΔEPC - λ·ΔIG
 
 **When F < 0, insight occurs.**
 
+> <small>Note: In the paper/implementation, we compute `g0` (0-hop) and `g_min` (multi-hop), and trigger events with quantile-calibrated thresholds `θ_AG` / `θ_DG` (see [`docs/gedig_spec.md`](../gedig_spec.md)). Here I write the simplified form with `θ_DG = 0` for intuition.</small>
+
 The moment when information gain exceeds structural cost—that is the essence of the "Aha!" moment.
 
 ### Correspondence with Thermodynamics
@@ -360,8 +392,10 @@ Once geDIG's equation was accepted as a fundamental principle, system designs fo
 
 #### AG/DG Two-Stage Gate
 
-- **AG (Anomaly Gate)**: Detects "something is off" at 0-hop (F > θ_AG)
-- **DG (Discovery Gate)**: Confirms "is this really a shortcut?" at multi-hop (F < θ_DG)
+- **AG (Anomaly Gate)**: When the 0-hop gauge `g0` is high, it signals ambiguity and opens exploration (`g0 > θ_AG`)
+- **DG (Discovery Gate)**: When the best multi-hop score `g_min` is low enough, it confirms a useful shortcut and commits the update (`min{g0, g_min} ≤ θ_DG`)
+
+> <small>Note: Depending on context, the paper uses AG=Ambiguity/Attention Gate and DG=Decision Gate (the roles are the same; only the naming varies).</small>
 
 ![AG/DG Orbit](ag_dg_orbit.png)
 
@@ -380,7 +414,7 @@ While developing this design, I noticed a correspondence with brain neurotransmi
 
 NA detects "something is off," DA confirms "that was right, let's remember." This is exactly the AG→DG flow.
 
-Note: The NA/DA correspondence is currently a **computational analogy for implementation design**, not a claim of physiological identity.
+> <small>Note: The NA/DA correspondence is currently a **computational analogy for implementation design**, not a claim of physiological identity.</small>
 
 #### Two-Phase Architecture
 
@@ -395,6 +429,8 @@ Memory consolidation (eviction) can also be controlled by F. Edges where F > 0 p
 
 From geDIG's equation, the same architecture as the brain emerged naturally. Is this coincidence? Or is it the **inevitable structure of intelligence**?
 
+---
+
 ### Starting with Mazes
 
 A grand hypothesis was proposed, but without validation, it's not science.
@@ -408,9 +444,11 @@ As the minimal verifiable unit, **maze exploration** was chosen:
 
 **Hypothesis**: By selecting memories to accept into the knowledge graph using movement episode similarity, and dynamically expanding/contracting the search range of memories stored in the knowledge graph based on F, efficient pathfinding becomes possible.
 
-**Results**: In terms of "exploration steps," "redundant branch pruning rate," and "shortest path arrival rate," geDIG's predictions consistently corresponded with actual exploration behavior. 15×15, 25×25, 51×51—this correspondence held across different scales. Success rate reached 98% compared to the baseline of 60%.
+**Results**: In terms of "exploration steps," "redundant branch pruning rate," and "shortest path arrival rate," geDIG's predictions consistently corresponded with actual exploration behavior. 15×15, 25×25, 51×51—this correspondence held across different scales. Success rates improved significantly over simple baselines; in 15×15 mazes we reached 98%, and we continue scaling tests to 25×25 and 51×51.
 
 > 📂 **Experiment details**: [`experiments/maze-query-hub-prototype/`](https://github.com/miyauchikazuyoshi/InsightSpike-AI/tree/main/experiments/maze-query-hub-prototype)
+
+---
 
 ### Extension to Transformers
 
@@ -422,18 +460,34 @@ Interpreting attention patterns as "semantic knowledge graphs," geDIG was applie
 - DG (Discovery Gate): Confirmation of valid reconstructions
 
 **Hypotheses**:
-- H1: Real Transformer attention produces lower F than random/uniform/local baselines
-- H2: Deeper layers show lower F (progressive structuring)
+- H1: Real Transformer attention shows F statistics that differ from random/uniform/local baselines
+- H2: Deeper layers change F and its components (ΔEPC, ΔH, ΔSP) in a structured way
 - H3: Interventions on attention (sparsification/noise) change downstream task performance according to ΔF
 
-**Results**:
-- Confirmed F_real < F_random (p<0.001, Cohen's d>0.5)
-- Observed layer-wise F decrease (Spearman ρ<−0.3)
-- F-regularized training outperformed baseline
+**Results (so far)**:
+- Threshold design (percentile vs absolute) is sensitive; the ordering against baselines can flip depending on how we represent attention as graphs
+- Intervention experiments show ΔF moves with downstream performance
+- F-regularization has an optimum: weak regularization helps slightly, strong regularization hurts (e.g., DistilBERT/SST-2: +0.33pt at α=0.001)
 
-By graphifying attention patterns, we observed the correspondence between "edit events" and "prediction improvement (ΔIG)," confirming that the Transformer's reasoning process follows geDIG dynamics.
+By representing attention patterns as graphs, we observed correspondences between "edit-like events" and "prediction improvement (ΔIG)," suggesting geDIG can be an actionable lens for Transformer reasoning.
 
 > 📂 **Experiment details**: [`experiments/transformer_gedig/`](https://github.com/miyauchikazuyoshi/InsightSpike-AI/tree/main/experiments/transformer_gedig)
+
+---
+
+### Where We Are Now (What Works / What’s Next)
+
+To keep this as a living origin story, here is what works today and what still needs design/implementation.
+
+**Working today**
+- Core spec (canonical gauge + gating): [`docs/gedig_spec.md`](../gedig_spec.md)
+- AG/DG gate behavior validated (Phase 1 / maze PoC): [`docs/phase1.md`](../phase1.md) / [`experiments/maze-query-hub-prototype/`](../../experiments/maze-query-hub-prototype/)
+
+**Designed, needs implementation**
+- Sleep layer (Phase 2 / offline optimization): [`docs/research/phase2/phase2_offline_appendix_ja_en.md`](phase2/phase2_offline_appendix_ja_en.md)
+- Cultivating the semantic space (self-organizing world model): [`docs/research/self_organizing_world_model.md`](self_organizing_world_model.md)
+
+---
 
 ### Self-Referentiality of the Theory
 
@@ -443,13 +497,13 @@ geDIG has a unique property:
 
 The process by which I arrived at geDIG:
 - Multiple knowledge domains (AI, physics, information theory)
-- Detection of contradiction (current AI cannot have insights)
+- Detection of contradiction (strong reasoning, weak “anomaly → structural update”)
 - Topological reconstruction (structure-information tradeoff)
 - Achievement of F < 0 (the conviction of "This is it!")
 
 geDIG can explain its own birth process.
 
-Note: This is not a proof of correctness, but **self-consistency** in the sense that the same lens can be used to describe cognitive processes.
+> <small>Note: This is not a proof of correctness, but **self-consistency** in the sense that the same lens can be used to describe cognitive processes.</small>
 
 This is also a hallmark of good theories:
 - Relativity applies to the physicist who discovers relativity
