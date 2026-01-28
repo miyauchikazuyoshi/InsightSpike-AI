@@ -124,14 +124,14 @@ geDIGの式を基本則として受け入れると、システム設計が自然
 
 #### AG/DG二段ゲート
 
-- **AG（Anomaly Gate）**：0-hop の `g0` が高いとき、「今の知識ではまだ曖昧だ」と判断して探索を開く（`g0 > θ_AG`）
-- **DG（Discovery Gate）**：multi-hop の最良値 `g_min` が十分小さいとき、「このショートカットは筋が良い」と判断して採用する（`min{g0, g_min} ≤ θ_DG`）
+- **AG（Attention Gate）**：0-hop の `g0` が高いとき、「今の知識ではまだ曖昧だ」と判断して探索を開く（`g0 > θ_AG`）
+- **DG（Decision Gate）**：multi-hop の最良値 `g_min` が十分小さいとき、「ここは統合して良い」と判断して確定する（`min{g0, g_min} ≤ θ_DG`）
 
-> <small>注：論文では AG=Ambiguity/Attention Gate、DG=Decision Gate と呼ぶ場合がある（役割は同じで、呼び方だけが文脈依存）。</small>
+> <small>注：論文の用語に合わせ、AG=Attention Gate（0-hop の曖昧性/新規性）、DG=Decision Gate（multi-hop の確認）として記す。</small>
 
 ![AG/DG Orbit](ag_dg_orbit.png)
 
-*図：0-hop Orbit（構造的近傍）とMulti-hop Reach（洞察的到達）。AGは局所的な異常を検知し、DGは遠方への短絡（ΔSP ≫ 0）が真に有効かを確認する。*
+*図：0-hop Orbit（構造的近傍）とMulti-hop Reach（洞察的到達）。AGは局所的な曖昧さ/違和感を検知し、DGは遠方への短絡（ΔSP ≫ 0）が真に有効かを確認する。*
 
 なぜ二段か？　閃きには二つのフェーズがあるからだ：
 1. 違和感の検知（「あれ？」）
@@ -141,7 +141,7 @@ geDIGの式を基本則として受け入れると、システム設計が自然
 
 この設計を考えていて、脳の神経伝達物質との対応に気づいた：
 
-- **ノルアドレナリン（NA）**：覚醒・注意・異常検知 → AGに対応
+- **ノルアドレナリン（NA）**：覚醒・注意・曖昧性/新規性の検知 → AGに対応
 - **ドーパミン（DA）**：報酬・学習・確信 → DGに対応
 
 NAが「何かおかしい」を検知し、DAが「正しかった、覚えよう」を確定する。これはまさにAG→DGの流れ。
@@ -188,8 +188,8 @@ geDIGの式から、脳と同じアーキテクチャが自然に導出された
 
 Attentionパターンを「意味的知識グラフ」として解釈し、geDIGを適用：
 
-- AG（Anomaly Gate）：矛盾・異常の検出
-- DG（Discovery Gate）：有効な再構成の確認
+- AG（Attention Gate）：曖昧性/新規性の検知（探索の起動）
+- DG（Decision Gate）：有効な再構成の確認（統合の確定）
 
 **仮説**：
 - H1: 実際のTransformer Attentionは、ランダム/一様/局所ベースラインとは異なるFの統計を示す
@@ -392,10 +392,10 @@ Once geDIG's equation was accepted as a fundamental principle, system designs fo
 
 #### AG/DG Two-Stage Gate
 
-- **AG (Anomaly Gate)**: When the 0-hop gauge `g0` is high, it signals ambiguity and opens exploration (`g0 > θ_AG`)
-- **DG (Discovery Gate)**: When the best multi-hop score `g_min` is low enough, it confirms a useful shortcut and commits the update (`min{g0, g_min} ≤ θ_DG`)
+- **AG (Attention Gate)**: When the 0-hop gauge `g0` is high, it signals ambiguity/novelty and opens exploration (`g0 > θ_AG`)
+- **DG (Decision Gate)**: When the best multi-hop score `g_min` is low enough, it confirms a useful shortcut and commits integration (`min{g0, g_min} ≤ θ_DG`)
 
-> <small>Note: Depending on context, the paper uses AG=Ambiguity/Attention Gate and DG=Decision Gate (the roles are the same; only the naming varies).</small>
+> <small>Note: Following the paper, we use AG=Attention Gate (0-hop ambiguity/novelty) and DG=Decision Gate (multi-hop confirmation).</small>
 
 ![AG/DG Orbit](ag_dg_orbit.png)
 
@@ -409,7 +409,7 @@ Why two stages? Because insight has two phases:
 
 While developing this design, I noticed a correspondence with brain neurotransmitters:
 
-- **Noradrenaline (NA)**: Arousal, attention, anomaly detection → corresponds to AG
+- **Noradrenaline (NA)**: Arousal, attention, ambiguity/novelty detection → corresponds to AG
 - **Dopamine (DA)**: Reward, learning, confirmation → corresponds to DG
 
 NA detects "something is off," DA confirms "that was right, let's remember." This is exactly the AG→DG flow.
@@ -456,8 +456,8 @@ Next, the Transformer—the core of modern AI—was tested.
 
 Interpreting attention patterns as "semantic knowledge graphs," geDIG was applied:
 
-- AG (Anomaly Gate): Detection of contradictions and anomalies
-- DG (Discovery Gate): Confirmation of valid reconstructions
+- AG (Attention Gate): Detect ambiguity/novelty (trigger exploration)
+- DG (Decision Gate): Confirm a valid reconstruction (commit integration)
 
 **Hypotheses**:
 - H1: Real Transformer attention shows F statistics that differ from random/uniform/local baselines
