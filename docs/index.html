@@ -322,14 +322,14 @@
                 geDIG implements the autonomic nervous system of <strong>"when to learn and when to forget"</strong>
                 into RAG using a single gauge:
                 <br>
-                <span class="text-2xl text-white mt-2 block">$\mathcal{F} = \Delta EPC - \lambda \Delta IG$</span>
+                <span class="text-2xl text-white mt-2 block">$\mathcal{F} = \Delta EPC_{norm} - \lambda(\Delta H_{norm} + \gamma \Delta SP_{rel})$</span>
                 <span
                     class="block mt-4 text-sm text-slate-400 font-normal max-w-lg mx-auto border-t border-white/10 pt-4">
                     <span class="text-accent">Plain English:</span> A single scalar that decides: <em>"Does this new
                         fact deserve a permanent place in the graph?"</em>
                     <br>
                     <span class="block mt-2">
-                        $\Delta EPC \approx$ "Rewiring Cost", $\Delta IG \approx$ "Path Shortening"
+                        $\Delta EPC_{norm} \approx$ "structure cost", $\Delta H_{norm} \approx$ "extension gain", $\Delta SP_{rel} \approx$ "shortcut gain"
                     </span>
                 </span>
                 <span
@@ -357,6 +357,88 @@
                     </svg>
                     View Paper (Draft)
                 </a>
+            </div>
+
+            <!-- geDIG-driven amoeba: live gauge + tunable parameters -->
+            <div class="mt-10 max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 text-left">
+                <div class="bg-bg/70 backdrop-blur border border-white/10 rounded-2xl p-4 shadow-2xl">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-mono text-slate-400">Amoeba geDIG (live)</span>
+                        <span id="slime-state" class="text-[11px] font-bold text-slate-300">--</span>
+                    </div>
+                    <div class="mt-2 text-[11px] text-slate-500 font-mono leading-snug">
+                        <span class="text-slate-300">$F$</span> = $\Delta EPC_{norm}$ − $\lambda(\Delta H_{norm} + \gamma\Delta SP_{rel})$
+                    </div>
+                    <div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] font-mono">
+                        <span class="text-slate-500">F</span><span id="slime-val-f" class="text-right text-slate-200">--</span>
+                        <span class="text-slate-500">ΔEPC</span><span id="slime-val-epc" class="text-right text-slate-300">--</span>
+                        <span class="text-slate-500">ΔH</span><span id="slime-val-h" class="text-right text-slate-300">--</span>
+                        <span class="text-slate-500">ΔSP</span><span id="slime-val-sp" class="text-right text-slate-300">--</span>
+                    </div>
+                    <div class="mt-3 h-1.5 bg-white/5 rounded overflow-hidden border border-white/10">
+                        <div id="slime-bar" class="h-full w-1/2 bg-gradient-to-r from-danger via-warn to-success"></div>
+                    </div>
+                    <div class="mt-2 text-[10px] text-slate-500 leading-snug">
+                        High $F$ → <span class="text-danger">AG</span> (explore). Low $F$ → <span class="text-success">DG</span> (commit).
+                    </div>
+                    <div class="mt-3 text-[10px] text-slate-600 leading-snug">
+                        Tip: the bright dots are <span class="text-slate-400">nodes</span>; thick veins are <span class="text-slate-400">edges</span>.
+                    </div>
+                </div>
+
+                <div class="bg-bg/70 backdrop-blur border border-white/10 rounded-2xl p-4 shadow-2xl">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-mono text-slate-400">Tune parameters</span>
+                        <button id="slime-reroll" type="button"
+                            class="text-[11px] font-bold text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-3 py-1 transition">
+                            Reroll nodes
+                        </button>
+                    </div>
+
+                    <div class="mt-4 space-y-4">
+                        <div>
+                            <div class="flex items-center justify-between text-[11px] font-mono">
+                                <label for="slime-lambda" class="text-slate-400">$\lambda$ (temperature)</label>
+                                <span id="slime-lambda-val" class="text-slate-300">--</span>
+                            </div>
+                            <input id="slime-lambda" type="range" min="0" max="1" step="0.01" value="0.26" class="w-full">
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between text-[11px] font-mono">
+                                <label for="slime-gamma" class="text-slate-400">$\gamma$ (shortcut weight)</label>
+                                <span id="slime-gamma-val" class="text-slate-300">--</span>
+                            </div>
+                            <input id="slime-gamma" type="range" min="0" max="2" step="0.01" value="0.90" class="w-full">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <div class="flex items-center justify-between text-[11px] font-mono">
+                                    <label for="slime-theta-ag" class="text-slate-400">$\theta_{AG}$</label>
+                                    <span id="slime-theta-ag-val" class="text-slate-300">--</span>
+                                </div>
+                                <input id="slime-theta-ag" type="range" min="-0.20" max="0.50" step="0.01" value="0.18" class="w-full">
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between text-[11px] font-mono">
+                                    <label for="slime-theta-dg" class="text-slate-400">$\theta_{DG}$</label>
+                                    <span id="slime-theta-dg-val" class="text-slate-300">--</span>
+                                </div>
+                                <input id="slime-theta-dg" type="range" min="-0.50" max="0.20" step="0.01" value="-0.08" class="w-full">
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between text-[11px] font-mono">
+                                <label for="slime-hops" class="text-slate-400">lookahead (multi-hop)</label>
+                                <span id="slime-hops-val" class="text-slate-300">--</span>
+                            </div>
+                            <input id="slime-hops" type="range" min="1" max="12" step="1" value="7" class="w-full">
+                        </div>
+                    </div>
+
+                    <div class="mt-3 text-[10px] text-slate-600 leading-snug">
+                        This is a visualization: $\Delta H$ and $\Delta SP$ are local proxies, but the <span class="text-slate-400">equation is real</span>.
+                    </div>
+                </div>
             </div>
 
             <div class="mt-12 flex flex-wrap justify-center gap-2 text-xs text-slate-500 font-mono">
@@ -1381,8 +1463,10 @@
     </script>
 
     <script>
-        // Hero background: lightweight "slime mold" (Physarum-style) trail simulation.
-        // Purely visual; uses a small offscreen buffer for performance.
+        // Hero background: geDIG-driven "slime mold" animation.
+        // The motion is controlled by the same equation used in the paper:
+        //   F = ΔEPC_norm − λ(ΔH_norm + γΔSP_rel)
+        // This is an illustrative (not biological) visualization.
         (() => {
             const canvas = document.getElementById('slime-bg');
             if (!canvas) return;
@@ -1392,6 +1476,16 @@
 
             const ctx = canvas.getContext('2d', { alpha: true });
             if (!ctx) return;
+
+            // HUD elements (optional; desktop only).
+            const hud = {
+                state: document.getElementById('slime-state'),
+                f: document.getElementById('slime-val-f'),
+                epc: document.getElementById('slime-val-epc'),
+                h: document.getElementById('slime-val-h'),
+                sp: document.getElementById('slime-val-sp'),
+                bar: document.getElementById('slime-bar'),
+            };
 
             let cssW = 1, cssH = 1, dpr = 1;
             let simW = 0, simH = 0;
@@ -1406,6 +1500,91 @@
 
             const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
             const rnd = (a = 0, b = 1) => a + Math.random() * (b - a);
+            const EPS = 1e-9;
+
+            // geDIG parameters (visualization-only tuning).
+            const G = {
+                lambda: 0.26,
+                gamma: 0.90,
+                thetaAG: 0.18,
+                thetaDG: -0.08,
+                lookahead: 7, // multi-hop proxy (bigger => stronger DG signal)
+            };
+            let userLookahead = null;
+
+            const controls = {
+                lambda: document.getElementById('slime-lambda'),
+                gamma: document.getElementById('slime-gamma'),
+                thetaAG: document.getElementById('slime-theta-ag'),
+                thetaDG: document.getElementById('slime-theta-dg'),
+                hops: document.getElementById('slime-hops'),
+                lambdaVal: document.getElementById('slime-lambda-val'),
+                gammaVal: document.getElementById('slime-gamma-val'),
+                thetaAGVal: document.getElementById('slime-theta-ag-val'),
+                thetaDGVal: document.getElementById('slime-theta-dg-val'),
+                hopsVal: document.getElementById('slime-hops-val'),
+                reroll: document.getElementById('slime-reroll'),
+            };
+
+            function fmtSigned(x, digits = 2) {
+                const s = x >= 0 ? "+" : "";
+                return `${s}${x.toFixed(digits)}`;
+            }
+
+            function syncControls() {
+                if (controls.lambdaVal) controls.lambdaVal.textContent = G.lambda.toFixed(2);
+                if (controls.gammaVal) controls.gammaVal.textContent = G.gamma.toFixed(2);
+                if (controls.thetaAGVal) controls.thetaAGVal.textContent = fmtSigned(G.thetaAG, 2);
+                if (controls.thetaDGVal) controls.thetaDGVal.textContent = fmtSigned(G.thetaDG, 2);
+                if (controls.hopsVal) controls.hopsVal.textContent = String(Math.round(G.lookahead));
+            }
+
+            function bindControls() {
+                if (controls.lambda) {
+                    controls.lambda.value = String(G.lambda);
+                    controls.lambda.addEventListener('input', () => {
+                        G.lambda = clamp(parseFloat(controls.lambda.value || "0"), 0, 1);
+                        syncControls();
+                    });
+                }
+                if (controls.gamma) {
+                    controls.gamma.value = String(G.gamma);
+                    controls.gamma.addEventListener('input', () => {
+                        G.gamma = clamp(parseFloat(controls.gamma.value || "0"), 0, 2);
+                        syncControls();
+                    });
+                }
+                if (controls.thetaAG) {
+                    controls.thetaAG.value = String(G.thetaAG);
+                    controls.thetaAG.addEventListener('input', () => {
+                        G.thetaAG = clamp(parseFloat(controls.thetaAG.value || "0"), -0.2, 0.5);
+                        syncControls();
+                    });
+                }
+                if (controls.thetaDG) {
+                    controls.thetaDG.value = String(G.thetaDG);
+                    controls.thetaDG.addEventListener('input', () => {
+                        G.thetaDG = clamp(parseFloat(controls.thetaDG.value || "0"), -0.5, 0.2);
+                        syncControls();
+                    });
+                }
+                if (controls.hops) {
+                    controls.hops.value = String(G.lookahead);
+                    controls.hops.addEventListener('input', () => {
+                        const v = clamp(parseInt(controls.hops.value || "1", 10) || 1, 1, 12);
+                        userLookahead = v;
+                        G.lookahead = v;
+                        syncControls();
+                    });
+                }
+                if (controls.reroll) {
+                    controls.reroll.addEventListener('click', () => {
+                        rerollWorld();
+                    });
+                }
+
+                syncControls();
+            }
 
             function sample(arr, x, y) {
                 x = Math.floor(x);
@@ -1419,6 +1598,205 @@
                 y = Math.floor(y);
                 if (x < 0 || y < 0 || x >= simW || y >= simH) return;
                 arr[y * simW + x] += v;
+            }
+
+            function wrapPoint(p) {
+                let x = p.x, y = p.y;
+                if (x < 0) x += simW;
+                if (x >= simW) x -= simW;
+                if (y < 0) y += simH;
+                if (y >= simH) y -= simH;
+                return { x, y };
+            }
+
+            function nearestFood(x, y) {
+                let best = foods[0] || { x: 0, y: 0 };
+                let bestD2 = Infinity;
+                for (const f of foods) {
+                    const dx = f.x - x, dy = f.y - y;
+                    const d2 = dx * dx + dy * dy;
+                    if (d2 < bestD2) { bestD2 = d2; best = f; }
+                }
+                return best;
+            }
+
+            function distToFood(x, y) {
+                const f = nearestFood(x, y);
+                const dx = f.x - x, dy = f.y - y;
+                return Math.hypot(dx, dy);
+            }
+
+            function entropyAt(x, y, a, sensorDist, sensorAng) {
+                // Directional "optionality" from local trail gradients.
+                const fx = x + Math.cos(a) * sensorDist;
+                const fy = y + Math.sin(a) * sensorDist;
+                const lx = x + Math.cos(a + sensorAng) * sensorDist;
+                const ly = y + Math.sin(a + sensorAng) * sensorDist;
+                const rx = x + Math.cos(a - sensorAng) * sensorDist;
+                const ry = y + Math.sin(a - sensorAng) * sensorDist;
+
+                const w0 = 0.001 + sample(trail, fx, fy);
+                const w1 = 0.001 + sample(trail, lx, ly);
+                const w2 = 0.001 + sample(trail, rx, ry);
+                const s = w0 + w1 + w2;
+                const p0 = w0 / s, p1 = w1 / s, p2 = w2 / s;
+                const H = -(p0 * Math.log(p0 + EPS) + p1 * Math.log(p1 + EPS) + p2 * Math.log(p2 + EPS)) / Math.log(3);
+                return clamp(H, 0, 1);
+            }
+
+            function lookaheadDistance(x, y, a, steps, speed) {
+                let xx = x, yy = y, aa = a;
+                for (let i = 0; i < steps; i++) {
+                    // A tiny steering toward the nearest "food" keeps the pattern legible.
+                    const f = nearestFood(xx, yy);
+                    const at = Math.atan2(f.y - yy, f.x - xx);
+                    const delta = Math.atan2(Math.sin(at - aa), Math.cos(at - aa));
+                    aa += 0.10 * delta;
+
+                    xx += Math.cos(aa) * speed;
+                    yy += Math.sin(aa) * speed;
+                    const wp = wrapPoint({ x: xx, y: yy });
+                    xx = wp.x; yy = wp.y;
+                }
+                return distToFood(xx, yy);
+            }
+
+            function hudUpdate(avg) {
+                if (!hud.f || !hud.state || !hud.bar) return;
+                const { F, dEPC, dH, dSP } = avg;
+
+                let state = "BALANCE";
+                let cls = "text-slate-300";
+                if (F > G.thetaAG) { state = "AG (EXPLORE)"; cls = "text-danger"; }
+                else if (F < G.thetaDG) { state = "DG (COMMIT)"; cls = "text-success"; }
+
+                hud.state.textContent = state;
+                hud.state.className = `text-[11px] font-bold ${cls}`;
+                hud.f.textContent = F.toFixed(3);
+                hud.epc.textContent = dEPC.toFixed(3);
+                hud.h.textContent = dH.toFixed(3);
+                hud.sp.textContent = dSP.toFixed(3);
+
+                // Bar: "progress to DG" (low F => longer fill reaching the green end).
+                const t = clamp((F - (-0.18)) / (0.36), 0, 1); // low F -> 0, high F -> 1
+                const prog = 1 - t;
+                hud.bar.style.width = `${Math.floor(prog * 100)}%`;
+            }
+
+            function toCanvas(x, y) {
+                return { x: (x / simW) * cssW, y: (y / simH) * cssH };
+            }
+
+            function edgeStrength(a, b) {
+                // Average trail intensity sampled along the segment (proxy for "edge existence").
+                const steps = 16;
+                let acc = 0;
+                for (let i = 0; i < steps; i++) {
+                    const t = (steps === 1) ? 0 : i / (steps - 1);
+                    const x = a.x + (b.x - a.x) * t;
+                    const y = a.y + (b.y - a.y) * t;
+                    acc += sample(trail, x, y);
+                }
+                const m = acc / steps;
+                return clamp(m / 12, 0, 1);
+            }
+
+            function drawGraphOverlay() {
+                if (!foods || foods.length === 0 || !trail) return;
+
+                ctx.save();
+                ctx.globalCompositeOperation = 'screen';
+                ctx.lineCap = 'round';
+
+                // Edges (only draw strong connections).
+                for (let i = 0; i < foods.length; i++) {
+                    for (let j = i + 1; j < foods.length; j++) {
+                        const a = foods[i], b = foods[j];
+                        const s = edgeStrength(a, b);
+                        if (s < 0.12) continue;
+                        const A = toCanvas(a.x, a.y);
+                        const B = toCanvas(b.x, b.y);
+                        ctx.globalAlpha = 0.08 + 0.30 * s;
+                        ctx.strokeStyle = 'rgb(34, 211, 238)'; // accent
+                        ctx.lineWidth = 0.6 + 2.6 * s;
+                        ctx.beginPath();
+                        ctx.moveTo(A.x, A.y);
+                        ctx.lineTo(B.x, B.y);
+                        ctx.stroke();
+                    }
+                }
+
+                // Nodes
+                for (let i = 0; i < foods.length; i++) {
+                    const f = foods[i];
+                    const P = toCanvas(f.x, f.y);
+                    ctx.globalAlpha = 0.95;
+                    ctx.shadowBlur = 18;
+                    ctx.shadowColor = 'rgba(250, 204, 21, 0.55)';
+                    ctx.fillStyle = 'rgb(250, 204, 21)'; // amber
+                    ctx.beginPath();
+                    ctx.arc(P.x, P.y, 4.2, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.shadowBlur = 0;
+                    ctx.globalAlpha = 0.55;
+                    ctx.strokeStyle = 'rgba(255,255,255,0.65)';
+                    ctx.lineWidth = 1.0;
+                    ctx.beginPath();
+                    ctx.arc(P.x, P.y, 6.6, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                ctx.restore();
+            }
+
+            function seedFoods(count = 6) {
+                const pad = 12;
+                const minD2 = Math.pow(Math.min(simW, simH) * 0.22, 2);
+                foods = [];
+                let tries = 0;
+                while (foods.length < count && tries < count * 80) {
+                    tries++;
+                    const p = { x: rnd(pad, simW - pad), y: rnd(pad, simH - pad) };
+                    if (foods.every(f => {
+                        const dx = f.x - p.x, dy = f.y - p.y;
+                        return (dx * dx + dy * dy) > minD2;
+                    })) foods.push(p);
+                }
+                if (foods.length < 3) {
+                    foods = [
+                        { x: pad, y: pad },
+                        { x: simW - pad, y: pad },
+                        { x: simW - pad, y: simH - pad },
+                        { x: pad, y: simH - pad },
+                    ];
+                }
+            }
+
+            function spawnAgents(N) {
+                agents = new Array(N).fill(0).map(() => {
+                    const f = foods[Math.floor(Math.random() * foods.length)];
+                    return {
+                        x: f.x + rnd(-6, 6),
+                        y: f.y + rnd(-6, 6),
+                        a: rnd(0, Math.PI * 2),
+                    };
+                });
+            }
+
+            function clearTrail() {
+                if (!trail || !trailNext) return;
+                trail.fill(0);
+                trailNext.fill(0);
+            }
+
+            function rerollWorld() {
+                if (!trail) return;
+                seedFoods(6);
+                clearTrail();
+                const isMobile = cssW < 640;
+                const N = Math.floor(isMobile ? clamp(simW * simH / 52, 260, 520) : clamp(simW * simH / 34, 520, 980));
+                spawnAgents(N);
             }
 
             function resize() {
@@ -1446,36 +1824,28 @@
                 imgBuf = img.getContext('2d', { willReadFrequently: true });
                 imgData = imgBuf.createImageData(simW, simH);
 
-                // Seed "food" points: gives the blob something to connect.
-                const pad = 12;
-                foods = [
-                    { x: rnd(pad, simW - pad), y: rnd(pad, simH - pad) },
-                    { x: rnd(pad, simW - pad), y: rnd(pad, simH - pad) },
-                    { x: rnd(pad, simW - pad), y: rnd(pad, simH - pad) },
-                ];
-
-                // Agents spawn near foods to quickly form veins.
-                const N = Math.floor(clamp(simW * simH / 26, 700, 1400));
-                agents = new Array(N).fill(0).map(() => {
-                    const f = foods[Math.floor(Math.random() * foods.length)];
-                    return {
-                        x: f.x + rnd(-6, 6),
-                        y: f.y + rnd(-6, 6),
-                        a: rnd(0, Math.PI * 2),
-                    };
-                });
+                // Seed "food" points (nodes) and agents.
+                seedFoods(6);
+                const isMobile = cssW < 640;
+                if (userLookahead == null) {
+                    G.lookahead = isMobile ? 4 : 7;
+                    if (controls.hops) controls.hops.value = String(G.lookahead);
+                }
+                const N = Math.floor(isMobile ? clamp(simW * simH / 52, 260, 520) : clamp(simW * simH / 34, 520, 980));
+                spawnAgents(N);
+                syncControls();
             }
 
             function step() {
                 if (!trail) return;
 
-                // Agent parameters (tuned for "veiny" growth, not full coverage).
+                // Agent parameters (tuned for organic, legible growth).
                 const sensorDist = 7.5;
                 const sensorAng = 0.55;
-                const turn = 0.28;
                 const speed = 1.0;
-                const depositAmt = 0.65;
-                const foodBoost = 3.0;
+                const depositBase = 0.52;
+                const foodBoost = 2.6;
+                const baseEPC = 0.22;
 
                 // Food sources continuously emit trail.
                 for (const f of foods) {
@@ -1486,32 +1856,53 @@
                     }
                 }
 
+                // Aggregate a cheap "live gauge" estimate for the HUD.
+                let sumF = 0, sumEPC = 0, sumH = 0, sumSP = 0, nAcc = 0;
+
                 for (const p of agents) {
-                    const fx = p.x + Math.cos(p.a) * sensorDist;
-                    const fy = p.y + Math.sin(p.a) * sensorDist;
-                    const lx = p.x + Math.cos(p.a + sensorAng) * sensorDist;
-                    const ly = p.y + Math.sin(p.a + sensorAng) * sensorDist;
-                    const rx = p.x + Math.cos(p.a - sensorAng) * sensorDist;
-                    const ry = p.y + Math.sin(p.a - sensorAng) * sensorDist;
+                    const Hbefore = entropyAt(p.x, p.y, p.a, sensorDist, sensorAng);
+                    const dBefore = distToFood(p.x, p.y);
 
-                    const fwd = sample(trail, fx, fy);
-                    const left = sample(trail, lx, ly);
-                    const right = sample(trail, rx, ry);
+                    // Evaluate a tiny "action set" (left/forward/right) and pick the minimum-F move.
+                    const candidates = [0, +sensorAng, -sensorAng];
+                    let best = { F: Infinity, a: p.a, x: p.x, y: p.y, dEPC: 0, dH: 0, dSP: 0 };
 
-                    if (left > fwd && left > right) p.a += turn;
-                    else if (right > fwd && right > left) p.a -= turn;
-                    else if (fwd < 0.02 && Math.random() < 0.18) p.a += rnd(-0.7, 0.7);
+                    for (const da of candidates) {
+                        const aa = p.a + da;
+                        const np = wrapPoint({ x: p.x + Math.cos(aa) * speed, y: p.y + Math.sin(aa) * speed });
 
-                    p.x += Math.cos(p.a) * speed;
-                    p.y += Math.sin(p.a) * speed;
+                        const Hafter = entropyAt(np.x, np.y, aa, sensorDist, sensorAng);
+                        const dH = Hafter - Hbefore;
 
-                    // Wrap edges (keeps flow continuous).
-                    if (p.x < 0) p.x = simW - 1;
-                    if (p.x >= simW) p.x = 0;
-                    if (p.y < 0) p.y = simH - 1;
-                    if (p.y >= simH) p.y = 0;
+                        const dEnd = lookaheadDistance(np.x, np.y, aa, G.lookahead, speed);
+                        const dSP = Math.max(0, (dBefore - dEnd) / Math.max(dBefore, 1e-6));
 
-                    deposit(trail, p.x, p.y, depositAmt);
+                        const local = sample(trail, np.x, np.y);
+                        const localN = clamp(local / 10, 0, 1);
+                        const dEPC = baseEPC * (0.35 + 0.65 * (1 - localN));
+
+                        const F = dEPC - G.lambda * (dH + G.gamma * dSP);
+                        if (F < best.F) best = { F, a: aa, x: np.x, y: np.y, dEPC, dH, dSP };
+                    }
+
+                    // High-F states behave more exploratory (amoeba-ish wobble).
+                    if (best.F > G.thetaAG) best.a += rnd(-0.9, 0.9) * 0.35;
+
+                    p.a = best.a;
+                    p.x = best.x;
+                    p.y = best.y;
+
+                    const isDG = best.F < G.thetaDG;
+                    const isAG = best.F > G.thetaAG;
+                    const dep = depositBase * (isDG ? 1.9 : (isAG ? 0.55 : 1.0));
+                    deposit(trail, p.x, p.y, dep);
+                    // Add a tiny thickness so veins read well on large screens.
+                    for (let k = 0; k < 2; k++) deposit(trail, p.x + rnd(-1, 1), p.y + rnd(-1, 1), dep * 0.25);
+
+                    // Sample only a subset for HUD stats (saves work).
+                    if ((nAcc < 140) && (Math.random() < 0.18)) {
+                        sumF += best.F; sumEPC += best.dEPC; sumH += best.dH; sumSP += best.dSP; nAcc++;
+                    }
                 }
 
                 // Diffuse + decay (single blur pass).
@@ -1551,6 +1942,16 @@
 
                 ctx.clearRect(0, 0, cssW, cssH);
                 ctx.drawImage(img, 0, 0, cssW, cssH);
+                drawGraphOverlay();
+
+                if (nAcc > 0) {
+                    hudUpdate({
+                        F: sumF / nAcc,
+                        dEPC: sumEPC / nAcc,
+                        dH: sumH / nAcc,
+                        dSP: sumSP / nAcc,
+                    });
+                }
             }
 
             let lastT = 0;
@@ -1567,6 +1968,7 @@
                 raf = requestAnimationFrame(loop);
             }
 
+            bindControls();
             resize();
             window.addEventListener('resize', () => resize(), { passive: true });
             raf = requestAnimationFrame(loop);
