@@ -73,7 +73,7 @@ geDIGは，「構造を変えるコスト」と「それによって得られる
 
 ここで各項は以下に対応する（表\ref{tab:gedig_terms}）．
 \begin{itemize}
-\item $\gednorm$：正規化EPC (Edge Placement Cost)．グラフ編集距離（GED）の局所近似であり，MDLにおけるモデル記述長 $L(M)$ の増分に相当する．$\Delta$は常に更新前$G_{t-1}$と更新後$G_t$の差分を表す．
+\item $\gednorm$：正規化EPC (Edge Placement Cost)．グラフ編集距離（GED）の局所近似であり，MDLにおけるモデル記述長 $L(M)$ の増分に相当する．$\Delta$は比較対象間の差分（迷路：更新前後$G_{t-1},G_t$，Transformer：ランダムベースラインとの差）を表す．
 \item $\Delta H_{\mathrm{norm}}$：シャノンエントロピーの差分（エントロピー増分；伸展利得, Extension Gain）．候補集合に対する重み付き分布$p$のエントロピー$H(p)$の変化として定義し，本稿では$\Delta H := H_{\mathrm{after}}-H_{\mathrm{before}}$（after-before）を採用する．$\Delta H>0$は候補分布の均質化（optionalityの増大）を表し，探索圧として$\F$を下げる（温度項）．
 \item $\Delta \mathrm{SP}_{\mathrm{rel}}$：平均最短路長の相対短縮率．グラフ上のショートカット形成による効率化を表し，MDLにおけるデータ記述長 $L(D|M)$ の圧縮に相当する．
 \end{itemize}
