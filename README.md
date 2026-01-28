@@ -86,4 +86,5 @@ We are looking for collaborators to test the **"Thermodynamics of Intelligence"*
 **Contact**: miyauchikazuyoshi@gmail.com
 
 ---
-*Licensed under Apache 2.0*
+*Licensed under Apache 2.0*  
+*Patent pending (JP 2025-082988, 2025-082989).*
