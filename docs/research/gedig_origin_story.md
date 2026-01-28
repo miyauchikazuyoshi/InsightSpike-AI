@@ -165,7 +165,7 @@ geDIGの式から、脳と同じアーキテクチャが自然に導出された
 - 最適解という明確な正解がある
 - サイズを変えてスケール不変性を検証できる
 
-**仮説**：Fの値に応じて記憶の探索範囲を動的に拡張・収縮する制御で、効率的な経路発見が可能。
+**仮説**：移動エピソードの類似度を用いて知識グラフへ受け入れる記憶を選定し、Fの値に応じて知識グラフに蓄えられた記憶の探索範囲を動的に拡張・収縮することで、効率的な経路発見が可能。
 
 **結果**：「探索ステップ数」「無駄枝の剪定率」「最短路到達率」において、geDIGの予測と実際の探索行動が一貫して対応した。15×15、25×25、51×51——スケールが変わっても、この対応は維持された。成功率はベースライン60%に対し98%を達成。
 
@@ -406,7 +406,7 @@ As the minimal verifiable unit, **maze exploration** was chosen:
 - Clear ground truth (optimal path)
 - Scale invariance can be tested by varying size
 
-**Hypothesis**: Dynamically expanding and contracting the memory search range based on F enables efficient pathfinding.
+**Hypothesis**: By selecting memories to accept into the knowledge graph using movement episode similarity, and dynamically expanding/contracting the search range of memories stored in the knowledge graph based on F, efficient pathfinding becomes possible.
 
 **Results**: In terms of "exploration steps," "redundant branch pruning rate," and "shortest path arrival rate," geDIG's predictions consistently corresponded with actual exploration behavior. 15×15, 25×25, 51×51—this correspondence held across different scales. Success rate reached 98% compared to the baseline of 60%.
 
