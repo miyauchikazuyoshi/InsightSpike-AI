@@ -64,6 +64,10 @@ We are actively exploring new applications of the thermodynamic engine:
 
 At its core, geDIG is based on the hypothesis that Intelligence acts to balance **Information Gain** (Novelty) and **Structural Cost** (Energy).
 
+> 📖 **[Origin Story: The Journey to Building an AI That Has Insights](docs/research/gedig_origin_story.md)**
+>
+> *How did geDIG come to be? From the question "How do we build an AI that thinks like Einstein?" to the mathematical formulation—read the full story.*
+
 $$F = \underbrace{\Delta \text{Structure Cost}}_{\text{Energy}} - \lambda \cdot \underbrace{\Delta \text{Information Gain}}_{\text{Entropy}}$$
 
 *   **Low F (Low Free Energy)** = Stable, Efficient, Low Entropy (Understanding).
