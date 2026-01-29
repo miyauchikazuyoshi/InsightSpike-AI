@@ -384,6 +384,12 @@ class StepRecord:
     # Sleep guidance diagnostics (curriculum / path compression)
     sleep_plan_action: int = -1  # action id (0-3) suggested by Sleep plan, -1 if none
     sleep_guided: bool = False  # whether executed action followed Sleep plan
+    # Cortisol (stress/adaptation) diagnostics: label "wasted" exploration as negative examples
+    cortisol_level: float = 0.0
+    cortisol_fire: bool = False
+    cortisol_reason: str = ""
+    cortisol_ag_streak: int = 0
+    cortisol_stuck_streak: int = 0
 
 
 @dataclass
@@ -475,6 +481,11 @@ class QueryHubConfig:
     steps_ultra_light: bool = False
     # Maze snapshot explicit dump (paper reproducibility)
     maze_snapshot_out: Optional[str] = None
+    # Cortisol (stress/adaptation): log-only negative-example signal from stuckness
+    cortisol_mode: str = "off"  # 'off' | 'log'
+    cortisol_ag_streak: int = 30
+    cortisol_stuck_streak: int = 10
+    cortisol_repeat_visits: int = 3
     # Force per-hop series via evaluator fallback even in L3-only mode
     force_per_hop: bool = False
     # Per-hop evaluator fallback only when AG fires (L3-only)
@@ -743,6 +754,16 @@ def run_episode_query(
     g0_history: deque = deque(maxlen=int(getattr(config, 'ag_window', 30)))
     # Cross-step APSP carry for ALL-PAIRS-EXACT
     apsp_exact_state: Dict[int, Dict[str, Any]] = {} if bool(getattr(config, 'sp_eval_allpairs_exact', False)) else {}
+    # Cortisol (stress/adaptation): negative-example signal from "stuckness" (log-only).
+    try:
+        cortisol_mode = str(getattr(config, "cortisol_mode", "off")).lower().strip() or "off"
+    except Exception:
+        cortisol_mode = "off"
+    cortisol_ag_thr = max(1, int(getattr(config, "cortisol_ag_streak", 30) or 30))
+    cortisol_stuck_thr = max(1, int(getattr(config, "cortisol_stuck_streak", 10) or 10))
+    cortisol_repeat_visits = max(1, int(getattr(config, "cortisol_repeat_visits", 3) or 3))
+    cortisol_ag_streak = 0
+    cortisol_stuck_streak = 0
 
     for step in range(config.max_steps):
         sleep_plan_action: Optional[int] = None
@@ -2390,6 +2411,10 @@ def run_episode_query(
         ag_fire = bool(g0 > float(locals().get('theta_ag_used', getattr(config, 'theta_ag', 0.0))))
         # DG判定は multi-hop のみ: best_hop>=1 かつ gmin_mh < θDG
         dg_fire = bool(int(best_hop) >= 1 and float(gmin_mh_val) < float(config.theta_dg))
+        if cortisol_mode != "off":
+            cortisol_ag_streak = (cortisol_ag_streak + 1) if ag_fire else 0
+        else:
+            cortisol_ag_streak = 0
         dg_commit_policy = str(getattr(config, 'dg_commit_policy', 'threshold')).lower()
 
         # Option: when DG fires, expand hop0 commit set to all S_link items (passable only).
@@ -2454,6 +2479,49 @@ def run_episode_query(
         moved = (current_position != last_position)
         current_query_node = make_query_node(current_position)
         visit_counts[current_position] = visit_counts.get(current_position, 0) + 1
+        # Cortisol signal (log-only): high when AG stays open or the run gets stuck/revisits too much.
+        cortisol_level = 0.0
+        cortisol_fire = False
+        cortisol_reason = ""
+        if cortisol_mode != "off":
+            stuck = False
+            try:
+                stuck = (not moved) or bool(getattr(obs, "is_dead_end", False))
+            except Exception:
+                stuck = (not moved)
+            try:
+                if int(visit_counts.get(current_position, 0)) >= int(cortisol_repeat_visits):
+                    stuck = True
+            except Exception:
+                pass
+            cortisol_stuck_streak = (cortisol_stuck_streak + 1) if stuck else 0
+            ag_ratio = float(cortisol_ag_streak) / float(max(1, cortisol_ag_thr))
+            stuck_ratio = float(cortisol_stuck_streak) / float(max(1, cortisol_stuck_thr))
+            cortisol_level = float(min(1.0, max(ag_ratio, stuck_ratio)))
+            cortisol_fire = bool((cortisol_ag_streak >= cortisol_ag_thr) or (cortisol_stuck_streak >= cortisol_stuck_thr))
+            reasons: List[str] = []
+            if cortisol_ag_streak >= cortisol_ag_thr:
+                reasons.append("ag_streak")
+            if cortisol_stuck_streak >= cortisol_stuck_thr:
+                reasons.append("stuck_streak")
+            if not moved:
+                reasons.append("no_move")
+            try:
+                if bool(getattr(obs, "is_dead_end", False)):
+                    reasons.append("dead_end")
+            except Exception:
+                pass
+            try:
+                if int(visit_counts.get(current_position, 0)) >= int(cortisol_repeat_visits):
+                    reasons.append("revisit")
+            except Exception:
+                pass
+            cortisol_reason = ",".join(reasons)
+        else:
+            cortisol_level = 0.0
+            cortisol_fire = False
+            cortisol_reason = ""
+            cortisol_stuck_streak = 0
         # Post-step possible moves (for consistent UI/debug)
         try:
             possible_moves_post = list(getattr(obs, 'possible_moves', []))
@@ -3237,6 +3305,11 @@ def run_episode_query(
                 sp_ds_eff_saved=int(sp_ds_eff_saved_ct),
                 sleep_plan_action=(int(sleep_plan_action) if sleep_plan_action is not None else -1),
                 sleep_guided=bool(sleep_guided),
+                cortisol_level=float(cortisol_level),
+                cortisol_fire=bool(cortisol_fire),
+                cortisol_reason=str(cortisol_reason),
+                cortisol_ag_streak=int(cortisol_ag_streak),
+                cortisol_stuck_streak=int(cortisol_stuck_streak),
                 dbg_gmin_calc=float(gmin_calc),
                 dbg_best_hop_calc=int(h_calc),
                 gmin_mh=float(gmin_mh_val),
@@ -3600,6 +3673,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--no-post-sp-diagnostics", dest="post_sp_diagnostics", action="store_false", help="Disable post-step SP diagnostics (hop_series_post) to save time")
     # Ultra-light steps (skip heavy graph snapshots entirely)
     parser.add_argument("--steps-ultra-light", dest="steps_ultra_light", action="store_true", help="Do not generate heavy snapshot arrays in steps.json; prefer DS/HTML light mode")
+    # Cortisol (stress/adaptation): define negative examples from "stuckness" without illegal-move probing (no GABA).
+    parser.add_argument(
+        "--cortisol-mode",
+        type=str,
+        choices=["off", "log"],
+        default="off",
+        help="Enable cortisol stress signal (log-only) to label negative steps when AG stays open too long or the agent gets stuck.",
+    )
+    parser.add_argument("--cortisol-ag-streak", type=int, default=30, help="Trigger cortisol after N consecutive AG-open steps (0-hop ambiguity).")
+    parser.add_argument("--cortisol-stuck-streak", type=int, default=10, help="Trigger cortisol after N consecutive stuck steps (no-move/deadend/revisit).")
+    parser.add_argument("--cortisol-repeat-visits", type=int, default=3, help="Treat a position as 'revisited' after this many visits for cortisol stuckness.")
     # Curriculum (Wake→Sleep→Wake): warmup run to ensure goal experience, then eval guided by Sleep path plan
     parser.add_argument(
         "--curriculum-warmup-steps",
@@ -3743,6 +3827,10 @@ def main() -> None:
             post_sp_diagnostics=bool(getattr(args, 'post_sp_diagnostics', True)),
             steps_ultra_light=bool(getattr(args, 'steps_ultra_light', False)),
             maze_snapshot_out=(str(getattr(args, 'maze_snapshot_out', '')).strip() or None),
+            cortisol_mode=str(getattr(args, "cortisol_mode", "off")),
+            cortisol_ag_streak=int(getattr(args, "cortisol_ag_streak", 30)),
+            cortisol_stuck_streak=int(getattr(args, "cortisol_stuck_streak", 10)),
+            cortisol_repeat_visits=int(getattr(args, "cortisol_repeat_visits", 3)),
             force_per_hop=bool(getattr(args, 'force_per_hop', False)),
             eval_per_hop_on_ag=bool(getattr(args, 'eval_per_hop_on_ag', False)),
             dg_bfs_shortcut=bool(getattr(args, 'dg_bfs_shortcut', False)),
@@ -3775,6 +3863,12 @@ def main() -> None:
                         "warmup_steps": int(getattr(args, "curriculum_warmup_steps", 0) or 0),
                         "eval_steps": int(getattr(args, "max_steps", 0) or 0),
                         "sleep_guide": str(getattr(args, "sleep_guide", "override")),
+                    },
+                    "cortisol": {
+                        "mode": str(getattr(args, "cortisol_mode", "off")),
+                        "ag_streak": int(getattr(args, "cortisol_ag_streak", 30)),
+                        "stuck_streak": int(getattr(args, "cortisol_stuck_streak", 10)),
+                        "repeat_visits": int(getattr(args, "cortisol_repeat_visits", 3)),
                     },
                 }
             )
@@ -3839,6 +3933,11 @@ def main() -> None:
                 "query_node_post": getattr(record, "query_node_post", []),
                 "sleep_plan_action": int(getattr(record, "sleep_plan_action", -1)),
                 "sleep_guided": bool(getattr(record, "sleep_guided", False)),
+                "cortisol_level": float(getattr(record, "cortisol_level", 0.0)),
+                "cortisol_fire": bool(getattr(record, "cortisol_fire", False)),
+                "cortisol_reason": str(getattr(record, "cortisol_reason", "")),
+                "cortisol_ag_streak": int(getattr(record, "cortisol_ag_streak", 0)),
+                "cortisol_stuck_streak": int(getattr(record, "cortisol_stuck_streak", 0)),
                 "ag_fire": bool(getattr(record, 'ag_fire', False)),
                 "dg_fire": bool(getattr(record, 'dg_fire', False)),
                 "theta_ag": float(getattr(record, 'theta_ag', 0.0)),
@@ -3975,6 +4074,11 @@ def main() -> None:
                         "moved": moved,
                         "sleep_plan_action": int(getattr(record, "sleep_plan_action", -1)),
                         "sleep_guided": bool(getattr(record, "sleep_guided", False)),
+                        "cortisol_level": float(getattr(record, "cortisol_level", 0.0)),
+                        "cortisol_fire": bool(getattr(record, "cortisol_fire", False)),
+                        "cortisol_reason": str(getattr(record, "cortisol_reason", "")),
+                        "cortisol_ag_streak": int(getattr(record, "cortisol_ag_streak", 0)),
+                        "cortisol_stuck_streak": int(getattr(record, "cortisol_stuck_streak", 0)),
                         "gate": {
                             "g0": float(getattr(record, "g0", 0.0)),
                             "gmin": float(getattr(record, "gmin", 0.0)),
@@ -4079,6 +4183,12 @@ def main() -> None:
                     "enabled": bool(use_curriculum),
                     "warmup_steps": int(warmup_steps),
                     "sleep_guide": str(getattr(args, "sleep_guide", "override")),
+                },
+                "cortisol": {
+                    "mode": str(getattr(args, "cortisol_mode", "off")),
+                    "ag_streak": int(getattr(args, "cortisol_ag_streak", 30)),
+                    "stuck_streak": int(getattr(args, "cortisol_stuck_streak", 10)),
+                    "repeat_visits": int(getattr(args, "cortisol_repeat_visits", 3)),
                 },
             },
             "summary": summary,
