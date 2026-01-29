@@ -15,7 +15,7 @@ import math
 import os
 import random
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from collections import deque, defaultdict
 import time
 from pathlib import Path
@@ -381,6 +381,9 @@ class StepRecord:
     # SP pairset DS persistence (post-step) diagnostics
     sp_ds_saved: bool = False
     sp_ds_eff_saved: int = 0
+    # Sleep guidance diagnostics (curriculum / path compression)
+    sleep_plan_action: int = -1  # action id (0-3) suggested by Sleep plan, -1 if none
+    sleep_guided: bool = False  # whether executed action followed Sleep plan
 
 
 @dataclass
@@ -495,7 +498,107 @@ class EpisodeArtifacts:
 # Core query-hub episode runner
 # --------------------------------------------------------------------------------------
 
-def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
+def _build_sleep_action_plan(
+    steps: Sequence[StepRecord],
+    *,
+    start_pos: Tuple[int, int],
+    goal_pos: Tuple[int, int],
+) -> Tuple[Dict[Tuple[int, int], int], Dict[str, Any]]:
+    """Derive a 1-step action plan from experienced transitions (Sleep path compression).
+
+    The plan maps (row,col) -> action_id (0-3) for the next step along the shortest
+    path to the goal, restricted to edges actually observed during the warmup run.
+    """
+    adjacency: Dict[Tuple[int, int], Set[Tuple[int, int]]] = defaultdict(set)
+    for rec in steps:
+        try:
+            pre_node = (getattr(rec, "query_node_pre", None) or [])[:2]
+            post_node = (getattr(rec, "query_node_post", None) or [])[:2]
+            pre = (int(pre_node[0]), int(pre_node[1]))
+            post = (int(post_node[0]), int(post_node[1]))
+        except Exception:
+            continue
+        if pre == post:
+            continue
+        adjacency[pre].add(post)
+        adjacency[post].add(pre)
+
+    frontier: deque[Tuple[int, int]] = deque([start_pos])
+    prev: Dict[Tuple[int, int], Tuple[int, int]] = {}
+    seen: Set[Tuple[int, int]] = {start_pos}
+    found = False
+    while frontier:
+        u = frontier.popleft()
+        if u == goal_pos:
+            found = True
+            break
+        for v in adjacency.get(u, set()):
+            if v in seen:
+                continue
+            seen.add(v)
+            prev[v] = u
+            frontier.append(v)
+
+    explored_edges_undirected = int(sum(len(v) for v in adjacency.values()) // 2)
+    if not found:
+        meta = {
+            "found": False,
+            "start_pos": [int(start_pos[0]), int(start_pos[1])],
+            "goal_pos": [int(goal_pos[0]), int(goal_pos[1])],
+            "explored_nodes": int(len(adjacency)),
+            "explored_edges_undirected": explored_edges_undirected,
+            "path_len": None,
+        }
+        return {}, meta
+
+    # Reconstruct path positions from goal -> start
+    path: List[Tuple[int, int]] = [goal_pos]
+    cur = goal_pos
+    while cur != start_pos:
+        cur = prev.get(cur)
+        if cur is None:
+            break
+        path.append(cur)
+    if not path or path[-1] != start_pos:
+        meta = {
+            "found": False,
+            "start_pos": [int(start_pos[0]), int(start_pos[1])],
+            "goal_pos": [int(goal_pos[0]), int(goal_pos[1])],
+            "explored_nodes": int(len(adjacency)),
+            "explored_edges_undirected": explored_edges_undirected,
+            "path_len": None,
+        }
+        return {}, meta
+    path.reverse()
+
+    delta_to_action = {tuple(v): int(k) for k, v in SimpleMaze.ACTIONS.items()}
+    plan: Dict[Tuple[int, int], int] = {}
+    for a, b in zip(path[:-1], path[1:]):
+        dr = int(b[0] - a[0])
+        dc = int(b[1] - a[1])
+        act = delta_to_action.get((dr, dc))
+        if act is None:
+            continue
+        plan[a] = int(act)
+
+    meta = {
+        "found": True,
+        "start_pos": [int(start_pos[0]), int(start_pos[1])],
+        "goal_pos": [int(goal_pos[0]), int(goal_pos[1])],
+        "explored_nodes": int(len(adjacency)),
+        "explored_edges_undirected": explored_edges_undirected,
+        "path_len": int(max(0, len(path) - 1)),
+    }
+    return plan, meta
+
+
+def run_episode_query(
+    seed: int,
+    config: QueryHubConfig,
+    *,
+    sleep_plan: Optional[Dict[Tuple[int, int], int]] = None,
+    sleep_guide: str = "off",
+) -> EpisodeArtifacts:
     random.seed(seed)
     np.random.seed(seed)
 
@@ -642,6 +745,17 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
     apsp_exact_state: Dict[int, Dict[str, Any]] = {} if bool(getattr(config, 'sp_eval_allpairs_exact', False)) else {}
 
     for step in range(config.max_steps):
+        sleep_plan_action: Optional[int] = None
+        try:
+            guide_mode = str(sleep_guide).lower().strip() or "off"
+        except Exception:
+            guide_mode = "off"
+        if sleep_plan and guide_mode != "off":
+            try:
+                sleep_plan_action = int(sleep_plan.get(current_position)) if current_position in sleep_plan else None
+            except Exception:
+                sleep_plan_action = None
+
         minimal_snap = str(getattr(config, 'snapshot_level', 'standard')).lower() == 'minimal'
         cand_edge_store: List[Tuple[Tuple[int, int, int], Tuple[int, int, int], bool, int]] = []
         possible_moves = obs.possible_moves
@@ -2322,6 +2436,13 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                         pm = pm2
             action = random.choice(pm)
 
+        # Sleep guidance (curriculum): follow the compressed shortest-path plan when available.
+        sleep_guided = False
+        if guide_mode in ("override", "prefer") and sleep_plan_action is not None:
+            if sleep_plan_action in possible_moves_set:
+                action = int(sleep_plan_action)
+                sleep_guided = True
+
         last_query_node = current_query_node
         last_position = current_position
         action_delta = SimpleMaze.ACTIONS[action]
@@ -3114,6 +3235,8 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                 sp_diagnostics=sp_diagnostics,
                 sp_ds_saved=bool(getattr(config, 'sp_ds_sqlite', None)),
                 sp_ds_eff_saved=int(sp_ds_eff_saved_ct),
+                sleep_plan_action=(int(sleep_plan_action) if sleep_plan_action is not None else -1),
+                sleep_guided=bool(sleep_guided),
                 dbg_gmin_calc=float(gmin_calc),
                 dbg_best_hop_calc=int(h_calc),
                 gmin_mh=float(gmin_mh_val),
@@ -3477,6 +3600,20 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--no-post-sp-diagnostics", dest="post_sp_diagnostics", action="store_false", help="Disable post-step SP diagnostics (hop_series_post) to save time")
     # Ultra-light steps (skip heavy graph snapshots entirely)
     parser.add_argument("--steps-ultra-light", dest="steps_ultra_light", action="store_true", help="Do not generate heavy snapshot arrays in steps.json; prefer DS/HTML light mode")
+    # Curriculum (Wake→Sleep→Wake): warmup run to ensure goal experience, then eval guided by Sleep path plan
+    parser.add_argument(
+        "--curriculum-warmup-steps",
+        type=int,
+        default=0,
+        help="If >0, run a warmup episode with this step cap (ensure goal experience), derive a Sleep path plan from experienced transitions, then run an eval episode with --max-steps guided by the plan.",
+    )
+    parser.add_argument(
+        "--sleep-guide",
+        type=str,
+        choices=["off", "prefer", "override"],
+        default="override",
+        help="How to apply the Sleep path plan during the eval episode (override/prefer/off).",
+    )
     parser.add_argument("--force-per-hop", dest="force_per_hop", action="store_true", help="Force per-hop series via evaluator even in L3-only path")
     parser.add_argument("--eval-per-hop-on-ag", dest="eval_per_hop_on_ag", action="store_true", help="Fallback to evaluator (per-hop) only when AG fires in L3-only path")
     parser.add_argument("--dg-bfs-shortcut", dest="dg_bfs_shortcut", action="store_true", help="When DG fires, commit chosen multi-hop edges as a BFS-like shortcut in one step")
@@ -3613,6 +3750,7 @@ def main() -> None:
         )
 
         runs: List[MazeSummary] = []
+        warmup_runs: List[MazeSummary] = []
         all_steps: List[StepLog] = []
         maze_data: Dict[str, Any] = {}
         dg_ledger_events: List[Dict[str, Any]] = []
@@ -3632,261 +3770,293 @@ def main() -> None:
                     "commit_budget": int(getattr(args, "commit_budget", 0)),
                     "lambda_weight": float(lambda_weight),
                     "dg_ledger_mode": dg_mode,
+                    "curriculum": {
+                        "enabled": bool(int(getattr(args, "curriculum_warmup_steps", 0) or 0) > 0),
+                        "warmup_steps": int(getattr(args, "curriculum_warmup_steps", 0) or 0),
+                        "eval_steps": int(getattr(args, "max_steps", 0) or 0),
+                        "sleep_guide": str(getattr(args, "sleep_guide", "override")),
+                    },
                 }
             )
 
         run_id = out_path.stem
 
-        for offset in range(args.seeds):
-            seed = args.seed_start + offset
-            artifacts = run_episode_query(seed=seed, config=config)
-            runs.append(artifacts.summary)
-            maze_data[str(seed)] = artifacts.maze_snapshot
-            # Append this seed's step records as we go (not only the last seed)
-            for record in artifacts.steps:
-                minimal = bool(getattr(args, 'log_minimal', False) or getattr(args, 'steps_ultra_light', False))
-                episode_id = f"maze:{run_id}:{int(record.seed)}:{int(record.step)}"
-                pos_pre = getattr(record, "query_node_pre", None)
-                pos_post = getattr(record, "query_node_post", None)
-                try:
-                    position_pre = [int(pos_pre[0]), int(pos_pre[1])] if pos_pre else None
-                except Exception:
-                    position_pre = None
-                try:
-                    position_post = [int(pos_post[0]), int(pos_post[1])] if pos_post else None
-                except Exception:
-                    position_post = None
-                moved = bool(position_pre is not None and position_post is not None and position_pre != position_post)
+        warmup_steps = int(getattr(args, "curriculum_warmup_steps", 0) or 0)
+        use_curriculum = warmup_steps > 0
+        curriculum_meta: Dict[str, Any] = {
+            "enabled": bool(use_curriculum),
+            "warmup_steps": int(warmup_steps),
+            "eval_steps": int(args.max_steps),
+            "sleep_guide": str(getattr(args, "sleep_guide", "override")),
+            "per_seed": {},
+        }
 
-                if minimal:
-                    # Minimal logging: keep UIに必要な基本値は残す（g0/gminに加えΔEPC/ΔIGも出力）
-                    all_steps.append({
+        def append_record(record: StepRecord, *, phase: str) -> None:
+            minimal = bool(getattr(args, 'log_minimal', False) or getattr(args, 'steps_ultra_light', False))
+            episode_id = (
+                f"maze:{run_id}:{int(record.seed)}:{phase}:{int(record.step)}"
+                if use_curriculum
+                else f"maze:{run_id}:{int(record.seed)}:{int(record.step)}"
+            )
+            pos_pre = getattr(record, "query_node_pre", None)
+            pos_post = getattr(record, "query_node_post", None)
+            try:
+                position_pre = [int(pos_pre[0]), int(pos_pre[1])] if pos_pre else None
+            except Exception:
+                position_pre = None
+            try:
+                position_post = [int(pos_post[0]), int(pos_post[1])] if pos_post else None
+            except Exception:
+                position_post = None
+            moved = bool(position_pre is not None and position_post is not None and position_pre != position_post)
+
+            row = {
+                "run_id": run_id,
+                "episode_phase": phase,
+                "episode_id": episode_id,
+                "seed": record.seed,
+                "step": record.step,
+                "position": list(record.position),
+                "position_pre": position_pre,
+                "position_post": position_post,
+                "moved": moved,
+                "action": record.action,
+                "ged_min_proxy": record.ged_min_proxy,
+                "lambda_weight": float(getattr(record, 'lambda_weight', gedig_params["lambda_weight"])),
+                "g0": record.g0,
+                "gmin": record.gmin,
+                "delta_ged": record.delta_ged,
+                "delta_ig": record.delta_ig,
+                "delta_ged_min": record.delta_ged_min,
+                "delta_ig_min": record.delta_ig_min,
+                "delta_sp": record.delta_sp,
+                "delta_sp_min": record.delta_sp_min,
+                "best_hop": record.best_hop,
+                "dg_staged_edges": getattr(record, "dg_staged_edges", []),
+                "dg_committed_edges": getattr(record, "dg_committed_edges", []),
+                "episode_vector": getattr(record, "episode_vector", []),
+                "query_node_pre": getattr(record, "query_node_pre", []),
+                "query_node_post": getattr(record, "query_node_post", []),
+                "sleep_plan_action": int(getattr(record, "sleep_plan_action", -1)),
+                "sleep_guided": bool(getattr(record, "sleep_guided", False)),
+                "ag_fire": bool(getattr(record, 'ag_fire', False)),
+                "dg_fire": bool(getattr(record, 'dg_fire', False)),
+                "theta_ag": float(getattr(record, 'theta_ag', 0.0)),
+                "possible_moves": getattr(record, 'possible_moves', []),
+                "is_dead_end": bool(getattr(record, 'is_dead_end', False)),
+                "time_ms_candidates": getattr(record, 'time_ms_candidates', 0.0),
+                "time_ms_eval": getattr(record, 'time_ms_eval', 0.0),
+            }
+            if not minimal:
+                row.update(
+                    {
+                        "candidate_selection": record.candidate_selection,
+                        "delta_h": record.delta_h,
+                        "delta_h_min": record.delta_h_min,
+                        "ring_Rr": getattr(record, 'ring_Rr', 0),
+                        "ring_Rc": getattr(record, 'ring_Rc', 0),
+                        "ring_max_cells": getattr(record, 'ring_max_cells', 0),
+                        "ring_cells": getattr(record, 'ring_cells', 0),
+                        "ring_nodes": getattr(record, 'ring_nodes', 0),
+                        "ring_fallback": getattr(record, 'ring_fallback', False),
+                        "obs_dist_evals": getattr(record, 'obs_dist_evals', 0),
+                        "mem_dist_evals": getattr(record, 'mem_dist_evals', 0),
+                        "total_dist_evals": getattr(record, 'total_dist_evals', 0),
+                        "sp_sssp_du": getattr(record, 'sp_sssp_du', 0),
+                        "sp_sssp_dv": getattr(record, 'sp_sssp_dv', 0),
+                        "sp_dv_leaf_skips": getattr(record, 'sp_dv_leaf_skips', 0),
+                        "sp_cycle_verifies": getattr(record, 'sp_cycle_verifies', 0),
+                        "linkset_delta_ged": record.linkset_delta_ged,
+                        "linkset_delta_h": record.linkset_delta_h,
+                        "linkset_delta_sp": record.linkset_delta_sp,
+                        "linkset_g": record.linkset_g,
+                        "linkset_entropy_before": getattr(record, 'linkset_entropy_before', None),
+                        "linkset_entropy_after": getattr(record, 'linkset_entropy_after', None),
+                        "linkset_pos_w_before": getattr(record, 'linkset_pos_w_before', None),
+                        "linkset_pos_w_after": getattr(record, 'linkset_pos_w_after', None),
+                        "linkset_topw_before": getattr(record, 'linkset_topw_before', []),
+                        "linkset_topw_after": getattr(record, 'linkset_topw_after', []),
+                        "structural_cost": record.structural_cost,
+                        "structural_improvement": record.structural_improvement,
+                        "ag_auto": getattr(record, 'ag_auto', False),
+                        "ag_quantile": getattr(record, 'ag_quantile', 0.0),
+                        "g0_history_len": getattr(record, 'g0_history_len', 0),
+                        "reward": record.reward,
+                        "done": record.done,
+                        "candidate_pool": record.candidate_pool,
+                        "selected_links": record.selected_links,
+                        "ranked_candidates": record.ranked_candidates,
+                        "graph_nodes": record.graph_nodes,
+                        "graph_edges": record.graph_edges,
+                        "graph_nodes_eval": getattr(record, 'graph_nodes_eval', []),
+                        "graph_edges_eval": getattr(record, 'graph_edges_eval', []),
+                        "graph_nodes_preselect": getattr(record, 'graph_nodes_preselect', []),
+                        "graph_edges_preselect": getattr(record, 'graph_edges_preselect', []),
+                        "graph_nodes_pre": getattr(record, 'graph_nodes_pre', []),
+                        "graph_edges_pre": getattr(record, 'graph_edges_pre', []),
+                        "graph_nodes_post": getattr(record, 'graph_nodes_post', []),
+                        "graph_edges_post": getattr(record, 'graph_edges_post', []),
+                        "ds_graph_nodes": getattr(record, 'ds_graph_nodes', []),
+                        "ds_graph_edges": getattr(record, 'ds_graph_edges', []),
+                        "committed_only_edges": record.committed_only_edges,
+                        "committed_only_nodes": getattr(record, 'committed_only_nodes', []),
+                        "cand_edges": record.cand_edges,
+                        "forced_edges": getattr(record, 'forced_edges', []),
+                        "new_edge": record.new_edge,
+                        "query_vector": record.query_vector,
+                        "query_node": record.query_node,
+                        "debug_hop0": record.debug_hop0,
+                        "hop_series": record.hop_series,
+                        "timeline_edges": record.timeline_edges,
+                        "hop_series_post": record.hop_series_post,
+                        "ecand_count": getattr(record, 'ecand_count', 0),
+                        "ecand_mem_count": getattr(record, 'ecand_mem_count', 0),
+                        "ecand_qpast_count": getattr(record, 'ecand_qpast_count', 0),
+                        "hop_series_len": getattr(record, 'hop_series_len', 0),
+                        "sp_diagnostics": getattr(record, 'sp_diagnostics', []),
+                        "dbg_gmin_calc": getattr(record, 'dbg_gmin_calc', 0.0),
+                        "dbg_best_hop_calc": getattr(record, 'dbg_best_hop_calc', 0),
+                        "gmin_mh": getattr(record, 'gmin_mh', None),
+                        "delta_ged_min_mh": getattr(record, 'delta_ged_min_mh', None),
+                        "delta_ig_min_mh": getattr(record, 'delta_ig_min_mh', None),
+                        "delta_sp_min_mh": getattr(record, 'delta_sp_min_mh', None),
+                        "sp_before": getattr(record, 'sp_before', None),
+                        "sp_after": getattr(record, 'sp_after', None),
+                        "sp_ds_saved": getattr(record, 'sp_ds_saved', False),
+                        "sp_ds_eff_saved": getattr(record, 'sp_ds_eff_saved', 0),
+                        "ds_nodes_total": getattr(record, 'ds_nodes_total', 0),
+                        "ds_edges_total": getattr(record, 'ds_edges_total', 0),
+                        "ds_nodes_saved": getattr(record, 'ds_nodes_saved', []),
+                        "ds_edges_saved": getattr(record, 'ds_edges_saved', []),
+                    }
+                )
+            all_steps.append(row)
+
+            # DG ledger (JSONL): record commit/reject events for multi-hop proposals
+            if dg_ledger_path:
+                if dg_mode == "commit" and not getattr(record, "dg_committed_edges", []):
+                    return
+                if dg_mode == "dg" and int(getattr(record, "best_hop", 0)) < 1:
+                    return
+                committed = bool(getattr(record, "dg_committed_edges", []))
+                policy = str(getattr(args, "dg_commit_policy", "")).lower()
+                best_h = int(getattr(record, "best_hop", 0))
+                if committed:
+                    if policy == "always":
+                        reason = "policy_always"
+                    elif bool(getattr(record, "dg_fire", False)):
+                        reason = "dg_fire_threshold"
+                    else:
+                        reason = "committed"
+                    decision = "commit"
+                else:
+                    if best_h < 1:
+                        reason = "not_dg_eligible"
+                    elif policy == "never":
+                        reason = "policy_never"
+                    elif bool(getattr(record, "dg_fire", False)):
+                        reason = "dg_fire_but_no_commit"
+                    else:
+                        reason = "dg_not_fired"
+                    decision = "reject"
+                dg_ledger_events.append(
+                    {
+                        "event": "dg_decision",
+                        "timestamp": time.time(),
+                        "domain": "maze",
                         "run_id": run_id,
+                        "episode_phase": phase,
                         "episode_id": episode_id,
-                        "seed": record.seed,
-                        "step": record.step,
-                        "position": list(record.position),
+                        "seed": int(record.seed),
+                        "step": int(record.step),
+                        "position": [int(record.position[0]), int(record.position[1])],
                         "position_pre": position_pre,
                         "position_post": position_post,
                         "moved": moved,
-                        "action": record.action,
-                        "ged_min_proxy": record.ged_min_proxy,
-                        "lambda_weight": float(getattr(record, 'lambda_weight', gedig_params["lambda_weight"])),
-                        # geDIG core metrics
-                        "g0": record.g0,
-                        "gmin": record.gmin,
-                        "delta_ged": record.delta_ged,
-                        "delta_ig": record.delta_ig,
-                        "delta_ged_min": record.delta_ged_min,
-                        "delta_ig_min": record.delta_ig_min,
-                        "delta_sp": record.delta_sp,
-                        "delta_sp_min": record.delta_sp_min,
-                        "best_hop": record.best_hop,
-                        "dg_staged_edges": getattr(record, "dg_staged_edges", []),
-                        "dg_committed_edges": getattr(record, "dg_committed_edges", []),
-                        "episode_vector": getattr(record, "episode_vector", []),
-                        "query_node_pre": getattr(record, "query_node_pre", []),
-                        "query_node_post": getattr(record, "query_node_post", []),
-                        # gating
-                        "ag_fire": bool(getattr(record, 'ag_fire', False)),
-                        "dg_fire": bool(getattr(record, 'dg_fire', False)),
-                        "theta_ag": float(getattr(record, 'theta_ag', 0.0)),
-                        # topology context
-                        "possible_moves": getattr(record, 'possible_moves', []),
-                        "is_dead_end": bool(getattr(record, 'is_dead_end', False)),
-                        # perf
-                        "time_ms_candidates": getattr(record, 'time_ms_candidates', 0.0),
-                        "time_ms_eval": getattr(record, 'time_ms_eval', 0.0),
-                    })
-                else:
-                    all_steps.append({
-                    "run_id": run_id,
-                    "episode_id": episode_id,
-                    "seed": record.seed,
-                    "step": record.step,
-                    "position": list(record.position),
-                    "position_pre": position_pre,
-                    "position_post": position_post,
-                    "moved": moved,
-                    "action": record.action,
-                    "ged_min_proxy": record.ged_min_proxy,
-                    "lambda_weight": float(getattr(record, 'lambda_weight', gedig_params["lambda_weight"])),
-                    "candidate_selection": record.candidate_selection,
-                    "delta_ged": record.delta_ged,
-                    "delta_ig": record.delta_ig,
-                    "delta_ged_min": record.delta_ged_min,
-                    "delta_ig_min": record.delta_ig_min,
-                    "delta_sp": record.delta_sp,
-                    "delta_sp_min": record.delta_sp_min,
-                    "delta_h": record.delta_h,
-                    "delta_h_min": record.delta_h_min,
-                    # profiling
-                    "ring_Rr": getattr(record, 'ring_Rr', 0),
-                    "ring_Rc": getattr(record, 'ring_Rc', 0),
-                    "ring_max_cells": getattr(record, 'ring_max_cells', 0),
-                    "ring_cells": getattr(record, 'ring_cells', 0),
-                    "ring_nodes": getattr(record, 'ring_nodes', 0),
-                    "ring_fallback": getattr(record, 'ring_fallback', False),
-                    "obs_dist_evals": getattr(record, 'obs_dist_evals', 0),
-                    "mem_dist_evals": getattr(record, 'mem_dist_evals', 0),
-                    "total_dist_evals": getattr(record, 'total_dist_evals', 0),
-                    "time_ms_candidates": getattr(record, 'time_ms_candidates', 0.0),
-                    "time_ms_eval": getattr(record, 'time_ms_eval', 0.0),
-                    # SP perf counters
-                    "sp_sssp_du": getattr(record, 'sp_sssp_du', 0),
-                    "sp_sssp_dv": getattr(record, 'sp_sssp_dv', 0),
-                    "sp_dv_leaf_skips": getattr(record, 'sp_dv_leaf_skips', 0),
-                    "sp_cycle_verifies": getattr(record, 'sp_cycle_verifies', 0),
-                    "linkset_delta_ged": record.linkset_delta_ged,
-                    "linkset_delta_h": record.linkset_delta_h,
-                    "linkset_delta_sp": record.linkset_delta_sp,
-                    "linkset_g": record.linkset_g,
-                    "linkset_entropy_before": getattr(record, 'linkset_entropy_before', None),
-                    "linkset_entropy_after": getattr(record, 'linkset_entropy_after', None),
-                    "linkset_pos_w_before": getattr(record, 'linkset_pos_w_before', None),
-                    "linkset_pos_w_after": getattr(record, 'linkset_pos_w_after', None),
-                    "linkset_topw_before": getattr(record, 'linkset_topw_before', []),
-                    "linkset_topw_after": getattr(record, 'linkset_topw_after', []),
-                    "linkset_entropy_before": getattr(record, 'linkset_entropy_before', None),
-                    "linkset_entropy_after": getattr(record, 'linkset_entropy_after', None),
-                    "structural_cost": record.structural_cost,
-                    "structural_improvement": record.structural_improvement,
-                    "g0": record.g0,
-                    "gmin": record.gmin,
-                    "theta_ag": getattr(record, 'theta_ag', 0.0),
-                    "ag_auto": getattr(record, 'ag_auto', False),
-                    "ag_quantile": getattr(record, 'ag_quantile', 0.0),
-                    "g0_history_len": getattr(record, 'g0_history_len', 0),
-                    "ag_fire": getattr(record, 'ag_fire', False),
-                    "dg_fire": getattr(record, 'dg_fire', False),
-                    "best_hop": record.best_hop,
-                    "dg_staged_edges": getattr(record, "dg_staged_edges", []),
-                    "dg_committed_edges": getattr(record, 'dg_committed_edges', []),
-                    "is_dead_end": record.is_dead_end,
-                    "reward": record.reward,
-                    "done": record.done,
-                    "possible_moves": record.possible_moves,
-                    "candidate_pool": record.candidate_pool,
-                    "selected_links": record.selected_links,
-                    "ranked_candidates": record.ranked_candidates,
-                    "graph_nodes": record.graph_nodes,
-                    "graph_edges": record.graph_edges,
-                    "graph_nodes_eval": getattr(record, 'graph_nodes_eval', []),
-                    "graph_edges_eval": getattr(record, 'graph_edges_eval', []),
-                    "graph_nodes_preselect": getattr(record, 'graph_nodes_preselect', []),
-                    "graph_edges_preselect": getattr(record, 'graph_edges_preselect', []),
-                    "graph_nodes_pre": getattr(record, 'graph_nodes_pre', []),
-                    "graph_edges_pre": getattr(record, 'graph_edges_pre', []),
-                    "graph_nodes_post": getattr(record, 'graph_nodes_post', []),
-                    "graph_edges_post": getattr(record, 'graph_edges_post', []),
-                    "ds_graph_nodes": getattr(record, 'ds_graph_nodes', []),
-                    "ds_graph_edges": getattr(record, 'ds_graph_edges', []),
-                    "graph_nodes_eval": getattr(record, 'graph_nodes_eval', []),
-                    "graph_edges_eval": getattr(record, 'graph_edges_eval', []),
-                    "committed_only_edges": record.committed_only_edges,
-                    "committed_only_nodes": getattr(record, 'committed_only_nodes', []),
-                    "cand_edges": record.cand_edges,
-                    "forced_edges": getattr(record, 'forced_edges', []),
-                    "new_edge": record.new_edge,
-                    "episode_vector": record.episode_vector,
-                    "query_vector": record.query_vector,
-                    "query_node": record.query_node,
-                    "query_node_pre": getattr(record, 'query_node_pre', []),
-                    "query_node_post": getattr(record, 'query_node_post', []),
-                    "debug_hop0": record.debug_hop0,
-                    "hop_series": record.hop_series,
-                    "timeline_edges": record.timeline_edges,
-                    "hop_series_post": record.hop_series_post,
-                    "committed_only_edges": record.committed_only_edges,
-                    "ecand_count": getattr(record, 'ecand_count', 0),
-                    "ecand_mem_count": getattr(record, 'ecand_mem_count', 0),
-                    "ecand_qpast_count": getattr(record, 'ecand_qpast_count', 0),
-                    "hop_series_len": getattr(record, 'hop_series_len', 0),
-                    "sp_diagnostics": getattr(record, 'sp_diagnostics', []),
-                    "dbg_gmin_calc": getattr(record, 'dbg_gmin_calc', 0.0),
-                    "dbg_best_hop_calc": getattr(record, 'dbg_best_hop_calc', 0),
-                    "gmin_mh": getattr(record, 'gmin_mh', None),
-                    "delta_ged_min_mh": getattr(record, 'delta_ged_min_mh', None),
-                    "delta_ig_min_mh": getattr(record, 'delta_ig_min_mh', None),
-                    "delta_sp_min_mh": getattr(record, 'delta_sp_min_mh', None),
-                    "sp_before": getattr(record, 'sp_before', None),
-                    "sp_after": getattr(record, 'sp_after', None),
-                    "sp_ds_saved": getattr(record, 'sp_ds_saved', False),
-                    "sp_ds_eff_saved": getattr(record, 'sp_ds_eff_saved', 0),
-                    "ds_nodes_total": getattr(record, 'ds_nodes_total', 0),
-                    "ds_edges_total": getattr(record, 'ds_edges_total', 0),
-                    "ds_nodes_saved": getattr(record, 'ds_nodes_saved', []),
-                    "ds_edges_saved": getattr(record, 'ds_edges_saved', []),
-                })
+                        "sleep_plan_action": int(getattr(record, "sleep_plan_action", -1)),
+                        "sleep_guided": bool(getattr(record, "sleep_guided", False)),
+                        "gate": {
+                            "g0": float(getattr(record, "g0", 0.0)),
+                            "gmin": float(getattr(record, "gmin", 0.0)),
+                            "gmin_mh": float(getattr(record, "gmin_mh", 0.0)),
+                            "theta_ag": float(getattr(record, "theta_ag", 0.0)),
+                            "theta_dg": float(args.theta_dg),
+                            "ag": bool(getattr(record, "ag_fire", False)),
+                            "dg": bool(getattr(record, "dg_fire", False)),
+                            "best_hop": best_h,
+                            "policy": policy,
+                            "commit_budget": int(getattr(args, "commit_budget", 0)),
+                        },
+                        "decision": decision,
+                        "reason": reason,
+                        "staged_edges": getattr(record, "dg_staged_edges", []),
+                        "committed_edges": getattr(record, "dg_committed_edges", []),
+                        "metrics": {
+                            "delta_ged": float(getattr(record, "delta_ged", 0.0)),
+                            "delta_ig": float(getattr(record, "delta_ig", 0.0)),
+                            "delta_sp": float(getattr(record, "delta_sp", 0.0)),
+                            "delta_h": float(getattr(record, "delta_h", 0.0)),
+                        },
+                    }
+                )
 
-                # DG ledger (JSONL): record commit/reject events for multi-hop proposals
-                if dg_ledger_path:
-                    # emission filter
-                    if dg_mode == "commit" and not getattr(record, "dg_committed_edges", []):
-                        continue
-                    if dg_mode == "dg" and int(getattr(record, "best_hop", 0)) < 1:
-                        continue
-                    committed = bool(getattr(record, "dg_committed_edges", []))
-                    policy = str(getattr(args, "dg_commit_policy", "")).lower()
-                    best_h = int(getattr(record, "best_hop", 0))
-                    if committed:
-                        if policy == "always":
-                            reason = "policy_always"
-                        elif bool(getattr(record, "dg_fire", False)):
-                            reason = "dg_fire_threshold"
-                        else:
-                            reason = "committed"
-                        decision = "commit"
-                    else:
-                        if best_h < 1:
-                            reason = "not_dg_eligible"
-                        elif policy == "never":
-                            reason = "policy_never"
-                        elif bool(getattr(record, "dg_fire", False)):
-                            reason = "dg_fire_but_no_commit"
-                        else:
-                            reason = "dg_not_fired"
-                        decision = "reject"
-                    dg_ledger_events.append(
-                        {
-                            "event": "dg_decision",
-                            "timestamp": time.time(),
-                            "domain": "maze",
-                            "run_id": out_path.stem,
-                            "episode_id": episode_id,
-                            "seed": int(record.seed),
-                            "step": int(record.step),
-                            "position": [int(record.position[0]), int(record.position[1])],
-                            "position_pre": position_pre,
-                            "position_post": position_post,
-                            "moved": moved,
-                            "gate": {
-                                "g0": float(getattr(record, "g0", 0.0)),
-                                "gmin": float(getattr(record, "gmin", 0.0)),
-                                "gmin_mh": float(getattr(record, "gmin_mh", 0.0)),
-                                "theta_ag": float(getattr(record, "theta_ag", 0.0)),
-                                "theta_dg": float(args.theta_dg),
-                                "ag": bool(getattr(record, "ag_fire", False)),
-                                "dg": bool(getattr(record, "dg_fire", False)),
-                                "best_hop": best_h,
-                                "policy": policy,
-                                "commit_budget": int(getattr(args, "commit_budget", 0)),
-                            },
-                            "decision": decision,
-                            "reason": reason,
-                            "staged_edges": getattr(record, "dg_staged_edges", []),
-                            "committed_edges": getattr(record, "dg_committed_edges", []),
-                            "metrics": {
-                                "delta_ged": float(getattr(record, "delta_ged", 0.0)),
-                                "delta_ig": float(getattr(record, "delta_ig", 0.0)),
-                                "delta_sp": float(getattr(record, "delta_sp", 0.0)),
-                                "delta_h": float(getattr(record, "delta_h", 0.0)),
-                            },
-                        }
-                    )
+        for offset in range(args.seeds):
+            seed = args.seed_start + offset
+            if use_curriculum:
+                warm_cfg = replace(config, max_steps=int(warmup_steps))
+                warm_artifacts = run_episode_query(seed=seed, config=warm_cfg)
+                warmup_runs.append(dict(warm_artifacts.summary, episode_phase="warmup"))
+                maze_data[str(seed)] = warm_artifacts.maze_snapshot
+
+                try:
+                    sp = tuple(int(v) for v in warm_artifacts.maze_snapshot.get("start_pos", [1, 1])[:2])
+                    gp = tuple(int(v) for v in warm_artifacts.maze_snapshot.get("goal_pos", [warm_cfg.maze_size - 2, warm_cfg.maze_size - 2])[:2])
+                except Exception:
+                    sp = (1, 1)
+                    gp = (warm_cfg.maze_size - 2, warm_cfg.maze_size - 2)
+                sleep_plan, sleep_meta = _build_sleep_action_plan(warm_artifacts.steps, start_pos=sp, goal_pos=gp)
+
+                eval_artifacts = run_episode_query(
+                    seed=seed,
+                    config=config,
+                    sleep_plan=(sleep_plan if sleep_meta.get("found") else None),
+                    sleep_guide=str(getattr(args, "sleep_guide", "override")),
+                )
+                runs.append(dict(eval_artifacts.summary, episode_phase="eval", sleep_plan=sleep_meta))
+
+                curriculum_meta["per_seed"][str(seed)] = {
+                    "sleep_plan": sleep_meta,
+                    "warmup": {"success": bool(warm_artifacts.summary.get("success")), "steps": int(warm_artifacts.summary.get("steps", 0))},
+                    "eval": {"success": bool(eval_artifacts.summary.get("success")), "steps": int(eval_artifacts.summary.get("steps", 0))},
+                }
+
+                for record in warm_artifacts.steps:
+                    append_record(record, phase="warmup")
+                for record in eval_artifacts.steps:
+                    append_record(record, phase="eval")
+            else:
+                artifacts = run_episode_query(seed=seed, config=config)
+                runs.append(dict(artifacts.summary, episode_phase="main"))
+                maze_data[str(seed)] = artifacts.maze_snapshot
+                for record in artifacts.steps:
+                    append_record(record, phase="main")
 
         summary = aggregate(runs)
         summary["lambda_weight"] = float(lambda_weight)
+        warmup_summary: Optional[Dict[str, Any]] = None
+        if warmup_runs:
+            warmup_summary = aggregate(warmup_runs)
+            warmup_summary["lambda_weight"] = float(lambda_weight)
+        if use_curriculum:
+            try:
+                per_seed = curriculum_meta.get("per_seed", {}) or {}
+                found_list = [bool(v.get("sleep_plan", {}).get("found")) for v in per_seed.values()]
+                curriculum_meta["summary"] = {
+                    "seeds": int(args.seeds),
+                    "sleep_plan_found_rate": (sum(found_list) / len(found_list)) if found_list else 0.0,
+                }
+            except Exception:
+                pass
         output_payload = {
             "config": {
                 "maze_size": args.maze_size,
@@ -3905,9 +4075,17 @@ def main() -> None:
                 # Also expose whether main L3 lite path was used (query-centric hop0)
                 "use_main_l3": bool(getattr(args, 'use_main_l3', False)),
                 "sp_cache_mode": str(getattr(args, 'sp_cache_mode', 'core')),
+                "curriculum": {
+                    "enabled": bool(use_curriculum),
+                    "warmup_steps": int(warmup_steps),
+                    "sleep_guide": str(getattr(args, "sleep_guide", "override")),
+                },
             },
             "summary": summary,
             "runs": runs,
+            "warmup_summary": warmup_summary,
+            "warmup_runs": warmup_runs,
+            "curriculum": curriculum_meta,
             "maze_data": maze_data,
         }
 

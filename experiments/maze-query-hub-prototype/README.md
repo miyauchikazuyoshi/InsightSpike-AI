@@ -285,7 +285,25 @@ python experiments/maze-query-hub-prototype/build_reports.py \
   --out     experiments/maze-query-hub-prototype/results/quick25_interactive.html
 ```
 
-### 3) 長めの実験（168/500 ステップ例）
+### 3) Wake→Sleep→Wake（カリキュラム）でステップ削減
+
+「最初にゴール到達経験を作る（warmup）→経験した遷移だけから最短経路プランを圧縮（Sleep）→本番ステップ数でプラン誘導して再実行（eval）」の2本立てです。
+
+- `--curriculum-warmup-steps N` が `>0` なら有効化
+- `--sleep-guide {override|prefer|off}` で誘導の強さを制御（既定 `override`）
+
+```
+python experiments/maze-query-hub-prototype/run_experiment_query.py \
+  --maze-size 25 --max-steps 80 --curriculum-warmup-steps 300 \
+  --sleep-guide override \
+  --linkset-mode --norm-base link \
+  --output experiments/maze-query-hub-prototype/results/curriculum25_summary.json \
+  --step-log experiments/maze-query-hub-prototype/results/curriculum25_steps.json
+```
+
+出力JSONでは `runs` が eval、本番前の warmup は `warmup_runs`、計画の成否は `curriculum.per_seed[].sleep_plan` に入ります。
+
+### 4) 長めの実験（168/500 ステップ例）
 
 ```
 # 168 steps
@@ -303,7 +321,7 @@ python experiments/maze-query-hub-prototype/run_experiment_query.py \
   --step-log experiments/maze-query-hub-prototype/results/run25_s500_steps.json
 ```
 
-### 4) L3 ライトパス（軽量・hop0のクエリ中心）
+### 5) L3 ライトパス（軽量・hop0のクエリ中心）
 
 main の L3GraphReasoner を直接使い、各ステップの評価を hop0 のクエリ中心で簡易化します。
 ΔSP は `cached`/`cached_incr` を使用し、ペア集合は ENV の `INSIGHTSPIKE_SP_REGISTRY` で再利用可能です。
