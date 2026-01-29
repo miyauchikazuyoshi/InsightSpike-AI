@@ -647,6 +647,7 @@ L_sleep = L_task_or_contrastive
   - 25×25（seed=0）: warmup 276 step → Sleep plan 124 → eval 124 step（warmup revisit=76, eval revisit=0）
 - **prefer（Sleep Qのsoft bias）**:
   - 25×25（seed=0, `--use-main-l3 --max-hops 3 --theta-ag 0.2 --theta-dg 0.15`）: warmup 276 step → eval 144 step（eval revisit=10, `dg_fire`=121/144, `sleep_guided`=124/144）
+  - 25×25（seeds=10, `--max-steps 200 --curriculum-warmup-steps 800 --sleep-q-beta 8 --sleep-plan-beta 2 --max-hops 2`）: 成功率 1.0 / avg_steps 124.4（`results/maze-local/sleepq_prefer_25_n10_qb8_pb2_h2_w800.json`）
   - 成功率を上げるチューニング用: `experiments/maze-query-hub-prototype/tools/run_sleepq_prefer_grid.py`（`sleep_q_beta` / `sleep_plan_beta` のスイープ）
 
 ### 16.3 未実装（次の差分）
