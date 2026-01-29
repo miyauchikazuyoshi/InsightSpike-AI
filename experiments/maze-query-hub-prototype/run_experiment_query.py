@@ -384,6 +384,7 @@ class StepRecord:
     # Sleep guidance diagnostics (curriculum / path compression)
     sleep_plan_action: int = -1  # action id (0-3) suggested by Sleep plan, -1 if none
     sleep_guided: bool = False  # whether executed action followed Sleep plan
+    sleep_plan_beta: float = 0.0  # soft bias strength used in prefer mode (0 if disabled)
     # Sleep Q guidance (curriculum / value propagation)
     sleep_q_applied: bool = False
     sleep_q_beta: float = 0.0
@@ -421,6 +422,8 @@ class QueryHubConfig:
     anti_backtrack: bool = True
     # Sleep Q (policy prior) controls: used when sleep_guide == 'prefer'
     sleep_q_beta: float = 4.0
+    # Sleep plan soft bias controls: used when sleep_guide == 'prefer'
+    sleep_plan_beta: float = 0.0
     # Diagnostics/Eval scope
     anchor_recent_q: int = 12  # include recent Q nodes into anchors for SP eval
     # SP cache controls
@@ -1041,6 +1044,17 @@ def run_episode_query(
         memory_candidates: List[Dict[str, Any]] = []
         seen_positions: set[str] = set()
         possible_moves_set = set(possible_moves)
+        # Sleep plan (prefer mode): optional soft bias toward BFS plan action (not override).
+        sleep_plan_bias = False
+        sleep_plan_beta = 0.0
+        if guide_mode == "prefer" and sleep_plan_action is not None:
+            try:
+                sleep_plan_beta = float(getattr(config, "sleep_plan_beta", 0.0) or 0.0)
+            except Exception:
+                sleep_plan_beta = 0.0
+            if math.isfinite(sleep_plan_beta) and sleep_plan_beta > 1e-12:
+                if int(sleep_plan_action) in possible_moves_set:
+                    sleep_plan_bias = True
         # Sleep Q (prefer mode): soft bias for action selection in the eval episode.
         sleep_q_bias = False
         sleep_q_beta = 0.0
@@ -1393,6 +1407,13 @@ def run_episode_query(
                                     w *= math.exp(float(sleep_q_beta) * q_adv)
                                 except Exception:
                                     pass
+                            if sleep_plan_bias and item.get("action") is not None:
+                                try:
+                                    act = int(item.get("action"))
+                                    if sleep_plan_action is not None and int(act) == int(sleep_plan_action):
+                                        w *= math.exp(float(sleep_plan_beta))
+                                except Exception:
+                                    pass
                             weights.append(float(w))
                         total = sum(weights)
                         if not (total > 0 and math.isfinite(total)):
@@ -1405,7 +1426,7 @@ def run_episode_query(
                                 return item
                     except Exception:
                         pass  # fallback to argmax
-                if not sleep_q_bias:
+                if not (sleep_q_bias or sleep_plan_bias):
                     return max(obs_items, key=lambda entry: float(entry.get("similarity", 0.0)))
                 def _score(entry: Dict[str, Any]) -> float:
                     base = float(entry.get("similarity", 0.0) or 0.0)
@@ -1413,12 +1434,20 @@ def run_episode_query(
                         act = int(entry.get("action"))
                     except Exception:
                         return base
+                    bonus = 0.0
                     try:
-                        q_val = float(sleep_q_by_action.get(act, sleep_q_max))
-                        q_adv = float(q_val - sleep_q_max)
-                        return float(base + float(sleep_q_beta) * q_adv)
+                        if sleep_q_bias:
+                            q_val = float(sleep_q_by_action.get(act, sleep_q_max))
+                            q_adv = float(q_val - sleep_q_max)
+                            bonus += float(sleep_q_beta) * q_adv
                     except Exception:
-                        return base
+                        pass
+                    try:
+                        if sleep_plan_bias and sleep_plan_action is not None and int(act) == int(sleep_plan_action):
+                            bonus += float(sleep_plan_beta)
+                    except Exception:
+                        pass
+                    return float(base + bonus)
                 return max(obs_items, key=_score)
             # 2) Fallback: choose the single best candidate (obs or mem) across all
             try:
@@ -2688,11 +2717,18 @@ def run_episode_query(
                     pm2 = [x for x in pm if x != opp_action]
                     if pm2:
                         pm = pm2
-            if sleep_q_bias and sleep_q_by_action and pm:
+            if (sleep_q_bias or sleep_plan_bias) and pm:
                 try:
-                    q_vals = [float(sleep_q_by_action.get(int(a), sleep_q_max)) for a in pm]
+                    q_vals = [float(sleep_q_by_action.get(int(a), sleep_q_max)) for a in pm] if sleep_q_by_action else [0.0 for _ in pm]
                     q_max_local = float(max(q_vals)) if q_vals else float(sleep_q_max)
-                    weights = [math.exp(float(sleep_q_beta) * (float(qv) - q_max_local)) for qv in q_vals]
+                    weights: List[float] = []
+                    for a, qv in zip(pm, q_vals):
+                        w = 1.0
+                        if sleep_q_bias:
+                            w *= math.exp(float(sleep_q_beta) * (float(qv) - q_max_local))
+                        if sleep_plan_bias and sleep_plan_action is not None and int(a) == int(sleep_plan_action):
+                            w *= math.exp(float(sleep_plan_beta))
+                        weights.append(float(w))
                     total = sum(weights)
                     if total > 0 and math.isfinite(total):
                         r = random.random() * total
@@ -2723,6 +2759,7 @@ def run_episode_query(
             except Exception:
                 sleep_guided = False
 
+        sleep_plan_beta_used = float(sleep_plan_beta) if sleep_plan_bias else 0.0
         sleep_q_applied = bool(sleep_q_bias)
         sleep_q_beta_used = float(sleep_q_beta) if sleep_q_applied else 0.0
         sleep_q_value = 0.0
@@ -3575,6 +3612,7 @@ def run_episode_query(
                 sp_ds_eff_saved=int(sp_ds_eff_saved_ct),
                 sleep_plan_action=(int(sleep_plan_action) if sleep_plan_action is not None else -1),
                 sleep_guided=bool(sleep_guided),
+                sleep_plan_beta=float(sleep_plan_beta_used),
                 sleep_q_applied=bool(sleep_q_applied),
                 sleep_q_beta=float(sleep_q_beta_used),
                 sleep_q_value=float(sleep_q_value),
@@ -3960,6 +3998,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--cortisol-stuck-streak", type=int, default=10, help="Trigger cortisol after N consecutive stuck steps (no-move/deadend/revisit).")
     parser.add_argument("--cortisol-repeat-visits", type=int, default=2, help="Treat a position as 'revisited' after this many visits (negative label).")
     # Sleep Q (value propagation) controls: used when sleep guide is 'prefer'
+    parser.add_argument("--sleep-plan-beta", type=float, default=0.0, help="Bias strength for BFS Sleep plan action when --sleep-guide prefer (logit bonus).")
     parser.add_argument("--sleep-q-beta", type=float, default=4.0, help="Bias strength for Sleep Q(s,a) when --sleep-guide prefer (logit multiplier).")
     parser.add_argument("--sleep-q-gamma", type=float, default=0.99, help="Discount factor for Sleep Q-learning replay.")
     parser.add_argument("--sleep-q-alpha", type=float, default=0.4, help="Learning rate for Sleep Q-learning replay.")
@@ -4071,6 +4110,7 @@ def main() -> None:
             action_temp=float(args.action_temp),
             anti_backtrack=bool(args.anti_backtrack),
             sleep_q_beta=float(getattr(args, "sleep_q_beta", 4.0)),
+            sleep_plan_beta=float(getattr(args, "sleep_plan_beta", 0.0)),
             anchor_recent_q=int(args.anchor_recent_q),
             sp_cache=bool(args.sp_cache),
             sp_cache_mode=str(args.sp_cache_mode),
@@ -4223,6 +4263,7 @@ def main() -> None:
                 "query_node_post": getattr(record, "query_node_post", []),
                 "sleep_plan_action": int(getattr(record, "sleep_plan_action", -1)),
                 "sleep_guided": bool(getattr(record, "sleep_guided", False)),
+                "sleep_plan_beta": float(getattr(record, "sleep_plan_beta", 0.0)),
                 "sleep_q_applied": bool(getattr(record, "sleep_q_applied", False)),
                 "sleep_q_beta": float(getattr(record, "sleep_q_beta", 0.0)),
                 "sleep_q_value": float(getattr(record, "sleep_q_value", 0.0)),
@@ -4369,6 +4410,7 @@ def main() -> None:
                         "moved": moved,
                         "sleep_plan_action": int(getattr(record, "sleep_plan_action", -1)),
                         "sleep_guided": bool(getattr(record, "sleep_guided", False)),
+                        "sleep_plan_beta": float(getattr(record, "sleep_plan_beta", 0.0)),
                         "sleep_q_applied": bool(getattr(record, "sleep_q_applied", False)),
                         "sleep_q_beta": float(getattr(record, "sleep_q_beta", 0.0)),
                         "sleep_q_value": float(getattr(record, "sleep_q_value", 0.0)),
@@ -4510,6 +4552,7 @@ def main() -> None:
                     "enabled": bool(use_curriculum),
                     "warmup_steps": int(warmup_steps),
                     "sleep_guide": str(getattr(args, "sleep_guide", "override")),
+                    "sleep_plan_beta": float(getattr(args, "sleep_plan_beta", 0.0)),
                 },
                 "cortisol": {
                     "mode": str(getattr(args, "cortisol_mode", "off")),
