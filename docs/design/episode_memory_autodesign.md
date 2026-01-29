@@ -455,6 +455,16 @@ ARCでは、Hypothesis は「DSLプログラム（または部分プログラム
 - Success率が落ちない（落ちても許容幅内）かつ P95 が改善
 - 失敗の構造化ログが取れている（どの条件でblocked判定になったか）
 
+> メモ（接続案）: 「Phase 2 検討で迷路はまず Q-learning から」という着地感は、このPhaseに自然に統合できる。
+> supervised で `P(passable|s,a)` を学習する代わりに、Sleep（リプレイ）で **Fitted Q-learning** を回し、
+> `Q(s,a)` を “prior” として候補選別に掛ける（または `P(passable)` と併用）という形が取りやすい。
+>
+> - 迷路の `state`（例）: `(x,y)` + 局所観測 + visits など（まずは粗い離散化でも良い）
+> - `action`: 4近傍（N/S/E/W）
+> - `reward`: ゴール到達の報酬に加えて、`blocked` の罰・ステップ罰、必要なら `-F`（=geDIGの“得”）を小さく混ぜる
+> - Sleep: `*steps*.json` の遷移ログを replay して Q を更新
+> - Wake: 類似度ランキング `score` に `exp(β·Q(s,a))` 等を掛けて提案器（prior）として使う
+
 ### Phase 2（Sleep v2）: ベクトル自律化（写像/メトリック）を“低自由度”で学習
 
 **狙い**: ベクトル本体を書き換えず、検索幾何だけ育てて安定に改善する。
