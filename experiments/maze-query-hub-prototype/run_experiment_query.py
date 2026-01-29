@@ -359,6 +359,8 @@ class StepRecord:
     delta_sp_min_mh: float = 0.0
     # DG commit snapshot
     dg_committed_edges: List[List[List[int]]] = field(default_factory=list)
+    # DG staged (proposed) edges snapshot: chosen_edges_by_hop[:best_hop] (before commit budget / policy)
+    dg_staged_edges: List[List[List[int]]] = field(default_factory=list)
     # Profiling & diagnostics
     ring_Rr: int = 0
     ring_Rc: int = 0
@@ -2992,6 +2994,21 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
         except Exception:
             pass
 
+        # DG staged (proposed) edges: chosen_edges_by_hop[:best_hop]
+        dg_staged_edges_snapshot: List[List[List[int]]] = []
+        try:
+            lim = int(best_hop) if int(best_hop) > 0 else 0
+            if lim > 0 and chosen_edges_by_hop:
+                for eu, ev in chosen_edges_by_hop[:lim]:
+                    dg_staged_edges_snapshot.append(
+                        [
+                            [int(eu[0]), int(eu[1]), int(eu[2])],
+                            [int(ev[0]), int(ev[1]), int(ev[2])],
+                        ]
+                    )
+        except Exception:
+            dg_staged_edges_snapshot = []
+
         step_records.append(
             StepRecord(
                 seed=seed,
@@ -3075,6 +3092,7 @@ def run_episode_query(seed: int, config: QueryHubConfig) -> EpisodeArtifacts:
                 ag_quantile=float(getattr(config, 'ag_quantile', 0.9)),
                 g0_history_len=int(len(g0_history)),
                 dg_committed_edges=dg_committed_edges_snapshot,
+                dg_staged_edges=dg_staged_edges_snapshot,
                 debug_hop0=debug_hop0,
                 hop_series=hop_series,
                 timeline_edges=timeline_edges_now,
@@ -3414,6 +3432,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--use-main-l3", dest="use_main_l3", action="store_true", help="Use main L3GraphReasoner (query-centric) for per-step eval (hop0 only)")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--step-log", type=Path)
+    parser.add_argument(
+        "--dg-ledger-log",
+        type=Path,
+        default=None,
+        help="If set, write DG ledger events as JSONL (commit/reject for multi-hop proposals)",
+    )
+    parser.add_argument(
+        "--dg-ledger-mode",
+        type=str,
+        default="dg",
+        choices=["commit", "dg", "all"],
+        help="DG ledger emission mode: commit=only committed, dg=only DG-eligible (best_hop>=1), all=every step",
+    )
     # Optional explicit maze snapshot JSON for paper reproducibility
     parser.add_argument("--maze-snapshot-out", type=Path, default=None, help="If set, write maze layout/start/goal/size to this JSON path at run start")
     # Persistence
@@ -3485,6 +3516,7 @@ def main() -> None:
 
     output_base = Path(args.output)
     step_log_base = Path(args.step_log) if args.step_log else None
+    dg_ledger_base = Path(args.dg_ledger_log) if getattr(args, "dg_ledger_log", None) else None
 
     def _lambda_suffix(val: float) -> str:
         return str(val).replace(".", "p").replace("-", "m")
@@ -3493,10 +3525,17 @@ def main() -> None:
         suffix = _lambda_suffix(lambda_weight) if multi_lambda else None
         out_path = output_base
         step_path = step_log_base
+        dg_ledger_path = dg_ledger_base
         if multi_lambda:
             out_path = output_base.with_name(f"{output_base.stem}_lambda{suffix}{output_base.suffix or '.json'}")
             if step_log_base:
                 step_path = step_log_base.with_name(f"{step_log_base.stem}_lambda{suffix}{step_log_base.suffix or '.json'}")
+            if dg_ledger_base:
+                dg_suf = dg_ledger_base.suffix or ".jsonl"
+                dg_ledger_path = dg_ledger_base.with_name(f"{dg_ledger_base.stem}_lambda{suffix}{dg_suf}")
+        else:
+            if dg_ledger_base and not dg_ledger_base.suffix:
+                dg_ledger_path = dg_ledger_base.with_suffix(".jsonl")
 
         gedig_params = {
             "lambda_weight": float(lambda_weight),
@@ -3576,6 +3615,25 @@ def main() -> None:
         runs: List[MazeSummary] = []
         all_steps: List[StepLog] = []
         maze_data: Dict[str, Any] = {}
+        dg_ledger_events: List[Dict[str, Any]] = []
+
+        dg_mode = str(getattr(args, "dg_ledger_mode", "dg")).lower()
+        if dg_ledger_path:
+            dg_ledger_events.append(
+                {
+                    "event": "run_start",
+                    "timestamp": time.time(),
+                    "domain": "maze",
+                    "run_id": out_path.stem,
+                    "output": str(out_path),
+                    "theta_ag": float(args.theta_ag),
+                    "theta_dg": float(args.theta_dg),
+                    "dg_commit_policy": str(getattr(args, "dg_commit_policy", "")),
+                    "commit_budget": int(getattr(args, "commit_budget", 0)),
+                    "lambda_weight": float(lambda_weight),
+                    "dg_ledger_mode": dg_mode,
+                }
+            )
 
         for offset in range(args.seeds):
             seed = args.seed_start + offset
@@ -3604,6 +3662,8 @@ def main() -> None:
                         "delta_sp": record.delta_sp,
                         "delta_sp_min": record.delta_sp_min,
                         "best_hop": record.best_hop,
+                        "dg_staged_edges": getattr(record, "dg_staged_edges", []),
+                        "dg_committed_edges": getattr(record, "dg_committed_edges", []),
                         # gating
                         "ag_fire": bool(getattr(record, 'ag_fire', False)),
                         "dg_fire": bool(getattr(record, 'dg_fire', False)),
@@ -3615,8 +3675,8 @@ def main() -> None:
                         "time_ms_candidates": getattr(record, 'time_ms_candidates', 0.0),
                         "time_ms_eval": getattr(record, 'time_ms_eval', 0.0),
                     })
-                    continue
-                all_steps.append({
+                else:
+                    all_steps.append({
                     "seed": record.seed,
                     "step": record.step,
                     "position": list(record.position),
@@ -3672,6 +3732,7 @@ def main() -> None:
                     "ag_fire": getattr(record, 'ag_fire', False),
                     "dg_fire": getattr(record, 'dg_fire', False),
                     "best_hop": record.best_hop,
+                    "dg_staged_edges": getattr(record, "dg_staged_edges", []),
                     "dg_committed_edges": getattr(record, 'dg_committed_edges', []),
                     "is_dead_end": record.is_dead_end,
                     "reward": record.reward,
@@ -3730,6 +3791,68 @@ def main() -> None:
                     "ds_edges_saved": getattr(record, 'ds_edges_saved', []),
                 })
 
+                # DG ledger (JSONL): record commit/reject events for multi-hop proposals
+                if dg_ledger_path:
+                    # emission filter
+                    if dg_mode == "commit" and not getattr(record, "dg_committed_edges", []):
+                        continue
+                    if dg_mode == "dg" and int(getattr(record, "best_hop", 0)) < 1:
+                        continue
+                    committed = bool(getattr(record, "dg_committed_edges", []))
+                    policy = str(getattr(args, "dg_commit_policy", "")).lower()
+                    best_h = int(getattr(record, "best_hop", 0))
+                    if committed:
+                        if policy == "always":
+                            reason = "policy_always"
+                        elif bool(getattr(record, "dg_fire", False)):
+                            reason = "dg_fire_threshold"
+                        else:
+                            reason = "committed"
+                        decision = "commit"
+                    else:
+                        if best_h < 1:
+                            reason = "not_dg_eligible"
+                        elif policy == "never":
+                            reason = "policy_never"
+                        elif bool(getattr(record, "dg_fire", False)):
+                            reason = "dg_fire_but_no_commit"
+                        else:
+                            reason = "dg_not_fired"
+                        decision = "reject"
+                    dg_ledger_events.append(
+                        {
+                            "event": "dg_decision",
+                            "timestamp": time.time(),
+                            "domain": "maze",
+                            "run_id": out_path.stem,
+                            "seed": int(record.seed),
+                            "step": int(record.step),
+                            "position": [int(record.position[0]), int(record.position[1])],
+                            "gate": {
+                                "g0": float(getattr(record, "g0", 0.0)),
+                                "gmin": float(getattr(record, "gmin", 0.0)),
+                                "gmin_mh": float(getattr(record, "gmin_mh", 0.0)),
+                                "theta_ag": float(getattr(record, "theta_ag", 0.0)),
+                                "theta_dg": float(args.theta_dg),
+                                "ag": bool(getattr(record, "ag_fire", False)),
+                                "dg": bool(getattr(record, "dg_fire", False)),
+                                "best_hop": best_h,
+                                "policy": policy,
+                                "commit_budget": int(getattr(args, "commit_budget", 0)),
+                            },
+                            "decision": decision,
+                            "reason": reason,
+                            "staged_edges": getattr(record, "dg_staged_edges", []),
+                            "committed_edges": getattr(record, "dg_committed_edges", []),
+                            "metrics": {
+                                "delta_ged": float(getattr(record, "delta_ged", 0.0)),
+                                "delta_ig": float(getattr(record, "delta_ig", 0.0)),
+                                "delta_sp": float(getattr(record, "delta_sp", 0.0)),
+                                "delta_h": float(getattr(record, "delta_h", 0.0)),
+                            },
+                        }
+                    )
+
         summary = aggregate(runs)
         summary["lambda_weight"] = float(lambda_weight)
         output_payload = {
@@ -3775,6 +3898,16 @@ def main() -> None:
             step_path.parent.mkdir(parents=True, exist_ok=True)
             step_path.write_text(json.dumps(all_steps, indent=2), encoding="utf-8")
 
+        if dg_ledger_path:
+            try:
+                dg_ledger_path.parent.mkdir(parents=True, exist_ok=True)
+                with open(dg_ledger_path, "w", encoding="utf-8") as f:
+                    for ev in dg_ledger_events:
+                        json.dump(ev, f, ensure_ascii=False)
+                        f.write("\n")
+            except Exception:
+                pass
+
         # Optional console hint for DG/AG threshold suggestions (paper-aligned)
         try:
             rec_dg = summary.get("rec_theta_dg_p95")
@@ -3803,7 +3936,7 @@ def main() -> None:
                                 continue
                             if tok in ('--auto-rerun-with-suggested','--write-recommendations'):
                                 continue
-                            if tok in ('--theta-dg','--theta-ag','--output','--step-log'):
+                            if tok in ('--theta-dg','--theta-ag','--output','--step-log','--dg-ledger-log'):
                                 skip_next = True
                                 continue
                             new_argv.append(tok)
@@ -3821,6 +3954,12 @@ def main() -> None:
                             if step_path:
                                 new_step = step_path.with_name(step_path.stem + '_rerun.json')
                                 new_argv += ['--step-log', str(new_step)]
+                        except Exception:
+                            pass
+                        try:
+                            if dg_ledger_path:
+                                new_ledger = dg_ledger_path.with_name(dg_ledger_path.stem + '_rerun.jsonl')
+                                new_argv += ['--dg-ledger-log', str(new_ledger)]
                         except Exception:
                             pass
                         print('[autorun] Rerunning with suggested thresholds:', ' '.join(shlex.quote(a) for a in new_argv))
