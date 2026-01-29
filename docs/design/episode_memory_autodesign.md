@@ -630,11 +630,12 @@ L_sleep = L_task_or_contrastive
   - `--curriculum-warmup-steps N` で warmup→Sleep→eval を実行
   - Sleep は warmup の経験遷移だけから BFS で最短プラン（1-step plan）を作る（経験内では最短が保証される）
   - Sleep は warmup の遷移ログから replay で `Q(s,a)` を学習（価値伝播 / Q-learning）
-  - eval は `--sleep-guide override|prefer|off` で適用:
-    - `override`: BFSプランをそのまま実行（テープ再生）
-    - `prefer`: `Q(s,a)` を softmax/argmax の prior として“バイアス”に使う（ハードoverrideしない）
-    - `off`: Sleep由来の誘導なし
-  - ログ: `episode_phase`, `sleep_plan_action`, `sleep_guided`, `sleep_q_applied`, `sleep_q_*`
+	  - eval は `--sleep-guide override|prefer|off` で適用:
+	    - `override`: BFSプランをそのまま実行（テープ再生）
+	    - `prefer`: `Q(s,a)` を softmax/argmax の prior として“バイアス”に使う（ハードoverrideしない）
+	      - 追加で `--sleep-plan-beta` を入れると、BFSプランの「次アクション」にも soft なボーナスを与えられる（still prefer）
+	    - `off`: Sleep由来の誘導なし
+	  - ログ: `episode_phase`, `sleep_plan_action`, `sleep_plan_beta`, `sleep_guided`, `sleep_q_applied`, `sleep_q_*`
 - 負例（revisit）ラベル:
   - `--cortisol-mode log --cortisol-repeat-visits 2` で「2回目以降に踏んだマスへの移動」を負例としてログ化
   - ログ: `cortisol_fire`, `cortisol_reason=revisit`
@@ -646,6 +647,7 @@ L_sleep = L_task_or_contrastive
   - 25×25（seed=0）: warmup 276 step → Sleep plan 124 → eval 124 step（warmup revisit=76, eval revisit=0）
 - **prefer（Sleep Qのsoft bias）**:
   - 25×25（seed=0, `--use-main-l3 --max-hops 3 --theta-ag 0.2 --theta-dg 0.15`）: warmup 276 step → eval 144 step（eval revisit=10, `dg_fire`=121/144, `sleep_guided`=124/144）
+  - 成功率を上げるチューニング用: `experiments/maze-query-hub-prototype/tools/run_sleepq_prefer_grid.py`（`sleep_q_beta` / `sleep_plan_beta` のスイープ）
 
 ### 16.3 未実装（次の差分）
 
