@@ -641,8 +641,11 @@ L_sleep = L_task_or_contrastive
 
 ### 16.2 動作確認の例（手元ログ）
 
-- 15×15（seed=0）: warmup 36 step → Sleep plan 28 → eval 28 step（warmup revisit=4, eval revisit=0）
-- 25×25（seed=0）: warmup 276 step → Sleep plan 124 → eval 124 step（warmup revisit=76, eval revisit=0）
+- **override（BFSプランのテープ再生）**:
+  - 15×15（seed=0）: warmup 36 step → Sleep plan 28 → eval 28 step（warmup revisit=4, eval revisit=0）
+  - 25×25（seed=0）: warmup 276 step → Sleep plan 124 → eval 124 step（warmup revisit=76, eval revisit=0）
+- **prefer（Sleep Qのsoft bias）**:
+  - 25×25（seed=0, `--use-main-l3 --max-hops 3 --theta-ag 0.2 --theta-dg 0.15`）: warmup 276 step → eval 144 step（eval revisit=10, `dg_fire`=121/144, `sleep_guided`=124/144）
 
 ### 16.3 未実装（次の差分）
 
