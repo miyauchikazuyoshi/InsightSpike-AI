@@ -188,7 +188,10 @@ class IsomorphismDiscovery:
         # 特殊ケース: 同一グラフ
         if nx.is_isomorphic(G1, G2):
             # 厳密な同型マッピングを見つける
-            matcher = nx.isomorphism.GraphMatcher(G1, G2)
+            if G1.is_directed() or G2.is_directed():
+                matcher = nx.isomorphism.DiGraphMatcher(G1, G2)
+            else:
+                matcher = nx.isomorphism.GraphMatcher(G1, G2)
             if matcher.is_isomorphic():
                 mapping = matcher.mapping
                 return Transform(node_mapping=mapping, cost=0.0)
