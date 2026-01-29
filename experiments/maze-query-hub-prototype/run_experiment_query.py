@@ -384,6 +384,12 @@ class StepRecord:
     # Sleep guidance diagnostics (curriculum / path compression)
     sleep_plan_action: int = -1  # action id (0-3) suggested by Sleep plan, -1 if none
     sleep_guided: bool = False  # whether executed action followed Sleep plan
+    # Sleep Q guidance (curriculum / value propagation)
+    sleep_q_applied: bool = False
+    sleep_q_beta: float = 0.0
+    sleep_q_value: float = 0.0
+    sleep_q_max: float = 0.0
+    sleep_q_adv: float = 0.0
     # Cortisol (stress/adaptation) diagnostics: label "wasted" exploration as negative examples
     cortisol_level: float = 0.0
     cortisol_fire: bool = False
@@ -413,6 +419,8 @@ class QueryHubConfig:
     action_policy: str = "softmax"  # default to softmax
     action_temp: float = 0.1       # default low temperature
     anti_backtrack: bool = True
+    # Sleep Q (policy prior) controls: used when sleep_guide == 'prefer'
+    sleep_q_beta: float = 4.0
     # Diagnostics/Eval scope
     anchor_recent_q: int = 12  # include recent Q nodes into anchors for SP eval
     # SP cache controls
@@ -486,6 +494,13 @@ class QueryHubConfig:
     cortisol_ag_streak: int = 30
     cortisol_stuck_streak: int = 10
     cortisol_repeat_visits: int = 2
+    # Sleep Q learning (value propagation from warmup logs)
+    sleep_q_gamma: float = 0.99
+    sleep_q_alpha: float = 0.4
+    sleep_q_iters: int = 50
+    sleep_q_step_penalty: float = -0.01
+    sleep_q_goal_reward: float = 1.0
+    sleep_q_revisit_penalty: float = -0.2
     # Force per-hop series via evaluator fallback even in L3-only mode
     force_per_hop: bool = False
     # Per-hop evaluator fallback only when AG fires (L3-only)
@@ -603,11 +618,178 @@ def _build_sleep_action_plan(
     return plan, meta
 
 
+def _build_sleep_q_table(
+    steps: Sequence[StepRecord],
+    *,
+    start_pos: Tuple[int, int],
+    goal_pos: Tuple[int, int],
+    gamma: float = 0.99,
+    alpha: float = 0.4,
+    iters: int = 50,
+    step_penalty: float = -0.01,
+    goal_reward: float = 1.0,
+    revisit_penalty: float = -0.2,
+    revisit_threshold: int = 2,
+) -> Tuple[Dict[Tuple[int, int], Dict[int, float]], Dict[str, Any]]:
+    """Derive a Q(s,a) table from warmup transitions (Sleep value propagation).
+
+    This is a lightweight, tabular replay update (Q-learning style) over the
+    experienced transitions only. It is intended to act as a *prior* for the
+    next Wake episode (soft bias), not as a hard plan.
+    """
+    # Collect transitions and per-state available actions.
+    actions_by_state: Dict[Tuple[int, int], Set[int]] = defaultdict(set)
+    transitions: List[Tuple[Tuple[int, int], int, Tuple[int, int], bool, bool]] = []
+
+    goal_reached = False
+    visit_counts: Dict[Tuple[int, int], int] = {tuple(start_pos): 1}
+    threshold = max(2, int(revisit_threshold or 2))
+    action_name_to_id = {str(v): int(k) for k, v in SimpleMaze.ACTION_NAMES.items()}
+
+    for rec in steps:
+        try:
+            pre_node = (getattr(rec, "query_node_pre", None) or [])[:2]
+            post_node = (getattr(rec, "query_node_post", None) or [])[:2]
+            if len(pre_node) < 2 or len(post_node) < 2:
+                continue
+            s = (int(pre_node[0]), int(pre_node[1]))
+        except Exception:
+            continue
+        try:
+            s2 = (int(post_node[0]), int(post_node[1]))
+        except Exception:
+            continue
+        try:
+            a_raw = getattr(rec, "action", None)
+            if isinstance(a_raw, int):
+                a = int(a_raw)
+            else:
+                a_str = str(a_raw)
+                if a_str.lstrip("-").isdigit():
+                    a = int(a_str)
+                else:
+                    a = action_name_to_id.get(a_str)
+            if a is None:
+                continue
+            a = int(a)
+        except Exception:
+            continue
+
+        # Record action availability for s and s2 when provided.
+        try:
+            for act in (getattr(rec, "possible_moves", []) or []):
+                actions_by_state[s].add(int(act))
+        except Exception:
+            pass
+        try:
+            for act in (getattr(rec, "possible_moves_post", []) or []):
+                actions_by_state[s2].add(int(act))
+        except Exception:
+            pass
+
+        # Revisit label: prefer logged label; otherwise recompute from visit counts.
+        revisit = False
+        try:
+            if "revisit" in str(getattr(rec, "cortisol_reason", "") or ""):
+                revisit = True
+        except Exception:
+            revisit = False
+        try:
+            visit_counts[s2] = int(visit_counts.get(s2, 0)) + 1
+            if visit_counts[s2] >= threshold:
+                revisit = True
+        except Exception:
+            pass
+
+        done = False
+        try:
+            done = bool(getattr(rec, "done", False))
+        except Exception:
+            done = False
+        if s2 == tuple(goal_pos):
+            done = True
+            goal_reached = True
+
+        transitions.append((s, a, s2, bool(done), bool(revisit)))
+
+    # Initialize Q-table for seen states/actions (missing entries default to 0.0).
+    q: Dict[Tuple[int, int], Dict[int, float]] = {}
+    for s, acts in actions_by_state.items():
+        q[s] = {int(a): 0.0 for a in sorted(acts)}
+    # Ensure start/goal exist as keys for diagnostics
+    q.setdefault(tuple(start_pos), {})
+    q.setdefault(tuple(goal_pos), {})
+
+    if not transitions:
+        meta = {
+            "goal_reached": False,
+            "states": int(len(q)),
+            "transitions": 0,
+            "q_min": 0.0,
+            "q_max": 0.0,
+            "params": {
+                "gamma": float(gamma),
+                "alpha": float(alpha),
+                "iters": int(iters),
+                "step_penalty": float(step_penalty),
+                "goal_reward": float(goal_reward),
+                "revisit_penalty": float(revisit_penalty),
+                "revisit_threshold": int(threshold),
+            },
+        }
+        return q, meta
+
+    g = float(gamma)
+    a_lr = float(alpha)
+    n_iter = max(1, int(iters or 1))
+    r_step = float(step_penalty)
+    r_goal = float(goal_reward)
+    r_revisit = float(revisit_penalty)
+
+    # Replay updates
+    for _ in range(n_iter):
+        for s, act, s2, done, revisit in transitions:
+            r = r_step
+            if revisit:
+                r += r_revisit
+            if s2 == tuple(goal_pos):
+                r += r_goal
+                done = True
+            if done:
+                target = r
+            else:
+                next_q = q.get(s2, {})
+                max_next = max(next_q.values()) if next_q else 0.0
+                target = r + g * float(max_next)
+            cur = q.setdefault(s, {}).get(int(act), 0.0)
+            q[s][int(act)] = float(cur + a_lr * (float(target) - float(cur)))
+
+    q_vals = [float(v) for m in q.values() for v in m.values()]
+    meta = {
+        "goal_reached": bool(goal_reached),
+        "states": int(len(q)),
+        "transitions": int(len(transitions)),
+        "q_min": float(min(q_vals)) if q_vals else 0.0,
+        "q_max": float(max(q_vals)) if q_vals else 0.0,
+        "params": {
+            "gamma": float(gamma),
+            "alpha": float(alpha),
+            "iters": int(iters),
+            "step_penalty": float(step_penalty),
+            "goal_reward": float(goal_reward),
+            "revisit_penalty": float(revisit_penalty),
+            "revisit_threshold": int(threshold),
+        },
+    }
+    return q, meta
+
+
 def run_episode_query(
     seed: int,
     config: QueryHubConfig,
     *,
     sleep_plan: Optional[Dict[Tuple[int, int], int]] = None,
+    sleep_q: Optional[Dict[Tuple[int, int], Dict[int, float]]] = None,
     sleep_guide: str = "off",
 ) -> EpisodeArtifacts:
     random.seed(seed)
@@ -859,6 +1041,28 @@ def run_episode_query(
         memory_candidates: List[Dict[str, Any]] = []
         seen_positions: set[str] = set()
         possible_moves_set = set(possible_moves)
+        # Sleep Q (prefer mode): soft bias for action selection in the eval episode.
+        sleep_q_bias = False
+        sleep_q_beta = 0.0
+        sleep_q_by_action: Dict[int, float] = {}
+        sleep_q_max = 0.0
+        if sleep_q is not None and guide_mode == "prefer":
+            try:
+                sleep_q_beta = float(getattr(config, "sleep_q_beta", 0.0) or 0.0)
+            except Exception:
+                sleep_q_beta = 0.0
+            if math.isfinite(sleep_q_beta) and sleep_q_beta > 1e-12:
+                try:
+                    sleep_q_by_action = dict(sleep_q.get(current_position, {}) or {})
+                except Exception:
+                    sleep_q_by_action = {}
+                if sleep_q_by_action:
+                    try:
+                        q_vals = [float(sleep_q_by_action[a]) for a in possible_moves_set if a in sleep_q_by_action]
+                        sleep_q_max = float(max(q_vals)) if q_vals else float(max(float(v) for v in sleep_q_by_action.values()))
+                    except Exception:
+                        sleep_q_max = 0.0
+                    sleep_q_bias = True
 
         def candidate_index(anchor: Tuple[int, int], dir_idx: int) -> str:
             return f"{anchor[0]},{anchor[1]},{dir_idx}"
@@ -1178,7 +1382,18 @@ def run_episode_query(
                         sims = [max(0.0, float(x.get("similarity", 0.0) or 0.0)) for x in obs_items]
                         if all(s <= 1e-12 for s in sims) or not math.isfinite(tau) or tau <= 1e-9:
                             raise ValueError("degenerate sims or tau")
-                        weights = [math.exp(s / tau) for s in sims]
+                        weights: List[float] = []
+                        for s, item in zip(sims, obs_items):
+                            w = math.exp(float(s) / tau)
+                            if sleep_q_bias and item.get("action") is not None:
+                                try:
+                                    act = int(item.get("action"))
+                                    q_val = float(sleep_q_by_action.get(act, sleep_q_max))
+                                    q_adv = float(q_val - sleep_q_max)  # <= 0
+                                    w *= math.exp(float(sleep_q_beta) * q_adv)
+                                except Exception:
+                                    pass
+                            weights.append(float(w))
                         total = sum(weights)
                         if not (total > 0 and math.isfinite(total)):
                             raise ValueError("invalid weights")
@@ -1190,7 +1405,21 @@ def run_episode_query(
                                 return item
                     except Exception:
                         pass  # fallback to argmax
-                return max(obs_items, key=lambda entry: float(entry.get("similarity", 0.0)))
+                if not sleep_q_bias:
+                    return max(obs_items, key=lambda entry: float(entry.get("similarity", 0.0)))
+                def _score(entry: Dict[str, Any]) -> float:
+                    base = float(entry.get("similarity", 0.0) or 0.0)
+                    try:
+                        act = int(entry.get("action"))
+                    except Exception:
+                        return base
+                    try:
+                        q_val = float(sleep_q_by_action.get(act, sleep_q_max))
+                        q_adv = float(q_val - sleep_q_max)
+                        return float(base + float(sleep_q_beta) * q_adv)
+                    except Exception:
+                        return base
+                return max(obs_items, key=_score)
             # 2) Fallback: choose the single best candidate (obs or mem) across all
             try:
                 flat = [it for items in collections for it in items]
@@ -2459,14 +2688,55 @@ def run_episode_query(
                     pm2 = [x for x in pm if x != opp_action]
                     if pm2:
                         pm = pm2
-            action = random.choice(pm)
+            if sleep_q_bias and sleep_q_by_action and pm:
+                try:
+                    q_vals = [float(sleep_q_by_action.get(int(a), sleep_q_max)) for a in pm]
+                    q_max_local = float(max(q_vals)) if q_vals else float(sleep_q_max)
+                    weights = [math.exp(float(sleep_q_beta) * (float(qv) - q_max_local)) for qv in q_vals]
+                    total = sum(weights)
+                    if total > 0 and math.isfinite(total):
+                        r = random.random() * total
+                        acc = 0.0
+                        for a, w in zip(pm, weights):
+                            acc += float(w)
+                            if r <= acc:
+                                action = int(a)
+                                break
+                        else:
+                            action = int(pm[0])
+                    else:
+                        action = int(random.choice(pm))
+                except Exception:
+                    action = int(random.choice(pm))
+            else:
+                action = random.choice(pm)
 
         # Sleep guidance (curriculum): follow the compressed shortest-path plan when available.
         sleep_guided = False
-        if guide_mode in ("override", "prefer") and sleep_plan_action is not None:
+        if guide_mode == "override" and sleep_plan_action is not None:
             if sleep_plan_action in possible_moves_set:
                 action = int(sleep_plan_action)
                 sleep_guided = True
+        elif guide_mode == "prefer" and sleep_plan_action is not None:
+            try:
+                sleep_guided = (int(action) == int(sleep_plan_action))
+            except Exception:
+                sleep_guided = False
+
+        sleep_q_applied = bool(sleep_q_bias)
+        sleep_q_beta_used = float(sleep_q_beta) if sleep_q_applied else 0.0
+        sleep_q_value = 0.0
+        sleep_q_max_used = 0.0
+        sleep_q_adv = 0.0
+        if sleep_q_applied:
+            try:
+                sleep_q_max_used = float(sleep_q_max)
+                sleep_q_value = float(sleep_q_by_action.get(int(action), sleep_q_max_used))
+                sleep_q_adv = float(sleep_q_value - sleep_q_max_used)
+            except Exception:
+                sleep_q_value = 0.0
+                sleep_q_max_used = 0.0
+                sleep_q_adv = 0.0
 
         last_query_node = current_query_node
         last_position = current_position
@@ -3305,6 +3575,11 @@ def run_episode_query(
                 sp_ds_eff_saved=int(sp_ds_eff_saved_ct),
                 sleep_plan_action=(int(sleep_plan_action) if sleep_plan_action is not None else -1),
                 sleep_guided=bool(sleep_guided),
+                sleep_q_applied=bool(sleep_q_applied),
+                sleep_q_beta=float(sleep_q_beta_used),
+                sleep_q_value=float(sleep_q_value),
+                sleep_q_max=float(sleep_q_max_used),
+                sleep_q_adv=float(sleep_q_adv),
                 cortisol_level=float(cortisol_level),
                 cortisol_fire=bool(cortisol_fire),
                 cortisol_reason=str(cortisol_reason),
@@ -3684,6 +3959,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--cortisol-ag-streak", type=int, default=30, help="Trigger cortisol after N consecutive AG-open steps (0-hop ambiguity).")
     parser.add_argument("--cortisol-stuck-streak", type=int, default=10, help="Trigger cortisol after N consecutive stuck steps (no-move/deadend/revisit).")
     parser.add_argument("--cortisol-repeat-visits", type=int, default=2, help="Treat a position as 'revisited' after this many visits (negative label).")
+    # Sleep Q (value propagation) controls: used when sleep guide is 'prefer'
+    parser.add_argument("--sleep-q-beta", type=float, default=4.0, help="Bias strength for Sleep Q(s,a) when --sleep-guide prefer (logit multiplier).")
+    parser.add_argument("--sleep-q-gamma", type=float, default=0.99, help="Discount factor for Sleep Q-learning replay.")
+    parser.add_argument("--sleep-q-alpha", type=float, default=0.4, help="Learning rate for Sleep Q-learning replay.")
+    parser.add_argument("--sleep-q-iters", type=int, default=50, help="Replay iterations for Sleep Q-learning.")
+    parser.add_argument("--sleep-q-step-penalty", type=float, default=-0.01, help="Per-step penalty used in Sleep Q-learning.")
+    parser.add_argument("--sleep-q-goal-reward", type=float, default=1.0, help="Goal reward used in Sleep Q-learning (added when reaching goal).")
+    parser.add_argument("--sleep-q-revisit-penalty", type=float, default=-0.2, help="Penalty used in Sleep Q-learning when a step is labeled revisit.")
     # Curriculum (Wake→Sleep→Wake): warmup run to ensure goal experience, then eval guided by Sleep path plan
     parser.add_argument(
         "--curriculum-warmup-steps",
@@ -3696,7 +3979,7 @@ def parse_args() -> argparse.Namespace:
         type=str,
         choices=["off", "prefer", "override"],
         default="override",
-        help="How to apply the Sleep path plan during the eval episode (override/prefer/off).",
+        help="How to apply Sleep guidance during the eval episode: override=follow 1-step plan, prefer=soft bias using Sleep Q(s,a), off=disable.",
     )
     parser.add_argument("--force-per-hop", dest="force_per_hop", action="store_true", help="Force per-hop series via evaluator even in L3-only path")
     parser.add_argument("--eval-per-hop-on-ag", dest="eval_per_hop_on_ag", action="store_true", help="Fallback to evaluator (per-hop) only when AG fires in L3-only path")
@@ -3787,6 +4070,7 @@ def main() -> None:
             action_policy=str(args.action_policy),
             action_temp=float(args.action_temp),
             anti_backtrack=bool(args.anti_backtrack),
+            sleep_q_beta=float(getattr(args, "sleep_q_beta", 4.0)),
             anchor_recent_q=int(args.anchor_recent_q),
             sp_cache=bool(args.sp_cache),
             sp_cache_mode=str(args.sp_cache_mode),
@@ -3830,7 +4114,13 @@ def main() -> None:
             cortisol_mode=str(getattr(args, "cortisol_mode", "off")),
             cortisol_ag_streak=int(getattr(args, "cortisol_ag_streak", 30)),
             cortisol_stuck_streak=int(getattr(args, "cortisol_stuck_streak", 10)),
-            cortisol_repeat_visits=int(getattr(args, "cortisol_repeat_visits", 3)),
+            cortisol_repeat_visits=int(getattr(args, "cortisol_repeat_visits", 2)),
+            sleep_q_gamma=float(getattr(args, "sleep_q_gamma", 0.99)),
+            sleep_q_alpha=float(getattr(args, "sleep_q_alpha", 0.4)),
+            sleep_q_iters=int(getattr(args, "sleep_q_iters", 50)),
+            sleep_q_step_penalty=float(getattr(args, "sleep_q_step_penalty", -0.01)),
+            sleep_q_goal_reward=float(getattr(args, "sleep_q_goal_reward", 1.0)),
+            sleep_q_revisit_penalty=float(getattr(args, "sleep_q_revisit_penalty", -0.2)),
             force_per_hop=bool(getattr(args, 'force_per_hop', False)),
             eval_per_hop_on_ag=bool(getattr(args, 'eval_per_hop_on_ag', False)),
             dg_bfs_shortcut=bool(getattr(args, 'dg_bfs_shortcut', False)),
@@ -3933,6 +4223,11 @@ def main() -> None:
                 "query_node_post": getattr(record, "query_node_post", []),
                 "sleep_plan_action": int(getattr(record, "sleep_plan_action", -1)),
                 "sleep_guided": bool(getattr(record, "sleep_guided", False)),
+                "sleep_q_applied": bool(getattr(record, "sleep_q_applied", False)),
+                "sleep_q_beta": float(getattr(record, "sleep_q_beta", 0.0)),
+                "sleep_q_value": float(getattr(record, "sleep_q_value", 0.0)),
+                "sleep_q_max": float(getattr(record, "sleep_q_max", 0.0)),
+                "sleep_q_adv": float(getattr(record, "sleep_q_adv", 0.0)),
                 "cortisol_level": float(getattr(record, "cortisol_level", 0.0)),
                 "cortisol_fire": bool(getattr(record, "cortisol_fire", False)),
                 "cortisol_reason": str(getattr(record, "cortisol_reason", "")),
@@ -4074,6 +4369,11 @@ def main() -> None:
                         "moved": moved,
                         "sleep_plan_action": int(getattr(record, "sleep_plan_action", -1)),
                         "sleep_guided": bool(getattr(record, "sleep_guided", False)),
+                        "sleep_q_applied": bool(getattr(record, "sleep_q_applied", False)),
+                        "sleep_q_beta": float(getattr(record, "sleep_q_beta", 0.0)),
+                        "sleep_q_value": float(getattr(record, "sleep_q_value", 0.0)),
+                        "sleep_q_max": float(getattr(record, "sleep_q_max", 0.0)),
+                        "sleep_q_adv": float(getattr(record, "sleep_q_adv", 0.0)),
                         "cortisol_level": float(getattr(record, "cortisol_level", 0.0)),
                         "cortisol_fire": bool(getattr(record, "cortisol_fire", False)),
                         "cortisol_reason": str(getattr(record, "cortisol_reason", "")),
@@ -4114,24 +4414,51 @@ def main() -> None:
 
                 try:
                     sp = tuple(int(v) for v in warm_artifacts.maze_snapshot.get("start_pos", [1, 1])[:2])
-                    gp = tuple(int(v) for v in warm_artifacts.maze_snapshot.get("goal_pos", [warm_cfg.maze_size - 2, warm_cfg.maze_size - 2])[:2])
+                    gp = tuple(
+                        int(v)
+                        for v in warm_artifacts.maze_snapshot.get(
+                            "goal_pos",
+                            [warm_cfg.maze_size - 2, warm_cfg.maze_size - 2],
+                        )[:2]
+                    )
                 except Exception:
                     sp = (1, 1)
                     gp = (warm_cfg.maze_size - 2, warm_cfg.maze_size - 2)
+
                 sleep_plan, sleep_meta = _build_sleep_action_plan(warm_artifacts.steps, start_pos=sp, goal_pos=gp)
+                sleep_q, sleep_q_meta = _build_sleep_q_table(
+                    warm_artifacts.steps,
+                    start_pos=sp,
+                    goal_pos=gp,
+                    gamma=float(getattr(warm_cfg, "sleep_q_gamma", 0.99)),
+                    alpha=float(getattr(warm_cfg, "sleep_q_alpha", 0.4)),
+                    iters=int(getattr(warm_cfg, "sleep_q_iters", 50)),
+                    step_penalty=float(getattr(warm_cfg, "sleep_q_step_penalty", -0.01)),
+                    goal_reward=float(getattr(warm_cfg, "sleep_q_goal_reward", 1.0)),
+                    revisit_penalty=float(getattr(warm_cfg, "sleep_q_revisit_penalty", -0.2)),
+                    revisit_threshold=int(getattr(warm_cfg, "cortisol_repeat_visits", 2)),
+                )
 
                 eval_artifacts = run_episode_query(
                     seed=seed,
                     config=config,
                     sleep_plan=(sleep_plan if sleep_meta.get("found") else None),
+                    sleep_q=sleep_q,
                     sleep_guide=str(getattr(args, "sleep_guide", "override")),
                 )
-                runs.append(dict(eval_artifacts.summary, episode_phase="eval", sleep_plan=sleep_meta))
+                runs.append(dict(eval_artifacts.summary, episode_phase="eval", sleep_plan=sleep_meta, sleep_q=sleep_q_meta))
 
                 curriculum_meta["per_seed"][str(seed)] = {
                     "sleep_plan": sleep_meta,
-                    "warmup": {"success": bool(warm_artifacts.summary.get("success")), "steps": int(warm_artifacts.summary.get("steps", 0))},
-                    "eval": {"success": bool(eval_artifacts.summary.get("success")), "steps": int(eval_artifacts.summary.get("steps", 0))},
+                    "sleep_q": sleep_q_meta,
+                    "warmup": {
+                        "success": bool(warm_artifacts.summary.get("success")),
+                        "steps": int(warm_artifacts.summary.get("steps", 0)),
+                    },
+                    "eval": {
+                        "success": bool(eval_artifacts.summary.get("success")),
+                        "steps": int(eval_artifacts.summary.get("steps", 0)),
+                    },
                 }
 
                 for record in warm_artifacts.steps:
@@ -4188,7 +4515,16 @@ def main() -> None:
                     "mode": str(getattr(args, "cortisol_mode", "off")),
                     "ag_streak": int(getattr(args, "cortisol_ag_streak", 30)),
                     "stuck_streak": int(getattr(args, "cortisol_stuck_streak", 10)),
-                    "repeat_visits": int(getattr(args, "cortisol_repeat_visits", 3)),
+                    "repeat_visits": int(getattr(args, "cortisol_repeat_visits", 2)),
+                },
+                "sleep_q": {
+                    "beta": float(getattr(args, "sleep_q_beta", 4.0)),
+                    "gamma": float(getattr(args, "sleep_q_gamma", 0.99)),
+                    "alpha": float(getattr(args, "sleep_q_alpha", 0.4)),
+                    "iters": int(getattr(args, "sleep_q_iters", 50)),
+                    "step_penalty": float(getattr(args, "sleep_q_step_penalty", -0.01)),
+                    "goal_reward": float(getattr(args, "sleep_q_goal_reward", 1.0)),
+                    "revisit_penalty": float(getattr(args, "sleep_q_revisit_penalty", -0.2)),
                 },
             },
             "summary": summary,
