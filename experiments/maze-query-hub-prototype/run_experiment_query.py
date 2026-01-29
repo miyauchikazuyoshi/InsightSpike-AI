@@ -3635,6 +3635,8 @@ def main() -> None:
                 }
             )
 
+        run_id = out_path.stem
+
         for offset in range(args.seeds):
             seed = args.seed_start + offset
             artifacts = run_episode_query(seed=seed, config=config)
@@ -3643,12 +3645,30 @@ def main() -> None:
             # Append this seed's step records as we go (not only the last seed)
             for record in artifacts.steps:
                 minimal = bool(getattr(args, 'log_minimal', False) or getattr(args, 'steps_ultra_light', False))
+                episode_id = f"maze:{run_id}:{int(record.seed)}:{int(record.step)}"
+                pos_pre = getattr(record, "query_node_pre", None)
+                pos_post = getattr(record, "query_node_post", None)
+                try:
+                    position_pre = [int(pos_pre[0]), int(pos_pre[1])] if pos_pre else None
+                except Exception:
+                    position_pre = None
+                try:
+                    position_post = [int(pos_post[0]), int(pos_post[1])] if pos_post else None
+                except Exception:
+                    position_post = None
+                moved = bool(position_pre is not None and position_post is not None and position_pre != position_post)
+
                 if minimal:
                     # Minimal logging: keep UIに必要な基本値は残す（g0/gminに加えΔEPC/ΔIGも出力）
                     all_steps.append({
+                        "run_id": run_id,
+                        "episode_id": episode_id,
                         "seed": record.seed,
                         "step": record.step,
                         "position": list(record.position),
+                        "position_pre": position_pre,
+                        "position_post": position_post,
+                        "moved": moved,
                         "action": record.action,
                         "ged_min_proxy": record.ged_min_proxy,
                         "lambda_weight": float(getattr(record, 'lambda_weight', gedig_params["lambda_weight"])),
@@ -3664,6 +3684,9 @@ def main() -> None:
                         "best_hop": record.best_hop,
                         "dg_staged_edges": getattr(record, "dg_staged_edges", []),
                         "dg_committed_edges": getattr(record, "dg_committed_edges", []),
+                        "episode_vector": getattr(record, "episode_vector", []),
+                        "query_node_pre": getattr(record, "query_node_pre", []),
+                        "query_node_post": getattr(record, "query_node_post", []),
                         # gating
                         "ag_fire": bool(getattr(record, 'ag_fire', False)),
                         "dg_fire": bool(getattr(record, 'dg_fire', False)),
@@ -3677,9 +3700,14 @@ def main() -> None:
                     })
                 else:
                     all_steps.append({
+                    "run_id": run_id,
+                    "episode_id": episode_id,
                     "seed": record.seed,
                     "step": record.step,
                     "position": list(record.position),
+                    "position_pre": position_pre,
+                    "position_post": position_post,
+                    "moved": moved,
                     "action": record.action,
                     "ged_min_proxy": record.ged_min_proxy,
                     "lambda_weight": float(getattr(record, 'lambda_weight', gedig_params["lambda_weight"])),
@@ -3825,9 +3853,13 @@ def main() -> None:
                             "timestamp": time.time(),
                             "domain": "maze",
                             "run_id": out_path.stem,
+                            "episode_id": episode_id,
                             "seed": int(record.seed),
                             "step": int(record.step),
                             "position": [int(record.position[0]), int(record.position[1])],
+                            "position_pre": position_pre,
+                            "position_post": position_post,
+                            "moved": moved,
                             "gate": {
                                 "g0": float(getattr(record, "g0", 0.0)),
                                 "gmin": float(getattr(record, "gmin", 0.0)),

@@ -352,6 +352,7 @@ ARCでは、Hypothesis は「DSLプログラム（または部分プログラム
 `docs/research/self_organizing_world_model.md` の要点を、この設計に落とすとこうなる。
 
 - **対比学習**：DG確定（正例）と、DG棄却（負例）で埋め込み空間を彫る
+- **グラフ構造パターン認知**：同型発見/近同型/モチーフ抽出で `(anchor, positive, hard negatives)` を作れる（設計メモ: `docs/design/graph_pattern_sleep_semantic_space.md`）
 - **不確実性（VAE的）**：エピソードを点ではなく分布（μ, Σ）として持ち、曖昧性を扱う（v2以降）
 - **階層（双曲空間）**：抽象ルール（上位）と具体例（下位）の関係を、自然に表現できる可能性（任意）
 

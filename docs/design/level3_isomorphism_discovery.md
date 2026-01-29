@@ -339,3 +339,17 @@ def discover_novel_analogies(knowledge_base: List[Graph]) -> List[AnalogySuggest
 3. [ ] 合成データテストの作成
 4. [ ] 基本アルゴリズムの実装
 5. [ ] 科学史シナリオでの検証
+
+---
+
+## 10. Wake/Sleep・意味空間への接続（なぜこれが“Sleep”に効くか）
+
+同型発見（構造パターン認知）は、単体で完結するというより、**Sleepでの統合（意味空間醸成）**の教師信号になり得る。
+
+- **Positive**: 同型/低コスト変換のペア（概念対応が安定している）
+- **Hard negative**: near-miss（ほぼ同型だが破綻する）を明示的に作れる
+- これらを使うと、`docs/research/self_organizing_world_model.md` の「対比学習（意味空間の彫刻）」が実データに落ちる
+
+関連メモ：
+- `docs/design/graph_pattern_sleep_semantic_space.md`
+- `docs/design/episode_memory_autodesign.md`

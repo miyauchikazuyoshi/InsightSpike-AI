@@ -13,6 +13,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
+import argparse
 import json
 from dataclasses import dataclass, asdict
 from typing import List, Dict, Tuple, Any
@@ -43,6 +44,47 @@ class AnalogyCandidate:
     node_mapping: Dict[str, str]
     insight_description: str
     novelty_score: float  # 高いほど意外
+
+
+def _truncate_mapping(mapping: Dict[str, str], max_items: int) -> tuple[Dict[str, str], bool]:
+    if len(mapping) <= max_items:
+        return mapping, False
+    items = list(mapping.items())[:max_items]
+    return dict(items), True
+
+
+def _serialize_transform(transform: Transform, *, max_mapping_items: int = 200, max_edits: int = 200) -> Dict[str, Any]:
+    mapping, mapping_truncated = _truncate_mapping(transform.node_mapping or {}, max_mapping_items)
+    edits_raw = transform.edit_operations or []
+    edits = []
+    edits_truncated = False
+    if len(edits_raw) > max_edits:
+        edits_raw = edits_raw[:max_edits]
+        edits_truncated = True
+    for op in edits_raw:
+        try:
+            edit_type = op.edit_type.value
+        except Exception:
+            edit_type = str(getattr(op, "edit_type", "unknown"))
+        edits.append(
+            {
+                "edit_type": edit_type,
+                "source": getattr(op, "source", None),
+                "target": getattr(op, "target", None),
+                "params": getattr(op, "params", {}),
+            }
+        )
+    return {
+        "cost": float(getattr(transform, "cost", 0.0)),
+        "node_mapping": mapping,
+        "node_mapping_size": int(len(transform.node_mapping or {})),
+        "node_mapping_truncated": bool(mapping_truncated),
+        "edit_operations": edits,
+        "edit_operations_size": int(len(transform.edit_operations or [])),
+        "edit_operations_truncated": bool(edits_truncated),
+        "metadata": getattr(transform, "metadata", {}),
+        "insight_description": transform.to_insight_description(),
+    }
 
 
 def create_diverse_knowledge_base() -> List[KnowledgeGraph]:
@@ -393,7 +435,10 @@ def calculate_novelty_score(source: KnowledgeGraph, target: KnowledgeGraph) -> f
 def discover_novel_analogies(
     knowledge_base: List[KnowledgeGraph],
     max_cost: float = 2.0,
-    top_k: int = 10
+    top_k: int = 10,
+    *,
+    transforms_jsonl: Path | None = None,
+    dump_all_pairs: bool = False,
 ) -> List[AnalogyCandidate]:
     """
     新規アナロジーを発見
@@ -407,25 +452,56 @@ def discover_novel_analogies(
 
     print(f"Comparing {len(knowledge_base)} graphs ({len(list(combinations(knowledge_base, 2)))} pairs)...")
 
-    for kg1, kg2 in combinations(knowledge_base, 2):
+    dump_fp = None
+    if transforms_jsonl:
+        transforms_jsonl.parent.mkdir(parents=True, exist_ok=True)
+        dump_fp = open(transforms_jsonl, "w", encoding="utf-8")
+
+    try:
+        for kg1, kg2 in combinations(knowledge_base, 2):
         # 同じドメイン内のペアはスキップしない（意外な発見もあり得る）
 
-        transform = discover_insight(kg1.graph, kg2.graph)
+            transform = discover_insight(kg1.graph, kg2.graph)
 
-        if transform.cost <= max_cost:
-            novelty = calculate_novelty_score(kg1, kg2)
+            if dump_fp and dump_all_pairs:
+                row = {
+                    "domain": "graph_pattern",
+                    "task": "novel_analogy_discovery",
+                    "source": {"id": f"kb:{kg1.name}", "name": kg1.name, "domain": kg1.domain, "subdomain": kg1.subdomain},
+                    "target": {"id": f"kb:{kg2.name}", "name": kg2.name, "domain": kg2.domain, "subdomain": kg2.subdomain},
+                    "transform": _serialize_transform(transform),
+                }
+                dump_fp.write(json.dumps(row, ensure_ascii=False) + "\n")
 
-            candidate = AnalogyCandidate(
-                source=kg1.name,
-                target=kg2.name,
-                source_domain=f"{kg1.domain}/{kg1.subdomain}",
-                target_domain=f"{kg2.domain}/{kg2.subdomain}",
-                transform_cost=transform.cost,
-                node_mapping=transform.node_mapping,
-                insight_description=transform.to_insight_description(),
-                novelty_score=novelty
-            )
-            candidates.append(candidate)
+            if transform.cost <= max_cost:
+                novelty = calculate_novelty_score(kg1, kg2)
+
+                candidate = AnalogyCandidate(
+                    source=kg1.name,
+                    target=kg2.name,
+                    source_domain=f"{kg1.domain}/{kg1.subdomain}",
+                    target_domain=f"{kg2.domain}/{kg2.subdomain}",
+                    transform_cost=transform.cost,
+                    node_mapping=transform.node_mapping,
+                    insight_description=transform.to_insight_description(),
+                    novelty_score=novelty,
+                )
+                candidates.append(candidate)
+                if dump_fp and not dump_all_pairs:
+                    row = {
+                        "domain": "graph_pattern",
+                        "task": "novel_analogy_discovery",
+                        "selected": True,
+                        "source": {"id": f"kb:{kg1.name}", "name": kg1.name, "domain": kg1.domain, "subdomain": kg1.subdomain},
+                        "target": {"id": f"kb:{kg2.name}", "name": kg2.name, "domain": kg2.domain, "subdomain": kg2.subdomain},
+                        "transform": _serialize_transform(transform),
+                        "novelty_score": float(novelty),
+                        "max_cost": float(max_cost),
+                    }
+                    dump_fp.write(json.dumps(row, ensure_ascii=False) + "\n")
+    finally:
+        if dump_fp:
+            dump_fp.close()
 
     # 新規性スコアでソート（高い順）、同点ならコストで（低い順）
     candidates.sort(key=lambda x: (-x.novelty_score, x.transform_cost))
@@ -454,7 +530,26 @@ def format_discovery_report(candidates: List[AnalogyCandidate]) -> str:
     return "\n".join(lines)
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Discover novel analogies via isomorphism discovery.")
+    parser.add_argument("--max-cost", type=float, default=1.0, help="Keep candidates with Transform.cost <= this value.")
+    parser.add_argument("--top-k", type=int, default=15, help="Return top-k candidates after sorting.")
+    parser.add_argument(
+        "--dump-transforms-jsonl",
+        type=Path,
+        default=None,
+        help="Optional JSONL dump of transforms (selected candidates by default).",
+    )
+    parser.add_argument(
+        "--dump-all-pairs",
+        action="store_true",
+        help="If set, dump transforms for all graph pairs (not only selected candidates).",
+    )
+    return parser.parse_args()
+
+
 def main():
+    args = parse_args()
     print("新規アナロジー発見実験を開始...")
     print()
 
@@ -466,7 +561,13 @@ def main():
     print()
 
     # 2. 新規アナロジーを発見
-    candidates = discover_novel_analogies(knowledge_base, max_cost=1.0, top_k=15)
+    candidates = discover_novel_analogies(
+        knowledge_base,
+        max_cost=float(args.max_cost),
+        top_k=int(args.top_k),
+        transforms_jsonl=args.dump_transforms_jsonl,
+        dump_all_pairs=bool(args.dump_all_pairs),
+    )
 
     # 3. レポート出力
     report = format_discovery_report(candidates)
