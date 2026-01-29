@@ -73,6 +73,61 @@ Sleep は「記憶や表現を作り直す時間」であり、負例を使っ�
   - 例: 「どの粒度でエピソードを切るか」「どの特徴で索引するか」「負例の比率や温度」
   - 変更案を “仮説” として扱い、改善が一貫して出るときのみ commit する
 
+### 4.3 DGを強くする：コミット（2-phase）とDG Ledger
+
+DG感が強い状態とは、少なくとも次の3点が成立していること。
+
+- **DGだけが永続状態を変える**（AGは探索を開くが、状態は“確定”しない）
+- **commitは取引（transaction）**で、根拠（evidence）がログに残り、追試できる
+- **commitが“たまに起きる”**（常時commitは情報が無いのと同義）
+
+#### 4.3.1 commit対象（例）
+
+- **迷路**：`dg_committed_edges` へのエッジ追加/削除、dead-endタグの確定、近道マクロ（n-step）の追加
+- **ARC**：DSLマクロの追加/剪定、部分プログラムの確定（語彙化）
+- **Sleep（学習成果の反映）**：
+  - affordance prior（`P(passable|s,a)`）モデルのバージョン更新
+  - 距離/温度など検索幾何の更新（Phase 0/2）
+- **メタ（自己設計）**：エピソード分割規則、特徴集合、`k_cap`、探索温度、分位目標、`θ_AG/θ_DG` の校正規約
+
+> 注：AG/DGの不等号が逆に見える問題は、`g0` と `gmin` を「同一スカラーの別表記」だと思うと起きる。実装では `g0` と `gmin` は別スコアで、AGは `g0 > θ_AG`、DGは `min(g0,gmin) ≤ θ_DG` で決まる（`src/insightspike/algorithms/gating.py`）。
+
+#### 4.3.2 二相コミット（staging → evaluate → commit）
+
+1. **staging**：候補（仮説）を一時領域へ置く（本体には反映しない）
+2. **evaluate**：固定seed/短い検証で「最低限の改善」と「破綻しない」を見る
+3. **commit**：基準を満たすときのみ、永続状態へ反映（以後は正例として扱う）
+4. **rollback（revert）**：後続の観測で悪化が確認されたら、revert自体をDGイベントとして記録する
+
+#### 4.3.3 採択基準（最小）
+
+- **改善の最小セット**：Solved率・平均step・P95・invalid率（mazeならhit_wall率/ループ率も）
+- **安定性**：複数seed/サイズで改善の符号が揃う（少なくとも“勝った/負けた”が再現する）
+- **予算（commit budget）**：一定ステップ/一定エピソードあたりのcommit上限を置き、スパイク（場当たり統合）を防ぐ
+
+#### 4.3.4 DG Ledger（監査ログ）最小スキーマ案
+
+commit/revert を 1行1イベントとして JSONL に残す（「負例データセット」兼「再現の台帳」）。
+
+```json
+{
+  "commit_id": "c_2026-01-29T12:34:56Z_001",
+  "domain": "maze|arc|meta",
+  "kind": "edge_add|macro_add|affordance_update|metric_update|chunking_update|revert",
+  "hypothesis_id": "h_... (proposal hash)",
+  "parent_commit_id": "c_... (optional)",
+  "gate": { "g0": 0.12, "gmin": -0.03, "theta_ag": 0.5, "theta_dg": 0.0, "ag": true, "dg": true },
+  "eval": {
+    "seeds": [0,1,2],
+    "metrics_before": { "solved": 0.60, "p95_steps": 210 },
+    "metrics_after":  { "solved": 0.72, "p95_steps": 160 }
+  },
+  "decision": "commit|reject|revert",
+  "reason": "p95_steps_improved_and_stable",
+  "artifacts": ["path/to/trace.json", "path/to/model.pt"]
+}
+```
+
 ---
 
 ## 5. 自己生成負例の種類（推奨カタログ）
