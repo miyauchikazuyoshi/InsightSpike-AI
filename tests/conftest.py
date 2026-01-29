@@ -102,6 +102,11 @@ if not _TORCH_AVAILABLE:
     def _tensor(data, dtype=None):
         return _to_array(data, dtype=dtype)
     torch_stub.tensor = _tensor  # type: ignore
+    # torch.Tensor は SciPy / scikit-learn 側の判定ロジックで参照されることがある。
+    # ここが無いと「torch はあるが Tensor が無い」状態になり、収集時に例外が起きる。
+    class _Tensor:  # pragma: no cover - minimal stub
+        pass
+    torch_stub.Tensor = _Tensor  # type: ignore[attr-defined]
     # no_grad コンテキスト (ダミー)
     class _NoGrad:
         def __enter__(self): return None
