@@ -41,6 +41,8 @@ class WorldModelVAE(nn.Module):
   - **正例ペア（近づけるべきもの）**: `geDIG`スコアが低い（構造的改善が大きい）エピソードの組み合わせ。
   - **負例ペア（遠ざけるべきもの）**: `geDIG`スコアが高い、あるいは矛盾するエピソードの組み合わせ。
 
+補足：この「正例/負例」は、単なる数値評価だけでなく、**グラフ構造パターン認知（同型発見/近同型/モチーフ）**から構成できる。たとえば「同型/低コスト変換のペアを正例」「near-miss（ほぼ同型だが破綻）を hard negative」として Sleep の学習データに落とすと、意味空間が“トポロジカルな不変量”を学びやすくなる（設計メモ: `docs/design/graph_pattern_sleep_semantic_space.md`）。
+
 ```python
 # geDIGを教師信号とした対照学習
 def contrastive_loss(positive_pair, negative_pairs, temperature=0.1):
@@ -124,6 +126,8 @@ class WorldModelVAE(nn.Module):
   - Use geDIG evaluations as teacher signals for contrastive learning.
   - **Positive pairs (pull together)**: Episode pairs with low `geDIG` scores (large structural improvement).
   - **Negative pairs (push apart)**: Episode pairs with high `geDIG` scores or contradictions.
+
+Note: These positive/negative pairs can also be derived from **graph-structure pattern recognition** (isomorphism / near-isomorphism / motifs). For example, treat “isomorphic or low-cost transforms” as positives and “near-miss (almost isomorphic but failing)” as hard negatives during Sleep. This helps the semantic space capture topological invariants (design memo: `docs/design/graph_pattern_sleep_semantic_space.md`).
 
 ```python
 # Contrastive learning using geDIG as a teacher signal

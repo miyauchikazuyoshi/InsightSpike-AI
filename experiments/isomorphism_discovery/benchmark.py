@@ -12,6 +12,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
+import argparse
 import time
 import json
 from dataclasses import dataclass, asdict
@@ -41,12 +42,53 @@ class BenchmarkResult:
     metadata: Dict[str, Any] = None
 
 
+def _truncate_mapping(mapping: Dict[str, str], max_items: int) -> tuple[Dict[str, str], bool]:
+    if len(mapping) <= max_items:
+        return mapping, False
+    items = list(mapping.items())[:max_items]
+    return dict(items), True
+
+
+def _serialize_transform(transform: Transform, *, max_mapping_items: int = 200, max_edits: int = 200) -> Dict[str, Any]:
+    mapping, mapping_truncated = _truncate_mapping(transform.node_mapping or {}, max_mapping_items)
+    edits_raw = transform.edit_operations or []
+    edits = []
+    edits_truncated = False
+    if len(edits_raw) > max_edits:
+        edits_raw = edits_raw[:max_edits]
+        edits_truncated = True
+    for op in edits_raw:
+        try:
+            edit_type = op.edit_type.value
+        except Exception:
+            edit_type = str(getattr(op, "edit_type", "unknown"))
+        edits.append(
+            {
+                "edit_type": edit_type,
+                "source": getattr(op, "source", None),
+                "target": getattr(op, "target", None),
+                "params": getattr(op, "params", {}),
+            }
+        )
+    return {
+        "cost": float(getattr(transform, "cost", 0.0)),
+        "node_mapping": mapping,
+        "node_mapping_size": int(len(transform.node_mapping or {})),
+        "node_mapping_truncated": bool(mapping_truncated),
+        "edit_operations": edits,
+        "edit_operations_size": int(len(transform.edit_operations or [])),
+        "edit_operations_truncated": bool(edits_truncated),
+        "metadata": getattr(transform, "metadata", {}),
+        "insight_description": transform.to_insight_description(),
+    }
+
+
 def run_single_benchmark(
     name: str,
     G1: nx.Graph,
     G2: nx.Graph,
     **kwargs
-) -> BenchmarkResult:
+) -> Tuple[BenchmarkResult, Transform]:
     """単一ベンチマークを実行"""
     start_time = time.perf_counter()
     transform = discover_insight(G1, G2, **kwargs)
@@ -63,7 +105,7 @@ def run_single_benchmark(
         mapping_found=len(transform.node_mapping) > 0,
         insight_description=transform.to_insight_description(),
         metadata=kwargs
-    )
+    ), transform
 
 
 # =============================================================================
@@ -283,9 +325,10 @@ def create_scalability_graphs(n_nodes: int, edge_prob: float = 0.1, seed: int = 
 def run_scalability_test(
     node_counts: List[int] = [10, 20, 50, 100, 200, 500, 1000],
     beam_width: int = 10
-) -> List[BenchmarkResult]:
+) -> Tuple[List[BenchmarkResult], List[Dict[str, Any]]]:
     """スケーラビリティテストを実行"""
     results = []
+    transforms_dump: List[Dict[str, Any]] = []
 
     for n in node_counts:
         print(f"Testing with {n} nodes...")
@@ -293,7 +336,7 @@ def run_scalability_test(
         G1, G2 = create_scalability_graphs(n, edge_prob=0.05)
 
         try:
-            result = run_single_benchmark(
+            result, transform = run_single_benchmark(
                 name=f"scale_{n}",
                 G1=G1,
                 G2=G2,
@@ -301,20 +344,32 @@ def run_scalability_test(
                 max_iterations=min(n, 100)
             )
             results.append(result)
+            transforms_dump.append(
+                {
+                    "domain": "graph_pattern",
+                    "task": "isomorphism_benchmark",
+                    "pair": result.name,
+                    "source": {"id": f"benchmark:{result.name}:source", "num_nodes": result.num_nodes_source, "num_edges": result.num_edges_source},
+                    "target": {"id": f"benchmark:{result.name}:target", "num_nodes": result.num_nodes_target, "num_edges": result.num_edges_target},
+                    "transform": _serialize_transform(transform),
+                    "params": {"beam_width": beam_width, "max_iterations": min(n, 100)},
+                }
+            )
             print(f"  Time: {result.execution_time_ms:.1f}ms, Cost: {result.transform_cost:.1f}")
         except Exception as e:
             print(f"  Error: {e}")
 
-    return results
+    return results, transforms_dump
 
 
 # =============================================================================
 # 3. メイン実行
 # =============================================================================
 
-def run_realworld_benchmarks() -> List[BenchmarkResult]:
+def run_realworld_benchmarks() -> Tuple[List[BenchmarkResult], List[Dict[str, Any]]]:
     """実世界データでのベンチマークを実行"""
     results = []
+    transforms_dump: List[Dict[str, Any]] = []
 
     print("=" * 60)
     print("実世界データでの検証")
@@ -323,8 +378,19 @@ def run_realworld_benchmarks() -> List[BenchmarkResult]:
     # 物理学ドメイン
     print("\n--- 物理学ドメイン ---")
     for name, G1, G2 in create_physics_graphs():
-        result = run_single_benchmark(name, G1, G2)
+        result, transform = run_single_benchmark(name, G1, G2)
         results.append(result)
+        transforms_dump.append(
+            {
+                "domain": "graph_pattern",
+                "task": "isomorphism_benchmark",
+                "pair": result.name,
+                "source": {"id": f"benchmark:{result.name}:source", "num_nodes": result.num_nodes_source, "num_edges": result.num_edges_source},
+                "target": {"id": f"benchmark:{result.name}:target", "num_nodes": result.num_nodes_target, "num_edges": result.num_edges_target},
+                "transform": _serialize_transform(transform),
+                "params": result.metadata or {},
+            }
+        )
         print(f"{name}:")
         print(f"  Cost: {result.transform_cost}, Time: {result.execution_time_ms:.1f}ms")
         print(f"  Insight: {result.insight_description[:100]}...")
@@ -332,8 +398,19 @@ def run_realworld_benchmarks() -> List[BenchmarkResult]:
     # 生物学ドメイン
     print("\n--- 生物学ドメイン ---")
     for name, G1, G2 in create_biology_graphs():
-        result = run_single_benchmark(name, G1, G2)
+        result, transform = run_single_benchmark(name, G1, G2)
         results.append(result)
+        transforms_dump.append(
+            {
+                "domain": "graph_pattern",
+                "task": "isomorphism_benchmark",
+                "pair": result.name,
+                "source": {"id": f"benchmark:{result.name}:source", "num_nodes": result.num_nodes_source, "num_edges": result.num_edges_source},
+                "target": {"id": f"benchmark:{result.name}:target", "num_nodes": result.num_nodes_target, "num_edges": result.num_edges_target},
+                "transform": _serialize_transform(transform),
+                "params": result.metadata or {},
+            }
+        )
         print(f"{name}:")
         print(f"  Cost: {result.transform_cost}, Time: {result.execution_time_ms:.1f}ms")
         print(f"  Insight: {result.insight_description[:100]}...")
@@ -341,32 +418,58 @@ def run_realworld_benchmarks() -> List[BenchmarkResult]:
     # 社会科学ドメイン
     print("\n--- 社会科学ドメイン ---")
     for name, G1, G2 in create_social_graphs():
-        result = run_single_benchmark(name, G1, G2)
+        result, transform = run_single_benchmark(name, G1, G2)
         results.append(result)
+        transforms_dump.append(
+            {
+                "domain": "graph_pattern",
+                "task": "isomorphism_benchmark",
+                "pair": result.name,
+                "source": {"id": f"benchmark:{result.name}:source", "num_nodes": result.num_nodes_source, "num_edges": result.num_edges_source},
+                "target": {"id": f"benchmark:{result.name}:target", "num_nodes": result.num_nodes_target, "num_edges": result.num_edges_target},
+                "transform": _serialize_transform(transform),
+                "params": result.metadata or {},
+            }
+        )
         print(f"{name}:")
         print(f"  Cost: {result.transform_cost}, Time: {result.execution_time_ms:.1f}ms")
         print(f"  Insight: {result.insight_description[:100]}...")
 
-    return results
+    return results, transforms_dump
 
 
-def main():
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run isomorphism discovery benchmarks.")
+    parser.add_argument(
+        "--dump-transforms-jsonl",
+        type=Path,
+        default=None,
+        help="Optional JSONL dump of (source,target,transform) for Sleep/semantic-space training.",
+    )
+    return parser.parse_args()
+
+
+def main() -> List[BenchmarkResult]:
     """メイン実行"""
+    args = parse_args()
     all_results = []
+    all_transforms_dump: List[Dict[str, Any]] = []
 
     # 1. 実世界データでの検証
-    realworld_results = run_realworld_benchmarks()
+    realworld_results, realworld_transforms = run_realworld_benchmarks()
     all_results.extend(realworld_results)
+    all_transforms_dump.extend(realworld_transforms)
 
     # 2. スケーラビリティテスト
     print("\n" + "=" * 60)
     print("スケーラビリティテスト")
     print("=" * 60)
-    scale_results = run_scalability_test(
+    scale_results, scale_transforms = run_scalability_test(
         node_counts=[10, 20, 50, 100, 200, 500],
         beam_width=10
     )
     all_results.extend(scale_results)
+    all_transforms_dump.extend(scale_transforms)
 
     # 結果のサマリ
     print("\n" + "=" * 60)
@@ -393,6 +496,13 @@ def main():
         json.dump(results_data, f, indent=2, ensure_ascii=False)
 
     print(f"\n結果を保存: {output_dir / 'benchmark_results.json'}")
+
+    if args.dump_transforms_jsonl:
+        args.dump_transforms_jsonl.parent.mkdir(parents=True, exist_ok=True)
+        with open(args.dump_transforms_jsonl, "w", encoding="utf-8") as f:
+            for row in all_transforms_dump:
+                f.write(json.dumps(row, ensure_ascii=False) + "\n")
+        print(f"Transforms JSONL: {args.dump_transforms_jsonl}")
 
     return all_results
 
