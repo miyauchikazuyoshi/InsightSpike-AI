@@ -329,6 +329,87 @@ ARCでは、Hypothesis は「DSLプログラム（または部分プログラム
 
 ---
 
+## 12. メモ：古典アプローチから取り入れるべき要素（Episode Memory向け）
+
+この設計は「候補生成→検証→統合」という意味で古典的だが、\textbf{古典の強い部品}を取り込むと一気に“回る”。
+
+### 12.1 MDL/モデル選択（ΔEPC/ΔIG の設計）
+- \textbf{EPCは“露骨に”効かせる}：チャンク粒度を細かくしすぎる／特徴を増やしすぎる／マクロを増やしすぎる、はコストとして明示的に罰する
+- \textbf{IGは段階評価を許す}：完全一致/完全成功だけでなく、改善量（ループ減、無効試行率減、P95改善など）を利得に含める
+- \textbf{ゲートは固定値より分位}：`θ_AG/θ_DG` は分位校正で安定化（seed/サイズ/局所分布の違いに追随）
+
+### 12.2 PBE的：失敗（負例）を資産化する
+- \textbf{near-miss（ほぼ良い）を残す}：最も学習価値が高いのは「似ているが破綻した」負例
+- \textbf{失敗理由を構造化して保存}：どの条件で破綻したか（例：`hit_wall`, `position_unchanged`, `dead_end`, 特定train例）を教師信号に直結させる
+
+### 12.3 DreamCoder的：Sleepで“語彙”を育てる
+- \textbf{成功軌跡からチャンク/マクロを抽出}して探索空間を圧縮
+- \textbf{過学習マクロを剪定}（再利用率が低い/コストが高い/汎化しない）
+- \textbf{語彙追加もDGで確定}：追加が本当に得か（held-outで安定改善）で採否を決める
+
+---
+
+## 13. 実装案（具体）：迷路→ARCに同型で持ち込むための最小構成
+
+「自律 divide & conquer（エピソード最小単位の自己設計）」を\textbf{手順化}すると、実装は3つの部品に分解できる。
+
+### 13.1 部品A：DG log から学習用データを生成（exporter）
+
+**入力**：
+- 迷路：`experiments/maze-query-hub-prototype/results/*steps*.json`（1ステップ＝1レコード）
+- ARC：`solve_one --dump-trace` のような探索ログ（将来）
+
+**出力（例：JSONL）**：
+- `affordance.jsonl`：`(state_repr, action_repr) -> blocked/passable`
+- `triplets.jsonl`：`(anchor, positive, negatives[])`（対比学習）
+
+**迷路のラベル（最小）**：
+- `passable`：移動できた（位置が変わった）／または `meta_passable=true`（Phase A）
+- `blocked`：`hit_wall=true` または `position_unchanged=true`（Phase B以降）
+
+**hard negative（迷路）候補**：
+- `P(passable|s,a)` が高いのに `blocked` だった（予測の裏切り）
+- 似ている（距離が近い）のに、その後 `is_dead_end=true` に繋がりやすい（将来：短いn-stepで近似）
+
+### 13.2 部品B：affordance model（提案器のprior）
+
+目的は end-to-end ではなく、\textbf{候補生成の事前分布}を作ること。
+
+**最小モデル**（まずこれで十分）：
+- ロジスティック回帰 or 小さなMLP
+- 入力：`φ_state(s) ⊕ φ_action(a)`（迷路なら `(x,y)` と `(dx,dy)`、局所観測を入れるなら後から）
+- 出力：`P(passable|s,a)`（または `P(blocked|s,a)`)
+
+**統合の仕方（安全）**：
+- 候補スコアに prior を掛ける：`score' = score * P(passable|s,a)`
+- しきい値でフィルタ：`P(passable|s,a) < τ_block` の候補は除外（ただし exploration で少量は残す）
+
+**ログで監査する指標（最低限）**：
+- invalid action rate（無効試行率）
+- 成功率 / 平均ステップ / P95
+- `ag_fire` / `dg_fire` の発火率（分位校正の破綻検知）
+
+### 13.3 部品C：メタDG（分割/特徴/温度/モデル自由度の採否）
+
+“自律化”の本体は、\textbf{設計変更を仮説として扱い、採択をDGで固定}すること。
+
+**仮説の例**：
+- 追加特徴：局所観測、n-step要約、成功タグ、goal近接タグ
+- 変更：重み `w`、温度 `T`、候補上限 `k_cap`、exploration率
+- 変更：チャンク粒度（原子→短いマクロ→長いマクロ）
+
+**コスト（ΔEPC）の見積り**（例）：
+- 次元数増加、モデルパラメータ数、候補数増、計算時間増、メモリ増
+
+**利得（ΔIG）の見積り**（例）：
+- held-outでの success↑、steps↓、P95↓、invalid rate↓、探索ノード↓
+
+**採択ルール（例）**：
+- 変更案を複数seed/サイズで評価し、改善が安定（方向が揃う）なら commit
+- 改善が局所/一時的なら保留 or 棄却（hard negativeとして保存）
+
+---
+
 ## References
 
 - `docs/design/arc_prize_spec.md`
