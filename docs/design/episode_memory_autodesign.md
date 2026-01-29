@@ -1,9 +1,9 @@
 # エピソード記憶の自己設計：AG/DG × Wake/Sleep × 自己生成負例
 
-**Version**: 0.1 (Draft)  
+**Version**: 0.2 (Draft)  
 **Date**: 2026-01-29  
 **Author**: Kazuyoshi Miyauchi  
-**Status**: Proposal
+**Status**: Proposal (updated with Maze PoC status)
 
 ---
 
@@ -128,7 +128,9 @@ commit/revert を 1行1イベントとして JSONL に残す（「負例デー�
 }
 ```
 
-> 迷路PoCでは、`experiments/maze-query-hub-prototype/run_experiment_query.py` に `--dg-ledger-log <path>.jsonl` を付けると、`staged_edges`（提案）と `committed_edges`（実コミット）を分けたDGレジャーを出力できる。
+> 迷路PoCでは、`experiments/maze-query-hub-prototype/run_experiment_query.py` に `--dg-ledger-log <path>.jsonl` を付けると、`staged_edges`（提案）と `committed_edges`（実コミット）を分けたDGレジャーを出力できる。  
+> また `--curriculum-warmup-steps N`（Wake→Sleep→Wake）で warmup→Sleep→eval を回せる。Sleep は warmup の経験遷移上で BFS により最短プランを作り、eval は `--sleep-guide override|prefer|off` で適用する。  
+> 負例ラベルの最小実装として `--cortisol-mode log --cortisol-repeat-visits 2` を用意しており、2回目以降に踏んだマスへの移動を `cortisol_fire=true`（`cortisol_reason=revisit`）としてログ化できる。
 
 ---
 
@@ -183,9 +185,11 @@ commit/revert を 1行1イベントとして JSONL に残す（「負例デー�
 - **Positive**：
   - DGで `dg_committed_edges` に入ったエッジ
   - あるいは（設計により）「その後の成功確率が上がった」エピソード分割
+  - （迷路PoC）Sleepで得たプラン上の遷移（evalで `sleep_guided=true`）を正例として扱う（“短い到達”の教師）
 - **Negative**：
   - AGで探索が開いたがDGで commit されなかった候補（hard negative の核）
   - `is_dead_end=true` に繋がりやすい候補（行動面の負例）
+  - （迷路PoC）revisit：移動後のセルが2回目以降の訪問なら負例（`cortisol_fire=true`, `cortisol_reason=revisit`）
 
 実験ログ（例：`experiments/maze-query-hub-prototype/results/*steps*.json`）には、`g0/gmin`、`theta_ag`、`ag_fire/dg_fire`、候補集合などが含まれるため、**負例データセットを外部教師なしで作れる**。
 
@@ -424,10 +428,12 @@ ARCでは、Hypothesis は「DSLプログラム（または部分プログラム
 **迷路のラベル（最小）**：
 - `passable`：移動できた（位置が変わった）／または `meta_passable=true`（Phase A）
 - `blocked`：`hit_wall=true` または `position_unchanged=true`（Phase B以降）
+- `revisit`：移動後のセルが「2回目以降の訪問」（PoCでは `cortisol_reason=revisit`）。壁試行をしなくても “無駄足” の負例が作れる。
 
 **hard negative（迷路）候補**：
 - `P(passable|s,a)` が高いのに `blocked` だった（予測の裏切り）
 - 似ている（距離が近い）のに、その後 `is_dead_end=true` に繋がりやすい（将来：短いn-stepで近似）
+- `revisit` を強く踏む行動（ループ/バックトラック）で、しかも `g0` が高い（AGを開かせ続ける）もの
 
 ### 13.2 部品B：affordance model（提案器のprior）
 
@@ -492,36 +498,39 @@ ARCでは、Hypothesis は「DSLプログラム（または部分プログラム
 - Success率を維持したまま、平均ステップ or P95 が改善（または悪化が統計的に小さい）
 - `ΔH`（IG）が飽和していない（常に0/常に最大、にならない）
 
-### Phase 1（Sleep v1）: affordance prior（blocked/passable）だけ学習
+### Phase 1（Sleep v1）: goal-directed prior（Q値/重み伝播）を学習
 
-**狙い**: “壁”に相当する無効候補を減らし、探索を軽くする（効果が指標に直結）。
+**狙い**: 1回目の試行（Wake）で得た「正例/負例」をエッジ重みに保存し、Sleepでゴール価値を伝播（Q-learning的）して、2回目（Wake）では softmax をバイアスして “近道を選びやすくする”。
 
 **仕様（更新対象）**
-- 学習対象は `A(·)=P(passable|s,a)`（または `P(blocked|s,a)`）のみ
-- 統合は “priorとして掛ける/弱くフィルタする” に限定（end-to-endはしない）
-  - 例：`score' = score * P(passable|s,a)`、または `P(passable)<τ_block` を除外
-- exploration を残す（完全遮断しない）
+- 主要な学習対象は `Q(s,a)`（または edge weight `w(s,a)`）：
+  - 正例（短い到達/有効な統合）を強化
+  - 負例（revisit/破綻/無駄足）を弱化
+- Sleep は replay で `Q(s,a)` を更新（Fitted Q-learning / DP）し、「どこへ進むとゴールに近いか」を“重み”に焼き込む
+- Wake は softmax の logits をバイアスして使う（ハードoverrideではなく “学習prior” として混ぜる）
+  - 例：`logit(a) += β * Q(s,a)`（候補スコアにも同様に掛ける）
+  - exploration は残す（完全遮断しない、βスケジュール/温度で調整）
 
 **入力（教師信号）**
 - 迷路:
-  - Phase A（安全）: `meta_passable` をラベルとして学習（壁試行なし）
-  - Phase B（学習）: `hit_wall` / `position_unchanged` をラベルとして学習（少量試行あり）
-- ARC: 候補プログラムが train 例で破綻したログ（near-miss含む）を `blocked` として学習
+  - ゴール到達（成功）を遅延報酬として使う
+  - `revisit` を即時の負例として使う（安全に取れる負例）
+  - （必要なら）`blocked`/`dead_end`/ステップ罰も混ぜる
+- ARC:
+  - train-fit の改善量（誤差減少）を報酬として定義し、破綻/冗長を負例として定義（教師ありを許容するなら supervised も併用可）
 
 **達成目標（Done）**
-- invalid action/candidate rate が下がる（無効試行/無効候補が減る）
-- Success率が落ちない（落ちても許容幅内）かつ P95 が改善
-- 失敗の構造化ログが取れている（どの条件でblocked判定になったか）
+- “2回目で短くなる” が、複数seed/サイズで安定に再現する（steps↓、revisit率↓、P95↓）
+- AGが開きっぱなしにならない（探索が収束する）
+- 学習priorを入れてもDGが壊れない（誤統合が増えない、監査可能）
 
-> メモ（接続案）: 「Phase 2 検討で迷路はまず Q-learning から」という着地感は、このPhaseに自然に統合できる。
-> supervised で `P(passable|s,a)` を学習する代わりに、Sleep（リプレイ）で **Fitted Q-learning** を回し、
-> `Q(s,a)` を “prior” として候補選別に掛ける（または `P(passable)` と併用）という形が取りやすい。
+> 実装メモ: まずは “テープ再生” である Sleep最短プラン（BFS）をベースラインとして置き、次に `Q(s,a)` の soft bias（`--sleep-guide prefer` 相当）へ置き換えるのが安全。
 >
-> - 迷路の `state`（例）: `(x,y)` + 局所観測 + visits など（まずは粗い離散化でも良い）
+> - 迷路の `state`（例）: `(x,y)` + visits + （任意で局所観測）
 > - `action`: 4近傍（N/S/E/W）
-> - `reward`: ゴール到達の報酬に加えて、`blocked` の罰・ステップ罰、必要なら `-F`（=geDIGの“得”）を小さく混ぜる
+> - `reward`: ゴール到達の報酬に加えて、`revisit` の罰・ステップ罰、必要なら `-F`（=geDIGの“得”）を小さく混ぜる
 > - Sleep: `*steps*.json` の遷移ログを replay して Q を更新
-> - Wake: 類似度ランキング `score` に `exp(β·Q(s,a))` 等を掛けて提案器（prior）として使う
+> - Wake: 類似度ランキング `score` に `exp(β·Q(s,a))` を掛けて提案器（prior）として使う（softmaxバイアス）
 
 ### Phase 2（Sleep v2）: ベクトル自律化（写像/メトリック）を“低自由度”で学習
 
@@ -607,6 +616,34 @@ L_sleep = L_task_or_contrastive
 - `drift`: 直前の表現からの変化量を抑える（運用安定性）
 
 > 方針: “入れる”のはOK。ただし「WakeのFに混ぜない」「低自由度から」「メタDGで採択」の3点で過剰統合を避ける。
+
+---
+
+## 16. 現在の実装状況（迷路PoC, 2026-01-29）
+
+このドキュメント上の「仕様案」に対して、現時点で動いているもの／まだ入れていないものを明示する。
+
+### 16.1 実装済み（Maze Query-Hub）
+
+- 実装ファイル: `experiments/maze-query-hub-prototype/run_experiment_query.py`
+- Wake→Sleep→Wake（2回で短くする）:
+  - `--curriculum-warmup-steps N` で warmup→Sleep→eval を実行
+  - Sleep は warmup の経験遷移だけから BFS で最短プランを作る（経験内では最短が保証される）
+  - eval は `--sleep-guide override|prefer|off` で適用（現状の `prefer` は `override` 相当の挙動）
+  - ログ: `episode_phase`, `sleep_plan_action`, `sleep_guided`
+- 負例（revisit）ラベル:
+  - `--cortisol-mode log --cortisol-repeat-visits 2` で「2回目以降に踏んだマスへの移動」を負例としてログ化
+  - ログ: `cortisol_fire`, `cortisol_reason=revisit`
+
+### 16.2 動作確認の例（手元ログ）
+
+- 15×15（seed=0）: warmup 36 step → Sleep plan 28 → eval 28 step（warmup revisit=4, eval revisit=0）
+- 25×25（seed=0）: warmup 276 step → Sleep plan 124 → eval 124 step（warmup revisit=76, eval revisit=0）
+
+### 16.3 未実装（次の差分）
+
+- Sleepでの価値伝播（Q-learning/DP）による `Q(s,a)` 学習
+- Wakeでの softmax バイアス（`logit += β·Q(s,a)`）としての統合（テープ再生ではなく“学習prior”）
 
 ---
 
