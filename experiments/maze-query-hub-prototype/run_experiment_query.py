@@ -485,7 +485,7 @@ class QueryHubConfig:
     cortisol_mode: str = "off"  # 'off' | 'log'
     cortisol_ag_streak: int = 30
     cortisol_stuck_streak: int = 10
-    cortisol_repeat_visits: int = 3
+    cortisol_repeat_visits: int = 2
     # Force per-hop series via evaluator fallback even in L3-only mode
     force_per_hop: bool = False
     # Per-hop evaluator fallback only when AG fires (L3-only)
@@ -2485,20 +2485,23 @@ def run_episode_query(
         cortisol_reason = ""
         if cortisol_mode != "off":
             stuck = False
+            revisit = False
             try:
                 stuck = (not moved) or bool(getattr(obs, "is_dead_end", False))
             except Exception:
                 stuck = (not moved)
             try:
                 if int(visit_counts.get(current_position, 0)) >= int(cortisol_repeat_visits):
+                    revisit = True
                     stuck = True
             except Exception:
                 pass
             cortisol_stuck_streak = (cortisol_stuck_streak + 1) if stuck else 0
             ag_ratio = float(cortisol_ag_streak) / float(max(1, cortisol_ag_thr))
             stuck_ratio = float(cortisol_stuck_streak) / float(max(1, cortisol_stuck_thr))
-            cortisol_level = float(min(1.0, max(ag_ratio, stuck_ratio)))
-            cortisol_fire = bool((cortisol_ag_streak >= cortisol_ag_thr) or (cortisol_stuck_streak >= cortisol_stuck_thr))
+            cortisol_level = float(min(1.0, max(ag_ratio, stuck_ratio, (1.0 if revisit else 0.0))))
+            # Negative label: revisit (>=N visits) is treated as a negative example by default.
+            cortisol_fire = bool(revisit or (cortisol_ag_streak >= cortisol_ag_thr) or (cortisol_stuck_streak >= cortisol_stuck_thr))
             reasons: List[str] = []
             if cortisol_ag_streak >= cortisol_ag_thr:
                 reasons.append("ag_streak")
@@ -2511,11 +2514,8 @@ def run_episode_query(
                     reasons.append("dead_end")
             except Exception:
                 pass
-            try:
-                if int(visit_counts.get(current_position, 0)) >= int(cortisol_repeat_visits):
-                    reasons.append("revisit")
-            except Exception:
-                pass
+            if revisit:
+                reasons.append("revisit")
             cortisol_reason = ",".join(reasons)
         else:
             cortisol_level = 0.0
@@ -3683,7 +3683,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--cortisol-ag-streak", type=int, default=30, help="Trigger cortisol after N consecutive AG-open steps (0-hop ambiguity).")
     parser.add_argument("--cortisol-stuck-streak", type=int, default=10, help="Trigger cortisol after N consecutive stuck steps (no-move/deadend/revisit).")
-    parser.add_argument("--cortisol-repeat-visits", type=int, default=3, help="Treat a position as 'revisited' after this many visits for cortisol stuckness.")
+    parser.add_argument("--cortisol-repeat-visits", type=int, default=2, help="Treat a position as 'revisited' after this many visits (negative label).")
     # Curriculum (Wake→Sleep→Wake): warmup run to ensure goal experience, then eval guided by Sleep path plan
     parser.add_argument(
         "--curriculum-warmup-steps",
