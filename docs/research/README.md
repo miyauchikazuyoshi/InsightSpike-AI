@@ -28,10 +28,13 @@ for readers who want to see how InsightSpike‑AI connects to:
   Proposal for a semi‑decentralized infrastructure for digital ownership and
   safety (“maker sovereignty”), including OSS/AI governance after powerful AI.
 
+- `deductive_optimal_nn.md`  
+  Notes on viewing geDIG as *structure learning* — aiming to construct an
+  “optimal” network topology under an explicit objective (F) and constraints.
+
 Again, these are exploratory notes. The normative behavior of the system is
 defined by:
 
 - The geDIG paper (`docs/paper/geDIG_onegauge_improved_v5.{tex,pdf}`)
 - The public spec (`docs/gedig_spec.md`)
 - The main architecture and experiment docs under `docs/`.
-
