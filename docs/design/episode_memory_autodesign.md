@@ -628,9 +628,13 @@ L_sleep = L_task_or_contrastive
 - 実装ファイル: `experiments/maze-query-hub-prototype/run_experiment_query.py`
 - Wake→Sleep→Wake（2回で短くする）:
   - `--curriculum-warmup-steps N` で warmup→Sleep→eval を実行
-  - Sleep は warmup の経験遷移だけから BFS で最短プランを作る（経験内では最短が保証される）
-  - eval は `--sleep-guide override|prefer|off` で適用（現状の `prefer` は `override` 相当の挙動）
-  - ログ: `episode_phase`, `sleep_plan_action`, `sleep_guided`
+  - Sleep は warmup の経験遷移だけから BFS で最短プラン（1-step plan）を作る（経験内では最短が保証される）
+  - Sleep は warmup の遷移ログから replay で `Q(s,a)` を学習（価値伝播 / Q-learning）
+  - eval は `--sleep-guide override|prefer|off` で適用:
+    - `override`: BFSプランをそのまま実行（テープ再生）
+    - `prefer`: `Q(s,a)` を softmax/argmax の prior として“バイアス”に使う（ハードoverrideしない）
+    - `off`: Sleep由来の誘導なし
+  - ログ: `episode_phase`, `sleep_plan_action`, `sleep_guided`, `sleep_q_applied`, `sleep_q_*`
 - 負例（revisit）ラベル:
   - `--cortisol-mode log --cortisol-repeat-visits 2` で「2回目以降に踏んだマスへの移動」を負例としてログ化
   - ログ: `cortisol_fire`, `cortisol_reason=revisit`
@@ -642,8 +646,9 @@ L_sleep = L_task_or_contrastive
 
 ### 16.3 未実装（次の差分）
 
-- Sleepでの価値伝播（Q-learning/DP）による `Q(s,a)` 学習
-- Wakeでの softmax バイアス（`logit += β·Q(s,a)`）としての統合（テープ再生ではなく“学習prior”）
+- `Q(s,a)` を（row,col）の表から、より一般の「状態表現（エピソードベクトル）」へ拡張（迷路以外の空間に移植）
+- 負例生成の自律化（revisit以外の “near-miss/blocked/誤操作” をどう作るか）
+- Sleep v2/v3（ベクトル自律化・メタDG採択）に向けた目的関数と安全柵（KL/ドリフト等）の具体設計
 
 ---
 
