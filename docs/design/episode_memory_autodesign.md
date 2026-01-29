@@ -128,6 +128,8 @@ commit/revert を 1行1イベントとして JSONL に残す（「負例デー�
 }
 ```
 
+> 迷路PoCでは、`experiments/maze-query-hub-prototype/run_experiment_query.py` に `--dg-ledger-log <path>.jsonl` を付けると、`staged_edges`（提案）と `committed_edges`（実コミット）を分けたDGレジャーを出力できる。
+
 ---
 
 ## 5. 自己生成負例の種類（推奨カタログ）

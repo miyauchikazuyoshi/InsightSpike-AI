@@ -49,6 +49,10 @@
 - `StepRecord` にクエリノード ID（例: `query_node: [row, col]`）を出力。
 - HTML ビューアではクエリノードを中心ハブとして描画し、`cand` タグは `target_position` 基準で表示する。
 - 旧実装との比較のため、`graph_mode`（既存実装: `center_hub`, 本プロトタイプ: `query_hub`）で実行モードを切り替え可能にする。
+- DG Ledger（監査ログ）:
+  - `--dg-ledger-log <path>.jsonl` を指定すると、DGの commit/reject を 1行1イベントで JSONL 出力します。
+  - `--dg-ledger-mode commit|dg|all` で出力範囲を制御できます（`dg` は best_hop>=1 のみ）。
+  - `staged_edges`（提案: chosen_edges_by_hop[:best_hop]）と `committed_edges`（実コミット）を分けて保存します（commit budget / policy の影響を監査可能）。
 
 #### 長時間実行対策（チェックポイント）
 - `--checkpoint-interval N` を指定すると、N ステップごとに `--step-log` へ部分 JSON を原子的に書き出します（タイムアウト時の保全用）。
