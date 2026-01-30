@@ -39,6 +39,7 @@ ARC Prize の「提出形態」「推論時間制限」「外部ツール/LLMの
 - **Search Budget Efficiency**: 1正解あたりの展開ノード数/時間
 - **Generalization Gap**: train-fit と eval の落差
 - **Macro Reuse Rate**: 既知マクロが解に寄与した割合
+- **Common-Structure Hit Rate**: train複数ペアから抽出した「共通構造（不変量/対応/骨格）」が、探索の削減や正解率に寄与した割合
 
 ---
 
@@ -78,6 +79,7 @@ ARC Prize の「提出形態」「推論時間制限」「外部ツール/LLMの
 - 連結成分（4/8近傍）・BBox・形状特徴量・重心
 - 「物体→操作→再配置→合成」系のDSL拡張
 - 複数オブジェクトの対応付け（入力→出力のマッチング仮説）
+- **共通構造の抽出（タスク内）**: train複数ペアから「不変量/対応/骨格」を抽出して探索空間を絞る（Intersection / Abduction、実装案: `docs/design/arc_prize_spec.md` の 6.5）
 - 探索の爆発に備えた正規化（同値プログラムの潰し込み）
 
 **Doneの定義**
@@ -107,7 +109,8 @@ ARC Prize の「提出形態」「推論時間制限」「外部ツール/LLMの
 
 - **Wake**: 探索中に得た有効部分プログラム（DG確定）を短期記憶へ
 - **Sleep**: オフラインで頻出パターンを圧縮し、マクロ/テンプレとして長期記憶へ
-- 近傍タスク検索（類似タスクから初期候補を生成）
+- **共通構造の発見（タスク間）**: solved task 群から「同型/近同型」「モチーフ」「不変量」を抽出し、概念バンクとして整理（意味空間の醸成、設計メモ: `docs/design/graph_pattern_sleep_semantic_space.md` / `docs/research/self_organizing_world_model.md`）
+- 近傍タスク検索（類似タスクから初期候補を生成；概念バンク/意味空間でブースト）
 - 自己生成負例（hard negative）をログ化し、Sleepで提案器/索引を改善（設計: `docs/design/episode_memory_autodesign.md`）
 - （任意）ニューラル提案器：DSLオペレータ/パラメータを提案する軽量モデル
 
