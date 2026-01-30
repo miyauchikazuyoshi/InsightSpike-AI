@@ -43,6 +43,10 @@
 
 ここでいう**トポロジー**とは、概念ノードと関係エッジからなる知識グラフの接続構造を指す。**再構成**とは、同じ語彙の再結合ではなく、矛盾の説明可能性を増やすようにエッジ集合そのものを更新する操作である。LLMの「パターン合成」とは、この点で質的に異なる。
 
+
+![The Origin of Insight](vis_insight_topology_3step.png)
+*図：矛盾（Paradox）から閃き（Insight）、そして発見（Discovery）へのトポロジー変遷。質量(Mass)とエネルギー(Energy)が新しい公理(Insight)を介して接続され、$E=mc^2$が導かれる様子。*
+
 ---
 
 ### 実験設計から理論へ
@@ -310,6 +314,9 @@ This is the essence of insight. **Memories that should never connect tunnel thro
 Both Einstein and Yukawa did not merely "rearrange" existing knowledge. They **changed the topology of knowledge itself**.
 
 Here, **topology** refers to the connectivity structure of a knowledge graph composed of concept nodes and relation edges. **Reconstruction** is not mere recombination of the same vocabulary, but an operation that updates the edge set itself to increase the explainability of contradictions. This is qualitatively different from the "pattern synthesis" of LLMs.
+
+![The Origin of Insight](vis_insight_topology_3step.png)
+*Figure: The topological transition from Paradox to Insight, and finally to Discovery. Mass and Energy connect via the new axiom (Insight), deriving $E=mc^2$.*
 
 ---
 
