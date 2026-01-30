@@ -222,6 +222,7 @@ Attentionをグラフとして表現した際の「編集イベント」と「�
 **現在設計中、実装が必要なもの**
 - 睡眠層（Phase 2 / Offline Optimization）：[`docs/research/phase2/phase2_offline_appendix_ja_en.md`](phase2/phase2_offline_appendix_ja_en.md)
 - 意味空間の醸成（動的なベクトル空間）：[`docs/research/self_organizing_world_model.md`](self_organizing_world_model.md)
+- **閃きと理解の統合**（メッセージパッシングによる仮説創発）：[`docs/research/insight_vs_understanding.md`](insight_vs_understanding.md)
 
 ---
 
@@ -493,6 +494,7 @@ To keep this as a living origin story, here is what works today and what still n
 **Designed, needs implementation**
 - Sleep layer (Phase 2 / offline optimization): [`docs/research/phase2/phase2_offline_appendix_ja_en.md`](phase2/phase2_offline_appendix_ja_en.md)
 - Cultivating the semantic space (self-organizing world model): [`docs/research/self_organizing_world_model.md`](self_organizing_world_model.md)
+- **Insight vs. Understanding** (hypothesis emergence via message passing): [`docs/research/insight_vs_understanding.md`](insight_vs_understanding.md)
 
 ---
 
