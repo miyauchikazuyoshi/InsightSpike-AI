@@ -133,9 +133,11 @@ geDIGの式を基本則として受け入れると、システム設計が自然
 
 > <small>注：論文の用語に合わせ、AG=Attention Gate（0-hop の曖昧性/新規性）、DG=Decision Gate（multi-hop の確認）として記す。</small>
 
-![Academic Orion Radar (AG/DG)](academic_orion_radar.png)
+| Conceptual Model (Orbit) | Academic Radar (Orion) |
+| :---: | :---: |
+| ![Orbit](ag_dg_orbit.png) | ![Radar](academic_orion_radar.png) |
 
-*図：Academic Orion Radar。0-hopの構造的近傍とMulti-hopの洞察的到達。AGは局所的な曖昧さ/違和感を検知し、DGは遠方への短絡（ΔSP ≫ 0）が真に有効かを確認する。*
+*図：AG/DGの二つの表現。左は概念的な軌道モデル（Orbit）、右は同心円状のレーダーチャート（Radar）。どちらも0-hopの構造的近傍とMulti-hopの洞察的到達を対比している。*
 
 なぜ二段か？　閃きには二つのフェーズがあるからだ：
 1. 違和感の検知（「あれ？」）
@@ -404,9 +406,11 @@ Once geDIG's equation was accepted as a fundamental principle, system designs fo
 
 > <small>Note: Following the paper, we use AG=Attention Gate (0-hop ambiguity/novelty) and DG=Decision Gate (multi-hop confirmation).</small>
 
-![Academic Orion Radar (AG/DG)](academic_orion_radar.png)
+| Conceptual Model (Orbit) | Academic Radar (Orion) |
+| :---: | :---: |
+| ![Orbit](ag_dg_orbit.png) | ![Radar](academic_orion_radar.png) |
 
-*Figure: Academic Orion Radar. 0-hop structural neighborhood vs. multi-hop insightful reach. AG detects local ambiguity, while DG confirms if distant shortcuts (ΔSP ≫ 0) are truly valid.*
+*Figure: Two representations of AG/DG. Left: Conceptual Orbit model. Right: Concentric Radar model. Both contrast 0-hop structural neighborhood with multi-hop insightful reach.*
 
 Why two stages? Because insight has two phases:
 1. Detection of anomaly ("Huh?")
