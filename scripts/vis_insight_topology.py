@@ -121,31 +121,54 @@ def create_insight_visualization():
     pos3 = pos2.copy()
     pos3["Mass (m)"] = np.array([-0.3, -0.2])   # Pull Mass to center
     pos3["Energy (E)"] = np.array([0.3, -0.2])  # Pull Energy to center
+    
+    # E=mc^2 is now a NODE (The 2nd Insight / Discovery)
+    second_insight_node = "E=mc²"
+    G3.add_node(second_insight_node, label=second_insight_node)
+    pos3[second_insight_node] = np.array([0.0, -0.4]) # Below Mass/Energy
+
+    # Connect Mass and Energy to this new node, and also link back to the 1st Insight?
+    # Or just show it emerging from Mass and Energy.
+    # User said: "E-mc2, 2nd insight"
+    
+    discovery_edges = [
+        ("Mass (m)", second_insight_node),
+        ("Energy (E)", second_insight_node)
+    ]
+    # Optionally connect 1st Insight to 2nd Insight to show derivation flow?
+    # Let's keep it simple: Mass/Energy converge to E=mc2.
+    discovery_edges.append(("INSIGHT", second_insight_node)) # The axiom enables it
+
+    G3.add_edges_from(discovery_edges)
+
+    # Label for 3rd Panel
+    ax3.set_title("3. The Discovery ($E=mc^2$ is a Node)", color=text_color, fontsize=16, pad=20, fontweight='bold')
 
     nx.draw_networkx_nodes(G3, pos3, nodelist=cluster1_nodes, node_color=node_color_Cluster1, node_size=1500, alpha=0.5, ax=ax3, edgecolors='gray', linewidths=1)
     nx.draw_networkx_nodes(G3, pos3, nodelist=cluster2_nodes, node_color=node_color_Cluster2, node_size=1500, alpha=0.5, ax=ax3, edgecolors='gray', linewidths=1)
+    
+    # 1st Insight
     nx.draw_networkx_nodes(G3, pos3, nodelist=["INSIGHT"], node_color=node_color_Insight, node_size=3000, alpha=1.0, ax=ax3, edgecolors='black', linewidths=2)
+    
+    # 2nd Insight (E=mc^2) - Different color or shape?
+    node_color_2nd = '#f43f5e' # Red/Pink
+    nx.draw_networkx_nodes(G3, pos3, nodelist=[second_insight_node], node_color=node_color_2nd, node_size=3500, alpha=1.0, ax=ax3, edgecolors='white', linewidths=3, node_shape='s') # Square
 
     # Background edges
-    bg_edges = [e for e in G3.edges() if e != emc2_edge and e not in discovery_edges]
+    bg_edges = [e for e in G3.edges() if second_insight_node not in e]
     nx.draw_networkx_edges(G3, pos3, edgelist=bg_edges, edge_color=edge_color_default, width=1, alpha=0.2, ax=ax3)
     
-    # Path highlight
-    path_edges = discovery_edges
-    nx.draw_networkx_edges(G3, pos3, edgelist=path_edges, edge_color='#f43f5e', style='dotted', width=2, alpha=0.8, ax=ax3)
+    # Path highlight (Discovery)
+    nx.draw_networkx_edges(G3, pos3, edgelist=discovery_edges, edge_color='#f43f5e', width=3, alpha=1.0, ax=ax3)
     
-    # The Big Result
-    nx.draw_networkx_edges(G3, pos3, edgelist=[emc2_edge], edge_color='#f43f5e', width=5, alpha=1.0, ax=ax3)
-    
+    # Labels
     nx.draw_networkx_labels(G3, pos3, font_size=9, font_color='black', font_weight='bold', ax=ax3)
+    
+    # Custom label for 2nd Insight to make it stand out
+    # (NetworkX labels are fine, but let's add the specific text user requested)
+    ax3.text(0, -0.65, "2nd Insight\n(Emergent Consolidator)", ha='center', va='top', color='#f43f5e', fontsize=12, fontweight='bold')
 
-    # Label E=mc2
-    edge_center = (pos3["Mass (m)"] + pos3["Energy (E)"]) / 2
-    ax3.text(edge_center[0], edge_center[1]-0.15, r"$E=mc^2$", 
-             ha='center', va='top', fontsize=22, color='#f43f5e', fontweight='bold',
-             bbox=dict(facecolor='white', alpha=0.9, edgecolor='#f43f5e', boxstyle='round,pad=0.3', linewidth=2))
-
-    ax3.text(0, -0.8, "Topological Path Found!\n(Information Gain Maximized)", ha='center', color=text_color, fontsize=12, style='italic')
+    ax3.text(0, -0.85, "Hypothesis Node Created via Message Passing", ha='center', color=text_color, fontsize=11, style='italic')
     ax3.set_axis_off()
 
     # Title for whole figure
