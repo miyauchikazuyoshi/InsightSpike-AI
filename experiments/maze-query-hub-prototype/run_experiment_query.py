@@ -391,6 +391,9 @@ class StepRecord:
     sleep_q_value: float = 0.0
     sleep_q_max: float = 0.0
     sleep_q_adv: float = 0.0
+    # Event-based prior diagnostics
+    event_bias: float = 0.0
+    event_bias_applied: bool = False
     # Cortisol (stress/adaptation) diagnostics: label "wasted" exploration as negative examples
     cortisol_level: float = 0.0
     cortisol_fire: bool = False
@@ -504,6 +507,9 @@ class QueryHubConfig:
     sleep_q_step_penalty: float = -0.01
     sleep_q_goal_reward: float = 1.0
     sleep_q_revisit_penalty: float = -0.2
+    # Event-based prior (semantic-space PoC): action bias from event weights
+    event_weights: Dict[str, float] = field(default_factory=dict)
+    event_beta: float = 1.0
     # Force per-hop series via evaluator fallback even in L3-only mode
     force_per_hop: bool = False
     # Per-hop evaluator fallback only when AG fires (L3-only)
@@ -1355,6 +1361,61 @@ def run_episode_query(
         ig_fixed_den = math.log(base_count + 1.0)
         l1_candidates = base_count
 
+        # Event-based prior (semantic-space PoC)
+        event_weights = {str(k): float(v) for k, v in (getattr(config, "event_weights", {}) or {}).items()}
+        try:
+            event_beta = float(getattr(config, "event_beta", 1.0))
+        except Exception:
+            event_beta = 1.0
+        event_bias_enabled = bool(event_weights) and math.isfinite(event_beta) and abs(event_beta) > 1e-12
+
+        def _event_bias_for_action(action_id: int) -> float:
+            if not event_bias_enabled:
+                return 0.0
+            w = 0.0
+            try:
+                if action_id in possible_moves_set:
+                    w += float(event_weights.get("move_success", 0.0))
+                else:
+                    w += float(event_weights.get("blocked", 0.0))
+                    return float(w)
+                if action_id in SimpleMaze.ACTIONS:
+                    dy, dx = SimpleMaze.ACTIONS[action_id]
+                    next_pos = (int(current_position[0]) + int(dy), int(current_position[1]) + int(dx))
+                    if next_pos == tuple(env.goal_pos):
+                        w += float(event_weights.get("goal_reached", 0.0))
+                    visits = int(visit_counts.get(next_pos, 0))
+                    if visits <= 0:
+                        w += float(event_weights.get("novel_cell", 0.0))
+                    else:
+                        w += float(event_weights.get("revisit", 0.0))
+                    if prev_action_delta is not None and (int(dy), int(dx)) == (-int(prev_action_delta[0]), -int(prev_action_delta[1])):
+                        w += float(event_weights.get("immediate_backtrack", 0.0))
+                    if "deadend" in event_weights:
+                        try:
+                            moves = 0
+                            for _, dlt in SimpleMaze.ACTIONS.items():
+                                probe = (int(next_pos[0]) + int(dlt[0]), int(next_pos[1]) + int(dlt[1]))
+                                if not env._is_wall(probe):
+                                    moves += 1
+                            if moves == 1:
+                                w += float(event_weights.get("deadend", 0.0))
+                        except Exception:
+                            pass
+                    # progress: align with Sleep plan or top-Q action
+                    try:
+                        if sleep_plan_action is not None and int(action_id) == int(sleep_plan_action):
+                            w += float(event_weights.get("progress", 0.0))
+                        elif sleep_q_by_action:
+                            q_val = float(sleep_q_by_action.get(int(action_id), float(sleep_q_max)))
+                            if math.isfinite(q_val) and q_val >= float(sleep_q_max) - 1e-9:
+                                w += float(event_weights.get("progress", 0.0))
+                    except Exception:
+                        pass
+            except Exception:
+                return 0.0
+            return float(w)
+
         def choose_observation_candidate(collections: Sequence[Sequence[Dict[str, Any]]]) -> Optional[Dict[str, Any]]:
             """Prefer feasible observation candidates; if none, fallback to best overall (incl. mem).
 
@@ -1414,6 +1475,12 @@ def run_episode_query(
                                         w *= math.exp(float(sleep_plan_beta))
                                 except Exception:
                                     pass
+                            if event_bias_enabled and item.get("action") is not None:
+                                try:
+                                    act = int(item.get("action"))
+                                    w *= math.exp(float(event_beta) * _event_bias_for_action(act))
+                                except Exception:
+                                    pass
                             weights.append(float(w))
                         total = sum(weights)
                         if not (total > 0 and math.isfinite(total)):
@@ -1426,7 +1493,7 @@ def run_episode_query(
                                 return item
                     except Exception:
                         pass  # fallback to argmax
-                if not (sleep_q_bias or sleep_plan_bias):
+                if not (sleep_q_bias or sleep_plan_bias or event_bias_enabled):
                     return max(obs_items, key=lambda entry: float(entry.get("similarity", 0.0)))
                 def _score(entry: Dict[str, Any]) -> float:
                     base = float(entry.get("similarity", 0.0) or 0.0)
@@ -1445,6 +1512,11 @@ def run_episode_query(
                     try:
                         if sleep_plan_bias and sleep_plan_action is not None and int(act) == int(sleep_plan_action):
                             bonus += float(sleep_plan_beta)
+                    except Exception:
+                        pass
+                    try:
+                        if event_bias_enabled:
+                            bonus += float(event_beta) * _event_bias_for_action(act)
                     except Exception:
                         pass
                     return float(base + bonus)
@@ -2717,7 +2789,7 @@ def run_episode_query(
                     pm2 = [x for x in pm if x != opp_action]
                     if pm2:
                         pm = pm2
-            if (sleep_q_bias or sleep_plan_bias) and pm:
+            if (sleep_q_bias or sleep_plan_bias or event_bias_enabled) and pm:
                 try:
                     q_vals = [float(sleep_q_by_action.get(int(a), sleep_q_max)) for a in pm] if sleep_q_by_action else [0.0 for _ in pm]
                     q_max_local = float(max(q_vals)) if q_vals else float(sleep_q_max)
@@ -2728,6 +2800,8 @@ def run_episode_query(
                             w *= math.exp(float(sleep_q_beta) * (float(qv) - q_max_local))
                         if sleep_plan_bias and sleep_plan_action is not None and int(a) == int(sleep_plan_action):
                             w *= math.exp(float(sleep_plan_beta))
+                        if event_bias_enabled:
+                            w *= math.exp(float(event_beta) * _event_bias_for_action(int(a)))
                         weights.append(float(w))
                     total = sum(weights)
                     if total > 0 and math.isfinite(total):
@@ -2774,6 +2848,16 @@ def run_episode_query(
                 sleep_q_value = 0.0
                 sleep_q_max_used = 0.0
                 sleep_q_adv = 0.0
+
+        event_bias_value = 0.0
+        event_bias_applied = False
+        if event_bias_enabled:
+            try:
+                event_bias_value = float(_event_bias_for_action(int(action)))
+                event_bias_applied = True
+            except Exception:
+                event_bias_value = 0.0
+                event_bias_applied = False
 
         last_query_node = current_query_node
         last_position = current_position
@@ -3618,6 +3702,8 @@ def run_episode_query(
                 sleep_q_value=float(sleep_q_value),
                 sleep_q_max=float(sleep_q_max_used),
                 sleep_q_adv=float(sleep_q_adv),
+                event_bias=float(event_bias_value),
+                event_bias_applied=bool(event_bias_applied),
                 cortisol_level=float(cortisol_level),
                 cortisol_fire=bool(cortisol_fire),
                 cortisol_reason=str(cortisol_reason),
@@ -4006,6 +4092,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--sleep-q-step-penalty", type=float, default=-0.01, help="Per-step penalty used in Sleep Q-learning.")
     parser.add_argument("--sleep-q-goal-reward", type=float, default=1.0, help="Goal reward used in Sleep Q-learning (added when reaching goal).")
     parser.add_argument("--sleep-q-revisit-penalty", type=float, default=-0.2, help="Penalty used in Sleep Q-learning when a step is labeled revisit.")
+    # Event-based prior (semantic space PoC)
+    parser.add_argument("--event-weights", type=Path, default=None, help="Path to event_weights.json produced by export_event_weights.py")
+    parser.add_argument("--event-beta", type=float, default=1.0, help="Bias strength for event-weighted prior (logit multiplier).")
     # Curriculum (Wake→Sleep→Wake): warmup run to ensure goal experience, then eval guided by Sleep path plan
     parser.add_argument(
         "--curriculum-warmup-steps",
@@ -4063,6 +4152,22 @@ def main() -> None:
 
     def _lambda_suffix(val: float) -> str:
         return str(val).replace(".", "p").replace("-", "m")
+
+    # Load event weights (optional)
+    event_weights: Dict[str, float] = {}
+    event_weights_path = None
+    if getattr(args, "event_weights", None):
+        try:
+            event_weights_path = Path(args.event_weights)
+            if event_weights_path.exists():
+                payload = json.loads(event_weights_path.read_text(encoding="utf-8"))
+                if isinstance(payload, dict):
+                    if isinstance(payload.get("weights"), dict):
+                        event_weights = {str(k): float(v) for k, v in payload["weights"].items()}
+                    elif all(isinstance(v, (int, float)) for v in payload.values()):
+                        event_weights = {str(k): float(v) for k, v in payload.items()}
+        except Exception:
+            event_weights = {}
 
     for lambda_weight in lambda_values:
         suffix = _lambda_suffix(lambda_weight) if multi_lambda else None
@@ -4161,6 +4266,8 @@ def main() -> None:
             sleep_q_step_penalty=float(getattr(args, "sleep_q_step_penalty", -0.01)),
             sleep_q_goal_reward=float(getattr(args, "sleep_q_goal_reward", 1.0)),
             sleep_q_revisit_penalty=float(getattr(args, "sleep_q_revisit_penalty", -0.2)),
+            event_weights=dict(event_weights or {}),
+            event_beta=float(getattr(args, "event_beta", 1.0)),
             force_per_hop=bool(getattr(args, 'force_per_hop', False)),
             eval_per_hop_on_ag=bool(getattr(args, 'eval_per_hop_on_ag', False)),
             dg_bfs_shortcut=bool(getattr(args, 'dg_bfs_shortcut', False)),
@@ -4269,6 +4376,8 @@ def main() -> None:
                 "sleep_q_value": float(getattr(record, "sleep_q_value", 0.0)),
                 "sleep_q_max": float(getattr(record, "sleep_q_max", 0.0)),
                 "sleep_q_adv": float(getattr(record, "sleep_q_adv", 0.0)),
+                "event_bias": float(getattr(record, "event_bias", 0.0)),
+                "event_bias_applied": bool(getattr(record, "event_bias_applied", False)),
                 "cortisol_level": float(getattr(record, "cortisol_level", 0.0)),
                 "cortisol_fire": bool(getattr(record, "cortisol_fire", False)),
                 "cortisol_reason": str(getattr(record, "cortisol_reason", "")),
@@ -4568,6 +4677,11 @@ def main() -> None:
                     "step_penalty": float(getattr(args, "sleep_q_step_penalty", -0.01)),
                     "goal_reward": float(getattr(args, "sleep_q_goal_reward", 1.0)),
                     "revisit_penalty": float(getattr(args, "sleep_q_revisit_penalty", -0.2)),
+                },
+                "event_prior": {
+                    "enabled": bool(event_weights),
+                    "weights_path": str(event_weights_path) if event_weights_path else None,
+                    "beta": float(getattr(args, "event_beta", 1.0)),
                 },
             },
             "summary": summary,
