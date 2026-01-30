@@ -133,7 +133,7 @@ geDIGの式を基本則として受け入れると、システム設計が自然
 
 > <small>注：論文の用語に合わせ、AG=Attention Gate（0-hop の曖昧性/新規性）、DG=Decision Gate（multi-hop の確認）として記す。</small>
 
-![Academic Orion Radar (AG/DG)](academic_orion_radar.png)
+<img src="academic_orion_radar.png" width="50%" alt="Academic Orion Radar (AG/DG)">
 
 *図：Academic Orion Radar。0-hopの構造的近傍とMulti-hopの洞察的到達。AGは局所的な曖昧さ/違和感を検知し、DGは遠方への短絡（ΔSP ≫ 0）が真に有効かを確認する。*
 
@@ -404,7 +404,7 @@ Once geDIG's equation was accepted as a fundamental principle, system designs fo
 
 > <small>Note: Following the paper, we use AG=Attention Gate (0-hop ambiguity/novelty) and DG=Decision Gate (multi-hop confirmation).</small>
 
-![Academic Orion Radar (AG/DG)](academic_orion_radar.png)
+<img src="academic_orion_radar.png" width="50%" alt="Academic Orion Radar (AG/DG)">
 
 *Figure: Academic Orion Radar. 0-hop structural neighborhood vs. multi-hop insightful reach. AG detects local ambiguity, while DG confirms if distant shortcuts (ΔSP ≫ 0) are truly valid.*
 
