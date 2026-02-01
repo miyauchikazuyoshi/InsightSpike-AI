@@ -34,6 +34,7 @@ from .graph_utils import (
 )
 from .monitor import GeDIGMonitor
 from .logger import GeDIGLogger
+from .linkset import compute_linkset_metrics
 
 __all__ = [
     # Types
@@ -63,5 +64,7 @@ __all__ = [
     # Monitoring and Logging
     "GeDIGMonitor",
     "GeDIGLogger",
+    # Linkset
+    "compute_linkset_metrics",
 ]
 
