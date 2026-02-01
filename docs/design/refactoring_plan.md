@@ -18,9 +18,9 @@
 | information_gain.py 行数 | 728 | **607** | -17% |
 | モジュール数（IG） | 0 | **3** | +3 |
 | 環境変数管理 | 散在（12箇所） | 集約（config.py） | 統一 |
-| テスト数（geDIG） | 53 | **205** | +152 (monitor+35, logger+14, linkset+11, multihop+20) |
+| テスト数（geDIG） | 53 | **227** | +174 (monitor+35, logger+14, linkset+11, multihop+20, selector+22) |
 | テスト数（IG） | 0 | **23** | +23 (types+13, methods+10) |
-| カバレッジ（geDIG） | 54% | **72%** | +18% |
+| カバレッジ（geDIG） | 54% | **84%** | +30% ✅目標達成 |
 
 ### 作成されたモジュール
 
@@ -707,14 +707,16 @@ geDIGリファクタリングで確立したパターンを他の大規模ファ
 pytest tests/unit/gedig/ --cov=src/insightspike/algorithms/gedig --cov-report=term-missing
 ```
 
-**現状**: 72%（目標: 80%）
+**現状**: ✅ **84%** 達成（目標: 80%）
 
 追加済みテスト:
-- `tests/unit/gedig/test_monitor.py` (35テスト) ← NEW
-- `tests/unit/gedig/test_logger.py` (14テスト) ← NEW
-- `tests/unit/gedig/test_linkset.py` (11テスト) ← NEW
-- `tests/unit/ig/test_types.py` (13テスト) ← NEW
-- `tests/unit/ig/test_methods.py` (10テスト) ← NEW
+- `tests/unit/gedig/test_monitor.py` (35テスト)
+- `tests/unit/gedig/test_logger.py` (14テスト)
+- `tests/unit/gedig/test_linkset.py` (11テスト)
+- `tests/unit/gedig/test_multihop.py` (20テスト) ← NEW
+- `tests/unit/gedig/test_selector.py` (22テスト) ← NEW
+- `tests/unit/ig/test_types.py` (13テスト)
+- `tests/unit/ig/test_methods.py` (10テスト)
 
 ### 8.4 CI/CD統合（優先度: 低）
 
@@ -730,6 +732,7 @@ pytest tests/unit/gedig/ --cov=src/insightspike/algorithms/gedig --cov-report=te
 | 2026-02-01 | Phase 1-7 | 初期リファクタリング完了 |
 | 2026-02-01 | 8.1-8.3 | linkset.py抽出、ig/パッケージ作成、テスト追加(83テスト) |
 | 2026-02-01 | 8.1 | multihop.py抽出(370行)、gedig_core 982→792行、テスト追加(20テスト) |
+| 2026-02-01 | 8.3 | selector.pyテスト追加(22テスト)、カバレッジ74%→84%達成 |
 
 ---
 
