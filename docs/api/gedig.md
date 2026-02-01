@@ -13,14 +13,17 @@ geDIG (Graph Edit Distance and Information Gain) is the core metric system for I
 
 ```
 insightspike.algorithms.gedig/
-├── __init__.py      # Public API exports
-├── types.py         # Data types (Enums, Dataclasses)
-├── config.py        # Configuration management
-├── spike.py         # Spike detection functions
-├── graph_utils.py   # Graph manipulation utilities
-├── monitor.py       # Runtime monitoring
-├── logger.py        # CSV logging
-└── selector.py      # Computation orchestration
+├── __init__.py       #  75行 - Public API exports (18 exports)
+├── types.py          # 128行 - Data types (Enums, Dataclasses)
+├── config.py         # 310行 - Configuration management
+├── spike.py          # 114行 - Spike detection functions
+├── graph_utils.py    # 416行 - Graph manipulation utilities
+├── monitor.py        # 193行 - Runtime monitoring
+├── logger.py         # 137行 - CSV logging
+├── selector.py       # 270行 - Computation orchestration
+├── linkset.py        # 218行 - Linkset metrics computation
+├── multihop.py       # 370行 - Multi-hop geDIG calculation
+└── ab_writer_helper.py
 ```
 
 ---
@@ -213,6 +216,55 @@ subgraph, nodes = extract_k_hop_subgraph(graph, focal_nodes={'a', 'b'}, k=2)
 
 # Convert various formats to NetworkX
 nx_graph = ensure_networkx(pyg_data)  # PyG, numpy array, or nx.Graph
+```
+
+---
+
+## Linkset Metrics
+
+### `compute_linkset_metrics`
+
+Compute IG based on linkset (paper-aligned mode).
+
+```python
+from insightspike.algorithms.gedig import compute_linkset_metrics
+
+metrics = compute_linkset_metrics(
+    linkset_info=linkset_info,
+    config=config,
+    lambda_weight=1.0,
+    entropy_tau=1.0,
+)
+# Returns LinksetMetrics with delta_ged_norm, delta_h_norm, gedig_value, etc.
+```
+
+---
+
+## Multi-hop Calculation
+
+### `calculate_multihop`
+
+Standalone multi-hop geDIG calculation with callback support.
+
+```python
+from insightspike.algorithms.gedig import calculate_multihop
+
+result = calculate_multihop(
+    g1=graph_before,
+    g2=graph_after,
+    features_before=features_before,
+    features_after=features_after,
+    focal_nodes={'node_a', 'node_b'},
+    start_time=time.time(),
+    max_hops=3,
+    decay_factor=0.7,
+    adaptive_hops=True,
+    use_multihop_sp_gain=True,
+    # Optional: custom calculators
+    ged_calculator=custom_ged_fn,
+    ig_calculator=custom_ig_fn,
+)
+# Returns GeDIGResult with hop_results dict
 ```
 
 ---

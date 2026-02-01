@@ -1,17 +1,71 @@
-%% GeDIG Refactor Architecture (August 2025)
+%% GeDIG Modular Architecture (2026-02)
+%% Post-Refactoring Complete
+
 graph TD
-  U[Caller / Navigator] --> F[GeDIGFactory]
-  F --> C[GeDIGCore]
-  C -->|compute| GED[Structural Improvement]
-  C -->|compute| IG[Entropy Variance IG]
-  IG --> STATS[Welford Stats]
-  STATS --> C
-  C --> REWARD[Reward Layer\nhop0 / aggregate]
-  C -->|optional| MH[Multi-hop Engine]
-  C --> LOG[GeDIGLogger\nRotating CSV]
-  subgraph FeatureFlag
-    F --> LEGACY[(Legacy Path)]
-    F --> REFACTORED[(Refactored Path)]
+  subgraph Caller["Entry Points"]
+    NAV[Navigator / L3 Reasoner]
+    SEL[gedig.selector.compute_gedig]
   end
-  C -. future .-> SPIKE[SpikeDetectionMode]
-  LOG -. future .-> MON[Monitoring / Dashboard]
+
+  NAV --> SEL
+  SEL --> CORE
+
+  subgraph ConfigSystem["Configuration System"]
+    CFG[GeDIGConfig]
+    CFG -->|from_env| ENV[12 Environment Variables]
+    CFG -->|from_kwargs| KWARGS[Explicit Overrides]
+    CFG -->|preset| PRESETS[(conservative/balanced/aggressive/maze/transformer/rag)]
+  end
+
+  subgraph Core["GeDIGCore (779 lines)"]
+    CORE[GeDIGCore]
+    CORE -->|uses| CFG
+    CORE -->|compute| GED[Structural Improvement]
+    CORE -->|compute| IG[Entropy Variance IG]
+  end
+
+  subgraph ExtractedModules["Extracted Modules (10 files)"]
+    direction TB
+    TYPES[types.py\n128行 - 5 types]
+    CONFIG[config.py\n310行 - GeDIGConfig]
+    SPIKE[spike.py\n114行 - detect/rewards]
+    GRAPH[graph_utils.py\n416行 - 11 functions]
+    LINKSET[linkset.py\n218行 - linkset metrics]
+    MULTIHOP[multihop.py\n370行 - multi-hop calc]
+    MONITOR[monitor.py\n193行]
+    LOGGER[logger.py\n137行]
+    SELECTOR[selector.py\n270行]
+  end
+
+  CORE --> LINKSET
+  CORE --> MULTIHOP
+  CORE --> SPIKE
+  MULTIHOP --> GRAPH
+  LINKSET --> TYPES
+  SPIKE --> TYPES
+
+  subgraph Output["Results"]
+    RESULT[GeDIGResult]
+    REWARD[Reward Layer\nhop0 / aggregate]
+    SPIKE_FLAG[Spike Detection]
+  end
+
+  CORE --> RESULT
+  RESULT --> REWARD
+  RESULT --> SPIKE_FLAG
+
+  subgraph Observability["Observability"]
+    LOG_OUT[GeDIGLogger\nRotating CSV]
+    MON_OUT[GeDIGMonitor\nMetrics Dashboard]
+  end
+
+  CORE --> LOG_OUT
+  CORE --> MON_OUT
+
+  subgraph Statistics["Refactoring Statistics"]
+    STAT1["gedig_core.py: 2,159→779 (-64%)"]
+    STAT2["Modules: 1→10 (+9)"]
+    STAT3["Tests: 53→227 (+174)"]
+    STAT4["Coverage: 54%→84% (+30%)"]
+  end
+

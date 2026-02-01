@@ -1,11 +1,53 @@
+%% GeDIG Selector Pipeline (2026-02)
+%% Post-Refactoring Architecture
+
 flowchart TD
-  A[Caller] -->|compute_gedig| S[algorithms.gedig.selector]
+  A[Caller] -->|compute_gedig| S[gedig.selector]
   S -->|mode=pure| P[PureGeDIGCalculator]
   S -->|mode=full| C[GeDIGCore]
   S -->|mode=ab| P & C
-  subgraph Core
-    M[core.metrics\n normalized_ged/entropy_ig]
-    C --> M
+
+  subgraph ConfigLayer["Configuration Layer"]
+    CFG[GeDIGConfig]
+    CFG -->|from_env| ENV[(Environment Variables)]
+    CFG -->|preset| PRESET[(Presets)]
   end
-  S -->|result| R[Dict: gedig, ged, ig]
+
+  C --> CFG
+
+  subgraph CorePipeline["GeDIGCore Pipeline"]
+    direction TB
+    LINK[linkset.compute_linkset_metrics]
+    MH[multihop.calculate_multihop]
+    SPIKE[spike.detect_spike]
+    REWARD[spike.compute_rewards]
+
+    C --> LINK
+    LINK --> MH
+    MH --> SPIKE
+    SPIKE --> REWARD
+  end
+
+  subgraph Utilities["Utility Modules"]
+    GU[graph_utils]
+    MON[GeDIGMonitor]
+    LOG[GeDIGLogger]
+    TYPES[types]
+  end
+
+  MH --> GU
+  C --> MON
+  C --> LOG
+
+  subgraph Metrics["Core Metrics"]
+    M[core.metrics\n normalized_ged/entropy_ig]
+  end
+
+  MH --> M
+  LINK --> M
+
+  S -->|result| R[GeDIGResult]
+  R -->|gedig_value| OUT1[float]
+  R -->|hop_results| OUT2[Dict hop→HopResult]
+  R -->|spike| OUT3[bool]
 

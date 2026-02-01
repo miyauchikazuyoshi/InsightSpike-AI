@@ -1,4 +1,18 @@
-# GeDIG Refactor Overview (August 2025)
+# GeDIG Refactor Overview (February 2026)
+
+> **Status**: ✅ Complete
+> **Last Updated**: 2026-02-01
+
+## Summary
+
+The geDIG module has been refactored from a monolithic 2,159-line file into 10 specialized modules with 84% test coverage.
+
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| gedig_core.py lines | 2,159 | 779 | **-64%** |
+| Modules (geDIG) | 1 | 10 | +9 |
+| Test count | 53 | 227 | +174 |
+| Test coverage | 54% | 84% | +30% |
 
 ## Goals
 
@@ -6,15 +20,37 @@
 - Provide stable reward surface via warmup + z-score IG scaling
 - Enable safe rollout with feature flags & dual evaluation
 - Improve observability (rotating CSV metrics)
+- **Modular architecture for maintainability** ← New
+
+## Package Structure
+
+```
+src/insightspike/algorithms/gedig/
+├── __init__.py       #  75行 - Public API (18 exports)
+├── types.py          # 128行 - ProcessingMode, SpikeDetectionMode, HopResult, GeDIGResult, LinksetMetrics
+├── config.py         # 310行 - GeDIGConfig (from_env, from_kwargs, preset)
+├── spike.py          # 114行 - detect_spike, compute_rewards
+├── graph_utils.py    # 416行 - 11 graph utility functions
+├── monitor.py        # 193行 - GeDIGMonitor
+├── logger.py         # 137行 - GeDIGLogger (rotating CSV)
+├── selector.py       # 270行 - TwoThresholdCandidateSelector, compute_gedig
+├── linkset.py        # 218行 - compute_linkset_metrics
+├── multihop.py       # 370行 - calculate_multihop
+└── ab_writer_helper.py
+```
 
 ## Core Components
 
 | Component | Responsibility |
 |-----------|----------------|
-| `GeDIGCore` | End-to-end calculation of GED, IG, rewards, optional multihop |
+| `GeDIGCore` | End-to-end calculation of GED, IG, rewards, optional multihop (779 lines) |
+| `GeDIGConfig` | Centralized configuration with env vars, kwargs, presets |
+| `calculate_multihop` | Multi-hop geDIG calculation with callbacks |
+| `compute_linkset_metrics` | Linkset-based IG computation |
 | `GeDIGFactory` | Feature flag instantiation (legacy vs refactored) |
 | `dual_evaluate` | Parallel run & divergence check |
 | `GeDIGLogger` | Rotating CSV export of key metrics |
+| `GeDIGMonitor` | Real-time metrics monitoring |
 | Welford Stats | Online IG mean/variance for z-score |
 
 > Note (2025‑10): L3 Graph Reasoner uses GeDIGCore as the default metrics engine via `MetricsSelector` and applies query‑centric local evaluation (top‑K centers, r‑hop) by default. Configure with `graph.ged_algorithm/ig_algorithm` and `metrics.query_centric/*`.
@@ -62,16 +98,39 @@ gedig:
 
 - Phase A (DONE): Core unification, reward refactor, logger, feature flag, smoke tests
 - Phase B (DONE): Basic invariants
-- Phase C: SpikeDetectionMode & presets
-- Phase D: Navigator integration
-- Phase E: Stability & reproducibility validation
+- Phase C (DONE): SpikeDetectionMode & presets → `spike.py`, `config.py`
+- Phase D (DONE): Navigator integration
+- Phase E (DONE): Stability & reproducibility validation
+- **Phase F (DONE): Modular refactoring → 10 modules, 84% coverage**
 
-## Usage Snippet (Linkset‑First)
+## Usage Snippet
+
+### Using GeDIGConfig (Recommended)
+
+```python
+from insightspike.algorithms.gedig import GeDIGConfig
+from insightspike.algorithms.gedig_core import GeDIGCore
+
+# Option 1: From environment variables
+config = GeDIGConfig.from_env()
+
+# Option 2: From kwargs with env overrides
+config = GeDIGConfig.from_kwargs(lambda_weight=0.7, max_hops=3)
+
+# Option 3: From presets
+config = GeDIGConfig.preset("maze")  # or "transformer", "rag", etc.
+
+# Initialize and use
+core = GeDIGCore(config=config)
+res = core.calculate(g_prev=g1, g_now=g2, linkset_info=ls)
+print(res.structural_cost, res.gedig_value, res.hop0_reward)
+```
+
+### Linkset‑First Mode
 
 ```python
 from insightspike.algorithms.linkset_adapter import build_linkset_info
 
-core = GeDIGFactory.create({'use_refactored_gedig': True})
 ls = build_linkset_info(
     s_link=[{"index": 1, "similarity": 1.0}],
     candidate_pool=[],
@@ -80,7 +139,6 @@ ls = build_linkset_info(
     base_mode="link",
 )
 res = core.calculate(g_prev=g1, g_now=g2, linkset_info=ls)
-print(res.structural_cost, res.ig_z_score, res.hop0_reward)
 ```
 
 Note: Calling `calculate(...)` without `linkset_info` falls back to graph‑IG and now emits a one‑time deprecation warning. Prefer passing linkset info for paper‑aligned IG.
@@ -117,4 +175,4 @@ Implications:
 Next steps include surfacing an API hook for ground-truth spike labeling (goal proximity + Δstructural_improvement anomaly) feeding precision/recall metrics.
 
 
-Last updated: 2025-08-23
+Last updated: 2026-02-01

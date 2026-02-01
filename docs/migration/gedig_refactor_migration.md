@@ -22,16 +22,19 @@ src/insightspike/algorithms/
 
 ```
 src/insightspike/algorithms/
-├── gedig_core.py  # 1,169 lines - GeDIGCore + convenience functions
+├── gedig_core.py  # 779 lines - GeDIGCore orchestration (-64%)
 └── gedig/
-    ├── __init__.py      # 67 lines - exports
-    ├── types.py         # 128 lines - Enums, dataclasses
-    ├── config.py        # 310 lines - GeDIGConfig
-    ├── spike.py         # 114 lines - spike detection
-    ├── graph_utils.py   # 416 lines - graph utilities
-    ├── monitor.py       # 193 lines - GeDIGMonitor
-    ├── logger.py        # 137 lines - GeDIGLogger
-    └── selector.py      # 270 lines - orchestration
+    ├── __init__.py       #  75 lines - Public API (18 exports)
+    ├── types.py          # 128 lines - Enums, dataclasses
+    ├── config.py         # 310 lines - GeDIGConfig
+    ├── spike.py          # 114 lines - spike detection
+    ├── graph_utils.py    # 416 lines - graph utilities
+    ├── monitor.py        # 193 lines - GeDIGMonitor
+    ├── logger.py         # 137 lines - GeDIGLogger
+    ├── selector.py       # 270 lines - orchestration
+    ├── linkset.py        # 218 lines - linkset metrics
+    ├── multihop.py       # 370 lines - multi-hop calculation
+    └── ab_writer_helper.py
 ```
 
 ---
@@ -152,6 +155,8 @@ eff = graph_efficiency(graph)
 | (new) | `gedig.graph_efficiency` | Graph efficiency |
 | (new) | `gedig.extract_k_hop_subgraph` | Subgraph extraction |
 | (new) | `gedig.compute_sp_gain_norm` | SP gain calculation |
+| (new) | `gedig.compute_linkset_metrics` | Linkset IG calculation |
+| (new) | `gedig.calculate_multihop` | Multi-hop geDIG calculation |
 
 ---
 
