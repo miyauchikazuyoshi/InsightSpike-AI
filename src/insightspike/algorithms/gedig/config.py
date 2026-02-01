@@ -239,6 +239,38 @@ class GeDIGConfig:
 
         return cls(**presets[name_lower])
 
+    @classmethod
+    def from_kwargs(cls, **kwargs) -> "GeDIGConfig":
+        """Create config from kwargs with environment variable overrides.
+
+        This combines explicit kwargs with environment variable overrides,
+        where explicit kwargs take precedence over env vars.
+
+        Args:
+            **kwargs: Configuration parameters to set.
+
+        Returns:
+            GeDIGConfig with kwargs and env overrides applied.
+        """
+        # Start with env-based config
+        config = cls.from_env()
+
+        # Apply explicit kwargs (these override env vars)
+        for key, value in kwargs.items():
+            if hasattr(config, key) and value is not None:
+                # Handle feature_weights specially
+                if key == "feature_weights" and value is not None:
+                    import numpy as np
+                    arr = np.asarray(value, dtype=np.float32)
+                    if arr.ndim == 1 and arr.size > 0:
+                        setattr(config, key, arr)
+                    else:
+                        setattr(config, key, None)
+                else:
+                    setattr(config, key, value)
+
+        return config
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert config to dictionary for GeDIGCore kwargs."""
         result = {

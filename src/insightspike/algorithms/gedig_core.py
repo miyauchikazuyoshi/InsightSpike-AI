@@ -43,8 +43,18 @@ logger = logging.getLogger(__name__)
 
 
 class GeDIGCore:
+    """Unified geDIG calculator with configurable parameters.
+
+    Can be initialized with individual kwargs or a GeDIGConfig object.
+    Environment variables are automatically applied via GeDIGConfig.from_kwargs().
+    """
+
     def __init__(
         self,
+        config: Optional[GeDIGConfig] = None,
+        *,
+        # All parameters below are for backward compatibility.
+        # If config is provided, these are ignored.
         node_cost: float = 1.0,
         edge_cost: float = 1.0,
         normalization: str = 'sum',
@@ -59,10 +69,10 @@ class GeDIGCore:
         enable_spectral: bool = False,
         spectral_weight: float = 0.3,
         lambda_weight: float = 1.0,
-        ig_mode: str = 'raw',  # 'raw' | 'z' | 'norm'
+        ig_mode: str = 'raw',
         ig_norm_strategy: str = 'before',
-        ig_delta_mode: str = 'after_before',  # ignored (fixed to 'after_before')
-        entropy_tau: float = 1.0,  # softmax temperature for entropy; tau=1 keeps legacy behavior
+        ig_delta_mode: str = 'after_before',
+        entropy_tau: float = 1.0,
         mu: float = 0.5,
         warmup_steps: int = 10,
         use_refactored_reward: bool = True,
@@ -70,188 +80,165 @@ class GeDIGCore:
         spike_detection_mode: str | SpikeDetectionMode = "and",
         tau_s: float = 0.15,
         tau_i: float = 0.25,
-        # Multi-hop shortcut gain: when enabled, incorporate
-        # normalized shortest-path gain per hop. In implementation we add
-        # the (relative) SP gain to the information term (ΔH + γ·ΔSP_rel),
-        # aligning with the paper's IG-side placement (γ ≈ sp_beta).
         use_multihop_sp_gain: bool = True,
-        sp_norm_mode: str = 'relative',  # 'relative' := (L_before-L_after)/L_before
-        # Weight for shortest-path relative gain in multi-hop (γ in the paper)
+        sp_norm_mode: str = 'relative',
         sp_beta: float = 0.2,
-        # Local normalization for decision-time control
         use_local_normalization: bool = False,
-        local_norm_mode: str = 'layer1',  # initial: Cmax_local^(0) = 1 + K (Layer1 candidates)
-        # Optional diagnostic: estimate GED_min proxy (path compression delta)
+        local_norm_mode: str = 'layer1',
         enable_ged_min_diag: bool = False,
-        # Performance guards for SP gain
         sp_node_cap: int = 200,
         sp_pair_samples: int = 400,
         sp_use_sampling: bool = True,
         feature_weights: Optional[Sequence[float]] = None,
         linkset_mode: bool = False,
-        # SP evaluation scope controls
-        sp_scope_mode: str = 'auto',  # 'auto' uses per-hop subgraphs; 'union' uses union-of-nodes for before/after
-        sp_hop_expand: int = 0,       # evaluate SP on (hop + expand) neighborhood
-        sp_eval_mode: str = 'connected',  # 'connected' (default) or 'fixed_before_pairs'
-        # Paper-aligned switches
-        ig_source_mode: str = 'graph',   # 'graph' | 'linkset' | 'hybrid'
-        ig_hop_apply: str = 'all',       # 'hop0' | 'all' (apply linkset IG to which hops)
-        ged_norm_scheme: str = 'edges_after', # 'edges_after' | 'candidate_base'
-        # Structural similarity for analogy detection
+        sp_scope_mode: str = 'auto',
+        sp_hop_expand: int = 0,
+        sp_eval_mode: str = 'connected',
+        ig_source_mode: str = 'graph',
+        ig_hop_apply: str = 'all',
+        ged_norm_scheme: str = 'edges_after',
         structural_similarity_config: Optional[Dict[str, Any]] = None,
     ) -> None:
-        self.node_cost = node_cost
-        self.edge_cost = edge_cost
-        self.normalization = normalization
-        self.efficiency_weight = efficiency_weight
-        self.min_nodes = min_nodes
-        self.smoothing = smoothing
-        self.enable_multihop = enable_multihop
-        self.max_hops = max_hops
-        self.decay_factor = decay_factor
-        self.adaptive_hops = adaptive_hops
-        self.spike_threshold = spike_threshold
-        self.enable_spectral = enable_spectral
-        self.spectral_weight = spectral_weight
-        self.lambda_weight = lambda_weight
-        # Allow env override for quick experiments
-        try:
-            env_lambda = os.environ.get('MAZE_GEDIG_LAMBDA')
-            if env_lambda:
-                self.lambda_weight = float(env_lambda)
-        except Exception:
-            pass
-        # Env overrides for structural weighting (cul-de-sac sensitivity knobs)
-        try:
-            nc = os.environ.get('MAZE_GEDIG_NODE_COST')
-            if nc: self.node_cost = float(nc)
-        except Exception:
-            pass
-        try:
-            ec = os.environ.get('MAZE_GEDIG_EDGE_COST')
-            if ec: self.edge_cost = float(ec)
-        except Exception:
-            pass
-        try:
-            ew = os.environ.get('MAZE_GEDIG_EFF_WEIGHT')
-            if ew is not None and ew != '': self.efficiency_weight = float(ew)
-        except Exception:
-            pass
-        try:
-            sp = os.environ.get('MAZE_GEDIG_SPECTRAL')
-            if sp is not None and sp.strip() not in ("0","false","False",""):
-                self.enable_spectral = True
-            sw = os.environ.get('MAZE_GEDIG_SPECTRAL_WEIGHT')
-            if sw: self.spectral_weight = float(sw)
-        except Exception:
-            pass
-        self.ig_mode = ig_mode
-        try:
-            env_mode = os.environ.get('MAZE_GEDIG_IG_MODE')
-            if env_mode:
-                self.ig_mode = str(env_mode).lower()
-        except Exception:
-            pass
-        self.ig_norm_strategy = str(ig_norm_strategy or 'before').lower()
-        try:
-            env_norm = os.environ.get('MAZE_GEDIG_IG_NORM')
-            if env_norm:
-                self.ig_norm_strategy = str(env_norm).lower()
-        except Exception:
-            pass
-        # Entropy temperature (tau). tau=1 -> legacy weights/sum. tau != 1 -> p ∝ w^(1/tau).
-        try:
-            ent_tau_env = os.environ.get('MAZE_GEDIG_ENTROPY_TAU') or os.environ.get('INSIGHTSPIKE_ENTROPY_TAU')
-            if ent_tau_env:
-                entropy_tau = float(ent_tau_env)
-        except Exception:
-            pass
-        self.entropy_tau = float(entropy_tau) if entropy_tau > 0 else 1.0
-        # IG delta orientation is fixed to after_before (no knob to flip sign)
-        self.ig_delta_mode = 'after_before'
-        # IG non-negative clamp (treat negative IG as 0 = no information gain)
-        try:
-            self._ig_nonneg = os.environ.get('MAZE_GEDIG_IG_NONNEG', '0').strip() not in ("0","false","False","")
-        except Exception:
-            self._ig_nonneg = False
-        try:
-            env_ged_min = os.environ.get('INSIGHTSPIKE_GED_MIN_DIAG', '')
-            if env_ged_min.strip() and env_ged_min.strip().lower() not in ("0","false","no","off"):
-                self.enable_ged_min_diag = True
-        except Exception:
-            pass
-        self.mu = mu
-        self.warmup_steps = warmup_steps
-        self.use_refactored_reward = use_refactored_reward
-        self.use_legacy_formula = use_legacy_formula
-        self.spike_detection_mode = spike_detection_mode
-        self.tau_s = tau_s
-        self.tau_i = tau_i
-        self.use_multihop_sp_gain = use_multihop_sp_gain
-        self.enable_ged_min_diag = bool(enable_ged_min_diag)
-        self.sp_norm_mode = sp_norm_mode
-        self.sp_beta = float(max(0.0, sp_beta))
-        self.use_local_normalization = use_local_normalization
-        self.local_norm_mode = local_norm_mode
-        # SP gain performance guards
-        self.sp_node_cap = int(max(1, sp_node_cap))
-        # Allow <=0 to mean "use ALL pairs" (parity/diagnostic)
-        self.sp_pair_samples = int(sp_pair_samples)
-        self.sp_use_sampling = bool(sp_use_sampling)
-        self.sp_scope_mode = str(sp_scope_mode or 'auto').lower()
-        self.sp_hop_expand = int(max(0, sp_hop_expand))
-        self.sp_boundary_mode = 'induced'
-        self.sp_eval_mode = str(sp_eval_mode or 'connected').lower()
-        try:
-            sbb = os.environ.get('MAZE_GEDIG_SP_BOUNDARY')
-            if sbb:
-                self.sp_boundary_mode = str(sbb).lower()
-        except Exception:
-            pass
-        if feature_weights is not None:
-            arr = np.asarray(feature_weights, dtype=np.float32)
-            if arr.ndim == 1 and arr.size > 0:
-                self.feature_weights = arr
-            else:
-                self.feature_weights = None
-        else:
-            self.feature_weights = None
-        self.linkset_mode = bool(linkset_mode)
-        # Paper-mode parameters
-        self.ig_source_mode = str(ig_source_mode or 'graph').lower()
-        self.ig_hop_apply = str(ig_hop_apply or 'all').lower()
-        self.ged_norm_scheme = str(ged_norm_scheme or 'edges_after').lower()
-        # Running stats
+        # Build config from kwargs if not provided (with env overrides)
+        if config is None:
+            config = GeDIGConfig.from_kwargs(
+                node_cost=node_cost,
+                edge_cost=edge_cost,
+                normalization=normalization,
+                efficiency_weight=efficiency_weight,
+                min_nodes=min_nodes,
+                smoothing=smoothing,
+                enable_multihop=enable_multihop,
+                max_hops=max_hops,
+                decay_factor=decay_factor,
+                adaptive_hops=adaptive_hops,
+                spike_threshold=spike_threshold,
+                enable_spectral=enable_spectral,
+                spectral_weight=spectral_weight,
+                lambda_weight=lambda_weight,
+                ig_mode=ig_mode,
+                ig_norm_strategy=ig_norm_strategy,
+                entropy_tau=entropy_tau,
+                mu=mu,
+                warmup_steps=warmup_steps,
+                use_refactored_reward=use_refactored_reward,
+                use_legacy_formula=use_legacy_formula,
+                spike_detection_mode=spike_detection_mode,
+                tau_s=tau_s,
+                tau_i=tau_i,
+                use_multihop_sp_gain=use_multihop_sp_gain,
+                sp_norm_mode=sp_norm_mode,
+                sp_beta=sp_beta,
+                use_local_normalization=use_local_normalization,
+                local_norm_mode=local_norm_mode,
+                enable_ged_min_diag=enable_ged_min_diag,
+                sp_node_cap=sp_node_cap,
+                sp_pair_samples=sp_pair_samples,
+                sp_use_sampling=sp_use_sampling,
+                linkset_mode=linkset_mode,
+                sp_scope_mode=sp_scope_mode,
+                sp_hop_expand=sp_hop_expand,
+                sp_eval_mode=sp_eval_mode,
+                ig_source_mode=ig_source_mode,
+                ig_hop_apply=ig_hop_apply,
+                ged_norm_scheme=ged_norm_scheme,
+                feature_weights=feature_weights,
+                structural_similarity_config=structural_similarity_config,
+            )
+
+        # Apply config to instance attributes
+        self._apply_config(config)
+
+        # Initialize runtime state
         self._ig_count = 0
         self._ig_mean = 0.0
         self._ig_m2 = 0.0
-        # Hooks
-        self.logger = None  # type: ignore
-        self.monitor = None  # type: ignore  # set by attach_monitor
-        # Deprecation: warn once when graph-IG path is used (linkset_info absent)
+        self.logger = None
+        self.monitor = None
         self._graph_ig_warned = False
 
-        # Structural similarity for analogy detection
+        # Initialize structural similarity evaluator if enabled
         self._ss_evaluator = None
         self._ss_config = structural_similarity_config or {}
         if self._ss_config.get('enabled', False):
-            try:
-                from .structural_similarity import StructuralSimilarityEvaluator
-                from ..config.models import StructuralSimilarityConfig
-                ss_cfg = StructuralSimilarityConfig(**self._ss_config)
-                self._ss_evaluator = StructuralSimilarityEvaluator(ss_cfg)
-                logger.info("Structural similarity evaluator enabled: method=%s", ss_cfg.method)
-            except Exception as e:
-                logger.warning("Failed to initialize structural similarity evaluator: %s", e)
-                self._ss_evaluator = None
+            self._init_structural_similarity()
 
         logger.info(
             "GeDIGCore initialized: multihop=%s max_hops=%s spectral=%s structural_sim=%s",
-            self.enable_multihop,
-            self.max_hops,
-            self.enable_spectral,
+            self.enable_multihop, self.max_hops, self.enable_spectral,
             self._ss_evaluator is not None,
         )
+
+    def _apply_config(self, config: GeDIGConfig) -> None:
+        """Apply GeDIGConfig values to instance attributes."""
+        self.node_cost = config.node_cost
+        self.edge_cost = config.edge_cost
+        self.normalization = config.normalization
+        self.efficiency_weight = config.efficiency_weight
+        self.min_nodes = config.min_nodes
+        self.smoothing = config.smoothing
+        self.enable_multihop = config.enable_multihop
+        self.max_hops = config.max_hops
+        self.decay_factor = config.decay_factor
+        self.adaptive_hops = config.adaptive_hops
+        self.spike_threshold = config.spike_threshold
+        self.enable_spectral = config.enable_spectral
+        self.spectral_weight = config.spectral_weight
+        self.lambda_weight = config.lambda_weight
+        self.ig_mode = config.ig_mode
+        self.ig_norm_strategy = str(config.ig_norm_strategy or 'before').lower()
+        self.ig_delta_mode = 'after_before'  # fixed
+        self.entropy_tau = float(config.entropy_tau) if config.entropy_tau > 0 else 1.0
+        self._ig_nonneg = config.ig_nonneg
+        self.mu = config.mu
+        self.warmup_steps = config.warmup_steps
+        self.use_refactored_reward = config.use_refactored_reward
+        self.use_legacy_formula = config.use_legacy_formula
+        self.spike_detection_mode = config.spike_detection_mode
+        self.tau_s = config.tau_s
+        self.tau_i = config.tau_i
+        self.use_multihop_sp_gain = config.use_multihop_sp_gain
+        self.enable_ged_min_diag = config.enable_ged_min_diag
+        self.sp_norm_mode = config.sp_norm_mode
+        self.sp_beta = float(max(0.0, config.sp_beta))
+        self.use_local_normalization = config.use_local_normalization
+        self.local_norm_mode = config.local_norm_mode
+        self.sp_node_cap = int(max(1, config.sp_node_cap))
+        self.sp_pair_samples = int(config.sp_pair_samples)
+        self.sp_use_sampling = config.sp_use_sampling
+        self.sp_scope_mode = str(config.sp_scope_mode or 'auto').lower()
+        self.sp_hop_expand = int(max(0, config.sp_hop_expand))
+        self.sp_boundary_mode = config.sp_boundary_mode
+        self.sp_eval_mode = str(config.sp_eval_mode or 'connected').lower()
+        self.feature_weights = config.feature_weights
+        self.linkset_mode = config.linkset_mode
+        self.ig_source_mode = str(config.ig_source_mode or 'graph').lower()
+        self.ig_hop_apply = str(config.ig_hop_apply or 'all').lower()
+        self.ged_norm_scheme = str(config.ged_norm_scheme or 'edges_after').lower()
+
+    def _init_structural_similarity(self) -> None:
+        """Initialize structural similarity evaluator."""
+        try:
+            from .structural_similarity import StructuralSimilarityEvaluator
+            from ..config.models import StructuralSimilarityConfig
+            ss_cfg = StructuralSimilarityConfig(**self._ss_config)
+            self._ss_evaluator = StructuralSimilarityEvaluator(ss_cfg)
+            logger.info("Structural similarity evaluator enabled: method=%s", ss_cfg.method)
+        except Exception as e:
+            logger.warning("Failed to initialize structural similarity evaluator: %s", e)
+            self._ss_evaluator = None
+
+    @classmethod
+    def from_config(cls, config: GeDIGConfig) -> "GeDIGCore":
+        """Create GeDIGCore from a GeDIGConfig object.
+
+        Args:
+            config: GeDIGConfig object with all parameters.
+
+        Returns:
+            GeDIGCore instance configured from the config object.
+        """
+        return cls(config=config)
 
     # ------------ Public API ------------
     def calculate(self, *args, **kwargs) -> GeDIGResult:
