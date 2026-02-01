@@ -1,8 +1,10 @@
 # InsightSpike Directory Structure
 
+> **Last Updated**: 2026-02-01
+
 ## 📁 Overview
 
-After the 2025-07-18 refactoring, InsightSpike follows a clean architecture with clear separation of concerns.
+InsightSpike follows a clean architecture with clear separation of concerns. The most recent refactoring (February 2026) modularized the geDIG package into 10 specialized modules.
 
 ## 🗂️ Directory Layout
 
@@ -44,8 +46,25 @@ src/insightspike/
 │   └── query_transformation/  # Query processing (unused)
 │
 ├── algorithms/                # Core algorithms
+│   ├── gedig/                # geDIG modular package (2026-02 refactored)
+│   │   ├── __init__.py       # Public API (18 exports)
+│   │   ├── types.py          # ProcessingMode, SpikeDetectionMode, HopResult, GeDIGResult
+│   │   ├── config.py         # GeDIGConfig (from_env, from_kwargs, preset)
+│   │   ├── spike.py          # detect_spike, compute_rewards
+│   │   ├── graph_utils.py    # Graph utility functions (11 functions)
+│   │   ├── monitor.py        # GeDIGMonitor
+│   │   ├── logger.py         # GeDIGLogger (rotating CSV)
+│   │   ├── selector.py       # TwoThresholdCandidateSelector, compute_gedig
+│   │   ├── linkset.py        # compute_linkset_metrics
+│   │   ├── multihop.py       # calculate_multihop
+│   │   └── ab_writer_helper.py
+│   ├── ig/                   # Information Gain package
+│   │   ├── __init__.py
+│   │   ├── types.py          # EntropyMethod, IGResult
+│   │   └── methods.py        # ImprovedEntropyMethods
+│   ├── gedig_core.py         # GeDIGCore orchestration (779 lines)
 │   ├── graph_edit_distance.py # GED calculation
-│   ├── information_gain.py    # IG calculation
+│   ├── information_gain.py    # IG calculation (607 lines)
 │   ├── similarity_entropy.py  # Entropy metrics
 │   └── __init__.py
 │
@@ -135,10 +154,47 @@ from insightspike.features.graph_reasoning.graph_analyzer import GraphAnalyzer
 from insightspike.algorithms.graph_edit_distance import calculate_graph_edit_distance
 from insightspike.algorithms.information_gain import calculate_information_gain
 
+# geDIG (refactored 2026-02)
+from insightspike.algorithms.gedig import GeDIGConfig, GeDIGResult
+from insightspike.algorithms.gedig import detect_spike, compute_rewards
+from insightspike.algorithms.gedig import calculate_multihop, compute_linkset_metrics
+from insightspike.algorithms.gedig_core import GeDIGCore
+
+# Using GeDIGConfig
+config = GeDIGConfig.from_env()  # From environment variables
+config = GeDIGConfig.from_kwargs(lambda_weight=0.7)  # With overrides
+config = GeDIGConfig.preset("maze")  # From presets
+core = GeDIGCore(config=config)
+
 # Configuration
 from insightspike.config import load_config, InsightSpikeConfig
 from insightspike.config.presets import ConfigPresets
 ```
+
+## 🎯 Key Changes (February 2026)
+
+### geDIG Modular Refactoring:
+- ✅ `gedig_core.py` reduced from 2,159 → 779 lines (-64%)
+- ✅ Extracted 10 specialized modules in `algorithms/gedig/`
+- ✅ Centralized configuration in `GeDIGConfig` (from_env, from_kwargs, preset)
+- ✅ Test coverage improved from 54% → 84%
+- ✅ Added 174 new tests (53 → 227 total)
+- ✅ Created `algorithms/ig/` package for Information Gain
+
+### New Modules:
+| Module | Lines | Responsibility |
+|--------|-------|----------------|
+| types.py | 128 | ProcessingMode, SpikeDetectionMode, HopResult, GeDIGResult, LinksetMetrics |
+| config.py | 310 | GeDIGConfig with from_env, from_kwargs, preset methods |
+| spike.py | 114 | detect_spike, compute_rewards |
+| graph_utils.py | 416 | 11 graph utility functions |
+| linkset.py | 218 | compute_linkset_metrics |
+| multihop.py | 370 | calculate_multihop |
+| monitor.py | 193 | GeDIGMonitor |
+| logger.py | 137 | GeDIGLogger (rotating CSV) |
+| selector.py | 270 | TwoThresholdCandidateSelector, compute_gedig |
+
+---
 
 ## 🎯 Key Changes (July 2025)
 

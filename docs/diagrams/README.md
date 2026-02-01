@@ -13,7 +13,8 @@ This directory contains Mermaid diagrams illustrating the InsightSpike-AI archit
 - **TECHNICAL_ARCHITECTURE.mermaid** - System architecture with scalable graph implementation
 - **DATA_FLOW_ARCHITECTURE.mermaid** - Data flow with query storage (updated)
 - **WORKFLOW_TREE.mermaid** - Processing workflow with query persistence
-- **GEDIG_SELECTOR_PIPELINE.mermaid** - Canonical selector→core pipeline (2025‑09)
+- **GEDIG_SELECTOR_PIPELINE.mermaid** - Canonical selector→core pipeline (2026-02 updated)
+- **GEDIG_REFACTOR_2025_08.mermaid** - Modular geDIG architecture post-refactoring (2026-02)
 - **WRITER_INJECTION.mermaid** - A/B logger writer injection flow (2025‑09)
 - **SYSTEM_DASHBOARD.mermaid** - Real-time system metrics with hierarchical graph performance
 
@@ -25,7 +26,30 @@ This directory contains Mermaid diagrams illustrating the InsightSpike-AI archit
 ### Insight Processing
 - **INSIGHT_LIFECYCLE.mermaid** - Insight discovery and quality assessment lifecycle
 
-## 🚀 Latest Updates (2025-08-06)
+## 🚀 Latest Updates (2026-02-01)
+
+### geDIG Modular Refactoring Complete
+1. **GEDIG_SELECTOR_PIPELINE.mermaid** ⚡ **UPDATED**
+   - Updated to reflect modular package structure
+   - Shows GeDIGConfig configuration layer
+   - Illustrates module dependencies (linkset, multihop, spike, graph_utils)
+
+2. **GEDIG_REFACTOR_2025_08.mermaid** ⚡ **UPDATED**
+   - Renamed to reflect completed refactoring (2026-02)
+   - Shows 10 extracted modules with line counts
+   - Includes statistics: 2,159→779 lines (-64%), 54%→84% coverage
+
+3. **Refactoring Statistics**
+   - gedig_core.py: 2,159 → 779 lines (-64%)
+   - Modules: 1 → 10 (+9)
+   - Tests: 53 → 227 (+174)
+   - Coverage: 54% → 84% (+30%)
+
+4. **Note**: SVG files may need regeneration from updated mermaid sources
+
+---
+
+## 🚀 Previous Updates (2025-08-06)
 
 ### Integrated Vector-Graph Index Implementation
 1. **Integrated Index Architecture** ⚡ **NEW**
