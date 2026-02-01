@@ -279,3 +279,136 @@ class TestComputeGedMinProxy:
         g2 = nx.Graph()
         proxy = compute_ged_min_proxy(g1, g2)
         assert proxy == 0.0
+
+    def test_disconnected_graph(self):
+        """Test with disconnected graph (uses largest component)."""
+        g1 = nx.Graph()
+        g1.add_edges_from([(0, 1), (1, 2), (3, 4)])  # Two components
+        g2 = g1.copy()
+        g2.add_edge(0, 4)  # Connect components
+        proxy = compute_ged_min_proxy(g1, g2)
+        assert isinstance(proxy, float)
+
+    def test_edge_densification_fallback(self):
+        """Test edge count fallback when SP gain is not positive."""
+        g1 = nx.Graph()
+        g1.add_node(0)
+        g2 = nx.Graph()
+        g2.add_edge(0, 1)
+        proxy = compute_ged_min_proxy(g1, g2)
+        assert proxy != 0.0  # Should use edge fallback
+
+
+class TestAvgShortestPathLengthSafeLargeGraph:
+    """Additional tests for avg_shortest_path_length_safe with large graphs."""
+
+    def test_large_graph_sampling(self):
+        """Test sampling behavior on large graphs."""
+        # Create a large graph that triggers sampling
+        g = nx.watts_strogatz_graph(100, 4, 0.3)
+        avg_sp = avg_shortest_path_length_safe(g, node_cap=20, pair_samples=50)
+        assert avg_sp > 0
+
+    def test_disconnected_large_graph(self):
+        """Test with large disconnected graph."""
+        g = nx.Graph()
+        for i in range(50):
+            g.add_edge(i * 2, i * 2 + 1)  # 50 disconnected pairs
+        avg_sp = avg_shortest_path_length_safe(g, node_cap=20, pair_samples=100)
+        # Many pairs won't be connected
+        assert avg_sp >= 0
+
+
+class TestComputeSpGainNormAbsolute:
+    """Additional tests for compute_sp_gain_norm absolute mode."""
+
+    def test_absolute_mode(self):
+        """Test absolute mode."""
+        g1 = nx.path_graph(10)
+        g2 = g1.copy()
+        g2.add_edge(0, 9)  # Add shortcut
+        gain = compute_sp_gain_norm(g1, g2, mode='absolute')
+        assert gain > 0
+
+
+class TestTrimTerminalEdgesExtended:
+    """Extended tests for trim_terminal_edges."""
+
+    def test_with_terminal_layer(self):
+        """Test that terminal layer edges are removed."""
+        g = nx.Graph()
+        g.add_edges_from([
+            ('a', 'b'), ('b', 'c'), ('c', 'd')
+        ])
+        anchors = {'a'}
+        trimmed = trim_terminal_edges(g, anchors, hop=2)
+        # Edge (b, c) should be removed as c is at hop=2 (terminal)
+        # Edge (c, d) is NOT removed because d is not visited (dist=None)
+        assert ('b', 'c') not in trimmed.edges()
+        assert ('a', 'b') in trimmed.edges()
+
+    def test_exception_handling(self):
+        """Test that exceptions are handled gracefully."""
+        g = nx.Graph()
+        g.add_edge('a', 'b')
+        # Empty anchors should still work
+        result = trim_terminal_edges(g, set(), hop=2)
+        assert isinstance(result, nx.Graph)
+
+
+class TestEnsureNetworkxExtended:
+    """Extended tests for ensure_networkx."""
+
+    def test_non_square_matrix(self):
+        """Test with non-square adjacency matrix."""
+        arr = np.array([[1, 2, 3], [4, 5, 6]])  # 2x3 matrix
+        g = ensure_networkx(arr)
+        assert g.number_of_nodes() == 0
+
+
+class TestPygToNetworkxExtended:
+    """Extended tests for pyg_to_networkx."""
+
+    def test_with_cpu_method(self):
+        """Test PyG data that has cpu() method (tensor-like)."""
+        class TensorLike:
+            def __init__(self, data):
+                self._data = np.array(data)
+
+            def cpu(self):
+                return self
+
+            def numpy(self):
+                return self._data
+
+            @property
+            def shape(self):
+                return self._data.shape
+
+            def __len__(self):
+                return len(self._data)
+
+            def __getitem__(self, idx):
+                return self._data[idx]
+
+        class MockPyGData:
+            def __init__(self):
+                self.num_nodes = 3
+                self.edge_index = TensorLike([[0, 1], [1, 2]])
+                self.x = TensorLike([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+
+        data = MockPyGData()
+        g = pyg_to_networkx(data)
+        assert g.number_of_nodes() == 3
+
+
+class TestFilterFeaturesExtended:
+    """Extended tests for filter_features."""
+
+    def test_1d_features_empty_result(self):
+        """Test with 1D features returning empty."""
+        g = nx.Graph()
+        g.add_node("a")
+        features = np.array([1.0, 2.0, 3.0])  # 1D
+        filtered = filter_features(features, {"z"}, g)  # Non-existent node
+        assert filtered.shape == (0,)
