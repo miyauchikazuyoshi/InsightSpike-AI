@@ -1,9 +1,11 @@
 # グラフ構造パターン認知を Sleep に取り込む：意味空間醸成の設計メモ
 
-**Version**: 0.3 (Draft)  
-**Date**: 2026-01-30  
-**Author**: Kazuyoshi Miyauchi  
+**Version**: 0.5 (Draft)
+**Date**: 2026-01-30
+**Author**: Kazuyoshi Miyauchi
 **Status**: Proposal
+
+> **v0.5 更新**: Section 3.5 追加 — similarity × confidence（検索と評価の分離と統合）。edge_weight の更新ルール、乗算型統合、geDIG/NA-DA 対応を明記。
 
 ---
 
@@ -143,7 +145,169 @@ w[e] = clip( log((P(e | success) + ε) / (P(e | fail) + ε)), w_min, w_max )
 
 これは「意味空間（prior）を育てる操作」そのものに DG 感を与えるための最小要件。
 
-### 3.4 Lossの最小案（いきなりGNNしない）
+### 3.4 外部prior × 内部記憶（affordance）の併用
+
+生物っぽさを出すには **短期のバイアス** と **長期の記憶痕** を分けて持つのが自然。
+
+- **外部prior（短期）**: `event_bias`
+  - `event_weights` をそのまま行動選択に加算（logit）
+  - その場の"気分/ホルモン"に近い
+- **内部記憶（長期）**: `affordance_bias`
+  - Q→dir の **方向ノードにバイアスを保存**（行動の習慣化）
+  - 更新はイベントラベルの合成で行う（下式）
+
+```
+affordance_bias := clip( affordance_bias + lr * label_score, -B, +B )
+```
+
+`label_score` はイベントの加算（goal/blocked/revisit 等）で構成。
+これにより **「外部priorで動かす → 内部記憶に刻む」** が可能になる。
+
+### 3.5 similarity × confidence: 検索と評価の分離と統合
+
+**核心的な問題**: 現在の迷路実装では、similarity（ベクトル距離）で候補を選んでいるが、「近い記憶」と「良い記憶」は別問題。
+
+```
+例：
+- 過去に A → B（行き止まり）を経験
+- 今 A にいて、B への similarity が高い
+- でも B は行き止まりだった（負例）
+- similarity だけだと B を選んでしまう！
+```
+
+#### 役割の分離
+
+| 軸 | 意味 | 対応 |
+|----|------|------|
+| **similarity** | 記憶の検索（どれが近いか） | 構造的近さ（低 EPC） |
+| **edge_weight** | 記憶の評価（良かったか悪かったか） | 情報利得の履歴（高 IG だった） |
+
+これは人間の記憶システムと同型：
+- **エピソード記憶（海馬）** → similarity による連想検索
+- **感情タグ（扁桃体）** → edge_weight による評価
+
+#### edge_weight の更新ルール（最小）
+
+```python
+# 初期化
+w[e] = 0.0  # e = (s, a, s')
+
+# 正例（重みを上げる）
+if reached_goal:
+    for i, e in enumerate(reversed(path_to_goal)):
+        w[e] += α * (γ ** i)  # ゴールに近いほど強く
+
+if s' not in visited:
+    w[e] += α_explore  # 新規セルへの到達
+
+# 負例（重みを下げる）
+if s' in visited:
+    w[e] -= β_revisit  # 再訪問
+```
+
+#### 統合方法の選択肢
+
+**A. 加算型（現状）**
+```python
+score = similarity + λ * edge_weight
+```
+- 問題: スケールが違う、バランス調整が難しい
+
+**B. 乗算型（推奨）**
+```python
+confidence = sigmoid(edge_weight)  # ∈ (0, 1)
+score = similarity * confidence
+```
+- 利点: 「近いけど悪い記憶」を自然に抑制
+- 解釈: **「近い記憶」の中から「良い記憶」を選ぶ**
+
+**C. 二段階型**
+```python
+candidates = top_k(by=similarity)  # Step 1: 検索
+action = argmax(candidates, by=edge_weight)  # Step 2: 評価
+```
+- 利点: 役割が明確、デバッグしやすい
+
+#### geDIG との対応
+
+```
+F = ΔEPC - λ·ΔIG
+
+similarity ≈ -ΔEPC（構造的に近い = 低コスト）
+edge_weight ≈ ΔIG（過去の情報利得）
+
+乗算型: score = exp(-EPC) * sigmoid(IG)
+       ≈ 「低コストで高利得」を選ぶ
+       ≈ F が低い（良い）ものを選ぶ
+```
+
+#### NA/DA 対応（神経伝達物質）
+
+この設計は脳の意思決定と同型：
+
+- **NA（ノルアドレナリン）**: similarity が低い（= 新規/曖昧）→ 探索モード
+- **DA（ドーパミン）**: edge_weight が高い（= 過去に良かった）→ 確信
+
+> 注: 実装では `affordance_bias`（方向ノード単位）と `edge_weight`（エッジ単位）の粒度が異なる。両方を併用する場合は、`edge_weight` を方向ごとに集約して `affordance_bias` に反映させる設計も考えられる。
+
+> 注: `--persist-graph-sqlite` を使うと、`affordance_bias` を SQLite/DS に保存してエピソード間で再ロードできる（namespace 単位）。
+
+#### 3.4.1 実装と設定（Maze PoC）
+
+**目的**  
+「負例（blocked / deadend / revisit など）の重みで affordance を更新するが、行動選択には event_bias を入れない」構成。  
+→ `event_beta=0` で **更新だけ有効** にする。
+
+**手順**
+
+1) event_weights を用意（既存ログから重みを生成）
+```
+.venv/bin/python experiments/maze-query-hub-prototype/tools/export_event_weights.py \
+  --steps results/maze-local/event_poc2b_steps.json \
+  --summary results/maze-local/event_poc2b_summary.json \
+  --out-dir results/maze-local/event_poc2b_events
+```
+
+2) affordance 更新のみ有効で実験
+```
+.venv/bin/python experiments/maze-query-hub-prototype/run_experiment_query.py \
+  --maze-size 19 --maze-type prim --max-steps 80 \
+  --curriculum-warmup-steps 80 --max-hops 2 \
+  --theta-ag 0.2 --theta-dg 0.15 \
+  --action-policy softmax --action-temp 2.0 \
+  --sleep-guide off --sleep-plan-beta 2.0 --sleep-q-beta 6.0 \
+  --sp-cache-mode cached_incr --cortisol-mode log \
+  --event-weights results/maze-local/event_poc2b_events/event_weights.json \
+  --event-beta 0 \
+  --affordance-bias \
+  --persist-graph-sqlite results/maze-local/affordance_bias_prim_growth_event.sqlite \
+  --output results/maze-local/affordance_bias_prim_growth_event_summary.json \
+  --step-log results/maze-local/affordance_bias_prim_growth_event_steps.json
+```
+
+3) HTML 可視化（growth/bias overlay）
+```
+.venv/bin/python experiments/maze-query-hub-prototype/build_reports.py \
+  --summary results/maze-local/affordance_bias_prim_growth_event_warmup_summary.json \
+  --steps results/maze-local/affordance_bias_prim_growth_event_warmup_steps.json \
+  --out results/maze-local/affordance_bias_prim_growth_event_warmup_interactive.html \
+  --sqlite results/maze-local/affordance_bias_prim_growth_event.sqlite --strict
+
+.venv/bin/python experiments/maze-query-hub-prototype/build_reports.py \
+  --summary results/maze-local/affordance_bias_prim_growth_event_eval_summary.json \
+  --steps results/maze-local/affordance_bias_prim_growth_event_eval_steps.json \
+  --out results/maze-local/affordance_bias_prim_growth_event_eval_interactive.html \
+  --sqlite results/maze-local/affordance_bias_prim_growth_event.sqlite --strict
+```
+
+**主要フラグ**
+- `--event-weights`: event_weights.json を読み込み（affordance 更新のソース）
+- `--event-beta 0`: 行動選択には event_bias を使わない（更新のみ）
+- `--affordance-bias`: Q→dir の方向ノードに長期バイアスを保存
+- `--affordance-beta / --affordance-lr / --affordance-clamp`: 影響強度・学習率・飽和値
+- `--persist-graph-sqlite`: エピソード間の記憶保持（growth overlay の基準にも使う）
+
+### 3.5 Lossの最小案（いきなりGNNしない）
 
 最初は **埋め込み学習なし**でもよい（モチーフ頻度ベクトルで近傍検索するだけでも Sleep の価値が出る）。
 

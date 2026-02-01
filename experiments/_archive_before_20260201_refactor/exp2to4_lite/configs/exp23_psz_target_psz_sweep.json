@@ -1,0 +1,3685 @@
+{
+  "psz_target": {
+    "target": {
+      "acc": 0.95,
+      "fmr": 0.02,
+      "p50": 200.0
+    },
+    "best": {
+      "acceptance_threshold": 0.35,
+      "top_k": 4,
+      "max_hops": 2,
+      "theta_ag": 5.0,
+      "theta_dg": 0.3,
+      "result": {
+        "per_mean": 0.4247383512544803,
+        "per_std": 0.4369452917831468,
+        "acceptance_rate": 1.0,
+        "fmr": 0.0,
+        "latency_p50": 136.07236748794094,
+        "latency_p95": 151.77100586297456,
+        "psz_inside": false,
+        "ag_rate": 0.0,
+        "dg_rate": 0.12,
+        "avg_steps": 2.88,
+        "gate_logs": [
+          {
+            "g0": 0.48472027972027976,
+            "gmin": 0.48472027972027976,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.48472027972027976,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.5455555555555556,
+            "gmin": 0.5455555555555556,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.5455555555555556,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.0,
+            "gmin": 0.0,
+            "ag": 0.0,
+            "dg": 1.0,
+            "gedig_value": 0.0,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.8184920634920635,
+            "gmin": 0.8184920634920635,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.8184920634920635,
+            "backend": "core"
+          },
+          {
+            "g0": 0.48472027972027976,
+            "gmin": 0.48472027972027976,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.48472027972027976,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.5455555555555556,
+            "gmin": 0.5455555555555556,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.5455555555555556,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.0,
+            "gmin": 0.0,
+            "ag": 0.0,
+            "dg": 1.0,
+            "gedig_value": 0.0,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.8184920634920635,
+            "gmin": 0.8184920634920635,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.8184920634920635,
+            "backend": "core"
+          },
+          {
+            "g0": 0.48472027972027976,
+            "gmin": 0.48472027972027976,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.48472027972027976,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.5455555555555556,
+            "gmin": 0.5455555555555556,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.5455555555555556,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.0,
+            "gmin": 0.0,
+            "ag": 0.0,
+            "dg": 1.0,
+            "gedig_value": 0.0,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.8184920634920635,
+            "gmin": 0.8184920634920635,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.8184920634920635,
+            "backend": "core"
+          },
+          {
+            "g0": 0.48472027972027976,
+            "gmin": 0.48472027972027976,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.48472027972027976,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.5455555555555556,
+            "gmin": 0.5455555555555556,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.5455555555555556,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.0,
+            "gmin": 0.0,
+            "ag": 0.0,
+            "dg": 1.0,
+            "gedig_value": 0.0,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.8184920634920635,
+            "gmin": 0.8184920634920635,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.8184920634920635,
+            "backend": "core"
+          },
+          {
+            "g0": 0.48472027972027976,
+            "gmin": 0.48472027972027976,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.48472027972027976,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.5455555555555556,
+            "gmin": 0.5455555555555556,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.5455555555555556,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.0,
+            "gmin": 0.0,
+            "ag": 0.0,
+            "dg": 1.0,
+            "gedig_value": 0.0,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.8184920634920635,
+            "gmin": 0.8184920634920635,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.8184920634920635,
+            "backend": "core"
+          },
+          {
+            "g0": 0.48472027972027976,
+            "gmin": 0.48472027972027976,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.48472027972027976,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.5455555555555556,
+            "gmin": 0.5455555555555556,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.5455555555555556,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.0,
+            "gmin": 0.0,
+            "ag": 0.0,
+            "dg": 1.0,
+            "gedig_value": 0.0,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          },
+          {
+            "g0": 0.8184920634920635,
+            "gmin": 0.8184920634920635,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.8184920634920635,
+            "backend": "core"
+          },
+          {
+            "g0": 0.48472027972027976,
+            "gmin": 0.48472027972027976,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.48472027972027976,
+            "backend": "core"
+          },
+          {
+            "g0": 0.3814985014985015,
+            "gmin": 0.3814985014985015,
+            "ag": 0.0,
+            "dg": 0.0,
+            "gedig_value": 0.3814985014985015,
+            "backend": "core"
+          }
+        ],
+        "per_samples": [
+          {
+            "query": "As a causal chain, how does coastal sunshine help marine animals obtain oxygen?",
+            "ground_truth": "When sunlight reaches coastal waters, marine algae photosynthesise, releasing oxygen that dissolves for fish to use.",
+            "answer": "Lunar gravity pulls water into bulges; as Earth rotates, those bulges shift, generating currents that mix shoreline waters.",
+            "steps": 3,
+            "latency_ms": 141.92864304641262,
+            "accepted": false,
+            "per": 0.06451612903225806,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "moon_tides_mix_11",
+              "moon_tides_mix_43",
+              "moon_tides_mix_19",
+              "moon_tides_mix_27",
+              "moon_tides_mix_3"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.48472027972027976
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_27"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_27"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_3"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "tidal_mixing"
+            }
+          },
+          {
+            "query": "Explain how sunlight and tides together deliver oxygen along coasts.",
+            "ground_truth": "Sunlight powers coastal algae to photosynthesise, and lunar-driven tides mix that oxygenated water along the shore.",
+            "answer": "Sunlight powers coastal algae to photosynthesise oxygen, and lunar-driven tides mix that oxygenated water along the shore.",
+            "steps": 3,
+            "latency_ms": 148.64500798285007,
+            "accepted": true,
+            "per": 0.9444444444444444,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_oxygen_9",
+              "solar_oxygen_17",
+              "solar_oxygen_49",
+              "solar_oxygen_2"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_49",
+                  "solar_oxygen_2"
+                ],
+                [
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_49",
+                  "solar_oxygen_2"
+                ],
+                [
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_49",
+                  "solar_oxygen_2"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "solar_tidal_mix"
+            }
+          },
+          {
+            "query": "Trace how solar energy becomes the oxygen we breathe.",
+            "ground_truth": "Solar photons drive photosynthesis in plants and algae, generating the oxygen that builds up in Earth's air.",
+            "answer": "Sunlight powers coastal algae to photosynthesise oxygen, and lunar-driven tides mix that oxygenated water along the shore.",
+            "steps": 3,
+            "latency_ms": 130.28717099223286,
+            "accepted": false,
+            "per": 0.16666666666666666,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_sun_8",
+              "solar_sun_16",
+              "solar_sun_49",
+              "solar_sun_41",
+              "moon_tides_mix_11",
+              "moon_tides_mix_43",
+              "moon_tides_mix_19",
+              "moon_tides_mix_3"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                1.8,
+                0.5455555555555556
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_sun_8",
+                  "solar_sun_16",
+                  "solar_sun_49",
+                  "solar_sun_41"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_3"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_3"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "solar_tidal_mix"
+            }
+          },
+          {
+            "query": "Describe concisely the mechanism by which lunar gravity keeps tidal mixing active.",
+            "ground_truth": "Lunar gravity pulls water into bulges; as Earth rotates, those bulges shift, generating currents that mix shoreline waters.",
+            "answer": "Sunlight powers coastal algae to photosynthesise oxygen, and lunar-driven tides mix that oxygenated water along the shore.",
+            "steps": 3,
+            "latency_ms": 136.55623397789896,
+            "accepted": false,
+            "per": 0.12903225806451613,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_oxygen_24",
+              "solar_oxygen_2",
+              "solar_oxygen_9",
+              "solar_oxygen_17"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_oxygen_24",
+                  "solar_oxygen_2",
+                  "solar_oxygen_9",
+                  "solar_oxygen_17"
+                ],
+                [
+                  "solar_oxygen_24",
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_2"
+                ],
+                [
+                  "solar_oxygen_24",
+                  "solar_oxygen_2",
+                  "solar_oxygen_9",
+                  "solar_oxygen_17"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "solar_tidal_mix"
+            }
+          },
+          {
+            "query": "How do routers forward packets along the Internet?",
+            "ground_truth": "Routers read packet addresses and consult routing tables to forward traffic along viable next hops.",
+            "answer": "Routers read packet addresses and consult routing tables to forward traffic along viable next hops.",
+            "steps": 3,
+            "latency_ms": 150.0740500050597,
+            "accepted": true,
+            "per": 1.0,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "net_router_36",
+              "net_router_28",
+              "net_router_44",
+              "net_router_4"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "net_router_36",
+                  "net_router_28",
+                  "net_router_44",
+                  "net_router_4"
+                ],
+                [
+                  "net_router_36",
+                  "net_router_44",
+                  "net_router_28",
+                  "net_router_4"
+                ],
+                [
+                  "net_router_44",
+                  "net_router_36",
+                  "net_router_28",
+                  "net_router_4"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "packet_routing"
+            }
+          },
+          {
+            "query": "How does a GPS receiver determine its location?",
+            "ground_truth": "It measures the arrival time of signals from several satellites and triangulates its location.",
+            "answer": "Lunar gravity pulls water into bulges; as Earth rotates, those bulges shift, generating currents that mix shoreline waters.",
+            "steps": 2,
+            "latency_ms": 71.59228704404086,
+            "accepted": false,
+            "per": 0.0,
+            "ag": false,
+            "dg": true,
+            "retrieved_doc_ids": [
+              "moon_cycle_12",
+              "moon_cycle_47",
+              "moon_cycle_18",
+              "moon_cycle_13"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.0
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                1.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "moon_cycle_12",
+                  "moon_cycle_47",
+                  "moon_cycle_18",
+                  "moon_cycle_13"
+                ],
+                [
+                  "moon_cycle_12",
+                  "moon_cycle_47",
+                  "moon_cycle_18",
+                  "moon_cycle_13"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                1
+              ],
+              "answer_template": "tidal_mixing"
+            }
+          },
+          {
+            "query": "What do mitochondria do to generate energy for the cell?",
+            "ground_truth": "They oxidise nutrients through respiration, generating ATP that fuels the cell's activities.",
+            "answer": "They oxidise nutrients through respiration, generating ATP that fuels the cell's activities.",
+            "steps": 3,
+            "latency_ms": 132.21122499089688,
+            "accepted": true,
+            "per": 1.0,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "cell_resp_6",
+              "cell_resp_46",
+              "cell_resp_14",
+              "cell_resp_38"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "cell_resp_6",
+                  "cell_resp_46",
+                  "cell_resp_14",
+                  "cell_resp_38"
+                ],
+                [
+                  "cell_resp_6",
+                  "cell_resp_46",
+                  "cell_resp_14",
+                  "cell_resp_38"
+                ],
+                [
+                  "cell_resp_6",
+                  "cell_resp_46",
+                  "cell_resp_14",
+                  "cell_resp_38"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "cell_energy"
+            }
+          },
+          {
+            "query": "Why does deforestation intensify the greenhouse effect?",
+            "ground_truth": "Losing forests reduces CO₂ uptake while releasing stored carbon, strengthening the greenhouse effect.",
+            "answer": "Deforestation reduces oxygen-producing forests on land; less photosynthetic output means less oxygen dissolving into waters where tides normally distribute it.",
+            "steps": 3,
+            "latency_ms": 129.58643096499145,
+            "accepted": false,
+            "per": 0.06666666666666667,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_sun_8",
+              "solar_sun_16",
+              "solar_sun_49",
+              "solar_sun_9",
+              "moon_tides_mix_11",
+              "moon_tides_mix_19",
+              "moon_tides_mix_43",
+              "moon_tides_mix_35",
+              "moon_tides_mix_3",
+              "moon_tides_mix_27"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                1.8,
+                0.8184920634920635
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_sun_8",
+                  "solar_sun_16",
+                  "solar_sun_49",
+                  "solar_sun_9"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_35"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_3",
+                  "moon_tides_mix_27"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "deforestation_chain"
+            }
+          },
+          {
+            "query": "As a causal chain, how does coastal sunshine help marine animals obtain oxygen?",
+            "ground_truth": "When sunlight reaches coastal waters, marine algae photosynthesise, releasing oxygen that dissolves for fish to use.",
+            "answer": "Lunar gravity pulls water into bulges; as Earth rotates, those bulges shift, generating currents that mix shoreline waters.",
+            "steps": 3,
+            "latency_ms": 144.71567602595314,
+            "accepted": false,
+            "per": 0.06451612903225806,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "moon_tides_mix_11",
+              "moon_tides_mix_43",
+              "moon_tides_mix_19",
+              "moon_tides_mix_27",
+              "moon_tides_mix_3"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.48472027972027976
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_27"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_27"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_3"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "tidal_mixing"
+            }
+          },
+          {
+            "query": "Explain how sunlight and tides together deliver oxygen along coasts.",
+            "ground_truth": "Sunlight powers coastal algae to photosynthesise, and lunar-driven tides mix that oxygenated water along the shore.",
+            "answer": "Sunlight powers coastal algae to photosynthesise oxygen, and lunar-driven tides mix that oxygenated water along the shore.",
+            "steps": 3,
+            "latency_ms": 137.44051102548838,
+            "accepted": true,
+            "per": 0.9444444444444444,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_oxygen_9",
+              "solar_oxygen_17",
+              "solar_oxygen_49",
+              "solar_oxygen_2"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_49",
+                  "solar_oxygen_2"
+                ],
+                [
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_49",
+                  "solar_oxygen_2"
+                ],
+                [
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_49",
+                  "solar_oxygen_2"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "solar_tidal_mix"
+            }
+          },
+          {
+            "query": "Trace how solar energy becomes the oxygen we breathe.",
+            "ground_truth": "Solar photons drive photosynthesis in plants and algae, generating the oxygen that builds up in Earth's air.",
+            "answer": "Sunlight powers coastal algae to photosynthesise oxygen, and lunar-driven tides mix that oxygenated water along the shore.",
+            "steps": 3,
+            "latency_ms": 137.5306699774228,
+            "accepted": false,
+            "per": 0.16666666666666666,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_sun_8",
+              "solar_sun_16",
+              "solar_sun_49",
+              "solar_sun_41",
+              "moon_tides_mix_11",
+              "moon_tides_mix_43",
+              "moon_tides_mix_19",
+              "moon_tides_mix_3"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                1.8,
+                0.5455555555555556
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_sun_8",
+                  "solar_sun_16",
+                  "solar_sun_49",
+                  "solar_sun_41"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_3"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_3"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "solar_tidal_mix"
+            }
+          },
+          {
+            "query": "Describe concisely the mechanism by which lunar gravity keeps tidal mixing active.",
+            "ground_truth": "Lunar gravity pulls water into bulges; as Earth rotates, those bulges shift, generating currents that mix shoreline waters.",
+            "answer": "Sunlight powers coastal algae to photosynthesise oxygen, and lunar-driven tides mix that oxygenated water along the shore.",
+            "steps": 3,
+            "latency_ms": 146.74932602792978,
+            "accepted": false,
+            "per": 0.12903225806451613,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_oxygen_24",
+              "solar_oxygen_2",
+              "solar_oxygen_9",
+              "solar_oxygen_17"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_oxygen_24",
+                  "solar_oxygen_2",
+                  "solar_oxygen_9",
+                  "solar_oxygen_17"
+                ],
+                [
+                  "solar_oxygen_24",
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_2"
+                ],
+                [
+                  "solar_oxygen_24",
+                  "solar_oxygen_2",
+                  "solar_oxygen_9",
+                  "solar_oxygen_17"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "solar_tidal_mix"
+            }
+          },
+          {
+            "query": "How do routers forward packets along the Internet?",
+            "ground_truth": "Routers read packet addresses and consult routing tables to forward traffic along viable next hops.",
+            "answer": "Routers read packet addresses and consult routing tables to forward traffic along viable next hops.",
+            "steps": 3,
+            "latency_ms": 131.9050490274094,
+            "accepted": true,
+            "per": 1.0,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "net_router_36",
+              "net_router_28",
+              "net_router_44",
+              "net_router_4"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "net_router_36",
+                  "net_router_28",
+                  "net_router_44",
+                  "net_router_4"
+                ],
+                [
+                  "net_router_36",
+                  "net_router_44",
+                  "net_router_28",
+                  "net_router_4"
+                ],
+                [
+                  "net_router_44",
+                  "net_router_36",
+                  "net_router_28",
+                  "net_router_4"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "packet_routing"
+            }
+          },
+          {
+            "query": "How does a GPS receiver determine its location?",
+            "ground_truth": "It measures the arrival time of signals from several satellites and triangulates its location.",
+            "answer": "Lunar gravity pulls water into bulges; as Earth rotates, those bulges shift, generating currents that mix shoreline waters.",
+            "steps": 2,
+            "latency_ms": 74.33048100210726,
+            "accepted": false,
+            "per": 0.0,
+            "ag": false,
+            "dg": true,
+            "retrieved_doc_ids": [
+              "moon_cycle_12",
+              "moon_cycle_47",
+              "moon_cycle_18",
+              "moon_cycle_13"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.0
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                1.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "moon_cycle_12",
+                  "moon_cycle_47",
+                  "moon_cycle_18",
+                  "moon_cycle_13"
+                ],
+                [
+                  "moon_cycle_12",
+                  "moon_cycle_47",
+                  "moon_cycle_18",
+                  "moon_cycle_13"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                1
+              ],
+              "answer_template": "tidal_mixing"
+            }
+          },
+          {
+            "query": "What do mitochondria do to generate energy for the cell?",
+            "ground_truth": "They oxidise nutrients through respiration, generating ATP that fuels the cell's activities.",
+            "answer": "They oxidise nutrients through respiration, generating ATP that fuels the cell's activities.",
+            "steps": 3,
+            "latency_ms": 137.93213199824095,
+            "accepted": true,
+            "per": 1.0,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "cell_resp_6",
+              "cell_resp_46",
+              "cell_resp_14",
+              "cell_resp_38"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "cell_resp_6",
+                  "cell_resp_46",
+                  "cell_resp_14",
+                  "cell_resp_38"
+                ],
+                [
+                  "cell_resp_6",
+                  "cell_resp_46",
+                  "cell_resp_14",
+                  "cell_resp_38"
+                ],
+                [
+                  "cell_resp_6",
+                  "cell_resp_46",
+                  "cell_resp_14",
+                  "cell_resp_38"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "cell_energy"
+            }
+          },
+          {
+            "query": "Why does deforestation intensify the greenhouse effect?",
+            "ground_truth": "Losing forests reduces CO₂ uptake while releasing stored carbon, strengthening the greenhouse effect.",
+            "answer": "Deforestation reduces oxygen-producing forests on land; less photosynthetic output means less oxygen dissolving into waters where tides normally distribute it.",
+            "steps": 3,
+            "latency_ms": 135.7512489776127,
+            "accepted": false,
+            "per": 0.06666666666666667,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_sun_8",
+              "solar_sun_16",
+              "solar_sun_49",
+              "solar_sun_9",
+              "moon_tides_mix_11",
+              "moon_tides_mix_19",
+              "moon_tides_mix_43",
+              "moon_tides_mix_35",
+              "moon_tides_mix_3",
+              "moon_tides_mix_27"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                1.8,
+                0.8184920634920635
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_sun_8",
+                  "solar_sun_16",
+                  "solar_sun_49",
+                  "solar_sun_9"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_35"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_3",
+                  "moon_tides_mix_27"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "deforestation_chain"
+            }
+          },
+          {
+            "query": "As a causal chain, how does coastal sunshine help marine animals obtain oxygen?",
+            "ground_truth": "When sunlight reaches coastal waters, marine algae photosynthesise, releasing oxygen that dissolves for fish to use.",
+            "answer": "Lunar gravity pulls water into bulges; as Earth rotates, those bulges shift, generating currents that mix shoreline waters.",
+            "steps": 3,
+            "latency_ms": 136.5567129687406,
+            "accepted": false,
+            "per": 0.06451612903225806,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "moon_tides_mix_11",
+              "moon_tides_mix_43",
+              "moon_tides_mix_19",
+              "moon_tides_mix_27",
+              "moon_tides_mix_3"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.48472027972027976
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_27"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_27"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_3"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "tidal_mixing"
+            }
+          },
+          {
+            "query": "Explain how sunlight and tides together deliver oxygen along coasts.",
+            "ground_truth": "Sunlight powers coastal algae to photosynthesise, and lunar-driven tides mix that oxygenated water along the shore.",
+            "answer": "Sunlight powers coastal algae to photosynthesise oxygen, and lunar-driven tides mix that oxygenated water along the shore.",
+            "steps": 3,
+            "latency_ms": 132.57035403512418,
+            "accepted": true,
+            "per": 0.9444444444444444,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_oxygen_9",
+              "solar_oxygen_17",
+              "solar_oxygen_49",
+              "solar_oxygen_2"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_49",
+                  "solar_oxygen_2"
+                ],
+                [
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_49",
+                  "solar_oxygen_2"
+                ],
+                [
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_49",
+                  "solar_oxygen_2"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "solar_tidal_mix"
+            }
+          },
+          {
+            "query": "Trace how solar energy becomes the oxygen we breathe.",
+            "ground_truth": "Solar photons drive photosynthesis in plants and algae, generating the oxygen that builds up in Earth's air.",
+            "answer": "Sunlight powers coastal algae to photosynthesise oxygen, and lunar-driven tides mix that oxygenated water along the shore.",
+            "steps": 3,
+            "latency_ms": 132.0359879755415,
+            "accepted": false,
+            "per": 0.16666666666666666,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_sun_8",
+              "solar_sun_16",
+              "solar_sun_49",
+              "solar_sun_41",
+              "moon_tides_mix_11",
+              "moon_tides_mix_43",
+              "moon_tides_mix_19",
+              "moon_tides_mix_3"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                1.8,
+                0.5455555555555556
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_sun_8",
+                  "solar_sun_16",
+                  "solar_sun_49",
+                  "solar_sun_41"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_3"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_3"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "solar_tidal_mix"
+            }
+          },
+          {
+            "query": "Describe concisely the mechanism by which lunar gravity keeps tidal mixing active.",
+            "ground_truth": "Lunar gravity pulls water into bulges; as Earth rotates, those bulges shift, generating currents that mix shoreline waters.",
+            "answer": "Sunlight powers coastal algae to photosynthesise oxygen, and lunar-driven tides mix that oxygenated water along the shore.",
+            "steps": 3,
+            "latency_ms": 150.96152998739854,
+            "accepted": false,
+            "per": 0.12903225806451613,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_oxygen_24",
+              "solar_oxygen_2",
+              "solar_oxygen_9",
+              "solar_oxygen_17"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_oxygen_24",
+                  "solar_oxygen_2",
+                  "solar_oxygen_9",
+                  "solar_oxygen_17"
+                ],
+                [
+                  "solar_oxygen_24",
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_2"
+                ],
+                [
+                  "solar_oxygen_24",
+                  "solar_oxygen_2",
+                  "solar_oxygen_9",
+                  "solar_oxygen_17"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "solar_tidal_mix"
+            }
+          },
+          {
+            "query": "How do routers forward packets along the Internet?",
+            "ground_truth": "Routers read packet addresses and consult routing tables to forward traffic along viable next hops.",
+            "answer": "Routers read packet addresses and consult routing tables to forward traffic along viable next hops.",
+            "steps": 3,
+            "latency_ms": 134.92040400160477,
+            "accepted": true,
+            "per": 1.0,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "net_router_36",
+              "net_router_28",
+              "net_router_44",
+              "net_router_4"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "net_router_36",
+                  "net_router_28",
+                  "net_router_44",
+                  "net_router_4"
+                ],
+                [
+                  "net_router_36",
+                  "net_router_44",
+                  "net_router_28",
+                  "net_router_4"
+                ],
+                [
+                  "net_router_44",
+                  "net_router_36",
+                  "net_router_28",
+                  "net_router_4"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "packet_routing"
+            }
+          },
+          {
+            "query": "How does a GPS receiver determine its location?",
+            "ground_truth": "It measures the arrival time of signals from several satellites and triangulates its location.",
+            "answer": "Lunar gravity pulls water into bulges; as Earth rotates, those bulges shift, generating currents that mix shoreline waters.",
+            "steps": 2,
+            "latency_ms": 72.91387300938368,
+            "accepted": false,
+            "per": 0.0,
+            "ag": false,
+            "dg": true,
+            "retrieved_doc_ids": [
+              "moon_cycle_12",
+              "moon_cycle_47",
+              "moon_cycle_18",
+              "moon_cycle_13"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.0
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                1.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "moon_cycle_12",
+                  "moon_cycle_47",
+                  "moon_cycle_18",
+                  "moon_cycle_13"
+                ],
+                [
+                  "moon_cycle_12",
+                  "moon_cycle_47",
+                  "moon_cycle_18",
+                  "moon_cycle_13"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                1
+              ],
+              "answer_template": "tidal_mixing"
+            }
+          },
+          {
+            "query": "What do mitochondria do to generate energy for the cell?",
+            "ground_truth": "They oxidise nutrients through respiration, generating ATP that fuels the cell's activities.",
+            "answer": "They oxidise nutrients through respiration, generating ATP that fuels the cell's activities.",
+            "steps": 3,
+            "latency_ms": 131.70012400951236,
+            "accepted": true,
+            "per": 1.0,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "cell_resp_6",
+              "cell_resp_46",
+              "cell_resp_14",
+              "cell_resp_38"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "cell_resp_6",
+                  "cell_resp_46",
+                  "cell_resp_14",
+                  "cell_resp_38"
+                ],
+                [
+                  "cell_resp_6",
+                  "cell_resp_46",
+                  "cell_resp_14",
+                  "cell_resp_38"
+                ],
+                [
+                  "cell_resp_6",
+                  "cell_resp_46",
+                  "cell_resp_14",
+                  "cell_resp_38"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "cell_energy"
+            }
+          },
+          {
+            "query": "Why does deforestation intensify the greenhouse effect?",
+            "ground_truth": "Losing forests reduces CO₂ uptake while releasing stored carbon, strengthening the greenhouse effect.",
+            "answer": "Deforestation reduces oxygen-producing forests on land; less photosynthetic output means less oxygen dissolving into waters where tides normally distribute it.",
+            "steps": 3,
+            "latency_ms": 140.73470002040267,
+            "accepted": false,
+            "per": 0.06666666666666667,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_sun_8",
+              "solar_sun_16",
+              "solar_sun_49",
+              "solar_sun_9",
+              "moon_tides_mix_11",
+              "moon_tides_mix_19",
+              "moon_tides_mix_43",
+              "moon_tides_mix_35",
+              "moon_tides_mix_3",
+              "moon_tides_mix_27"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                1.8,
+                0.8184920634920635
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_sun_8",
+                  "solar_sun_16",
+                  "solar_sun_49",
+                  "solar_sun_9"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_35"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_3",
+                  "moon_tides_mix_27"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "deforestation_chain"
+            }
+          },
+          {
+            "query": "As a causal chain, how does coastal sunshine help marine animals obtain oxygen?",
+            "ground_truth": "When sunlight reaches coastal waters, marine algae photosynthesise, releasing oxygen that dissolves for fish to use.",
+            "answer": "Lunar gravity pulls water into bulges; as Earth rotates, those bulges shift, generating currents that mix shoreline waters.",
+            "steps": 3,
+            "latency_ms": 149.27963103400543,
+            "accepted": false,
+            "per": 0.06451612903225806,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "moon_tides_mix_11",
+              "moon_tides_mix_43",
+              "moon_tides_mix_19",
+              "moon_tides_mix_27",
+              "moon_tides_mix_3"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.48472027972027976
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_27"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_27"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_3"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "tidal_mixing"
+            }
+          },
+          {
+            "query": "Explain how sunlight and tides together deliver oxygen along coasts.",
+            "ground_truth": "Sunlight powers coastal algae to photosynthesise, and lunar-driven tides mix that oxygenated water along the shore.",
+            "answer": "Sunlight powers coastal algae to photosynthesise oxygen, and lunar-driven tides mix that oxygenated water along the shore.",
+            "steps": 3,
+            "latency_ms": 152.29579899460077,
+            "accepted": true,
+            "per": 0.9444444444444444,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_oxygen_9",
+              "solar_oxygen_17",
+              "solar_oxygen_49",
+              "solar_oxygen_2"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_49",
+                  "solar_oxygen_2"
+                ],
+                [
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_49",
+                  "solar_oxygen_2"
+                ],
+                [
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_49",
+                  "solar_oxygen_2"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "solar_tidal_mix"
+            }
+          },
+          {
+            "query": "Trace how solar energy becomes the oxygen we breathe.",
+            "ground_truth": "Solar photons drive photosynthesis in plants and algae, generating the oxygen that builds up in Earth's air.",
+            "answer": "Sunlight powers coastal algae to photosynthesise oxygen, and lunar-driven tides mix that oxygenated water along the shore.",
+            "steps": 3,
+            "latency_ms": 128.82323894882575,
+            "accepted": false,
+            "per": 0.16666666666666666,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_sun_8",
+              "solar_sun_16",
+              "solar_sun_49",
+              "solar_sun_41",
+              "moon_tides_mix_11",
+              "moon_tides_mix_43",
+              "moon_tides_mix_19",
+              "moon_tides_mix_3"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                1.8,
+                0.5455555555555556
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_sun_8",
+                  "solar_sun_16",
+                  "solar_sun_49",
+                  "solar_sun_41"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_3"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_3"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "solar_tidal_mix"
+            }
+          },
+          {
+            "query": "Describe concisely the mechanism by which lunar gravity keeps tidal mixing active.",
+            "ground_truth": "Lunar gravity pulls water into bulges; as Earth rotates, those bulges shift, generating currents that mix shoreline waters.",
+            "answer": "Sunlight powers coastal algae to photosynthesise oxygen, and lunar-driven tides mix that oxygenated water along the shore.",
+            "steps": 3,
+            "latency_ms": 153.18082500016317,
+            "accepted": false,
+            "per": 0.12903225806451613,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_oxygen_24",
+              "solar_oxygen_2",
+              "solar_oxygen_9",
+              "solar_oxygen_17"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_oxygen_24",
+                  "solar_oxygen_2",
+                  "solar_oxygen_9",
+                  "solar_oxygen_17"
+                ],
+                [
+                  "solar_oxygen_24",
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_2"
+                ],
+                [
+                  "solar_oxygen_24",
+                  "solar_oxygen_2",
+                  "solar_oxygen_9",
+                  "solar_oxygen_17"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "solar_tidal_mix"
+            }
+          },
+          {
+            "query": "How do routers forward packets along the Internet?",
+            "ground_truth": "Routers read packet addresses and consult routing tables to forward traffic along viable next hops.",
+            "answer": "Routers read packet addresses and consult routing tables to forward traffic along viable next hops.",
+            "steps": 3,
+            "latency_ms": 128.94105195300654,
+            "accepted": true,
+            "per": 1.0,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "net_router_36",
+              "net_router_28",
+              "net_router_44",
+              "net_router_4"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "net_router_36",
+                  "net_router_28",
+                  "net_router_44",
+                  "net_router_4"
+                ],
+                [
+                  "net_router_36",
+                  "net_router_44",
+                  "net_router_28",
+                  "net_router_4"
+                ],
+                [
+                  "net_router_44",
+                  "net_router_36",
+                  "net_router_28",
+                  "net_router_4"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "packet_routing"
+            }
+          },
+          {
+            "query": "How does a GPS receiver determine its location?",
+            "ground_truth": "It measures the arrival time of signals from several satellites and triangulates its location.",
+            "answer": "Lunar gravity pulls water into bulges; as Earth rotates, those bulges shift, generating currents that mix shoreline waters.",
+            "steps": 2,
+            "latency_ms": 79.73062695236877,
+            "accepted": false,
+            "per": 0.0,
+            "ag": false,
+            "dg": true,
+            "retrieved_doc_ids": [
+              "moon_cycle_12",
+              "moon_cycle_47",
+              "moon_cycle_18",
+              "moon_cycle_13"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.0
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                1.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "moon_cycle_12",
+                  "moon_cycle_47",
+                  "moon_cycle_18",
+                  "moon_cycle_13"
+                ],
+                [
+                  "moon_cycle_12",
+                  "moon_cycle_47",
+                  "moon_cycle_18",
+                  "moon_cycle_13"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                1
+              ],
+              "answer_template": "tidal_mixing"
+            }
+          },
+          {
+            "query": "What do mitochondria do to generate energy for the cell?",
+            "ground_truth": "They oxidise nutrients through respiration, generating ATP that fuels the cell's activities.",
+            "answer": "They oxidise nutrients through respiration, generating ATP that fuels the cell's activities.",
+            "steps": 3,
+            "latency_ms": 141.46082400111482,
+            "accepted": true,
+            "per": 1.0,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "cell_resp_6",
+              "cell_resp_46",
+              "cell_resp_14",
+              "cell_resp_38"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "cell_resp_6",
+                  "cell_resp_46",
+                  "cell_resp_14",
+                  "cell_resp_38"
+                ],
+                [
+                  "cell_resp_6",
+                  "cell_resp_46",
+                  "cell_resp_14",
+                  "cell_resp_38"
+                ],
+                [
+                  "cell_resp_6",
+                  "cell_resp_46",
+                  "cell_resp_14",
+                  "cell_resp_38"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "cell_energy"
+            }
+          },
+          {
+            "query": "Why does deforestation intensify the greenhouse effect?",
+            "ground_truth": "Losing forests reduces CO₂ uptake while releasing stored carbon, strengthening the greenhouse effect.",
+            "answer": "Deforestation reduces oxygen-producing forests on land; less photosynthetic output means less oxygen dissolving into waters where tides normally distribute it.",
+            "steps": 3,
+            "latency_ms": 128.88759199995548,
+            "accepted": false,
+            "per": 0.06666666666666667,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_sun_8",
+              "solar_sun_16",
+              "solar_sun_49",
+              "solar_sun_9",
+              "moon_tides_mix_11",
+              "moon_tides_mix_19",
+              "moon_tides_mix_43",
+              "moon_tides_mix_35",
+              "moon_tides_mix_3",
+              "moon_tides_mix_27"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                1.8,
+                0.8184920634920635
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_sun_8",
+                  "solar_sun_16",
+                  "solar_sun_49",
+                  "solar_sun_9"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_35"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_3",
+                  "moon_tides_mix_27"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "deforestation_chain"
+            }
+          },
+          {
+            "query": "As a causal chain, how does coastal sunshine help marine animals obtain oxygen?",
+            "ground_truth": "When sunlight reaches coastal waters, marine algae photosynthesise, releasing oxygen that dissolves for fish to use.",
+            "answer": "Lunar gravity pulls water into bulges; as Earth rotates, those bulges shift, generating currents that mix shoreline waters.",
+            "steps": 3,
+            "latency_ms": 130.35205198684707,
+            "accepted": false,
+            "per": 0.06451612903225806,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "moon_tides_mix_11",
+              "moon_tides_mix_43",
+              "moon_tides_mix_19",
+              "moon_tides_mix_27",
+              "moon_tides_mix_3"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.48472027972027976
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_27"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_27"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_3"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "tidal_mixing"
+            }
+          },
+          {
+            "query": "Explain how sunlight and tides together deliver oxygen along coasts.",
+            "ground_truth": "Sunlight powers coastal algae to photosynthesise, and lunar-driven tides mix that oxygenated water along the shore.",
+            "answer": "Sunlight powers coastal algae to photosynthesise oxygen, and lunar-driven tides mix that oxygenated water along the shore.",
+            "steps": 3,
+            "latency_ms": 136.74509397242218,
+            "accepted": true,
+            "per": 0.9444444444444444,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_oxygen_9",
+              "solar_oxygen_17",
+              "solar_oxygen_49",
+              "solar_oxygen_2"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_49",
+                  "solar_oxygen_2"
+                ],
+                [
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_49",
+                  "solar_oxygen_2"
+                ],
+                [
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_49",
+                  "solar_oxygen_2"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "solar_tidal_mix"
+            }
+          },
+          {
+            "query": "Trace how solar energy becomes the oxygen we breathe.",
+            "ground_truth": "Solar photons drive photosynthesis in plants and algae, generating the oxygen that builds up in Earth's air.",
+            "answer": "Sunlight powers coastal algae to photosynthesise oxygen, and lunar-driven tides mix that oxygenated water along the shore.",
+            "steps": 3,
+            "latency_ms": 140.61567099997774,
+            "accepted": false,
+            "per": 0.16666666666666666,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_sun_8",
+              "solar_sun_16",
+              "solar_sun_49",
+              "solar_sun_41",
+              "moon_tides_mix_11",
+              "moon_tides_mix_43",
+              "moon_tides_mix_19",
+              "moon_tides_mix_3"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                1.8,
+                0.5455555555555556
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_sun_8",
+                  "solar_sun_16",
+                  "solar_sun_49",
+                  "solar_sun_41"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_3"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_3"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "solar_tidal_mix"
+            }
+          },
+          {
+            "query": "Describe concisely the mechanism by which lunar gravity keeps tidal mixing active.",
+            "ground_truth": "Lunar gravity pulls water into bulges; as Earth rotates, those bulges shift, generating currents that mix shoreline waters.",
+            "answer": "Sunlight powers coastal algae to photosynthesise oxygen, and lunar-driven tides mix that oxygenated water along the shore.",
+            "steps": 3,
+            "latency_ms": 148.9461079472676,
+            "accepted": false,
+            "per": 0.12903225806451613,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_oxygen_24",
+              "solar_oxygen_2",
+              "solar_oxygen_9",
+              "solar_oxygen_17"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_oxygen_24",
+                  "solar_oxygen_2",
+                  "solar_oxygen_9",
+                  "solar_oxygen_17"
+                ],
+                [
+                  "solar_oxygen_24",
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_2"
+                ],
+                [
+                  "solar_oxygen_24",
+                  "solar_oxygen_2",
+                  "solar_oxygen_9",
+                  "solar_oxygen_17"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "solar_tidal_mix"
+            }
+          },
+          {
+            "query": "How do routers forward packets along the Internet?",
+            "ground_truth": "Routers read packet addresses and consult routing tables to forward traffic along viable next hops.",
+            "answer": "Routers read packet addresses and consult routing tables to forward traffic along viable next hops.",
+            "steps": 3,
+            "latency_ms": 129.59353695623577,
+            "accepted": true,
+            "per": 1.0,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "net_router_36",
+              "net_router_28",
+              "net_router_44",
+              "net_router_4"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "net_router_36",
+                  "net_router_28",
+                  "net_router_44",
+                  "net_router_4"
+                ],
+                [
+                  "net_router_36",
+                  "net_router_44",
+                  "net_router_28",
+                  "net_router_4"
+                ],
+                [
+                  "net_router_44",
+                  "net_router_36",
+                  "net_router_28",
+                  "net_router_4"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "packet_routing"
+            }
+          },
+          {
+            "query": "How does a GPS receiver determine its location?",
+            "ground_truth": "It measures the arrival time of signals from several satellites and triangulates its location.",
+            "answer": "Lunar gravity pulls water into bulges; as Earth rotates, those bulges shift, generating currents that mix shoreline waters.",
+            "steps": 2,
+            "latency_ms": 77.41149299545214,
+            "accepted": false,
+            "per": 0.0,
+            "ag": false,
+            "dg": true,
+            "retrieved_doc_ids": [
+              "moon_cycle_12",
+              "moon_cycle_47",
+              "moon_cycle_18",
+              "moon_cycle_13"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.0
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                1.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "moon_cycle_12",
+                  "moon_cycle_47",
+                  "moon_cycle_18",
+                  "moon_cycle_13"
+                ],
+                [
+                  "moon_cycle_12",
+                  "moon_cycle_47",
+                  "moon_cycle_18",
+                  "moon_cycle_13"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                1
+              ],
+              "answer_template": "tidal_mixing"
+            }
+          },
+          {
+            "query": "What do mitochondria do to generate energy for the cell?",
+            "ground_truth": "They oxidise nutrients through respiration, generating ATP that fuels the cell's activities.",
+            "answer": "They oxidise nutrients through respiration, generating ATP that fuels the cell's activities.",
+            "steps": 3,
+            "latency_ms": 147.92093803407624,
+            "accepted": true,
+            "per": 1.0,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "cell_resp_6",
+              "cell_resp_46",
+              "cell_resp_14",
+              "cell_resp_38"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "cell_resp_6",
+                  "cell_resp_46",
+                  "cell_resp_14",
+                  "cell_resp_38"
+                ],
+                [
+                  "cell_resp_6",
+                  "cell_resp_46",
+                  "cell_resp_14",
+                  "cell_resp_38"
+                ],
+                [
+                  "cell_resp_6",
+                  "cell_resp_46",
+                  "cell_resp_14",
+                  "cell_resp_38"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "cell_energy"
+            }
+          },
+          {
+            "query": "Why does deforestation intensify the greenhouse effect?",
+            "ground_truth": "Losing forests reduces CO₂ uptake while releasing stored carbon, strengthening the greenhouse effect.",
+            "answer": "Deforestation reduces oxygen-producing forests on land; less photosynthetic output means less oxygen dissolving into waters where tides normally distribute it.",
+            "steps": 3,
+            "latency_ms": 172.81429702416062,
+            "accepted": false,
+            "per": 0.06666666666666667,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_sun_8",
+              "solar_sun_16",
+              "solar_sun_49",
+              "solar_sun_9",
+              "moon_tides_mix_11",
+              "moon_tides_mix_19",
+              "moon_tides_mix_43",
+              "moon_tides_mix_35",
+              "moon_tides_mix_3",
+              "moon_tides_mix_27"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                1.8,
+                0.8184920634920635
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_sun_8",
+                  "solar_sun_16",
+                  "solar_sun_49",
+                  "solar_sun_9"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_35"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_3",
+                  "moon_tides_mix_27"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "deforestation_chain"
+            }
+          },
+          {
+            "query": "As a causal chain, how does coastal sunshine help marine animals obtain oxygen?",
+            "ground_truth": "When sunlight reaches coastal waters, marine algae photosynthesise, releasing oxygen that dissolves for fish to use.",
+            "answer": "Lunar gravity pulls water into bulges; as Earth rotates, those bulges shift, generating currents that mix shoreline waters.",
+            "steps": 3,
+            "latency_ms": 151.12959203543141,
+            "accepted": false,
+            "per": 0.06451612903225806,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "moon_tides_mix_11",
+              "moon_tides_mix_43",
+              "moon_tides_mix_19",
+              "moon_tides_mix_27",
+              "moon_tides_mix_3"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.48472027972027976
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_27"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_27"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_3"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "tidal_mixing"
+            }
+          },
+          {
+            "query": "Explain how sunlight and tides together deliver oxygen along coasts.",
+            "ground_truth": "Sunlight powers coastal algae to photosynthesise, and lunar-driven tides mix that oxygenated water along the shore.",
+            "answer": "Sunlight powers coastal algae to photosynthesise oxygen, and lunar-driven tides mix that oxygenated water along the shore.",
+            "steps": 3,
+            "latency_ms": 130.19539299421012,
+            "accepted": true,
+            "per": 0.9444444444444444,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_oxygen_9",
+              "solar_oxygen_17",
+              "solar_oxygen_49",
+              "solar_oxygen_2"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_49",
+                  "solar_oxygen_2"
+                ],
+                [
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_49",
+                  "solar_oxygen_2"
+                ],
+                [
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_49",
+                  "solar_oxygen_2"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "solar_tidal_mix"
+            }
+          },
+          {
+            "query": "Trace how solar energy becomes the oxygen we breathe.",
+            "ground_truth": "Solar photons drive photosynthesis in plants and algae, generating the oxygen that builds up in Earth's air.",
+            "answer": "Sunlight powers coastal algae to photosynthesise oxygen, and lunar-driven tides mix that oxygenated water along the shore.",
+            "steps": 3,
+            "latency_ms": 139.78734699776396,
+            "accepted": false,
+            "per": 0.16666666666666666,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_sun_8",
+              "solar_sun_16",
+              "solar_sun_49",
+              "solar_sun_41",
+              "moon_tides_mix_11",
+              "moon_tides_mix_43",
+              "moon_tides_mix_19",
+              "moon_tides_mix_3"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                1.8,
+                0.5455555555555556
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_sun_8",
+                  "solar_sun_16",
+                  "solar_sun_49",
+                  "solar_sun_41"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_3"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_3"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "solar_tidal_mix"
+            }
+          },
+          {
+            "query": "Describe concisely the mechanism by which lunar gravity keeps tidal mixing active.",
+            "ground_truth": "Lunar gravity pulls water into bulges; as Earth rotates, those bulges shift, generating currents that mix shoreline waters.",
+            "answer": "Sunlight powers coastal algae to photosynthesise oxygen, and lunar-driven tides mix that oxygenated water along the shore.",
+            "steps": 3,
+            "latency_ms": 149.61785497143865,
+            "accepted": false,
+            "per": 0.12903225806451613,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_oxygen_24",
+              "solar_oxygen_2",
+              "solar_oxygen_9",
+              "solar_oxygen_17"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_oxygen_24",
+                  "solar_oxygen_2",
+                  "solar_oxygen_9",
+                  "solar_oxygen_17"
+                ],
+                [
+                  "solar_oxygen_24",
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_2"
+                ],
+                [
+                  "solar_oxygen_24",
+                  "solar_oxygen_2",
+                  "solar_oxygen_9",
+                  "solar_oxygen_17"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "solar_tidal_mix"
+            }
+          },
+          {
+            "query": "How do routers forward packets along the Internet?",
+            "ground_truth": "Routers read packet addresses and consult routing tables to forward traffic along viable next hops.",
+            "answer": "Routers read packet addresses and consult routing tables to forward traffic along viable next hops.",
+            "steps": 3,
+            "latency_ms": 126.76948501029983,
+            "accepted": true,
+            "per": 1.0,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "net_router_36",
+              "net_router_28",
+              "net_router_44",
+              "net_router_4"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "net_router_36",
+                  "net_router_28",
+                  "net_router_44",
+                  "net_router_4"
+                ],
+                [
+                  "net_router_36",
+                  "net_router_44",
+                  "net_router_28",
+                  "net_router_4"
+                ],
+                [
+                  "net_router_44",
+                  "net_router_36",
+                  "net_router_28",
+                  "net_router_4"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "packet_routing"
+            }
+          },
+          {
+            "query": "How does a GPS receiver determine its location?",
+            "ground_truth": "It measures the arrival time of signals from several satellites and triangulates its location.",
+            "answer": "Lunar gravity pulls water into bulges; as Earth rotates, those bulges shift, generating currents that mix shoreline waters.",
+            "steps": 2,
+            "latency_ms": 95.00273200683296,
+            "accepted": false,
+            "per": 0.0,
+            "ag": false,
+            "dg": true,
+            "retrieved_doc_ids": [
+              "moon_cycle_12",
+              "moon_cycle_47",
+              "moon_cycle_18",
+              "moon_cycle_13"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.0
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                1.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "moon_cycle_12",
+                  "moon_cycle_47",
+                  "moon_cycle_18",
+                  "moon_cycle_13"
+                ],
+                [
+                  "moon_cycle_12",
+                  "moon_cycle_47",
+                  "moon_cycle_18",
+                  "moon_cycle_13"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                1
+              ],
+              "answer_template": "tidal_mixing"
+            }
+          },
+          {
+            "query": "What do mitochondria do to generate energy for the cell?",
+            "ground_truth": "They oxidise nutrients through respiration, generating ATP that fuels the cell's activities.",
+            "answer": "They oxidise nutrients through respiration, generating ATP that fuels the cell's activities.",
+            "steps": 3,
+            "latency_ms": 129.9850910436362,
+            "accepted": true,
+            "per": 1.0,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "cell_resp_6",
+              "cell_resp_46",
+              "cell_resp_14",
+              "cell_resp_38"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "cell_resp_6",
+                  "cell_resp_46",
+                  "cell_resp_14",
+                  "cell_resp_38"
+                ],
+                [
+                  "cell_resp_6",
+                  "cell_resp_46",
+                  "cell_resp_14",
+                  "cell_resp_38"
+                ],
+                [
+                  "cell_resp_6",
+                  "cell_resp_46",
+                  "cell_resp_14",
+                  "cell_resp_38"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "cell_energy"
+            }
+          },
+          {
+            "query": "Why does deforestation intensify the greenhouse effect?",
+            "ground_truth": "Losing forests reduces CO₂ uptake while releasing stored carbon, strengthening the greenhouse effect.",
+            "answer": "Deforestation reduces oxygen-producing forests on land; less photosynthetic output means less oxygen dissolving into waters where tides normally distribute it.",
+            "steps": 3,
+            "latency_ms": 127.06594198243693,
+            "accepted": false,
+            "per": 0.06666666666666667,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_sun_8",
+              "solar_sun_16",
+              "solar_sun_49",
+              "solar_sun_9",
+              "moon_tides_mix_11",
+              "moon_tides_mix_19",
+              "moon_tides_mix_43",
+              "moon_tides_mix_35",
+              "moon_tides_mix_3",
+              "moon_tides_mix_27"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                1.8,
+                0.8184920634920635
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_sun_8",
+                  "solar_sun_16",
+                  "solar_sun_49",
+                  "solar_sun_9"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_35"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_3",
+                  "moon_tides_mix_27"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "deforestation_chain"
+            }
+          },
+          {
+            "query": "As a causal chain, how does coastal sunshine help marine animals obtain oxygen?",
+            "ground_truth": "When sunlight reaches coastal waters, marine algae photosynthesise, releasing oxygen that dissolves for fish to use.",
+            "answer": "Lunar gravity pulls water into bulges; as Earth rotates, those bulges shift, generating currents that mix shoreline waters.",
+            "steps": 3,
+            "latency_ms": 136.39348599826917,
+            "accepted": false,
+            "per": 0.06451612903225806,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "moon_tides_mix_11",
+              "moon_tides_mix_43",
+              "moon_tides_mix_19",
+              "moon_tides_mix_27",
+              "moon_tides_mix_3"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.48472027972027976
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_27"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_27"
+                ],
+                [
+                  "moon_tides_mix_11",
+                  "moon_tides_mix_19",
+                  "moon_tides_mix_43",
+                  "moon_tides_mix_3"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "tidal_mixing"
+            }
+          },
+          {
+            "query": "Explain how sunlight and tides together deliver oxygen along coasts.",
+            "ground_truth": "Sunlight powers coastal algae to photosynthesise, and lunar-driven tides mix that oxygenated water along the shore.",
+            "answer": "Sunlight powers coastal algae to photosynthesise oxygen, and lunar-driven tides mix that oxygenated water along the shore.",
+            "steps": 3,
+            "latency_ms": 132.17186299152672,
+            "accepted": true,
+            "per": 0.9444444444444444,
+            "ag": false,
+            "dg": false,
+            "retrieved_doc_ids": [
+              "solar_oxygen_9",
+              "solar_oxygen_17",
+              "solar_oxygen_49",
+              "solar_oxygen_2"
+            ],
+            "metadata": {
+              "gedig_g0_sequence": [
+                1.8,
+                0.5455555555555556,
+                0.3814985014985015
+              ],
+              "gedig_ag_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "gedig_dg_sequence": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "iter_retrieved_ids": [
+                [
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_49",
+                  "solar_oxygen_2"
+                ],
+                [
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_49",
+                  "solar_oxygen_2"
+                ],
+                [
+                  "solar_oxygen_9",
+                  "solar_oxygen_17",
+                  "solar_oxygen_49",
+                  "solar_oxygen_2"
+                ]
+              ],
+              "iter_ag": [
+                0,
+                0,
+                0
+              ],
+              "iter_dg": [
+                0,
+                0,
+                0
+              ],
+              "answer_template": "solar_tidal_mix"
+            }
+          }
+        ]
+      },
+      "ok": true,
+      "json": "experiments/exp2to4_lite/results/exp23_psz_target_20251104_051222.json"
+    }
+  }
+}

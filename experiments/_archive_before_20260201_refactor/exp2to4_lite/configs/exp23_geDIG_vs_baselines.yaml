@@ -1,0 +1,55 @@
+experiment:
+  name: exp23_lite
+  output_dir: experiments/exp2to4_lite/results
+  seed: 42
+
+dataset:
+  path: experiments/exp2to4_lite/data/sample_queries_small.jsonl
+  max_queries: 25
+
+embedding:
+  model: null         # default random embeddings for cloud-safe run
+  normalize: true
+  cache_dir: null
+
+retrieval:
+  top_k: 4
+  bm25_weight: 0.5
+  embedding_weight: 0.5
+  expansion_hops: 1
+
+gedig:
+  lambda: 0.6
+  use_multihop: true
+  max_hops: 3
+  decay_factor: 0.7
+  sp_beta: 0.2
+  theta_ag: 8.0
+  theta_dg: 0.6
+  ig_mode: raw
+  spike_mode: and
+
+psz:
+  acceptance_threshold: 0.6
+  fmr_threshold: 0.02
+  latency_p50_threshold_ms: 200
+
+baselines:
+  - name: static_rag
+    type: static
+    description: "一次 retrieval のみで回答"
+  - name: frequency
+    type: frequency
+    description: "過去の参照頻度を優先するヒューリスティック"
+  - name: cosine_topk
+    type: cosine
+    description: "埋め込み類似度のみで上位を採用"
+  - name: gedig_ag_dg
+    type: gedig
+    description: "geDIG + 二段ゲート (AG/DG) 制御"
+
+logging:
+  save_step_logs: true
+  save_memory_snapshots: false
+  snapshot_interval: 10
+

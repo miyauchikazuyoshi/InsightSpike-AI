@@ -1,9 +1,13 @@
 # エピソード記憶の自己設計：AG/DG × Wake/Sleep × 自己生成負例
 
-**Version**: 0.2 (Draft)  
-**Date**: 2026-01-29  
-**Author**: Kazuyoshi Miyauchi  
+**Version**: 0.4 (Draft)
+**Date**: 2026-01-30
+**Author**: Kazuyoshi Miyauchi
 **Status**: Proposal (updated with Maze PoC status)
+
+> **v0.4 更新**: レビュー指摘を反映 — ゴール未到達時のfallback設計、スケール統合の正規化方針、obs/mem評価ポリシーを追加。
+>
+> **v0.3 更新**: Phase 1 (Section 14.1) を大幅改訂 — Q-learning と edge_weight の区別を明記。similarity × edge_weight の統合方法（加算/乗算/二段階）を追加。geDIG との整合性を重視した設計指針を明確化。
 
 ---
 
@@ -192,6 +196,24 @@ commit/revert を 1行1イベントとして JSONL に残す（「負例デー�
   - （迷路PoC）revisit：移動後のセルが2回目以降の訪問なら負例（`cortisol_fire=true`, `cortisol_reason=revisit`）
 
 実験ログ（例：`experiments/maze-query-hub-prototype/results/*steps*.json`）には、`g0/gmin`、`theta_ag`、`ag_fire/dg_fire`、候補集合などが含まれるため、**負例データセットを外部教師なしで作れる**。
+
+#### 候補ランク付けと行動選択の分離（obs / mem ポリシー）
+
+迷路PoCでは、候補は2種類のソースから来る：
+- **obs（観測）**: 現在位置から見える方向への候補
+- **mem（記憶）**: 過去の経験から検索された類似候補
+
+**評価ポリシーの選択肢**:
+
+| ポリシー | 説明 | 使いどころ |
+|---------|------|-----------|
+| **同列評価** | obs と mem を同じスコアでランク付け | 記憶を積極的に活用したい場合 |
+| **obs優先** | obs が有効なら obs から選び、なければ mem | 観測を信頼し、記憶は補助として使う場合 |
+| **mem優先** | mem のスコアが高ければ mem を優先 | 経験を重視する場合（慣れた環境） |
+
+**現状の実装（迷路PoC）**: 基本は同列評価だが、`obs` に有効な候補がある場合は `obs` から選ぶ傾向がある（similarity が高くなりやすいため）。
+
+**推奨**: Phase 1 では**obs優先**から始め、記憶の質が上がったら**同列評価**へ移行。これにより「悪い記憶に引っ張られる」リスクを下げられる。
 
 ### 7.1 抽象定義 → 迷路エピソードの最小単位（導出）
 
@@ -500,16 +522,82 @@ ARCでは、Hypothesis は「DSLプログラム（または部分プログラム
 
 ### Phase 1（Sleep v1）: goal-directed prior（Q値/重み伝播）を学習
 
-**狙い**: 1回目の試行（Wake）で得た「正例/負例」をエッジ重みに保存し、Sleepでゴール価値を伝播（Q-learning的）して、2回目（Wake）では softmax をバイアスして “近道を選びやすくする”。
+**狙い**: 1回目の試行（Wake）で得た「正例/負例」をエッジ重みに保存し、Sleepでゴール価値を伝播して、2回目（Wake）では "近道を選びやすくする"。
 
-**仕様（更新対象）**
-- 主要な学習対象は `Q(s,a)`（または edge weight `w(s,a)`）：
-  - 正例（短い到達/有効な統合）を強化
-  - 負例（revisit/破綻/無駄足）を弱化
-- Sleep は replay で `Q(s,a)` を更新（Fitted Q-learning / DP）し、「どこへ進むとゴールに近いか」を“重み”に焼き込む
-- Wake は softmax の logits をバイアスして使う（ハードoverrideではなく “学習prior” として混ぜる）
-  - 例：`logit(a) += β * Q(s,a)`（候補スコアにも同様に掛ける）
-  - exploration は残す（完全遮断しない、βスケジュール/温度で調整）
+#### Q-learning と edge_weight の区別（重要）
+
+現在の実装には2つのアプローチがある：
+
+| アプローチ | 対象 | 更新ルール | 理論 |
+|-----------|------|-----------|------|
+| **Q-learning** | Q(s,a) | Bellman 更新（報酬の期待値） | 強化学習 |
+| **edge_weight** | w(s,a,s') | 正例/負例の経験蓄積 | geDIG（構造-情報トレードオフ） |
+
+Q-learning は「報酬の期待値」を学習し、edge_weight は「過去の経験の評価」を蓄積する。似ているが根本が異なる。
+
+**geDIG との整合性を重視するなら edge_weight 方式を推奨**（Q-learning はベースライン比較用）。
+
+#### edge_weight の更新ルール（推奨）
+
+```python
+# 初期化
+w[e] = 0.0  # e = (s, a, s')
+
+# 正例（重みを上げる）
+if reached_goal:
+    for i, e in enumerate(reversed(path_to_goal)):
+        w[e] += α * (γ ** i)  # ゴールに近いほど強く
+if s' not in visited:
+    w[e] += α_explore  # 新規セルへの到達
+
+# 負例（重みを下げる）
+if s' in visited:
+    w[e] -= β_revisit  # 再訪問
+```
+
+#### similarity と edge_weight の統合（核心）
+
+迷路の行動選択は similarity（ベクトル距離）ベースだが、「近い記憶」と「良い記憶」は別問題。
+
+**統合方法の選択肢**:
+
+**A. 加算型（現状の sleep_q）**
+```python
+score = similarity + λ * edge_weight
+```
+
+**B. 乗算型（推奨）**
+```python
+confidence = sigmoid(edge_weight)  # ∈ (0, 1)
+score = similarity * confidence
+```
+- 「近いけど悪い記憶」を自然に抑制
+- 人間の意思決定と同型（連想記憶 × 感情タグ）
+
+**C. 二段階型**
+```python
+candidates = top_k(by=similarity)  # 検索
+action = argmax(candidates, by=edge_weight)  # 評価
+```
+
+**現状の実装との対応**
+
+| 実装 | 統合方式 | 備考 |
+|------|---------|------|
+| SleepQ（現状） | **加算型（A）** | Q(s,a) を soft bias として加算（ベースライン） |
+| edge_weight（目標） | **乗算型（B）** | geDIGの整合性重視。重みは経験蓄積 |
+
+#### スケール統合の正規化方針
+
+similarity と edge_weight は異なるスケールを持つため、合成時に正規化が必要。
+
+| 方式 | 式 | 特性 |
+|------|---|------|
+| **そのまま（乗算型）** | `sigmoid(w)` で [0,1] に収める | edge_weight 側を正規化、similarity は exp(-d/τ) で既に [0,1] 付近 |
+| **min-max** | `(x - min) / (max - min)` | バッチ内での相対順位を保つ |
+| **z-score** | `(x - μ) / σ` | 分布の中心と広がりを揃える |
+
+**推奨**: 乗算型では `sigmoid(edge_weight)` を使うため、追加の正規化は不要。加算型を使う場合は、similarity と edge_weight の分散を揃える（z-score or バッチ正規化）。
 
 **入力（教師信号）**
 - 迷路:
@@ -519,18 +607,35 @@ ARCでは、Hypothesis は「DSLプログラム（または部分プログラム
 - ARC:
   - train-fit の改善量（誤差減少）を報酬として定義し、破綻/冗長を負例として定義（教師ありを許容するなら supervised も併用可）
 
+#### ゴール未到達時の扱い（fallback）
+
+edge_weight は正例（ゴール経路）が付かないと「負例だけが残る」状態になる。
+ただし `α_explore` は **ゴール未到達でも付与可能**（“探索の進展”としての弱い正例）。
+
+**fallback 設計**:
+- **未到達時**: ゴール経路の正例更新はスキップし、`α_explore` は維持（弱い正例として許容）
+- **探索重視モード**: `confidence = sigmoid(w)` の下限を設ける（例: `max(0.1, sigmoid(w))`）
+- **理由**: 負例だけで重みが負に偏ると、全候補が抑制されて探索が停滞する
+
+```python
+# 未到達時の安全柵
+if not reached_goal:
+    # ゴール経路正例なし、探索正例は維持
+    confidence = max(MIN_CONFIDENCE, sigmoid(edge_weight))
+```
+
 **達成目標（Done）**
-- “2回目で短くなる” が、複数seed/サイズで安定に再現する（steps↓、revisit率↓、P95↓）
+- "2回目で短くなる" が、複数seed/サイズで安定に再現する（steps↓、revisit率↓、P95↓）
 - AGが開きっぱなしにならない（探索が収束する）
 - 学習priorを入れてもDGが壊れない（誤統合が増えない、監査可能）
 
-> 実装メモ: まずは “テープ再生” である Sleep最短プラン（BFS）をベースラインとして置き、次に `Q(s,a)` の soft bias（`--sleep-guide prefer` 相当）へ置き換えるのが安全。
->
+> 実装メモ:
+> - まずは "テープ再生" である Sleep最短プラン（BFS）をベースラインとして置く
+> - 次に `edge_weight` の乗算型バイアスを実装し、Q-learning（加算型）と比較
 > - 迷路の `state`（例）: `(x,y)` + visits + （任意で局所観測）
 > - `action`: 4近傍（N/S/E/W）
-> - `reward`: ゴール到達の報酬に加えて、`revisit` の罰・ステップ罰、必要なら `-F`（=geDIGの“得”）を小さく混ぜる
-> - Sleep: `*steps*.json` の遷移ログを replay して Q を更新
-> - Wake: 類似度ランキング `score` に `exp(β·Q(s,a))` を掛けて提案器（prior）として使う（softmaxバイアス）
+> - Sleep: `*steps*.json` の遷移ログから edge_weight を更新
+> - Wake: `score = similarity * sigmoid(edge_weight)` で行動選択
 
 ### Phase 2（Sleep v2）: ベクトル自律化（写像/メトリック）を“低自由度”で学習
 
