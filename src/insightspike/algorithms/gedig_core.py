@@ -6,95 +6,38 @@ import logging
 import math
 import os
 import time
-from dataclasses import dataclass, asdict
-from enum import Enum
-from typing import Any, Dict, Optional, Set, Tuple, List
-from collections import deque
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
 import networkx as nx
 import numpy as np
 
+# Import types from dedicated module
+from .gedig.types import (
+    ProcessingMode,
+    SpikeDetectionMode,
+    HopResult,
+    GeDIGResult,
+    LinksetMetrics,
+)
+from .gedig.config import GeDIGConfig, GeDIGPresets
+from .gedig.spike import detect_spike, compute_rewards
+from .gedig.graph_utils import (
+    graph_efficiency,
+    spectral_score,
+    avg_shortest_path_length_safe,
+    compute_sp_gain_norm,
+    extract_k_hop_subgraph,
+    trim_terminal_edges,
+    ensure_networkx,
+    pyg_to_networkx,
+    extract_features,
+    filter_features,
+    compute_ged_min_proxy,
+)
+from .gedig.monitor import GeDIGMonitor
+from .gedig.logger import GeDIGLogger
+
 logger = logging.getLogger(__name__)
-
-
-class ProcessingMode(Enum):
-    WAKE = "wake"
-    SLEEP = "sleep"
-
-
-class SpikeDetectionMode(Enum):
-    THRESHOLD = "threshold"
-    AND = "and"
-    OR = "or"
-
-
-@dataclass
-class HopResult:
-    hop: int
-    # Normalized GED (cost-based, positive), kept for inspection
-    ged: float
-    # Shannon-entropy based IG (variance reduction)
-    ig: float
-    # Per-hop geDIG value (cost - lambda*IG)
-    gedig: float
-    # Structural cost used for this hop (positive is worse); equals
-    # base normalized GED at hop==0, optionally adjusted by SP gain for hop>0.
-    struct_cost: float
-    node_count: int
-    edge_count: int
-    sp: float = 0.0
-    h_component: float = 0.0
-    ged_raw: float = 0.0
-    ged_den: float = 1.0
-    entropy_before: float = 0.0
-    entropy_after: float = 0.0
-    ig_delta: float = 0.0
-    ig_den: float = 1.0
-    variance_reduction: float = 0.0
-
-    @property
-    def struct_term(self) -> float:
-        """Deprecated alias returning negative structural improvement (legacy behaviour)."""
-        return -self.struct_cost
-
-
-@dataclass
-class GeDIGResult:
-    gedig_value: float
-    ged_value: float
-    ig_value: float
-    raw_ged: float = 0.0
-    ged_norm_den: float = 1.0
-    ig_raw: float = 0.0
-    ig_norm_den: float = 1.0
-    ig_z_score: float = 0.0
-    delta_ged_norm: float = 0.0
-    delta_sp_rel: float = 0.0
-    delta_h_norm: float = 0.0
-    structural_cost: float = 0.0
-    structural_improvement: float = 0.0
-    information_integration: float = 0.0
-    entropy_before: float = 0.0
-    entropy_after: float = 0.0
-    ig_delta: float = 0.0
-    variance_reduction: float = 0.0
-    hop0_reward: float = 0.0
-    aggregate_reward: float = 0.0
-    reward: float = 0.0
-    hop_results: Optional[Dict[int, HopResult]] = None
-    computation_time: float = 0.0
-    focal_nodes: Optional[Set[str]] = None
-    version: str = "refactor_phaseA"
-    spike: bool = False
-    linkset_metrics: Optional["LinksetMetrics"] = None
-    ged_min_proxy: float = 0.0
-
-    @property
-    def has_spike(self) -> bool:  # backward compat
-        return self.spike
-
-    def to_dict(self) -> Dict[str, Any]:  # type: ignore[name-defined]
-        return asdict(self)
 
 
 class GeDIGCore:
@@ -957,74 +900,15 @@ class GeDIGCore:
 
     # ------------ Helpers ------------
     def _graph_efficiency(self, g: nx.Graph) -> float:
-        if g.number_of_nodes() == 0:
-            return 0.0
-        try:
-            ge = nx.global_efficiency(g)
-        except Exception:
-            ge = 0.0
-        try:
-            cl = nx.average_clustering(g)
-        except Exception:
-            cl = 0.0
-        return 0.7 * ge + 0.3 * cl
+        return graph_efficiency(g)
 
     def _avg_shortest_path_length_safe(self, g: nx.Graph) -> float:
-        """Average shortest-path length over connected pairs only.
-        Uses exact all-pairs for small graphs; for larger graphs, falls back to
-        a light sampling over node pairs to bound runtime. Returns 0.0 on degenerate.
-        """
-        import random
-
-        n = g.number_of_nodes()
-        if n < 2:
-            return 0.0
-        # Exact path lengths for small graphs
-        if n <= max(32, self.sp_node_cap // 3):
-            try:
-                total = 0
-                count = 0
-                for u, lengths in nx.all_pairs_shortest_path_length(g):
-                    for v, d in lengths.items():
-                        if v <= u:
-                            continue
-                        total += d
-                        count += 1
-                return (total / count) if count > 0 else 0.0
-            except Exception:
-                return 0.0
-        # Sampling for larger graphs
-        try:
-            nodes = list(g.nodes())
-            if len(nodes) < 2:
-                return 0.0
-            samples = min(self.sp_pair_samples, (n * (n - 1)) // 2)
-            if samples <= 0:
-                return 0.0
-            total = 0.0
-            count = 0
-            for _ in range(samples):
-                u, v = random.sample(nodes, 2)
-                try:
-                    d = nx.shortest_path_length(g, u, v)
-                    total += float(d)
-                    count += 1
-                except Exception:
-                    continue
-            return (total / count) if count > 0 else 0.0
-        except Exception:
-            return 0.0
+        """Average shortest-path length over connected pairs only."""
+        return avg_shortest_path_length_safe(g, self.sp_node_cap, self.sp_pair_samples)
 
     def _compute_sp_gain_norm(self, g_before: nx.Graph, g_after: nx.Graph, mode: str = 'relative') -> float:
-        """Normalized signed shortest-path gain between two subgraphs.
-
-        - If `sp_eval_mode == 'fixed_before_pairs'`, evaluate ΔSP on a fixed pair set
-          sampled from `g_before` (DistanceCache semantics). `sp_pair_samples <= 0`
-          means ALL pairs.
-        - Otherwise, fall back to average all-pairs shortest path.
-
-        mode='relative': (L_before - L_after) / L_before  (in [-1, 1])
-        """
+        """Normalized signed shortest-path gain between two subgraphs."""
+        # Handle fixed_before_pairs mode specially (requires DistanceCache)
         try:
             if str(self.sp_eval_mode).lower() == 'fixed_before_pairs':
                 from .sp_distcache import DistanceCache
@@ -1033,124 +917,30 @@ class GeDIGCore:
                 rel = dc.estimate_sp_between_graphs(sig=sig, g_before=g_before, g_after=g_after)
                 return float(max(-1.0, min(1.0, rel)))
         except Exception:
-            # Fallback to average SP below
             pass
-        # Average SP on before/after subgraphs
-        Lb = self._avg_shortest_path_length_safe(g_before)
-        La = self._avg_shortest_path_length_safe(g_after)
-        if Lb <= 0.0:
-            return 0.0
-        gain = Lb - La
-        if mode == 'relative':
-            return max(-1.0, min(1.0, gain / Lb))
-        return max(-1.0, min(1.0, gain))
+        return compute_sp_gain_norm(g_before, g_after, mode, self.sp_node_cap, self.sp_pair_samples)
 
     def _trim_terminal_edges(self, g: nx.Graph, anchors: Set[str], hop: int) -> nx.Graph:
-        """Trim edges incident to terminal layer (distance == hop) while keeping nodes.
-        Distances are computed from anchors via BFS limited to hop."""
-        try:
-            from collections import deque
-            dist: Dict[Any, Optional[int]] = {n: None for n in g.nodes()}
-            dq: deque = deque()
-            for a in anchors:
-                if a in g:
-                    dist[a] = 0
-                    dq.append(a)
-            while dq:
-                u = dq.popleft()
-                du = dist[u]
-                if du is None or du >= hop:
-                    continue
-                for v in g.neighbors(u):
-                    if dist[v] is None:
-                        dist[v] = du + 1
-                        if dist[v] < hop:
-                            dq.append(v)
-            out = g.copy()
-            to_remove = []
-            for u, v in out.edges():
-                du = dist.get(u, None)
-                dv = dist.get(v, None)
-                if du is None or dv is None:
-                    continue
-                if du == hop or dv == hop:
-                    to_remove.append((u, v))
-            if to_remove:
-                out.remove_edges_from(to_remove)
-            return out
-        except Exception:
-            return g.copy()
+        """Trim edges incident to terminal layer."""
+        return trim_terminal_edges(g, anchors, hop)
 
     def _extract_k_hop_subgraph(self, graph: nx.Graph, focal_nodes: Set[str], k: int) -> Tuple[nx.Graph, Set[str]]:
-        valid = {n for n in focal_nodes if n in graph}
-        if not valid:
-            return nx.Graph(), set()
-        if k == 0:
-            return graph.subgraph(valid).copy(), valid
-        all_nodes = set(valid); current = valid
-        for _ in range(k):
-            nxt = set(); [nxt.update(graph.neighbors(n)) for n in current if n in graph]
-            all_nodes.update(nxt); current = nxt
-        return graph.subgraph(all_nodes).copy(), all_nodes
+        return extract_k_hop_subgraph(graph, focal_nodes, k)
 
     def _ensure_networkx(self, graph: Any) -> nx.Graph:
-        if isinstance(graph, nx.Graph):
-            return graph
-        if hasattr(graph, 'edge_index') or hasattr(graph, 'x'):
-            return self._pyg_to_networkx(graph)
-        if isinstance(graph, np.ndarray) and graph.ndim == 2 and graph.shape[0] == graph.shape[1]:
-            return nx.from_numpy_array(graph)
-        return nx.Graph()
+        return ensure_networkx(graph)
 
     def _pyg_to_networkx(self, data: Any) -> nx.Graph:
-        G = nx.Graph()
-        if hasattr(data, 'num_nodes'):
-            n = data.num_nodes
-        elif hasattr(data, 'x') and data.x is not None:
-            n = data.x.shape[0]
-        else:
-            return G
-        G.add_nodes_from(range(n))
-        if hasattr(data, 'edge_index') and data.edge_index is not None:
-            ei = data.edge_index
-            if hasattr(ei, 'cpu'):
-                ei = ei.cpu().numpy()
-            ei = np.array(ei)
-            if ei.ndim == 2 and ei.shape[0] == 2:
-                G.add_edges_from(ei.T.tolist())
-        if hasattr(data, 'x') and data.x is not None:
-            feats = data.x
-            if hasattr(feats, 'cpu'):
-                feats = feats.cpu().numpy()
-            for i in range(n):
-                if i < len(feats):
-                    G.nodes[i]['feature'] = feats[i]
-        return G
+        return pyg_to_networkx(data)
 
     def _extract_features(self, graph: nx.Graph) -> np.ndarray:
-        feats = []
-        for node in graph.nodes():
-            d = graph.nodes[node]
-            if 'feature' in d:
-                feats.append(d['feature'])
-            elif 'vec' in d:
-                feats.append(d['vec'])
-            else:
-                feats.append(np.random.randn(64))
-        return np.array(feats)
+        return extract_features(graph)
 
     def _filter_features(self, features: np.ndarray, node_set: Set[str], original_graph: nx.Graph) -> np.ndarray:
-        node_to_idx = {node: i for i, node in enumerate(original_graph.nodes())}
-        filtered = [features[node_to_idx[n]] for n in sorted(node_set) if n in node_to_idx and node_to_idx[n] < len(features)]
-        return np.array(filtered) if filtered else np.empty((0, features.shape[1]))
+        return filter_features(features, node_set, original_graph)
 
     def _calculate_spectral_score(self, g: nx.Graph) -> float:
-        if g.number_of_nodes() < 2:
-            return 0.0
-        try:
-            L = nx.laplacian_matrix(g).toarray(); eig = np.linalg.eigvalsh(L); return float(np.std(eig))
-        except Exception:
-            return 0.0
+        return spectral_score(g)
 
     # Metric helpers
     def _calculate_normalized_ged(self, g1: nx.Graph, g2: nx.Graph, *, norm_override: float | None = None) -> Dict[str, float]:
@@ -1278,42 +1068,8 @@ class GeDIGCore:
         return self._ig_m2 / (self._ig_count - 1)
 
     def _compute_ged_min_proxy(self, g_before: nx.Graph, g_after: nx.Graph) -> float:
-        """Approximate GED_min via relative average shortest-path shortening.
-
-        Uses undirected graphs and the largest connected component to avoid inf.
-        Returns (ASP_before - ASP_after) / max(ASP_before, 1).
-        """
-        def _avg_sp(g: nx.Graph) -> float:
-            if g.number_of_nodes() < 2:
-                return 0.0
-            und = g.to_undirected()
-            if not nx.is_connected(und):
-                # use largest component for a stable finite estimate
-                comp = max(nx.connected_components(und), key=len)
-                und = und.subgraph(comp).copy()
-                if und.number_of_nodes() < 2:
-                    return 0.0
-            try:
-                return float(nx.average_shortest_path_length(und))
-            except Exception:
-                return 0.0
-
-        asp_before = _avg_sp(g_before)
-        asp_after = _avg_sp(g_after)
-        if asp_before <= 0.0:
-            asp_gain = 0.0
-        else:
-            asp_gain = float((asp_before - asp_after) / max(asp_before, 1.0))
-
-        if asp_gain > 0.0:
-            return asp_gain
-
-        # Fallback proxy: edge densification (normalized)
-        e_before = g_before.number_of_edges()
-        e_after = g_after.number_of_edges()
-        if e_after != e_before:
-            return float((e_after - e_before) / max(e_before, 1.0))
-        return 0.0
+        """Approximate GED_min via relative average shortest-path shortening."""
+        return compute_ged_min_proxy(g_before, g_after)
 
     def _compute_ig_z(self, ig_raw: float) -> float:
         if self._ig_count < 2:
@@ -1324,286 +1080,35 @@ class GeDIGCore:
         return (ig_raw - self._ig_mean) / (var ** 0.5)
 
     def _compute_rewards(self, result: GeDIGResult) -> None:
-        lambda_w = 0.0 if self._ig_count <= self.warmup_steps else self.lambda_weight
-        structural_signal = -result.delta_ged_norm
-        result.hop0_reward = lambda_w * result.ig_z_score + self.mu * structural_signal
-        if result.hop_results:
-            total_si = 0.0; total_w = 0.0
-            for hop, hr in result.hop_results.items():
-                w = self.decay_factor ** hop
-                total_si += w * (-hr.ged); total_w += w
-            avg_si = (total_si / total_w) if total_w > 0 else structural_signal
-            result.aggregate_reward = lambda_w * result.ig_z_score + self.mu * avg_si
-        else:
-            result.aggregate_reward = result.hop0_reward
+        compute_rewards(
+            result,
+            lambda_weight=self.lambda_weight,
+            mu=self.mu,
+            decay_factor=self.decay_factor,
+            warmup_steps=self.warmup_steps,
+            ig_count=self._ig_count,
+        )
 
     # Spike detection
     def _detect_spike(self, result: GeDIGResult) -> bool:
-        mode = SpikeDetectionMode(self.spike_detection_mode.lower()) if isinstance(self.spike_detection_mode, str) else self.spike_detection_mode
-        structural_signal = float(getattr(result, 'structural_improvement', -result.delta_ged_norm))
-        if mode == SpikeDetectionMode.THRESHOLD:
-            return bool(result.gedig_value < self.spike_threshold)
-        if mode == SpikeDetectionMode.AND:
-            if (structural_signal > self.tau_s) and (result.ig_z_score > self.tau_i):
-                return True
-            # Fallback: IG 分散が極小で z-score がほぼ情報を持たない場合、構造改善のみで閾値の2倍を超えたら自然スパイク扱い
-            try:
-                ig_var = self._ig_variance()
-            except Exception:
-                ig_var = 0.0
-            if ig_var < 1e-9 and structural_signal > (self.tau_s * 2):
-                return True
-            return False
-        if mode == SpikeDetectionMode.OR:
-            # Primary threshold logic
-            if (structural_signal > self.tau_s) or (result.ig_z_score > self.tau_i):
-                return True
-            # Backward-compatibility: legacy OR mode treated any positive signal as a spike
-            # (tests expect spike True even when thresholds are set higher than observed values)
-            if (structural_signal > 0) or (result.ig_z_score > 0):
-                return True
-            return False
-        # Fallback path (natural spike induction):
-        #  - If IG variance stays ~0 (no informative z-score) but structural_improvement remains positive
-        #  - AND auto-threshold backoff already minimized (tau_s,tau_i near floor)
-        #  - THEN allow structural improvement alone to constitute a spike (prevents permanent zero-spike regime)
         try:
             ig_var = self._ig_variance()
         except Exception:
             ig_var = 0.0
-        if self.tau_s <= 1e-4 and self.tau_i <= 1e-4 and ig_var < 1e-9 and structural_signal > 0.0:
-            return True
-        return bool(result.gedig_value < self.spike_threshold)
+        return detect_spike(
+            result,
+            mode=self.spike_detection_mode,
+            spike_threshold=self.spike_threshold,
+            tau_s=self.tau_s,
+            tau_i=self.tau_i,
+            ig_variance=ig_var,
+        )
 
     def attach_monitor(self, monitor: 'GeDIGMonitor') -> None:
         self.monitor = monitor
 
-class GeDIGMonitor:
-    """Runtime monitoring for spike predictions.
 
-    Features (extended):
-      - Rolling spike rate
-      - False positive rate tracking (when ground-truth provided)
-      - Simple auto-threshold adjustment to keep FP rate under target
-      - Ground-truth spike auto-derivation (structural_improvement & ig_z_score)
-      - Exportable metrics snapshot (JSON / CSV)
-      - Tau (tau_s, tau_i) adjustment history
-    """
-    def __init__(self, window_size: int = 200, target_fp_rate: float = 0.1, adjust_factor: float = 1.1,
-                 gt_si_threshold: float | None = None, gt_igz_threshold: float | None = None,
-                 gt_mode: str = 'and'):
-        self.pred_buffer = deque(maxlen=window_size)
-        self.fp_buffer = deque(maxlen=window_size)
-        self.actual_buffer = deque(maxlen=window_size)
-        self.target_fp_rate = target_fp_rate
-        self.adjust_factor = adjust_factor
-        self.gt_si_threshold = gt_si_threshold
-        self.gt_igz_threshold = gt_igz_threshold
-        self.gt_mode = gt_mode.lower()
-        self.tau_history: list[dict[str, float]] = []
-        # Spike が全く検出されない期間が続く場合に tau を積極的に緩和するためのカウンタ
-        self.zero_spike_backoff_count: int = 0
-
-    def record_prediction(self, predicted_spike: bool) -> None:
-        self.pred_buffer.append(1 if predicted_spike else 0)
-
-    def record_outcome(self, actual_spike: bool) -> None:
-        if not self.pred_buffer:
-            return
-        predicted = bool(self.pred_buffer[-1])
-        is_fp = 1 if (predicted and not actual_spike) else 0
-        self.fp_buffer.append(is_fp)
-        self.actual_buffer.append(1 if actual_spike else 0)
-
-    def derive_ground_truth(self, result: 'GeDIGResult', core: 'GeDIGCore') -> bool:
-        if self.gt_mode == 'threshold':
-            return bool(result.has_spike)
-        si_thr = self.gt_si_threshold if self.gt_si_threshold is not None else getattr(core, 'tau_s', 0.0)
-        ig_thr = self.gt_igz_threshold if self.gt_igz_threshold is not None else getattr(core, 'tau_i', 0.0)
-        cond_si = result.structural_improvement > si_thr
-        cond_ig = result.ig_z_score > ig_thr
-        if self.gt_mode == 'or':
-            return cond_si or cond_ig
-        return cond_si and cond_ig
-
-    def record_auto_outcome(self, result: 'GeDIGResult', core: 'GeDIGCore') -> bool:
-        label = self.derive_ground_truth(result, core)
-        self.record_outcome(label)
-        return label
-
-    def spike_rate(self) -> float:
-        if not self.pred_buffer:
-            return 0.0
-        return sum(self.pred_buffer) / len(self.pred_buffer)
-
-    def false_positive_rate(self) -> float:
-        if not self.fp_buffer:
-            return 0.0
-        return sum(self.fp_buffer) / len(self.fp_buffer)
-
-    def auto_adjust_thresholds(self, core: 'GeDIGCore') -> None:
-        if len(self.fp_buffer) < 10:
-            return
-        fp = self.false_positive_rate()
-        sp_rate = self.spike_rate()
-        # 誤検出多い → 閾値強化
-        if fp > self.target_fp_rate * 1.1:
-            core.tau_s *= self.adjust_factor
-            core.tau_i *= self.adjust_factor
-        # 誤検出少ない & spike もほぼ出ていない → 閾値緩和
-        elif fp < self.target_fp_rate * 0.5 and sp_rate < 0.05:
-            core.tau_s /= self.adjust_factor
-            core.tau_i /= self.adjust_factor
-        # 全く spike が無い期間がウィンドウ満杯で継続 → 一段強い緩和 (二乗)
-        if sp_rate == 0.0 and len(self.pred_buffer) >= self.pred_buffer.maxlen:
-            core.tau_s /= (self.adjust_factor ** 2)
-            core.tau_i /= (self.adjust_factor ** 2)
-            self.zero_spike_backoff_count += 1
-            if self.zero_spike_backoff_count >= 2:
-                try:
-                    core.spike_detection_mode = 'or'
-                except Exception:
-                    pass
-        core.tau_s = float(np.clip(core.tau_s, 1e-4, 10.0))
-        core.tau_i = float(np.clip(core.tau_i, 1e-4, 10.0))
-        self.tau_history.append({'n_samples': float(len(self.fp_buffer)), 'tau_s': core.tau_s, 'tau_i': core.tau_i})
-
-    def get_metrics(self) -> dict[str, float | int]:
-        return {
-            'spike_rate': self.spike_rate(),
-            'false_positive_rate': self.false_positive_rate(),
-            'n_predictions': len(self.pred_buffer),
-            'n_actual': len(self.actual_buffer),
-            'zero_spike_backoff_count': self.zero_spike_backoff_count,
-        }
-
-    def export_metrics(self, path: str, core: 'GeDIGCore', include_history: bool = True) -> None:
-        import json, csv, os
-        metrics = self.get_metrics()
-        metrics.update({'tau_s': core.tau_s, 'tau_i': core.tau_i, 'lambda_weight': getattr(core, 'lambda_weight', 0.0), 'mu': getattr(core, 'mu', 0.0)})
-        if path.endswith('.json'):
-            out = {'metrics': metrics}
-            if include_history:
-                out['tau_history'] = self.tau_history
-            with open(path, 'w') as f:
-                json.dump(out, f, ensure_ascii=False, indent=2)
-        else:
-            fieldnames = sorted(metrics.keys())
-            first = not os.path.exists(path)
-            with open(path, 'a', newline='') as f:
-                w = csv.DictWriter(f, fieldnames=fieldnames)
-                if first:
-                    w.writeheader()
-                w.writerow(metrics)
-            if include_history and self.tau_history:
-                hist_path = path + '.tau_history.json'
-                with open(hist_path, 'w') as fh:
-                    json.dump(self.tau_history, fh, ensure_ascii=False, indent=2)
-
-    # --- Hop detail aggregation (Task 5) ---
-    def summarize_hop_results(self, result: 'GeDIGResult') -> dict[str, float]:  # lightweight stats for logging
-        if not getattr(result, 'hop_results', None):
-            return {}
-        vals = [hr.gedig for hr in result.hop_results.values()]
-        import statistics, math
-        if not vals:
-            return {}
-        mean_v = statistics.fmean(vals)
-        p95 = sorted(vals)[int(len(vals)*0.95)-1] if len(vals) >= 2 else vals[0]
-        return {
-            'hop_gedig_mean': float(mean_v),
-            'hop_gedig_p95': float(p95),
-            'hop_gedig_max': float(max(vals)),
-            'hop_count': float(len(vals)),
-        }
-
-class GeDIGPresets:
-    CONSERVATIVE = {"lambda_weight": 0.3, "mu": 0.7, "tau_s": 0.2, "tau_i": 0.3, "spike_detection_mode": "and"}
-    BALANCED = {"lambda_weight": 0.5, "mu": 0.5, "tau_s": 0.15, "tau_i": 0.25, "spike_detection_mode": "and"}
-    AGGRESSIVE = {"lambda_weight": 0.7, "mu": 0.3, "tau_s": 0.08, "tau_i": 0.15, "spike_detection_mode": "or"}
-
-
-class GeDIGLogger:
-    def __init__(self, output_path: Any, max_lines: int = 50_000, max_bytes: int = 50 * 1024 * 1024, compress_on_rotate: bool = False):
-        """CSV ロガー (行数/バイト数でローテーション)。PathLike も受け付ける。
-
-        Parameters
-        ----------
-        output_path: ベースとなるファイルパス (拡張子省略可)。`pathlib.Path` 可。
-        max_lines: 1ファイルあたりの最大データ行数 (ヘッダ除外カウント)。
-        max_bytes: 1ファイルあたりの最大サイズ (バイト)。
-        """
-        import csv, os
-        # PathLike 対応: 早期に str へ正規化
-        self.output_path = str(output_path)
-        self.max_lines = max_lines
-        self.max_bytes = max_bytes
-        self.compress_on_rotate = compress_on_rotate
-        self._line_count = 0
-        self._file_index = 0
-        self._csv = csv
-        self._os = os
-        self.fields = ['step','raw_ged','ged_value','structural_improvement','ig_raw','ig_z_score','hop0_reward','aggregate_reward','reward','spike','version']
-        self._open_writer()
-
-    def _rotate_needed(self) -> bool:
-        try:
-            size = self._os.path.getsize(self._current_file)
-        except OSError:
-            size = 0
-        return self._line_count >= self.max_lines or size >= self.max_bytes
-
-    def _open_writer(self):
-        self._current_file = self._build_filename()
-        first = not self._os.path.exists(self._current_file)
-        self._fh = open(self._current_file, 'a', newline='')
-        self._writer = self._csv.DictWriter(self._fh, fieldnames=self.fields)
-        if first:
-            self._writer.writeheader()
-            self._fh.flush()
-            self._line_count = 0
-
-    def _build_filename(self) -> str:
-        base = self.output_path
-        if '.' in base and not base.endswith('.'):
-            root, ext = base.rsplit('.', 1)
-        else:
-            root, ext = base, 'csv'
-        return f"{root}_{self._file_index}.{ext}"
-
-    def log(self, step: int, result: GeDIGResult):
-        if self._rotate_needed():
-            old_file = self._current_file
-            self._fh.close()
-            if self.compress_on_rotate:
-                try:
-                    import gzip, shutil
-                    with open(old_file, 'rb') as f_in, gzip.open(old_file + '.gz', 'wb') as f_out:
-                        shutil.copyfileobj(f_in, f_out)
-                    self._os.remove(old_file)
-                except Exception as e:  # pragma: no cover
-                    logger.warning(f"Compression failed for {old_file}: {e}")
-            self._file_index += 1
-            self._open_writer()
-        row = {
-            'step': step,
-            'raw_ged': result.raw_ged,
-            'ged_value': result.ged_value,
-            'structural_improvement': result.structural_improvement,
-            'ig_raw': result.ig_raw,
-            'ig_z_score': result.ig_z_score,
-            'hop0_reward': result.hop0_reward,
-            'aggregate_reward': result.aggregate_reward,
-            'reward': result.reward,
-            'spike': int(result.has_spike),
-            'version': result.version
-        }
-        self._writer.writerow(row)
-        self._fh.flush()
-        self._line_count += 1
-    def close(self):  # pragma: no cover
-        try: self._fh.close()
-        except Exception: pass
+# ------------ Convenience Functions ------------
 
 
 def calculate_gedig(graph_before: Any, graph_after: Any, config: Optional[Dict[str, Any]] = None, **kwargs) -> float:
@@ -1660,499 +1165,3 @@ def delta_ig(graph_before: Any, graph_after: Any, **kwargs) -> float:
     ls = _build_ls(s_link=[], candidate_pool=[], decision={}, query_vector=None, base_mode="link") if _build_ls else None
     return calc.calculate(g_prev=graph_before, g_now=graph_after, **({"linkset_info": ls} if ls is not None else {})).ig_value
 
-    # ------------- Utility helpers (migrated from misplaced GeDIGLogger region) -------------
-    def _graph_efficiency(self, g: nx.Graph) -> float:
-        if g.number_of_nodes() == 0:
-            return 0.0
-        try:
-            global_eff = nx.global_efficiency(g)
-        except Exception:
-            global_eff = 0.0
-        try:
-            clustering = nx.average_clustering(g)
-        except Exception:
-            clustering = 0.0
-        return 0.7 * global_eff + 0.3 * clustering
-
-    def _extract_k_hop_subgraph(self, graph: nx.Graph, focal_nodes: Set[Any], k: int) -> Tuple[nx.Graph, Set[Any]]:
-        valid_focal = {n for n in focal_nodes if n in graph}
-        if not valid_focal:
-            return nx.Graph(), set()
-        if k == 0:
-            return graph.subgraph(valid_focal).copy(), valid_focal
-        all_nodes = set(valid_focal)
-        current_layer = valid_focal
-        class GeDIGLogger:
-            """CSV logger with rotation (Phase A5)."""
-            def __init__(self, output_path: str, max_lines: int = 50_000, max_bytes: int = 50 * 1024 * 1024):
-                import csv, os
-                self.output_path = output_path
-                self.max_lines = max_lines
-                self.max_bytes = max_bytes
-                self._line_count = 0
-                self._file_index = 0
-                self._csv = csv
-                self._os = os
-                self.fields = [
-                    'step','raw_ged','ged_value','structural_improvement','ig_raw','ig_z_score',
-                    'hop0_reward','aggregate_reward','reward','spike','version'
-                ]
-                self._open_writer()
-
-            def _rotate_needed(self) -> bool:
-                try:
-                    size = self._os.path.getsize(self._current_file)
-                except OSError:
-                    size = 0
-                return self._line_count >= self.max_lines or size >= self.max_bytes
-
-            def _open_writer(self):
-                self._current_file = self._build_filename()
-                first = not self._os.path.exists(self._current_file)
-                self._fh = open(self._current_file, 'a', newline='')
-                self._writer = self._csv.DictWriter(self._fh, fieldnames=self.fields)
-                if first:
-                    self._writer.writeheader()
-                    self._fh.flush()
-                    self._line_count = 0
-
-            def _build_filename(self) -> str:
-                base = self.output_path
-                root, ext = (base.rsplit('.',1)+['csv'])[:2] if '.' in base else (base, 'csv')
-                return f"{root}_{self._file_index}.{ext}"
-
-            def log(self, step: int, result: GeDIGResult):
-                if self._rotate_needed():
-                    self._fh.close()
-                    self._file_index += 1
-                    self._open_writer()
-                row = {
-                    'step': step,
-                    'raw_ged': result.raw_ged,
-                    'ged_value': result.ged_value,
-                    'structural_improvement': result.structural_improvement,
-                    'ig_raw': result.ig_raw,
-                    'ig_z_score': result.ig_z_score,
-                    'hop0_reward': result.hop0_reward,
-                    'aggregate_reward': result.aggregate_reward,
-                    'reward': result.reward,
-                    'spike': int(result.has_spike),
-                    'version': result.version
-                }
-                self._writer.writerow(row)
-                self._fh.flush()
-                self._line_count += 1
-
-            def close(self):  # pragma: no cover
-                try:
-                    self._fh.close()
-                except Exception:
-                    pass
-
-
-        # ---------------- Convenience Functions ----------------
-        def calculate_gedig(graph_before: Any, graph_after: Any, config: Optional[Dict[str, Any]] = None, **kwargs) -> float:
-            if config:
-                metrics_config = config.get('metrics', config)
-                spectral_config = metrics_config.get('spectral_evaluation', {})
-                calculator = GeDIGCore(
-                    enable_multihop=metrics_config.get('use_multihop', False),
-                    max_hops=metrics_config.get('max_hops', 3),
-                    enable_spectral=spectral_config.get('enabled', False),
-                    spectral_weight=spectral_config.get('weight', 0.3),
-                    **kwargs
-                )
-            else:
-                calculator = GeDIGCore(**kwargs)
-            return calculator.calculate(g_prev=graph_before, g_now=graph_after).gedig_value
-
-
-        def detect_insight_spike(graph_before: Any, graph_after: Any, threshold: float = -0.5, **kwargs) -> bool:
-            calculator = GeDIGCore(spike_threshold=threshold, **kwargs)
-            return calculator.calculate(g_prev=graph_before, g_now=graph_after).has_spike
-
-
-        def delta_ged(graph_before: Any, graph_after: Any, **kwargs) -> float:
-            config = kwargs.get('config', {})
-            if config and 'metrics' in config:
-                metrics_config = config['metrics']
-                calculator = GeDIGCore(
-                    enable_multihop=metrics_config.get('use_multihop_gedig', False),
-                    max_hops=metrics_config.get('max_hops', 2),
-                    decay_factor=metrics_config.get('decay_factor', 0.5)
-                )
-            else:
-                calculator = GeDIGCore()
-            return calculator.calculate(g_prev=graph_before, g_now=graph_after).ged_value
-
-
-        def delta_ig(graph_before: Any, graph_after: Any, **kwargs) -> float:
-            config = kwargs.get('config', {})
-            if config and 'metrics' in config:
-                metrics_config = config['metrics']
-                calculator = GeDIGCore(
-                    enable_multihop=metrics_config.get('use_multihop_gedig', False),
-                    max_hops=metrics_config.get('max_hops', 2),
-                    decay_factor=metrics_config.get('decay_factor', 0.5)
-                )
-            else:
-                calculator = GeDIGCore()
-            return calculator.calculate(g_prev=graph_before, g_now=graph_after).ig_value
-
-            # Combine with existing structural improvement
-            structural_improvement = (
-                structural_improvement * (1 - self.spectral_weight) +
-                np.tanh(spectral_improvement) * self.spectral_weight
-            )
-        
-        return {
-            'raw_ged': raw_ged,
-            'normalized_ged': normalized_ged,
-            'structural_improvement': np.clip(structural_improvement, -1.0, 1.0),
-            'efficiency_change': efficiency_change
-        }
-    
-    def _calculate_entropy_variance_ig(
-        self,
-        graph: nx.Graph,
-        features_before: np.ndarray,
-        features_after: np.ndarray,
-        query_vector: Optional[List[float]] = None,
-        *,
-        fixed_den: Optional[float] = None,
-        k_star: Optional[int] = None,
-    ) -> Dict[str, float]:
-        """Calculate information gain using entropy variance."""
-        from .core.metrics import entropy_ig as _entropy_ig
-
-        return _entropy_ig(
-            graph,
-            features_before,
-            features_after,
-            smoothing=self.smoothing,
-            min_nodes=self.min_nodes,
-            norm_strategy=self.ig_norm_strategy,
-            extra_vectors=[query_vector] if query_vector is not None else None,
-            fixed_den=fixed_den,
-            k_star=k_star,
-        )
-    
-    def _calculate_local_entropies(self,
-                                  graph: nx.Graph,
-                                  features: np.ndarray) -> np.ndarray:
-        """Calculate Shannon entropy for each node's neighborhood."""
-        entropies = []
-        
-        for node in graph.nodes():
-            # Get node and neighbors
-            neighbors = list(graph.neighbors(node))
-            local_nodes = [node] + neighbors
-            
-            # Get features for local neighborhood
-            local_features = []
-            for n in local_nodes:
-                # Handle both int and str node IDs
-                try:
-                    node_idx = int(n) if isinstance(n, str) else n
-                    if node_idx < len(features):
-                        local_features.append(features[node_idx])
-                except (ValueError, TypeError):
-                    # Skip non-numeric node IDs
-                    continue
-            
-            if not local_features:
-                continue
-            
-            # Calculate local entropy
-            local_features = np.array(local_features)
-            
-            # Use feature variance as proxy for entropy
-            if len(local_features) > 1:
-                # Normalize features
-                normalized = local_features / (np.linalg.norm(local_features, axis=1, keepdims=True) + self.smoothing)
-                # Calculate pairwise similarities
-                similarities = np.dot(normalized, normalized.T)
-                # Convert to probabilities
-                probs = (similarities + 1) / 2  # Map from [-1,1] to [0,1]
-                # Flatten and normalize
-                probs = probs.flatten()
-                probs = probs / (probs.sum() + self.smoothing)
-                # Shannon entropy
-                entropy = -np.sum(probs * np.log(probs + self.smoothing))
-            else:
-                entropy = 0.0
-            
-            entropies.append(entropy)
-        
-        return np.array(entropies)
-    
-    def _graph_efficiency(self, g: nx.Graph) -> float:
-        """Calculate combined graph efficiency metric."""
-        if g.number_of_nodes() == 0:
-            return 0.0
-        
-        try:
-            global_eff = nx.global_efficiency(g)
-        except:
-            global_eff = 0.0
-        
-        try:
-            clustering = nx.average_clustering(g)
-        except:
-            clustering = 0.0
-        
-        return 0.7 * global_eff + 0.3 * clustering
-    
-    def _extract_k_hop_subgraph(self,
-                               graph: nx.Graph,
-                               focal_nodes: Set[Any],
-                               k: int) -> Tuple[nx.Graph, Set[Any]]:
-        """Extract k-hop subgraph around focal nodes."""
-        # Ensure focal nodes exist in graph
-        valid_focal = {n for n in focal_nodes if n in graph}
-        if not valid_focal:
-            logger.warning(f"No focal nodes found in graph. Focal: {focal_nodes}, Graph nodes: {list(graph.nodes())[:5]}")
-            return nx.Graph(), set()
-        
-        if k == 0:
-            # Only focal nodes
-            subgraph = graph.subgraph(valid_focal).copy()
-            return subgraph, valid_focal
-        
-        # BFS to find k-hop neighbors
-        all_nodes = set(valid_focal)
-        current_layer = valid_focal
-        
-        for _ in range(k):
-            next_layer = set()
-            for node in current_layer:
-                if node in graph:
-                    next_layer.update(graph.neighbors(node))
-            all_nodes.update(next_layer)
-            current_layer = next_layer
-        
-        subgraph = graph.subgraph(all_nodes).copy()
-        return subgraph, all_nodes
-    
-    def _ensure_networkx(self, graph: Any) -> nx.Graph:
-        """Convert various graph types to NetworkX."""
-        if isinstance(graph, nx.Graph):
-            return graph
-        
-        # Handle PyG Data
-        if hasattr(graph, 'edge_index') or hasattr(graph, 'x'):
-            return self._pyg_to_networkx(graph)
-        
-        # Handle adjacency matrix
-        if isinstance(graph, np.ndarray) and graph.ndim == 2:
-            # CRITICAL FIX: Ensure it's a square matrix before treating as adjacency
-            if graph.shape[0] == graph.shape[1]:
-                return nx.from_numpy_array(graph)
-            else:
-                logger.warning(
-                    f"Received non-square numpy array {graph.shape} where a graph "
-                    f"was expected. This might be a feature matrix. Returning empty graph."
-                )
-                return nx.Graph()
-        
-        logger.warning(f"Unknown graph type: {type(graph)}")
-        return nx.Graph()
-    
-    def _pyg_to_networkx(self, data: Any) -> nx.Graph:
-        """Convert PyTorch Geometric Data to NetworkX."""
-        G = nx.Graph()
-        
-        # Add nodes
-        if hasattr(data, 'num_nodes'):
-            num_nodes = data.num_nodes
-        elif hasattr(data, 'x') and data.x is not None:
-            num_nodes = data.x.shape[0]
-        else:
-            logger.warning("Cannot determine number of nodes from PyG Data")
-            return G
-        G.add_nodes_from(range(num_nodes))
-        
-        # Add edges
-        if hasattr(data, 'edge_index') and data.edge_index is not None:
-            edge_array = data.edge_index
-            if hasattr(edge_array, 'cpu'):
-                edge_array = edge_array.cpu().numpy()
-            
-            # Ensure it's a numpy array
-            edge_array = np.array(edge_array)
-
-            if edge_array.ndim == 2 and edge_array.shape[0] == 2:
-                edges = edge_array.T.tolist()
-                G.add_edges_from(edges)
-            else:
-                logger.warning(f"edge_index has unexpected shape: {edge_array.shape}")
-
-        # Add node features as attributes
-        if hasattr(data, 'x') and data.x is not None:
-            features = data.x
-            if hasattr(features, 'cpu'):
-                features = features.cpu().numpy()
-            
-            for i in range(num_nodes):
-                if i < len(features):
-                    G.nodes[i]['feature'] = features[i]
-        
-        return G
-    
-    def _extract_features(self, graph: nx.Graph) -> np.ndarray:
-        """Extract or generate node features."""
-        n = graph.number_of_nodes()
-        
-        # Try to get existing features
-        features = []
-        for node in graph.nodes():
-            node_data = graph.nodes[node]
-            if 'feature' in node_data:
-                features.append(node_data['feature'])
-            elif 'vec' in node_data:
-                features.append(node_data['vec'])
-            else:
-                # Generate random features as fallback
-                features.append(np.random.randn(64))
-        
-        return np.array(features)
-    
-    def _filter_features(self,
-                        features: np.ndarray,
-                        node_set: Set[str],
-                        original_graph: nx.Graph) -> np.ndarray:
-        """Filter features to match node subset."""
-        # Map node IDs to indices
-        node_to_idx = {node: i for i, node in enumerate(original_graph.nodes())}
-        
-        filtered = []
-        for node in sorted(node_set):
-            if node in node_to_idx and node_to_idx[node] < len(features):
-                filtered.append(features[node_to_idx[node]])
-        
-        return np.array(filtered) if filtered else np.empty((0, features.shape[1]))
-    
-    def _calculate_spectral_score(self, g: nx.Graph) -> float:
-        """Calculate structural score using Laplacian eigenvalues.
-        
-        Returns:
-            Standard deviation of eigenvalues (higher = more irregular structure)
-        """
-        if g.number_of_nodes() < 2:
-            return 0.0
-        
-        try:
-            # Calculate Laplacian matrix
-            L = nx.laplacian_matrix(g).toarray()
-            
-            # Calculate eigenvalues (real only)
-            eigvals = np.linalg.eigvalsh(L)
-            
-            # Use standard deviation as irregularity metric
-            return np.std(eigvals)
-            
-        except Exception as e:
-            logger.warning(f"Spectral score calculation failed: {e}")
-            return 0.0
-
-
-# Convenience functions for backward compatibility
-def calculate_gedig(graph_before: Any,
-                   graph_after: Any,
-                   config: Optional[Dict[str, Any]] = None,
-                   **kwargs) -> float:
-    """
-    Simple interface to calculate geDIG value.
-    
-    Returns just the geDIG score for backward compatibility.
-    """
-    if config:
-        # Handle both old and new config formats
-        metrics_config = config.get('metrics', config)
-        spectral_config = metrics_config.get('spectral_evaluation', {})
-        
-        calculator = GeDIGCore(
-            enable_multihop=metrics_config.get('use_multihop', False),
-            max_hops=metrics_config.get('max_hops', 3),
-            enable_spectral=spectral_config.get('enabled', False),
-            spectral_weight=spectral_config.get('weight', 0.3),
-            **kwargs
-        )
-    else:
-        calculator = GeDIGCore(**kwargs)
-    
-    result = calculator.calculate(g_prev=graph_before, g_now=graph_after)
-    return result.gedig_value
-
-
-def detect_insight_spike(graph_before: Any,
-                        graph_after: Any,
-                        threshold: float = -0.5,
-                        **kwargs) -> bool:
-    """
-    Check if the graph change represents an insight spike.
-    """
-    calculator = GeDIGCore(spike_threshold=threshold, **kwargs)
-    result = calculator.calculate(g_prev=graph_before, g_now=graph_after)
-    return result.has_spike
-
-
-# Wrapper functions for backward compatibility with metrics_selector.py
-def delta_ged(graph_before: Any, graph_after: Any, **kwargs) -> float:
-    """
-    Calculate ΔGED for backward compatibility.
-    Returns negative value when graph simplifies (insight formation).
-    """
-    # Check if config is passed via kwargs
-    config = kwargs.get('config', {})
-    if config and 'metrics' in config:
-        metrics_config = config['metrics']
-        calculator = GeDIGCore(
-            enable_multihop=metrics_config.get('use_multihop_gedig', False),
-            max_hops=metrics_config.get('max_hops', 2),
-            decay_factor=metrics_config.get('decay_factor', 0.5)
-        )
-    else:
-        calculator = GeDIGCore()
-    result = calculator.calculate(g_prev=graph_before, g_now=graph_after)
-    return result.ged_value
-
-
-def delta_ig(graph_before: Any, graph_after: Any, **kwargs) -> float:
-    """
-    Calculate ΔIG for backward compatibility.
-    Returns positive value when information gain occurs.
-    """
-    # Check if config is passed via kwargs
-    config = kwargs.get('config', {})
-    if config and 'metrics' in config:
-        metrics_config = config['metrics']
-        calculator = GeDIGCore(
-            enable_multihop=metrics_config.get('use_multihop_gedig', False),
-            max_hops=metrics_config.get('max_hops', 2),
-            decay_factor=metrics_config.get('decay_factor', 0.5)
-        )
-    else:
-        calculator = GeDIGCore()
-    result = calculator.calculate(g_prev=graph_before, g_now=graph_after)
-    return result.ig_value
-@dataclass
-class LinksetMetrics:
-    delta_ged_norm: float
-    delta_h_norm: float
-    delta_sp_rel: float
-    gedig_value: float
-    raw_ged: float
-    ged_norm_den: float
-    ig_norm_den: float
-    entropy_before: float
-    entropy_after: float
-    ig_delta: float
-    before_size: int
-    after_size: int
-    query_similarity: float
-    # Diagnostics: positive-weight counts and top weights (before/after)
-    pos_w_before: int = 0
-    pos_w_after: int = 0
-    topw_before: list[float] | None = None
-    topw_after: list[float] | None = None

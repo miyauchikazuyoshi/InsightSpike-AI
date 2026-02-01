@@ -1,0 +1,68 @@
+# Baseline Test Results - Phase 1 Refactoring Preparation
+# Date: 2026-02-01
+# Command: pytest tests/ --tb=no -q
+
+## Summary
+- Passed: 600
+- Failed: 46
+- Skipped: 82
+- XFailed: 1
+- Warnings: 27
+- Errors: 8
+- Total Time: 105.16s
+
+## Failed Tests (46)
+
+### Integration Tests
+1. test_config_variations.py - 1 failure
+2. test_july_2024_features.py - 4 failures (test_dynamic_config_update, etc.)
+3. test_main_agent_integration.py - 11 failures
+   - TestMainAgentProcessing::test_spike_detection
+   - TestMainAgentLearning::test_add_single_document
+   - TestMainAgentLearning::test_learn_from_text
+   - TestMainAgentLearning::test_batch_learning
+   - TestMainAgentStatePersistence::test_save_state
+   - TestMainAgentStatePersistence::test_load_state
+   - TestMainAgentWithDifferentConfigs::test_with_experiment_config
+   - TestMainAgentWithDifferentConfigs::test_with_production_config
+   - TestMainAgentInsights::test_get_insights
+   - TestMainAgentInsights::test_search_insights
+   - TestConvergenceDetection::test_spike_based_convergence
+4. test_maze_gedig_integration.py - 1 failure
+5. test_multihop_pipeline.py - 4 failures
+6. test_query_storage_integration.py - 2 failures
+7. test_query_transform_smoke.py - 1 failure
+8. test_slim_main_agent.py - 11 failures
+9. test_spike_detection_core.py - 2 failures
+
+### Regression Tests
+10. test_layer_integration.py - 5 failures
+11. test_pipeline_configs.py - 1 failure
+12. test_pipeline_configs_numpy.py - 1 failure
+
+### Performance Tests
+13. test_gedig_small_maze_stability.py - 1 failure (cv=0.441)
+
+### Other Tests
+14. test_providerfactory_layer4_integration.py - 1 failure
+
+## Errors (8)
+All in test_simple_config_check.py:
+- test_configuration[Basic (all disabled)]
+- test_configuration[Entropy Variance IG]
+- test_configuration[Normalized GED]
+- test_configuration[Multi-hop geDIG]
+- test_configuration[All Features]
+- test_configuration[Preset: Experiment]
+- test_configuration[Preset: Research]
+- test_configuration[Preset: Minimal]
+
+## Notes
+These failures exist BEFORE refactoring and should be excluded from regression testing.
+The goal is to maintain the same pass/fail status after refactoring.
+
+## Key Observations
+1. MainAgent and SlimMainAgent tests have most failures (22 combined)
+2. Layer integration tests have 5 failures
+3. test_simple_config_check has 8 errors (likely import or setup issue)
+4. geDIG core tests pass - good baseline for refactoring
