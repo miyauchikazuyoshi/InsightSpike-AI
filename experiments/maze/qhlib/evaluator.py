@@ -1024,6 +1024,16 @@ def evaluate_multihop(
             try:
                 row['add_nodes'] = int(max(0, sub_a.number_of_nodes() - sub_b.number_of_nodes()))
                 row['add_edges'] = int(max(0, sub_a.number_of_edges() - sub_b.number_of_edges()))
+                # Debug: absolute counts for before/after subgraphs
+                row['nodes_b'] = int(sub_b.number_of_nodes())
+                row['nodes_a'] = int(sub_a.number_of_nodes())
+                row['edges_b'] = int(sub_b.number_of_edges())
+                row['edges_a'] = int(sub_a.number_of_edges())
+            except Exception:
+                pass
+            # Debug: GED normalization denominator (Cmax)
+            try:
+                row['cmax'] = float(denom_cmax_base)
             except Exception:
                 pass
         except Exception:

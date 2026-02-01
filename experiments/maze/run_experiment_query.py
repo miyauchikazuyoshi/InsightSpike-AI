@@ -2110,6 +2110,32 @@ def run_episode_query(
                             row['sp_examples'] = o.get('sp_examples')
                         except Exception:
                             pass
+                    # Debug fields: Cmax, node/edge counts
+                    if 'cmax' in o:
+                        try:
+                            row['cmax'] = float(o.get('cmax'))
+                        except Exception:
+                            pass
+                    if 'nodes_b' in o:
+                        try:
+                            row['nodes_b'] = int(o.get('nodes_b'))
+                        except Exception:
+                            pass
+                    if 'nodes_a' in o:
+                        try:
+                            row['nodes_a'] = int(o.get('nodes_a'))
+                        except Exception:
+                            pass
+                    if 'edges_b' in o:
+                        try:
+                            row['edges_b'] = int(o.get('edges_b'))
+                        except Exception:
+                            pass
+                    if 'edges_a' in o:
+                        try:
+                            row['edges_a'] = int(o.get('edges_a'))
+                        except Exception:
+                            pass
             except Exception:
                 pass
             if sp_bef is not None:
