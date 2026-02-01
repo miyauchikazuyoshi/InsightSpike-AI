@@ -35,6 +35,7 @@ from .graph_utils import (
 from .monitor import GeDIGMonitor
 from .logger import GeDIGLogger
 from .linkset import compute_linkset_metrics
+from .multihop import calculate_multihop
 
 __all__ = [
     # Types
@@ -66,5 +67,7 @@ __all__ = [
     "GeDIGLogger",
     # Linkset
     "compute_linkset_metrics",
+    # Multihop
+    "calculate_multihop",
 ]
 
