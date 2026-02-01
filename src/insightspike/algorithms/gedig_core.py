@@ -306,12 +306,12 @@ class GeDIGCore:
         k_star = cand_count
         # Original implementation below (refactored)
         start_time = time.time()
-        g1 = self._ensure_networkx(g_prev)
-        g2 = self._ensure_networkx(g_now)
+        g1 = ensure_networkx(g_prev)
+        g2 = ensure_networkx(g_now)
         if features_prev is None:
-            features_prev = self._extract_features(g1)
+            features_prev = extract_features(g1)
         if features_now is None:
-            features_now = self._extract_features(g2)
+            features_now = extract_features(g2)
         query_vector = kwargs.get('query_vector')
 
         # Optional GED_min-style proxy: relative shortening of average SP
@@ -691,8 +691,8 @@ class GeDIGCore:
     ) -> GeDIGResult:
         hop_results: Dict[int, HopResult] = {}
         for hop in range(self.max_hops + 1):
-            sub_g1, nodes1 = self._extract_k_hop_subgraph(g1, focal_nodes, hop)
-            sub_g2, nodes2 = self._extract_k_hop_subgraph(g2, focal_nodes, hop)
+            sub_g1, nodes1 = extract_k_hop_subgraph(g1, focal_nodes, hop)
+            sub_g2, nodes2 = extract_k_hop_subgraph(g2, focal_nodes, hop)
             if len(sub_g1) == 0 and len(sub_g2) == 0:
                 continue
 
@@ -707,8 +707,8 @@ class GeDIGCore:
                     denom = self.node_cost + self.edge_cost
             ged_result = self._calculate_normalized_ged(sub_g1, sub_g2, norm_override=denom)
 
-            sub_before = self._filter_features(features_before, nodes1, g1)
-            sub_after = self._filter_features(features_after, nodes2, g2)
+            sub_before = filter_features(features_before, nodes1, g1)
+            sub_after = filter_features(features_after, nodes2, g2)
             # IG ソースの切り替え
             if str(self.ig_source_mode).lower() in ('linkset','paper','strict') and linkset_metrics is not None:
                 # 論文準拠: 候補分布ベースのΔHを使用
@@ -738,16 +738,16 @@ class GeDIGCore:
             if hop > 0 and self.use_multihop_sp_gain:
                 # Evaluate SP on possibly expanded neighborhood and optional union scope
                 eff_hop = hop + int(max(0, self.sp_hop_expand))
-                sp_g1, nodes_sp1 = self._extract_k_hop_subgraph(g1, focal_nodes, eff_hop)
-                sp_g2, nodes_sp2 = self._extract_k_hop_subgraph(g2, focal_nodes, eff_hop)
+                sp_g1, nodes_sp1 = extract_k_hop_subgraph(g1, focal_nodes, eff_hop)
+                sp_g2, nodes_sp2 = extract_k_hop_subgraph(g2, focal_nodes, eff_hop)
                 if str(self.sp_scope_mode).lower() in ('union','merge','superset'):
                     all_nodes = set(nodes_sp1) | set(nodes_sp2)
                     if all_nodes:
                         sp_g1 = g1.subgraph(all_nodes).copy()
                         sp_g2 = g2.subgraph(all_nodes).copy()
                 if str(self.sp_boundary_mode).lower() in ('trim','terminal','nodes'):
-                    sp_g1 = self._trim_terminal_edges(sp_g1, focal_nodes, eff_hop)
-                    sp_g2 = self._trim_terminal_edges(sp_g2, focal_nodes, eff_hop)
+                    sp_g1 = trim_terminal_edges(sp_g1, focal_nodes, eff_hop)
+                    sp_g2 = trim_terminal_edges(sp_g2, focal_nodes, eff_hop)
 
                 if self.sp_eval_mode in ('fixed_before_pairs','fixed_pairs','fixed'):
                     # Fixed-before-pairs: measure La on the same pair set as before
@@ -899,13 +899,6 @@ class GeDIGCore:
         )
 
     # ------------ Helpers ------------
-    def _graph_efficiency(self, g: nx.Graph) -> float:
-        return graph_efficiency(g)
-
-    def _avg_shortest_path_length_safe(self, g: nx.Graph) -> float:
-        """Average shortest-path length over connected pairs only."""
-        return avg_shortest_path_length_safe(g, self.sp_node_cap, self.sp_pair_samples)
-
     def _compute_sp_gain_norm(self, g_before: nx.Graph, g_after: nx.Graph, mode: str = 'relative') -> float:
         """Normalized signed shortest-path gain between two subgraphs."""
         # Handle fixed_before_pairs mode specially (requires DistanceCache)
@@ -920,24 +913,12 @@ class GeDIGCore:
             pass
         return compute_sp_gain_norm(g_before, g_after, mode, self.sp_node_cap, self.sp_pair_samples)
 
-    def _trim_terminal_edges(self, g: nx.Graph, anchors: Set[str], hop: int) -> nx.Graph:
-        """Trim edges incident to terminal layer."""
-        return trim_terminal_edges(g, anchors, hop)
+    # Backward compatibility methods for tests
+    def _graph_efficiency(self, g: nx.Graph) -> float:
+        return graph_efficiency(g)
 
     def _extract_k_hop_subgraph(self, graph: nx.Graph, focal_nodes: Set[str], k: int) -> Tuple[nx.Graph, Set[str]]:
         return extract_k_hop_subgraph(graph, focal_nodes, k)
-
-    def _ensure_networkx(self, graph: Any) -> nx.Graph:
-        return ensure_networkx(graph)
-
-    def _pyg_to_networkx(self, data: Any) -> nx.Graph:
-        return pyg_to_networkx(data)
-
-    def _extract_features(self, graph: nx.Graph) -> np.ndarray:
-        return extract_features(graph)
-
-    def _filter_features(self, features: np.ndarray, node_set: Set[str], original_graph: nx.Graph) -> np.ndarray:
-        return filter_features(features, node_set, original_graph)
 
     def _calculate_spectral_score(self, g: nx.Graph) -> float:
         return spectral_score(g)
