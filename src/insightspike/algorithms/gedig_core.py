@@ -551,8 +551,36 @@ class GeDIGCore:
     def _extract_k_hop_subgraph(self, graph: nx.Graph, focal_nodes: Set[str], k: int) -> Tuple[nx.Graph, Set[str]]:
         return extract_k_hop_subgraph(graph, focal_nodes, k)
 
+    def _trim_terminal_edges(self, graph: nx.Graph, focal_nodes: Set[str], max_dist: int) -> nx.Graph:
+        return trim_terminal_edges(graph, focal_nodes, max_dist)
+
     def _calculate_spectral_score(self, g: nx.Graph) -> float:
         return spectral_score(g)
+
+    def _compute_linkset_metrics(
+        self,
+        g_before: nx.Graph,
+        g_after: nx.Graph,
+        linkset_info: Optional[Dict[str, Any]],
+        *,
+        query_vector: Optional[List[float]] = None,
+        ig_fixed_den: Optional[float] = None,
+    ) -> LinksetMetrics:
+        """Backward compatibility wrapper for compute_linkset_metrics."""
+        return compute_linkset_metrics(
+            g_before,
+            g_after,
+            linkset_info,
+            entropy_tau=self.entropy_tau,
+            sp_beta=self.sp_beta,
+            use_multihop_sp_gain=self.use_multihop_sp_gain,
+            ig_mode=self.ig_mode,
+            ig_nonneg=self._ig_nonneg,
+            lambda_weight=self.lambda_weight,
+            use_legacy_formula=self.use_legacy_formula,
+            query_vector=query_vector,
+            ig_fixed_den=ig_fixed_den,
+        )
 
     # Metric helpers
     def _calculate_normalized_ged(self, g1: nx.Graph, g2: nx.Graph, *, norm_override: float | None = None) -> Dict[str, float]:
