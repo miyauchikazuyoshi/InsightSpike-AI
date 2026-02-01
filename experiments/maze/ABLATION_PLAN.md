@@ -428,16 +428,20 @@ python ... --top-link 0 --gh-mode greedy --no-pre-eval --output .../S1_greedy_no
 
 次手（検証TODO）
 
-1) GED 一貫性チェック（g0 vs hop>0）
-   - 分母: どちらも Cmax=1+|S_link| を明示指定（norm_override）して等価化する。
-   - サブグラフ: before/after で同一アンカー集合・同一 hop 展開（union/trim 規則も一致）を強制。
+1) ~~GED 一貫性チェック（g0 vs hop>0）~~ ✅ 完了（2026-02-02）
+   - **結論**: `ged_hop0_const=True`（デフォルト）でGEDは全hop一貫
+   - hop0/hop>0で同一のGED値を使用（A1設定）
+   - GEDが1.0に張り付く問題はA2設定（ged_hop0_const=False）でのみ発生
+   - 現在のデフォルトで問題なし
 
-2) step=32 のログ再検証（seed=0）
-   - pre/after の anchor_nodes、commit_items、Ecand、stage_graph の構成をダンプし、hop0=0 かつ hop>0=1.0 の原因を特定。
-   - 「既に edge が存在」しているケース（0ΔGED）を事前に検知し、候補除外または δGED=0 に固定して評価。
+2) step=32 のログ再検証（seed=0） → 不要（GED一貫性確認済み）
 
-3) 可視化/HTML
-   - Per-hop Metrics テーブルに ΔGED の分母（Cmax）と使用したアンカー数の簡易統計（nodes/edges）を追加（デバッグ用）。
+3) ~~可視化/HTML~~ ✅ 完了（2026-02-02）
+   - Per-hop Metrics テーブルに以下を追加:
+     - `Cmax`: GED正規化分母
+     - `nodes(b/a)`: before/afterサブグラフのノード数
+     - `edges(b/a)`: before/afterサブグラフのエッジ数
+   - 修正ファイル: `qhlib/evaluator.py`, `run_experiment_query.py`, `query_interactive_template.html`
 
 ---
 
@@ -779,6 +783,12 @@ hop=15: GED mean=0.715,  =1.0: 45%
 
 **所見**: decay factorは今回の設定では効果なし
 
+**原因調査結果（2026-02-02）**:
+- `decay_factor`は`spike.py`の`aggregate_reward`計算にのみ使用
+- 実験コードは`argmin(g[h])`で`best_hop`を選択（decayを使わない）
+- `aggregate_reward`は論文未定義、実験でも未使用 → デッドコードの可能性
+- **結論**: decay_factorパラメータは現状無効。将来的に削除検討
+
 ### 推奨設定
 
 **バランス重視**:
@@ -801,6 +811,28 @@ hop=15: GED mean=0.715,  =1.0: 45%
 
 ### 比較HTML
 `experiments/maze/results/sweep/comparison.html`
+
+### 追加スイープ（2026-02-02）
+
+**SP Beta スイープ**:
+
+| sp_beta | gmin_mean | best_hop_mean | delta_sp_min | 備考 |
+|---------|-----------|---------------|--------------|------|
+| 0.5 | -0.504 | 1.61 | 0.077 | SP重み低 |
+| 1.0 | -0.542 | 1.61 | 0.077 | デフォルト |
+| 2.0 | **-0.631** | 1.60 | 0.075 | **gmin最良** |
+
+**Action Temperature スイープ**:
+
+| temp | gmin_mean | best_hop_mean | delta_sp_min | 備考 |
+|------|-----------|---------------|--------------|------|
+| 0.05 | -0.542 | 1.61 | 0.077 | 決定的 |
+| 0.1 | -0.542 | 1.61 | 0.077 | デフォルト |
+| 0.2 | -0.542 | 1.61 | 0.077 | 探索的 |
+
+**所見**:
+- `sp_beta↑` → gmin改善（SP重視でより良い洞察発見）
+- `action_temp` → 効果なし（今回の迷路サイズ/seedでは差が出ない）
 
 ### 動作確認（2026-02-02）
 

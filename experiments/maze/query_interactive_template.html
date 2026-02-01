@@ -2818,12 +2818,19 @@ window.addEventListener('error', (event) => {
           const spa = Number(s.sp_after ?? (rec.sp_after ?? NaN));
           const cu = (s.cand_used !== undefined) ? Number(s.cand_used) : NaN;
           const ct = (s.cand_count_total !== undefined) ? Number(s.cand_count_total) : ((s.cand_total !== undefined) ? Number(s.cand_total) : NaN);
+          // Debug fields
+          const cmax = (s.cmax !== undefined) ? Number(s.cmax) : NaN;
+          const nb = (s.nodes_b !== undefined) ? Number(s.nodes_b) : NaN;
+          const na = (s.nodes_a !== undefined) ? Number(s.nodes_a) : NaN;
+          const eb = (s.edges_b !== undefined) ? Number(s.edges_b) : NaN;
+          const ea = (s.edges_a !== undefined) ? Number(s.edges_a) : NaN;
           const fmt6 = v => Number.isFinite(v) ? v.toFixed(6) : '—';
+          const fmt2 = v => Number.isFinite(v) ? v.toFixed(2) : '—';
           const fmtI = v => Number.isFinite(v) ? String(v) : '—';
-          return `<tr><td>${hop}</td><td>${g}</td><td>${ged}</td><td>${ig}</td><td>${h}</td><td>${sp}</td><td>${fmt6(hb)}</td><td>${fmt6(ha)}</td><td>${fmt6(spb)}</td><td>${fmt6(spa)}</td><td>${fmtI(cu)}</td><td>${fmtI(ct)}</td></tr>`;
+          return `<tr><td>${hop}</td><td>${g}</td><td>${ged}</td><td>${ig}</td><td>${h}</td><td>${sp}</td><td>${fmt6(hb)}</td><td>${fmt6(ha)}</td><td>${fmt6(spb)}</td><td>${fmt6(spa)}</td><td>${fmtI(cu)}</td><td>${fmtI(ct)}</td><td>${fmt2(cmax)}</td><td>${fmtI(nb)}/${fmtI(na)}</td><td>${fmtI(eb)}/${fmtI(ea)}</td></tr>`;
         }).join('');
         hopTable.innerHTML = `
-          <thead><tr><th>hop</th><th>g(h)</th><th>ΔEPC</th><th>IG</th><th>H</th><th>ΔSP</th><th>H_before</th><th>H_after</th><th>SP_before</th><th>SP_after</th><th>cand_used</th><th>cand_total</th></tr></thead>
+          <thead><tr><th>hop</th><th>g(h)</th><th>ΔEPC</th><th>IG</th><th>H</th><th>ΔSP</th><th>H_before</th><th>H_after</th><th>SP_before</th><th>SP_after</th><th>cand_used</th><th>cand_total</th><th>Cmax</th><th>nodes(b/a)</th><th>edges(b/a)</th></tr></thead>
           <tbody>${rowsHop}</tbody>
         `;
         const sd = Array.isArray(rec.sp_diagnostics) ? rec.sp_diagnostics : [];
