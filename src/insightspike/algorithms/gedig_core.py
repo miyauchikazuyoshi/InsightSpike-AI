@@ -532,9 +532,13 @@ class GeDIGCore:
     # ------------ Helpers ------------
     def _compute_sp_gain_norm(self, g_before: nx.Graph, g_after: nx.Graph, mode: str = 'relative') -> float:
         """Normalized signed shortest-path gain between two subgraphs."""
+        # Check if before graph has edges - if not, skip DistanceCache path
+        # since fixed_before_pairs requires connectivity in the before graph.
+        has_edges_before = g_before.number_of_edges() > 0
+
         # Handle fixed_before_pairs mode specially (requires DistanceCache)
         try:
-            if str(self.sp_eval_mode).lower() == 'fixed_before_pairs':
+            if has_edges_before and str(self.sp_eval_mode).lower() == 'fixed_before_pairs':
                 from .sp_distcache import DistanceCache
                 dc = DistanceCache(mode='cached', pair_samples=int(getattr(self, 'sp_pair_samples', 400)))
                 sig = dc.signature(g_before, set(), 1, str(self.sp_scope_mode), str(self.sp_boundary_mode))

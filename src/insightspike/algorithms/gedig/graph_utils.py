@@ -141,6 +141,12 @@ def compute_sp_gain_norm(
     La = avg_shortest_path_length_safe(g_after, node_cap, pair_samples)
 
     if Lb <= 0.0:
+        # Before has no connectivity (no edges or disconnected).
+        # If after has connectivity, this is an improvement from "no paths" to "paths exist".
+        if La > 0.0:
+            # Maximum improvement: went from no connectivity to some connectivity.
+            return 1.0
+        # Both have no connectivity - no change.
         return 0.0
 
     gain = Lb - La
@@ -230,7 +236,10 @@ def trim_terminal_edges(
             dv = dist.get(v, None)
             if du is None or dv is None:
                 continue
-            if du == hop or dv == hop:
+            # Only remove edges where BOTH endpoints are at terminal distance.
+            # This preserves edges from anchor to terminal nodes while removing
+            # boundary edges between terminal nodes.
+            if du == hop and dv == hop:
                 to_remove.append((u, v))
 
         if to_remove:
