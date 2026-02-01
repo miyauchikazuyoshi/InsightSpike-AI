@@ -37,6 +37,7 @@ from .gedig.graph_utils import (
 from .gedig.monitor import GeDIGMonitor
 from .gedig.logger import GeDIGLogger
 from .gedig.linkset import compute_linkset_metrics
+from .gedig.multihop import calculate_multihop
 
 logger = logging.getLogger(__name__)
 
@@ -362,19 +363,53 @@ class GeDIGCore:
             if linkset_metrics is None and not self._graph_ig_warned:
                 logger.warning("[DEPRECATION] geDIG graph-IG path is in use (no linkset_info). This path will be retired; please migrate callers to provide linkset_info.")
                 self._graph_ig_warned = True
-            result = self._calculate_multihop(
+            result = calculate_multihop(
                 g1,
                 g2,
                 features_prev,
                 features_now,
                 focal_nodes,
                 start_time,
+                # GED parameters
+                node_cost=self.node_cost,
+                edge_cost=self.edge_cost,
+                ged_norm_scheme=self.ged_norm_scheme,
+                candidate_count=cand_count,
+                # IG parameters
+                ig_source_mode=self.ig_source_mode,
+                ig_hop_apply=self.ig_hop_apply,
+                ig_mode=self.ig_mode,
+                ig_nonneg=self._ig_nonneg,
+                ig_norm_strategy=self.ig_norm_strategy,
+                ig_delta_mode=self.ig_delta_mode,
+                smoothing=self.smoothing,
+                min_nodes=self.min_nodes,
+                # Multi-hop parameters
+                max_hops=self.max_hops,
+                adaptive_hops=self.adaptive_hops,
+                lambda_weight=self.lambda_weight,
+                # SP gain parameters
+                use_multihop_sp_gain=self.use_multihop_sp_gain,
+                sp_beta=self.sp_beta,
+                sp_scope_mode=self.sp_scope_mode,
+                sp_hop_expand=self.sp_hop_expand,
+                sp_boundary_mode=self.sp_boundary_mode,
+                sp_eval_mode=self.sp_eval_mode,
+                sp_node_cap=self.sp_node_cap,
+                sp_pair_samples=self.sp_pair_samples,
+                # Optional inputs
                 norm_override=cmax_local,
                 query_vector=query_vector,
                 fixed_den=ig_fixed_den,
                 k_star=k_star,
-                candidate_count=cand_count,
                 linkset_metrics=linkset_metrics,
+                # Feature weights
+                feature_weights=self.feature_weights,
+                # Structural similarity evaluator
+                ss_evaluator=self._ss_evaluator,
+                # Callbacks for GED and IG computation
+                ged_calculator=self._calculate_normalized_ged,
+                ig_calculator=self._calculate_entropy_variance_ig,
             )
         else:
             denom = self.node_cost + self.edge_cost * max(g2.number_of_edges(), 0)
@@ -506,231 +541,6 @@ class GeDIGCore:
             except Exception as e:  # pragma: no cover
                 logger.warning("GeDIGLogger failed: %s", e)
         return result
-
-    # ------------ Multi-hop ------------
-    def _calculate_multihop(
-        self,
-        g1: nx.Graph,
-        g2: nx.Graph,
-        features_before: np.ndarray,
-        features_after: np.ndarray,
-        focal_nodes: Set[str],
-        start_time: float,
-        norm_override: float | None = None,
-        query_vector: Optional[List[float]] = None,
-        fixed_den: Optional[float] = None,
-        k_star: Optional[int] = None,
-        candidate_count: int = 1,
-        linkset_metrics: Optional[LinksetMetrics] = None,
-    ) -> GeDIGResult:
-        hop_results: Dict[int, HopResult] = {}
-        for hop in range(self.max_hops + 1):
-            sub_g1, nodes1 = extract_k_hop_subgraph(g1, focal_nodes, hop)
-            sub_g2, nodes2 = extract_k_hop_subgraph(g2, focal_nodes, hop)
-            if len(sub_g1) == 0 and len(sub_g2) == 0:
-                continue
-
-            # GED 正規化分母のスキーム選択
-            if str(self.ged_norm_scheme).lower() in ('candidate','candidate_base','link','links','linkset'):
-                # Cmax ≈ c_node + |S_link|·c_edge（候補台固定）
-                base_k = int(max(1, candidate_count))
-                denom = self.node_cost + self.edge_cost * base_k
-            else:
-                denom = self.node_cost + self.edge_cost * max(sub_g2.number_of_edges(), 0)
-                if denom <= 0.0:
-                    denom = self.node_cost + self.edge_cost
-            ged_result = self._calculate_normalized_ged(sub_g1, sub_g2, norm_override=denom)
-
-            sub_before = filter_features(features_before, nodes1, g1)
-            sub_after = filter_features(features_after, nodes2, g2)
-            # IG ソースの切り替え
-            if str(self.ig_source_mode).lower() in ('linkset','paper','strict') and linkset_metrics is not None:
-                # 論文準拠: 候補分布ベースのΔHを使用
-                delta_h_norm = float(linkset_metrics.delta_h_norm)
-                # 参照用にentropy_before/afterはhop0に限り流す（他hopも同値）
-                ig_result = {
-                    'ig_value': delta_h_norm,
-                    'entropy_before': float(linkset_metrics.entropy_before),
-                    'entropy_after': float(linkset_metrics.entropy_after),
-                    'delta_entropy': float(linkset_metrics.ig_delta),
-                    'normalization_den': float(linkset_metrics.ig_norm_den),
-                }
-            else:
-                ig_result = self._calculate_entropy_variance_ig(
-                    sub_g2,
-                    sub_before,
-                    sub_after,
-                    query_vector=query_vector,
-                    fixed_den=fixed_den,
-                    k_star=candidate_count,
-                )
-                delta_h_norm = float(ig_result['ig_value'])
-
-            delta_ged_norm = float(ged_result['normalized_ged'])
-            delta_sp_rel = 0.0
-            sp_multiplier = 0.0
-            if hop > 0 and self.use_multihop_sp_gain:
-                # Evaluate SP on possibly expanded neighborhood and optional union scope
-                eff_hop = hop + int(max(0, self.sp_hop_expand))
-                sp_g1, nodes_sp1 = extract_k_hop_subgraph(g1, focal_nodes, eff_hop)
-                sp_g2, nodes_sp2 = extract_k_hop_subgraph(g2, focal_nodes, eff_hop)
-                if str(self.sp_scope_mode).lower() in ('union','merge','superset'):
-                    all_nodes = set(nodes_sp1) | set(nodes_sp2)
-                    if all_nodes:
-                        sp_g1 = g1.subgraph(all_nodes).copy()
-                        sp_g2 = g2.subgraph(all_nodes).copy()
-                if str(self.sp_boundary_mode).lower() in ('trim','terminal','nodes'):
-                    sp_g1 = trim_terminal_edges(sp_g1, focal_nodes, eff_hop)
-                    sp_g2 = trim_terminal_edges(sp_g2, focal_nodes, eff_hop)
-
-                if self.sp_eval_mode in ('fixed_before_pairs','fixed_pairs','fixed'):
-                    # Fixed-before-pairs: measure La on the same pair set as before
-                    try:
-                        dist1 = dict(nx.all_pairs_shortest_path_length(sp_g1))
-                        pairs = []
-                        total1 = 0.0
-                        for u, dmap in dist1.items():
-                            for v, d in dmap.items():
-                                if v == u:
-                                    continue
-                                if v <= u:
-                                    continue
-                                total1 += float(d)
-                                pairs.append((u, v, float(d)))
-                        if pairs:
-                            Lb = total1 / len(pairs)
-                            dist2 = dict(nx.all_pairs_shortest_path_length(sp_g2))
-                            total2 = 0.0
-                            count2 = 0
-                            for u, v, _ in pairs:
-                                dm = dist2.get(u, {})
-                                if v in dm:
-                                    total2 += float(dm[v])
-                                    count2 += 1
-                            if count2 > 0 and Lb > 0.0:
-                                La = total2 / count2
-                                gain = Lb - La  # signed gain
-                                # relative signed change clamped to [-1, 1] for robustness
-                                delta_sp_rel = max(-1.0, min(1.0, gain / Lb))
-                            else:
-                                delta_sp_rel = 0.0
-                        else:
-                            delta_sp_rel = 0.0
-                    except Exception:
-                        delta_sp_rel = 0.0
-                else:
-                    delta_sp_rel = float(self._compute_sp_gain_norm(sp_g1, sp_g2, mode=self.sp_norm_mode))
-                sp_multiplier = self.sp_beta
-
-            # IG の適用範囲（hop0のみ or 全hop）
-            if str(self.ig_source_mode).lower() in ('linkset','paper','strict') and str(self.ig_hop_apply).lower() == 'hop0' and hop > 0:
-                # hop>0 はSPのみ
-                combined_ig = 0.0 + sp_multiplier * delta_sp_rel
-            else:
-                combined_ig = delta_h_norm + sp_multiplier * delta_sp_rel
-
-            # Structural similarity bonus for analogy detection
-            analogy_bonus = 0.0
-            if self._ss_evaluator is not None:
-                try:
-                    center_node = list(focal_nodes)[0] if focal_nodes else None
-                    analogy_bonus = self._ss_evaluator.compute_analogy_bonus(
-                        sub_g1, sub_g2,
-                        center1=center_node,
-                        center2=center_node,
-                    )
-                    if analogy_bonus > 0:
-                        combined_ig += analogy_bonus
-                        logger.debug(
-                            "[ANALOGY] hop=%d bonus=%.4f combined_ig=%.4f",
-                            hop, analogy_bonus, combined_ig
-                        )
-                except Exception as e:
-                    logger.warning("Structural similarity evaluation failed: %s", e)
-
-            ig_for_lambda = combined_ig
-            if str(self.ig_mode).lower() in ('norm', 'normalized'):
-                ig_for_lambda = float(np.tanh(max(0.0, ig_for_lambda)))
-            if self._ig_nonneg:
-                ig_for_lambda = max(0.0, ig_for_lambda)
-            lambda_term = self.lambda_weight * ig_for_lambda
-            hop_gedig = float(delta_ged_norm - lambda_term)
-
-            hop_results[hop] = HopResult(
-                hop=hop,
-                ged=delta_ged_norm,
-                ig=combined_ig,
-                gedig=hop_gedig,
-                struct_cost=delta_ged_norm,
-                node_count=len(sub_g2),
-                edge_count=sub_g2.number_of_edges(),
-                sp=delta_sp_rel,
-                h_component=delta_h_norm,
-                ged_raw=float(ged_result.get('raw_ged', 0.0)),
-                ged_den=float(ged_result.get('normalization_den', denom)),
-                entropy_before=float(ig_result.get('entropy_before', 0.0)),
-                entropy_after=float(ig_result.get('entropy_after', 0.0)),
-                ig_delta=float(ig_result.get('delta_entropy', 0.0)),
-                ig_den=float(ig_result.get('normalization_den', fixed_den if fixed_den is not None else 1.0)),
-                variance_reduction=float(ig_result.get('variance_reduction', 0.0)),
-            )
-
-            if self.adaptive_hops and hop > 0 and abs(hop_gedig) < 0.01:
-                break
-
-        if not hop_results:
-            empty_result = GeDIGResult(
-                gedig_value=0.0,
-                ged_value=0.0,
-                ig_value=0.0,
-                raw_ged=0.0,
-                ged_norm_den=1.0,
-                ig_raw=0.0,
-                ig_norm_den=1.0,
-                delta_ged_norm=0.0,
-                delta_sp_rel=0.0,
-                delta_h_norm=0.0,
-                structural_cost=0.0,
-                structural_improvement=0.0,
-                information_integration=0.0,
-                entropy_before=0.0,
-                entropy_after=0.0,
-                ig_delta=0.0,
-                variance_reduction=0.0,
-                hop_results={},
-                computation_time=time.time() - start_time,
-                focal_nodes=focal_nodes,
-                version="onegauge_v1_multihop",
-            )
-            return empty_result
-
-        hop0 = hop_results.get(0, next(iter(hop_results.values())))
-        best_hop = min(hop_results.keys(), key=lambda h: hop_results[h].gedig)
-        best_result = hop_results[best_hop]
-
-        return GeDIGResult(
-            gedig_value=best_result.gedig,
-            ged_value=hop0.ged,
-            ig_value=best_result.ig,
-            raw_ged=hop0.ged_raw,
-            ged_norm_den=hop0.ged_den,
-            ig_raw=best_result.ig,
-            ig_norm_den=hop0.ig_den,
-            delta_ged_norm=hop0.ged,
-            delta_sp_rel=best_result.sp,
-            delta_h_norm=hop0.h_component,
-            structural_cost=hop0.struct_cost,
-            structural_improvement=-hop0.ged,
-            information_integration=best_result.ig,
-            entropy_before=hop0.entropy_before,
-            entropy_after=hop0.entropy_after,
-            ig_delta=hop0.ig_delta,
-            variance_reduction=hop0.variance_reduction,
-            hop_results=hop_results,
-            focal_nodes=focal_nodes,
-            computation_time=time.time() - start_time,
-            version="onegauge_v1_multihop"
-        )
 
     # ------------ Helpers ------------
     def _compute_sp_gain_norm(self, g_before: nx.Graph, g_after: nx.Graph, mode: str = 'relative') -> float:
