@@ -13,12 +13,12 @@
 
 | 指標 | Before | After | 変化 |
 |------|--------|-------|------|
-| gedig_core.py 行数 | 2,159 | **982** | **-55%** |
-| モジュール数（geDIG） | 1 | **9** | +8 |
+| gedig_core.py 行数 | 2,159 | **792** | **-63%** |
+| モジュール数（geDIG） | 1 | **10** | +9 |
 | information_gain.py 行数 | 728 | **607** | -17% |
 | モジュール数（IG） | 0 | **3** | +3 |
 | 環境変数管理 | 散在（12箇所） | 集約（config.py） | 統一 |
-| テスト数（geDIG） | 53 | **185** | +132 (monitor+35, logger+14, linkset+11) |
+| テスト数（geDIG） | 53 | **205** | +152 (monitor+35, logger+14, linkset+11, multihop+20) |
 | テスト数（IG） | 0 | **23** | +23 (types+13, methods+10) |
 | カバレッジ（geDIG） | 54% | **72%** | +18% |
 
@@ -26,7 +26,7 @@
 
 ```
 src/insightspike/algorithms/gedig/
-├── __init__.py      #  70行 - 公開API（17エクスポート）
+├── __init__.py      #  75行 - 公開API（18エクスポート）
 ├── types.py         # 128行 - 型定義（5 dataclass/enum）
 ├── config.py        # 310行 - 設定管理（from_env, preset）
 ├── spike.py         # 114行 - スパイク検出（2関数）
@@ -34,7 +34,8 @@ src/insightspike/algorithms/gedig/
 ├── monitor.py       # 193行 - モニタリング
 ├── logger.py        # 137行 - CSVロギング
 ├── selector.py      # 270行 - オーケストレーション
-└── linkset.py       # 218行 - リンクセットメトリクス ← NEW
+├── linkset.py       # 218行 - リンクセットメトリクス
+└── multihop.py      # 370行 - マルチホップ計算 ← NEW
 
 src/insightspike/algorithms/ig/
 ├── __init__.py      #  17行 - 公開API
@@ -671,16 +672,19 @@ def test_calculation_time():
 
 ### 8.1 gedig_core.py さらなる軽量化（優先度: 高）
 
-現在**982行**のgedig_core.pyを400行以下にするための追加リファクタリング:
+現在**792行**のgedig_core.pyを400行以下にするための追加リファクタリング:
 
 | 抽出対象 | 推定行数 | 抽出先 | 状態 |
 |----------|----------|--------|------|
-| マルチホップ処理 | ~200行 | `gedig/multihop.py` | **未着手** |
+| マルチホップ処理 | ~200行 | `gedig/multihop.py` | **✅ 完了** (370行) |
 | LinksetMetrics関連 | ~150行 | `gedig/linkset.py` | **✅ 完了** (218行) |
 | グラフ変換処理 | ~100行 | `gedig/graph_utils.py` に統合 | **✅ 完了** |
 | 内部ヘルパー関数 | ~100行 | `gedig/helpers.py` | **未着手** |
+| __init__環境変数解析 | ~100行 | `GeDIGConfig.from_env()` へ統合 | **未着手** |
 
-**残り**: multihop.py抽出で約400行まで削減可能
+**現状**: 792行（目標400行まで残り約400行）
+- __init__メソッドの環境変数解析をGeDIGConfigに移行すれば約100行削減可能
+- single-hop計算を関数化すれば約90行削減可能
 
 ### 8.2 他ファイルへのパターン適用（優先度: 中）
 
@@ -725,6 +729,7 @@ pytest tests/unit/gedig/ --cov=src/insightspike/algorithms/gedig --cov-report=te
 |------|----------|------|
 | 2026-02-01 | Phase 1-7 | 初期リファクタリング完了 |
 | 2026-02-01 | 8.1-8.3 | linkset.py抽出、ig/パッケージ作成、テスト追加(83テスト) |
+| 2026-02-01 | 8.1 | multihop.py抽出(370行)、gedig_core 982→792行、テスト追加(20テスト) |
 
 ---
 
