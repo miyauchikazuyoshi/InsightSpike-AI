@@ -501,8 +501,8 @@ hop=15: GED mean=0.715,  =1.0: 45%
 
 - [x] スケール検証: 51×51迷路、seeds=3 ← 完了
 - [x] シード間並列化 ← 完了
-- [ ] Link Auto-wire（T字路安定化）の検証
-- [ ] S2bl-2phase（Greedy + Two-phase commit）の検証
+- [x] Link Auto-wire（T字路安定化）の検証 ← 完了（効果なし）
+- [x] S2bl-2phase（Greedy + Two-phase commit）の検証 ← 完了（マルチホップ5倍活性化）
 
 ---
 
@@ -844,3 +844,98 @@ hop=15: GED mean=0.715,  =1.0: 45%
 | 10×10 | 5 | 80% | 32.8 | ✓ 正常 |
 
 リファクタリングによる影響なし。分割したモジュール（models, utils, sleep, aggregate, cli）すべて正常動作。
+
+---
+
+## 論文用実験（2026-02-02）
+
+### 実験設定
+
+| サイズ | max_steps | seeds | 設定 |
+|--------|-----------|-------|------|
+| 25×25 | 500 | 60 | greedy, eval-all-hops, λ=1.0, sp_beta=1.0 |
+| 51×51 | 1500 | 40 | 同上 |
+
+### 進捗
+
+| サイズ | 完了seeds | 成功率 | 平均steps | 状態 |
+|--------|-----------|--------|-----------|------|
+| 25×25 | 12/60 | 100% | 186 | 実行中 |
+| 51×51 | 0/40 | - | - | 実行中 |
+
+### コマンド
+
+```bash
+# 25×25
+/Users/miyauchikazuyoshi/miniconda3/bin/python experiments/maze/run_experiment_query.py \
+  --maze-size 25 --max-steps 500 --seeds 60 --workers 8 \
+  --max-hops 10 --sp-pair-samples 128 --sp-cand-topk 12 \
+  --lambda-weight 1.0 --sp-beta 1.0 --linkset-mode --sp-scope union --sp-hop-expand 3 \
+  --theta-ag -1.0 --theta-dg 0.15 --gh-mode greedy --eval-all-hops \
+  --output experiments/maze/results/paper/25x25_s500_seed60.json
+
+# 51×51
+/Users/miyauchikazuyoshi/miniconda3/bin/python experiments/maze/run_experiment_query.py \
+  --maze-size 51 --max-steps 1500 --seeds 40 --workers 8 \
+  --max-hops 10 --sp-pair-samples 128 --sp-cand-topk 12 \
+  --lambda-weight 1.0 --sp-beta 1.0 --linkset-mode --sp-scope union --sp-hop-expand 3 \
+  --theta-ag -1.0 --theta-dg 0.15 --gh-mode greedy --eval-all-hops \
+  --output experiments/maze/results/paper/51x51_s1500_seed40.json
+```
+
+### 進捗確認
+
+```bash
+wc -l experiments/maze/results/paper/*.incremental.jsonl
+```
+
+---
+
+## 次のステップ（TODO）
+
+### 優先度: 高
+
+1. **論文実験完了待ち** ← 現在
+   - 25×25: 60seeds完了後、結果集計
+   - 51×51: 40seeds完了後、結果集計
+
+2. **結果分析・レポート作成**
+   - HTML比較レポート生成
+   - 成功率、平均steps、gmin分布の可視化
+   - 論文用図表の作成
+
+### 優先度: 中
+
+3. **デッドコード削除検討**
+   - `decay_factor`: `spike.py`の`aggregate_reward`計算にのみ使用、実験では未使用
+   - `aggregate_reward`: 論文未定義、`argmin(g[h])`によるbest_hop選択に置き換え済み
+   - 影響範囲: `spike.py`, `run_experiment_query.py`, CLI引数
+   - **判断**: 論文提出前に削除するか、互換性のため残すか要検討
+
+4. **コード整理**
+   - `HopGreedyEvaluator`クラス: 未使用（デッドコード）、削除候補
+   - `run_episode_query`関数: 3300行、更なる分割検討
+
+### 優先度: 低
+
+5. **追加実験（オプション）**
+   - 異なる迷路タイプ（prim, kruskal）での検証
+   - さらに大きな迷路（101×101）でのスケール検証
+   - ランダムシード範囲を変えた再現性検証
+
+6. **ドキュメント整備**
+   - 実験再現手順のREADME作成
+   - パラメータ設定のガイドライン
+
+---
+
+## 完了タスク一覧
+
+- [x] GED一貫性チェック（2026-02-02）
+- [x] HTML改善: Cmax, nodes, edges表示（2026-02-02）
+- [x] パラメータスイープ: lambda, hops, decay, sp_beta, action_temp（2026-02-02）
+- [x] SP最適化: 6.2倍高速化（2026-02-02）
+- [x] ファイル分割リファクタリング: 23%削減（2026-02-02）
+- [x] 並列化実装: workers引数追加（2026-02-02）
+- [x] インクリメンタル保存: クラッシュ対策（2026-02-02）
+- [x] 権限設定簡略化: Bash(*)許可（2026-02-02）
