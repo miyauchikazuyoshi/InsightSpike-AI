@@ -3857,11 +3857,53 @@ def main() -> None:
         seeds_list = [args.seed_start + offset for offset in range(args.seeds)]
 
         if not use_curriculum and num_workers > 1:
-            # Parallel execution
+            # Parallel execution with incremental saving
             print(f"Running {len(seeds_list)} seeds with {num_workers} workers...")
             worker_args = [(seed, config) for seed in seeds_list]
+
+            # Incremental output file (JSONL format - one result per line)
+            incremental_path = None
+            if args.output:
+                incremental_path = Path(args.output).with_suffix('.incremental.jsonl')
+                # Check for existing incremental results (resume support)
+                completed_seeds = set()
+                if incremental_path.exists():
+                    try:
+                        with open(incremental_path, 'r') as f:
+                            for line in f:
+                                try:
+                                    obj = json.loads(line.strip())
+                                    if 'seed' in obj:
+                                        completed_seeds.add(int(obj['seed']))
+                                except Exception:
+                                    pass
+                        if completed_seeds:
+                            print(f"Resuming: found {len(completed_seeds)} completed seeds")
+                            worker_args = [(s, c) for s, c in worker_args if s not in completed_seeds]
+                    except Exception:
+                        pass
+
+            results = []
             with Pool(processes=num_workers) as pool:
-                results = pool.map(_run_seed_worker, worker_args)
+                # Use imap_unordered for incremental results
+                for seed, artifacts in pool.imap_unordered(_run_seed_worker, worker_args):
+                    results.append((seed, artifacts))
+                    print(f"  Completed seed {seed} ({len(results)}/{len(worker_args)})")
+
+                    # Save incrementally
+                    if incremental_path:
+                        try:
+                            incremental_record = {
+                                "seed": seed,
+                                "summary": dict(artifacts.summary, episode_phase="main"),
+                                "maze_snapshot": artifacts.maze_snapshot,
+                                "steps_count": len(artifacts.steps),
+                            }
+                            with open(incremental_path, 'a') as f:
+                                f.write(json.dumps(incremental_record) + '\n')
+                        except Exception as e:
+                            print(f"  Warning: failed to save incremental result: {e}")
+
             # Process results sequentially (append_record uses shared state)
             for seed, artifacts in sorted(results, key=lambda x: x[0]):
                 runs.append(dict(artifacts.summary, episode_phase="main"))
