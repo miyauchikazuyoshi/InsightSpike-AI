@@ -36,6 +36,12 @@ from .monitor import GeDIGMonitor
 from .logger import GeDIGLogger
 from .linkset import compute_linkset_metrics
 from .multihop import calculate_multihop
+from .attention import (
+    AttentionGeDIGConfig,
+    AttentionGeDIGResult,
+    AttentionGeDIGCalculator,
+    compute_attention_gedig,
+)
 
 __all__ = [
     # Types
@@ -69,5 +75,10 @@ __all__ = [
     "compute_linkset_metrics",
     # Multihop
     "calculate_multihop",
+    # Attention (for Transformer experiments)
+    "AttentionGeDIGConfig",
+    "AttentionGeDIGResult",
+    "AttentionGeDIGCalculator",
+    "compute_attention_gedig",
 ]
 
