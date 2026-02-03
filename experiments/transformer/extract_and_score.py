@@ -2,100 +2,61 @@
 """
 Extract attentions and compute geDIG F per head/layer on a small text set.
 Supports multiple models (including local checkpoints) and percentile/absolute thresholds.
+
+Uses the main codebase's AttentionGeDIGCalculator for consistent F-score computation.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-from dataclasses import dataclass
+import sys
 from pathlib import Path
-from typing import Dict, List, Tuple, Sequence, Optional
+from typing import Dict, List, Tuple, Optional
 
 import networkx as nx
 import numpy as np
 import torch
 from datasets import load_dataset
-from scipy.stats import entropy
 from transformers import AutoModel, AutoTokenizer
 
+# Add src to path for importing main codebase
+_src_path = Path(__file__).resolve().parents[2] / "src"
+if str(_src_path) not in sys.path:
+    sys.path.insert(0, str(_src_path))
 
-@dataclass
+from insightspike.algorithms.gedig import (
+    AttentionGeDIGConfig,
+    AttentionGeDIGCalculator,
+)
+
+
+# Backward-compatible wrapper
 class GeDIGCalculator:
-    lambda_param: float = 1.0
-    gamma: float = 0.5
-    threshold: float = 0.01
-    use_percentile: bool = False
-    percentile: float = 0.9
-    undirected_sp: bool = True
+    """Wrapper for backward compatibility with existing code."""
+
+    def __init__(
+        self,
+        lambda_param: float = 1.0,
+        gamma: float = 0.5,
+        threshold: float = 0.01,
+        use_percentile: bool = False,
+        percentile: float = 0.9,
+        undirected_sp: bool = True,
+    ):
+        self.config = AttentionGeDIGConfig(
+            lambda_param=lambda_param,
+            gamma=gamma,
+            threshold=threshold,
+            use_percentile=use_percentile,
+            percentile=percentile,
+            undirected_sp=undirected_sp,
+        )
+        self._calc = AttentionGeDIGCalculator(self.config)
 
     def compute_F(self, attn: np.ndarray, valid_mask: np.ndarray) -> Dict[str, float]:
-        idx = np.where(valid_mask)[0]
-        if len(idx) == 0:
-            return {"F": 0.0, "E_eff": 0.0, "delta_epc": 0.0, "delta_sp": 0.0, "delta_h": 0.0, "num_edges": 0, "density": 0.0}
-        attn = attn[np.ix_(idx, idx)]
-        L = attn.shape[0]
-        G = self._build_graph(attn)
-        max_edges = L * L
-        delta_epc = G.number_of_edges() / max_edges if max_edges > 0 else 0.0
-        delta_sp = self._compute_path_efficiency(G)
-        delta_h = self._compute_entropy(attn)
-        E_eff = delta_epc - self.lambda_param * self.gamma * delta_sp
-        F = E_eff - self.lambda_param * delta_h
-        return {
-            "F": float(F),
-            "E_eff": float(E_eff),
-            "delta_epc": float(delta_epc),
-            "delta_sp": float(delta_sp),
-            "delta_h": float(delta_h),
-            "num_edges": int(G.number_of_edges()),
-            "density": float(nx.density(G)) if G.number_of_nodes() > 0 else 0.0,
-        }
-
-    def _build_graph(self, attn: np.ndarray) -> nx.DiGraph:
-        G = nx.DiGraph()
-        L = attn.shape[0]
-        G.add_nodes_from(range(L))
-        thresh = float(np.quantile(attn, self.percentile)) if self.use_percentile else float(self.threshold)
-        for i in range(L):
-            for j in range(L):
-                if attn[i, j] > thresh:
-                    G.add_edge(i, j, weight=float(attn[i, j]))
-        return G
-
-    def _compute_path_efficiency(self, G: nx.DiGraph) -> float:
-        if G.number_of_edges() == 0 or G.number_of_nodes() < 2:
-            return 0.0
-        try:
-            if self.undirected_sp:
-                G2 = G.to_undirected()
-                if nx.is_connected(G2):
-                    avg_path = nx.average_shortest_path_length(G2)
-                    return 1.0 / avg_path if avg_path > 0 else 0.0
-                comp = max(nx.connected_components(G2), key=len)
-                sub = G2.subgraph(comp).copy()
-            else:
-                if nx.is_weakly_connected(G):
-                    avg_path = nx.average_shortest_path_length(G)
-                    return 1.0 / avg_path if avg_path > 0 else 0.0
-                comp = max(nx.weakly_connected_components(G), key=len)
-                sub = G.subgraph(comp).copy()
-            if sub.number_of_nodes() < 2:
-                return 0.0
-            avg_path = nx.average_shortest_path_length(sub)
-            return 1.0 / avg_path if avg_path > 0 else 0.0
-        except Exception:
-            return 0.0
-
-    def _compute_entropy(self, attn: np.ndarray) -> float:
-        flat = attn.flatten()
-        flat = flat[flat > 1e-10]
-        if flat.size == 0:
-            return 0.0
-        flat = flat / flat.sum()
-        H = entropy(flat)
-        max_H = np.log(flat.size)
-        return float(H / max_H) if max_H > 0 else 0.0
+        result = self._calc.compute(attn, valid_mask)
+        return result.to_dict()
 
 
 def _resolve_dtype(dtype_str: str) -> Optional[torch.dtype]:

@@ -6,54 +6,56 @@ Offline-friendly attention interventions:
 - identity: no change
 
 Logs F on the last layer and a placeholder accuracy (None).
+
+Uses the main codebase's AttentionGeDIGCalculator for consistent F-score computation.
 """
 
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+import sys
 from pathlib import Path
 from typing import Dict, List, Callable, Tuple
 
 import numpy as np
 import torch
-from scipy.stats import entropy
 from transformers import AutoModel, AutoTokenizer, AutoModelForSequenceClassification
 from datasets import load_dataset
 
+# Add src to path for importing main codebase
+_src_path = Path(__file__).resolve().parents[2] / "src"
+if str(_src_path) not in sys.path:
+    sys.path.insert(0, str(_src_path))
 
-@dataclass
+from insightspike.algorithms.gedig import (
+    AttentionGeDIGConfig,
+    AttentionGeDIGCalculator,
+)
+
+
 class GeDIGCalculator:
-    lambda_param: float = 1.0
-    gamma: float = 0.5
-    threshold: float = 0.01
-    use_percentile: bool = True
-    percentile: float = 0.9
+    """Wrapper for backward compatibility - returns F as float."""
+
+    def __init__(
+        self,
+        lambda_param: float = 1.0,
+        gamma: float = 0.5,
+        threshold: float = 0.01,
+        use_percentile: bool = True,
+        percentile: float = 0.9,
+    ):
+        self.config = AttentionGeDIGConfig(
+            lambda_param=lambda_param,
+            gamma=gamma,
+            threshold=threshold,
+            use_percentile=use_percentile,
+            percentile=percentile,
+        )
+        self._calc = AttentionGeDIGCalculator(self.config)
 
     def compute_F(self, attn: np.ndarray, mask: np.ndarray) -> float:
-        idx = np.where(mask)[0]
-        if len(idx) == 0:
-            return 0.0
-        attn = attn[np.ix_(idx, idx)]
-        L = attn.shape[0]
-        # density
-        thresh = float(np.quantile(attn, self.percentile)) if self.use_percentile else float(self.threshold)
-        edges = (attn > thresh).sum()
-        delta_epc = edges / (L * L) if L > 0 else 0.0
-        # entropy
-        flat = attn.flatten()
-        flat = flat[flat > 1e-10]
-        if flat.size == 0:
-            delta_h = 0.0
-        else:
-            flat = flat / flat.sum()
-            delta_h = float(entropy(flat) / np.log(flat.size))
-        # SP (simple proxy: 1/avg distance on largest component, undirected)
-        delta_sp = 0.0
-        # geDIG
-        E_eff = delta_epc - self.lambda_param * self.gamma * delta_sp
-        F = E_eff - self.lambda_param * delta_h
-        return float(F)
+        result = self._calc.compute(attn, mask)
+        return result.F
 
 
 def sparsify_topk(attn: torch.Tensor, k: int = 8) -> torch.Tensor:
