@@ -95,7 +95,7 @@ def build_command(seed_offset: int, num_seeds: int, workers: int, results_dir: P
         f"--maze-size", str(CONFIG["maze_size"]),
         f"--max-steps", str(CONFIG["max_steps"]),
         f"--seeds", str(num_seeds),
-        f"--seed-offset", str(seed_offset),
+        f"--seed-start", str(seed_offset),
         f"--workers", str(workers),
 
         # geDIG params
