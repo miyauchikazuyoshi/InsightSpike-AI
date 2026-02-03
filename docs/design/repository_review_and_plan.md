@@ -371,18 +371,27 @@ Week 3-4: 迷路固め
 
 ## 9. 進捗状況（2026-02-03 更新）
 
-### 9.1 Phase 1: コード整理 - 部分完了
+### 9.1 Phase 1: コード整理 - ✅ 完了
+
+詳細: **[refactoring_plan.md](./refactoring_plan.md)**
 
 | タスク | 状態 | 備考 |
 |--------|------|------|
-| gedig_core.py 分割 | ⚠️ 部分完了 | 811行（目標500行以下） |
+| gedig_core.py 分割 | ✅ 完了 | 2,159行 → **779行（-64%）** |
+| gedig/ モジュール作成 | ✅ 完了 | **10モジュール作成** |
+| テストカバレッジ | ✅ 完了 | 54% → **84%**（+30%） |
 | run_experiment_query.py 分割 | ✅ 完了 | 5551行 → 4341行（22%削減） |
 | qhlib/ モジュール作成 | ✅ 完了 | 18モジュール作成 |
-| 環境変数→Config | ⏳ 未着手 | |
+| 環境変数→Config | ✅ 完了 | config.pyに集約 |
 
-**qhlib/ 分割済みモジュール**:
-- models.py, cli.py, evaluator.py, utils.py, sleep.py, aggregate.py
-- edges.py, commit.py, metrics.py, store.py, sp_pairsets.py, etc.
+**gedig/ 分割済みモジュール**:
+```
+src/insightspike/algorithms/gedig/
+├── types.py, config.py, spike.py, graph_utils.py
+├── monitor.py, logger.py, selector.py
+├── linkset.py, multihop.py
+└── __init__.py (公開API: 18エクスポート)
+```
 
 ### 9.2 Phase 2: 迷路固め - 進行中
 
