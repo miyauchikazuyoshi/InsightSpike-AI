@@ -304,6 +304,9 @@ $\Delta\mathrm{SP}_{\mathrm{rel}}$はsoft adjacencyの有限長（$\le4$）パ�
 これは，学習済みTransformerが既に$\F$最小化に近い状態で動作していることを示唆する．
 すなわち，Transformerは学習過程で自発的に構造化圧を獲得しており，geDIGはその「隠れた最適化目標」を顕在化したものと解釈できる．
 
+なお，推論時にAttention重みを直接編集する介入実験では，軽微なノイズ（scale=0.05）でも精度が約50\%低下した．
+これはF正則化が有効なのは学習時にモデル全体が適応できるためであり，推論時の直接操作には適さないことを示す．
+
 \begin{table}[t]
 \centering
 \caption{F正則化の効果（SST-2, DistilBERT, $n=3$ seeds）}
