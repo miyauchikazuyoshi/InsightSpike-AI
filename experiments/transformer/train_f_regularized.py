@@ -214,10 +214,12 @@ class FRegularizedModel(nn.Module):
         base_model: nn.Module,
         alpha: float = 0.1,
         gedig_config: Optional[Dict[str, Any]] = None,
+        random_reg: bool = False,
     ):
         super().__init__()
         self.base_model = base_model
         self.alpha = alpha
+        self.random_reg = random_reg  # Use random values instead of geDIG F
         self.gedig = DifferentiableGeDIG(**(gedig_config or {}))
 
         # Storage for logging
@@ -243,12 +245,17 @@ class FRegularizedModel(nn.Module):
             # Compute F regularization from all attention layers
             all_attentions = outputs.attentions  # tuple of (B, H, S, S)
 
-            f_values = []
-            for layer_attn in all_attentions:
-                gedig_out = self.gedig.compute_F(layer_attn, attention_mask)
-                f_values.append(gedig_out["F_mean"])
-
-            f_mean = torch.stack(f_values).mean()
+            if self.random_reg:
+                # Negative control: use random values instead of real geDIG F
+                # Same scale as typical F values (-1 to 0)
+                f_mean = torch.randn(1, device=input_ids.device) * 0.2 - 0.4
+                f_mean = f_mean.squeeze()
+            else:
+                f_values = []
+                for layer_attn in all_attentions:
+                    gedig_out = self.gedig.compute_F(layer_attn, attention_mask)
+                    f_values.append(gedig_out["F_mean"])
+                f_mean = torch.stack(f_values).mean()
 
             # Modified loss: L_total = L_CE + alpha * F_mean
             # Note: We want to MINIMIZE F, so we add it to the loss
@@ -310,6 +317,7 @@ def run_experiment(
     learning_rate: float = 2e-5,
     seed: int = 42,
     output_dir: Optional[Path] = None,
+    random_reg: bool = False,
 ) -> Dict[str, Any]:
     """
     Run a single F-regularization experiment.
@@ -321,7 +329,8 @@ def run_experiment(
     output_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"\n{'='*60}")
-    print(f"Running experiment: alpha={alpha}")
+    reg_type = "RANDOM (negative control)" if random_reg else "geDIG F"
+    print(f"Running experiment: alpha={alpha}, regularization={reg_type}")
     print(f"{'='*60}\n")
 
     # Load data
@@ -342,11 +351,13 @@ def run_experiment(
     train_ds = train_ds.remove_columns(cols_to_remove).with_format("torch")
     eval_ds = eval_ds.remove_columns(cols_to_remove).with_format("torch")
 
-    # Load model
-    base_model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2)
+    # Load model (use eager attention to support output_attentions=True)
+    base_model = AutoModelForSequenceClassification.from_pretrained(
+        model_name, num_labels=2, attn_implementation="eager"
+    )
 
     if alpha > 0:
-        model = FRegularizedModel(base_model, alpha=alpha)
+        model = FRegularizedModel(base_model, alpha=alpha, random_reg=random_reg)
     else:
         model = base_model
 
@@ -382,7 +393,7 @@ def run_experiment(
         args=training_args,
         train_dataset=train_ds,
         eval_dataset=eval_ds,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         data_collator=data_collator,
         compute_metrics=compute_metrics,
     )
@@ -558,6 +569,7 @@ def main():
     parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument("--lr", type=float, default=2e-5)
     parser.add_argument("--output-dir", type=Path, default=Path("results/transformer_gedig/f_reg"))
+    parser.add_argument("--random-reg", action="store_true", help="Negative control: use random values instead of geDIG F")
     args = parser.parse_args()
 
     if args.alpha_sweep or args.alpha is None:
@@ -592,6 +604,7 @@ def main():
             batch_size=args.batch_size,
             learning_rate=args.lr,
             output_dir=args.output_dir / f"alpha_{args.alpha}",
+            random_reg=args.random_reg,
         )
 
 
