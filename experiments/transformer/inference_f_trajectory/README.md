@@ -1,12 +1,12 @@
 # 推論時F軌跡実験
 
-**ステータス**: 📝 仕様検討中
+**ステータス**: 🔬 初回実験完了・仮説要修正
 
 ## 概要
 
-Transformerの推論時（1回のforward pass）において、**層を通過するごとにF値が単調減少するか**を検証する実験。
+Transformerの推論時（1回のforward pass）において、**層を通過するごとにF値がどう変化するか**を検証する実験。
 
-## 核心的仮説
+## 核心的仮説（当初）
 
 ```
 Layer 0 (入力埋め込み):  F_0 = 高い（無構造・曖昧）
@@ -15,59 +15,75 @@ Layer 1:                 F_1 < F_0
 Layer L (出力):          F_L = 最小（構造解決済み）
 ```
 
+## 結果サマリー
+
+**仮説は棄却された**。代わりに**U字型パターン**を発見：
+
+```
+F軌跡:
+
+   高│  *                          *
+     │   *                        *
+   F │    *                      *
+     │     * * * * * * * * * *
+   低│
+     └────────────────────────────
+       0  1  2  3  4  5 ... 10 11
+               Layer
+```
+
+- ✅ 浅層（0-2）: 中〜高F（入力処理）
+- ✅ 中間層（3-9）: 低F（効率的な意味処理）
+- ✅ 深層（10-11）: 高Fスパイク（出力準備）
+- ❌ 単調減少: 0%（全サンプルで非単調）
+
+詳細は [REPORT.md](./REPORT.md) を参照。
+
 ## 学習過程との関係
 
-| 過程 | 観測対象 | 何が変化するか | 検証方法 |
-|------|----------|---------------|----------|
-| **学習** | モデル（重み） | Attention構造 | Pythiaチェックポイント |
-| **推論** | ベクトル（表現） | Hidden state構造 | 任意モデルのforward pass |
+| 過程 | 観測対象 | Fパターン |
+|------|----------|----------|
+| **学習** | モデル（重み） | step進行で収束 |
+| **推論** | ベクトル（表現） | U字型（bathtub curve） |
 
-両者は**対をなす**：
-- 学習 = 「F↓を実現する変換」を獲得する過程
-- 推論 = 獲得した変換で「F↓」を実行する過程
-
-## 検討中の論点
-
-### Hidden StateベースのgeDIG定義
-
-```python
-# 類似度行列（暗黙のグラフ）
-sim = cosine_similarity(h, h)
-
-# vs Attention（QK^T）を使うべきか？
-```
-
-### 位置符号の活用
-
-```python
-# 位置距離を重み付けに使用
-# 「遠いのに類似度が高い」= ショートカット
-shortcut_score = (sim * position_distance).mean()
-```
-
-### Q, K, V分離の意味
-
-```
-QK^T = h @ W_Q @ W_K.T @ h.T = h @ W_QK @ h.T
-
-cosine(h, h) = h @ h.T  ← W_QK = I の特殊ケース
-```
-
-## 関連実験
-
-- **学習過程の検証**: [../pythia_checkpoints/](../pythia_checkpoints/) （実験完了）
+両者は**異なるパターン**を示す。
 
 ## ファイル構成
 
 ```
 inference_f_trajectory/
-├── README.md    # 本ファイル
-├── SPEC.md      # 詳細仕様書
-└── (実装予定)
+├── README.md              # 本ファイル
+├── SPEC.md                # 詳細仕様書
+├── REPORT.md              # 実験レポート
+├── gedig_hidden.py        # Hidden stateベースのgeDIG実装
+├── measure_trajectory.py  # F軌跡測定スクリプト
+├── visualize_trajectory.py # 結果可視化
+└── results/
+    ├── trajectory_bert-base-uncased.json
+    ├── trajectory_gpt2.json
+    ├── trajectory_visualization.png
+    ├── layer_comparison.png
+    └── summary.json
 ```
 
-詳細仕様は [SPEC.md](./SPEC.md) を参照。
+## 実行方法
+
+```bash
+# 単体テスト
+poetry run python gedig_hidden.py
+
+# 実験実行
+poetry run python measure_trajectory.py --model bert-base-uncased
+poetry run python measure_trajectory.py --model gpt2
+
+# 可視化
+poetry run python visualize_trajectory.py
+```
+
+## 関連実験
+
+- **学習過程の検証**: [../pythia_checkpoints/](../pythia_checkpoints/)
 
 ---
 
-*Last updated: 2026-02-03*
+*Last updated: 2026-02-05*
