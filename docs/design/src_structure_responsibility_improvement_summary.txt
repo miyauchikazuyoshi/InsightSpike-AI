@@ -1,0 +1,15 @@
+total_files=298
+priority_P0=7
+priority_P1=9
+priority_P2=185
+priority_P3=97
+runtime_unreachable=188
+runtime_and_test_unreachable=101
+top_p0_files:
+- src/insightspike/cli/spike.py :: split
+- src/insightspike/implementations/agents/main_agent.py :: split
+- src/insightspike/implementations/agents/main_agent_refactored.py :: merge_or_archive
+- src/insightspike/implementations/datastore/sqlite_store.py :: split
+- src/insightspike/implementations/layers/cached_memory_manager.py :: merge
+- src/insightspike/implementations/layers/layer2_memory_manager.py :: split
+- src/insightspike/implementations/layers/layer4_llm_interface.py :: split
