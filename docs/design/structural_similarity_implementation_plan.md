@@ -1,5 +1,8 @@
 # 構造的類似度評価機能 実装計画書
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 ## 1. 目的
 
 ### 1.1 背景

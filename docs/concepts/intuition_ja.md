@@ -1,5 +1,8 @@
 # geDIG 直感的ガイド：数式なしで理解する
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 > 「もし、データベースが脳のように『考える』ことができたら？」
 
 InsightSpike-AI の数式が難しく感じられるなら、ここから始めてください。このガイドでは、**geDIG (Geometric Differential Information Gain)** の核心概念を、数式を一文字も使わずに解説します。

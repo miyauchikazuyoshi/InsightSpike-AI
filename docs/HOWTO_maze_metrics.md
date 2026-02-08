@@ -1,5 +1,8 @@
 # 迷路実験 やり方メモ（等資源 + 運用ELBO）
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 このメモは Phase 1（EPCベース）の迷路PoCを、等資源（equal-resources）条件と指標一式で再現するための最小手順です。
 
 ## 等資源（equal-resources）の固定

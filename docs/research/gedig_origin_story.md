@@ -1,4 +1,7 @@
 # geDIGの起源：閃くAIを作るまでの思考の軌跡
+
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
 ## Origin of geDIG: The Journey to Building an AI That Has Insights
 
 <small>Created: 2026-01-28</small>

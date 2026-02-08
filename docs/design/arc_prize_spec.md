@@ -1,5 +1,8 @@
 # ARC Prize Solver Spec（geDIG駆動のDSLプログラム探索）
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 **Version**: 0.1 (Draft)  
 **Date**: 2026-01-29  
 **Author**: Kazuyoshi Miyauchi  

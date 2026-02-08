@@ -1,5 +1,8 @@
 # 論文ストーリー: GED編集操作 = 閃きの実体
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 ## 1. 現在の論文 (v6) の位置づけ
 
 ```

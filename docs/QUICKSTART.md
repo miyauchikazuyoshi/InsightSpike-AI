@@ -1,5 +1,8 @@
 # QUICKSTART — 5分で始める InsightSpike-AI
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 このガイドは「最初の5分で動かす」ための最短経路です。詳細は README.md や docs/paper を参照してください。
 
 ## 要件

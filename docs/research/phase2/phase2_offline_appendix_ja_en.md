@@ -1,5 +1,8 @@
 # Phase 2: Offline Optimization / Sleep Phase Appendix  
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 このドキュメントは、geDIG v5 論文で「Phase 2（オフライン全体最適化）」と呼んでいる設計案のうち、  
 より神経科学メタファ寄りのアイデア（睡眠フェーズ / 神経調節物質など）を、日本語と英語で補足するための付録です。  
 論文本文の主張や実験結果は Phase 1 のみを対象としており、ここで述べる内容は **将来の拡張候補** です。
