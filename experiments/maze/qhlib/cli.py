@@ -180,6 +180,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--affordance-beta", type=float, default=1.0, help="Bias strength for affordance memory (logit multiplier).")
     parser.add_argument("--affordance-lr", type=float, default=0.2, help="Update rate for affordance memory (per-step additive).")
     parser.add_argument("--affordance-clamp", type=float, default=3.0, help="Clamp range for affordance bias magnitude (abs max).")
+    # Graph-persistent DG: vector mode and propagation parameters
+    parser.add_argument("--vector-mode", type=str, default="standard", choices=["standard", "extended"],
+                        help="Vector mode: standard (8D) or extended (10D with reward/propagated dims).")
+    parser.add_argument("--propagated-alpha", type=float, default=1.0,
+                        help="Scalar bonus weight for propagated values (standard mode only; extended uses vector dims).")
+    parser.add_argument("--sleep-propagate-gamma", type=float, default=0.95,
+                        help="Discount factor for graph reward propagation in Sleep phase.")
+    parser.add_argument("--sleep-propagate-iters", type=int, default=50,
+                        help="Max iterations for graph reward propagation in Sleep phase.")
     # Curriculum (Wake→Sleep→Wake): warmup run to ensure goal experience, then eval guided by Sleep path plan
     parser.add_argument(
         "--curriculum-warmup-steps",
@@ -334,6 +343,10 @@ def build_config(
         sleep_edge_deadend_penalty=float(getattr(args, "sleep_edge_deadend_penalty", 0.2)),
         sleep_edge_blocked_penalty=float(getattr(args, "sleep_edge_blocked_penalty", 0.2)),
         sleep_edge_mode=str(getattr(args, "sleep_edge_mode", "mul")),
+        vector_mode=str(getattr(args, "vector_mode", "standard")),
+        propagated_alpha=float(getattr(args, "propagated_alpha", 1.0)),
+        sleep_propagate_gamma=float(getattr(args, "sleep_propagate_gamma", 0.95)),
+        sleep_propagate_iters=int(getattr(args, "sleep_propagate_iters", 50)),
         event_weights=dict(event_weights or {}),
         event_beta=float(getattr(args, "event_beta", 1.0)),
         affordance_bias=bool(getattr(args, "affordance_bias", False)),

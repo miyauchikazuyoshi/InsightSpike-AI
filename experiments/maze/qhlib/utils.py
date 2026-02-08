@@ -31,8 +31,21 @@ DELTA_TO_DIR = {delta: direction for direction, delta in DIR_TO_DELTA.items()}
 DIR_LABELS = {0: "N", 1: "E", 2: "S", 3: "W", QUERY_MARKER: QUERY_LABEL}
 
 WEIGHT_VECTOR = np.array([1.0, 1.0, 0.0, 0.0, 3.0, 2.0, 0.0, 0.0], dtype=float)
+WEIGHT_VECTOR_EXTENDED = np.array([1.0, 1.0, 0.0, 0.0, 3.0, 2.0, 0.0, 0.0, 2.0, 3.0], dtype=float)
+VECTOR_DIM_STANDARD = 8
+VECTOR_DIM_EXTENDED = 10
 QUERY_TEMPERATURE = 0.1
 RADIUS_BLOCK = 1e6
+
+
+def get_weight_vector(mode: str = "standard") -> np.ndarray:
+    if mode == "extended":
+        return WEIGHT_VECTOR_EXTENDED.copy()
+    return WEIGHT_VECTOR.copy()
+
+
+def get_vector_dim(mode: str = "standard") -> int:
+    return VECTOR_DIM_EXTENDED if mode == "extended" else VECTOR_DIM_STANDARD
 
 
 # --------------------------------------------------------------------------------------
@@ -94,8 +107,15 @@ def compute_episode_vector(
     success: bool,
     is_goal: bool,
     target_position: Optional[Tuple[int, int]] = None,
+    reward: float = 0.0,
+    propagated: float = 0.0,
+    vector_dim: int = 8,
 ) -> np.ndarray:
-    """Return the 8D feature vector used across the maze experiments."""
+    """Return the feature vector used across the maze experiments.
+
+    Standard mode (8D): position, direction, passability, visits, success, is_goal.
+    Extended mode (10D): + reward (dim8), tanh(propagated) (dim9).
+    """
 
     row, col = base_position
     height, width = maze_shape
@@ -106,7 +126,7 @@ def compute_episode_vector(
     dx = float(dc)
     dy = float(-dr)
 
-    vector = np.zeros(8, dtype=float)
+    vector = np.zeros(max(vector_dim, 8), dtype=float)
     vector[0] = row / max(height, 1)
     vector[1] = col / max(width, 1)
     vector[2] = dx
@@ -115,21 +135,47 @@ def compute_episode_vector(
     vector[5] = math.log1p(max(0, visits))
     vector[6] = 1.0 if success else 0.0
     vector[7] = 1.0 if is_goal else 0.0
+    if vector_dim >= 10:
+        vector[8] = float(reward)
+        vector[9] = math.tanh(float(propagated))
     return vector
 
 
-def compute_query_vector(position: Tuple[int, int], maze_shape: Tuple[int, int]) -> np.ndarray:
-    vector = np.zeros(8, dtype=float)
+def compute_query_vector(
+    position: Tuple[int, int],
+    maze_shape: Tuple[int, int],
+    vector_dim: int = 8,
+    *,
+    reward: float = 0.0,
+    propagated: float = 0.0,
+) -> np.ndarray:
+    """Query vector: target for similarity.
+
+    Extended mode (10D): dim8/dim9 follow the same encoding as
+    ``compute_episode_vector`` — actual reward / tanh(propagated) of the
+    current position — so that the full 10-D distance works naturally.
+    """
+    vector = np.zeros(max(vector_dim, 8), dtype=float)
     row, col = position
     height, width = maze_shape
     vector[0] = row / max(height, 1)
     vector[1] = col / max(width, 1)
     vector[4] = 1.0
+    if vector_dim >= 10:
+        vector[8] = float(reward)
+        vector[9] = math.tanh(float(propagated))
     return vector
 
 
-def weighted_distance(query_vec: np.ndarray, candidate_vec: np.ndarray) -> float:
-    diff = WEIGHT_VECTOR * (query_vec - candidate_vec)
+def weighted_distance(
+    query_vec: np.ndarray,
+    candidate_vec: np.ndarray,
+    weights: Optional[np.ndarray] = None,
+) -> float:
+    if weights is None:
+        weights = WEIGHT_VECTOR
+    n = min(len(query_vec), len(candidate_vec), len(weights))
+    diff = weights[:n] * (query_vec[:n] - candidate_vec[:n])
     return float(np.linalg.norm(diff))
 
 

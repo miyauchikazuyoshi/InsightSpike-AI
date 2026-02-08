@@ -316,6 +316,11 @@ class QueryHubConfig:
     dg_bfs_shortcut: bool = False
     # Force SP gain evaluation at hop0 (diagnostic)
     force_sp_gain_eval: bool = False
+    # Graph-persistent DG: extended vector mode and Sleep propagation
+    vector_mode: str = "standard"  # 'standard' (8D) or 'extended' (10D)
+    propagated_alpha: float = 1.0
+    sleep_propagate_gamma: float = 0.95
+    sleep_propagate_iters: int = 50
 
 
 @dataclass
@@ -324,3 +329,4 @@ class EpisodeArtifacts:
     summary: MazeSummary
     steps: List[StepRecord]
     maze_snapshot: Dict[str, Any]
+    graph: Optional[Any] = None
