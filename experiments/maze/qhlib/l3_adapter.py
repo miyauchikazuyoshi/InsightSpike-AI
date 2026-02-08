@@ -4,8 +4,9 @@ from typing import Any, Dict, List, Sequence, Tuple, Set
 
 import numpy as np
 
-# Match A/B's feature weighting for maze 8D vectors
+# Match A/B's feature weighting for maze 8D vectors (fallback)
 WEIGHT_VECTOR = np.array([1.0, 1.0, 0.0, 0.0, 3.0, 2.0, 0.0, 0.0], dtype=np.float32)
+WEIGHT_VECTOR_EXTENDED = np.array([1.0, 1.0, 0.0, 0.0, 3.0, 2.0, 0.0, 0.0, 2.0, 3.0], dtype=np.float32)
 
 
 class _LiteData:
@@ -32,8 +33,9 @@ def _nx_to_litedata(g, node_order: Sequence[Any], default_dim: int = 8) -> _Lite
         feats.append(arr.astype(np.float32))
     x = np.vstack(feats) if feats else np.zeros((0, default_dim), dtype=np.float32)
     # Apply weighting to align with Core's entropy_ig path
-    if x.size and x.shape[1] == WEIGHT_VECTOR.size:
-        x = x * WEIGHT_VECTOR
+    wv = WEIGHT_VECTOR_EXTENDED if default_dim >= 10 else WEIGHT_VECTOR
+    if x.size and x.shape[1] == wv.size:
+        x = x * wv
     # Edge index from mapping
     idx = {n: i for i, n in enumerate(node_order)}
     edges = []

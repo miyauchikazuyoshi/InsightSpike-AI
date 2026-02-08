@@ -67,6 +67,7 @@ from qhlib.models import StepRecord, QueryHubConfig, EpisodeArtifacts, MazeSumma
 from qhlib.utils import (
     QUERY_MARKER, QUERY_LABEL, DIR_TO_DELTA, DELTA_TO_DIR, DIR_LABELS,
     WEIGHT_VECTOR, QUERY_TEMPERATURE, RADIUS_BLOCK,
+    get_weight_vector, get_vector_dim,
     direction_from_delta, delta_from_direction,
     make_query_node, make_direction_node,
     canonical_node_id, canonical_edge_id,
@@ -80,6 +81,7 @@ from qhlib.sleep import (
     build_sleep_edge_weights as _build_sleep_edge_weights,
 )
 from qhlib.aggregate import aggregate
+from graph_persistent_dg.sleep_propagate import sleep_optimize as _sleep_graph_optimize
 from qhlib.cli import parse_args, build_config, build_selector_params
 
 StepLog = Dict[str, Any]
@@ -108,9 +110,15 @@ def run_episode_query(
     sleep_q: Optional[Dict[Tuple[int, int], Dict[int, float]]] = None,
     sleep_edge: Optional[Dict[Tuple[int, int], Dict[int, float]]] = None,
     sleep_guide: str = "off",
+    inherited_graph: Optional[nx.Graph] = None,
 ) -> EpisodeArtifacts:
     random.seed(seed)
     np.random.seed(seed)
+
+    # Vector mode: standard (8D) or extended (10D with reward/propagated dims)
+    vector_mode = str(getattr(config, 'vector_mode', 'standard') or 'standard').lower()
+    vector_dim = get_vector_dim(vector_mode)
+    weight_vec = get_weight_vector(vector_mode)
 
     # Respect SP boundary mode via environment before Core init
     try:
@@ -137,7 +145,7 @@ def run_episode_query(
         lambda_weight=config.gedig["lambda_weight"],
         use_local_normalization=True,
         adaptive_hops=bool(config.gedig["adaptive_hops"]),
-        feature_weights=WEIGHT_VECTOR,
+        feature_weights=weight_vec,
         linkset_mode=config.linkset_mode,
         sp_beta=float(config.gedig.get("sp_beta", 0.2)),
         sp_pair_samples=int(getattr(config, 'sp_pair_samples', 400)),
@@ -178,7 +186,7 @@ def run_episode_query(
     prev_success = False
 
     current_query_node = make_query_node(current_position)
-    query_vec = compute_query_vector(current_position, maze_shape)
+    query_vec = compute_query_vector(current_position, maze_shape, vector_dim=vector_dim)
     graph.add_node(
         current_query_node,
         abs_vector=query_vec,
@@ -197,7 +205,7 @@ def run_episode_query(
     # Spatial index for fast neighborhood lookup
     sp_index = SpatialGridIndex(maze_shape)
     # Layer1 weighted-L2 index for vector prefilter
-    l1_index = WeightedL2Index(dim=8, weights=WEIGHT_VECTOR)
+    l1_index = WeightedL2Index(dim=vector_dim, weights=weight_vec)
     # Keep recent Q nodes for anchor expansion
     recent_q_nodes: deque[Tuple[int, int, int]] = deque(maxlen=max(1, int(getattr(config, 'anchor_recent_q', 12))))
     recent_q_nodes.append(current_query_node)
@@ -239,7 +247,17 @@ def run_episode_query(
             node_entry["birth_step"] = int(step_index)
         if source and "source" not in node_entry:
             node_entry["source"] = source
-        node_entry["abs_vector"] = np.asarray(candidate_vec_abs, dtype=float)
+        vec = np.asarray(candidate_vec_abs, dtype=float)
+        # Inherit propagated values from Sleep-optimized graph (graph-persistent DG)
+        if inherited_graph is not None and vector_dim >= 10 and vec.size >= 10:
+            if inherited_graph.has_node(node_id):
+                inh = inherited_graph.nodes[node_id]
+                vec[8] = float(inh.get("reward", vec[8]))
+                prop = float(inh.get("propagated", 0.0))
+                vec[9] = math.tanh(prop)
+                node_entry["reward"] = vec[8]
+                node_entry["propagated"] = prop
+        node_entry["abs_vector"] = vec
         node_entry["visit_count"] = int(target_visits)
         node_entry["last_action_delta"] = (int(delta[0]), int(delta[1]))
         node_entry["success"] = False
@@ -330,7 +348,7 @@ def run_episode_query(
         if current_query_node not in graph:
             graph.add_node(
                 current_query_node,
-                abs_vector=compute_query_vector(anchor_position, maze_shape),
+                abs_vector=compute_query_vector(anchor_position, maze_shape, vector_dim=vector_dim),
                 visit_count=visit_counts.get(anchor_position, 0),
                 direction=QUERY_MARKER,
                 node_type="query",
@@ -339,7 +357,7 @@ def run_episode_query(
             )
         current_query_entry = graph.nodes[current_query_node]
         if current_query_entry.get("abs_vector") is None:
-            current_query_entry["abs_vector"] = compute_query_vector(anchor_position, maze_shape)
+            current_query_entry["abs_vector"] = compute_query_vector(anchor_position, maze_shape, vector_dim=vector_dim)
 
         # 0-hop定義の厳密化: 実行経路（Q_prev→dir→Q_now）の強制結線はデフォルトで行わない。
         # 可視化や緩和モードで必要な場合のみ、明示フラグでグラフへ注入する。
@@ -357,6 +375,7 @@ def run_episode_query(
                         success=True,
                         is_goal=False,
                         target_position=anchor_position,
+                        vector_dim=vector_dim,
                     )
                     direction_node_id = make_direction_node(anchor_prev, int(dir_idx_prev))
                     register_direction_node(
@@ -379,7 +398,21 @@ def run_episode_query(
         except Exception:
             pass
 
-        query_vec = compute_query_vector(anchor_position, maze_shape)
+        # Look up current position's reward / propagated from inherited graph
+        # so that query dim8/dim9 follow the same encoding as episode vectors.
+        _q_reward = 0.0
+        _q_propagated = 0.0
+        if inherited_graph is not None and vector_dim >= 10:
+            for _d in range(4):
+                _dn = (anchor_position[0], anchor_position[1], _d)
+                if inherited_graph.has_node(_dn):
+                    _inh = inherited_graph.nodes[_dn]
+                    _q_reward = max(_q_reward, float(_inh.get("reward", 0.0)))
+                    _q_propagated = max(_q_propagated, float(_inh.get("propagated", 0.0)))
+        query_vec = compute_query_vector(
+            anchor_position, maze_shape, vector_dim=vector_dim,
+            reward=_q_reward, propagated=_q_propagated,
+        )
         query_vec_list = query_vec.tolist()
 
         observation_candidates: List[Dict[str, Any]] = []
@@ -439,6 +472,29 @@ def run_episode_query(
                 if sleep_edge_by_action:
                     sleep_edge_bias = True
 
+        # Propagated bias (graph-persistent DG): use inherited graph's propagated values
+        # In extended mode, propagated is already in the vector (dim9) → skip scalar bonus
+        propagated_bias = False
+        propagated_alpha = 0.0
+        if inherited_graph is not None and vector_mode != "extended":
+            try:
+                propagated_alpha = float(getattr(config, "propagated_alpha", 1.0) or 1.0)
+            except Exception:
+                propagated_alpha = 1.0
+            if math.isfinite(propagated_alpha) and abs(propagated_alpha) > 1e-12:
+                propagated_bias = True
+
+        def _propagated_for_action(action_id: int) -> float:
+            if not propagated_bias:
+                return 0.0
+            try:
+                dn = make_direction_node(current_position, int(action_id))
+                if inherited_graph.has_node(dn):
+                    return float(inherited_graph.nodes[dn].get("propagated", 0.0))
+            except Exception:
+                pass
+            return 0.0
+
         t_cand_start = time.perf_counter()
 
         obs_dist_evals_counter = 0
@@ -468,6 +524,7 @@ def run_episode_query(
                 success=False,
                 is_goal=(next_pos == env.goal_pos),
                 target_position=next_pos,
+                vector_dim=vector_dim,
             )
             candidate_vec_rel = compute_episode_vector(
                 base_position=anchor_position,
@@ -478,10 +535,23 @@ def run_episode_query(
                 success=False,
                 is_goal=(next_pos == env.goal_pos),
                 target_position=next_pos,
+                vector_dim=vector_dim,
             )
 
-            w_distance_rel = weighted_distance(query_vec, candidate_vec_rel)
-            w_distance_abs = weighted_distance(query_vec, candidate_vec_abs)
+            # Inherit reward/propagated from Sleep-optimized graph for obs candidates.
+            # Update BOTH rel and abs vectors so that 10D distance is consistent.
+            if inherited_graph is not None and vector_dim >= 10 and candidate_vec_abs.size >= 10:
+                obs_dir_node = make_direction_node(anchor_position, dir_idx)
+                if inherited_graph.has_node(obs_dir_node):
+                    inh = inherited_graph.nodes[obs_dir_node]
+                    _obs_rw = float(inh.get("reward", 0.0))
+                    _obs_pr = math.tanh(float(inh.get("propagated", 0.0)))
+                    candidate_vec_abs[8] = _obs_rw
+                    candidate_vec_abs[9] = _obs_pr
+                    candidate_vec_rel[8] = _obs_rw
+                    candidate_vec_rel[9] = _obs_pr
+            w_distance_rel = weighted_distance(query_vec, candidate_vec_rel, weights=weight_vec)
+            w_distance_abs = weighted_distance(query_vec, candidate_vec_abs, weights=weight_vec)
             similarity = math.exp(-w_distance_rel / QUERY_TEMPERATURE)
             obs_dist_evals_counter += 1
 
@@ -495,11 +565,8 @@ def run_episode_query(
                     "similarity": similarity,
                     "distance": float(w_distance_rel),
                     "weighted_distance": w_distance_rel,
-                    "d_w_rel": w_distance_rel,
                     "origin": "obs",
                     "pos_key": pos_key,
-                    # 半径フィルタ用の距離は相対距離ベースに切替（クエリ基準）。
-                    # 従来の絶対距離は診断用キーとして残す。
                     "r_abs_cand": w_distance_abs,
                     "r_abs_link": w_distance_abs,
                     "radius_cand": w_distance_rel,
@@ -561,7 +628,7 @@ def run_episode_query(
                 except Exception:
                     topk = 128
                 # Search by current query's abs vector
-                q_abs = compute_query_vector(center, maze_shape)
+                q_abs = compute_query_vector(center, maze_shape, vector_dim=vector_dim)
                 # Use candidate radius (relative distance) to bound L1 search
                 try:
                     r_cand = float(config.selector.get("cand_radius", 1.0) or 1.0)
@@ -631,10 +698,15 @@ def run_episode_query(
                 success=data.get("success", False),
                 is_goal=(target_tuple == env.goal_pos),
                 target_position=target_tuple,
+                vector_dim=vector_dim,
             )
             stored_vec_abs = np.asarray(data.get("abs_vector", stored_vec_rel), dtype=float)
-            w_distance_rel = weighted_distance(query_vec, stored_vec_rel)
-            w_distance_abs = weighted_distance(query_vec, stored_vec_abs)
+            # Sync rel vector dim8/dim9 from abs (which has inherited reward/propagated)
+            if vector_dim >= 10 and stored_vec_abs.size >= 10 and stored_vec_rel.size >= 10:
+                stored_vec_rel[8] = stored_vec_abs[8]
+                stored_vec_rel[9] = stored_vec_abs[9]
+            w_distance_rel = weighted_distance(query_vec, stored_vec_rel, weights=weight_vec)
+            w_distance_abs = weighted_distance(query_vec, stored_vec_abs, weights=weight_vec)
             similarity = math.exp(-w_distance_rel / QUERY_TEMPERATURE)
             mem_dist_evals_counter += 1
 
@@ -891,6 +963,12 @@ def run_episode_query(
                                     w *= _sleep_edge_multiplier(edge_weight)
                                 except Exception:
                                     pass
+                            if propagated_bias and item.get("action") is not None:
+                                try:
+                                    act = int(item.get("action"))
+                                    w *= math.exp(float(propagated_alpha) * _propagated_for_action(act))
+                                except Exception:
+                                    pass
                             weights.append(float(w))
                         total = sum(weights)
                         if not (total > 0 and math.isfinite(total)):
@@ -903,7 +981,7 @@ def run_episode_query(
                                 return item
                     except Exception:
                         pass  # fallback to argmax
-                if not (sleep_q_bias or sleep_plan_bias or event_bias_enabled or affordance_bias_enabled or sleep_edge_bias):
+                if not (sleep_q_bias or sleep_plan_bias or event_bias_enabled or affordance_bias_enabled or sleep_edge_bias or propagated_bias):
                     return max(items, key=lambda entry: float(entry.get("similarity", 0.0)))
                 def _score(entry: Dict[str, Any]) -> float:
                     base = float(entry.get("similarity", 0.0) or 0.0)
@@ -941,6 +1019,11 @@ def run_episode_query(
                                 bonus += float(sleep_edge_beta) * float(edge_weight)
                             else:
                                 base *= max(0.0, 1.0 + math.tanh(float(sleep_edge_beta) * float(edge_weight)))
+                    except Exception:
+                        pass
+                    try:
+                        if propagated_bias:
+                            bonus += float(propagated_alpha) * _propagated_for_action(act)
                     except Exception:
                         pass
                     return float(base + bonus)
@@ -1163,8 +1246,8 @@ def run_episode_query(
         pre_result = None
         pre_hop0 = None
         if bool(getattr(config, 'pre_eval', True)):
-            pre_features_prev = build_feature_matrix(prev_graph, cand_node_ids, current_query_node, zero_candidates=True)
-            pre_features_now = build_feature_matrix(graph_pre, cand_node_ids, current_query_node, zero_candidates=False)
+            pre_features_prev = build_feature_matrix(prev_graph, cand_node_ids, current_query_node, zero_candidates=True, default_dim=vector_dim)
+            pre_features_now = build_feature_matrix(graph_pre, cand_node_ids, current_query_node, zero_candidates=False, default_dim=vector_dim)
             pre_result = core.calculate(
                 g_prev=prev_graph,
                 g_now=graph_pre,
@@ -1247,8 +1330,8 @@ def run_episode_query(
         t_eval_start = time.perf_counter()
         # Preserve pre-step query node for logging/visualization
         query_node_pre = current_query_node
-        features_prev = build_feature_matrix(prev_graph, cand_node_ids, current_query_node, zero_candidates=True)
-        features_now = build_feature_matrix(eval_after, cand_node_ids, current_query_node, zero_candidates=False)
+        features_prev = build_feature_matrix(prev_graph, cand_node_ids, current_query_node, zero_candidates=True, default_dim=vector_dim)
+        features_now = build_feature_matrix(eval_after, cand_node_ids, current_query_node, zero_candidates=False, default_dim=vector_dim)
         anchor_nodes = set(pre_anchor_nodes)
         # 段階的な仮想コミットで after_graph_h を構築し、g(h) を評価
         # 準備: base after_graph (h=0) は eval_after（Top‑L S_link を接続済み：評価用）
@@ -1426,7 +1509,7 @@ def run_episode_query(
                     r_ec = float(config.selector.get("cand_radius", 1.0) or 1.0)
                 except Exception:
                     r_ec = 1.0
-                q_abs_vec = compute_query_vector(anchor_position, maze_shape)
+                q_abs_vec = compute_query_vector(anchor_position, maze_shape, vector_dim=vector_dim)
                 l1_hits = l1_index.search_radius(q_abs_vec, radius=r_ec, top_k=topk_ec)
                 prefilter_nodes = set(nid for (nid, _d) in l1_hits)
         except Exception:
@@ -1776,7 +1859,7 @@ def run_episode_query(
                         pair_samples=int(getattr(config, 'sp_pair_samples', 200)),
                         budget=int(getattr(config, 'commit_budget', 1)),
                         cand_topk=int(getattr(config, 'sp_cand_topk', 0)),
-                        default_dim=8,
+                        default_dim=vector_dim,
                         lambda_weight=float(core.lambda_weight),
                     )
                     m = res_l3.get('metrics', {})
@@ -1894,7 +1977,7 @@ def run_episode_query(
                             pair_samples=int(getattr(config, 'sp_pair_samples', 200)),
                             budget=int(getattr(config, 'commit_budget', 1)),
                             cand_topk=int(getattr(config, 'sp_cand_topk', 0)),
-                            default_dim=8,
+                            default_dim=vector_dim,
                             max_hops=int(core.max_hops) if hasattr(core, 'max_hops') else int(getattr(config.gedig, 'max_hops', 0)),
                         )
                         dbg_map = {}
@@ -2023,12 +2106,12 @@ def run_episode_query(
                 delta_h = float(m.get('delta_h', 0.0))
                 delta_h_min = delta_h
             else:
-                feats_b = gather_node_features(graph_pre)
-                feats_a = gather_node_features(graph_eval)
-                if feats_b.size and feats_b.shape[1] == WEIGHT_VECTOR.size:
-                    feats_b = feats_b * WEIGHT_VECTOR
-                if feats_a.size and feats_a.shape[1] == WEIGHT_VECTOR.size:
-                    feats_a = feats_a * WEIGHT_VECTOR
+                feats_b = gather_node_features(graph_pre, default_dim=vector_dim)
+                feats_a = gather_node_features(graph_eval, default_dim=vector_dim)
+                if feats_b.size and feats_b.shape[1] == weight_vec.size:
+                    feats_b = feats_b * weight_vec
+                if feats_a.size and feats_a.shape[1] == weight_vec.size:
+                    feats_a = feats_a * weight_vec
                 ab_h_dict = _entropy_ig(graph_eval, feats_b, feats_a, delta_mode='after_before')
                 ab_delta_h = float(ab_h_dict.get('ig_value', 0.0))
                 delta_h = ab_delta_h
@@ -2291,7 +2374,7 @@ def run_episode_query(
                     pm2 = [x for x in pm if x != opp_action]
                     if pm2:
                         pm = pm2
-            if (sleep_q_bias or sleep_plan_bias or event_bias_enabled or affordance_bias_enabled or sleep_edge_bias) and pm:
+            if (sleep_q_bias or sleep_plan_bias or event_bias_enabled or affordance_bias_enabled or sleep_edge_bias or propagated_bias) and pm:
                 try:
                     q_vals = [float(sleep_q_by_action.get(int(a), sleep_q_max)) for a in pm] if sleep_q_by_action else [0.0 for _ in pm]
                     q_max_local = float(max(q_vals)) if q_vals else float(sleep_q_max)
@@ -2309,6 +2392,8 @@ def run_episode_query(
                         if sleep_edge_bias:
                             edge_weight = _sleep_edge_weight_for_action(int(a))
                             w *= _sleep_edge_multiplier(edge_weight)
+                        if propagated_bias:
+                            w *= math.exp(float(propagated_alpha) * _propagated_for_action(int(a)))
                         weights.append(float(w))
                     total = sum(weights)
                     if total > 0 and math.isfinite(total):
@@ -2516,13 +2601,38 @@ def run_episode_query(
             except Exception:
                 pass
 
+        # Record heuristic reward on direction node (graph-persistent DG)
+        if action_dir_idx is not None:
+            try:
+                reward_node = make_direction_node(last_position, int(action_dir_idx))
+                if graph.has_node(reward_node):
+                    r = 0.0
+                    if not moved:
+                        r = -1.0  # blocked
+                    elif bool(obs.is_goal):
+                        r = 1.0  # goal_reached
+                    elif int(visit_counts.get(current_position, 0)) <= 1:
+                        r = 0.2  # novel_cell
+                    else:
+                        r = -0.4  # revisit
+                    if moved and len(possible_moves_post) <= 1:
+                        r = min(r, -1.0)  # deadend
+                    graph.nodes[reward_node]["reward"] = float(r)
+                    # Extended mode: sync reward into abs_vector dim8
+                    if vector_dim >= 10:
+                        vec = graph.nodes[reward_node].get("abs_vector")
+                        if vec is not None and len(vec) >= 10:
+                            vec[8] = float(r)
+            except Exception:
+                pass
+
         # Build timeline edges for DS/visualization
         timeline_edges_now: List[List[List[int]]] = []
         if getattr(config, 'add_next_q', False):
             if current_query_node not in graph:
                 graph.add_node(
                     current_query_node,
-                    abs_vector=compute_query_vector(current_position, maze_shape),
+                    abs_vector=compute_query_vector(current_position, maze_shape, vector_dim=vector_dim),
                     visit_count=0,
                     direction=QUERY_MARKER,
                     node_type="query",
@@ -2544,6 +2654,7 @@ def run_episode_query(
                     success=bool(moved),
                     is_goal=obs.is_goal,
                     target_position=current_position,
+                    vector_dim=vector_dim,
                 ),
                 target_visits=visit_counts[current_position],
                 is_passable=bool(moved),
@@ -2820,8 +2931,8 @@ def run_episode_query(
             linkset_topw_after = []
 
         if False:
-            features_prev = build_feature_matrix(prev_graph, cand_node_ids, current_query_node, zero_candidates=True)
-            features_now = build_feature_matrix(graph_temp, cand_node_ids, current_query_node, zero_candidates=False)
+            features_prev = build_feature_matrix(prev_graph, cand_node_ids, current_query_node, zero_candidates=True, default_dim=vector_dim)
+            features_now = build_feature_matrix(graph_temp, cand_node_ids, current_query_node, zero_candidates=False, default_dim=vector_dim)
             anchor_nodes = {current_query_node}
             result = core.calculate(
                 g_prev=prev_graph,
@@ -3009,6 +3120,7 @@ def run_episode_query(
             success=bool(moved),
             is_goal=obs.is_goal,
             target_position=current_position,
+            vector_dim=vector_dim,
         )
 
         # Debug payload: both pre and post evaluations captured above
@@ -3381,6 +3493,7 @@ def run_episode_query(
         summary=episode_summary,
         steps=step_records,
         maze_snapshot=maze_snapshot,
+        graph=graph,
     )
 
 
@@ -3557,6 +3670,10 @@ def main() -> None:
             eval_per_hop_on_ag=bool(getattr(args, 'eval_per_hop_on_ag', False)),
             dg_bfs_shortcut=bool(getattr(args, 'dg_bfs_shortcut', False)),
             force_sp_gain_eval=bool(getattr(args, 'force_sp_gain_eval', False)),
+            vector_mode=str(getattr(args, "vector_mode", "standard")),
+            propagated_alpha=float(getattr(args, "propagated_alpha", 1.0)),
+            sleep_propagate_gamma=float(getattr(args, "sleep_propagate_gamma", 0.95)),
+            sleep_propagate_iters=int(getattr(args, "sleep_propagate_iters", 50)),
         )
 
         runs: List[MazeSummary] = []
@@ -3964,6 +4081,19 @@ def main() -> None:
                             revisit_threshold=int(getattr(warm_cfg, "cortisol_repeat_visits", 2)),
                         )
 
+                    # Graph-persistent DG: Sleep phase (reward propagation on graph)
+                    optimized_graph = None
+                    if warm_artifacts.graph is not None and warm_artifacts.graph.number_of_nodes() > 0:
+                        try:
+                            optimized_graph = _sleep_graph_optimize(
+                                warm_artifacts.graph,
+                                gamma=float(getattr(warm_cfg, "sleep_propagate_gamma", 0.95)),
+                                n_iters=int(getattr(warm_cfg, "sleep_propagate_iters", 50)),
+                            )
+                        except Exception as e:
+                            print(f"  Warning: sleep_graph_optimize failed: {e}")
+                            optimized_graph = None
+
                     eval_artifacts = run_episode_query(
                         seed=seed,
                         config=config,
@@ -3971,6 +4101,7 @@ def main() -> None:
                         sleep_q=sleep_q,
                         sleep_edge=sleep_edge,
                         sleep_guide=str(getattr(args, "sleep_guide", "override")),
+                        inherited_graph=optimized_graph,
                     )
                     runs.append(dict(eval_artifacts.summary, episode_phase="eval", sleep_plan=sleep_meta, sleep_q=sleep_q_meta, sleep_edge=sleep_edge_meta))
 
