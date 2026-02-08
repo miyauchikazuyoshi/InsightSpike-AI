@@ -1,5 +1,8 @@
 # JSAI2026 発表・質疑応答用 総合スクリプト (Master Script)
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 「前提・定義・検証・結論」を網羅した、本番用・完全版スクリプトです。
 
 ---

@@ -1,5 +1,8 @@
 # Option A: 迷路実験版
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 ## タイトル案
 
 **日本語**: 「geDIG: 自由エネルギー原理に基づく知識グラフ自律更新の統一ゲージ」

@@ -5,6 +5,9 @@ title: geDIG — Unified Gauge Control
 
 # geDIG — Unified Gauge Control for Dynamic Knowledge Graphs
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 > A discrete free‑energy perspective bridging FEP, MDL, and information thermodynamics to govern When/What in dynamic knowledge graphs.
 
 - Landing (JA, overview slide): [geDIG unified gauge (JA overview)](images/gedig_unified_gauge_ja_landing.pdf)

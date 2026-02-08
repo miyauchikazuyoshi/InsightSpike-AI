@@ -1,5 +1,8 @@
 # 「閃き」と「理解」：InsightSpikeの2つの知的プロセス
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 ## 概要
 
 現在のInsightSpikeのGED/IG評価は「理解」のプロセスを実装しているが、真の「閃き（Eureka moment）」は、メッセージパッシングによる仮説生成プロセスによって実現される。この文書では、これら2つの異なる知的プロセスを明確に区別し、それぞれの役割を定義する。

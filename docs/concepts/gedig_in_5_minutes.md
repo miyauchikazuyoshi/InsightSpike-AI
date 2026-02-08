@@ -1,5 +1,8 @@
 # geDIG in 5 Minutes
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 > **One sentence**: geDIG is a unified gauge that tells a system **when** to accept new information, by balancing structural cost against information gain.
 
 ---
@@ -67,7 +70,7 @@ F = ΔEPC_norm − λ·(ΔH_norm + γ·ΔSP_rel)
 
 Two gates control the decision:
 
-### AG (Ambiguity Gate) — "Should I explore more?"
+### AG (Attention Gate) — "Should I explore more?"
 - Fires when local structure looks wrong
 - Triggers: more retrieval, deeper search
 

@@ -1,5 +1,8 @@
 # 三角対照学習（Triangular Contrastive Learning）
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 **Date**: 2026-02-06
 **Status**: Hypothesis / Working Draft
 **Origin**: Claude対話セッションでの着想

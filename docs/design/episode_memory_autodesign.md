@@ -1,5 +1,8 @@
 # エピソード記憶の自己設計：AG/DG × Wake/Sleep × 自己生成負例
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 **Version**: 0.4 (Draft)
 **Date**: 2026-01-30
 **Author**: Kazuyoshi Miyauchi

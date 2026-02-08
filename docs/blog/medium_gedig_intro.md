@@ -1,5 +1,7 @@
 # Solving RAG's "When to Update" Problem with geDIG
 
+> **Formula Status (Simplified)**: Equations in this article are simplified for explanation. Canonical definitions are in `docs/gedig_spec.md`.
+
 *A unified gauge for deciding when to accept new information*
 
 ---
@@ -58,7 +60,7 @@ geDIG makes this judgment computable.
 
 geDIG has two gates:
 
-### AG (Ambiguity Gate) — "Should I search more?"
+### AG (Attention Gate) — "Should I search more?"
 
 Fires when local structure looks uncertain.
 
@@ -187,7 +189,7 @@ If this principle is fundamental, we might be able to design AI that **knows whe
 
 | Problem | geDIG's Solution |
 |---------|-----------------|
-| When to search? | AG (Ambiguity Gate) decides |
+| When to search? | AG (Attention Gate) decides |
 | When to accept? | DG (Decision Gate) decides |
 | How to filter noise? | Reject high F-score information |
 | What's the criterion? | Structural Cost − λ × Information Gain |

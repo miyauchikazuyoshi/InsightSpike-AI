@@ -1,5 +1,8 @@
 # JSAI論文構成案: geDIG v3
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 **対象**: JSAI 2026 全国大会
 **ページ数**: 4P
 **テーマ**: geDIGによる学習効率の統一的評価 - 迷路からTransformerへ

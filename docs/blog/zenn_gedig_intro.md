@@ -8,6 +8,8 @@ published: false
 
 # RAGの「いつ更新するか」問題を解く
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
 RAG（Retrieval-Augmented Generation）は「**何を**取得するか」の最適化で大きく進歩しました。BM25、DPR、Contriever、ColBERT... 検索精度は年々向上しています。
 
 でも、こんな経験はありませんか？
@@ -62,7 +64,7 @@ geDIGはこの判断を計算可能にしたものです。
 
 geDIGには2つのゲートがあります。
 
-### AG（Ambiguity Gate）—「もっと探すべき？」
+### AG（Attention Gate）—「もっと探すべき？」
 
 ローカルな構造が曖昧なときに発火します。
 

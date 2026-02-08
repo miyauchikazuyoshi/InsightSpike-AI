@@ -1,5 +1,8 @@
 # spike系コマンド実装完了報告
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 ## 実装完了したコマンド
 
 ### 1. spike discover - 洞察発見コマンド ✅

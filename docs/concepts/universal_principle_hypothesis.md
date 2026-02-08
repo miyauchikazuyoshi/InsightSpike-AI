@@ -1,5 +1,8 @@
 # The Universal Principle Hypothesis
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 > **Hypothesis**: The balance between structural cost and information gain (F = ΔStructure − λ·ΔInformation) is a fundamental design principle shared by all intelligent and adaptive systems.
 
 **Status**: Speculative / Under Investigation

@@ -1,5 +1,8 @@
 # InsightSpike-AI 包括的改善計画書
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 **Version**: 1.0
 **Date**: 2025-11-27
 **Status**: Draft（提案・未実装を含む）

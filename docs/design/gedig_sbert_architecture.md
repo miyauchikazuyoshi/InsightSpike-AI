@@ -1,5 +1,8 @@
 # geDIG-SBERT Architecture Design
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 **Version**: 0.1 (Draft)
 **Date**: 2026-01-26
 **Author**: Kazuyoshi Miyauchi
@@ -161,7 +164,7 @@ class SentenceEncoder(nn.Module):
         return embeddings
 ```
 
-### 3.2 AG Gate (Ambiguity Gate for Pairs)
+### 3.2 AG Gate (Attention Gate for Pairs)
 
 **目的**: 「驚き」のあるペアのみを選択し、計算量を削減
 

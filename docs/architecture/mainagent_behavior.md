@@ -1,5 +1,8 @@
 # MainAgent Behavior Documentation
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 ## 🧠 Overview
 
 MainAgent is the core orchestrator in InsightSpike that coordinates all 4 neurobiologically-inspired layers to process questions, manage memory, detect insights, and generate responses.

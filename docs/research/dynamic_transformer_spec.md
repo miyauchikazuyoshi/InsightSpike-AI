@@ -33,7 +33,7 @@
 ### 3.1 Phase 1: Awake (Dynamic Routing / Exploration)
 *   **動作:** 推論（Inference）および探索。
 *   **Attention:**
-    *   既存のエッジ（Strong Attention）だけでなく、**AG (Ambiguity Gate)** を開いて未知のノードへの接続（Weak Attention）を試行する（Transformer文脈ではAttention Gate表記もある）。
+    *   既存のエッジ（Strong Attention）だけでなく、**AG (Attention Gate)** を開いて未知のノードへの接続（Weak Attention）を試行する。
     *   これは「全結合 Attention」の一部を動的に計算することに相当する。
 *   **学習:**
     *   DG (Decision Gate) が発火（洞察を獲得）した場合、そのパスを **「短期記憶 (Short-term Edge)」** として一時保存する。
@@ -73,7 +73,7 @@
 計算コストと脳の機能局在（海馬/大脳皮質）に基づき、処理を以下の2段階に分ける。
 
 1.  **Phase 1: Awake (Lightweight Exploration)**
-    *   **AG (Ambiguity Gate)**: ベクトル類似度のみで高速に接続・探索する。
+    *   **AG (Attention Gate)**: ベクトル類似度のみで高速に接続・探索する。
     *   **DG (Decision Gate)**: Raw IG（単純なエントロピー減少）のみで判定し、短期記憶に保存する。
     *   *役割*: 「面白そうな情報の収集」
 

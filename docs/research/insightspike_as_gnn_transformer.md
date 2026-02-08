@@ -1,5 +1,8 @@
 # InsightSpike as GNN-Transformer: A geDIG Perspective
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 ## Overview
 
 InsightSpikeの現在の実装は、Graph Neural Network (GNN) とTransformerの特性を併せ持つアーキテクチャとして解釈できる。この文書では、その振る舞いを分析し、geDIG原理による次世代AIアーキテクチャへの道筋を探る。

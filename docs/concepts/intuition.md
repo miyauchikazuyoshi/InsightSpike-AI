@@ -1,5 +1,8 @@
 # The Intuitive Guide to geDIG
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 > "What if your database could think like a brain?"
 
 If you find the math in InsightSpike-AI daunting, you are in the right place. This guide explains the core concept—**geDIG**—using zero equations.

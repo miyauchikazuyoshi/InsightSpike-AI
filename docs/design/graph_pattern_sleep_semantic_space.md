@@ -1,5 +1,8 @@
 # グラフ構造パターン認知を Sleep に取り込む：意味空間醸成の設計メモ
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 **Version**: 0.5 (Draft)
 **Date**: 2026-01-30
 **Author**: Kazuyoshi Miyauchi

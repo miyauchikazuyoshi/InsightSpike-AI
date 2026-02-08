@@ -1,5 +1,8 @@
 # Recent InsightSpike-AI Features (July 2024)
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 This document provides comprehensive documentation of the major features implemented in July 2024, including usage notes, specifications, and configuration details.
 
 ## Table of Contents

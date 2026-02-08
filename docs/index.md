@@ -9,6 +9,9 @@ title: geDIG - Structure IS Probability
 
 # Structure IS Probability
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 <h2 style="font-weight: normal; color: #666;">
 What if structural optimization and probabilistic inference<br>
 are the same operation?
@@ -107,7 +110,7 @@ Input
   │
   ▼
 ┌─────────────────────────┐
-│  AG (Ambiguity Gate)    │
+│  AG (Attention Gate)    │
 │  "Is this surprising?"  │
 │                         │
 │  Prediction ≠ Input     │

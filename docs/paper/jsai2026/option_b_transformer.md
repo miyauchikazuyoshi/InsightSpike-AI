@@ -1,5 +1,8 @@
 # Option B: Transformer実験版
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 ## タイトル案
 
 **日本語**: 「Attention機構の熱力学的解釈: geDIGゲージによる構造評価とF正則化」

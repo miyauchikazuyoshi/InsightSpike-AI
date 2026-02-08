@@ -1,5 +1,8 @@
 # 迷路実験設計の詳細化
 
+> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+
+
 ## 追加内容
 
 ### §5.1 実験設定（大幅拡充）
