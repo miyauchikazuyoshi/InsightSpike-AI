@@ -129,3 +129,4 @@ experiments/transformer/
 - アーカイブ: `experiments/_archive_before_20260201_refactor/transformer_gedig/`
 - 計画書: `docs/design/repository_review_and_plan.md` (Section 3.2)
 - 理論: `docs/research/gpt_bert_gedig_perspective.md`
+- 推論v2設計/実装: `experiments/transformer/inference_gedig_v2/`
