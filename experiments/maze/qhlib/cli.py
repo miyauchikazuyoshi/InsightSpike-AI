@@ -208,6 +208,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--force-per-hop", dest="force_per_hop", action="store_true", help="Force per-hop series via evaluator even in L3-only path")
     parser.add_argument("--eval-per-hop-on-ag", dest="eval_per_hop_on_ag", action="store_true", help="Fallback to evaluator (per-hop) only when AG fires in L3-only path")
     parser.add_argument("--dg-bfs-shortcut", dest="dg_bfs_shortcut", action="store_true", help="When DG fires, commit chosen multi-hop edges as a BFS-like shortcut in one step")
+    # Three-layer search
+    parser.add_argument("--search-mode", type=str, default="legacy", choices=["legacy", "threelayer"],
+                        help="Search mode: legacy (default) or threelayer (L0 hash → L1 attention walk → L2 full sort)")
+    parser.add_argument("--theta-attention", type=float, default=0.3, help="Attention threshold for L1 graph walk")
+    parser.add_argument("--attention-decay", type=float, default=0.95, help="Per-step attention decay rate")
+    parser.add_argument("--attention-boost", type=float, default=0.1, help="Attention boost on edge traversal")
+    parser.add_argument("--attention-alpha", type=float, default=0.5, help="Attention exponent for effective_score")
+    parser.add_argument("--min-layer1-candidates", type=int, default=2, help="Min L1 candidates to skip L2 fallback")
     # Defaults
     parser.set_defaults(link_autowire_all=True)
     # Prefer recording per-hop on AG in L3-light path unless explicitly disabled
@@ -359,4 +367,10 @@ def build_config(
         eval_per_hop_on_ag=bool(getattr(args, 'eval_per_hop_on_ag', False)),
         dg_bfs_shortcut=bool(getattr(args, 'dg_bfs_shortcut', False)),
         force_sp_gain_eval=bool(getattr(args, 'force_sp_gain_eval', False)),
+        search_mode=str(getattr(args, "search_mode", "legacy")),
+        theta_attention=float(getattr(args, "theta_attention", 0.3)),
+        attention_decay=float(getattr(args, "attention_decay", 0.95)),
+        attention_boost=float(getattr(args, "attention_boost", 0.1)),
+        attention_alpha=float(getattr(args, "attention_alpha", 0.5)),
+        min_layer1_candidates=int(getattr(args, "min_layer1_candidates", 2)),
     )

@@ -178,6 +178,27 @@ def run_episode_query(
     from insightspike.algorithms.sp_distcache import DistanceCache
     sp_mode = str(getattr(config, 'sp_cache_mode', 'core'))
     distcache = DistanceCache(mode=sp_mode, pair_samples=int(getattr(config, 'sp_pair_samples', 400)))
+    # Three-layer search engine (only initialized when search_mode=threelayer)
+    _threelayer_engine = None
+    _attention_mgr = None
+    if str(getattr(config, 'search_mode', 'legacy')) == 'threelayer':
+        from qhlib.search_engine import ThreeLayerSearchEngine
+        from qhlib.attention import AttentionManager
+        _threelayer_engine = ThreeLayerSearchEngine(
+            hash_resolution=1.0 / config.maze_size,
+            theta_revisit=0.95,
+            theta_attention=float(getattr(config, 'theta_attention', 0.3)),
+            attention_alpha=float(getattr(config, 'attention_alpha', 0.5)),
+            weight_vector=weight_vec,
+            top_k=int(config.selector.get('candidate_cap', 32)),
+            min_layer1_candidates=int(getattr(config, 'min_layer1_candidates', 2)),
+        )
+        _attention_mgr = AttentionManager(
+            decay_rate=float(getattr(config, 'attention_decay', 0.95)),
+            use_boost=float(getattr(config, 'attention_boost', 0.1)),
+            theta=float(getattr(config, 'theta_attention', 0.3)),
+        )
+
     obs = env.reset()
     current_position = (int(obs.position[0]), int(obs.position[1]))
     maze_shape = (config.maze_size, config.maze_size)
@@ -311,6 +332,13 @@ def run_episode_query(
     cortisol_stuck_streak = 0
 
     for step in range(config.max_steps):
+        # Three-layer search per-step diagnostics (initialized to legacy defaults)
+        _step_search_layer = -1
+        _step_search_revisit = False
+        _step_search_sim = 0.0
+        _step_search_time_ms = 0.0
+        _step_search_l1_count = 0
+
         sleep_plan_action: Optional[int] = None
         try:
             guide_mode = str(sleep_guide).lower().strip() or "off"
@@ -1499,34 +1527,56 @@ def run_episode_query(
 
         # Optional weighted-norm prefilter for Ecand (reuse Layer1 index results)
         prefilter_nodes: Optional[Set[Tuple[int,int,int]]] = None
-        try:
-            if bool(getattr(config, 'layer1_prefilter', False)):
-                try:
-                    topk_ec = int(max(1, int(getattr(config, 'l1_cap', 128))))
-                except Exception:
-                    topk_ec = 128
-                try:
-                    r_ec = float(config.selector.get("cand_radius", 1.0) or 1.0)
-                except Exception:
-                    r_ec = 1.0
-                q_abs_vec = compute_query_vector(anchor_position, maze_shape, vector_dim=vector_dim)
-                l1_hits = l1_index.search_radius(q_abs_vec, radius=r_ec, top_k=topk_ec)
-                prefilter_nodes = set(nid for (nid, _d) in l1_hits)
-        except Exception:
-            prefilter_nodes = None
+        # Three-layer search: try L0→L1 before falling through to L2
+        _tl_used_l1 = False
+        if _threelayer_engine is not None:
+            _tl_result = _threelayer_engine.search(query_vec, prev_graph)
+            _step_search_layer = _tl_result.layer_used
+            _step_search_revisit = _tl_result.is_revisit
+            _step_search_sim = _tl_result.revisit_similarity
+            _step_search_time_ms = _tl_result.search_time_ms
+            if _tl_result.layer_used <= 1 and len(_tl_result.candidates) > 0:
+                # L1 hit: use graph walker candidates directly
+                from qhlib.edges import build_ecand_from_layer1
+                ecand, ecand_mem_count, ecand_qpast_count = build_ecand_from_layer1(
+                    layer1_candidates=_tl_result.candidates,
+                    current_query_node=current_query_node,
+                    prev_graph=prev_graph,
+                    cap_topk=int(getattr(config, 'sp_cand_topk', 0)),
+                )
+                _step_search_l1_count = len(_tl_result.candidates)
+                _tl_used_l1 = True
 
-        ecand, ecand_mem_count, ecand_qpast_count = build_ecand(
-            prev_graph=prev_graph,
-            selection_candidates=selection.candidates,
-            current_query_node=current_query_node,
-            anchor_position=anchor_position,
-            cap_topk=int(getattr(config, 'sp_cand_topk', 0)),
-            include_qpast=True,
-            ring_center=anchor_position,
-            ring_size=(Rr, Rc),
-            ellipse=bool(getattr(config, 'ring_ellipse', False)),
-            prefilter_nodes=prefilter_nodes,
-        )
+        if not _tl_used_l1:
+            # Legacy path (L2 fallback or legacy mode)
+            try:
+                if bool(getattr(config, 'layer1_prefilter', False)):
+                    try:
+                        topk_ec = int(max(1, int(getattr(config, 'l1_cap', 128))))
+                    except Exception:
+                        topk_ec = 128
+                    try:
+                        r_ec = float(config.selector.get("cand_radius", 1.0) or 1.0)
+                    except Exception:
+                        r_ec = 1.0
+                    q_abs_vec = compute_query_vector(anchor_position, maze_shape, vector_dim=vector_dim)
+                    l1_hits = l1_index.search_radius(q_abs_vec, radius=r_ec, top_k=topk_ec)
+                    prefilter_nodes = set(nid for (nid, _d) in l1_hits)
+            except Exception:
+                prefilter_nodes = None
+
+            ecand, ecand_mem_count, ecand_qpast_count = build_ecand(
+                prev_graph=prev_graph,
+                selection_candidates=selection.candidates,
+                current_query_node=current_query_node,
+                anchor_position=anchor_position,
+                cap_topk=int(getattr(config, 'sp_cand_topk', 0)),
+                include_qpast=True,
+                ring_center=anchor_position,
+                ring_size=(Rr, Rc),
+                ellipse=bool(getattr(config, 'ring_ellipse', False)),
+                prefilter_nodes=prefilter_nodes,
+            )
 
         # Ensure forced fallback candidates are also evaluated for ΔSP when S_link is empty
         try:
@@ -2359,6 +2409,25 @@ def run_episode_query(
         # 選択された配線を実体の graph にコミット（評価専用のeval_afterとは分離）
         graph = graph_commit
         graph_temp = graph_commit
+
+        # Three-layer search: attention lifecycle update (after commit)
+        if _threelayer_engine is not None and _attention_mgr is not None:
+            # Initialize attention=1.0 on newly committed edges BEFORE decay
+            # (on_step sets attention=0.0 for edges without it, making the
+            #  post-decay check impossible)
+            for _u, _v, _d in graph.edges(data=True):
+                if 'attention' not in _d:
+                    _d['attention'] = 1.0
+            # Decay all edge attention
+            _attention_mgr.on_step(graph)
+            # Boost traversed edges (committed this step)
+            for _ce_snap in dg_committed_edges_snapshot:
+                if len(_ce_snap) == 2:
+                    _eu = tuple(_ce_snap[0])
+                    _ev = tuple(_ce_snap[1])
+                    _attention_mgr.on_traverse(graph, _eu, _ev)
+            # Register current query node in hash index
+            _threelayer_engine.register(current_query_node, query_vec)
 
         if chosen_obs is not None and chosen_obs.get("action") is not None:
             action = int(chosen_obs["action"]) 
@@ -3403,6 +3472,11 @@ def run_episode_query(
                 graph_node_count=int(graph.number_of_nodes()) if graph.number_of_nodes() > 0 else 0,
                 graph_edge_count=int(graph.number_of_edges()),
                 betti_1=(int(graph.number_of_edges()) - int(graph.number_of_nodes()) + nx.number_connected_components(graph)) if graph.number_of_nodes() > 0 else 0,
+                search_layer_used=int(_step_search_layer),
+                search_is_revisit=bool(_step_search_revisit),
+                search_revisit_similarity=float(_step_search_sim),
+                search_time_ms=float(_step_search_time_ms),
+                search_l1_candidates=int(_step_search_l1_count),
             )
         )
 
@@ -3681,6 +3755,12 @@ def main() -> None:
             sleep_propagate_gamma=float(getattr(args, "sleep_propagate_gamma", 0.95)),
             sleep_propagate_iters=int(getattr(args, "sleep_propagate_iters", 50)),
             sp_mode=str(getattr(args, "sp_mode", "asp")),
+            search_mode=str(getattr(args, "search_mode", "legacy")),
+            theta_attention=float(getattr(args, "theta_attention", 0.3)),
+            attention_decay=float(getattr(args, "attention_decay", 0.95)),
+            attention_boost=float(getattr(args, "attention_boost", 0.1)),
+            attention_alpha=float(getattr(args, "attention_alpha", 0.5)),
+            min_layer1_candidates=int(getattr(args, "min_layer1_candidates", 2)),
         )
 
         runs: List[MazeSummary] = []
@@ -3808,6 +3888,11 @@ def main() -> None:
                 "is_dead_end": bool(getattr(record, 'is_dead_end', False)),
                 "time_ms_candidates": getattr(record, 'time_ms_candidates', 0.0),
                 "time_ms_eval": getattr(record, 'time_ms_eval', 0.0),
+                "search_layer_used": int(getattr(record, 'search_layer_used', -1)),
+                "search_is_revisit": bool(getattr(record, 'search_is_revisit', False)),
+                "search_revisit_similarity": float(getattr(record, 'search_revisit_similarity', 0.0)),
+                "search_time_ms": float(getattr(record, 'search_time_ms', 0.0)),
+                "search_l1_candidates": int(getattr(record, 'search_l1_candidates', 0)),
             }
             if not minimal:
                 row.update(
@@ -4216,6 +4301,14 @@ def main() -> None:
                     "beta": float(getattr(args, "affordance_beta", 1.0)),
                     "lr": float(getattr(args, "affordance_lr", 0.2)),
                     "clamp": float(getattr(args, "affordance_clamp", 3.0)),
+                },
+                "threelayer_search": {
+                    "search_mode": str(getattr(args, "search_mode", "legacy")),
+                    "theta_attention": float(getattr(args, "theta_attention", 0.3)),
+                    "attention_decay": float(getattr(args, "attention_decay", 0.95)),
+                    "attention_boost": float(getattr(args, "attention_boost", 0.1)),
+                    "attention_alpha": float(getattr(args, "attention_alpha", 0.5)),
+                    "min_layer1_candidates": int(getattr(args, "min_layer1_candidates", 2)),
                 },
             },
             "summary": summary,

@@ -46,9 +46,9 @@ class AttentionGraphWalker:
                 if attention < self.theta:
                     continue
 
-                neighbor_vec = graph.nodes[neighbor].get(
-                    "abs_vector"
-                ) or graph.nodes[neighbor].get("vector")
+                neighbor_vec = graph.nodes[neighbor].get("abs_vector")
+                if neighbor_vec is None:
+                    neighbor_vec = graph.nodes[neighbor].get("vector")
                 if neighbor_vec is None:
                     continue
                 neighbor_arr = np.asarray(neighbor_vec, dtype=float)
