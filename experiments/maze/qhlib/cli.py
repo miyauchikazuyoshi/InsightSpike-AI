@@ -29,6 +29,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--decay-factor", type=float, default=0.7)
     parser.add_argument("--adaptive-hops", action="store_true")
     parser.add_argument("--sp-beta", type=float, default=1.0)
+    parser.add_argument("--sp-mode", type=str, default="asp", choices=["asp", "betti1", "both"],
+                        help="SP definition: asp (default), betti1, or both (parallel recording)")
     parser.add_argument("--linkset-mode", action="store_true", default=True, help="Use linkset-based entropy calculation (paper mode, default: on)")
     parser.add_argument("--no-linkset-mode", dest="linkset_mode", action="store_false", help="Disable linkset-based entropy calculation")
     parser.add_argument("--linkset-base", type=str, default="mem", choices=["link","mem","pool"], help="Base set for linkset IG before: link=S_link, mem=memory candidates, pool=all candidates")
