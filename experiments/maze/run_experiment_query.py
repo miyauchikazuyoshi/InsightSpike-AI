@@ -3400,9 +3400,9 @@ def run_episode_query(
                 delta_sp_min_mh=float(sp_mh_val),
                 sp_before=float(hop_series[0].get('sp_before', 0.0) if (hop_series and isinstance(hop_series[0], dict)) else 0.0),
                 sp_after=float(hop_series[0].get('sp_after', 0.0) if (hop_series and isinstance(hop_series[0], dict)) else 0.0),
-                graph_node_count=int(inherited_graph.number_of_nodes()) if inherited_graph is not None else 0,
-                graph_edge_count=int(inherited_graph.number_of_edges()) if inherited_graph is not None else 0,
-                betti_1=(int(inherited_graph.number_of_edges()) - int(inherited_graph.number_of_nodes()) + 1) if (inherited_graph is not None and inherited_graph.number_of_nodes() > 0) else 0,
+                graph_node_count=int(graph.number_of_nodes()) if graph.number_of_nodes() > 0 else 0,
+                graph_edge_count=int(graph.number_of_edges()),
+                betti_1=(int(graph.number_of_edges()) - int(graph.number_of_nodes()) + nx.number_connected_components(graph)) if graph.number_of_nodes() > 0 else 0,
             )
         )
 
