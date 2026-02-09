@@ -410,6 +410,22 @@ def compute_ged_min_proxy(g_before: nx.Graph, g_after: nx.Graph) -> float:
     return 0.0
 
 
+def compute_betti_1(g: nx.Graph) -> int:
+    """First Betti number: β₁ = E - V + C.
+
+    Counts independent cycles in the graph.
+    For connected graphs (C=1), simplifies to E - V + 1.
+
+    Computational cost: O(V+E) general, O(1) if connected.
+    """
+    V = g.number_of_nodes()
+    if V == 0:
+        return 0
+    E = g.number_of_edges()
+    C = nx.number_connected_components(g)
+    return E - V + C
+
+
 __all__ = [
     "graph_efficiency",
     "spectral_score",
@@ -422,4 +438,5 @@ __all__ = [
     "extract_features",
     "filter_features",
     "compute_ged_min_proxy",
+    "compute_betti_1",
 ]

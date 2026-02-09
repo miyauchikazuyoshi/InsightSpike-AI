@@ -3400,6 +3400,9 @@ def run_episode_query(
                 delta_sp_min_mh=float(sp_mh_val),
                 sp_before=float(hop_series[0].get('sp_before', 0.0) if (hop_series and isinstance(hop_series[0], dict)) else 0.0),
                 sp_after=float(hop_series[0].get('sp_after', 0.0) if (hop_series and isinstance(hop_series[0], dict)) else 0.0),
+                graph_node_count=int(inherited_graph.number_of_nodes()) if inherited_graph is not None else 0,
+                graph_edge_count=int(inherited_graph.number_of_edges()) if inherited_graph is not None else 0,
+                betti_1=(int(inherited_graph.number_of_edges()) - int(inherited_graph.number_of_nodes()) + 1) if (inherited_graph is not None and inherited_graph.number_of_nodes() > 0) else 0,
             )
         )
 
@@ -3487,6 +3490,9 @@ def run_episode_query(
         "accepted_series": [bool(getattr(rec, 'dg_fire', False)) for rec in step_records],
         "dead_end_steps": dead_end_steps,
         "dead_end_escape_rate": (dead_end_escape / dead_end_steps) if dead_end_steps else 1.0,
+        "node_count_series": [rec.graph_node_count for rec in step_records],
+        "edge_count_series": [rec.graph_edge_count for rec in step_records],
+        "betti1_series": [rec.betti_1 for rec in step_records],
     }
 
     return EpisodeArtifacts(
@@ -3674,6 +3680,7 @@ def main() -> None:
             propagated_alpha=float(getattr(args, "propagated_alpha", 1.0)),
             sleep_propagate_gamma=float(getattr(args, "sleep_propagate_gamma", 0.95)),
             sleep_propagate_iters=int(getattr(args, "sleep_propagate_iters", 50)),
+            sp_mode=str(getattr(args, "sp_mode", "asp")),
         )
 
         runs: List[MazeSummary] = []

@@ -1,7 +1,7 @@
 # β₁（第一Betti数）採用検討メモ
 
-**日付:** 2026-02-07
-**ステータス:** 60-seed実験のASP-β₁相関確認待ち → 確認後、全面移行判断
+**日付:** 2026-02-07（更新: 2026-02-09）
+**ステータス:** β₁並行記録を実装済み（`--sp-mode both`）。ASP vs β₁ の比較検証中。相関確認後、SP定義の切替判断を行う。
 
 ---
 
@@ -202,11 +202,14 @@ d_effが現在の埋め込み次元を超えたら拡張、下がったら縮小
 
 ## 8. 実装計画
 
-### Phase 1：相関検証（現在）
-- 60-seed実験完走を待つ（SP=ASPで走行中）
-- β₁記録コードを追加（graph_utils.pyに `compute_betti_1` 追加、引き算1行）
-- 事後的にASP vs β₁のPearson/Spearman相関を計算
-- 判定基準：|r| > 0.7 → 置換可能、|r| < 0.7 → 独立情報
+### Phase 1：並行記録（実装済み 2026-02-09）
+- `compute_betti_1` を `graph_utils.py` に追加済み
+- `HopResult.betti_1`, `GeDIGResult.betti_1_before/after/delta_betti_1` を `types.py` に追加済み
+- `gedig_core.py` の `calculate()` で single-hop / multihop 両パスにβ₁記録を挿入済み
+- `--sp-mode asp|betti1|both` CLIフラグを追加済み（デフォルト: `asp` = 現行動作維持）
+- ステップごとの V/E/β₁ を `StepRecord` に記録し、JSON series に出力済み
+- 次回60-seed実験で `--sp-mode both` を指定すれば ASP と β₁ が並行記録される
+- 判定基準：Spearman |r| > 0.7 → 置換可能、|r| < 0.7 → 独立情報（四項式拡張を検討）
 
 ### Phase 2：全面移行
 - 高相関確認後、SP定義をβ₁に切り替え

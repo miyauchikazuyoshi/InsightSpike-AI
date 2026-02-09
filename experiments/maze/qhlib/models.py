@@ -179,6 +179,10 @@ class StepRecord:
     cortisol_reason: str = ""
     cortisol_ag_streak: int = 0
     cortisol_stuck_streak: int = 0
+    # β₁ (first Betti number) diagnostics
+    graph_node_count: int = 0
+    graph_edge_count: int = 0
+    betti_1: int = 0
 
 
 @dataclass
@@ -321,6 +325,8 @@ class QueryHubConfig:
     propagated_alpha: float = 1.0
     sleep_propagate_gamma: float = 0.95
     sleep_propagate_iters: int = 50
+    # SP definition mode: asp (default), betti1, both (parallel recording)
+    sp_mode: str = "asp"
 
 
 @dataclass
