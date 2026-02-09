@@ -183,6 +183,12 @@ class StepRecord:
     graph_node_count: int = 0
     graph_edge_count: int = 0
     betti_1: int = 0
+    # Three-layer search diagnostics
+    search_layer_used: int = -1          # 0, 1, 2 (-1 = legacy)
+    search_is_revisit: bool = False
+    search_revisit_similarity: float = 0.0
+    search_time_ms: float = 0.0
+    search_l1_candidates: int = 0
 
 
 @dataclass
@@ -327,6 +333,13 @@ class QueryHubConfig:
     sleep_propagate_iters: int = 50
     # SP definition mode: asp (default), betti1, both (parallel recording)
     sp_mode: str = "asp"
+    # Three-layer search mode
+    search_mode: str = "legacy"            # 'legacy' or 'threelayer'
+    theta_attention: float = 0.3           # attention threshold for L1
+    attention_decay: float = 0.95          # per-step attention decay rate
+    attention_boost: float = 0.1           # traverse boost
+    attention_alpha: float = 0.5           # attention exponent for effective_score
+    min_layer1_candidates: int = 2         # min L1 candidates to skip L2
 
 
 @dataclass

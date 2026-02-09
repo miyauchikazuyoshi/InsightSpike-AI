@@ -145,3 +145,49 @@ def build_ecand(
         ecand = ecand[:cap_topk]
 
     return ecand, mem_count, qpast_count
+
+
+def build_ecand_from_layer1(
+    *,
+    layer1_candidates: List[Dict[str, Any]],
+    current_query_node: Node,
+    prev_graph: nx.Graph,
+    cap_topk: int = 0,
+) -> Tuple[List[Tuple[Node, Node, Dict[str, Any]]], int, int]:
+    """Build Ecand from three-layer search Layer 1 candidates.
+
+    Converts AttentionGraphWalker output into ecand edges compatible
+    with evaluate_multihop.
+
+    Returns: (ecand_edges, l1_count, 0)
+    """
+    ecand: List[Tuple[Node, Node, Dict[str, Any]]] = []
+    seen: Set[Tuple[Node, Node]] = set()
+    l1_count = 0
+
+    for cand in layer1_candidates:
+        node_id = cand.get("node_id")
+        if node_id is None:
+            continue
+        if node_id not in prev_graph:
+            continue
+        e = canonical_edge_id(current_query_node, node_id)
+        if e in seen:
+            continue
+        seen.add(e)
+
+        meta = {
+            "origin": "layer1",
+            "index": f"l1:{node_id[0]},{node_id[1]},{node_id[2]}",
+            "anchor_position": [int(node_id[0]), int(node_id[1])],
+            "attention": cand.get("attention", 0.0),
+            "effective_score": cand.get("effective_score", 0.0),
+            "weighted_similarity": cand.get("weighted_similarity", 0.0),
+        }
+        ecand.append((e[0], e[1], meta))
+        l1_count += 1
+
+    if cap_topk and cap_topk > 0 and len(ecand) > cap_topk:
+        ecand = ecand[:cap_topk]
+
+    return ecand, l1_count, 0
