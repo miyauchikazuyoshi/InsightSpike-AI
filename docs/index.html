@@ -1,547 +1,1973 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>geDIG — The Thermodynamics of Intelligence</title>
-<meta name="description" content="A research framework exploring whether a single dimensionless equation spanning metric, measure, and topology can describe how any information-bearing system restructures itself.">
-<meta property="og:title" content="geDIG — The Thermodynamics of Intelligence">
-<meta property="og:description" content="F = ΔEPC − λ(ΔH + γΔβ₁) — Three independent mathematical structures. One dimensionless, scale-invariant scalar.">
-<meta property="og:url" content="https://miyauchikazuyoshi.github.io/InsightSpike-AI/">
-<meta property="og:type" content="website">
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>geDIG — The Thermodynamics of Intelligence | InsightSpike-AI</title>
+    <meta name="google-site-verification" content="7b2bONEB5GEFUNTGYAWemjjporVrUKMzw3eiok__65A" />
+    <meta name="description"
+        content="geDIG: A research framework exploring whether a single dimensionless equation spanning metric, measure, and topology can describe how any information-bearing system restructures itself.">
+    <meta name="keywords"
+        content="RAG, Knowledge Graph, AI, geDIG, InsightSpike, Multi-Agent, Neuroscience, Machine Learning">
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://miyauchikazuyoshi.github.io/InsightSpike-AI/">
+    <meta property="og:title" content="geDIG — The Thermodynamics of Intelligence | InsightSpike-AI">
+    <meta property="og:description"
+        content="F = ΔEPC − λ(ΔH + γΔβ₁) — Three independent mathematical structures. One dimensionless, scale-invariant scalar.">
+    <meta property="og:image"
+        content="https://miyauchikazuyoshi.github.io/InsightSpike-AI/images/multihop_subgraphs.png">
 
-  body {
-    background: #faf8f5;
-    font-family: 'Source Serif 4', 'Georgia', serif;
-    color: #1a1a1a;
-    line-height: 1.7;
-    display: flex;
-    justify-content: center;
-    padding: 40px 20px 80px;
-  }
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://miyauchikazuyoshi.github.io/InsightSpike-AI/">
+    <meta property="twitter:title" content="geDIG — The Thermodynamics of Intelligence | InsightSpike-AI">
+    <meta property="twitter:description"
+        content="F = ΔEPC − λ(ΔH + γΔβ₁) — Three independent mathematical structures. One dimensionless, scale-invariant scalar.">
+    <meta property="twitter:image"
+        content="https://miyauchikazuyoshi.github.io/InsightSpike-AI/images/multihop_subgraphs.png">
+    <script src="https://cdn.tailwindcss.com"></script>
 
-  .page { max-width: 820px; width: 100%; }
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
-  /* Hero */
-  .hero {
-    text-align: center;
-    margin-bottom: 48px;
-    padding-bottom: 40px;
-    border-bottom: 1px solid #ddd;
-  }
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bg: '#0f172a',
+                        panel: '#1e293b',
+                        accent: '#06b6d4', // Cyan
+                        success: '#10b981', // Emerald
+                        warn: '#f59e0b',
+                        danger: '#ef4444',
+                        purple: '#a855f7', // Entropy
+                        orange: '#f97316', // Shortest Path
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+        }
 
-  .hero h1 {
-    font-size: 32px;
-    font-weight: 700;
-    color: #111;
-    margin-bottom: 12px;
-    letter-spacing: -0.01em;
-  }
+        .gradient-text {
+            background: linear-gradient(to right, #22d3ee, #3b82f6);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
-  .hero .subtitle {
-    font-size: 15px;
-    color: #666;
-    font-style: italic;
-    max-width: 600px;
-    margin: 0 auto 28px;
-    line-height: 1.6;
-  }
+        /* MathJax Adjustment */
+        mjx-container {
+            outline: none !important;
+        }
 
-  .equation-box {
-    background: #f0ece6;
-    border: 1px solid #d4cfc7;
-    border-radius: 8px;
-    padding: 20px 28px;
-    margin: 24px auto;
-    max-width: 520px;
-  }
+        /* Graph Styles */
+        #stage {
+            background: #020617;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5);
+            cursor: crosshair;
+        }
 
-  .equation {
-    font-family: 'Times New Roman', 'Source Serif 4', serif;
-    font-size: 26px;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    color: #1a1a1a;
-  }
+        svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
 
-  .equation .epc { color: #c45a2d; }
-  .equation .h   { color: #2a6b8a; }
-  .equation .b   { color: #6b2fa0; }
+        .edge {
+            stroke: #334155;
+            stroke-width: 1;
+            opacity: 0.3;
+            transition: all 0.3s;
+        }
 
-  .nav-links {
-    margin-top: 20px;
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-  }
+        .edge.hop1 {
+            stroke: #22d3ee;
+            opacity: 0.6;
+            stroke-width: 1.5;
+        }
 
-  .nav-links a {
-    color: #555;
-    text-decoration: none;
-    margin: 0 8px;
-    padding: 5px 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    transition: all 0.2s;
-  }
+        .edge.hop2 {
+            stroke: #34d399;
+            opacity: 0.5;
+        }
 
-  .nav-links a:hover {
-    color: #111;
-    border-color: #999;
-    background: #f0ece6;
-  }
+        .edge.hop3 {
+            stroke: #facc15;
+            opacity: 0.4;
+        }
 
-  /* Sections */
-  section {
-    margin-bottom: 44px;
-    padding-bottom: 36px;
-    border-bottom: 1px solid #e5e1db;
-  }
+        .edge.added {
+            stroke: #facc15;
+            stroke-width: 2.5;
+            opacity: 1;
+            filter: drop-shadow(0 0 3px rgba(250, 204, 21, 0.5));
+        }
 
-  section:last-child { border-bottom: none; }
+        .node {
+            fill: #475569;
+            transition: fill 0.3s, r 0.3s;
+        }
 
-  h2 {
-    font-size: 22px;
-    font-weight: 700;
-    color: #111;
-    margin-bottom: 14px;
-    letter-spacing: 0.01em;
-  }
+        .node.base {
+            r: 3;
+        }
 
-  h3 {
-    font-size: 17px;
-    font-weight: 600;
-    color: #333;
-    margin: 20px 0 10px;
-  }
+        .node.center {
+            fill: #facc15;
+            stroke: #fff;
+            stroke-width: 2;
+            r: 7;
+            filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.6));
+        }
 
-  p { margin-bottom: 12px; color: #333; }
+        .node.hop0 {
+            fill: #e2e8f0;
+            stroke: #22d3ee;
+            stroke-width: 1;
+            r: 4;
+        }
 
-  a { color: #2a6b8a; text-decoration: none; }
-  a:hover { text-decoration: underline; }
+        .node.hop1 {
+            fill: #22d3ee;
+            r: 4;
+        }
 
-  blockquote {
-    border-left: 3px solid #c45a2d;
-    padding: 8px 16px;
-    margin: 14px 0;
-    color: #555;
-    font-style: italic;
-    background: #f7f4ef;
-  }
+        .node.hop2 {
+            fill: #34d399;
+            r: 3.5;
+        }
 
-  /* Tables */
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 16px 0;
-    font-size: 14px;
-    font-family: 'Inter', sans-serif;
-  }
+        .node.hop3 {
+            fill: #facc15;
+            r: 3;
+        }
 
-  th {
-    text-align: left;
-    font-weight: 600;
-    color: #555;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    padding: 8px 12px;
-    border-bottom: 2px solid #ccc;
-  }
+        /* Custom Cursor Guide */
+        #cursor-guide {
+            pointer-events: none;
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s, opacity 0.2s;
+            opacity: 0;
+            z-index: 10;
+        }
 
-  td {
-    padding: 8px 12px;
-    border-bottom: 1px solid #e5e1db;
-    color: #333;
-    vertical-align: top;
-  }
+        #stage:hover #cursor-guide {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.5);
+        }
 
-  tr:last-child td { border-bottom: none; }
+        /* Animations */
+        .insight-flash {
+            animation: flash-green 1s ease-out;
+        }
 
-  /* Term table colors */
-  .term-table .term-epc { color: #c45a2d; font-weight: 600; }
-  .term-table .term-h   { color: #2a6b8a; font-weight: 600; }
-  .term-table .term-b   { color: #6b2fa0; font-weight: 600; }
+        .ambiguity-flash {
+            animation: flash-red 1s ease-out;
+        }
 
-  /* Code */
-  code {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    background: #f0ece6;
-    padding: 2px 5px;
-    border-radius: 3px;
-    color: #333;
-  }
+        @keyframes flash-green {
+            0% {
+                box-shadow: inset 0 0 0 0 rgba(16, 185, 129, 0.8);
+                border-color: #10b981;
+            }
 
-  pre {
-    background: #2d2d2d;
-    color: #e0e0e0;
-    padding: 16px 20px;
-    border-radius: 6px;
-    overflow-x: auto;
-    margin: 14px 0;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    line-height: 1.6;
-  }
+            100% {
+                box-shadow: inset 0 0 0 50px rgba(16, 185, 129, 0);
+                border-color: transparent;
+            }
+        }
 
-  pre code {
-    background: none;
-    padding: 0;
-    color: inherit;
-  }
+        @keyframes flash-red {
+            0% {
+                box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0.8);
+                border-color: #ef4444;
+            }
 
-  /* Flow diagram */
-  .flow-diagram {
-    background: #f7f4ef;
-    border: 1px solid #e5e1db;
-    border-radius: 6px;
-    padding: 20px;
-    margin: 16px auto;
-    max-width: 380px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    line-height: 1.5;
-    color: #333;
-    white-space: pre;
-    text-align: left;
-  }
+            100% {
+                box-shadow: inset 0 0 0 50px rgba(239, 68, 68, 0);
+                border-color: transparent;
+            }
+        }
 
-  /* Callout */
-  .callout {
-    background: #f0ece6;
-    border-left: 3px solid #6b2fa0;
-    padding: 14px 18px;
-    margin: 18px 0;
-    border-radius: 0 6px 6px 0;
-  }
+        /* Custom Range Slider */
+        input[type=range] {
+            appearance: none;
+            -webkit-appearance: none;
+            background: transparent;
+        }
 
-  .callout-title {
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: #6b2fa0;
-    margin-bottom: 6px;
-  }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 14px;
+            width: 14px;
+            border-radius: 50%;
+            background: #22d3ee;
+            margin-top: -5px;
+            cursor: pointer;
+        }
 
-  .callout p { margin-bottom: 6px; font-size: 14px; }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #334155;
+            border-radius: 2px;
+        }
 
-  /* Ordered list */
-  ol {
-    margin: 12px 0;
-    padding-left: 24px;
-  }
+        /* Hero "slime mold" background */
+        #slime-bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.35;
+            /* Make the trails feel organic rather than neon UI */
+            filter: saturate(1.1) contrast(1.05);
+            mix-blend-mode: screen;
+        }
 
-  ol li {
-    margin-bottom: 12px;
-    color: #333;
-  }
-
-  ol li strong { color: #111; }
-
-  /* Footer */
-  .footer {
-    text-align: center;
-    color: #888;
-    font-size: 13px;
-    font-family: 'Inter', sans-serif;
-    margin-top: 40px;
-    padding-top: 24px;
-    border-top: 1px solid #ddd;
-  }
-
-  .footer p { color: #888; margin-bottom: 6px; }
-  .footer a { color: #2a6b8a; }
-
-  /* Results highlight */
-  .result-grid {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 4px 16px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    margin: 14px 0;
-    padding: 12px 16px;
-    background: #f7f4ef;
-    border-radius: 6px;
-  }
-
-  .result-grid .label { color: #888; }
-  .result-grid .value { color: #333; font-weight: 600; }
-
-  .evolution-box {
-    background: #f7f4ef;
-    border: 1px solid #e5e1db;
-    border-radius: 6px;
-    padding: 16px 20px;
-    margin: 14px 0;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    line-height: 1.8;
-    color: #555;
-  }
-
-  .evolution-box .arrow { color: #c45a2d; font-weight: 600; }
-  .evolution-box .comment { color: #999; font-size: 11px; }
-</style>
+        .slime-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background:
+                radial-gradient(900px 420px at 50% 35%, rgba(16, 185, 129, 0.20), rgba(2, 6, 23, 0) 60%),
+                radial-gradient(700px 300px at 20% 30%, rgba(34, 211, 238, 0.14), rgba(2, 6, 23, 0) 60%),
+                radial-gradient(700px 300px at 80% 70%, rgba(250, 204, 21, 0.10), rgba(2, 6, 23, 0) 55%),
+                linear-gradient(to bottom, rgba(2, 6, 23, 0.20), rgba(2, 6, 23, 0.85));
+        }
+    </style>
 </head>
-<body>
-<div class="page">
 
-  <!-- Hero -->
-  <div class="hero">
-    <h1>The Thermodynamics of Intelligence</h1>
-    <p class="subtitle">
-      Can a single dimensionless equation &mdash; spanning metric, measure, and topology &mdash;
-      describe how any information-bearing system restructures itself?
-    </p>
+<body class="antialiased selection:bg-cyan-500 selection:text-white">
 
-    <div class="equation-box">
-      <div class="equation">
-        F = <span class="epc">&Delta;EPC</span>
-        &minus; &lambda;(<span class="h">&Delta;H</span>
-        + &gamma;<span class="b">&Delta;&beta;<sub>1</sub></span>)
-      </div>
-    </div>
+    <nav class="fixed w-full z-50 bg-bg/90 backdrop-blur-md border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-accent animate-pulse"></div>
+                    <a href="#" class="font-bold text-xl tracking-tight hover:text-white transition">geDIG</a>
+                    <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded text-slate-400">v6.0 Draft</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-1">
+                        <a href="#demo"
+                            class="text-slate-300 hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition">Interactive
+                            Demo</a>
+                        <a href="#concept"
+                            class="text-slate-300 hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition">Concept</a>
+                        <a href="#resources"
+                            class="text-slate-300 hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition">Downloads</a>
+                        <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI" target="_blank"
+                            class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full text-sm font-bold ml-4 transition border border-white/10 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd"
+                                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                                    clip-rule="evenodd"></path>
+                            </svg>
+                            GitHub
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-    <table class="term-table" style="max-width: 560px; margin: 20px auto;">
-      <thead>
-        <tr><th>Term</th><th>Mathematical Structure</th><th>What It Captures</th></tr>
-      </thead>
-      <tbody>
-        <tr><td class="term-epc">&Delta;EPC</td><td>Metric (distance)</td><td>Cost of restructuring</td></tr>
-        <tr><td class="term-h">&Delta;H</td><td>Measure (probability)</td><td>Change in entropy</td></tr>
-        <tr><td class="term-b">&Delta;&beta;<sub>1</sub></td><td>Topology (loops)</td><td>Change in independent cycles</td></tr>
-      </tbody>
-    </table>
+    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+        <!-- Organic "slime mold" growth background -->
+        <canvas id="slime-bg" aria-hidden="true"></canvas>
+        <div class="slime-overlay" aria-hidden="true"></div>
 
-    <p style="color: #666; font-size: 14px;">
-      Three independent mathematical structures. One dimensionless, scale-invariant scalar.<br>
-      <strong>F &lt; 0</strong> means information gain exceeds structural cost &mdash; the system should commit the change.
-    </p>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
+                The Thermodynamics<br>
+                <span class="gradient-text">of Intelligence</span>
+            </h1>
+            <p class="mt-6 max-w-2xl mx-auto text-lg md:text-xl text-slate-400 leading-relaxed">
+                Can a single dimensionless equation — spanning metric, measure, and topology —<br>
+                describe how any information-bearing system restructures itself?
+                <br>
+                <span class="text-2xl text-white mt-2 block">$\mathcal{F} = \Delta EPC - \lambda(\Delta H + \gamma \Delta \beta_1)$</span>
+                <span
+                    class="block mt-4 text-sm text-slate-400 font-normal max-w-lg mx-auto border-t border-white/10 pt-4">
+                    <span class="text-accent">Three independent structures:</span>
+                    <span class="block mt-2">
+                        $\Delta EPC \approx$ "metric (distance)", $\Delta H \approx$ "measure (probability)", $\Delta \beta_1 \approx$ "topology (loops)"
+                    </span>
+                    <br>
+                    $\mathcal{F} < 0$ means information gain exceeds structural cost — the system should commit the change.
+                </span>
+                <span
+                    class="block mt-4 text-xs text-slate-500 font-mono bg-white/5 inline-block px-3 py-1 rounded border border-white/5">
+                    <strong>Maze:</strong> 60% → <strong>98%</strong> goal-reach (15×15).
+                    <strong>Transformer:</strong> F tracks model quality across 8 models. </span>
+            </p>
+            <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
+                <a href="https://huggingface.co/spaces/miyaukaz/gedig-demo" target="_blank"
+                    class="px-8 py-4 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white font-bold transition shadow-[0_0_20px_rgba(168,85,247,0.4)] text-center flex items-center justify-center gap-2">
+                    <span>🧠</span>
+                    Try Live Demo (HF Spaces)
+                </a>
+                <a href="research/thinking/matchstick_figure_v2_en.html"
+                    class="px-8 py-4 rounded-full bg-accent hover:bg-cyan-400 text-bg font-bold transition shadow-[0_0_20px_rgba(34,211,238,0.3)] text-center">
+                    Visual Intuition: Matchstick Figure
+                </a>
+                <a href="#resources"
+                    class="px-8 py-4 rounded-full border border-slate-600 hover:border-white hover:bg-white/5 transition font-medium flex items-center justify-center gap-2 group">
+                    <svg class="w-5 h-5 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                        </path>
+                    </svg>
+                    View Paper (Draft)
+                </a>
+            </div>
 
-    <div class="nav-links">
-      <a href="paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf">Paper (PDF)</a>
-      <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI">GitHub</a>
-      <a href="https://huggingface.co/spaces/miyaukaz/gedig-demo">Live Demo</a>
-      <a href="demo.html">Interactive Visualizer</a>
-    </div>
-  </div>
+            <!-- geDIG-driven amoeba: live gauge + tunable parameters -->
+            <div class="mt-10 max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 text-left">
+                <div class="bg-bg/70 backdrop-blur border border-white/10 rounded-2xl p-4 shadow-2xl">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-mono text-slate-400">Amoeba geDIG (live)</span>
+                        <span id="slime-state" class="text-[11px] font-bold text-slate-300">--</span>
+                    </div>
+                    <div class="mt-2 text-[11px] text-slate-500 font-mono leading-snug">
+                        <span class="text-slate-300">$F$</span> = $\Delta EPC$ − $\lambda(\Delta H + \gamma\Delta \beta_1)$
+                    </div>
+                    <div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] font-mono">
+                        <span class="text-slate-500">F</span><span id="slime-val-f" class="text-right text-slate-200">--</span>
+                        <span class="text-slate-500">ΔEPC</span><span id="slime-val-epc" class="text-right text-slate-300">--</span>
+                        <span class="text-slate-500">ΔH</span><span id="slime-val-h" class="text-right text-slate-300">--</span>
+                        <span class="text-slate-500">Δβ₁</span><span id="slime-val-sp" class="text-right text-slate-300">--</span>
+                    </div>
+                    <div class="mt-3 h-1.5 bg-white/5 rounded overflow-hidden border border-white/10">
+                        <div id="slime-bar" class="h-full w-1/2 bg-gradient-to-r from-danger via-warn to-success"></div>
+                    </div>
+                    <div class="mt-2 text-[10px] text-slate-500 leading-snug">
+                        High $F$ → <span class="text-danger">AG</span> (explore). Low $F$ → <span class="text-success">DG</span> (commit).
+                    </div>
+                    <div class="mt-3 text-[10px] text-slate-600 leading-snug">
+                        Tip: the bright dots are <span class="text-slate-400">nodes</span>; thick veins are <span class="text-slate-400">edges</span>.
+                    </div>
+                </div>
 
-  <!-- Visual Intuition -->
-  <section>
-    <h2>Visual Intuition: The Matchstick Figure</h2>
-    <p>
-      Why are these three terms independent?
-      The <a href="research/thinking/matchstick_figure_v2_en.html">Matchstick Figure</a>
-      provides an interactive visual explanation.
-    </p>
-    <p>
-      For the same edit cost (EPC = 1), topology (&Delta;&beta;<sub>1</sub>) and
-      information (&Delta;H) vary independently &mdash; one move can create a loop without
-      changing entropy, or reduce entropy without changing topology.
-      This independence is why F needs all three terms.
-    </p>
-    <p>
-      <a href="research/thinking/matchstick_figure_v2_en.html"><strong>View the Matchstick Figure (EN)</strong></a>
-      &nbsp;&middot;&nbsp;
-      <a href="research/thinking/matchstick_figure_v2.html"><strong>(JA)</strong></a>
-    </p>
-  </section>
+                <div class="bg-bg/70 backdrop-blur border border-white/10 rounded-2xl p-4 shadow-2xl">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-mono text-slate-400">Tune parameters</span>
+                        <button id="slime-reroll" type="button"
+                            class="text-[11px] font-bold text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-3 py-1 transition">
+                            Reroll nodes
+                        </button>
+                    </div>
 
-  <!-- Origin -->
-  <section>
-    <h2>Origin</h2>
-    <blockquote>"How do we build an AI that thinks like Einstein?"</blockquote>
-    <p>
-      From this question came geDIG: the hypothesis that <strong>insight is the topological
-      reconstruction of memory</strong>, and that it can be measured as a thermodynamic
-      quantity &mdash; isomorphic to Helmholtz free energy F = E &minus; TS.
-    </p>
-    <p>The equation evolved through research:</p>
-    <div class="evolution-box">
-      &Delta;IG <span class="comment">(undifferentiated gain)</span><br>
-      &nbsp;&nbsp;<span class="arrow">&darr;</span> decompose<br>
-      &Delta;H + &gamma;&Delta;SP <span class="comment">(SP = average shortest path &mdash; graph-dependent)</span><br>
-      &nbsp;&nbsp;<span class="arrow">&darr;</span> abstract<br>
-      &Delta;H + &gamma;&Delta;&beta;<sub>1</sub> <span class="comment">(&beta;<sub>1</sub> = first Betti number &mdash; topological invariant)</span>
-    </div>
-    <p>
-      The SP &rarr; &beta;<sub>1</sub> abstraction was the decisive leap: from an operational
-      definition that depends on graph shape, to a structural definition that exists wherever space exists.
-    </p>
-    <p><a href="research/gedig_origin_story.md"><strong>Read the full origin story</strong></a> (EN / JA)</p>
-    <blockquote>
-      Note: The v6 paper uses &Delta;SP (shortest-path shortening) as the structural term.
-      The ongoing research generalizes this to &Delta;&beta;<sub>1</sub>, which is a topological
-      invariant independent of graph shape or scale.
-    </blockquote>
-  </section>
+                    <div class="mt-4 space-y-4">
+                        <div>
+                            <div class="flex items-center justify-between text-[11px] font-mono">
+                                <label for="slime-lambda" class="text-slate-400">$\lambda$ (temperature)</label>
+                                <span id="slime-lambda-val" class="text-slate-300">--</span>
+                            </div>
+                            <input id="slime-lambda" type="range" min="0" max="1" step="0.01" value="0.26" class="w-full">
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between text-[11px] font-mono">
+                                <label for="slime-gamma" class="text-slate-400">$\gamma$ (topology weight)</label>
+                                <span id="slime-gamma-val" class="text-slate-300">--</span>
+                            </div>
+                            <input id="slime-gamma" type="range" min="0" max="2" step="0.01" value="0.90" class="w-full">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <div class="flex items-center justify-between text-[11px] font-mono">
+                                    <label for="slime-theta-ag" class="text-slate-400">$\theta_{AG}$</label>
+                                    <span id="slime-theta-ag-val" class="text-slate-300">--</span>
+                                </div>
+                                <input id="slime-theta-ag" type="range" min="-0.20" max="0.50" step="0.01" value="0.18" class="w-full">
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between text-[11px] font-mono">
+                                    <label for="slime-theta-dg" class="text-slate-400">$\theta_{DG}$</label>
+                                    <span id="slime-theta-dg-val" class="text-slate-300">--</span>
+                                </div>
+                                <input id="slime-theta-dg" type="range" min="-0.50" max="0.20" step="0.01" value="-0.08" class="w-full">
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between text-[11px] font-mono">
+                                <label for="slime-hops" class="text-slate-400">lookahead (multi-hop)</label>
+                                <span id="slime-hops-val" class="text-slate-300">--</span>
+                            </div>
+                            <input id="slime-hops" type="range" min="1" max="12" step="1" value="7" class="w-full">
+                        </div>
+                    </div>
 
-  <!-- AG/DG Gating -->
-  <section>
-    <h2>The Mechanism: AG/DG Gating</h2>
-    <p>Two gates govern intelligent processing:</p>
-    <div class="flow-diagram">Input
-  |
-  v
-+-------------------------+
-|  AG (Attention Gate)    |
-|  "Is this surprising?"  |
-|                         |
-|  Prediction != Input    |
-|  -> Fire                |
-+------------+------------+
-             | Yes
-             v
-       [ Process ]
-             |
-             v
-+-------------------------+
-|  DG (Decision Gate)     |
-|  "Does F decrease?"     |
-|                         |
-|  dF < 0 -> Update       |
-|  dF >= 0 -> Reject      |
-+------------+------------+
-             | Yes
-             v
-    [ Structure Update ]</div>
-    <p>
-      <strong>AG</strong> (Attention Gate): Detects ambiguity/novelty (0-hop). Analogous to noradrenaline.<br>
-      <strong>DG</strong> (Decision Gate): Confirms valid restructuring (multi-hop). Analogous to dopamine.
-    </p>
-    <blockquote>The neurotransmitter correspondence is a computational analogy, not a physiological claim.</blockquote>
-  </section>
+                    <div class="mt-3 text-[10px] text-slate-600 leading-snug">
+                        This is a visualization: $\Delta H$ and $\Delta SP$ are local proxies, but the <span class="text-slate-400">equation is real</span>.
+                    </div>
+                </div>
+            </div>
 
-  <!-- Experiments -->
-  <section>
-    <h2>Experiments</h2>
+            <div class="mt-12 flex flex-wrap justify-center gap-2 text-xs text-slate-500 font-mono">
+                <span
+                    class="px-3 py-1 bg-panel rounded border border-white/5 hover:border-white/20 cursor-default">$\Delta
+                    EPC$ (Metric)</span>
+                <span
+                    class="px-3 py-1 bg-panel rounded border border-white/5 hover:border-white/20 cursor-default">$\Delta
+                    H$ (Measure)</span>
+                <span
+                    class="px-3 py-1 bg-panel rounded border border-white/5 hover:border-white/20 cursor-default">$\Delta
+                    \beta_1$ (Topology)</span>
+                <span
+                    class="px-3 py-1 bg-panel rounded border border-white/5 hover:border-white/20 cursor-default">Helmholtz
+                    F = E − TS</span>
+            </div>
+        </div>
 
-    <h3>Maze Navigation</h3>
-    <p>
-      A partial-observation maze agent that builds a persistent knowledge graph
-      and uses geDIG to decide when to explore vs. exploit.
-    </p>
-    <table>
-      <thead><tr><th>Experiment</th><th>Result</th></tr></thead>
-      <tbody>
-        <tr><td><strong>15&times;15 Maze</strong> (Dynamic Gating)</td><td>60% &rarr; <strong>98%</strong> goal-reach rate</td></tr>
-        <tr><td><strong>25&times;25 Maze</strong> (Graph-Persistent DG)</td><td>Active experimentation with 10D vector extension</td></tr>
-      </tbody>
-    </table>
-    <p>
-      Architecture: Wake-Sleep-Wake cycle with three-layer search
-      (L0: O(1) hash, L1: O(degree) attention walk, L2: O(N log N) full sort).
-    </p>
-    <pre><code># Reproduce (requires .venv with networkx, numpy, etc.)
-.venv/bin/python3 experiments/maze/run_experiment_query.py \
-  --maze-size 15 --max-steps 250 --seeds 12 \
-  --search-mode threelayer --vector-mode extended</code></pre>
+    </section>
 
-    <h3>Transformer Inference F-Trajectory</h3>
-    <p>
-      Layer-by-layer measurement of &Delta;EPC, &Delta;H, and &Delta;&beta;<sub>1</sub>
-      across Transformer hidden states, testing whether F tracks model quality.
-    </p>
-    <ul style="margin: 10px 0 10px 24px;">
-      <li><strong>8 token-level models tested</strong>: BERT, DistilBERT, GPT-2, GPT-2 Medium, DistilGPT2, TinyLlama (2 checkpoints)</li>
-      <li><strong>Key finding</strong>: GPT series shows monotonic improvement in &Delta;R&sup2;<sub>struct</sub> with model scale</li>
-    </ul>
-    <div class="result-grid">
-      <span class="label">distilgpt2:</span><span class="value">&Delta;R&sup2;<sub>struct</sub> = &minus;0.777</span>
-      <span class="label">gpt2:</span><span class="value">&Delta;R&sup2;<sub>struct</sub> = &minus;0.086</span>
-      <span class="label">gpt2-medium:</span><span class="value">&Delta;R&sup2;<sub>struct</sub> = &minus;0.065</span>
-    </div>
-    <p>
-      F has sensitivity to model quality &mdash; better models produce more structured F-trajectories.
-    </p>
-    <p>
-      <strong>Status</strong>: Preliminary. &Delta;R&sup2;<sub>struct</sub> is still negative for all models
-      (random-init outperforms baseline), but trending toward zero with scale. Large-scale model
-      verification (70B+) is future work.
-    </p>
+    <section id="demo" class="py-10 bg-panel/30 border-y border-white/5 backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
+                <div>
+                    <h2 class="text-3xl font-bold text-white flex items-center gap-3">
+                        <span class="w-1 h-8 bg-accent rounded-full"></span>
+                        Visualizing "The Pulse"
+                    </h2>
+                    <p class="text-slate-400 mt-2 text-sm">
+                        Real-time simulation of the gauge $\mathcal{F}$ as the graph grows.<br>
+                        Click anywhere in the graph to inject a new query node and see if it triggers an Insight (DG) or
+                        Ambiguity (AG).
+                        <br>
+                        <span class="text-xs text-slate-500 mt-2 block">
+                            <strong>AG (Ambiguity Gauge):</strong> 0-hop error (High Cost). <br>
+                            <strong>DG (Discovery Gauge):</strong> Multi-hop shortcut (Insight Found).
+                        </span>
+                    </p>
+                    <div class="mt-4 p-3 bg-white/5 rounded border border-white/10 text-xs text-slate-400">
+                        <strong class="text-slate-300 block mb-1">Observation Guide:</strong>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li><strong>Click near a cluster:</strong> $\Delta EPC$ is low, but $\Delta IG$ is also low.
+                                $\mathcal{F}$ stays high (Reject).</li>
+                            <li><strong>Click between clusters:</strong> If a shortcut is found, $\Delta SP$ spikes
+                                (negative cost), driving $\mathcal{F} < \theta$ (Insight!).</li>
+                        </ul>
+                    </div>
+                </div>
 
-    <h3>Earlier Experiments</h3>
-    <p>
-      HotpotQA (multi-hop QA) and cross-domain analogy experiments were conducted in earlier phases
-      and informed the theory. These have not been reproduced under the current codebase and are archived.
-    </p>
-  </section>
+                <div class="flex gap-2 bg-bg/80 p-1.5 rounded-xl border border-white/10 shadow-lg backdrop-blur">
+                    <button onclick="playScenario('ambiguity')"
+                        class="flex flex-col items-start px-4 py-2 rounded-lg bg-white/5 hover:bg-danger/10 border border-transparent hover:border-danger/40 transition group min-w-[140px]">
+                        <span class="text-xs text-danger font-bold group-hover:text-red-400">Case 1: Ambiguity
+                            Gate</span>
+                        <span class="text-[10px] text-slate-500 group-hover:text-slate-300">Phase 1: Exploration Needed
+                            (Awake)</span>
+                    </button>
+                    <button onclick="playScenario('insight')"
+                        class="flex flex-col items-start px-4 py-2 rounded-lg bg-white/5 hover:bg-success/10 border border-transparent hover:border-success/40 transition group min-w-[140px]">
+                        <span class="text-xs text-success font-bold group-hover:text-emerald-400">Case 2: Decision
+                            Gate</span>
+                        <span class="text-[10px] text-slate-500 group-hover:text-slate-300">Phase 2: Insight Found
+                            (Sleep)</span>
+                    </button>
+                </div>
+            </div>
 
-  <!-- Theoretical Connections -->
-  <section>
-    <h2>Theoretical Connections</h2>
-    <table>
-      <thead><tr><th>Framework</th><th>Mapping to geDIG</th></tr></thead>
-      <tbody>
-        <tr><td><strong>Helmholtz Free Energy</strong></td><td>F = E &minus; TS &harr; F = &Delta;EPC &minus; &lambda;(&Delta;H + &gamma;&Delta;&beta;<sub>1</sub>)</td></tr>
-        <tr><td><strong>FEP</strong> (Free Energy Principle)</td><td>Model complexity &harr; EPC, Prediction error &harr; IG</td></tr>
-        <tr><td><strong>MDL</strong> (Minimum Description Length)</td><td>Code length &harr; EPC, Compression &harr; IG</td></tr>
-        <tr><td><strong>Active Inference</strong></td><td>Precision weighting &harr; AG/DG gating</td></tr>
-      </tbody>
-    </table>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-bg rounded-2xl border border-white/10 p-1 shadow-2xl relative group"
+                    id="vis-container">
+                    <div id="stage" class="aspect-video w-full border border-white/5">
+                        <svg id="svg" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet">
+                            <g id="edges"></g>
+                            <g id="nodes"></g>
+                        </svg>
+                        <div id="cursor-guide"></div>
+                        <div id="status-overlay"
+                            class="absolute top-6 left-6 pointer-events-none transition-all opacity-0 transform -translate-y-2">
+                            <div
+                                class="bg-bg/90 backdrop-blur border border-white/20 px-4 py-2 rounded shadow-xl flex items-center gap-3">
+                                <div id="status-dot" class="w-2 h-2 rounded-full bg-slate-500"></div>
+                                <span id="status-text" class="font-bold font-mono text-sm tracking-wide">IDLE</span>
+                            </div>
+                        </div>
+                        <div class="absolute top-6 right-6 pointer-events-none text-right">
+                            <div class="text-[10px] text-slate-500 font-mono bg-bg/80 px-2 py-1 rounded">Click to Add
+                                Node</div>
+                        </div>
+                    </div>
+                    <div
+                        class="flex flex-wrap gap-4 px-4 py-3 text-[10px] text-slate-400 border-t border-white/5 bg-panel/50 rounded-b-xl font-mono uppercase tracking-wider">
+                        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-slate-500"></span>
+                            Base Node</div>
+                        <div class="flex items-center gap-2"><span
+                                class="w-3 h-3 rounded-full bg-yellow-400 border-2 border-white"></span> Query</div>
+                        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                            1-hop (Ego)</div>
+                        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                            2-hop+ (Insight)</div>
+                    </div>
+                </div>
 
-    <p>Each term of F is grounded in independent prior work:</p>
-    <table>
-      <thead><tr><th>F term</th><th>Prior work</th></tr></thead>
-      <tbody>
-        <tr><td class="term-epc">&Delta;EPC (metric)</td><td>Hewitt &amp; Manning (2019), <a href="https://aclanthology.org/N19-1419/">A Structural Probe for Finding Syntax</a></td></tr>
-        <tr><td class="term-h">&Delta;H (measure)</td><td>Ali et al. (2025), <a href="https://arxiv.org/abs/2502.16570">Entropy-Lens</a></td></tr>
-        <tr><td class="term-b">&Delta;&beta;<sub>1</sub> (topology)</td><td>Oyama et al. (2025), <a href="https://aclanthology.org/2025.acl-long.1584/">Mapping 1,000+ Language Models</a> &mdash; ACL Outstanding Paper</td></tr>
-      </tbody>
-    </table>
-    <p style="font-size: 14px; color: #555;">
-      Related: Gao et al. (2025), <a href="https://arxiv.org/abs/2511.13653">Weight-sparse transformers have interpretable circuits</a>
-      &mdash; sparsification as &beta;<sub>1</sub> reduction in F.
-    </p>
-  </section>
+                <div class="lg:col-span-1 space-y-4">
+                    <div
+                        class="bg-panel/80 backdrop-blur rounded-xl border border-white/10 p-6 h-full flex flex-col justify-between shadow-lg">
+                        <div>
+                            <h3
+                                class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                                    </path>
+                                </svg>
+                                Gauge Telemetry
+                            </h3>
 
-  <!-- Open Questions -->
-  <section>
-    <h2>Open Questions</h2>
-    <p>We are exploring specific, actionable research questions:</p>
-    <ol>
-      <li><strong>Independent F-trajectory reproduction</strong> &mdash; Does F show structured layer-wise behavior on models we haven't tested?</li>
-      <li><strong>&beta;<sub>1</sub> vs SP as structural term</strong> &mdash; Under what conditions does topological &Delta;&beta;<sub>1</sub> outperform metric &Delta;SP? Expertise in topological data analysis (TDA) welcome.</li>
-      <li><strong>Scaling to 70B+ models</strong> &mdash; We hypothesize that (&lambda;, &gamma;) converge across model families at sufficient scale. Verification requires GPU resources beyond our current individual setup.</li>
-      <li><strong>F-regularization robustness</strong> &mdash; The v6 paper shows weak F-regularization improves downstream performance (+0.33pt on SST-2). Is this robust across tasks and model families?</li>
-    </ol>
-    <p>These are <strong>open research questions</strong>, not claims. We welcome critical feedback.</p>
-  </section>
+                            <div class="space-y-6">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-2">
+                                        <span class="text-slate-400 font-medium">Structural Cost ($\Delta EPC$)</span>
+                                        <span id="val-epc" class="font-mono font-bold text-slate-200">--</span>
+                                    </div>
+                                    <div
+                                        class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden border border-white/5">
+                                        <div id="bar-epc"
+                                            class="h-full bg-gradient-to-r from-red-500 to-pink-600 transition-all duration-500"
+                                            style="width: 0%"></div>
+                                    </div>
+                                    <div class="text-[10px] text-slate-600 mt-1 text-right">wiring cost (normalized)
+                                    </div>
+                                </div>
 
-  <!-- Resources -->
-  <section>
-    <h2>Resources</h2>
-    <table>
-      <thead><tr><th>Type</th><th>Link</th></tr></thead>
-      <tbody>
-        <tr><td>Paper (English)</td><td><a href="paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf">geDIG v6 (PDF)</a></td></tr>
-        <tr><td>Paper (Japanese)</td><td><a href="paper/geDIG_onegauge_improved_v6.pdf">geDIG v6 (PDF)</a></td></tr>
-        <tr><td>GitHub</td><td><a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI">InsightSpike-AI</a></td></tr>
-        <tr><td>Live Demo</td><td><a href="https://huggingface.co/spaces/miyaukaz/gedig-demo">HuggingFace Space</a></td></tr>
-        <tr><td>Interactive Visualizer</td><td><a href="demo.html">geDIG Graph Demo</a></td></tr>
-        <tr><td>Matchstick Figure</td><td><a href="research/thinking/matchstick_figure_v2_en.html">EN</a> / <a href="research/thinking/matchstick_figure_v2.html">JA</a></td></tr>
-        <tr><td>Canonical Spec</td><td><a href="gedig_spec.md">gedig_spec.md</a></td></tr>
-      </tbody>
-    </table>
-  </section>
+                                <div class="p-4 bg-slate-900/50 rounded-lg border border-white/5">
+                                    <div class="flex justify-between text-xs mb-3">
+                                        <span class="text-white font-bold">Information Gain ($\Delta IG$)</span>
+                                        <span id="val-ig" class="font-mono font-bold text-success">--</span>
+                                    </div>
+                                    <div
+                                        class="h-2 w-full bg-slate-800 rounded-full overflow-hidden mb-4 border border-white/5">
+                                        <div id="bar-ig"
+                                            class="h-full bg-gradient-to-r from-emerald-400 to-cyan-500 transition-all duration-500"
+                                            style="width: 0%"></div>
+                                    </div>
 
-  <!-- Footer -->
-  <div class="footer">
-    <p><strong>Email</strong>: <a href="mailto:miyauchikazuyoshi@gmail.com">miyauchikazuyoshi@gmail.com</a>
-    &nbsp;&middot;&nbsp;
-    <strong>X</strong>: <a href="https://twitter.com/kazuyoshim5436">@kazuyoshim5436</a></p>
-    <p style="margin-top: 12px;">Apache-2.0 | Patent: JP 2025-082988, JP 2025-082989</p>
-    <p style="font-style: italic; margin-top: 8px;">
-      All theoretical contributions and experimental design are by the author.
-      Implementation is AI-assisted (Claude, GitHub Copilot).
-    </p>
-  </div>
+                                    <div class="grid grid-cols-2 gap-4 pt-2 border-t border-white/5">
+                                        <div>
+                                            <div class="flex justify-between text-[10px] mb-1 text-purple-300">
+                                                <span>Entropy ($\Delta H$)</span>
+                                                <span id="val-h" class="font-mono">--</span>
+                                            </div>
+                                            <div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+                                                <div id="bar-h" class="h-full bg-purple transition-all duration-500"
+                                                    style="width: 0%"></div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between text-[10px] mb-1 text-orange-300">
+                                                <span>Shortcuts ($\Delta SP$)</span>
+                                                <span id="val-sp" class="font-mono">--</span>
+                                            </div>
+                                            <div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+                                                <div id="bar-sp" class="h-full bg-orange transition-all duration-500"
+                                                    style="width: 0%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-</div>
+                        <div class="pt-6 border-t border-white/10">
+                            <div class="flex justify-between items-baseline mb-2">
+                                <span class="text-sm font-bold text-white">Total Gauge ($\mathcal{F}$)</span>
+                                <span id="val-gedig"
+                                    class="text-3xl font-bold font-mono text-slate-600 transition-colors">--</span>
+                            </div>
+                            <div class="flex justify-between text-[10px] font-mono">
+                                <span class="text-slate-500">Threshold: &lt; 0.30</span>
+                                <span id="status-badge"
+                                    class="px-2 py-0.5 rounded bg-slate-800 text-slate-500">IDLE</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-4 border-t border-white/5">
+                            <div class="flex justify-between text-xs mb-2">
+                                <span class="text-slate-500">Manual Override</span>
+                                <button id="btnReset"
+                                    class="text-accent hover:text-white transition text-[10px] uppercase tracking-wider">Reset
+                                    Graph</button>
+                            </div>
+                            <button id="btnAddCenter"
+                                class="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded text-xs text-slate-300 font-bold transition flex items-center justify-center gap-2">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                Auto-Place Node (Center)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="concept" class="py-24 bg-bg relative overflow-hidden">
+        <div class="max-w-6xl mx-auto px-4 relative z-10">
+            <div class="text-center mb-20">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Conceptual Architecture</h2>
+                <p class="text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                    F unifies three independent mathematical structures into a single decision criterion.<br>
+                    When should a system commit a structural change to its knowledge?
+                </p>
+            </div>
+
+            <div class="space-y-20">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="order-2 md:order-1">
+                        <div class="bg-panel border border-white/5 rounded-xl p-1 relative">
+                            <div
+                                class="aspect-[4/3] bg-bg rounded-lg relative overflow-hidden flex items-center justify-center">
+                                <div
+                                    class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_50%,rgba(255,0,0,0.2),transparent_70%)]">
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-danger font-mono font-bold text-lg mb-2">Static RAG</div>
+                                    <div class="text-slate-500 text-xs">Always Retrieve -> Always Append</div>
+                                    <div class="mt-4 flex gap-2 justify-center opacity-50">
+                                        <div class="w-8 h-8 rounded-full bg-slate-700"></div>
+                                        <div class="w-8 h-8 rounded-full bg-slate-700"></div>
+                                        <div class="w-8 h-8 rounded-full bg-slate-700"></div>
+                                    </div>
+                                    <div class="mt-2 text-danger text-xs font-bold">Infinite Growth / Pollution</div>
+                                    <div class="mt-4 pt-4 border-t border-white/5 w-full px-4">
+                                        <div class="text-xs text-slate-500 mb-1">vs geDIG</div>
+                                        <div class="flex justify-between items-center text-[10px] font-mono">
+                                            <span class="text-slate-400">LLM $\to$ Retriever $\to$</span>
+                                            <span
+                                                class="px-1 py-0.5 rounded bg-accent/10 text-accent border border-accent/20">Gauge
+                                                $\mathcal{F}$</span>
+                                            <span class="text-slate-400">$\to$ [Accept/Reject]</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="order-1 md:order-2">
+                        <div class="text-accent font-mono text-sm mb-2">01. THE PROBLEM</div>
+                        <h3 class="text-2xl font-bold text-white mb-4">Blind Accumulation</h3>
+                        <p class="text-slate-400 leading-relaxed mb-4">
+                            Static RAG systems lack a norm for rejection. They accumulate noise, redundancies, and
+                            contradictions, leading to performance degradation over time (The "Context Window" trap).
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <div class="text-success font-mono text-sm mb-2">02. THE SOLUTION</div>
+                        <h3 class="text-2xl font-bold text-white mb-4">One-Gauge Control ($\mathcal{F}$)</h3>
+                        <p class="text-slate-400 leading-relaxed mb-4">
+                            We unified Structural Cost (Graph Edit Distance) and Information Gain (Entropy + Topology)
+                            into a single dimensionless, scale-invariant scalar.
+                        </p>
+                        <ul class="space-y-3 text-slate-400 text-sm">
+                            <li class="flex items-start gap-3">
+                                <span class="w-1.5 h-1.5 bg-success rounded-full mt-2"></span>
+                                <span><strong>$\Delta EPC$:</strong> Cost of wiring. Penalizes complexity.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="w-1.5 h-1.5 bg-purple rounded-full mt-2"></span>
+                                <span><strong>$\Delta H$:</strong> Entropy reduction. Rewards order.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="w-1.5 h-1.5 bg-orange rounded-full mt-2"></span>
+                                <span><strong>$\Delta \beta_1$:</strong> Topology change. Rewards structural insight (loop formation/removal).</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="bg-panel border border-white/5 rounded-xl p-1 relative">
+                            <div
+                                class="aspect-[4/3] bg-bg rounded-lg relative overflow-hidden flex items-center justify-center">
+                                <div
+                                    class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.2),transparent_70%)]">
+                                </div>
+                                <div class="text-3xl font-bold font-mono text-white">
+                                    $\mathcal{F} < \theta$ </div>
+                                        <div
+                                            class="absolute bottom-8 text-success text-xs font-bold uppercase tracking-widest">
+                                            Accept</div>
+                                        <div
+                                            class="absolute top-8 text-danger text-xs font-bold uppercase tracking-widest">
+                                            Reject</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-12 items-start">
+                        <div>
+                            <div class="text-slate-500 font-mono text-sm mb-2">03. WHY BOTH</div>
+                            <h3 class="text-2xl font-bold text-white mb-4">Why Three Terms, Together</h3>
+                            <p class="text-slate-400 leading-relaxed">
+                                Metric alone cannot detect loops; measure alone cannot detect shortcuts;
+                                topology alone cannot measure cost. F evaluates all three to decide when to restructure.
+                            </p>
+                            <div class="mt-6 bg-bg border border-white/10 rounded-xl p-4">
+                                <div class="text-[11px] text-slate-500 uppercase tracking-wider mb-3">Quick Comparison
+                                </div>
+                                <table class="w-full text-left text-xs text-slate-400">
+                                    <thead class="text-[11px] uppercase tracking-wider text-slate-500">
+                                        <tr>
+                                            <th class="py-2">Method</th>
+                                            <th class="py-2">Probability</th>
+                                            <th class="py-2">Graph</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-white/5">
+                                        <tr>
+                                            <td class="py-2 text-slate-300">BM25 / Contriever</td>
+                                            <td class="py-2 text-success">Yes</td>
+                                            <td class="py-2 text-slate-500">No</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2 text-slate-300">GraphRAG</td>
+                                            <td class="py-2 text-slate-500">No</td>
+                                            <td class="py-2 text-success">Yes</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2 text-slate-300 font-bold">geDIG</td>
+                                            <td class="py-2 text-success font-bold">Yes</td>
+                                            <td class="py-2 text-success font-bold">Yes</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div>
+                            <details class="group bg-bg border border-white/10 rounded-xl p-4">
+                                <summary
+                                    class="cursor-pointer text-sm font-semibold text-slate-200 flex items-center justify-between">
+                                    <span>Rationale in the paper (expand)</span>
+                                    <span class="text-[11px] text-slate-500 group-open:hidden">Details</span>
+                                    <span class="text-[11px] text-slate-500 hidden group-open:inline">Close</span>
+                                </summary>
+                                <div class="mt-3 text-xs text-slate-400 leading-relaxed space-y-3">
+                                    <p>
+                                        geDIG measures structural cost (graph edit distance) and probabilistic gain
+                                        (entropy reduction + shortcut effect) in one gauge. This blocks false positives
+                                        that look structured but stay uncertain, and avoids redundant retrievals that
+                                        look
+                                        probable but add no structure.
+                                    </p>
+                                    <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/raw/main/docs/paper/geDIG_onegauge_improved_v6.pdf"
+                                        target="_blank" class="text-accent hover:underline">See the full explanation
+                                        (PDF,
+                                        §Why Both)</a>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-12 items-center">
+                        <div class="order-2 md:order-1">
+                            <div class="bg-panel border border-white/5 rounded-xl p-8">
+                                <h4 class="text-white font-bold mb-4 border-b border-white/10 pb-2">FEP-MDL Bridge</h4>
+                                <div class="space-y-4 text-sm font-mono">
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-400">0-hop (AG)</span>
+                                        <span class="text-danger">Ambiguity / Error</span>
+                                        <span class="text-slate-500">→ FEP</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-400">Multi-hop (DG)</span>
+                                        <span class="text-success">Compression / Insight</span>
+                                        <span class="text-slate-500">→ MDL</span>
+                                    </div>
+                                    <div class="text-center pt-4 text-xs text-slate-500 italic">
+                                        "Operational Correspondence"
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="order-1 md:order-2">
+                            <div class="text-slate-500 font-mono text-sm mb-2">04. THEORETICAL BACKBONE</div>
+                            <h3 class="text-2xl font-bold text-white mb-4">Bridging FEP & MDL</h3>
+                            <p class="text-slate-400 leading-relaxed mb-4">
+                                geDIG provides an <strong>operational correspondence</strong> between the Free Energy
+                                Principle (minimizing surprise) and Minimum Description Length (maximizing compression).
+                            </p>
+                            <p class="text-slate-400 leading-relaxed">
+                                0-hop detects immediate prediction error (FEP), while Multi-hop validates global
+                                compression (MDL).
+                            </p>
+                            <p class="mt-4 text-xs text-slate-500 italic">
+                                *For readers familiar with FEP/MDL: This is an operational analogy, not a formal proof
+                                of equivalence.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </section>
+
+    <section id="resources" class="py-24 bg-panel/30 border-t border-white/5">
+        <div class="max-w-5xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-white">Downloads, Code & Reproducibility</h2>
+                <p class="mt-2 text-slate-400">Draft papers, code entrypoints, and maze reproduction commands.</p>
+            </div>
+
+            <!-- HF Demo Card -->
+            <div
+                class="mb-10 bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-xl p-8 hover:border-purple-500/50 transition group">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="flex-1">
+                        <span
+                            class="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-1 block">Interactive</span>
+                        <h3 class="text-2xl font-bold text-white mb-2">Live Demo with Knowledge Graph Visualization</h3>
+                        <p class="text-slate-400 text-sm mb-4">
+                            See geDIG in action on HotPotQA questions. Watch how the knowledge graph evolves
+                            before and after retrieval, and understand why geDIG accepts or rejects new information.
+                        </p>
+                        <ul class="text-xs text-slate-400 space-y-1 mb-4">
+                            <li class="flex items-center gap-2"><span class="text-purple-400">✓</span> Before/After
+                                Knowledge Graph comparison</li>
+                            <li class="flex items-center gap-2"><span class="text-purple-400">✓</span> Real-time F-score
+                                calculation</li>
+                            <li class="flex items-center gap-2"><span class="text-purple-400">✓</span> AG/DG gate status
+                                visualization</li>
+                        </ul>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <a href="https://huggingface.co/spaces/miyaukaz/gedig-demo" target="_blank"
+                            class="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white font-bold transition shadow-lg hover:shadow-purple-500/25 text-lg">
+                            <span class="text-2xl">🧠</span>
+                            Try on Hugging Face
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
+                                </path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 mb-10">
+                <div class="bg-bg border border-white/10 rounded-xl p-8 hover:border-accent/30 transition group">
+                    <div class="flex items-start justify-between mb-6">
+                        <div>
+                            <span class="text-[10px] font-bold text-accent uppercase tracking-wider mb-1 block">For
+                                Researchers</span>
+                            <h3 class="text-xl font-bold text-white group-hover:text-accent transition">Research Paper
+                            </h3>
+                            <p class="text-sm text-slate-400 mt-2">"geDIG: Gauge what Knowledge Graph needs"</p>
+                            <span class="inline-block mt-3 text-xs bg-white/5 text-slate-400 px-2 py-1 rounded">v6.0
+                                Draft</span>
+                        </div>
+                        <svg class="w-8 h-8 text-slate-600 group-hover:text-accent transition" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/raw/main/docs/paper/geDIG_onegauge_improved_v6.pdf"
+                            target="_blank"
+                            class="flex items-center justify-center gap-2 py-3 rounded-lg bg-white/5 hover:bg-accent hover:text-bg text-slate-300 font-bold text-sm transition">
+                            <span>JA Version (v6)</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                        </a>
+                        <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/raw/main/docs/paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf"
+                            target="_blank"
+                            class="flex items-center justify-center gap-2 py-3 rounded-lg border border-white/10 hover:border-white/40 text-slate-400 hover:text-white font-medium text-sm transition">
+                            <span>EN Version (v6)</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                        </a>
+                        <a href="images/gedig_unified_gauge_ja_landing.pdf" target="_blank"
+                            class="flex items-center justify-center gap-2 py-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 hover:text-white font-medium text-sm transition col-span-2">
+                            <span>JA Overview Slide (Landing PDF)</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-bg border border-white/10 rounded-xl p-8 hover:border-white/30 transition group">
+                    <div class="flex items-start justify-between mb-6">
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">For
+                                Engineers</span>
+                            <h3 class="text-xl font-bold text-white">Source Code</h3>
+                            <p class="text-sm text-slate-400 mt-2">miyauchikazuyoshi/InsightSpike-AI</p>
+                            <p class="text-xs text-slate-500 mt-3">Brain-Inspired Multi-Agent Architecture for “Spike of
+                                Insight”</p>
+                        </div>
+                        <svg class="w-8 h-8 text-slate-600 group-hover:text-white transition" fill="currentColor"
+                            viewBox="0 0 24 24">
+                            <path fill-rule="evenodd"
+                                d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <div class="space-y-3">
+                        <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI" target="_blank"
+                            class="block text-sm text-accent hover:underline">View Repository</a>
+                        <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/tree/main/experiments"
+                            target="_blank" class="block text-sm text-slate-400 hover:text-white hover:underline">Browse
+                            Experiments & Logs</a>
+                        <div class="mt-4 text-[11px] text-slate-400 font-mono">
+                            <p class="mb-1 text-slate-300 uppercase tracking-wider text-[10px]">Quick Start</p>
+                            <p><span class="text-slate-500">Install:</span> <code
+                                    class="bg-black/40 px-1 py-0.5 rounded border border-white/5">pip install -e .</code>
+                            </p>
+                            <p class="mt-1"><span class="text-slate-500">Test:</span> <code
+                                    class="bg-black/40 px-1 py-0.5 rounded border border-white/5">make test</code>
+                            </p>
+                            <p class="mt-1"><span class="text-slate-500">Maze:</span> <code
+                                    class="bg-black/40 px-1 py-0.5 rounded border border-white/5">.venv/bin/python3 experiments/maze/run_experiment_query.py --help</code>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 mt-4 mb-10">
+                <div class="bg-bg border border-white/10 rounded-xl p-6">
+                    <p class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Reproduce (Maze 15×15)</p>
+                    <div class="space-y-2 font-mono text-[11px] text-slate-300">
+                        <p class="text-slate-400 mb-1">Requires .venv with networkx, numpy, etc.</p>
+                        <p><span class="text-slate-500">Three-layer search (12 seeds):</span></p>
+                        <p class="bg-black/40 px-2 py-1 rounded border border-white/5">.venv/bin/python3
+                            experiments/maze/run_experiment_query.py --maze-size 15 --max-steps 250 --seeds 12
+                            --search-mode threelayer --vector-mode extended</p>
+                        <p class="mt-2"><span class="text-slate-500">Result:</span> 98% goal-reach rate (baseline ~60%)</p>
+                        <p class="mt-2 text-[10px] text-slate-500">See <code
+                                class="bg-black/40 px-1 py-0.5 rounded border border-white/5">experiments/maze/README.md</code>
+                            for full CLI reference.</p>
+                    </div>
+                </div>
+                <div class="bg-bg border border-white/10 rounded-xl p-6">
+                    <p class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Open Research Questions</p>
+                    <div class="text-sm text-slate-300 space-y-2">
+                        <p class="mb-3 text-accent font-bold">
+                            We welcome collaboration on these specific questions:
+                        </p>
+                        <ul class="list-disc list-inside text-slate-400 text-[13px] space-y-2">
+                            <li>
+                                <strong class="text-slate-300">F-trajectory reproduction:</strong><br>
+                                <span class="pl-4 block text-slate-500">Does F show structured layer-wise behavior on untested models?</span>
+                            </li>
+                            <li>
+                                <strong class="text-slate-300">&beta;&#8321; vs SP as structural term:</strong><br>
+                                <span class="pl-4 block text-slate-500">When does topological &Delta;&beta;&#8321; outperform metric &Delta;SP? TDA expertise welcome.</span>
+                            </li>
+                            <li>
+                                <strong class="text-slate-300">Scaling to 70B+ models:</strong><br>
+                                <span class="pl-4 block text-slate-500">We hypothesize (&lambda;, &gamma;) converge at sufficient scale. GPU resources needed.</span>
+                            </li>
+                        </ul>
+                        <p class="text-[13px] text-slate-400 mt-4">
+                            How to engage: open an Issue, PR, or DM on X:
+                            <span class="font-mono text-slate-200">@kazuyoshim5436</span>.
+                        </p>
+                        <p class="text-[10px] text-slate-500 mt-3">
+                            See also:
+                            <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/docs/gedig_spec.md"
+                                class="text-accent hover:underline">geDIG spec</a>,
+                            <a href="research/thinking/matchstick_figure_v2_en.html"
+                                class="text-accent hover:underline">Matchstick Figure</a>,
+                            <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/experiments/maze/README.md"
+                                class="text-accent hover:underline">Maze experiments</a>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 max-w-3xl mx-auto">
+                <p class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Citation (BibTeX)</p>
+                <div
+                    class="bg-black/40 p-4 rounded-lg border border-white/5 font-mono text-xs text-slate-400 overflow-x-auto select-all">
+                    @article{miyauchi2025gedig,
+                    title={geDIG: Gauge what Knowledge Graph needs},
+                    author={Miyauchi, Kazuyoshi},
+                    year={2025},
+                    journal={GitHub repository},
+                    url={https://github.com/miyauchikazuyoshi/InsightSpike-AI}
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-bg pt-16 pb-16 border-t border-white/10">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="mb-8">
+                <p class="text-slate-500 font-medium">Kazuyoshi Miyauchi</p>
+                <p class="text-xs text-slate-600 mt-1">Independent AI Researcher</p>
+                <p class="text-[10px] text-slate-500 mt-2 uppercase tracking-[0.16em]">Certain aspects patent pending
+                    (JP 2025-082988, 2025-082989)</p>
+                <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/docs/research/gedig_origin_story.md"
+                   class="inline-block mt-4 text-xs text-slate-500 hover:text-accent transition" target="_blank">
+                    Origin Story: The Journey to Building an AI That Has Insights →
+                </a>
+            </div>
+
+            <div class="flex justify-center gap-10 mb-12">
+                <a href="https://x.com/kazuyoshim5436" target="_blank" class="group flex flex-col items-center gap-2">
+                    <div
+                        class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 group-hover:text-white text-slate-400 transition">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                    </div>
+                    <span class="text-xs text-slate-500 group-hover:text-slate-300">@kazuyoshim5436</span>
+                </a>
+
+                <a href="mailto:miyauchikazuyoshi@gmail.com" class="group flex flex-col items-center gap-2">
+                    <div
+                        class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 group-hover:text-white text-slate-400 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <span class="text-xs text-slate-500 group-hover:text-slate-300">Email</span>
+                </a>
+
+                <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI" target="_blank"
+                    class="group flex flex-col items-center gap-2">
+                    <div
+                        class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 group-hover:text-white text-slate-400 transition">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path fill-rule="evenodd"
+                                d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <span class="text-xs text-slate-500 group-hover:text-slate-300">GitHub</span>
+                </a>
+            </div>
+
+            <p class="text-[10px] text-slate-700">
+                &copy; 2025 Insight Spike-AI. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // --- UTILS ---
+        const rng = (() => { let s = 1234567; return () => (s = (1103515245 * s + 12345) >>> 0) / 0xffffffff; })();
+        function randn(mu = 0, sd = 1) { let u = 0, v = 0; while (u === 0) u = rng(); while (v === 0) v = rng(); return mu + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v) }
+        function rbfSim(p, q, s) { const dx = p.x - q.x, dy = p.y - q.y; const d2 = dx * dx + dy * dy; return Math.exp(-d2 / (2 * s * s)) }
+        function toScreen(p) { return { x: (p.x + 3) / 6 * 1000, y: (1 - (p.y + 1.5) / 3) * 700 } }
+        function svgToGraph(sx, sy) { const rect = document.getElementById('stage').getBoundingClientRect(); const xRel = sx / rect.width; const yRel = sy / rect.height; return { x: (xRel * 6) - 3, y: (1 - yRel) * 3 - 1.5 }; }
+
+        // --- PARAMS ---
+        let SIGMA = 0.9, THR = 0.60, KHOP = 3;
+        let LAYOUT = 'clusters', R_DONUT = 2.2, JITTER = 0.25;
+        let CMAX_MODE = 'nC2';
+        let LAMBDA = 0.50;
+        let nodes = [], edges = [], addedEdges = new Set(), centerId = null;
+
+        // --- METRICS LOGIC ---
+        function ensureSet(x) { return (x instanceof Set) ? x : new Set(); }
+        function key(a, b) { if (a == null || b == null) return `${a}-${b}`; return (a < b) ? `${a}-${b}` : `${b}-${a}`; }
+
+        function avgSPL(Ns, Es) {
+            if (Ns.length < 2) return NaN;
+            const adj = new Map(); Ns.forEach(n => adj.set(n.id, []));
+            for (const e of Es) { const a = adj.get(e.a), b = adj.get(e.b); if (a) a.push(e.b); if (b) b.push(e.a); }
+            const seen = new Set(), comps = [];
+            for (const n of Ns) {
+                if (seen.has(n.id)) continue; const q = [n.id]; const comp = new Set([n.id]); seen.add(n.id);
+                while (q.length) { const v = q.shift(); for (const w of adj.get(v) || []) { if (!seen.has(w)) { seen.add(w); q.push(w); comp.add(w); } } }
+                comps.push(comp);
+            }
+            let total = 0, weight = 0;
+            for (const comp of comps) {
+                if (comp.size < 2) continue; const compArr = [...comp]; let tt = 0, cc = 0;
+                for (const s of compArr) {
+                    const dist = new Map(); dist.set(s, 0); const q = [s];
+                    while (q.length) { const v = q.shift(); for (const w of adj.get(v) || []) { if (!dist.has(w)) { dist.set(w, dist.get(v) + 1); q.push(w); } } }
+                    for (const t of compArr) { if (t !== s && dist.has(t)) { tt += dist.get(t); cc++; } }
+                }
+                if (cc > 0) { total += (tt / cc) * comp.size; weight += comp.size; }
+            }
+            return weight > 0 ? total / weight : NaN;
+        }
+
+        function nodesOfEgo(center, k, Ns, Es) {
+            const adj = new Map(); Ns.forEach(n => adj.set(n.id, [])); for (const e of Es) { const a = adj.get(e.a), b = adj.get(e.b); if (a) a.push(e.b); if (b) b.push(e.a); }
+            const dist = new Map(); dist.set(center, 0); const q = [center];
+            while (q.length) { const v = q.shift(); if ((dist.get(v) || 0) >= k) continue; for (const w of adj.get(v) || []) { if (!dist.has(w)) { dist.set(w, (dist.get(v) || 0) + 1); q.push(w); } } }
+            return new Set([...dist.entries()].map(([id]) => id));
+        }
+
+        function induced(ids, Ns, Es) { const set = new Set(ids); return { Ns: Ns.filter(n => set.has(n.id)), Es: Es.filter(e => set.has(e.a) && set.has(e.b)) }; }
+
+        function angleEntropy(centerId, Ns, Es, binN = 24) {
+            const center = Ns.find(n => n.id === centerId); if (!center) return null;
+            const targets = Ns.filter(n => n.id !== centerId); if (targets.length === 0) return 0;
+            const hist = new Array(binN).fill(0);
+            for (const q of targets) { const ang = Math.atan2(q.y - center.y, q.x - center.x); let k = Math.floor(((ang + Math.PI) / (2 * Math.PI)) * binN); if (k < 0) k = 0; if (k >= binN) k = binN - 1; hist[k]++; }
+            const total = hist.reduce((a, b) => a + b, 0); let H = 0; for (const c of hist) { if (c > 0) { const p = c / total; H += -p * Math.log(p); } }
+            return H;
+        }
+
+        function neighborInfo(centerId, Ns, Es, sigma = SIGMA) {
+            const center = Ns.find(n => n.id === centerId); if (!center) return null;
+            const adj = new Map(); Ns.forEach(n => adj.set(n.id, [])); for (const e of Es) { const a = adj.get(e.a), b = adj.get(e.b); if (a) a.push(e.b); if (b) b.push(e.a); }
+            const nbrs = adj.get(centerId) || [];
+            if (nbrs.length === 0) return 0;
+            const EPS = 1e-9; let sum = 0;
+            for (const nb of nbrs) { const q = Ns.find(n => n.id === nb); if (!q) continue; const dx = center.x - q.x, dy = center.y - q.y; const sim = Math.exp(-(dx * dx + dy * dy) / (2 * sigma * sigma)); sum += -Math.log(Math.max(sim, EPS)); }
+            return sum / nbrs.length;
+        }
+
+        function gedNorm(subB, subA, mode) {
+            const eKey = e => (e && Number.isInteger(e.a) && Number.isInteger(e.b)) ? (e.a < e.b ? `${e.a}-${e.b}` : `${e.b}-${e.a}`) : '';
+            const Eb = new Set(subB.Es.map(eKey).filter(Boolean)), Ea = new Set(subA.Es.map(eKey).filter(Boolean));
+            let diff = 0; Ea.forEach(k => { if (!Eb.has(k)) diff++ }); Eb.forEach(k => { if (!Ea.has(k)) diff++ });
+            const GED = diff / 2;
+            let Cmax = 1;
+            if (mode === 'nC2') { const idSet = new Set([...subB.Ns.map(n => n.id), ...subA.Ns.map(n => n.id)]); const n = idSet.size; Cmax = Math.max(1, n * (n - 1) / 2); }
+            else { const unionE = new Set([...Eb, ...Ea]); Cmax = Math.max(1, unionE.size); }
+            return GED / Cmax;
+        }
+
+        function topKNeighbors(pt, k = 3) {
+            const arr = nodes.filter(n => n.kind === 'base').map(n => ({ id: n.id, s: rbfSim(pt, n, SIGMA) }));
+            arr.sort((a, b) => b.s - a.s);
+            return arr.slice(0, k);
+        }
+
+        // --- GRAPH MANIPULATION ---
+        function resetGraph() {
+            nodes = []; edges = []; addedEdges = ensureSet(addedEdges); addedEdges.clear(); centerId = null;
+            const nBase = 70;
+            if (LAYOUT === 'clusters') {
+                const n1 = 30, n2 = 30, nz = 10;
+                for (let i = 0; i < n1; i++)nodes.push({ id: nodes.length, x: randn(-1.5, 0.4), y: randn(0.0, 0.2), kind: 'base' });
+                for (let i = 0; i < n2; i++)nodes.push({ id: nodes.length, x: randn(1.5, 0.4), y: randn(0.2, 0.25), kind: 'base' });
+                for (let i = 0; i < nz; i++) nodes.push({ id: nodes.length, x: rng() * 6 - 3, y: (rng() * 3) - 1.5, kind: 'base' });
+            } else if (LAYOUT === 'donut') {
+                for (let i = 0; i < nBase; i++) { const th = rng() * Math.PI * 2; const r = Math.max(0.1, R_DONUT + randn(0, JITTER)); nodes.push({ id: nodes.length, x: r * Math.cos(th), y: r * Math.sin(th), kind: 'base' }) }
+            } else {
+                for (let i = 0; i < nBase; i++)nodes.push({ id: nodes.length, x: rng() * 6 - 3, y: (rng() * 3) - 1.5, kind: 'base' });
+            }
+            rebuildEdges();
+            updateUI(null);
+        }
+
+        function rebuildEdges() {
+            const base = nodes.filter(n => n.kind === 'base'); edges = []; addedEdges = ensureSet(addedEdges); addedEdges.clear();
+            for (let i = 0; i < base.length; i++)for (let j = i + 1; j < base.length; j++) {
+                if (rbfSim(base[i], base[j], SIGMA) > THR) edges.push({ a: base[i].id, b: base[j].id });
+            }
+            if (centerId != null) {
+                const pt = nodes.find(n => n.id === centerId);
+                if (pt) { topKNeighbors(pt, 3).forEach(o => { if (o && Number.isInteger(o.id)) { edges.push({ a: centerId, b: o.id }); addedEdges.add(key(centerId, o.id)); } }); }
+            }
+            draw();
+        }
+
+        function addCenter(pt) {
+            if (centerId != null) return; // Only one query at a time for demo
+            const id = nodes.length; nodes.push({ id, x: pt.x, y: pt.y, kind: 'center' }); centerId = id;
+
+            const kn = topKNeighbors(pt, 3);
+            for (const o of kn) { if (o && Number.isInteger(o.id)) { edges.push({ a: id, b: o.id }); addedEdges.add(key(id, o.id)); } }
+
+            calculateMetricsFull(id);
+            draw();
+        }
+
+        // --- REAL METRICS CALC ---
+        function calculateMetricsFull(cid) {
+            const baseNodes = nodes.slice(0, -1);
+            const baseEdges = edges.filter(e => e.a !== cid && e.b !== cid);
+            const pt = nodes.find(n => n.id === cid);
+            const kn = topKNeighbors(pt, 3);
+            const rep = (kn[0] && Number.isInteger(kn[0].id)) ? kn[0].id : (baseNodes[0] ? baseNodes[0].id : null);
+
+            let minGeDIG = 999;
+            let bestK = 0;
+            let metrics = {};
+
+            // Evaluate k=0 to 3
+            for (let k = 0; k <= 3; k++) {
+                const kForEdges = k + 1;
+                const setB = nodesOfEgo(rep, kForEdges, baseNodes, baseEdges);
+                const setA = nodesOfEgo(cid, kForEdges, nodes, edges);
+                const subB = induced(setB, baseNodes, baseEdges);
+                const subA = induced(setA, nodes, edges);
+
+                const SPLb = avgSPL(subB.Ns, subB.Es);
+                const SPLa = avgSPL(subA.Ns, subA.Es);
+                // Delta SP: Positive if path shortens
+                const dSPrel = (Number.isFinite(SPLb) && Number.isFinite(SPLa)) ? ((SPLb - SPLa) / Math.max(SPLb, 1e-6)) : 0;
+
+                const gedBase = gedNorm(subB, subA, CMAX_MODE);
+                const gedn = gedBase; // Simplify for viz: EPC is mainly structure cost
+
+                // Delta H
+                let Hb, Ha;
+                if (k === 0) { Hb = neighborInfo(rep, subB.Ns, subB.Es, SIGMA); Ha = neighborInfo(cid, subA.Ns, subA.Es, SIGMA); }
+                else { Hb = angleEntropy(rep, subB.Ns, subB.Es, 24); Ha = angleEntropy(cid, subA.Ns, subA.Es, 24); }
+                const dHn = (Hb != null && Ha != null) ? ((Hb - Ha) / Math.max(Hb, 1e-6)) : 0;
+
+                // IG = dH + dSP
+                const dIGn = dHn + dSPrel;
+
+                const ge = gedn - LAMBDA * dIGn;
+
+                if (ge < minGeDIG) {
+                    minGeDIG = ge;
+                    bestK = k;
+                    metrics = { gedn, dh: dHn, dsp: dSPrel, dign: dIGn, geDIG: ge };
+                }
+            }
+
+            updateUI(metrics);
+            showStatusBasedOnScore(metrics.geDIG);
+        }
+
+        // --- VISUALS ---
+        const gEdges = document.getElementById('edges'), gNodes = document.getElementById('nodes');
+        const svgEl = document.getElementById('svg');
+
+        function draw() {
+            gEdges.innerHTML = '';
+
+            // BFS for coloring
+            let hopClass = new Map();
+            if (centerId != null) {
+                const adj = new Map(); nodes.forEach(n => adj.set(n.id, [])); for (const e of edges) { const a = adj.get(e.a), b = adj.get(e.b); if (a) a.push(e.b); if (b) b.push(e.a); }
+                const dist = new Map(); dist.set(centerId, 0); const q = [centerId];
+                while (q.length) { const v = q.shift(); if ((dist.get(v) || 0) >= 3) continue; for (const w of adj.get(v) || []) { if (!dist.has(w)) { dist.set(w, (dist.get(v) || 0) + 1); q.push(w); } } }
+                nodes.forEach(n => { const d = dist.get(n.id); if (d != null) hopClass.set(n.id, 'hop' + d); });
+            }
+
+            for (const e of edges) {
+                const A = nodes[e.a], B = nodes[e.b]; if (!A || !B) continue;
+                const p = toScreen(A), q = toScreen(B);
+                const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                ln.setAttribute('x1', p.x); ln.setAttribute('y1', p.y); ln.setAttribute('x2', q.x); ln.setAttribute('y2', q.y);
+
+                let cls = 'edge';
+                const da = hopClass.get(e.a), db = hopClass.get(e.b);
+                if (da && db) {
+                    // Color edge by min hop
+                    const ha = parseInt(da.replace('hop', '')), hb = parseInt(db.replace('hop', ''));
+                    cls += ' hop' + Math.min(ha, hb);
+                }
+                if (ensureSet(addedEdges).has(key(e.a, e.b))) cls += ' added';
+
+                ln.setAttribute('class', cls);
+                gEdges.appendChild(ln);
+            }
+
+            gNodes.innerHTML = '';
+            nodes.forEach(n => {
+                const P = toScreen(n);
+                const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                c.setAttribute('cx', P.x); c.setAttribute('cy', P.y);
+                let cls = 'node';
+                const hc = hopClass.get(n.id); if (hc) cls += ' ' + hc;
+                if (n.kind === 'base') cls += ' base'; if (n.kind === 'center') cls += ' center';
+                c.setAttribute('class', cls);
+                gNodes.appendChild(c);
+            });
+        }
+
+        function updateUI(m) {
+            const elEpc = document.getElementById('val-epc');
+            const elIg = document.getElementById('val-ig');
+            const elH = document.getElementById('val-h');
+            const elSp = document.getElementById('val-sp');
+            const elGedig = document.getElementById('val-gedig');
+
+            const barEpc = document.getElementById('bar-epc');
+            const barIg = document.getElementById('bar-ig');
+            const barH = document.getElementById('bar-h');
+            const barSp = document.getElementById('bar-sp');
+
+            if (!m) {
+                [elEpc, elIg, elH, elSp, elGedig].forEach(e => e.textContent = '--');
+                [barEpc, barIg, barH, barSp].forEach(b => b.style.width = '0%');
+                document.getElementById('status-badge').textContent = "IDLE";
+                document.getElementById('status-badge').className = "px-2 py-0.5 rounded bg-slate-800 text-slate-500";
+                return;
+            }
+
+            elEpc.textContent = m.gedn.toFixed(2);
+            elIg.textContent = m.dign.toFixed(2);
+            elH.textContent = m.dh.toFixed(2);
+            elSp.textContent = m.dsp.toFixed(2);
+            elGedig.textContent = m.geDIG.toFixed(3);
+
+            barEpc.style.width = `${Math.min(Math.max(m.gedn * 100, 0), 100)}%`;
+            barIg.style.width = `${Math.min(Math.max(m.dign * 100, 0), 100)}%`;
+            // Normalize H/SP for visualization bars (approx scale)
+            barH.style.width = `${Math.min(Math.max(m.dh * 100 + 20, 0), 100)}%`;
+            barSp.style.width = `${Math.min(Math.max(m.dsp * 100, 0), 100)}%`;
+
+            // Text color logic
+            elGedig.className = "text-3xl font-bold font-mono transition-colors " +
+                (m.geDIG < 0.3 ? "text-success" : (m.geDIG > 0.5 ? "text-danger" : "text-warn"));
+        }
+
+        function showStatusBasedOnScore(score) {
+            const overlay = document.getElementById('status-overlay');
+            const txt = document.getElementById('status-text');
+            const dot = document.getElementById('status-dot');
+            const stage = document.getElementById('vis-container');
+            const badge = document.getElementById('status-badge');
+
+            let type = 'warn', msg = 'PENDING';
+            if (score < 0.3) { type = 'success'; msg = 'INSIGHT FOUND (DG)'; }
+            else if (score > 0.5) { type = 'danger'; msg = 'AMBIGUITY (AG)'; }
+
+            // Overlay
+            txt.textContent = msg;
+            txt.className = 'font-bold font-mono text-sm tracking-wide ' + (type === 'success' ? 'text-success' : (type === 'danger' ? 'text-danger' : 'text-warn'));
+            dot.className = 'w-2 h-2 rounded-full ' + (type === 'success' ? 'bg-success' : (type === 'danger' ? 'bg-danger' : 'bg-warn'));
+
+            overlay.style.opacity = '1';
+            overlay.style.transform = 'translateY(0)';
+
+            stage.classList.remove('insight-active', 'ambiguity-active');
+            void stage.offsetWidth;
+            if (type !== 'warn') stage.classList.add(type === 'success' ? 'insight-active' : 'ambiguity-active');
+
+            // Badge
+            badge.textContent = msg;
+            badge.className = "px-2 py-0.5 rounded " + (type === 'success' ? 'bg-success/20 text-success' : (type === 'danger' ? 'bg-danger/20 text-danger' : 'bg-warn/20 text-warn'));
+
+            setTimeout(() => {
+                overlay.style.opacity = '0';
+                overlay.style.transform = 'translateY(-10px)';
+            }, 2500);
+        }
+
+        // --- INTERACTIONS ---
+        function playScenario(type) {
+            // Reset and set predefined good seeds
+            centerId = null;
+            if (type === 'ambiguity') {
+                LAYOUT = 'uniform'; resetGraph();
+                setTimeout(() => { addCenter({ x: 0, y: 0 }); }, 600);
+            } else if (type === 'insight') {
+                LAYOUT = 'donut'; resetGraph();
+                setTimeout(() => { addCenter({ x: 0, y: 0 }); }, 600);
+            }
+        }
+
+        // Mouse Interaction
+        const stage = document.getElementById('stage');
+        const guide = document.getElementById('cursor-guide');
+
+        stage.addEventListener('mousemove', (e) => {
+            if (centerId !== null) { guide.style.opacity = 0; return; }
+            const rect = stage.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            guide.style.left = x + 'px';
+            guide.style.top = y + 'px';
+            guide.style.opacity = 1;
+        });
+
+        stage.addEventListener('click', (e) => {
+            if (centerId !== null) return;
+            const rect = stage.getBoundingClientRect();
+            const p = svgToGraph(e.clientX - rect.left, e.clientY - rect.top); // Need svgToGraph
+            addCenter(p);
+        });
+
+        function svgToGraph(sx, sy) {
+            const rect = stage.getBoundingClientRect(); // 100% width/height logic
+            // Map screen (0..width, 0..height) to graph coords (-3..3, 1.5..-1.5)
+            // Note: SVG viewBox is 1000x700
+            // toScreen logic: x: (p.x+3)/6*1000
+
+            // Inverse:
+            // sx_svg = sx / rect.width * 1000
+            // sy_svg = sy / rect.height * 700
+
+            const svgX = (sx / rect.width) * 1000;
+            const svgY = (sy / rect.height) * 700;
+
+            const gx = (svgX / 1000) * 6 - 3;
+            const gy = (1 - (svgY / 700)) * 3 - 1.5;
+            return { x: gx, y: gy };
+        }
+
+        document.getElementById('btnReset').addEventListener('click', () => { LAYOUT = 'clusters'; resetGraph(); });
+        document.getElementById('btnAddCenter').addEventListener('click', () => addCenter({ x: 0, y: -0.2 }));
+
+        // Init
+        resetGraph();
+        setTimeout(() => playScenario('insight'), 1000);
+    </script>
+
+    <script>
+        // Hero background: geDIG-driven "slime mold" animation.
+        // The motion is controlled by the same equation used in the paper:
+        //   F = ΔEPC_norm − λ(ΔH_norm + γΔSP_rel)
+        // This is an illustrative (not biological) visualization.
+        (() => {
+            const canvas = document.getElementById('slime-bg');
+            if (!canvas) return;
+
+            const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+            if (prefersReduced) return;
+
+            const ctx = canvas.getContext('2d', { alpha: true });
+            if (!ctx) return;
+
+            // HUD elements (optional; desktop only).
+            const hud = {
+                state: document.getElementById('slime-state'),
+                f: document.getElementById('slime-val-f'),
+                epc: document.getElementById('slime-val-epc'),
+                h: document.getElementById('slime-val-h'),
+                sp: document.getElementById('slime-val-sp'),
+                bar: document.getElementById('slime-bar'),
+            };
+
+            let cssW = 1, cssH = 1, dpr = 1;
+            let simW = 0, simH = 0;
+            let trail = null;
+            let trailNext = null;
+            let img = null;
+            let imgData = null;
+            let imgBuf = null;
+            let agents = [];
+            let foods = [];
+            let raf = 0;
+
+            const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+            const rnd = (a = 0, b = 1) => a + Math.random() * (b - a);
+            const EPS = 1e-9;
+
+            // geDIG parameters (visualization-only tuning).
+            const G = {
+                lambda: 0.26,
+                gamma: 0.90,
+                thetaAG: 0.18,
+                thetaDG: -0.08,
+                lookahead: 7, // multi-hop proxy (bigger => stronger DG signal)
+            };
+            let userLookahead = null;
+
+            const controls = {
+                lambda: document.getElementById('slime-lambda'),
+                gamma: document.getElementById('slime-gamma'),
+                thetaAG: document.getElementById('slime-theta-ag'),
+                thetaDG: document.getElementById('slime-theta-dg'),
+                hops: document.getElementById('slime-hops'),
+                lambdaVal: document.getElementById('slime-lambda-val'),
+                gammaVal: document.getElementById('slime-gamma-val'),
+                thetaAGVal: document.getElementById('slime-theta-ag-val'),
+                thetaDGVal: document.getElementById('slime-theta-dg-val'),
+                hopsVal: document.getElementById('slime-hops-val'),
+                reroll: document.getElementById('slime-reroll'),
+            };
+
+            function fmtSigned(x, digits = 2) {
+                const s = x >= 0 ? "+" : "";
+                return `${s}${x.toFixed(digits)}`;
+            }
+
+            function syncControls() {
+                if (controls.lambdaVal) controls.lambdaVal.textContent = G.lambda.toFixed(2);
+                if (controls.gammaVal) controls.gammaVal.textContent = G.gamma.toFixed(2);
+                if (controls.thetaAGVal) controls.thetaAGVal.textContent = fmtSigned(G.thetaAG, 2);
+                if (controls.thetaDGVal) controls.thetaDGVal.textContent = fmtSigned(G.thetaDG, 2);
+                if (controls.hopsVal) controls.hopsVal.textContent = String(Math.round(G.lookahead));
+            }
+
+            function bindControls() {
+                if (controls.lambda) {
+                    controls.lambda.value = String(G.lambda);
+                    controls.lambda.addEventListener('input', () => {
+                        G.lambda = clamp(parseFloat(controls.lambda.value || "0"), 0, 1);
+                        syncControls();
+                    });
+                }
+                if (controls.gamma) {
+                    controls.gamma.value = String(G.gamma);
+                    controls.gamma.addEventListener('input', () => {
+                        G.gamma = clamp(parseFloat(controls.gamma.value || "0"), 0, 2);
+                        syncControls();
+                    });
+                }
+                if (controls.thetaAG) {
+                    controls.thetaAG.value = String(G.thetaAG);
+                    controls.thetaAG.addEventListener('input', () => {
+                        G.thetaAG = clamp(parseFloat(controls.thetaAG.value || "0"), -0.2, 0.5);
+                        syncControls();
+                    });
+                }
+                if (controls.thetaDG) {
+                    controls.thetaDG.value = String(G.thetaDG);
+                    controls.thetaDG.addEventListener('input', () => {
+                        G.thetaDG = clamp(parseFloat(controls.thetaDG.value || "0"), -0.5, 0.2);
+                        syncControls();
+                    });
+                }
+                if (controls.hops) {
+                    controls.hops.value = String(G.lookahead);
+                    controls.hops.addEventListener('input', () => {
+                        const v = clamp(parseInt(controls.hops.value || "1", 10) || 1, 1, 12);
+                        userLookahead = v;
+                        G.lookahead = v;
+                        syncControls();
+                    });
+                }
+                if (controls.reroll) {
+                    controls.reroll.addEventListener('click', () => {
+                        rerollWorld();
+                    });
+                }
+
+                syncControls();
+            }
+
+            function sample(arr, x, y) {
+                x = Math.floor(x);
+                y = Math.floor(y);
+                if (x < 0 || y < 0 || x >= simW || y >= simH) return 0;
+                return arr[y * simW + x];
+            }
+
+            function deposit(arr, x, y, v) {
+                x = Math.floor(x);
+                y = Math.floor(y);
+                if (x < 0 || y < 0 || x >= simW || y >= simH) return;
+                arr[y * simW + x] += v;
+            }
+
+            function wrapPoint(p) {
+                let x = p.x, y = p.y;
+                if (x < 0) x += simW;
+                if (x >= simW) x -= simW;
+                if (y < 0) y += simH;
+                if (y >= simH) y -= simH;
+                return { x, y };
+            }
+
+            function nearestFood(x, y) {
+                let best = foods[0] || { x: 0, y: 0 };
+                let bestD2 = Infinity;
+                for (const f of foods) {
+                    const dx = f.x - x, dy = f.y - y;
+                    const d2 = dx * dx + dy * dy;
+                    if (d2 < bestD2) { bestD2 = d2; best = f; }
+                }
+                return best;
+            }
+
+            function distToFood(x, y) {
+                const f = nearestFood(x, y);
+                const dx = f.x - x, dy = f.y - y;
+                return Math.hypot(dx, dy);
+            }
+
+            function entropyAt(x, y, a, sensorDist, sensorAng) {
+                // Directional "optionality" from local trail gradients.
+                const fx = x + Math.cos(a) * sensorDist;
+                const fy = y + Math.sin(a) * sensorDist;
+                const lx = x + Math.cos(a + sensorAng) * sensorDist;
+                const ly = y + Math.sin(a + sensorAng) * sensorDist;
+                const rx = x + Math.cos(a - sensorAng) * sensorDist;
+                const ry = y + Math.sin(a - sensorAng) * sensorDist;
+
+                const w0 = 0.001 + sample(trail, fx, fy);
+                const w1 = 0.001 + sample(trail, lx, ly);
+                const w2 = 0.001 + sample(trail, rx, ry);
+                const s = w0 + w1 + w2;
+                const p0 = w0 / s, p1 = w1 / s, p2 = w2 / s;
+                const H = -(p0 * Math.log(p0 + EPS) + p1 * Math.log(p1 + EPS) + p2 * Math.log(p2 + EPS)) / Math.log(3);
+                return clamp(H, 0, 1);
+            }
+
+            function lookaheadDistance(x, y, a, steps, speed) {
+                let xx = x, yy = y, aa = a;
+                for (let i = 0; i < steps; i++) {
+                    // A tiny steering toward the nearest "food" keeps the pattern legible.
+                    const f = nearestFood(xx, yy);
+                    const at = Math.atan2(f.y - yy, f.x - xx);
+                    const delta = Math.atan2(Math.sin(at - aa), Math.cos(at - aa));
+                    aa += 0.10 * delta;
+
+                    xx += Math.cos(aa) * speed;
+                    yy += Math.sin(aa) * speed;
+                    const wp = wrapPoint({ x: xx, y: yy });
+                    xx = wp.x; yy = wp.y;
+                }
+                return distToFood(xx, yy);
+            }
+
+            function hudUpdate(avg) {
+                if (!hud.f || !hud.state || !hud.bar) return;
+                const { F, dEPC, dH, dSP } = avg;
+
+                let state = "BALANCE";
+                let cls = "text-slate-300";
+                if (F > G.thetaAG) { state = "AG (EXPLORE)"; cls = "text-danger"; }
+                else if (F < G.thetaDG) { state = "DG (COMMIT)"; cls = "text-success"; }
+
+                hud.state.textContent = state;
+                hud.state.className = `text-[11px] font-bold ${cls}`;
+                hud.f.textContent = F.toFixed(3);
+                hud.epc.textContent = dEPC.toFixed(3);
+                hud.h.textContent = dH.toFixed(3);
+                hud.sp.textContent = dSP.toFixed(3);
+
+                // Bar: "progress to DG" (low F => longer fill reaching the green end).
+                const t = clamp((F - (-0.18)) / (0.36), 0, 1); // low F -> 0, high F -> 1
+                const prog = 1 - t;
+                hud.bar.style.width = `${Math.floor(prog * 100)}%`;
+            }
+
+            function toCanvas(x, y) {
+                return { x: (x / simW) * cssW, y: (y / simH) * cssH };
+            }
+
+            function edgeStrength(a, b) {
+                // Average trail intensity sampled along the segment (proxy for "edge existence").
+                const steps = 16;
+                let acc = 0;
+                for (let i = 0; i < steps; i++) {
+                    const t = (steps === 1) ? 0 : i / (steps - 1);
+                    const x = a.x + (b.x - a.x) * t;
+                    const y = a.y + (b.y - a.y) * t;
+                    acc += sample(trail, x, y);
+                }
+                const m = acc / steps;
+                return clamp(m / 12, 0, 1);
+            }
+
+            function drawGraphOverlay() {
+                if (!foods || foods.length === 0 || !trail) return;
+
+                ctx.save();
+                ctx.globalCompositeOperation = 'screen';
+                ctx.lineCap = 'round';
+
+                // Edges (only draw strong connections).
+                for (let i = 0; i < foods.length; i++) {
+                    for (let j = i + 1; j < foods.length; j++) {
+                        const a = foods[i], b = foods[j];
+                        const s = edgeStrength(a, b);
+                        if (s < 0.12) continue;
+                        const A = toCanvas(a.x, a.y);
+                        const B = toCanvas(b.x, b.y);
+                        ctx.globalAlpha = 0.08 + 0.30 * s;
+                        ctx.strokeStyle = 'rgb(34, 211, 238)'; // accent
+                        ctx.lineWidth = 0.6 + 2.6 * s;
+                        ctx.beginPath();
+                        ctx.moveTo(A.x, A.y);
+                        ctx.lineTo(B.x, B.y);
+                        ctx.stroke();
+                    }
+                }
+
+                // Nodes
+                for (let i = 0; i < foods.length; i++) {
+                    const f = foods[i];
+                    const P = toCanvas(f.x, f.y);
+                    ctx.globalAlpha = 0.95;
+                    ctx.shadowBlur = 18;
+                    ctx.shadowColor = 'rgba(250, 204, 21, 0.55)';
+                    ctx.fillStyle = 'rgb(250, 204, 21)'; // amber
+                    ctx.beginPath();
+                    ctx.arc(P.x, P.y, 4.2, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.shadowBlur = 0;
+                    ctx.globalAlpha = 0.55;
+                    ctx.strokeStyle = 'rgba(255,255,255,0.65)';
+                    ctx.lineWidth = 1.0;
+                    ctx.beginPath();
+                    ctx.arc(P.x, P.y, 6.6, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                ctx.restore();
+            }
+
+            function seedFoods(count = 6) {
+                const pad = 12;
+                const minD2 = Math.pow(Math.min(simW, simH) * 0.22, 2);
+                foods = [];
+                let tries = 0;
+                while (foods.length < count && tries < count * 80) {
+                    tries++;
+                    const p = { x: rnd(pad, simW - pad), y: rnd(pad, simH - pad) };
+                    if (foods.every(f => {
+                        const dx = f.x - p.x, dy = f.y - p.y;
+                        return (dx * dx + dy * dy) > minD2;
+                    })) foods.push(p);
+                }
+                if (foods.length < 3) {
+                    foods = [
+                        { x: pad, y: pad },
+                        { x: simW - pad, y: pad },
+                        { x: simW - pad, y: simH - pad },
+                        { x: pad, y: simH - pad },
+                    ];
+                }
+            }
+
+            function spawnAgents(N) {
+                agents = new Array(N).fill(0).map(() => {
+                    const f = foods[Math.floor(Math.random() * foods.length)];
+                    return {
+                        x: f.x + rnd(-6, 6),
+                        y: f.y + rnd(-6, 6),
+                        a: rnd(0, Math.PI * 2),
+                    };
+                });
+            }
+
+            function clearTrail() {
+                if (!trail || !trailNext) return;
+                trail.fill(0);
+                trailNext.fill(0);
+            }
+
+            function rerollWorld() {
+                if (!trail) return;
+                seedFoods(6);
+                clearTrail();
+                const isMobile = cssW < 640;
+                const N = Math.floor(isMobile ? clamp(simW * simH / 52, 260, 520) : clamp(simW * simH / 34, 520, 980));
+                spawnAgents(N);
+            }
+
+            function resize() {
+                const rect = canvas.getBoundingClientRect();
+                cssW = Math.max(1, rect.width);
+                cssH = Math.max(1, rect.height);
+                dpr = window.devicePixelRatio || 1;
+                canvas.width = Math.floor(cssW * dpr);
+                canvas.height = Math.floor(cssH * dpr);
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+                // Keep the simulation grid small; scale up to the hero size.
+                const targetW = clamp(Math.floor(cssW / 6), 160, 320);
+                const targetH = clamp(Math.floor(cssH / 6), 90, 200);
+                if (targetW === simW && targetH === simH) return;
+                simW = targetW;
+                simH = targetH;
+
+                trail = new Float32Array(simW * simH);
+                trailNext = new Float32Array(simW * simH);
+
+                img = document.createElement('canvas');
+                img.width = simW;
+                img.height = simH;
+                imgBuf = img.getContext('2d', { willReadFrequently: true });
+                imgData = imgBuf.createImageData(simW, simH);
+
+                // Seed "food" points (nodes) and agents.
+                seedFoods(6);
+                const isMobile = cssW < 640;
+                if (userLookahead == null) {
+                    G.lookahead = isMobile ? 4 : 7;
+                    if (controls.hops) controls.hops.value = String(G.lookahead);
+                }
+                const N = Math.floor(isMobile ? clamp(simW * simH / 52, 260, 520) : clamp(simW * simH / 34, 520, 980));
+                spawnAgents(N);
+                syncControls();
+            }
+
+            function step() {
+                if (!trail) return;
+
+                // Agent parameters (tuned for organic, legible growth).
+                const sensorDist = 7.5;
+                const sensorAng = 0.55;
+                const speed = 1.0;
+                const depositBase = 0.52;
+                const foodBoost = 2.6;
+                const baseEPC = 0.22;
+
+                // Food sources continuously emit trail.
+                for (const f of foods) {
+                    for (let k = 0; k < 10; k++) {
+                        const ang = rnd(0, Math.PI * 2);
+                        const r = rnd(0, 4);
+                        deposit(trail, f.x + Math.cos(ang) * r, f.y + Math.sin(ang) * r, foodBoost);
+                    }
+                }
+
+                // Aggregate a cheap "live gauge" estimate for the HUD.
+                let sumF = 0, sumEPC = 0, sumH = 0, sumSP = 0, nAcc = 0;
+
+                for (const p of agents) {
+                    const Hbefore = entropyAt(p.x, p.y, p.a, sensorDist, sensorAng);
+                    const dBefore = distToFood(p.x, p.y);
+
+                    // Evaluate a tiny "action set" (left/forward/right) and pick the minimum-F move.
+                    const candidates = [0, +sensorAng, -sensorAng];
+                    let best = { F: Infinity, a: p.a, x: p.x, y: p.y, dEPC: 0, dH: 0, dSP: 0 };
+
+                    for (const da of candidates) {
+                        const aa = p.a + da;
+                        const np = wrapPoint({ x: p.x + Math.cos(aa) * speed, y: p.y + Math.sin(aa) * speed });
+
+                        const Hafter = entropyAt(np.x, np.y, aa, sensorDist, sensorAng);
+                        const dH = Hafter - Hbefore;
+
+                        const dEnd = lookaheadDistance(np.x, np.y, aa, G.lookahead, speed);
+                        const dSP = Math.max(0, (dBefore - dEnd) / Math.max(dBefore, 1e-6));
+
+                        const local = sample(trail, np.x, np.y);
+                        const localN = clamp(local / 10, 0, 1);
+                        const dEPC = baseEPC * (0.35 + 0.65 * (1 - localN));
+
+                        const F = dEPC - G.lambda * (dH + G.gamma * dSP);
+                        if (F < best.F) best = { F, a: aa, x: np.x, y: np.y, dEPC, dH, dSP };
+                    }
+
+                    // High-F states behave more exploratory (amoeba-ish wobble).
+                    if (best.F > G.thetaAG) best.a += rnd(-0.9, 0.9) * 0.35;
+
+                    p.a = best.a;
+                    p.x = best.x;
+                    p.y = best.y;
+
+                    const isDG = best.F < G.thetaDG;
+                    const isAG = best.F > G.thetaAG;
+                    const dep = depositBase * (isDG ? 1.9 : (isAG ? 0.55 : 1.0));
+                    deposit(trail, p.x, p.y, dep);
+                    // Add a tiny thickness so veins read well on large screens.
+                    for (let k = 0; k < 2; k++) deposit(trail, p.x + rnd(-1, 1), p.y + rnd(-1, 1), dep * 0.25);
+
+                    // Sample only a subset for HUD stats (saves work).
+                    if ((nAcc < 140) && (Math.random() < 0.18)) {
+                        sumF += best.F; sumEPC += best.dEPC; sumH += best.dH; sumSP += best.dSP; nAcc++;
+                    }
+                }
+
+                // Diffuse + decay (single blur pass).
+                const keep = 0.68;
+                const spread = 0.08;
+                for (let y = 0; y < simH; y++) {
+                    const ym = (y - 1 + simH) % simH;
+                    const yp = (y + 1) % simH;
+                    for (let x = 0; x < simW; x++) {
+                        const xm = (x - 1 + simW) % simW;
+                        const xp = (x + 1) % simW;
+                        const i = y * simW + x;
+                        const c = trail[i];
+                        const n = trail[ym * simW + x] + trail[yp * simW + x] + trail[y * simW + xm] + trail[y * simW + xp];
+                        trailNext[i] = c * keep + n * spread;
+                    }
+                }
+                // Swap buffers
+                const tmp = trail; trail = trailNext; trailNext = tmp;
+
+                // Render to image buffer.
+                const d = imgData.data;
+                for (let i = 0; i < simW * simH; i++) {
+                    const v = clamp(trail[i] / 10, 0, 1);
+                    const g = Math.pow(v, 0.55);
+                    const r = 18 + g * 90;
+                    const gg = 24 + g * 235;
+                    const b = 30 + g * 110;
+                    const a = Math.floor(clamp(g * 255, 0, 220));
+                    const j = i * 4;
+                    d[j + 0] = r;
+                    d[j + 1] = gg;
+                    d[j + 2] = b;
+                    d[j + 3] = a;
+                }
+                imgBuf.putImageData(imgData, 0, 0);
+
+                ctx.clearRect(0, 0, cssW, cssH);
+                ctx.drawImage(img, 0, 0, cssW, cssH);
+                drawGraphOverlay();
+
+                if (nAcc > 0) {
+                    hudUpdate({
+                        F: sumF / nAcc,
+                        dEPC: sumEPC / nAcc,
+                        dH: sumH / nAcc,
+                        dSP: sumSP / nAcc,
+                    });
+                }
+            }
+
+            let lastT = 0;
+            function loop(t) {
+                if (document.hidden) {
+                    raf = requestAnimationFrame(loop);
+                    return;
+                }
+                // Cap FPS to keep CPU usage reasonable on laptops.
+                if (t - lastT > 33) { // ~30fps
+                    lastT = t;
+                    step();
+                }
+                raf = requestAnimationFrame(loop);
+            }
+
+            bindControls();
+            resize();
+            window.addEventListener('resize', () => resize(), { passive: true });
+            raf = requestAnimationFrame(loop);
+        })();
+    </script>
 </body>
+
 </html>

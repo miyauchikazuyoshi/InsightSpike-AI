@@ -4,28 +4,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>geDIG: The "When" of Knowledge | InsightSpike-AI</title>
+    <title>geDIG — The Thermodynamics of Intelligence | InsightSpike-AI</title>
     <meta name="google-site-verification" content="7b2bONEB5GEFUNTGYAWemjjporVrUKMzw3eiok__65A" />
     <meta name="description"
-        content="geDIG: A brain-inspired multi-agent architecture for RAG that optimizes 'when to learn and when to forget' using a unified gauge of structural cost and information gain.">
+        content="geDIG: A research framework exploring whether a single dimensionless equation spanning metric, measure, and topology can describe how any information-bearing system restructures itself.">
     <meta name="keywords"
         content="RAG, Knowledge Graph, AI, geDIG, InsightSpike, Multi-Agent, Neuroscience, Machine Learning">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://miyauchikazuyoshi.github.io/InsightSpike-AI/">
-    <meta property="og:title" content="geDIG: The 'When' of Knowledge | InsightSpike-AI">
+    <meta property="og:title" content="geDIG — The Thermodynamics of Intelligence | InsightSpike-AI">
     <meta property="og:description"
-        content="Retrieval is solved. Adaptation is missing. geDIG implements the autonomic nervous system of 'when to learn and when to forget' into RAG.">
+        content="F = ΔEPC − λ(ΔH + γΔβ₁) — Three independent mathematical structures. One dimensionless, scale-invariant scalar.">
     <meta property="og:image"
         content="https://miyauchikazuyoshi.github.io/InsightSpike-AI/images/multihop_subgraphs.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://miyauchikazuyoshi.github.io/InsightSpike-AI/">
-    <meta property="twitter:title" content="geDIG: The 'When' of Knowledge | InsightSpike-AI">
+    <meta property="twitter:title" content="geDIG — The Thermodynamics of Intelligence | InsightSpike-AI">
     <meta property="twitter:description"
-        content="Retrieval is solved. Adaptation is missing. geDIG implements the autonomic nervous system of 'when to learn and when to forget' into RAG.">
+        content="F = ΔEPC − λ(ΔH + γΔβ₁) — Three independent mathematical structures. One dimensionless, scale-invariant scalar.">
     <meta property="twitter:image"
         content="https://miyauchikazuyoshi.github.io/InsightSpike-AI/images/multihop_subgraphs.png">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -314,28 +314,27 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
             <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
-                Brain-Inspired Multi-Agent Architecture<br>
-                <span class="gradient-text">for "Spike of Insight"</span>
+                The Thermodynamics<br>
+                <span class="gradient-text">of Intelligence</span>
             </h1>
             <p class="mt-6 max-w-2xl mx-auto text-lg md:text-xl text-slate-400 leading-relaxed">
-                Retrieval is solved. Adaptation is missing.<br>
-                geDIG implements the autonomic nervous system of <strong>"when to learn and when to forget"</strong>
-                into RAG using a single gauge:
+                Can a single dimensionless equation — spanning metric, measure, and topology —<br>
+                describe how any information-bearing system restructures itself?
                 <br>
-                <span class="text-2xl text-white mt-2 block">$\mathcal{F} = \Delta EPC_{norm} - \lambda(\Delta H_{norm} + \gamma \Delta SP_{rel})$</span>
+                <span class="text-2xl text-white mt-2 block">$\mathcal{F} = \Delta EPC - \lambda(\Delta H + \gamma \Delta \beta_1)$</span>
                 <span
                     class="block mt-4 text-sm text-slate-400 font-normal max-w-lg mx-auto border-t border-white/10 pt-4">
-                    <span class="text-accent">Plain English:</span> A single scalar that decides: <em>"Does this new
-                        fact deserve a permanent place in the graph?"</em>
-                    <br>
+                    <span class="text-accent">Three independent structures:</span>
                     <span class="block mt-2">
-                        $\Delta EPC_{norm} \approx$ "structure cost", $\Delta H_{norm} \approx$ "extension gain", $\Delta SP_{rel} \approx$ "shortcut gain"
+                        $\Delta EPC \approx$ "metric (distance)", $\Delta H \approx$ "measure (probability)", $\Delta \beta_1 \approx$ "topology (loops)"
                     </span>
+                    <br>
+                    $\mathcal{F} < 0$ means information gain exceeds structural cost — the system should commit the change.
                 </span>
                 <span
                     class="block mt-4 text-xs text-slate-500 font-mono bg-white/5 inline-block px-3 py-1 rounded border border-white/5">
-                    <strong>Benchmark Result:</strong> On 25x25 Maze + RAG, geDIG reduced redundant exploration by
-                    <strong>40%</strong> while keeping FMR < 2%. </span>
+                    <strong>Maze:</strong> 60% → <strong>98%</strong> goal-reach (15×15).
+                    <strong>Transformer:</strong> F tracks model quality across 8 models. </span>
             </p>
             <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
                 <a href="https://huggingface.co/spaces/miyaukaz/gedig-demo" target="_blank"
@@ -343,9 +342,9 @@
                     <span>🧠</span>
                     Try Live Demo (HF Spaces)
                 </a>
-                <a href="#demo"
+                <a href="research/thinking/matchstick_figure_v2_en.html"
                     class="px-8 py-4 rounded-full bg-accent hover:bg-cyan-400 text-bg font-bold transition shadow-[0_0_20px_rgba(34,211,238,0.3)] text-center">
-                    Interactive Graph Demo
+                    Visual Intuition: Matchstick Figure
                 </a>
                 <a href="#resources"
                     class="px-8 py-4 rounded-full border border-slate-600 hover:border-white hover:bg-white/5 transition font-medium flex items-center justify-center gap-2 group">
@@ -367,13 +366,13 @@
                         <span id="slime-state" class="text-[11px] font-bold text-slate-300">--</span>
                     </div>
                     <div class="mt-2 text-[11px] text-slate-500 font-mono leading-snug">
-                        <span class="text-slate-300">$F$</span> = $\Delta EPC_{norm}$ − $\lambda(\Delta H_{norm} + \gamma\Delta SP_{rel})$
+                        <span class="text-slate-300">$F$</span> = $\Delta EPC$ − $\lambda(\Delta H + \gamma\Delta \beta_1)$
                     </div>
                     <div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] font-mono">
                         <span class="text-slate-500">F</span><span id="slime-val-f" class="text-right text-slate-200">--</span>
                         <span class="text-slate-500">ΔEPC</span><span id="slime-val-epc" class="text-right text-slate-300">--</span>
                         <span class="text-slate-500">ΔH</span><span id="slime-val-h" class="text-right text-slate-300">--</span>
-                        <span class="text-slate-500">ΔSP</span><span id="slime-val-sp" class="text-right text-slate-300">--</span>
+                        <span class="text-slate-500">Δβ₁</span><span id="slime-val-sp" class="text-right text-slate-300">--</span>
                     </div>
                     <div class="mt-3 h-1.5 bg-white/5 rounded overflow-hidden border border-white/10">
                         <div id="slime-bar" class="h-full w-1/2 bg-gradient-to-r from-danger via-warn to-success"></div>
@@ -405,7 +404,7 @@
                         </div>
                         <div>
                             <div class="flex items-center justify-between text-[11px] font-mono">
-                                <label for="slime-gamma" class="text-slate-400">$\gamma$ (shortcut weight)</label>
+                                <label for="slime-gamma" class="text-slate-400">$\gamma$ (topology weight)</label>
                                 <span id="slime-gamma-val" class="text-slate-300">--</span>
                             </div>
                             <input id="slime-gamma" type="range" min="0" max="2" step="0.01" value="0.90" class="w-full">
@@ -444,16 +443,16 @@
             <div class="mt-12 flex flex-wrap justify-center gap-2 text-xs text-slate-500 font-mono">
                 <span
                     class="px-3 py-1 bg-panel rounded border border-white/5 hover:border-white/20 cursor-default">$\Delta
-                    EPC$ (Structure Cost)</span>
+                    EPC$ (Metric)</span>
                 <span
                     class="px-3 py-1 bg-panel rounded border border-white/5 hover:border-white/20 cursor-default">$\Delta
-                    H$ (Entropy)</span>
+                    H$ (Measure)</span>
                 <span
                     class="px-3 py-1 bg-panel rounded border border-white/5 hover:border-white/20 cursor-default">$\Delta
-                    SP$ (Shortcuts)</span>
+                    \beta_1$ (Topology)</span>
                 <span
-                    class="px-3 py-1 bg-panel rounded border border-white/5 hover:border-white/20 cursor-default">FEP-MDL
-                    Bridge</span>
+                    class="px-3 py-1 bg-panel rounded border border-white/5 hover:border-white/20 cursor-default">Helmholtz
+                    F = E − TS</span>
             </div>
         </div>
 
@@ -649,8 +648,8 @@
             <div class="text-center mb-20">
                 <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Conceptual Architecture</h2>
                 <p class="text-slate-400 max-w-2xl mx-auto leading-relaxed">
-                    Most RAG systems only optimize "what to retrieve". geDIG optimizes "when to integrate".<br>
-                    This adds a metacognitive layer to the AI's memory system.
+                    F unifies three independent mathematical structures into a single decision criterion.<br>
+                    When should a system commit a structural change to its knowledge?
                 </p>
             </div>
 
@@ -701,8 +700,8 @@
                         <div class="text-success font-mono text-sm mb-2">02. THE SOLUTION</div>
                         <h3 class="text-2xl font-bold text-white mb-4">One-Gauge Control ($\mathcal{F}$)</h3>
                         <p class="text-slate-400 leading-relaxed mb-4">
-                            We unified Structural Cost (Graph Edit Distance) and Information Gain (Entropy + Shortcuts)
-                            into a single scalar.
+                            We unified Structural Cost (Graph Edit Distance) and Information Gain (Entropy + Topology)
+                            into a single dimensionless, scale-invariant scalar.
                         </p>
                         <ul class="space-y-3 text-slate-400 text-sm">
                             <li class="flex items-start gap-3">
@@ -715,7 +714,7 @@
                             </li>
                             <li class="flex items-start gap-3">
                                 <span class="w-1.5 h-1.5 bg-orange rounded-full mt-2"></span>
-                                <span><strong>$\Delta SP$:</strong> Path shortening. Rewards insight (shortcuts).</span>
+                                <span><strong>$\Delta \beta_1$:</strong> Topology change. Rewards structural insight (loop formation/removal).</span>
                             </li>
                         </ul>
                     </div>
@@ -742,10 +741,10 @@
                     <div class="grid md:grid-cols-2 gap-12 items-start">
                         <div>
                             <div class="text-slate-500 font-mono text-sm mb-2">03. WHY BOTH</div>
-                            <h3 class="text-2xl font-bold text-white mb-4">Why Probability + Graph, Together</h3>
+                            <h3 class="text-2xl font-bold text-white mb-4">Why Three Terms, Together</h3>
                             <p class="text-slate-400 leading-relaxed">
-                                Similarity alone stops too early; structure alone cannot tell if uncertainty remains.
-                                geDIG evaluates both to decide when to integrate.
+                                Metric alone cannot detect loops; measure alone cannot detect shortcuts;
+                                topology alone cannot measure cost. F evaluates all three to decide when to restructure.
                             </p>
                             <div class="mt-6 bg-bg border border-white/10 rounded-xl p-4">
                                 <div class="text-[11px] text-slate-500 uppercase tracking-wider mb-3">Quick Comparison
@@ -961,15 +960,15 @@
                             target="_blank" class="block text-sm text-slate-400 hover:text-white hover:underline">Browse
                             Experiments & Logs</a>
                         <div class="mt-4 text-[11px] text-slate-400 font-mono">
-                            <p class="mb-1 text-slate-300 uppercase tracking-wider text-[10px]">CLI / Quick Start</p>
-                            <p><span class="text-slate-500">Quick start:</span> <code
-                                    class="bg-black/40 px-1 py-0.5 rounded border border-white/5">python examples/public_quick_start.py</code>
+                            <p class="mb-1 text-slate-300 uppercase tracking-wider text-[10px]">Quick Start</p>
+                            <p><span class="text-slate-500">Install:</span> <code
+                                    class="bg-black/40 px-1 py-0.5 rounded border border-white/5">pip install -e .</code>
                             </p>
-                            <p class="mt-1"><span class="text-slate-500">CLI:</span> <code
-                                    class="bg-black/40 px-1 py-0.5 rounded border border-white/5">python -m insightspike.cli.spike --help</code>
+                            <p class="mt-1"><span class="text-slate-500">Test:</span> <code
+                                    class="bg-black/40 px-1 py-0.5 rounded border border-white/5">make test</code>
                             </p>
-                            <p class="mt-1"><span class="text-slate-500">Smoke tests:</span> <code
-                                    class="bg-black/40 px-1 py-0.5 rounded border border-white/5">make codex-smoke</code>
+                            <p class="mt-1"><span class="text-slate-500">Maze:</span> <code
+                                    class="bg-black/40 px-1 py-0.5 rounded border border-white/5">.venv/bin/python3 experiments/maze/run_experiment_query.py --help</code>
                             </p>
                         </div>
                     </div>
@@ -978,60 +977,51 @@
 
             <div class="grid md:grid-cols-2 gap-8 mt-4 mb-10">
                 <div class="bg-bg border border-white/10 rounded-xl p-6">
-                    <p class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Reproduce (Maze 25×25, 500
-                        steps)</p>
+                    <p class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Reproduce (Maze 15×15)</p>
                     <div class="space-y-2 font-mono text-[11px] text-slate-300">
-                        <p class="text-slate-400 mb-1">Phase-1 PoC: Maze + RAG under equal resources.</p>
-                        <p><span class="text-slate-500">L3 batch (60 seeds):</span></p>
-                        <p class="bg-black/40 px-2 py-1 rounded border border-white/5">python
-                            scripts/run_maze_batch_and_update.py --mode l3 --seeds 60 --workers 4 --update-tex</p>
-                        <p class="mt-2"><span class="text-slate-500">Eval batch (60 seeds):</span></p>
-                        <p class="bg-black/40 px-2 py-1 rounded border border-white/5">python
-                            scripts/run_maze_batch_and_update.py --mode eval --seeds 60 --workers 4 --update-tex</p>
-                        <p class="mt-2 text-[10px] text-slate-500">Aggregates land in <code
-                                class="bg-black/40 px-1 py-0.5 rounded border border-white/5">docs/paper/data/</code>;
-                            the 25×25 table updates automatically.</p>
+                        <p class="text-slate-400 mb-1">Requires .venv with networkx, numpy, etc.</p>
+                        <p><span class="text-slate-500">Three-layer search (12 seeds):</span></p>
+                        <p class="bg-black/40 px-2 py-1 rounded border border-white/5">.venv/bin/python3
+                            experiments/maze/run_experiment_query.py --maze-size 15 --max-steps 250 --seeds 12
+                            --search-mode threelayer --vector-mode extended</p>
+                        <p class="mt-2"><span class="text-slate-500">Result:</span> 98% goal-reach rate (baseline ~60%)</p>
+                        <p class="mt-2 text-[10px] text-slate-500">See <code
+                                class="bg-black/40 px-1 py-0.5 rounded border border-white/5">experiments/maze/README.md</code>
+                            for full CLI reference.</p>
                     </div>
                 </div>
                 <div class="bg-bg border border-white/10 rounded-xl p-6">
-                    <p class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Call for arXiv Endorsement
-                        / Reviewers</p>
+                    <p class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Open Research Questions</p>
                     <div class="text-sm text-slate-300 space-y-2">
                         <p class="mb-3 text-accent font-bold">
-                            We are seeking an arXiv endorsement for <span class="text-white">cs.AI</span> or <span
-                                class="text-white">cs.LG</span> to publish our v6 paper.
+                            We welcome collaboration on these specific questions:
                         </p>
-                        <p>We&rsquo;re also looking for collaborators on:</p>
                         <ul class="list-disc list-inside text-slate-400 text-[13px] space-y-2">
                             <li>
-                                <strong class="text-slate-300">Information thermodynamics / FEP:</strong><br>
-                                <span class="pl-4 block text-slate-500">Help formalize the free-energy mapping and check
-                                    for missing assumptions.</span>
+                                <strong class="text-slate-300">F-trajectory reproduction:</strong><br>
+                                <span class="pl-4 block text-slate-500">Does F show structured layer-wise behavior on untested models?</span>
                             </li>
                             <li>
-                                <strong class="text-slate-300">Graph RAG / Multi-hop:</strong><br>
-                                <span class="pl-4 block text-slate-500">Stress-test geDIG on your existing GraphRAG
-                                    benchmarks.</span>
+                                <strong class="text-slate-300">&beta;&#8321; vs SP as structural term:</strong><br>
+                                <span class="pl-4 block text-slate-500">When does topological &Delta;&beta;&#8321; outperform metric &Delta;SP? TDA expertise welcome.</span>
                             </li>
                             <li>
-                                <strong class="text-slate-300">Phase-2 (Offline Rewiring):</strong><br>
-                                <span class="pl-4 block text-slate-500">Co-design offline "sleep phase" rewiring
-                                    experiments.</span>
+                                <strong class="text-slate-300">Scaling to 70B+ models:</strong><br>
+                                <span class="pl-4 block text-slate-500">We hypothesize (&lambda;, &gamma;) converge at sufficient scale. GPU resources needed.</span>
                             </li>
                         </ul>
                         <p class="text-[13px] text-slate-400 mt-4">
-                            How to engage: open an Issue with &ldquo;Review&rdquo; label, PR small fixes, or DM on X
-                            (Twitter):
+                            How to engage: open an Issue, PR, or DM on X:
                             <span class="font-mono text-slate-200">@kazuyoshim5436</span>.
                         </p>
                         <p class="text-[10px] text-slate-500 mt-3">
                             See also:
                             <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/docs/gedig_spec.md"
                                 class="text-accent hover:underline">geDIG spec</a>,
-                            <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/docs/phase1.md"
-                                class="text-accent hover:underline">Phase‑1 (maze &amp; RAG)</a>,
-                            <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/docs/tutorials/trace.md"
-                                class="text-accent hover:underline">Trace a spike</a>.
+                            <a href="research/thinking/matchstick_figure_v2_en.html"
+                                class="text-accent hover:underline">Matchstick Figure</a>,
+                            <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/experiments/maze/README.md"
+                                class="text-accent hover:underline">Maze experiments</a>.
                         </p>
                     </div>
                 </div>
