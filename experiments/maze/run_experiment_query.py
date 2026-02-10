@@ -189,6 +189,10 @@ def run_episode_query(
             theta_revisit=0.95,
             theta_attention=float(getattr(config, 'theta_attention', 0.3)),
             attention_alpha=float(getattr(config, 'attention_alpha', 0.5)),
+            dg_gate_tau=float(getattr(config, 'dg_gate_tau', 1.0)),
+            tau_dg_3att=float(getattr(config, 'l1_tau_dg', 0.3)),
+            tau_reward=float(getattr(config, 'l1_tau_reward', 0.3)),
+            score_mode=str(getattr(config, 'l1_score_mode', 'legacy')),
             weight_vector=weight_vec,
             top_k=int(config.selector.get('candidate_cap', 32)),
             min_layer1_candidates=int(getattr(config, 'min_layer1_candidates', 2)),
@@ -338,6 +342,19 @@ def run_episode_query(
         _step_search_sim = 0.0
         _step_search_time_ms = 0.0
         _step_search_l1_count = 0
+        _step_search_l1_score_3att_max = 0.0
+        _step_search_l1_score_3att_mean = 0.0
+        _step_search_l1_score_legacy_max = 0.0
+        _step_search_l1_score_legacy_mean = 0.0
+
+        # Phase C: warmup-aware score mode switching
+        if _threelayer_engine is not None:
+            _switch_step = int(getattr(config, 'l1_score_switch_step', 0))
+            if _switch_step > 0:
+                if step < _switch_step:
+                    _threelayer_engine.graph_walker.score_mode = "legacy"
+                else:
+                    _threelayer_engine.graph_walker.score_mode = str(getattr(config, 'l1_score_mode', 'legacy'))
 
         sleep_plan_action: Optional[int] = None
         try:
@@ -459,27 +476,22 @@ def run_episode_query(
                 if int(sleep_plan_action) in possible_moves_set:
                     sleep_plan_bias = True
         # Sleep Q (prefer mode): soft bias for action selection in the eval episode.
+        # Q bias strength is controlled by action_temp (softmax temperature).
         sleep_q_bias = False
-        sleep_q_beta = 0.0
         sleep_q_by_action: Dict[int, float] = {}
         sleep_q_max = 0.0
         if sleep_q is not None and guide_mode == "prefer":
             try:
-                sleep_q_beta = float(getattr(config, "sleep_q_beta", 0.0) or 0.0)
+                sleep_q_by_action = dict(sleep_q.get(current_position, {}) or {})
             except Exception:
-                sleep_q_beta = 0.0
-            if math.isfinite(sleep_q_beta) and sleep_q_beta > 1e-12:
+                sleep_q_by_action = {}
+            if sleep_q_by_action:
                 try:
-                    sleep_q_by_action = dict(sleep_q.get(current_position, {}) or {})
+                    q_vals = [float(sleep_q_by_action[a]) for a in possible_moves_set if a in sleep_q_by_action]
+                    sleep_q_max = float(max(q_vals)) if q_vals else float(max(float(v) for v in sleep_q_by_action.values()))
                 except Exception:
-                    sleep_q_by_action = {}
-                if sleep_q_by_action:
-                    try:
-                        q_vals = [float(sleep_q_by_action[a]) for a in possible_moves_set if a in sleep_q_by_action]
-                        sleep_q_max = float(max(q_vals)) if q_vals else float(max(float(v) for v in sleep_q_by_action.values()))
-                    except Exception:
-                        sleep_q_max = 0.0
-                    sleep_q_bias = True
+                    sleep_q_max = 0.0
+                sleep_q_bias = True
         sleep_edge_bias = False
         sleep_edge_beta = 0.0
         sleep_edge_by_action: Dict[int, float] = {}
@@ -501,24 +513,51 @@ def run_episode_query(
                     sleep_edge_bias = True
 
         # Propagated bias (graph-persistent DG): use inherited graph's propagated values
-        # In extended mode, propagated is already in the vector (dim9) → skip scalar bonus
+        # Enable in both standard and extended modes — dim9 affects DG similarity
+        # but does NOT function as an action-selection bias without this mechanism.
         propagated_bias = False
         propagated_alpha = 0.0
-        if inherited_graph is not None and vector_mode != "extended":
+        _propagated_mode = str(getattr(config, "propagated_mode", "abs")).lower()
+        if inherited_graph is not None:
             try:
-                propagated_alpha = float(getattr(config, "propagated_alpha", 1.0) or 1.0)
+                _pa = getattr(config, "propagated_alpha", None)
+                propagated_alpha = float(_pa) if _pa is not None else 1.0
             except Exception:
                 propagated_alpha = 1.0
             if math.isfinite(propagated_alpha) and abs(propagated_alpha) > 1e-12:
                 propagated_bias = True
 
+        def _propagated_at_pos(pos: Tuple[int, int]) -> float:
+            """Max propagated value over all direction nodes at a position."""
+            best = None
+            for d in range(4):
+                dn = make_direction_node(pos, d)
+                if inherited_graph.has_node(dn):
+                    val = float(inherited_graph.nodes[dn].get("propagated", 0.0))
+                    if best is None or val > best:
+                        best = val
+            return best if best is not None else 0.0
+
         def _propagated_for_action(action_id: int) -> float:
             if not propagated_bias:
                 return 0.0
             try:
-                dn = make_direction_node(current_position, int(action_id))
-                if inherited_graph.has_node(dn):
-                    return float(inherited_graph.nodes[dn].get("propagated", 0.0))
+                if _propagated_mode == "gradient":
+                    # Gradient mode: prop(next_position) - prop(current_position)
+                    # Gives directional signal: positive = moving toward higher value
+                    delta = SimpleMaze.ACTIONS.get(int(action_id))
+                    if delta is None:
+                        return 0.0
+                    next_pos = (current_position[0] + delta[0],
+                                current_position[1] + delta[1])
+                    prop_here = _propagated_at_pos(current_position)
+                    prop_next = _propagated_at_pos(next_pos)
+                    return prop_next - prop_here
+                else:
+                    # Abs mode: raw propagated value at direction node
+                    dn = make_direction_node(current_position, int(action_id))
+                    if inherited_graph.has_node(dn):
+                        return float(inherited_graph.nodes[dn].get("propagated", 0.0))
             except Exception:
                 pass
             return 0.0
@@ -962,7 +1001,7 @@ def run_episode_query(
                                     act = int(item.get("action"))
                                     q_val = float(sleep_q_by_action.get(act, sleep_q_max))
                                     q_adv = float(q_val - sleep_q_max)  # <= 0
-                                    w *= math.exp(float(sleep_q_beta) * q_adv)
+                                    w *= math.exp(q_adv / tau)
                                 except Exception:
                                     pass
                             if sleep_plan_bias and item.get("action") is not None:
@@ -1001,6 +1040,16 @@ def run_episode_query(
                         total = sum(weights)
                         if not (total > 0 and math.isfinite(total)):
                             raise ValueError("invalid weights")
+                        # Advantage-gated selection
+                        _adv_commit = float(getattr(config, "advantage_commit", 0.0) or 0.0)
+                        _use_argmax = False
+                        if _adv_commit > 1.0 and len(weights) >= 2:
+                            _sw = sorted(weights, reverse=True)
+                            if _sw[1] > 1e-12 and _sw[0] / _sw[1] >= _adv_commit:
+                                _use_argmax = True
+                        if _use_argmax:
+                            _best_idx = weights.index(max(weights))
+                            return items[_best_idx]
                         r = random.random() * total
                         acc = 0.0
                         for w, item in zip(weights, items):
@@ -1022,7 +1071,7 @@ def run_episode_query(
                         if sleep_q_bias:
                             q_val = float(sleep_q_by_action.get(act, sleep_q_max))
                             q_adv = float(q_val - sleep_q_max)
-                            bonus += float(sleep_q_beta) * q_adv
+                            bonus += q_adv
                     except Exception:
                         pass
                     try:
@@ -1545,6 +1594,14 @@ def run_episode_query(
                     cap_topk=int(getattr(config, 'sp_cand_topk', 0)),
                 )
                 _step_search_l1_count = len(_tl_result.candidates)
+                # Phase B: compute L1 score statistics (both scoring modes logged in parallel)
+                if _tl_result.candidates:
+                    _s3 = [float(c.get("score_3att", 0.0)) for c in _tl_result.candidates]
+                    _sl = [float(c.get("effective_score", 0.0)) for c in _tl_result.candidates]
+                    _step_search_l1_score_3att_max = max(_s3)
+                    _step_search_l1_score_3att_mean = sum(_s3) / len(_s3)
+                    _step_search_l1_score_legacy_max = max(_sl)
+                    _step_search_l1_score_legacy_mean = sum(_sl) / len(_sl)
                 _tl_used_l1 = True
 
         if not _tl_used_l1:
@@ -2410,6 +2467,46 @@ def run_episode_query(
         graph = graph_commit
         graph_temp = graph_commit
 
+        # Phase A: Record ag_attention (similarity at connection time) on hop0 committed edges
+        for _item in commit_items:
+            try:
+                _anch = _item.get("anchor_position") or _item.get("position") or []
+                _at = (int(_anch[0]), int(_anch[1]))
+                _d = _item.get("direction")
+                if _d is not None:
+                    _dir_node = (_at[0], _at[1], int(_d))
+                    if graph.has_edge(current_query_node, _dir_node):
+                        _sim = float(_item.get("similarity", 0.0))
+                        _existing_ag = float(graph[current_query_node][_dir_node].get("ag_attention", 0.0))
+                        graph[current_query_node][_dir_node]["ag_attention"] = max(_existing_ag, _sim)
+            except Exception:
+                pass
+
+        # Phase A: Record dg_attention (geDIG g value) on committed edges
+        # hop0 edges: record g0 (AG evaluation score)
+        for _item in commit_items:
+            try:
+                _anch = _item.get("anchor_position") or _item.get("position") or []
+                _at = (int(_anch[0]), int(_anch[1]))
+                _d = _item.get("direction")
+                if _d is not None:
+                    _dir_node = (_at[0], _at[1], int(_d))
+                    if graph.has_edge(current_query_node, _dir_node):
+                        graph[current_query_node][_dir_node]["dg_attention"] = float(g0)
+            except Exception:
+                pass
+        # DG shortcut edges: record gmin_mh (multi-hop best)
+        if dg_fire:
+            for _dg_snap in dg_committed_edges_snapshot:
+                try:
+                    if len(_dg_snap) == 2:
+                        _eu = (int(_dg_snap[0][0]), int(_dg_snap[0][1]), int(_dg_snap[0][2]))
+                        _ev = (int(_dg_snap[1][0]), int(_dg_snap[1][1]), int(_dg_snap[1][2]))
+                        if graph.has_edge(_eu, _ev):
+                            graph[_eu][_ev]["dg_attention"] = float(gmin_mh_val)
+                except Exception:
+                    pass
+
         # Three-layer search: attention lifecycle update (after commit)
         if _threelayer_engine is not None and _attention_mgr is not None:
             # Initialize attention=1.0 on newly committed edges BEFORE decay
@@ -2430,7 +2527,7 @@ def run_episode_query(
             _threelayer_engine.register(current_query_node, query_vec)
 
         if chosen_obs is not None and chosen_obs.get("action") is not None:
-            action = int(chosen_obs["action"]) 
+            action = int(chosen_obs["action"])
         else:
             # Fallback policy with anti-backtrack masking if possible
             pm = list(possible_moves)
@@ -2445,13 +2542,16 @@ def run_episode_query(
                         pm = pm2
             if (sleep_q_bias or sleep_plan_bias or event_bias_enabled or affordance_bias_enabled or sleep_edge_bias or propagated_bias) and pm:
                 try:
+                    tau = float(getattr(config, 'action_temp', 0.1) or 0.1)
+                    if not (math.isfinite(tau) and tau > 1e-9):
+                        tau = 0.1
                     q_vals = [float(sleep_q_by_action.get(int(a), sleep_q_max)) for a in pm] if sleep_q_by_action else [0.0 for _ in pm]
                     q_max_local = float(max(q_vals)) if q_vals else float(sleep_q_max)
                     weights: List[float] = []
                     for a, qv in zip(pm, q_vals):
                         w = 1.0
                         if sleep_q_bias:
-                            w *= math.exp(float(sleep_q_beta) * (float(qv) - q_max_local))
+                            w *= math.exp((float(qv) - q_max_local) / tau)
                         if sleep_plan_bias and sleep_plan_action is not None and int(a) == int(sleep_plan_action):
                             w *= math.exp(float(sleep_plan_beta))
                         if event_bias_enabled:
@@ -2466,15 +2566,26 @@ def run_episode_query(
                         weights.append(float(w))
                     total = sum(weights)
                     if total > 0 and math.isfinite(total):
-                        r = random.random() * total
-                        acc = 0.0
-                        for a, w in zip(pm, weights):
-                            acc += float(w)
-                            if r <= acc:
-                                action = int(a)
-                                break
+                        # Advantage-gated selection: commit if clear winner
+                        _adv_commit = float(getattr(config, "advantage_commit", 0.0) or 0.0)
+                        _use_argmax = False
+                        if _adv_commit > 1.0 and len(weights) >= 2:
+                            _sw = sorted(weights, reverse=True)
+                            if _sw[1] > 1e-12 and _sw[0] / _sw[1] >= _adv_commit:
+                                _use_argmax = True
+                        if _use_argmax:
+                            _best_idx = weights.index(max(weights))
+                            action = int(pm[_best_idx])
                         else:
-                            action = int(pm[0])
+                            r = random.random() * total
+                            acc = 0.0
+                            for a, w in zip(pm, weights):
+                                acc += float(w)
+                                if r <= acc:
+                                    action = int(a)
+                                    break
+                            else:
+                                action = int(pm[0])
                     else:
                         action = int(random.choice(pm))
                 except Exception:
@@ -2496,7 +2607,7 @@ def run_episode_query(
 
         sleep_plan_beta_used = float(sleep_plan_beta) if sleep_plan_bias else 0.0
         sleep_q_applied = bool(sleep_q_bias)
-        sleep_q_beta_used = float(sleep_q_beta) if sleep_q_applied else 0.0
+        sleep_q_beta_used = 0.0  # deprecated: Q bias now controlled by action_temp
         sleep_q_value = 0.0
         sleep_q_max_used = 0.0
         sleep_q_adv = 0.0
@@ -3332,6 +3443,31 @@ def run_episode_query(
         except Exception:
             dg_staged_edges_snapshot = []
 
+        # Phase A: Compute 3-attention statistics from current graph
+        _ag_att_vals: List[float] = []
+        _dg_att_vals: List[float] = []
+        _rw_att_vals: List[float] = []
+        for _u, _v, _ed in graph.edges(data=True):
+            _ag_v = _ed.get("ag_attention")
+            if _ag_v is not None:
+                _ag_att_vals.append(float(_ag_v))
+            _dg_v = _ed.get("dg_attention")
+            if _dg_v is not None:
+                _dg_att_vals.append(float(_dg_v))
+        for _nd in graph.nodes():
+            _nvec = graph.nodes[_nd].get("abs_vector")
+            if _nvec is None:
+                _nvec = graph.nodes[_nd].get("vector")
+            if _nvec is not None and len(_nvec) > 9:
+                _rw_att_vals.append(float(_nvec[9]))
+        _ag_att_mean = sum(_ag_att_vals) / len(_ag_att_vals) if _ag_att_vals else 0.0
+        _ag_att_max = max(_ag_att_vals) if _ag_att_vals else 0.0
+        _dg_att_mean = sum(_dg_att_vals) / len(_dg_att_vals) if _dg_att_vals else 0.0
+        _dg_att_max = max(_dg_att_vals) if _dg_att_vals else 0.0
+        _rw_att_mean = sum(_rw_att_vals) / len(_rw_att_vals) if _rw_att_vals else 0.0
+        _rw_att_max = max(_rw_att_vals) if _rw_att_vals else 0.0
+        _rw_att_min = min(_rw_att_vals) if _rw_att_vals else 0.0
+
         step_records.append(
             StepRecord(
                 seed=seed,
@@ -3477,6 +3613,19 @@ def run_episode_query(
                 search_revisit_similarity=float(_step_search_sim),
                 search_time_ms=float(_step_search_time_ms),
                 search_l1_candidates=int(_step_search_l1_count),
+                search_l1_score_3att_max=float(_step_search_l1_score_3att_max),
+                search_l1_score_3att_mean=float(_step_search_l1_score_3att_mean),
+                search_l1_score_legacy_max=float(_step_search_l1_score_legacy_max),
+                search_l1_score_legacy_mean=float(_step_search_l1_score_legacy_mean),
+                ag_attention_mean=float(_ag_att_mean),
+                ag_attention_max=float(_ag_att_max),
+                ag_attention_count=int(len(_ag_att_vals)),
+                dg_attention_mean=float(_dg_att_mean),
+                dg_attention_max=float(_dg_att_max),
+                dg_attention_count=int(len(_dg_att_vals)),
+                reward_attention_mean=float(_rw_att_mean),
+                reward_attention_max=float(_rw_att_max),
+                reward_attention_min=float(_rw_att_min),
             )
         )
 
@@ -3677,7 +3826,7 @@ def main() -> None:
             action_temp=float(args.action_temp),
             action_source=str(getattr(args, "action_source", "obs")),
             anti_backtrack=bool(args.anti_backtrack),
-            sleep_q_beta=float(getattr(args, "sleep_q_beta", 4.0)),
+            sleep_q_beta=0.0,  # deprecated: Q bias now controlled by action_temp
             sleep_plan_beta=float(getattr(args, "sleep_plan_beta", 0.0)),
             anchor_recent_q=int(args.anchor_recent_q),
             sp_cache=bool(args.sp_cache),
@@ -3761,6 +3910,7 @@ def main() -> None:
             attention_boost=float(getattr(args, "attention_boost", 0.1)),
             attention_alpha=float(getattr(args, "attention_alpha", 0.5)),
             min_layer1_candidates=int(getattr(args, "min_layer1_candidates", 2)),
+            dg_gate_tau=float(getattr(args, "dg_gate_tau", 1.0)),
         )
 
         runs: List[MazeSummary] = []
@@ -3893,6 +4043,19 @@ def main() -> None:
                 "search_revisit_similarity": float(getattr(record, 'search_revisit_similarity', 0.0)),
                 "search_time_ms": float(getattr(record, 'search_time_ms', 0.0)),
                 "search_l1_candidates": int(getattr(record, 'search_l1_candidates', 0)),
+                "search_l1_score_3att_max": float(getattr(record, 'search_l1_score_3att_max', 0.0)),
+                "search_l1_score_3att_mean": float(getattr(record, 'search_l1_score_3att_mean', 0.0)),
+                "search_l1_score_legacy_max": float(getattr(record, 'search_l1_score_legacy_max', 0.0)),
+                "search_l1_score_legacy_mean": float(getattr(record, 'search_l1_score_legacy_mean', 0.0)),
+                "ag_attention_mean": float(getattr(record, 'ag_attention_mean', 0.0)),
+                "ag_attention_max": float(getattr(record, 'ag_attention_max', 0.0)),
+                "ag_attention_count": int(getattr(record, 'ag_attention_count', 0)),
+                "dg_attention_mean": float(getattr(record, 'dg_attention_mean', 0.0)),
+                "dg_attention_max": float(getattr(record, 'dg_attention_max', 0.0)),
+                "dg_attention_count": int(getattr(record, 'dg_attention_count', 0)),
+                "reward_attention_mean": float(getattr(record, 'reward_attention_mean', 0.0)),
+                "reward_attention_max": float(getattr(record, 'reward_attention_max', 0.0)),
+                "reward_attention_min": float(getattr(record, 'reward_attention_min', 0.0)),
             }
             if not minimal:
                 row.update(
@@ -4175,16 +4338,67 @@ def main() -> None:
 
                     # Graph-persistent DG: Sleep phase (reward propagation on graph)
                     optimized_graph = None
-                    if warm_artifacts.graph is not None and warm_artifacts.graph.number_of_nodes() > 0:
+                    accumulated_graph = warm_artifacts.graph
+                    accumulated_steps = list(warm_artifacts.steps)
+                    if accumulated_graph is not None and accumulated_graph.number_of_nodes() > 0:
                         try:
                             optimized_graph = _sleep_graph_optimize(
-                                warm_artifacts.graph,
+                                accumulated_graph,
                                 gamma=float(getattr(warm_cfg, "sleep_propagate_gamma", 0.95)),
                                 n_iters=int(getattr(warm_cfg, "sleep_propagate_iters", 50)),
                             )
                         except Exception as e:
                             print(f"  Warning: sleep_graph_optimize failed: {e}")
                             optimized_graph = None
+
+                    # Extra Wake-Sleep cycles (W-S-W-S-W when wsw_cycles=2)
+                    _wsw_cycles = int(getattr(args, "wsw_cycles", 1) or 1)
+                    for _cyc in range(1, _wsw_cycles):
+                        _cyc_steps = max(warmup_steps // _wsw_cycles, 50)
+                        _cyc_cfg = replace(config, max_steps=int(_cyc_steps))
+                        _cyc_artifacts = run_episode_query(
+                            seed=seed,
+                            config=_cyc_cfg,
+                            sleep_plan=(sleep_plan if sleep_meta.get("found") else None),
+                            sleep_q=sleep_q,
+                            sleep_edge=sleep_edge,
+                            sleep_guide=str(getattr(args, "sleep_guide", "override")),
+                            inherited_graph=optimized_graph,
+                        )
+                        # Merge graphs: combine new exploration with accumulated
+                        if _cyc_artifacts.graph is not None and _cyc_artifacts.graph.number_of_nodes() > 0:
+                            if accumulated_graph is not None:
+                                accumulated_graph = nx.compose(accumulated_graph, _cyc_artifacts.graph)
+                            else:
+                                accumulated_graph = _cyc_artifacts.graph
+                        # Accumulate steps for plan/Q rebuild
+                        accumulated_steps.extend(_cyc_artifacts.steps)
+                        # Re-build Sleep plan and Q from expanded experience
+                        sleep_plan, sleep_meta = _build_sleep_action_plan(accumulated_steps, start_pos=sp, goal_pos=gp)
+                        sleep_q, sleep_q_meta = _build_sleep_q_table(
+                            accumulated_steps,
+                            start_pos=sp,
+                            goal_pos=gp,
+                            gamma=float(getattr(warm_cfg, "sleep_q_gamma", 0.99)),
+                            alpha=float(getattr(warm_cfg, "sleep_q_alpha", 0.4)),
+                            iters=int(getattr(warm_cfg, "sleep_q_iters", 50)),
+                            step_penalty=float(getattr(warm_cfg, "sleep_q_step_penalty", -0.01)),
+                            goal_reward=float(getattr(warm_cfg, "sleep_q_goal_reward", 1.0)),
+                            revisit_penalty=float(getattr(warm_cfg, "sleep_q_revisit_penalty", -0.2)),
+                            deadend_penalty=float(getattr(warm_cfg, "sleep_q_deadend_penalty", 0.0)),
+                            blocked_penalty=float(getattr(warm_cfg, "sleep_q_blocked_penalty", 0.0)),
+                            revisit_threshold=int(getattr(warm_cfg, "cortisol_repeat_visits", 2)),
+                        )
+                        # Re-optimize graph
+                        if accumulated_graph is not None and accumulated_graph.number_of_nodes() > 0:
+                            try:
+                                optimized_graph = _sleep_graph_optimize(
+                                    accumulated_graph,
+                                    gamma=float(getattr(warm_cfg, "sleep_propagate_gamma", 0.95)),
+                                    n_iters=int(getattr(warm_cfg, "sleep_propagate_iters", 50)),
+                                )
+                            except Exception:
+                                pass
 
                     eval_artifacts = run_episode_query(
                         seed=seed,
@@ -4270,7 +4484,7 @@ def main() -> None:
                     "repeat_visits": int(getattr(args, "cortisol_repeat_visits", 2)),
                 },
                 "sleep_q": {
-                    "beta": float(getattr(args, "sleep_q_beta", 4.0)),
+                    "beta": 0.0,  # deprecated: Q bias now controlled by action_temp
                     "gamma": float(getattr(args, "sleep_q_gamma", 0.99)),
                     "alpha": float(getattr(args, "sleep_q_alpha", 0.4)),
                     "iters": int(getattr(args, "sleep_q_iters", 50)),
@@ -4309,6 +4523,7 @@ def main() -> None:
                     "attention_boost": float(getattr(args, "attention_boost", 0.1)),
                     "attention_alpha": float(getattr(args, "attention_alpha", 0.5)),
                     "min_layer1_candidates": int(getattr(args, "min_layer1_candidates", 2)),
+                    "dg_gate_tau": float(getattr(args, "dg_gate_tau", 1.0)),
                 },
             },
             "summary": summary,

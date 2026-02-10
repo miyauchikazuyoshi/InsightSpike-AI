@@ -189,6 +189,21 @@ class StepRecord:
     search_revisit_similarity: float = 0.0
     search_time_ms: float = 0.0
     search_l1_candidates: int = 0
+    # Three-attention diagnostics (Phase A: measurement only)
+    ag_attention_mean: float = 0.0       # mean ag_attention across all edges
+    ag_attention_max: float = 0.0        # max ag_attention
+    ag_attention_count: int = 0          # edges with ag_attention recorded
+    dg_attention_mean: float = 0.0       # mean dg_attention (raw g_min) across DG edges
+    dg_attention_max: float = 0.0        # max (least negative) dg_attention
+    dg_attention_count: int = 0          # edges with dg_attention recorded
+    reward_attention_mean: float = 0.0   # mean propagated (dim9) across nodes
+    reward_attention_max: float = 0.0    # max propagated
+    reward_attention_min: float = 0.0    # min propagated
+    # Phase B: L1 3-attention scoring diagnostics
+    search_l1_score_3att_max: float = 0.0
+    search_l1_score_3att_mean: float = 0.0
+    search_l1_score_legacy_max: float = 0.0
+    search_l1_score_legacy_mean: float = 0.0
 
 
 @dataclass
@@ -215,7 +230,7 @@ class QueryHubConfig:
     anti_backtrack: bool = True
     action_source: str = "obs"  # 'obs' (default) or 'mix' (obs+mem)
     # Sleep Q (policy prior) controls: used when sleep_guide == 'prefer'
-    sleep_q_beta: float = 4.0
+    sleep_q_beta: float = 0.0  # deprecated: Q bias now controlled by action_temp
     # Sleep plan soft bias controls: used when sleep_guide == 'prefer'
     sleep_plan_beta: float = 0.0
     # Diagnostics/Eval scope
@@ -329,6 +344,8 @@ class QueryHubConfig:
     # Graph-persistent DG: extended vector mode and Sleep propagation
     vector_mode: str = "standard"  # 'standard' (8D) or 'extended' (10D)
     propagated_alpha: float = 1.0
+    propagated_mode: str = "abs"  # 'abs' or 'gradient'
+    advantage_commit: float = 0.0  # if > 1.0, argmax when best/second >= threshold
     sleep_propagate_gamma: float = 0.95
     sleep_propagate_iters: int = 50
     # SP definition mode: asp (default), betti1, both (parallel recording)
@@ -340,6 +357,11 @@ class QueryHubConfig:
     attention_boost: float = 0.1           # traverse boost
     attention_alpha: float = 0.5           # attention exponent for effective_score
     min_layer1_candidates: int = 2         # min L1 candidates to skip L2
+    dg_gate_tau: float = 1.0               # DG gate temperature for L1
+    l1_tau_dg: float = 0.3                 # σ(-dg_attention/τ) temperature (3att)
+    l1_tau_reward: float = 0.3             # σ(propagated/τ) temperature (3att)
+    l1_score_mode: str = "legacy"          # 'legacy' or '3att'
+    l1_score_switch_step: int = 0          # step to switch from legacy to l1_score_mode (0=no switch)
 
 
 @dataclass

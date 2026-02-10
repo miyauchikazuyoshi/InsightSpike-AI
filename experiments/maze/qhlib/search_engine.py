@@ -43,13 +43,20 @@ class ThreeLayerSearchEngine:
         theta_revisit: float = 0.95,
         theta_attention: float = 0.3,
         attention_alpha: float = 0.5,
+        dg_gate_tau: float = 1.0,
+        tau_dg_3att: float = 0.3,
+        tau_reward: float = 0.3,
+        score_mode: str = "legacy",
         weight_vector: np.ndarray,
         top_k: int = 32,
         min_layer1_candidates: int = 2,
     ):
         self.hash_index = VectorHashIndex(resolution=hash_resolution)
         self.graph_walker = AttentionGraphWalker(
-            theta=theta_attention, alpha=attention_alpha
+            theta=theta_attention, alpha=attention_alpha,
+            dg_gate_tau=dg_gate_tau,
+            tau_dg_3att=tau_dg_3att, tau_reward=tau_reward,
+            score_mode=score_mode,
         )
         self.theta_revisit = theta_revisit
         self.min_layer1 = min_layer1_candidates

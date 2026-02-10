@@ -95,9 +95,9 @@ geDIG は Phase 1 では完全にヒューリスティック（人間定義）�
 | Phase | テーマ | 正例/負例 | 埋め込み空間・ベクトル定義 | 検討状態 |
 |-------|--------|----------|--------------------------|----------|
 | 1 | 覚醒実装 | なし | ヒューリスティック | [実装済](#phase-1-仕様概略) |
-| 2 | 覚醒-睡眠-覚醒実装 | ヒューリスティック | ヒューリスティック | [仕様検討中](../../docs/research/phase2/draft_specification.md) |
+| 2 | 覚醒-睡眠-覚醒実装 | ヒューリスティック | ヒューリスティック | **プロトタイプ完了**（統計試験未実施）|
 | 3 | 埋め込み/ベクトル定義の動的化 | ヒューリスティック | 内発報酬により可変 | [仕様検討中](../../docs/design/episode_memory_autodesign.md) |
-| 4 | 正例/負例の自己判断 | 経験により可変定義 | 内発報酬により可変 | 未検討/構想中 |
+| 4 | 正例/負例の自己判断 | 経験により可変定義 | 内発報酬により可変 | [構想中](../../docs/research/thinking/spiral_agdg_flow.md) |
 
 **「最初から学習不要で動く、経験を積むと賢くなる」**
 
@@ -303,6 +303,80 @@ python experiments/maze-query-hub-prototype/tools/run_adjusted_step_caps.py \
 - Timeline uses mh‑only minima（gminはhop>=1のみで集計）
 - Show all query nodes（過去Qの表示） / Show SP anchors（アンカー表示）
 
+## 推奨デフォルト実験設定
+
+### seed毎の分割実行（推奨）
+
+メモリ蓄積を回避し、途中結果を保全するため、**seed毎に分割実行**を推奨する。
+参考実装: `run_v6_perseed.sh`
+
+```bash
+OUTDIR="results/my_experiment"
+SQLITEDIR="$OUTDIR/sqlite"
+mkdir -p "$OUTDIR" "$SQLITEDIR"
+
+for SEED in $(seq 0 9); do
+    OUTFILE="$OUTDIR/seed${SEED}.json"
+    SQLITE="$SQLITEDIR/seed${SEED}.db"
+
+    # スキップ（既存結果がある場合）
+    [ -f "$OUTFILE" ] && echo "[seed=$SEED] skip" && continue
+
+    PYTHONPATH=.../src INSIGHTSPIKE_MIN_IMPORT=1 INSIGHTSPIKE_LITE_MODE=1 \
+    .venv/bin/python3 run_experiment_query.py \
+        --seeds 1 --seed-start "$SEED" \
+        --maze-size 25 --max-steps 500 \
+        --max-hops 10 --sp-cand-topk 5 \
+        --lambda-weight 1.0 --theta-ag 0.4 \
+        --vector-mode extended --steps-ultra-light \
+        --search-mode threelayer --dg-gate-tau 1.0 \
+        --persist-graph-sqlite "$SQLITE" \
+        --output "$OUTFILE"
+done
+```
+
+ポイント:
+- `--seeds 1 --seed-start $SEED` でseed毎に独立実行
+- `--persist-graph-sqlite` でグラフ（記憶）をSQLiteに永続化
+- `--output` でseed毎にJSON保存（途中クラッシュしても完了分は保全）
+- `--steps-ultra-light` でメモリ・ディスク消費を抑制
+- `--checkpoint-interval N` を追加すると N ステップ毎に中間結果を書き出し
+
+### 三層検索（Three-Layer Search）の推奨設定
+
+Wake-Sleep-Wake アーキテクチャの推論フェーズでは三層検索を有効化する。
+
+```
+--search-mode threelayer     # 三層検索を有効化（default: legacy）
+--dg-gate-tau 1.0            # DG Gate温度（σ(propagated/τ)）
+--theta-attention 0.3        # L1 attention閾値
+--attention-decay 0.95       # attention減衰率（per step）
+--attention-boost 0.1        # エッジ走行時のattentionブースト
+--attention-alpha 0.5        # effective_scoreのattention指数
+--min-layer1-candidates 2    # L1候補がこの数未満ならL2フォールバック
+```
+
+#### 三層検索の構造
+
+| Layer | 名称 | 計算量 | 役割 | RAG対応 |
+|-------|------|--------|------|---------|
+| L0 | VectorHashIndex | O(1) | 再訪検出（ハッシュ一致） | 通常RAG（embedding検索キャッシュ） |
+| L1 | AttentionGraphWalker + DG Gate | O(degree) | グラフ近傍の質的選別 | GraphRAG（attention + 正例/負例ベース） |
+| L2 | Full memory sort | O(N log N) | フォールバック全探索 | 全ドキュメント再ランキング |
+
+- L0でヒット → L1でグラフ歩行 → DG Gate `σ(propagated/τ)` で候補の質をゲーティング
+- L1の候補数 < `min-layer1-candidates` の場合、L2へフォールバック
+- **DG Gate**: Sleep phaseで事前計算した `propagated` 値（Q-learning的逆伝播）を利用
+  - 正 → 有望（gate ≈ 1）、ゼロ → 中立（gate = 0.5、L2へ委任）、負 → 抑制（gate ≈ 0）
+
+### パフォーマンス注意事項
+
+| パラメータ | 推奨値 | 注意 |
+|-----------|--------|------|
+| `--max-hops` | 10 | 15は25x25で極端に遅い（78x）|
+| `--sp-cand-topk` | 5 | 0（無制限）は大迷路で危険 |
+| `--sp-hop-expand` | 3 | eff_hop = max_hops + expand |
+
 ## CLI（抜粋）
 - geDIG/評価
   - `--max-hops H` / `--lambda-weight` / `--sp-beta` / `--sp-scope` / `--sp-boundary` / `--sp-hop-expand`
@@ -312,6 +386,10 @@ python experiments/maze-query-hub-prototype/tools/run_adjusted_step_caps.py \
 - 候補/行動
   - `--theta-cand/--theta-link` / `--candidate-cap` / `--top-m` / `--cand-radius/--link-radius`
   - `--action-policy {argmax|softmax}` / `--action-temp τ` / `--anti-backtrack/--no-anti-backtrack`
+- 三層検索
+  - `--search-mode {legacy|threelayer}` / `--dg-gate-tau τ`
+  - `--theta-attention` / `--attention-decay` / `--attention-boost` / `--attention-alpha`
+  - `--min-layer1-candidates`
 - 永続化/スナップショット
   - `--persist-graph-sqlite PATH` / `--persist-namespace` / `--persist-forced-candidates` / `--persist-timeline-edges`
   - `--snapshot-level {minimal|standard|full}` / `--snapshot-mode {before_select|after_select}`

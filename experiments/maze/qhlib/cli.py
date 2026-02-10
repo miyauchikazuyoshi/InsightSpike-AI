@@ -156,7 +156,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--cortisol-repeat-visits", type=int, default=2, help="Treat a position as 'revisited' after this many visits (negative label).")
     # Sleep Q (value propagation) controls: used when sleep guide is 'prefer'
     parser.add_argument("--sleep-plan-beta", type=float, default=0.0, help="Bias strength for BFS Sleep plan action when --sleep-guide prefer (logit bonus).")
-    parser.add_argument("--sleep-q-beta", type=float, default=4.0, help="Bias strength for Sleep Q(s,a) when --sleep-guide prefer (logit multiplier).")
+    parser.add_argument("--sleep-q-beta", type=float, default=0.0, help="DEPRECATED: Q bias now controlled by --action-temp. Ignored if set.")
     parser.add_argument("--sleep-q-gamma", type=float, default=0.99, help="Discount factor for Sleep Q-learning replay.")
     parser.add_argument("--sleep-q-alpha", type=float, default=0.4, help="Learning rate for Sleep Q-learning replay.")
     parser.add_argument("--sleep-q-iters", type=int, default=50, help="Replay iterations for Sleep Q-learning.")
@@ -186,7 +186,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--vector-mode", type=str, default="standard", choices=["standard", "extended"],
                         help="Vector mode: standard (8D) or extended (10D with reward/propagated dims).")
     parser.add_argument("--propagated-alpha", type=float, default=1.0,
-                        help="Scalar bonus weight for propagated values (standard mode only; extended uses vector dims).")
+                        help="Scalar bonus weight for propagated values in action selection.")
+    parser.add_argument("--propagated-mode", type=str, default="abs", choices=["abs", "gradient"],
+                        help="How to use propagated values: abs (raw value) or gradient (prop(next) - prop(here)).")
+    parser.add_argument("--wsw-cycles", type=int, default=1,
+                        help="Number of Wake-Sleep cycles before final eval (1=W-S-W, 2=W-S-W-S-W). Warmup budget split evenly.")
+    parser.add_argument("--advantage-commit", type=float, default=0.0,
+                        help="Advantage-gated selection: if best_weight/second_weight > threshold, use argmax. 0=disabled.")
     parser.add_argument("--sleep-propagate-gamma", type=float, default=0.95,
                         help="Discount factor for graph reward propagation in Sleep phase.")
     parser.add_argument("--sleep-propagate-iters", type=int, default=50,
@@ -216,6 +222,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--attention-boost", type=float, default=0.1, help="Attention boost on edge traversal")
     parser.add_argument("--attention-alpha", type=float, default=0.5, help="Attention exponent for effective_score")
     parser.add_argument("--min-layer1-candidates", type=int, default=2, help="Min L1 candidates to skip L2 fallback")
+    parser.add_argument("--dg-gate-tau", type=float, default=1.0, help="DG gate temperature: σ(propagated/τ) modulates L1 effective_score")
+    parser.add_argument("--l1-tau-dg", type=float, default=0.3, help="Temperature for σ(-dg_attention/τ) in 3-attention L1 scoring")
+    parser.add_argument("--l1-tau-reward", type=float, default=0.3, help="Temperature for σ(reward_attention/τ) in 3-attention L1 scoring")
+    parser.add_argument("--l1-score-mode", type=str, default="legacy", choices=["legacy", "3att"], help="L1 scoring: legacy (att^α×sim×gate) or 3att (ag×σ(-dg/τ)×σ(rw/τ))")
+    parser.add_argument("--l1-score-switch-step", type=int, default=0, help="Step at which to switch from legacy to l1-score-mode (0=no switch, use l1-score-mode from start)")
     # Defaults
     parser.set_defaults(link_autowire_all=True)
     # Prefer recording per-hop on AG in L3-light path unless explicitly disabled
@@ -290,7 +301,7 @@ def build_config(
         action_temp=float(args.action_temp),
         action_source=str(getattr(args, "action_source", "obs")),
         anti_backtrack=bool(args.anti_backtrack),
-        sleep_q_beta=float(getattr(args, "sleep_q_beta", 4.0)),
+        sleep_q_beta=0.0,  # deprecated: Q bias now controlled by action_temp
         sleep_plan_beta=float(getattr(args, "sleep_plan_beta", 0.0)),
         anchor_recent_q=int(args.anchor_recent_q),
         sp_cache=bool(args.sp_cache),
@@ -355,6 +366,8 @@ def build_config(
         sleep_edge_mode=str(getattr(args, "sleep_edge_mode", "mul")),
         vector_mode=str(getattr(args, "vector_mode", "standard")),
         propagated_alpha=float(getattr(args, "propagated_alpha", 1.0)),
+        propagated_mode=str(getattr(args, "propagated_mode", "abs")),
+        advantage_commit=float(getattr(args, "advantage_commit", 0.0)),
         sleep_propagate_gamma=float(getattr(args, "sleep_propagate_gamma", 0.95)),
         sleep_propagate_iters=int(getattr(args, "sleep_propagate_iters", 50)),
         event_weights=dict(event_weights or {}),
@@ -373,4 +386,9 @@ def build_config(
         attention_boost=float(getattr(args, "attention_boost", 0.1)),
         attention_alpha=float(getattr(args, "attention_alpha", 0.5)),
         min_layer1_candidates=int(getattr(args, "min_layer1_candidates", 2)),
+        dg_gate_tau=float(getattr(args, "dg_gate_tau", 1.0)),
+        l1_tau_dg=float(getattr(args, "l1_tau_dg", 0.3)),
+        l1_tau_reward=float(getattr(args, "l1_tau_reward", 0.3)),
+        l1_score_mode=str(getattr(args, "l1_score_mode", "legacy")),
+        l1_score_switch_step=int(getattr(args, "l1_score_switch_step", 0)),
     )
