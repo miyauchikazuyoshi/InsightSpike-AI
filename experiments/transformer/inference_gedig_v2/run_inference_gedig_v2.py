@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import gc
 import json
 import random
 from datetime import datetime, timezone
@@ -106,11 +107,40 @@ def load_model_and_tokenizer(
     model_kind: str,
     random_init: bool,
     device: torch.device,
+    local_files_only: bool,
+    prefer_safetensors: bool,
 ) -> Tuple[torch.nn.Module, object, str]:
-    config = AutoConfig.from_pretrained(model_name)
+    def _from_pretrained_preferring_safetensors(auto_cls, name: str):
+        """Prefer safetensors to avoid legacy .bin loading paths."""
+        try:
+            return auto_cls.from_pretrained(
+                name,
+                use_safetensors=True,
+                local_files_only=local_files_only,
+            )
+        except Exception as exc:
+            # Transformers may try Hub API conversion checks when safetensors
+            # is unavailable. Force a direct .bin load as fallback.
+            try:
+                return auto_cls.from_pretrained(
+                    name,
+                    use_safetensors=False,
+                    local_files_only=local_files_only,
+                )
+            except Exception:
+                raise exc
+
+    config = AutoConfig.from_pretrained(
+        model_name,
+        local_files_only=local_files_only,
+    )
     resolved_kind = infer_model_kind(model_name=model_name, config=config, explicit=model_kind)
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_name,
+        use_fast=True,
+        local_files_only=local_files_only,
+    )
     if tokenizer.pad_token is None:
         if tokenizer.eos_token is not None:
             tokenizer.pad_token = tokenizer.eos_token
@@ -121,13 +151,29 @@ def load_model_and_tokenizer(
         model = (
             AutoModelForCausalLM.from_config(config)
             if random_init
-            else AutoModelForCausalLM.from_pretrained(model_name)
+            else (
+                _from_pretrained_preferring_safetensors(AutoModelForCausalLM, model_name)
+                if prefer_safetensors
+                else AutoModelForCausalLM.from_pretrained(
+                    model_name,
+                    use_safetensors=False,
+                    local_files_only=local_files_only,
+                )
+            )
         )
     else:
         model = (
             AutoModelForMaskedLM.from_config(config)
             if random_init
-            else AutoModelForMaskedLM.from_pretrained(model_name)
+            else (
+                _from_pretrained_preferring_safetensors(AutoModelForMaskedLM, model_name)
+                if prefer_safetensors
+                else AutoModelForMaskedLM.from_pretrained(
+                    model_name,
+                    use_safetensors=False,
+                    local_files_only=local_files_only,
+                )
+            )
         )
 
     if len(tokenizer) > model.get_input_embeddings().num_embeddings:
@@ -135,6 +181,9 @@ def load_model_and_tokenizer(
     if getattr(model.config, "pad_token_id", None) is None and tokenizer.pad_token_id is not None:
         model.config.pad_token_id = tokenizer.pad_token_id
 
+    if device.type == "mps":
+        # Some model configs default to bf16, which MPS cannot accept.
+        model = model.to(dtype=torch.float32)
     model.to(device)
     model.eval()
     return model, tokenizer, resolved_kind
@@ -189,6 +238,20 @@ def _safe_mean(values: Sequence[Optional[float]]) -> Optional[float]:
     return float(np.mean(finite))
 
 
+def resolve_structural_term(sp_mode: str, requested_term: str) -> str:
+    """Resolve which structural delta curve should be used in F."""
+    if requested_term not in {"sp", "betti1"}:
+        raise ValueError(f"unsupported structural term: {requested_term}")
+    if sp_mode not in {"spearman", "betti1", "both"}:
+        raise ValueError(f"unsupported sp_mode: {sp_mode}")
+
+    if sp_mode == "spearman" and requested_term != "sp":
+        raise ValueError("f-structural-term=betti1 requires --sp-mode betti1 or both")
+    if sp_mode == "betti1" and requested_term != "betti1":
+        raise ValueError("f-structural-term=sp requires --sp-mode spearman or both")
+    return requested_term
+
+
 def run_condition(
     condition_name: str,
     model: torch.nn.Module,
@@ -208,9 +271,11 @@ def run_condition(
         "H": [],
         "EPC": [],
         "SP": [],
+        "B1": [],
         "delta_H": [],
         "delta_EPC": [],
         "delta_SP": [],
+        "delta_B1": [],
         "F": [],
     }
     sample_records: List[Dict[str, object]] = []
@@ -251,11 +316,17 @@ def run_condition(
             b_depth=b_depth,
             temperature=args.temperature,
             vocab_chunk_tokens=args.vocab_chunk_tokens,
+            sp_mode=args.sp_mode,
+            betti_k_neighbors=args.betti_k_neighbors,
+            betti_threshold=args.betti_threshold,
         )
+        structural_term = resolve_structural_term(args.sp_mode, args.f_structural_term)
+        structural_curve = curves.delta_SP if structural_term == "sp" else curves.delta_B1
+
         f_curve = compute_f_curve(
             delta_epc=curves.delta_EPC,
             delta_h=curves.delta_H,
-            delta_sp=curves.delta_SP,
+            delta_sp=structural_curve,
             lambda_param=args.lambda_param,
             gamma=args.gamma,
         )
@@ -267,9 +338,11 @@ def run_condition(
         curves_by_metric["H"].append(curves.H)
         curves_by_metric["EPC"].append(curves.EPC)
         curves_by_metric["SP"].append(curves.SP)
+        curves_by_metric["B1"].append(curves.B1)
         curves_by_metric["delta_H"].append(curves.delta_H)
         curves_by_metric["delta_EPC"].append(curves.delta_EPC)
         curves_by_metric["delta_SP"].append(curves.delta_SP)
+        curves_by_metric["delta_B1"].append(curves.delta_B1)
         curves_by_metric["F"].append(f_curve)
 
         record: Dict[str, object] = {
@@ -294,10 +367,12 @@ def run_condition(
     if args.grid_search:
         lambda_values = parse_float_list(args.grid_lambda)
         gamma_values = parse_float_list(args.grid_gamma)
+        structural_term = resolve_structural_term(args.sp_mode, args.f_structural_term)
+        structural_key = "delta_SP" if structural_term == "sp" else "delta_B1"
         grid_result = grid_search_f(
             delta_epc=mean_curves["delta_EPC"],
             delta_h=mean_curves["delta_H"],
-            delta_sp=mean_curves["delta_SP"],
+            delta_sp=mean_curves[structural_key],
             lambda_values=lambda_values,
             gamma_values=gamma_values,
         )
@@ -313,6 +388,7 @@ def run_condition(
         "mean_sample_r2": _safe_mean([record["fit"]["r2"] for record in sample_records]),  # type: ignore[index]
         "mean_sample_slope": _safe_mean([record["fit"]["slope"] for record in sample_records]),  # type: ignore[index]
         "grid_search_best": grid_result,
+        "f_structural_term": resolve_structural_term(args.sp_mode, args.f_structural_term),
     }
 
     if args.save_samples:
@@ -332,6 +408,32 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--gamma", type=float, default=0.5)
     parser.add_argument("--temperature", type=float, default=1.0)
     parser.add_argument("--vocab-chunk-tokens", type=int, default=8)
+    parser.add_argument(
+        "--sp-mode",
+        type=str,
+        default="both",
+        choices=["spearman", "betti1", "both"],
+        help="Structural metrics to compute: spearman, betti1, or both",
+    )
+    parser.add_argument(
+        "--f-structural-term",
+        type=str,
+        default="betti1",
+        choices=["sp", "betti1"],
+        help="Which structural delta term to use in F (delta_SP or delta_B1)",
+    )
+    parser.add_argument(
+        "--betti-k-neighbors",
+        type=int,
+        default=5,
+        help="k for k-NN graph when computing Betti-1 (<=0 uses threshold graph)",
+    )
+    parser.add_argument(
+        "--betti-threshold",
+        type=float,
+        default=None,
+        help="Distance threshold for Betti graph when --betti-k-neighbors <= 0 (default: median)",
+    )
 
     parser.add_argument("--b-dist", type=str, default=None, help="Path to B_dist .npy")
     parser.add_argument("--b-depth", type=str, default=None, help="Path to B_depth .npy")
@@ -347,6 +449,16 @@ def build_parser() -> argparse.ArgumentParser:
 
     parser.add_argument("--device", type=str, default="auto", choices=["auto", "cpu", "cuda", "mps"])
     parser.add_argument(
+        "--local-files-only",
+        action="store_true",
+        help="Load model/tokenizer from local cache only (skip remote fetch).",
+    )
+    parser.add_argument(
+        "--prefer-safetensors",
+        action="store_true",
+        help="Try safetensors first (falls back to .bin if needed).",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=Path("experiments/transformer/inference_gedig_v2/results"),
@@ -359,6 +471,7 @@ def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
     args.device = choose_device(args.device)
+    resolve_structural_term(args.sp_mode, args.f_structural_term)
 
     torch.manual_seed(args.seed)
     random.seed(args.seed)
@@ -371,11 +484,19 @@ def main() -> None:
         model_kind=args.model_kind,
         random_init=False,
         device=args.device,
+        local_files_only=args.local_files_only,
+        prefer_safetensors=args.prefer_safetensors,
     )
 
     print(f"[info] device={args.device}")
     print(f"[info] model={args.model} kind={resolved_kind}")
+    print(f"[info] local_files_only={args.local_files_only}")
+    print(f"[info] prefer_safetensors={args.prefer_safetensors}")
     print(f"[info] samples={len(texts)}")
+    print(
+        f"[info] sp_mode={args.sp_mode} "
+        f"f_structural_term={resolve_structural_term(args.sp_mode, args.f_structural_term)}"
+    )
 
     conditions: Dict[str, object] = {}
     conditions["baseline"] = run_condition(
@@ -400,11 +521,21 @@ def main() -> None:
         )
 
     if args.random_control:
+        # Free pretrained model before building random-init model to reduce peak memory.
+        del model
+        gc.collect()
+        if args.device.type == "cuda":
+            torch.cuda.empty_cache()
+        elif args.device.type == "mps":
+            torch.mps.empty_cache()
+
         random_model, random_tokenizer, random_kind = load_model_and_tokenizer(
             model_name=args.model,
             model_kind=args.model_kind,
             random_init=True,
             device=args.device,
+            local_files_only=args.local_files_only,
+            prefer_safetensors=args.prefer_safetensors,
         )
         conditions["random_init"] = run_condition(
             condition_name="random_init",
@@ -436,7 +567,8 @@ def main() -> None:
                 "H": "vocab entropy from hidden->unembedding logits",
                 "EPC": "normalized Frobenius distance-matrix change",
                 "SP": "Spearman correlation of depth predictions across layers",
-                "F": "delta_EPC - lambda*(delta_H + gamma*delta_SP)",
+                "B1": "first Betti number from layer-wise distance graph",
+                "F": "delta_EPC - lambda*(delta_H + gamma*delta_structural)",
             },
         },
         "config": {
@@ -446,6 +578,10 @@ def main() -> None:
             "b_dist": args.b_dist,
             "b_depth": args.b_depth,
             "proj_dim": args.proj_dim,
+            "sp_mode": args.sp_mode,
+            "f_structural_term": resolve_structural_term(args.sp_mode, args.f_structural_term),
+            "betti_k_neighbors": args.betti_k_neighbors,
+            "betti_threshold": args.betti_threshold,
             "grid_search": args.grid_search,
             "grid_lambda": args.grid_lambda,
             "grid_gamma": args.grid_gamma,

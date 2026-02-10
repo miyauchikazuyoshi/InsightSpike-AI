@@ -52,6 +52,9 @@ archive/
 .ruff_cache/
 *.egg-info/
 
+# Private research notes (pre-publication)
+docs/research/thinking/_private/
+
 # Misc
 .coverage
 .DS_Store
