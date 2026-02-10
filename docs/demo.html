@@ -458,14 +458,47 @@
 
     </section>
 
-    <section id="demo" class="py-10 bg-panel/30 border-y border-white/5 backdrop-blur-sm">
+    <section id="intuition" class="py-16 bg-panel/30 border-y border-white/5 backdrop-blur-sm">
         <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-white flex items-center justify-center gap-3 mb-4">
+                    <span class="w-1 h-8 bg-accent rounded-full"></span>
+                    Visual Intuition
+                </h2>
+                <p class="text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                    Why does F need <em>three</em> terms? The
+                    <a href="research/thinking/matchstick_figure_v2_en.html" class="text-accent hover:underline font-semibold">Matchstick Figure</a>
+                    shows it in one glance: for the same edit cost (EPC&nbsp;=&nbsp;1),
+                    topology ($\Delta\beta_1$) and information ($\Delta H$) vary independently.
+                    One move can create a loop without changing entropy, or reduce entropy without changing topology.
+                </p>
+                <div class="mt-6 flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="research/thinking/matchstick_figure_v2_en.html"
+                        class="px-6 py-3 rounded-full bg-accent hover:bg-cyan-400 text-bg font-bold transition shadow-[0_0_20px_rgba(34,211,238,0.3)] text-center">
+                        Matchstick Figure (EN)
+                    </a>
+                    <a href="research/thinking/matchstick_figure_v2.html"
+                        class="px-6 py-3 rounded-full border border-slate-600 hover:border-white hover:bg-white/5 transition font-medium text-center">
+                        Matchstick Figure (JA)
+                    </a>
+                </div>
+            </div>
+
+            <details class="group">
+                <summary class="cursor-pointer flex items-center justify-center gap-2 text-sm text-slate-500 hover:text-slate-300 transition py-4">
+                    <svg class="w-4 h-4 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                    <span>Interactive Graph Demo &mdash; see F in real-time as a graph grows</span>
+                </summary>
+
+            <div class="mt-8">
             <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
                 <div>
-                    <h2 class="text-3xl font-bold text-white flex items-center gap-3">
-                        <span class="w-1 h-8 bg-accent rounded-full"></span>
+                    <h3 class="text-2xl font-bold text-white flex items-center gap-3">
+                        <span class="w-1 h-6 bg-accent rounded-full"></span>
                         Visualizing "The Pulse"
-                    </h2>
+                    </h3>
                     <p class="text-slate-400 mt-2 text-sm">
                         Real-time simulation of the gauge $\mathcal{F}$ as the graph grows.<br>
                         Click anywhere in the graph to inject a new query node and see if it triggers an Insight (DG) or
@@ -640,6 +673,9 @@
                     </div>
                 </div>
             </div>
+            </div>
+            </details>
+
         </div>
     </section>
 
