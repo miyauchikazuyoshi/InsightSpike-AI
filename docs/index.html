@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>geDIG — The Thermodynamics of Intelligence</title>
+<meta name="description" content="A research framework exploring whether a single dimensionless equation spanning metric, measure, and topology can describe how any information-bearing system restructures itself.">
+<meta property="og:title" content="geDIG — The Thermodynamics of Intelligence">
+<meta property="og:description" content="F = ΔEPC − λ(ΔH + γΔβ₁) — Three independent mathematical structures. One dimensionless, scale-invariant scalar.">
+<meta property="og:url" content="https://miyauchikazuyoshi.github.io/InsightSpike-AI/">
+<meta property="og:type" content="website">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #faf8f5;
+    font-family: 'Source Serif 4', 'Georgia', serif;
+    color: #1a1a1a;
+    line-height: 1.7;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px 80px;
+  }
+
+  .page { max-width: 820px; width: 100%; }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    margin-bottom: 48px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .hero h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+
+  .hero .subtitle {
+    font-size: 15px;
+    color: #666;
+    font-style: italic;
+    max-width: 600px;
+    margin: 0 auto 28px;
+    line-height: 1.6;
+  }
+
+  .equation-box {
+    background: #f0ece6;
+    border: 1px solid #d4cfc7;
+    border-radius: 8px;
+    padding: 20px 28px;
+    margin: 24px auto;
+    max-width: 520px;
+  }
+
+  .equation {
+    font-family: 'Times New Roman', 'Source Serif 4', serif;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #1a1a1a;
+  }
+
+  .equation .epc { color: #c45a2d; }
+  .equation .h   { color: #2a6b8a; }
+  .equation .b   { color: #6b2fa0; }
+
+  .nav-links {
+    margin-top: 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+  }
+
+  .nav-links a {
+    color: #555;
+    text-decoration: none;
+    margin: 0 8px;
+    padding: 5px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+
+  .nav-links a:hover {
+    color: #111;
+    border-color: #999;
+    background: #f0ece6;
+  }
+
+  /* Sections */
+  section {
+    margin-bottom: 44px;
+    padding-bottom: 36px;
+    border-bottom: 1px solid #e5e1db;
+  }
+
+  section:last-child { border-bottom: none; }
+
+  h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 14px;
+    letter-spacing: 0.01em;
+  }
+
+  h3 {
+    font-size: 17px;
+    font-weight: 600;
+    color: #333;
+    margin: 20px 0 10px;
+  }
+
+  p { margin-bottom: 12px; color: #333; }
+
+  a { color: #2a6b8a; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  blockquote {
+    border-left: 3px solid #c45a2d;
+    padding: 8px 16px;
+    margin: 14px 0;
+    color: #555;
+    font-style: italic;
+    background: #f7f4ef;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  th {
+    text-align: left;
+    font-weight: 600;
+    color: #555;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 8px 12px;
+    border-bottom: 2px solid #ccc;
+  }
+
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #e5e1db;
+    color: #333;
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  /* Term table colors */
+  .term-table .term-epc { color: #c45a2d; font-weight: 600; }
+  .term-table .term-h   { color: #2a6b8a; font-weight: 600; }
+  .term-table .term-b   { color: #6b2fa0; font-weight: 600; }
+
+  /* Code */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: #f0ece6;
+    padding: 2px 5px;
+    border-radius: 3px;
+    color: #333;
+  }
+
+  pre {
+    background: #2d2d2d;
+    color: #e0e0e0;
+    padding: 16px 20px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 14px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  pre code {
+    background: none;
+    padding: 0;
+    color: inherit;
+  }
+
+  /* Flow diagram */
+  .flow-diagram {
+    background: #f7f4ef;
+    border: 1px solid #e5e1db;
+    border-radius: 6px;
+    padding: 20px;
+    margin: 16px auto;
+    max-width: 380px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #333;
+    white-space: pre;
+    text-align: left;
+  }
+
+  /* Callout */
+  .callout {
+    background: #f0ece6;
+    border-left: 3px solid #6b2fa0;
+    padding: 14px 18px;
+    margin: 18px 0;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .callout-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b2fa0;
+    margin-bottom: 6px;
+  }
+
+  .callout p { margin-bottom: 6px; font-size: 14px; }
+
+  /* Ordered list */
+  ol {
+    margin: 12px 0;
+    padding-left: 24px;
+  }
+
+  ol li {
+    margin-bottom: 12px;
+    color: #333;
+  }
+
+  ol li strong { color: #111; }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    color: #888;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid #ddd;
+  }
+
+  .footer p { color: #888; margin-bottom: 6px; }
+  .footer a { color: #2a6b8a; }
+
+  /* Results highlight */
+  .result-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    margin: 14px 0;
+    padding: 12px 16px;
+    background: #f7f4ef;
+    border-radius: 6px;
+  }
+
+  .result-grid .label { color: #888; }
+  .result-grid .value { color: #333; font-weight: 600; }
+
+  .evolution-box {
+    background: #f7f4ef;
+    border: 1px solid #e5e1db;
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin: 14px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #555;
+  }
+
+  .evolution-box .arrow { color: #c45a2d; font-weight: 600; }
+  .evolution-box .comment { color: #999; font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Hero -->
+  <div class="hero">
+    <h1>The Thermodynamics of Intelligence</h1>
+    <p class="subtitle">
+      Can a single dimensionless equation &mdash; spanning metric, measure, and topology &mdash;
+      describe how any information-bearing system restructures itself?
+    </p>
+
+    <div class="equation-box">
+      <div class="equation">
+        F = <span class="epc">&Delta;EPC</span>
+        &minus; &lambda;(<span class="h">&Delta;H</span>
+        + &gamma;<span class="b">&Delta;&beta;<sub>1</sub></span>)
+      </div>
+    </div>
+
+    <table class="term-table" style="max-width: 560px; margin: 20px auto;">
+      <thead>
+        <tr><th>Term</th><th>Mathematical Structure</th><th>What It Captures</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="term-epc">&Delta;EPC</td><td>Metric (distance)</td><td>Cost of restructuring</td></tr>
+        <tr><td class="term-h">&Delta;H</td><td>Measure (probability)</td><td>Change in entropy</td></tr>
+        <tr><td class="term-b">&Delta;&beta;<sub>1</sub></td><td>Topology (loops)</td><td>Change in independent cycles</td></tr>
+      </tbody>
+    </table>
+
+    <p style="color: #666; font-size: 14px;">
+      Three independent mathematical structures. One dimensionless, scale-invariant scalar.<br>
+      <strong>F &lt; 0</strong> means information gain exceeds structural cost &mdash; the system should commit the change.
+    </p>
+
+    <div class="nav-links">
+      <a href="paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf">Paper (PDF)</a>
+      <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI">GitHub</a>
+      <a href="https://huggingface.co/spaces/miyaukaz/gedig-demo">Live Demo</a>
+      <a href="demo.html">Interactive Visualizer</a>
+    </div>
+  </div>
+
+  <!-- Visual Intuition -->
+  <section>
+    <h2>Visual Intuition: The Matchstick Figure</h2>
+    <p>
+      Why are these three terms independent?
+      The <a href="research/thinking/matchstick_figure_v2_en.html">Matchstick Figure</a>
+      provides an interactive visual explanation.
+    </p>
+    <p>
+      For the same edit cost (EPC = 1), topology (&Delta;&beta;<sub>1</sub>) and
+      information (&Delta;H) vary independently &mdash; one move can create a loop without
+      changing entropy, or reduce entropy without changing topology.
+      This independence is why F needs all three terms.
+    </p>
+    <p>
+      <a href="research/thinking/matchstick_figure_v2_en.html"><strong>View the Matchstick Figure (EN)</strong></a>
+      &nbsp;&middot;&nbsp;
+      <a href="research/thinking/matchstick_figure_v2.html"><strong>(JA)</strong></a>
+    </p>
+  </section>
+
+  <!-- Origin -->
+  <section>
+    <h2>Origin</h2>
+    <blockquote>"How do we build an AI that thinks like Einstein?"</blockquote>
+    <p>
+      From this question came geDIG: the hypothesis that <strong>insight is the topological
+      reconstruction of memory</strong>, and that it can be measured as a thermodynamic
+      quantity &mdash; isomorphic to Helmholtz free energy F = E &minus; TS.
+    </p>
+    <p>The equation evolved through research:</p>
+    <div class="evolution-box">
+      &Delta;IG <span class="comment">(undifferentiated gain)</span><br>
+      &nbsp;&nbsp;<span class="arrow">&darr;</span> decompose<br>
+      &Delta;H + &gamma;&Delta;SP <span class="comment">(SP = average shortest path &mdash; graph-dependent)</span><br>
+      &nbsp;&nbsp;<span class="arrow">&darr;</span> abstract<br>
+      &Delta;H + &gamma;&Delta;&beta;<sub>1</sub> <span class="comment">(&beta;<sub>1</sub> = first Betti number &mdash; topological invariant)</span>
+    </div>
+    <p>
+      The SP &rarr; &beta;<sub>1</sub> abstraction was the decisive leap: from an operational
+      definition that depends on graph shape, to a structural definition that exists wherever space exists.
+    </p>
+    <p><a href="research/gedig_origin_story.md"><strong>Read the full origin story</strong></a> (EN / JA)</p>
+    <blockquote>
+      Note: The v6 paper uses &Delta;SP (shortest-path shortening) as the structural term.
+      The ongoing research generalizes this to &Delta;&beta;<sub>1</sub>, which is a topological
+      invariant independent of graph shape or scale.
+    </blockquote>
+  </section>
+
+  <!-- AG/DG Gating -->
+  <section>
+    <h2>The Mechanism: AG/DG Gating</h2>
+    <p>Two gates govern intelligent processing:</p>
+    <div class="flow-diagram">Input
+  |
+  v
++-------------------------+
+|  AG (Attention Gate)    |
+|  "Is this surprising?"  |
+|                         |
+|  Prediction != Input    |
+|  -> Fire                |
++------------+------------+
+             | Yes
+             v
+       [ Process ]
+             |
+             v
++-------------------------+
+|  DG (Decision Gate)     |
+|  "Does F decrease?"     |
+|                         |
+|  dF < 0 -> Update       |
+|  dF >= 0 -> Reject      |
++------------+------------+
+             | Yes
+             v
+    [ Structure Update ]</div>
+    <p>
+      <strong>AG</strong> (Attention Gate): Detects ambiguity/novelty (0-hop). Analogous to noradrenaline.<br>
+      <strong>DG</strong> (Decision Gate): Confirms valid restructuring (multi-hop). Analogous to dopamine.
+    </p>
+    <blockquote>The neurotransmitter correspondence is a computational analogy, not a physiological claim.</blockquote>
+  </section>
+
+  <!-- Experiments -->
+  <section>
+    <h2>Experiments</h2>
+
+    <h3>Maze Navigation</h3>
+    <p>
+      A partial-observation maze agent that builds a persistent knowledge graph
+      and uses geDIG to decide when to explore vs. exploit.
+    </p>
+    <table>
+      <thead><tr><th>Experiment</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td><strong>15&times;15 Maze</strong> (Dynamic Gating)</td><td>60% &rarr; <strong>98%</strong> goal-reach rate</td></tr>
+        <tr><td><strong>25&times;25 Maze</strong> (Graph-Persistent DG)</td><td>Active experimentation with 10D vector extension</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Architecture: Wake-Sleep-Wake cycle with three-layer search
+      (L0: O(1) hash, L1: O(degree) attention walk, L2: O(N log N) full sort).
+    </p>
+    <pre><code># Reproduce (requires .venv with networkx, numpy, etc.)
+.venv/bin/python3 experiments/maze/run_experiment_query.py \
+  --maze-size 15 --max-steps 250 --seeds 12 \
+  --search-mode threelayer --vector-mode extended</code></pre>
+
+    <h3>Transformer Inference F-Trajectory</h3>
+    <p>
+      Layer-by-layer measurement of &Delta;EPC, &Delta;H, and &Delta;&beta;<sub>1</sub>
+      across Transformer hidden states, testing whether F tracks model quality.
+    </p>
+    <ul style="margin: 10px 0 10px 24px;">
+      <li><strong>8 token-level models tested</strong>: BERT, DistilBERT, GPT-2, GPT-2 Medium, DistilGPT2, TinyLlama (2 checkpoints)</li>
+      <li><strong>Key finding</strong>: GPT series shows monotonic improvement in &Delta;R&sup2;<sub>struct</sub> with model scale</li>
+    </ul>
+    <div class="result-grid">
+      <span class="label">distilgpt2:</span><span class="value">&Delta;R&sup2;<sub>struct</sub> = &minus;0.777</span>
+      <span class="label">gpt2:</span><span class="value">&Delta;R&sup2;<sub>struct</sub> = &minus;0.086</span>
+      <span class="label">gpt2-medium:</span><span class="value">&Delta;R&sup2;<sub>struct</sub> = &minus;0.065</span>
+    </div>
+    <p>
+      F has sensitivity to model quality &mdash; better models produce more structured F-trajectories.
+    </p>
+    <p>
+      <strong>Status</strong>: Preliminary. &Delta;R&sup2;<sub>struct</sub> is still negative for all models
+      (random-init outperforms baseline), but trending toward zero with scale. Large-scale model
+      verification (70B+) is future work.
+    </p>
+
+    <h3>Earlier Experiments</h3>
+    <p>
+      HotpotQA (multi-hop QA) and cross-domain analogy experiments were conducted in earlier phases
+      and informed the theory. These have not been reproduced under the current codebase and are archived.
+    </p>
+  </section>
+
+  <!-- Theoretical Connections -->
+  <section>
+    <h2>Theoretical Connections</h2>
+    <table>
+      <thead><tr><th>Framework</th><th>Mapping to geDIG</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Helmholtz Free Energy</strong></td><td>F = E &minus; TS &harr; F = &Delta;EPC &minus; &lambda;(&Delta;H + &gamma;&Delta;&beta;<sub>1</sub>)</td></tr>
+        <tr><td><strong>FEP</strong> (Free Energy Principle)</td><td>Model complexity &harr; EPC, Prediction error &harr; IG</td></tr>
+        <tr><td><strong>MDL</strong> (Minimum Description Length)</td><td>Code length &harr; EPC, Compression &harr; IG</td></tr>
+        <tr><td><strong>Active Inference</strong></td><td>Precision weighting &harr; AG/DG gating</td></tr>
+      </tbody>
+    </table>
+
+    <p>Each term of F is grounded in independent prior work:</p>
+    <table>
+      <thead><tr><th>F term</th><th>Prior work</th></tr></thead>
+      <tbody>
+        <tr><td class="term-epc">&Delta;EPC (metric)</td><td>Hewitt &amp; Manning (2019), <a href="https://aclanthology.org/N19-1419/">A Structural Probe for Finding Syntax</a></td></tr>
+        <tr><td class="term-h">&Delta;H (measure)</td><td>Ali et al. (2025), <a href="https://arxiv.org/abs/2502.16570">Entropy-Lens</a></td></tr>
+        <tr><td class="term-b">&Delta;&beta;<sub>1</sub> (topology)</td><td>Oyama et al. (2025), <a href="https://aclanthology.org/2025.acl-long.1584/">Mapping 1,000+ Language Models</a> &mdash; ACL Outstanding Paper</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size: 14px; color: #555;">
+      Related: Gao et al. (2025), <a href="https://arxiv.org/abs/2511.13653">Weight-sparse transformers have interpretable circuits</a>
+      &mdash; sparsification as &beta;<sub>1</sub> reduction in F.
+    </p>
+  </section>
+
+  <!-- Open Questions -->
+  <section>
+    <h2>Open Questions</h2>
+    <p>We are exploring specific, actionable research questions:</p>
+    <ol>
+      <li><strong>Independent F-trajectory reproduction</strong> &mdash; Does F show structured layer-wise behavior on models we haven't tested?</li>
+      <li><strong>&beta;<sub>1</sub> vs SP as structural term</strong> &mdash; Under what conditions does topological &Delta;&beta;<sub>1</sub> outperform metric &Delta;SP? Expertise in topological data analysis (TDA) welcome.</li>
+      <li><strong>Scaling to 70B+ models</strong> &mdash; We hypothesize that (&lambda;, &gamma;) converge across model families at sufficient scale. Verification requires GPU resources beyond our current individual setup.</li>
+      <li><strong>F-regularization robustness</strong> &mdash; The v6 paper shows weak F-regularization improves downstream performance (+0.33pt on SST-2). Is this robust across tasks and model families?</li>
+    </ol>
+    <p>These are <strong>open research questions</strong>, not claims. We welcome critical feedback.</p>
+  </section>
+
+  <!-- Resources -->
+  <section>
+    <h2>Resources</h2>
+    <table>
+      <thead><tr><th>Type</th><th>Link</th></tr></thead>
+      <tbody>
+        <tr><td>Paper (English)</td><td><a href="paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf">geDIG v6 (PDF)</a></td></tr>
+        <tr><td>Paper (Japanese)</td><td><a href="paper/geDIG_onegauge_improved_v6.pdf">geDIG v6 (PDF)</a></td></tr>
+        <tr><td>GitHub</td><td><a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI">InsightSpike-AI</a></td></tr>
+        <tr><td>Live Demo</td><td><a href="https://huggingface.co/spaces/miyaukaz/gedig-demo">HuggingFace Space</a></td></tr>
+        <tr><td>Interactive Visualizer</td><td><a href="demo.html">geDIG Graph Demo</a></td></tr>
+        <tr><td>Matchstick Figure</td><td><a href="research/thinking/matchstick_figure_v2_en.html">EN</a> / <a href="research/thinking/matchstick_figure_v2.html">JA</a></td></tr>
+        <tr><td>Canonical Spec</td><td><a href="gedig_spec.md">gedig_spec.md</a></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p><strong>Email</strong>: <a href="mailto:miyauchikazuyoshi@gmail.com">miyauchikazuyoshi@gmail.com</a>
+    &nbsp;&middot;&nbsp;
+    <strong>X</strong>: <a href="https://twitter.com/kazuyoshim5436">@kazuyoshim5436</a></p>
+    <p style="margin-top: 12px;">Apache-2.0 | Patent: JP 2025-082988, JP 2025-082989</p>
+    <p style="font-style: italic; margin-top: 8px;">
+      All theoretical contributions and experimental design are by the author.
+      Implementation is AI-assisted (Claude, GitHub Copilot).
+    </p>
+  </div>
+
+</div>
+</body>
+</html>
