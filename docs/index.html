@@ -9,7 +9,7 @@
     <meta name="description"
         content="geDIG: A research framework exploring whether a single dimensionless equation spanning metric, measure, and topology can describe how any information-bearing system restructures itself.">
     <meta name="keywords"
-        content="RAG, Knowledge Graph, AI, geDIG, InsightSpike, Multi-Agent, Neuroscience, Machine Learning">
+        content="geDIG, Information Theory, Topology, Knowledge Graph, AI, InsightSpike, Thermodynamics, Machine Learning">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -328,8 +328,7 @@
                     <span class="block mt-2">
                         $\Delta EPC \approx$ "metric (distance)", $\Delta H \approx$ "measure (probability)", $\Delta \beta_1 \approx$ "topology (loops)"
                     </span>
-                    <br>
-                    $\mathcal{F} < 0$ means information gain exceeds structural cost — the system should commit the change.
+                    <span class="block mt-3">$\mathcal{F} < 0$ means information gain exceeds structural cost — the system should commit the change.</span>
                 </span>
                 <span
                     class="block mt-4 text-xs text-slate-500 font-mono bg-white/5 inline-block px-3 py-1 rounded border border-white/5">
@@ -476,8 +475,8 @@
 
                 <!-- Case A: Insight -->
                 <div class="bg-bg border border-white/10 rounded-xl p-6 text-center hover:border-accent/40 transition">
-                    <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-3">Case A &mdash; Insight</div>
-                    <div class="flex items-center justify-center gap-4 mb-4">
+                    <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-4">Case A &mdash; Insight</div>
+                    <div class="flex items-center justify-center gap-4 mb-5">
                         <svg width="80" height="65" viewBox="0 0 120 90">
                             <line x1="20" y1="70" x2="60" y2="20" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
                             <line x1="60" y1="20" x2="100" y2="70" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
@@ -497,18 +496,24 @@
                             <circle cx="100" cy="70" r="4" fill="#94a3b8"/>
                         </svg>
                     </div>
-                    <div class="space-y-1 text-[11px] font-mono">
+                    <div class="space-y-1 text-[11px] font-mono mb-3">
                         <div class="flex justify-between"><span class="text-slate-500">EPC</span><span class="text-slate-300">1</span></div>
                         <div class="flex justify-between"><span class="text-purple-400">$\Delta\beta_1$</span><span class="text-emerald-400 font-bold">+1</span></div>
                         <div class="flex justify-between"><span class="text-cyan-400">$\Delta H$</span><span class="text-slate-300">+0.4</span></div>
                     </div>
-                    <div class="mt-3 text-[10px] text-emerald-400/70">Loop created &mdash; new path options</div>
+                    <div class="border-t border-white/10 pt-3">
+                        <div class="flex justify-between text-[11px] font-mono">
+                            <span class="text-slate-400 font-semibold">F</span>
+                            <span class="text-emerald-400 font-bold text-sm">&minus;0.4</span>
+                        </div>
+                        <div class="text-[10px] text-emerald-400 mt-1">F &lt; 0 &rarr; Commit</div>
+                    </div>
                 </div>
 
                 <!-- Case B: Routine -->
                 <div class="bg-bg border border-white/10 rounded-xl p-6 text-center hover:border-white/20 transition">
-                    <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3">Case B &mdash; Routine</div>
-                    <div class="flex items-center justify-center gap-4 mb-4">
+                    <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-4">Case B &mdash; Routine</div>
+                    <div class="flex items-center justify-center gap-4 mb-5">
                         <svg width="80" height="65" viewBox="0 0 120 90">
                             <line x1="15" y1="45" x2="55" y2="45" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
                             <line x1="55" y1="45" x2="95" y2="45" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
@@ -528,18 +533,24 @@
                             <circle cx="95" cy="75" r="4" fill="#94a3b8"/>
                         </svg>
                     </div>
-                    <div class="space-y-1 text-[11px] font-mono">
+                    <div class="space-y-1 text-[11px] font-mono mb-3">
                         <div class="flex justify-between"><span class="text-slate-500">EPC</span><span class="text-slate-300">1</span></div>
                         <div class="flex justify-between"><span class="text-purple-400">$\Delta\beta_1$</span><span class="text-slate-500">0</span></div>
                         <div class="flex justify-between"><span class="text-cyan-400">$\Delta H$</span><span class="text-slate-300">+0.3</span></div>
                     </div>
-                    <div class="mt-3 text-[10px] text-slate-500">No loop &mdash; information gained, topology unchanged</div>
+                    <div class="border-t border-white/10 pt-3">
+                        <div class="flex justify-between text-[11px] font-mono">
+                            <span class="text-slate-400 font-semibold">F</span>
+                            <span class="text-amber-400 font-bold text-sm">+0.7</span>
+                        </div>
+                        <div class="text-[10px] text-slate-500 mt-1">F &gt; 0 &rarr; Reject</div>
+                    </div>
                 </div>
 
                 <!-- Case C: Collapse -->
                 <div class="bg-bg border border-white/10 rounded-xl p-6 text-center hover:border-red-500/30 transition">
-                    <div class="text-[10px] font-bold text-red-400 uppercase tracking-wider mb-3">Case C &mdash; Collapse</div>
-                    <div class="flex items-center justify-center gap-4 mb-4">
+                    <div class="text-[10px] font-bold text-red-400 uppercase tracking-wider mb-4">Case C &mdash; Collapse</div>
+                    <div class="flex items-center justify-center gap-4 mb-5">
                         <svg width="80" height="65" viewBox="0 0 120 90">
                             <polygon points="25,15 95,15 95,75 25,75" fill="rgba(168,85,247,0.12)" stroke="rgba(168,85,247,0.25)" stroke-width="1"/>
                             <line x1="25" y1="15" x2="95" y2="15" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
@@ -563,23 +574,30 @@
                             <circle cx="25" cy="75" r="4" fill="#94a3b8"/>
                         </svg>
                     </div>
-                    <div class="space-y-1 text-[11px] font-mono">
+                    <div class="space-y-1 text-[11px] font-mono mb-3">
                         <div class="flex justify-between"><span class="text-slate-500">EPC</span><span class="text-slate-300">1</span></div>
                         <div class="flex justify-between"><span class="text-purple-400">$\Delta\beta_1$</span><span class="text-red-400 font-bold">&minus;1</span></div>
                         <div class="flex justify-between"><span class="text-cyan-400">$\Delta H$</span><span class="text-slate-300">&minus;0.2</span></div>
                     </div>
-                    <div class="mt-3 text-[10px] text-red-400/70">Loop destroyed &mdash; redundancy lost</div>
+                    <div class="border-t border-white/10 pt-3">
+                        <div class="flex justify-between text-[11px] font-mono">
+                            <span class="text-slate-400 font-semibold">F</span>
+                            <span class="text-red-400 font-bold text-sm">+2.2</span>
+                        </div>
+                        <div class="text-[10px] text-red-400/70 mt-1">F &gt; 0 &rarr; Reject</div>
+                    </div>
                 </div>
 
             </div>
 
             <div class="text-center mb-10">
-                <p class="text-slate-500 text-sm max-w-2xl mx-auto">
+                <p class="text-slate-500 text-sm max-w-2xl mx-auto mb-2">
                     All three cases have <strong class="text-slate-300">EPC = 1</strong>, yet
                     <strong class="text-purple-400">$\Delta\beta_1$</strong> diverges to +1, 0, &minus;1.
                     KL divergence sees only $\Delta H$ and cannot distinguish Case A from B.
                     F sees all three.
                 </p>
+                <p class="text-slate-600 text-xs font-mono">(&lambda; = 1, &gamma; = 1)</p>
                 <div class="mt-5 flex flex-col sm:flex-row justify-center gap-3">
                     <a href="research/thinking/matchstick_figure_v2_en.html"
                         class="text-sm text-accent hover:underline font-medium">
