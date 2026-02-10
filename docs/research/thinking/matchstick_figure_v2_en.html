@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>geDIG F-Decomposition: Visual Proofs</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #faf8f5;
+    font-family: 'Source Serif 4', 'Inter', serif;
+    color: #1a1a1a;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .page {
+    max-width: 900px;
+    width: 100%;
+  }
+
+  /* -- Section divider -- */
+  .section {
+    margin-bottom: 52px;
+  }
+
+  .section-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: #c45a2d;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .figure-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #111;
+    letter-spacing: 0.01em;
+    line-height: 1.4;
+  }
+
+  .figure-subtitle {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+
+  .formula-bar {
+    background: #f0ece6;
+    border-left: 3px solid #c45a2d;
+    padding: 12px 18px;
+    margin-bottom: 26px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: #333;
+    letter-spacing: 0.03em;
+  }
+
+  .formula-bar .epc { color: #c45a2d; font-weight: 600; }
+  .formula-bar .h   { color: #2a6b8a; font-weight: 600; }
+  .formula-bar .b   { color: #6b2fa0; font-weight: 600; }
+
+  /* -- Matchstick cases -- */
+  .cases {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .case-row {
+    display: grid;
+    grid-template-columns: 52px 1fr 36px 1fr 1fr;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border: 1px solid #e0dbd4;
+    border-radius: 6px;
+    padding: 16px 18px;
+    position: relative;
+  }
+
+  .case-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .graph-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .graph-cell .label {
+    font-size: 11px;
+    color: #888;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .arrow-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    color: #aaa;
+  }
+
+  .metrics-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding-left: 14px;
+    border-left: 1px solid #e8e4de;
+  }
+
+  .metric {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+  }
+
+  .metric .tag {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    min-width: 36px;
+    text-align: center;
+  }
+
+  .tag-epc { background: #fce8de; color: #c45a2d; }
+  .tag-h   { background: #ddeef5; color: #2a6b8a; }
+  .tag-b   { background: #eeddf8; color: #6b2fa0; }
+
+  .metric .val { color: #333; font-weight: 600; }
+  .metric .desc { color: #888; font-size: 10.5px; font-weight: 400; }
+
+  .insight-badge {
+    position: absolute;
+    top: 9px;
+    right: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 3px 9px;
+    border-radius: 10px;
+  }
+
+  .insight-aha   { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+  .insight-noise { background: #f5f5f5; color: #999;    border: 1px solid #ddd; }
+  .insight-loss  { background: #fce4ec; color: #c62828; border: 1px solid #ef9a9a; }
+
+  /* SVG styles */
+  .stick { stroke-width: 5; stroke-linecap: round; }
+  .stick-on { stroke: #c45a2d; filter: drop-shadow(0 1px 2px rgba(196,90,45,0.2)); }
+  .stick-dim { stroke: #ddd; stroke-dasharray: 4 3; }
+  .stick-new { stroke: #6b2fa0; filter: drop-shadow(0 1px 3px rgba(107,47,160,0.25)); }
+  .stick-removed { stroke: #e57373; stroke-dasharray: 4 3; opacity: 0.5; }
+  .node { fill: #1a1a1a; }
+  .node-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: #888; text-anchor: middle; }
+  .loop-fill { fill: rgba(107, 47, 160, 0.06); stroke: rgba(107, 47, 160, 0.18); stroke-width: 1; }
+
+  /* -- K5 pruning section -- */
+  .pruning-container {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    align-items: center;
+    gap: 0;
+    background: #fff;
+    border: 1px solid #e0dbd4;
+    border-radius: 8px;
+    padding: 28px 24px;
+    margin-bottom: 20px;
+  }
+
+  .pruning-graph {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .pruning-graph .graph-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+    letter-spacing: 0.04em;
+  }
+
+  .pruning-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: #c45a2d;
+  }
+
+  .pruning-arrow .arr {
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  .pruning-arrow .arr-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 600;
+    color: #c45a2d;
+    letter-spacing: 0.06em;
+  }
+
+  .pruning-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 24px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: #fff;
+    border: 1px solid #e0dbd4;
+    border-radius: 6px;
+    padding: 14px 16px;
+  }
+
+  .stat-card .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    color: #999;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+  }
+
+  .stat-row .stat-key {
+    font-size: 12px;
+    color: #666;
+  }
+
+  .stat-row .stat-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .val-down { color: #2e7d32; }
+  .val-up   { color: #c62828; }
+  .val-neutral { color: #555; }
+
+  /* -- Insight callout -- */
+  .insight-callout {
+    background: linear-gradient(135deg, #fff8f0 0%, #fef3e8 100%);
+    border: 1px solid #f5d0a9;
+    border-radius: 6px;
+    padding: 18px 22px;
+    margin-bottom: 20px;
+  }
+
+  .insight-callout .ic-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #c45a2d;
+    margin-bottom: 8px;
+  }
+
+  .insight-callout .ic-text {
+    font-size: 13px;
+    line-height: 1.7;
+    color: #444;
+  }
+
+  .insight-callout .ic-text em {
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  /* -- Summary boxes -- */
+  .summary {
+    background: #f7f4ef;
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin-top: 4px;
+  }
+
+  .summary-title {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #333;
+  }
+
+  .summary-text {
+    font-size: 13px;
+    line-height: 1.7;
+    color: #444;
+  }
+
+  .summary-text em {
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  .caption {
+    margin-top: 14px;
+    font-size: 11.5px;
+    color: #777;
+    line-height: 1.6;
+  }
+
+  .legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #555;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+
+  /* -- Horizontal rule -- */
+  .divider {
+    border: none;
+    border-top: 1px solid #e0dbd4;
+    margin: 44px 0;
+  }
+
+  /* -- NN analogy table -- */
+  .nn-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  .nn-table th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: #999;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 2px solid #e0dbd4;
+  }
+
+  .nn-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee;
+    color: #444;
+  }
+
+  .nn-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* redundant edge highlight */
+  .edge-redundant {
+    stroke: #e57373;
+    stroke-width: 2.5;
+    stroke-dasharray: 5 3;
+    opacity: 0.5;
+  }
+
+  .edge-essential {
+    stroke: #2e7d32;
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+
+  .edge-hub {
+    stroke: #c45a2d;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+  }
+
+  .node-hub {
+    fill: #c45a2d;
+  }
+
+  .node-pruned {
+    fill: none;
+    stroke: #e57373;
+    stroke-width: 2;
+    stroke-dasharray: 3 2;
+  }
+
+  .cycle-shade {
+    fill: rgba(107, 47, 160, 0.05);
+    stroke: rgba(107, 47, 160, 0.12);
+    stroke-width: 1;
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+<!-- ================================================ -->
+<!-- SECTION 1: Matchstick Analogy                     -->
+<!-- ================================================ -->
+<div class="section">
+
+  <div class="section-number">Figure 1</div>
+  <div class="figure-title">Matchstick Analogy &mdash; Independence of the Three Terms</div>
+  <div class="figure-subtitle">
+    For the same edit cost (EPC = 1), topology (&Delta;&beta;<sub>1</sub>) and information (&Delta;H) vary independently.<br>
+    This is not a metaphor &mdash; it is a concrete instance of the geDIG decomposition.
+  </div>
+
+  <div class="formula-bar">
+    F = <span class="epc">EPC</span> &minus; &lambda; (<span class="h">&Delta;H</span> + &gamma; &middot; <span class="b">&Delta;&beta;<sub>1</sub></span>)
+  </div>
+
+  <div class="cases">
+
+    <!-- Case A -->
+    <div class="case-row">
+      <div class="case-label">Case A</div>
+      <div class="graph-cell">
+        <svg width="110" height="82" viewBox="0 0 120 90">
+          <line x1="20" y1="70" x2="60" y2="20" class="stick stick-on"/>
+          <line x1="60" y1="20" x2="100" y2="70" class="stick stick-on"/>
+          <line x1="20" y1="70" x2="100" y2="70" class="stick stick-dim"/>
+          <circle cx="20" cy="70" r="4" class="node"/>
+          <circle cx="60" cy="20" r="4" class="node"/>
+          <circle cx="100" cy="70" r="4" class="node"/>
+        </svg>
+        <span class="label">&beta;<sub>1</sub> = 0</span>
+      </div>
+      <div class="arrow-cell">&rarr;</div>
+      <div class="graph-cell">
+        <svg width="110" height="82" viewBox="0 0 120 90">
+          <polygon points="20,70 60,20 100,70" class="loop-fill"/>
+          <line x1="20" y1="70" x2="60" y2="20" class="stick stick-on"/>
+          <line x1="60" y1="20" x2="100" y2="70" class="stick stick-on"/>
+          <line x1="20" y1="70" x2="100" y2="70" class="stick stick-new"/>
+          <circle cx="20" cy="70" r="4" class="node"/>
+          <circle cx="60" cy="20" r="4" class="node"/>
+          <circle cx="100" cy="70" r="4" class="node"/>
+        </svg>
+        <span class="label">&beta;<sub>1</sub> = 1</span>
+      </div>
+      <div class="metrics-cell">
+        <div class="metric"><span class="tag tag-epc">EPC</span> <span class="val">1</span> <span class="desc">+1 edge</span></div>
+        <div class="metric"><span class="tag tag-b">&Delta;&beta;<sub>1</sub></span> <span class="val" style="color:#6b2fa0;">+1</span> <span class="desc">loop created</span></div>
+        <div class="metric"><span class="tag tag-h">&Delta;H</span> <span class="val">+0.4</span> <span class="desc">new path options</span></div>
+      </div>
+      <span class="insight-badge insight-aha">Insight</span>
+    </div>
+
+    <!-- Case B -->
+    <div class="case-row">
+      <div class="case-label">Case B</div>
+      <div class="graph-cell">
+        <svg width="110" height="82" viewBox="0 0 120 90">
+          <line x1="15" y1="45" x2="55" y2="45" class="stick stick-on"/>
+          <line x1="55" y1="45" x2="95" y2="45" class="stick stick-on"/>
+          <circle cx="15" cy="45" r="4" class="node"/>
+          <circle cx="55" cy="45" r="4" class="node"/>
+          <circle cx="95" cy="45" r="4" class="node"/>
+          <circle cx="95" cy="78" r="3" style="fill:none;stroke:#ccc;stroke-width:1.5;stroke-dasharray:3 2;"/>
+        </svg>
+        <span class="label">&beta;<sub>1</sub> = 0</span>
+      </div>
+      <div class="arrow-cell">&rarr;</div>
+      <div class="graph-cell">
+        <svg width="110" height="82" viewBox="0 0 120 90">
+          <line x1="15" y1="45" x2="55" y2="45" class="stick stick-on"/>
+          <line x1="55" y1="45" x2="95" y2="45" class="stick stick-on"/>
+          <line x1="95" y1="45" x2="95" y2="78" class="stick stick-new"/>
+          <circle cx="15" cy="45" r="4" class="node"/>
+          <circle cx="55" cy="45" r="4" class="node"/>
+          <circle cx="95" cy="45" r="4" class="node"/>
+          <circle cx="95" cy="78" r="4" class="node"/>
+        </svg>
+        <span class="label">&beta;<sub>1</sub> = 0</span>
+      </div>
+      <div class="metrics-cell">
+        <div class="metric"><span class="tag tag-epc">EPC</span> <span class="val">1</span> <span class="desc">+1 edge</span></div>
+        <div class="metric"><span class="tag tag-b">&Delta;&beta;<sub>1</sub></span> <span class="val">0</span> <span class="desc">topology unchanged</span></div>
+        <div class="metric"><span class="tag tag-h">&Delta;H</span> <span class="val">+0.3</span> <span class="desc">information gained</span></div>
+      </div>
+      <span class="insight-badge insight-noise">Routine</span>
+    </div>
+
+    <!-- Case C -->
+    <div class="case-row">
+      <div class="case-label">Case C</div>
+      <div class="graph-cell">
+        <svg width="110" height="82" viewBox="0 0 120 90">
+          <polygon points="25,18 95,18 95,72 25,72" class="loop-fill"/>
+          <line x1="25" y1="18" x2="95" y2="18" class="stick stick-on"/>
+          <line x1="95" y1="18" x2="95" y2="72" class="stick stick-on"/>
+          <line x1="95" y1="72" x2="25" y2="72" class="stick stick-on"/>
+          <line x1="25" y1="72" x2="25" y2="18" class="stick stick-on"/>
+          <circle cx="25" cy="18" r="4" class="node"/>
+          <circle cx="95" cy="18" r="4" class="node"/>
+          <circle cx="95" cy="72" r="4" class="node"/>
+          <circle cx="25" cy="72" r="4" class="node"/>
+        </svg>
+        <span class="label">&beta;<sub>1</sub> = 1</span>
+      </div>
+      <div class="arrow-cell">&rarr;</div>
+      <div class="graph-cell">
+        <svg width="110" height="82" viewBox="0 0 120 90">
+          <line x1="25" y1="18" x2="95" y2="18" class="stick stick-on"/>
+          <line x1="95" y1="18" x2="95" y2="72" class="stick stick-on"/>
+          <line x1="95" y1="72" x2="25" y2="72" class="stick stick-on"/>
+          <line x1="25" y1="72" x2="25" y2="18" class="stick stick-removed"/>
+          <circle cx="25" cy="18" r="4" class="node"/>
+          <circle cx="95" cy="18" r="4" class="node"/>
+          <circle cx="95" cy="72" r="4" class="node"/>
+          <circle cx="25" cy="72" r="4" class="node"/>
+        </svg>
+        <span class="label">&beta;<sub>1</sub> = 0</span>
+      </div>
+      <div class="metrics-cell">
+        <div class="metric"><span class="tag tag-epc">EPC</span> <span class="val">1</span> <span class="desc">&minus;1 edge</span></div>
+        <div class="metric"><span class="tag tag-b">&Delta;&beta;<sub>1</sub></span> <span class="val" style="color:#c62828;">&minus;1</span> <span class="desc">loop destroyed</span></div>
+        <div class="metric"><span class="tag tag-h">&Delta;H</span> <span class="val">&minus;0.2</span> <span class="desc">redundancy lost</span></div>
+      </div>
+      <span class="insight-badge insight-loss">Structural collapse</span>
+    </div>
+
+  </div>
+
+  <div class="summary">
+    <div class="summary-title">The Blind Spot of KL Divergence</div>
+    <div class="summary-text">
+      All three cases have <em>EPC = 1</em>, yet <em>&Delta;&beta;<sub>1</sub></em> diverges to +1, 0, &minus;1.
+      KL divergence sees only the measure (&Delta;H) and cannot distinguish Case A from B.
+      geDIG decomposes every change into three irreducible primitives:
+      <em>metric</em>, <em>measure</em>, and <em>topology</em>.
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#c45a2d;"></div>EPC &mdash; Metric</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#2a6b8a;"></div>&Delta;H &mdash; Measure</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#6b2fa0;"></div>&Delta;&beta;<sub>1</sub> &mdash; Topology</div>
+    </div>
+  </div>
+
+</div>
+
+<hr class="divider">
+
+<!-- ================================================ -->
+<!-- SECTION 2: K5 Pruning                             -->
+<!-- ================================================ -->
+<div class="section">
+
+  <div class="section-number">Figure 2</div>
+  <div class="figure-title">The Pruning Paradox &mdash; Why Removing Structure Improves Performance</div>
+  <div class="figure-subtitle">
+    Removing the central hub node incurs an edit cost, but eliminates three redundant cycles,<br>
+    reducing the structure to a topologically sufficient state. F decreases = efficiency increases.
+  </div>
+
+  <div class="pruning-container">
+
+    <!-- Before: K5-like -->
+    <div class="pruning-graph">
+      <div class="graph-title">Dense (before pruning)</div>
+      <svg width="200" height="200" viewBox="0 0 200 200">
+        <!-- shaded triangles to show redundant cycles -->
+        <polygon points="100,30 170,90 170,170" class="cycle-shade"/>
+        <polygon points="100,30 30,90 30,170" class="cycle-shade"/>
+        <polygon points="30,90 170,90 100,100" class="cycle-shade"/>
+        <polygon points="30,170 170,170 100,100" class="cycle-shade"/>
+
+        <!-- outer square edges (essential) -->
+        <line x1="30" y1="90" x2="170" y2="90" class="edge-essential" style="opacity:0.35;"/>
+        <line x1="170" y1="90" x2="170" y2="170" class="edge-essential" style="opacity:0.35;"/>
+        <line x1="170" y1="170" x2="30" y2="170" class="edge-essential" style="opacity:0.35;"/>
+        <line x1="30" y1="170" x2="30" y2="90" class="edge-essential" style="opacity:0.35;"/>
+
+        <!-- hub edges (redundant) -->
+        <line x1="100" y1="100" x2="30" y2="90" class="edge-hub"/>
+        <line x1="100" y1="100" x2="170" y2="90" class="edge-hub"/>
+        <line x1="100" y1="100" x2="170" y2="170" class="edge-hub"/>
+        <line x1="100" y1="100" x2="30" y2="170" class="edge-hub"/>
+
+        <!-- nodes -->
+        <circle cx="30" cy="90" r="7" class="node"/>
+        <circle cx="170" cy="90" r="7" class="node"/>
+        <circle cx="170" cy="170" r="7" class="node"/>
+        <circle cx="30" cy="170" r="7" class="node"/>
+        <circle cx="100" cy="100" r="8" class="node-hub"/>
+
+        <!-- labels -->
+        <text x="15" y="82" class="node-label" style="font-size:12px;">A</text>
+        <text x="180" y="82" class="node-label" style="font-size:12px;">B</text>
+        <text x="180" y="185" class="node-label" style="font-size:12px;">C</text>
+        <text x="15" y="185" class="node-label" style="font-size:12px;">D</text>
+        <text x="100" y="80" class="node-label" style="font-size:12px;fill:#c45a2d;">hub</text>
+
+        <!-- stats -->
+        <text x="100" y="20" class="node-label" style="font-size:11px;fill:#6b2fa0;">V=5 E=8 &beta;<tspan baseline-shift="sub" font-size="8">1</tspan>=4</text>
+      </svg>
+      <span class="label" style="color:#c45a2d;">4 redundant cycles</span>
+    </div>
+
+    <!-- Arrow -->
+    <div class="pruning-arrow">
+      <div class="arr-label">PRUNE</div>
+      <div class="arr">&rarr;</div>
+      <div class="arr-label" style="color:#2e7d32;">F &darr;&darr;</div>
+    </div>
+
+    <!-- After: Square -->
+    <div class="pruning-graph">
+      <div class="graph-title">Sparse (after pruning)</div>
+      <svg width="200" height="200" viewBox="0 0 200 200">
+        <!-- single essential cycle -->
+        <polygon points="30,90 170,90 170,170 30,170" class="loop-fill"/>
+
+        <!-- essential edges -->
+        <line x1="30" y1="90" x2="170" y2="90" class="edge-essential"/>
+        <line x1="170" y1="90" x2="170" y2="170" class="edge-essential"/>
+        <line x1="170" y1="170" x2="30" y2="170" class="edge-essential"/>
+        <line x1="30" y1="170" x2="30" y2="90" class="edge-essential"/>
+
+        <!-- pruned hub (ghost) -->
+        <circle cx="100" cy="100" r="7" class="node-pruned"/>
+        <line x1="100" y1="100" x2="30" y2="90" class="edge-redundant"/>
+        <line x1="100" y1="100" x2="170" y2="90" class="edge-redundant"/>
+        <line x1="100" y1="100" x2="170" y2="170" class="edge-redundant"/>
+        <line x1="100" y1="100" x2="30" y2="170" class="edge-redundant"/>
+
+        <!-- remaining nodes -->
+        <circle cx="30" cy="90" r="7" class="node"/>
+        <circle cx="170" cy="90" r="7" class="node"/>
+        <circle cx="170" cy="170" r="7" class="node"/>
+        <circle cx="30" cy="170" r="7" class="node"/>
+
+        <!-- labels -->
+        <text x="15" y="82" class="node-label" style="font-size:12px;">A</text>
+        <text x="180" y="82" class="node-label" style="font-size:12px;">B</text>
+        <text x="180" y="185" class="node-label" style="font-size:12px;">C</text>
+        <text x="15" y="185" class="node-label" style="font-size:12px;">D</text>
+
+        <!-- stats -->
+        <text x="100" y="20" class="node-label" style="font-size:11px;fill:#2e7d32;">V=4 E=4 &beta;<tspan baseline-shift="sub" font-size="8">1</tspan>=1</text>
+      </svg>
+      <span class="label" style="color:#2e7d32;">1 sufficient cycle</span>
+    </div>
+
+  </div>
+
+  <!-- Metric comparison -->
+  <div class="pruning-stats">
+    <div class="stat-card">
+      <div class="stat-label">Structural Change</div>
+      <div class="stat-row"><span class="stat-key">Nodes</span> <span class="stat-val val-down">5 &rarr; 4 (&minus;1)</span></div>
+      <div class="stat-row"><span class="stat-key">Edges</span> <span class="stat-val val-down">8 &rarr; 4 (&minus;4)</span></div>
+      <div class="stat-row"><span class="stat-key">EPC</span> <span class="stat-val val-neutral">5 (1 node + 4 edges)</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">F Decomposition</div>
+      <div class="stat-row"><span class="stat-key">&Delta;&beta;<sub>1</sub></span> <span class="stat-val val-down">4 &rarr; 1 (&minus;3 cycles)</span></div>
+      <div class="stat-row"><span class="stat-key">&Delta;H</span> <span class="stat-val val-down">non-uniform &rarr; uniform (&darr;)</span></div>
+      <div class="stat-row"><span class="stat-key">F</span> <span class="stat-val val-down">drops significantly &darr;&darr;</span></div>
+    </div>
+  </div>
+
+  <!-- Insight -->
+  <div class="insight-callout">
+    <div class="ic-title">Why does removing structure improve performance?</div>
+    <div class="ic-text">
+      A dense layer is fully connected (K5-like), with <em>high &beta;<sub>1</sub></em>.
+      Many independent cycles exist, but most are <em>redundant paths carrying the same information</em>.<br><br>
+      Pruning reduces &beta;<sub>1</sub>, eliminating redundant paths and concentrating signal on essential routes.
+      <em>Overfitting</em> occurs when redundant cycles memorize noise in the training data &mdash;
+      lowering &beta;<sub>1</sub> physically reduces the capacity to memorize noise.<br><br>
+      <em>Lottery Ticket Hypothesis</em>: A "winning ticket" is a subgraph that minimizes &beta;<sub>1</sub>
+      while maintaining &beta;<sub>0</sub> = 1 (global connectivity). The square is the winning ticket inside K5.
+    </div>
+  </div>
+
+  <!-- NN mapping table -->
+  <table class="nn-table">
+    <thead>
+      <tr>
+        <th>Graph</th>
+        <th>Neural Network</th>
+        <th>F Behavior</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>K5 (complete graph)</td>
+        <td>Dense layer (fully connected)</td>
+        <td>High &beta;<sub>1</sub>, high F, redundant</td>
+      </tr>
+      <tr>
+        <td>Square (pruned)</td>
+        <td>Sparse layer (pruned)</td>
+        <td>Minimal &beta;<sub>1</sub>, low F, efficient</td>
+      </tr>
+      <tr>
+        <td>Tree (&beta;<sub>1</sub> = 0)</td>
+        <td>Over-pruned</td>
+        <td>Zero redundancy, fragile</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="summary">
+    <div class="summary-title">The Principle of Optimal Pruning</div>
+    <div class="summary-text">
+      Pruning to <em>&beta;<sub>1</sub> = 0</em> (a tree) eliminates all redundancy and becomes fragile.
+      <em>&beta;<sub>1</sub> &gg; 1</em> (fully connected) is too redundant and memorizes noise.<br>
+      Optimal pruning is the operation of <em>tuning &beta;<sub>1</sub> to "just enough redundancy"</em>,
+      which is equivalent to finding the subgraph that minimizes F.
+    </div>
+  </div>
+
+  <div class="caption">
+    Fig. 2: Removing the central hub from a K5 graph (dense layer) reduces &beta;<sub>1</sub> from 4 to 1 and sharply lowers F.
+    This provides a topological explanation of why pruning improves performance in neural networks,
+    and offers a geDIG reinterpretation of the Lottery Ticket Hypothesis.
+  </div>
+
+</div>
+
+<hr class="divider">
+
+<!-- ================================================ -->
+<!-- SECTION 3: Semantic Analogy (Matchstick Puzzle)    -->
+<!-- ================================================ -->
+<div class="section">
+
+  <div class="section-number">Figure 3 &mdash; Speculative Analogy</div>
+  <div class="figure-title">The Matchstick Equation &mdash; Why One Move Creates Meaning</div>
+  <div class="figure-subtitle">
+    A single matchstick moved transforms a false equation into a true one.<br>
+    The structural cost is minimal (EPC = 1), but the information gain is maximal &mdash;<br>
+    this is the "aha" moment that geDIG's Information Gain captures.
+  </div>
+
+  <div class="formula-bar">
+    IG = <span class="h">&Delta;H</span> + &gamma; &middot; <span class="b">&Delta;SP</span> &nbsp;&nbsp;|&nbsp;&nbsp;
+    The cost of <span class="epc">one edit</span> that makes <span class="h">everything click</span>
+  </div>
+
+  <!-- Matchstick equation: 6+4=4 → 0+4=4 -->
+  <div style="background:#fff; border:1px solid #e0dbd4; border-radius:8px; padding:28px 24px; margin-bottom:20px;">
+
+    <div style="display:grid; grid-template-columns:1fr 60px 1fr; align-items:center; gap:0;">
+
+      <!-- BEFORE: 6+4=4 (wrong) -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; color:#c62828; letter-spacing:0.04em;">FALSE</div>
+        <svg width="280" height="80" viewBox="0 0 280 80">
+          <!-- Digit 6: segments a,c,d,e,f,g (missing b=top-right) -->
+          <!-- a: top --> <line x1="8" y1="5" x2="32" y2="5" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <!-- f: top-left --> <line x1="5" y1="8" x2="5" y2="35" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <!-- g: middle (this one moves!) --> <line x1="8" y1="38" x2="32" y2="38" stroke="#e57373" stroke-width="5" stroke-linecap="round" stroke-dasharray="0"/>
+          <!-- e: bottom-left --> <line x1="5" y1="41" x2="5" y2="68" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <!-- d: bottom --> <line x1="8" y1="71" x2="32" y2="71" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <!-- c: bottom-right --> <line x1="35" y1="41" x2="35" y2="68" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <!-- b: top-right MISSING -->
+          <circle cx="35" cy="21" r="3" style="fill:none;stroke:#ddd;stroke-width:1.5;stroke-dasharray:2 2;"/>
+
+          <!-- Plus sign -->
+          <line x1="55" y1="38" x2="75" y2="38" stroke="#999" stroke-width="4" stroke-linecap="round"/>
+          <line x1="65" y1="28" x2="65" y2="48" stroke="#999" stroke-width="4" stroke-linecap="round"/>
+
+          <!-- Digit 4: segments b,c,f,g -->
+          <!-- f: top-left --> <line x1="85" y1="8" x2="85" y2="35" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <!-- g: middle --> <line x1="88" y1="38" x2="112" y2="38" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <!-- b: top-right --> <line x1="115" y1="8" x2="115" y2="35" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <!-- c: bottom-right --> <line x1="115" y1="41" x2="115" y2="68" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+
+          <!-- Equals sign -->
+          <line x1="135" y1="32" x2="155" y2="32" stroke="#999" stroke-width="4" stroke-linecap="round"/>
+          <line x1="135" y1="44" x2="155" y2="44" stroke="#999" stroke-width="4" stroke-linecap="round"/>
+
+          <!-- Digit 4: segments b,c,f,g -->
+          <!-- f: top-left --> <line x1="165" y1="8" x2="165" y2="35" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <!-- g: middle --> <line x1="168" y1="38" x2="192" y2="38" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <!-- b: top-right --> <line x1="195" y1="8" x2="195" y2="35" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <!-- c: bottom-right --> <line x1="195" y1="41" x2="195" y2="68" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+
+          <!-- X mark over equation -->
+          <line x1="210" y1="25" x2="225" y2="50" stroke="#c62828" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+          <line x1="225" y1="25" x2="210" y2="50" stroke="#c62828" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+        </svg>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#c62828;">6 + 4 = 4 &nbsp; ???</div>
+      </div>
+
+      <!-- Arrow -->
+      <div class="pruning-arrow">
+        <div class="arr-label">MOVE 1</div>
+        <div class="arr">&rarr;</div>
+        <div class="arr-label" style="color:#2e7d32;">IG &uarr;&uarr;</div>
+      </div>
+
+      <!-- AFTER: 0+4=4 (correct!) -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; color:#2e7d32; letter-spacing:0.04em;">TRUE</div>
+        <svg width="280" height="80" viewBox="0 0 280 80">
+          <!-- Digit 0: segments a,b,c,d,e,f (missing g=middle) -->
+          <rect x="4" y="4" width="32" height="68" rx="2" style="fill:rgba(46,125,50,0.06); stroke:rgba(46,125,50,0.2); stroke-width:1;"/>
+          <!-- a: top --> <line x1="8" y1="5" x2="32" y2="5" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <!-- f: top-left --> <line x1="5" y1="8" x2="5" y2="35" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <!-- b: top-right (moved here!) --> <line x1="35" y1="8" x2="35" y2="35" stroke="#6b2fa0" stroke-width="5" stroke-linecap="round" filter="url(#glow)"/>
+          <!-- e: bottom-left --> <line x1="5" y1="41" x2="5" y2="68" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <!-- d: bottom --> <line x1="8" y1="71" x2="32" y2="71" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <!-- c: bottom-right --> <line x1="35" y1="41" x2="35" y2="68" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <!-- g: middle REMOVED -->
+
+          <!-- Plus sign -->
+          <line x1="55" y1="38" x2="75" y2="38" stroke="#999" stroke-width="4" stroke-linecap="round"/>
+          <line x1="65" y1="28" x2="65" y2="48" stroke="#999" stroke-width="4" stroke-linecap="round"/>
+
+          <!-- Digit 4: segments b,c,f,g -->
+          <line x1="85" y1="8" x2="85" y2="35" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <line x1="88" y1="38" x2="112" y2="38" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <line x1="115" y1="8" x2="115" y2="35" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <line x1="115" y1="41" x2="115" y2="68" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+
+          <!-- Equals sign -->
+          <line x1="135" y1="32" x2="155" y2="32" stroke="#999" stroke-width="4" stroke-linecap="round"/>
+          <line x1="135" y1="44" x2="155" y2="44" stroke="#999" stroke-width="4" stroke-linecap="round"/>
+
+          <!-- Digit 4: segments b,c,f,g -->
+          <line x1="165" y1="8" x2="165" y2="35" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <line x1="168" y1="38" x2="192" y2="38" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <line x1="195" y1="8" x2="195" y2="35" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+          <line x1="195" y1="41" x2="195" y2="68" stroke="#c45a2d" stroke-width="5" stroke-linecap="round"/>
+
+          <!-- Check mark -->
+          <line x1="210" y1="40" x2="218" y2="50" stroke="#2e7d32" stroke-width="3.5" stroke-linecap="round"/>
+          <line x1="218" y1="50" x2="232" y2="25" stroke="#2e7d32" stroke-width="3.5" stroke-linecap="round"/>
+        </svg>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#2e7d32;">0 + 4 = 4 &nbsp; &check;</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Metrics -->
+  <div class="pruning-stats">
+    <div class="stat-card">
+      <div class="stat-label">Structural Cost</div>
+      <div class="stat-row"><span class="stat-key">Matchsticks moved</span> <span class="stat-val val-neutral">1</span></div>
+      <div class="stat-row"><span class="stat-key">EPC</span> <span class="stat-val val-neutral">1 (remove + add)</span></div>
+      <div class="stat-row"><span class="stat-key">&Delta;&beta;<sub>1</sub></span> <span class="stat-val val-neutral">0 (both have one loop)</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Information Gain</div>
+      <div class="stat-row"><span class="stat-key">&Delta;H</span> <span class="stat-val val-down">max &rarr; 0 (nonsense &rarr; true)</span></div>
+      <div class="stat-row"><span class="stat-key">IG</span> <span class="stat-val val-down">massive &uarr;&uarr;</span></div>
+      <div class="stat-row"><span class="stat-key">Experience</span> <span class="stat-val" style="color:#e65100;">"Aha!"</span></div>
+    </div>
+  </div>
+
+  <!-- Insight -->
+  <div class="insight-callout">
+    <div class="ic-title">The Aha Moment as Information Gain</div>
+    <div class="ic-text">
+      The matchstick puzzle captures the essence of geDIG's Information Gain.<br><br>
+      Before the move: the equation is <em>false</em> &mdash; every interpretation fails,
+      entropy is maximal, the structure carries no valid meaning.<br><br>
+      After the move: the equation is <em>true</em> &mdash; a unique valid interpretation emerges,
+      entropy collapses to zero, meaning crystallizes from the same material.<br><br>
+      The structural cost was trivial (<em>EPC = 1</em>). The topology didn't even change (<em>&Delta;&beta;<sub>1</sub> = 0</em>).
+      But the <em>information gain was maximal</em> &mdash; one rearrangement turned noise into signal.<br><br>
+      This is exactly what geDIG measures: not how much you changed, but
+      <em>how much meaning emerged from the change</em>.
+      The AG (Attention Gate) fires at the moment of the "aha" &mdash;
+      the DG (Differential Information Gain) quantifies why.
+    </div>
+  </div>
+
+  <!-- Connection table -->
+  <table class="nn-table">
+    <thead>
+      <tr>
+        <th>Matchstick Puzzle</th>
+        <th>geDIG</th>
+        <th>Transformer Inference</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Equation before move (false)</td>
+        <td>Graph before edge edit</td>
+        <td>Hidden state at shallow layer (high H)</td>
+      </tr>
+      <tr>
+        <td>Moving one matchstick</td>
+        <td>EPC = 1 (minimal edit)</td>
+        <td>One layer's transformation</td>
+      </tr>
+      <tr>
+        <td>Equation after move (true)</td>
+        <td>Graph after edit (IG maximized)</td>
+        <td>Hidden state at deep layer (low H)</td>
+      </tr>
+      <tr>
+        <td>The "aha" moment</td>
+        <td>AG fires &rarr; DG quantifies</td>
+        <td>Phase transition in F trajectory</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="summary">
+    <div class="summary-title">A Speculative Bridge</div>
+    <div class="summary-text">
+      This analogy is deliberately stretched &mdash; matchstick puzzles operate in a semantic space
+      that the current F decomposition does not formally address. However, the structural parallel
+      is suggestive:<br><br>
+      In all three domains (puzzles, graphs, neural networks),
+      <em>minimal structural rearrangement can trigger maximal information gain</em>.
+      F measures the gap between the cost of change (EPC) and the value of change (IG).
+      When F drops sharply, structure has found its meaning.
+    </div>
+  </div>
+
+  <div class="caption">
+    Fig. 3: A matchstick puzzle as semantic analogy for Information Gain. Moving one matchstick (EPC = 1)
+    transforms a false equation into a true one, collapsing semantic entropy from maximum to zero.
+    The topology is unchanged (&Delta;&beta;<sub>1</sub> = 0), yet the meaning is entirely different &mdash;
+    illustrating that IG captures semantic transitions invisible to purely topological or metric measures alone.
+  </div>
+
+</div>
+
+</div>
+
+</body>
+</html>
