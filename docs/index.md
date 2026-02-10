@@ -1,37 +1,43 @@
 ---
 layout: default
-title: geDIG - Structure IS Probability
+title: geDIG — The Thermodynamics of Intelligence
 ---
 
 <div align="center">
 
 <br>
 
-# Structure IS Probability
-
-> **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
-
+# The Thermodynamics of Intelligence
 
 <h2 style="font-weight: normal; color: #666;">
-What if structural optimization and probabilistic inference<br>
-are the same operation?
+Can a single dimensionless equation — spanning metric, measure, and topology —<br>
+describe how any information-bearing system restructures itself?
 </h2>
 
 <br>
 
-<div style="font-size: 1.4em; font-family: 'Times New Roman', serif; letter-spacing: 0.05em;">
+<div style="font-size: 1.5em; font-family: 'Times New Roman', serif; letter-spacing: 0.05em;">
 
-**F = ΔEPC − λΔIG**
+**F = ΔEPC − λ(ΔH + γΔβ₁)**
 
 </div>
 
-<p style="color: #888; font-size: 0.9em;">
-One equation. From mazes to multi-hop QA.
+<br>
+
+| Term | Mathematical Structure | What It Captures |
+|:-----|:----------------------|:-----------------|
+| **ΔEPC** | **Metric** (distance) | Cost of restructuring |
+| **ΔH** | **Measure** (probability) | Change in entropy |
+| **Δβ₁** | **Topology** (loops) | Change in independent cycles |
+
+<p style="color: #666; font-size: 0.95em; margin-top: 1em;">
+Three independent mathematical structures. One dimensionless, scale-invariant scalar.<br>
+<strong>F &lt; 0</strong> means information gain exceeds structural cost — the system should commit the change.
 </p>
 
 <br>
 
-[Paper](paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf) ・ [GitHub](https://github.com/miyauchikazuyoshi/InsightSpike-AI) ・ [Demo](https://huggingface.co/spaces/miyaukaz/gedig-demo)
+[Paper (PDF)](paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf) ・ [GitHub](https://github.com/miyauchikazuyoshi/InsightSpike-AI) ・ [Demo](https://huggingface.co/spaces/miyaukaz/gedig-demo) ・ [Interactive Visualizer](demo.html)
 
 ---
 
@@ -39,61 +45,39 @@ One equation. From mazes to multi-hop QA.
 
 <br>
 
-## The Insight
+## Visual Intuition: The Matchstick Figure
 
-<div align="center">
+Why are these three terms independent? The [Matchstick Figure](research/thinking/matchstick_figure_v2_en.html) provides an interactive visual explanation.
 
-```
-Selecting by STRUCTURE          Selecting by PROBABILITY
-        │                               │
-   Graph Topology               Distribution over States
-   Nodes & Edges                    P(x)
-   Edge Cost (EPC)                  Entropy (H)
-        │                               │
-        └───────────┬───────────────────┘
-                    │
-            F-minimization
-            governs both
-                    │
-                    ▼
-        Selection by structure
-                 =
-        Selection by probability
-```
+For the same edit cost (EPC = 1), topology (Δβ₁) and information (ΔH) vary independently — one move can create a loop without changing entropy, or reduce entropy without changing topology. This independence is why F needs all three terms.
 
-</div>
-
-<br>
-
-**This equivalence explains:**
-
-| Phenomenon | Structure View | Probability View |
-|:-----------|:---------------|:-----------------|
-| Learning | Graph rewiring | Distribution update |
-| Insight | Structural isomorphism | Sudden entropy collapse |
-| Forgetting | Edge pruning | Probability decay |
-| Intuition | Consolidated path (FFN) | High-confidence shortcut |
+[**View the Matchstick Figure (EN)**](research/thinking/matchstick_figure_v2_en.html) ・ [**(JA)**](research/thinking/matchstick_figure_v2.html)
 
 <br>
 
 ---
 
-## Why This Matters
+## Origin
 
-<br>
+> *"How do we build an AI that thinks like Einstein?"*
 
-<div align="center">
+From this question came geDIG: the hypothesis that **insight is the topological reconstruction of memory**, and that it can be measured as a thermodynamic quantity — isomorphic to Helmholtz free energy F = E − TS.
 
-| Domain | Application | Status |
-|:-------|:------------|:-------|
-| **AI** | Adaptive RAG, Dynamic Gating | ✅ Demonstrated |
-| **Cognition** | Episodic memory, Insight | ✅ Modeled |
+The equation evolved through research:
 
-</div>
+```
+ΔIG (undifferentiated gain)
+  ↓  decompose
+ΔH + γΔSP (SP = average shortest path — graph-dependent)
+  ↓  abstract
+ΔH + γΔβ₁ (β₁ = first Betti number — topological invariant)
+```
 
-<br>
+The SP → β₁ abstraction was the decisive leap: from an operational definition that depends on graph shape, to a structural definition that exists wherever space exists.
 
-We believe this framework may extend to other domains (neuroscience, economics), but these are **hypotheses to be tested**, not claims.
+[**Read the full origin story**](research/gedig_origin_story.md) (EN / JA)
+
+> *Note: The v6 paper uses ΔSP (shortest-path shortening) as the structural term. The ongoing research generalizes this to Δβ₁, which is a topological invariant independent of graph shape or scale.*
 
 <br>
 
@@ -101,7 +85,7 @@ We believe this framework may extend to other domains (neuroscience, economics),
 
 ## The Mechanism: AG/DG Gating
 
-Two gates govern all intelligent processing:
+Two gates govern intelligent processing:
 
 <div align="center">
 
@@ -135,33 +119,56 @@ Input
 
 </div>
 
-<br>
+**AG** (Attention Gate): Detects ambiguity/novelty (0-hop). Analogous to noradrenaline.
 
-**AG** = What to attend to (Precision weighting)
+**DG** (Decision Gate): Confirms valid restructuring (multi-hop). Analogous to dopamine.
 
-**DG** = What to learn (Model selection)
+> *The neurotransmitter correspondence is a computational analogy, not a physiological claim.*
 
 <br>
 
 ---
 
-## Proof: It Works
+## Experiments
 
-<br>
+### Maze Navigation
 
-<div align="center">
+A partial-observation maze agent that builds a persistent knowledge graph and uses geDIG to decide when to explore vs. exploit.
 
-| Experiment | Domain | Result |
-|:-----------|:-------|:-------|
-| **Dynamic Gating** | 15×15 Maze | 60% → **98%** success |
-| **Adaptive RAG** | HotpotQA | **+3.5pt** Exact Match |
-| **Analogy Discovery** | Cross-domain KG | **+60%** F1 |
+| Experiment | Result |
+|:-----------|:-------|
+| **15×15 Maze** (Dynamic Gating) | 60% → **98%** goal-reach rate |
+| **25×25 Maze** (Graph-Persistent DG) | Active experimentation with 10D vector extension |
 
-</div>
+Architecture: Wake-Sleep-Wake cycle with three-layer search (L0: O(1) hash, L1: O(degree) attention walk, L2: O(N log N) full sort).
 
-<br>
+```bash
+# Reproduce (requires .venv with networkx, numpy, etc.)
+.venv/bin/python3 experiments/maze/run_experiment_query.py \
+  --maze-size 15 --max-steps 250 --seeds 12 \
+  --search-mode threelayer --vector-mode extended
+```
 
-All three experiments use **the same F-gauge**. No task-specific tuning.
+### Transformer Inference F-Trajectory
+
+Layer-by-layer measurement of ΔEPC, ΔH, and Δβ₁ across Transformer hidden states, testing whether F tracks model quality.
+
+- **8 token-level models tested**: BERT, DistilBERT, GPT-2, GPT-2 Medium, DistilGPT2, TinyLlama (2 checkpoints)
+- **Key finding**: GPT series shows monotonic improvement in ΔR²_struct with model scale
+
+```
+distilgpt2:    ΔR²_struct = -0.777
+gpt2:          ΔR²_struct = -0.086
+gpt2-medium:   ΔR²_struct = -0.065
+```
+
+F has sensitivity to model quality — better models produce more structured F-trajectories.
+
+**Status**: Preliminary. ΔR²_struct is still negative for all models (random-init outperforms baseline), but trending toward zero with scale. Large-scale model verification (70B+) is future work.
+
+### Earlier Experiments
+
+HotpotQA (multi-hop QA) and cross-domain analogy experiments were conducted in earlier phases and informed the theory. These have not been reproduced under the current codebase and are archived.
 
 <br>
 
@@ -169,56 +176,26 @@ All three experiments use **the same F-gauge**. No task-specific tuning.
 
 ## Theoretical Connections
 
-<br>
-
 <div align="center">
 
 | Framework | Mapping to geDIG |
 |:----------|:-----------------|
+| **Helmholtz Free Energy** | F = E − TS ↔ F = ΔEPC − λ(ΔH + γΔβ₁) |
 | **FEP** (Free Energy Principle) | Model complexity ↔ EPC, Prediction error ↔ IG |
 | **MDL** (Minimum Description Length) | Code length ↔ EPC, Compression ↔ IG |
-| **Helmholtz Free Energy** | F = U − TS ↔ F = ΔEPC − λΔIG |
 | **Active Inference** | Precision weighting ↔ AG/DG gating |
 
 </div>
 
-<br>
+Each term of F is grounded in independent prior work:
 
-geDIG provides an **operational bridge** — turning abstract principles into computable graph algorithms.
+| F term | Prior work |
+|:-------|:-----------|
+| **ΔEPC** (metric) | Hewitt & Manning (2019), [A Structural Probe for Finding Syntax](https://aclanthology.org/N19-1419/) |
+| **ΔH** (measure) | Ali et al. (2025), [Entropy-Lens](https://arxiv.org/abs/2502.16570) |
+| **Δβ₁** (topology) | Oyama et al. (2025), [Mapping 1,000+ Language Models](https://aclanthology.org/2025.acl-long.1584/) — ACL Outstanding Paper |
 
-<br>
-
----
-
-## Get Started
-
-```bash
-git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
-cd InsightSpike-AI
-poetry install
-
-# Run the maze experiment
-make reproduce-maze15
-
-# Run HotpotQA benchmark
-make reproduce-hotpotqa
-```
-
-<br>
-
----
-
-## Resources
-
-<br>
-
-| Type | Link |
-|:-----|:-----|
-| 📄 **Paper (English)** | [geDIG v6 (PDF)](paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf) |
-| 📄 **Paper (日本語)** | [geDIG v6 (PDF)](paper/geDIG_onegauge_improved_v6.pdf) |
-| 💻 **GitHub** | [InsightSpike-AI](https://github.com/miyauchikazuyoshi/InsightSpike-AI) |
-| 🎮 **Demo** | [HuggingFace Space](https://huggingface.co/spaces/miyaukaz/gedig-demo) |
-| 💬 **Discussion** | [Active Inference Institute Discord](https://discord.gg/activeInference) |
+Related: Gao et al. (2025), [Weight-sparse transformers have interpretable circuits](https://arxiv.org/abs/2511.13653) — sparsification as β₁ reduction in F.
 
 <br>
 
@@ -226,13 +203,15 @@ make reproduce-hotpotqa
 
 ## Open Questions
 
-We are exploring whether this framework extends beyond AI:
+We are exploring specific, actionable research questions:
 
-| Domain | Hypothesis | Status |
-|:-------|:-----------|:-------|
-| Cognition | Episodic memory as AG/DG graph construction | Testing |
-| Neuroscience | Synaptic plasticity follows F-gradient | Hypothesis |
-| Economics | Market equilibria as F-minima | Hypothesis |
+1. **Independent F-trajectory reproduction** — Does F show structured layer-wise behavior on models we haven't tested?
+
+2. **β₁ vs SP as structural term** — Under what conditions does topological Δβ₁ outperform metric ΔSP? Expertise in topological data analysis (TDA) welcome.
+
+3. **Scaling to 70B+ models** — We hypothesize that (λ, γ) converge across model families at sufficient scale. Verification requires GPU resources beyond our current individual setup.
+
+4. **F-regularization robustness** — The v6 paper shows weak F-regularization improves downstream performance (+0.33pt on SST-2). Is this robust across tasks and model families?
 
 These are **open research questions**, not claims. We welcome critical feedback.
 
@@ -240,16 +219,17 @@ These are **open research questions**, not claims. We welcome critical feedback.
 
 ---
 
-## Collaboration
+## Resources
 
-We are looking for collaborators to test and challenge the **"Structure = Probability"** hypothesis:
-
-| Role | Contribution |
-|:-----|:-------------|
-| 🧠 **Cognitive Scientists** | Human insight experiments |
-| 🔬 **Neuroscientists** | Synaptic plasticity validation |
-| 💻 **ML Engineers** | Large-scale experiments |
-| 🔍 **Critics** | Find where this breaks down |
+| Type | Link |
+|:-----|:-----|
+| **Paper (English)** | [geDIG v6 (PDF)](paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf) |
+| **Paper (Japanese)** | [geDIG v6 (PDF)](paper/geDIG_onegauge_improved_v6.pdf) |
+| **GitHub** | [InsightSpike-AI](https://github.com/miyauchikazuyoshi/InsightSpike-AI) |
+| **Live Demo** | [HuggingFace Space](https://huggingface.co/spaces/miyaukaz/gedig-demo) |
+| **Interactive Visualizer** | [geDIG Graph Demo](demo.html) |
+| **Matchstick Figure** | [EN](research/thinking/matchstick_figure_v2_en.html) / [JA](research/thinking/matchstick_figure_v2.html) |
+| **Canonical Spec** | [gedig_spec.md](gedig_spec.md) |
 
 <br>
 
@@ -271,20 +251,9 @@ We are looking for collaborators to test and challenge the **"Structure = Probab
 
 <br>
 
-> *"Structure and probability are two views of the same reality.*
-> *F-minimization is the lens that unifies them."*
+**Apache-2.0** | Patent: JP 2025-082988, JP 2025-082989
 
-<br>
-
-**Apache-2.0** | Patent Pending (JP 2025-082988, 2025-082989)
-
-<br>
-
----
-
-<br>
-
-**geDIG** — *Where Structure Meets Probability.*
+> *All theoretical contributions and experimental design are by the author. Implementation is AI-assisted (Claude, GitHub Copilot).*
 
 <br>
 
