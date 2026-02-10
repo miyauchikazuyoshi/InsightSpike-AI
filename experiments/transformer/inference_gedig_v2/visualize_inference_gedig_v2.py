@@ -60,6 +60,14 @@ def _condition_items(payload: dict) -> List[Tuple[str, dict]]:
     return list(conditions.items())
 
 
+def _structural_metric_key(payload: dict) -> str:
+    config = payload.get("config", {})
+    if not isinstance(config, dict):
+        return "delta_SP"
+    term = str(config.get("f_structural_term", "sp")).lower()
+    return "delta_B1" if term == "betti1" else "delta_SP"
+
+
 def _plot_f_curves(payload: dict, output_dir: Path, run_stem: str) -> Path:
     condition_items = _condition_items(payload)
     fig, ax = plt.subplots(figsize=(10, 5.5))
@@ -100,8 +108,10 @@ def _plot_f_curves(payload: dict, output_dir: Path, run_stem: str) -> Path:
 
 def _plot_component_deltas(payload: dict, output_dir: Path, run_stem: str) -> Path:
     condition_items = _condition_items(payload)
-    metrics = ["delta_EPC", "delta_H", "delta_SP"]
-    ylabels = ["delta_EPC", "delta_H", "delta_SP"]
+    structural_key = _structural_metric_key(payload)
+    structural_label = "delta_B1" if structural_key == "delta_B1" else "delta_SP"
+    metrics = ["delta_EPC", "delta_H", structural_key]
+    ylabels = ["delta_EPC", "delta_H", structural_label]
 
     fig, axes = plt.subplots(1, 3, figsize=(14, 4.8))
     for ax, metric, ylabel in zip(axes, metrics, ylabels):
@@ -225,9 +235,13 @@ def _plot_sample_trajectories(payload: dict, output_dir: Path, run_stem: str, ma
 def _write_text_summary(payload: dict, output_dir: Path, run_stem: str, source_path: Path) -> Path:
     lines = []
     meta = payload.get("metadata", {})
+    config = payload.get("config", {})
     model = meta.get("model", "unknown")
     lines.append(f"source: {source_path}")
     lines.append(f"model: {model}")
+    if isinstance(config, dict):
+        lines.append(f"sp_mode: {config.get('sp_mode', 'n/a')}")
+        lines.append(f"f_structural_term: {config.get('f_structural_term', 'n/a')}")
     lines.append("")
 
     for name, condition in _condition_items(payload):

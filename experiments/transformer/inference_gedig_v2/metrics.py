@@ -4,7 +4,8 @@ Definitions implemented in this module:
   - H(l): vocab entropy from hidden state projected by unembedding matrix.
   - EPC(l): normalized Frobenius change of pairwise distance matrices.
   - SP(l): Spearman correlation of predicted depth vectors across layers.
-  - F(l): delta_EPC(l) - lambda * (delta_H(l) + gamma * delta_SP(l)).
+  - B1(l): First Betti number from layer-wise distance graph.
+  - F(l): delta_EPC(l) - lambda * (delta_H(l) + gamma * delta_structural(l)).
 """
 
 from __future__ import annotations
@@ -17,6 +18,7 @@ import numpy as np
 import torch
 
 EPS = 1e-12
+SP_MODES = {"spearman", "betti1", "both"}
 
 
 def _rankdata(values: np.ndarray) -> np.ndarray:
@@ -119,23 +121,105 @@ def _fro_norm(value: torch.Tensor) -> torch.Tensor:
     return torch.linalg.norm(value, ord="fro")
 
 
+def _count_components(adj: np.ndarray) -> int:
+    """Count connected components for an undirected adjacency matrix."""
+    n = int(adj.shape[0])
+    if n == 0:
+        return 0
+
+    visited = np.zeros((n,), dtype=bool)
+    components = 0
+
+    for start in range(n):
+        if visited[start]:
+            continue
+        components += 1
+        stack = [start]
+        visited[start] = True
+        while stack:
+            node = stack.pop()
+            neighbors = np.flatnonzero(adj[node])
+            for nb in neighbors:
+                if visited[nb]:
+                    continue
+                visited[nb] = True
+                stack.append(int(nb))
+
+    return components
+
+
+def _betti_1_from_distance_matrix(
+    dist_mat: torch.Tensor,
+    threshold: Optional[float] = None,
+    k_neighbors: int = 5,
+) -> float:
+    """Compute first Betti number from a pairwise distance matrix.
+
+    If `k_neighbors > 0`, uses a symmetric k-NN graph.
+    Otherwise uses threshold graph (`distance < threshold`), where threshold
+    defaults to the median of upper-triangle distances.
+    """
+    n = int(dist_mat.shape[0])
+    if n < 2:
+        return 0.0
+
+    dist = dist_mat.detach().cpu().numpy().astype(np.float64, copy=False)
+    adj = np.zeros((n, n), dtype=bool)
+
+    if k_neighbors > 0:
+        k_eff = min(int(k_neighbors), n - 1)
+        for i in range(n):
+            row = dist[i]
+            order = np.argsort(row, kind="mergesort")
+            picked = 0
+            for j in order:
+                j = int(j)
+                if j == i:
+                    continue
+                adj[i, j] = True
+                picked += 1
+                if picked >= k_eff:
+                    break
+        # Undirected graph
+        adj = np.logical_or(adj, adj.T)
+    else:
+        if threshold is None:
+            tri_u = np.triu_indices(n, k=1)
+            vals = dist[tri_u]
+            if vals.size == 0:
+                return 0.0
+            threshold = float(np.median(vals))
+        adj = dist < float(threshold)
+        np.fill_diagonal(adj, False)
+        adj = np.logical_or(adj, adj.T)
+
+    edges = int(np.count_nonzero(np.triu(adj, k=1)))
+    components = _count_components(adj)
+    beta1 = edges - n + components
+    return float(max(beta1, 0))
+
+
 @dataclass
 class LayerCurves:
     H: List[Optional[float]]
     EPC: List[Optional[float]]
     SP: List[Optional[float]]
+    B1: List[Optional[float]]
     delta_H: List[Optional[float]]
     delta_EPC: List[Optional[float]]
     delta_SP: List[Optional[float]]
+    delta_B1: List[Optional[float]]
 
     def as_dict(self) -> Dict[str, List[Optional[float]]]:
         return {
             "H": self.H,
             "EPC": self.EPC,
             "SP": self.SP,
+            "B1": self.B1,
             "delta_H": self.delta_H,
             "delta_EPC": self.delta_EPC,
             "delta_SP": self.delta_SP,
+            "delta_B1": self.delta_B1,
         }
 
 
@@ -146,21 +230,30 @@ def compute_layer_curves(
     b_depth: torch.Tensor,
     temperature: float = 1.0,
     vocab_chunk_tokens: int = 8,
+    sp_mode: str = "both",
+    betti_k_neighbors: int = 5,
+    betti_threshold: Optional[float] = None,
 ) -> LayerCurves:
-    """Compute H/EPC/SP and their deltas layer by layer."""
+    """Compute H/EPC and structural metrics (SP/B1) layer by layer."""
     if len(hidden_states) < 2:
         raise ValueError("hidden_states must include at least embedding + 1 layer")
+    if sp_mode not in SP_MODES:
+        raise ValueError(f"sp_mode must be one of {sorted(SP_MODES)}, got: {sp_mode}")
 
     num_layers = len(hidden_states)
     h_values: List[Optional[float]] = [None] * num_layers
     epc_values: List[Optional[float]] = [None] * num_layers
     sp_values: List[Optional[float]] = [None] * num_layers
+    b1_values: List[Optional[float]] = [None] * num_layers
     delta_h: List[Optional[float]] = [None] * num_layers
     delta_epc: List[Optional[float]] = [None] * num_layers
     delta_sp: List[Optional[float]] = [None] * num_layers
+    delta_b1: List[Optional[float]] = [None] * num_layers
 
     dist_mats: List[torch.Tensor] = []
     depth_vectors: List[torch.Tensor] = []
+    use_sp = sp_mode in {"spearman", "both"}
+    use_betti = sp_mode in {"betti1", "both"}
 
     for idx, layer_hidden in enumerate(hidden_states):
         layer_hidden = layer_hidden.to(dtype=torch.float32)
@@ -172,11 +265,19 @@ def compute_layer_curves(
         )
 
         z_dist = layer_hidden @ b_dist.t()
-        dist_mats.append(pairwise_distance_matrix(z_dist))
+        dm = pairwise_distance_matrix(z_dist)
+        dist_mats.append(dm)
+        if use_betti:
+            b1_values[idx] = _betti_1_from_distance_matrix(
+                dm,
+                threshold=betti_threshold,
+                k_neighbors=betti_k_neighbors,
+            )
 
-        z_depth = layer_hidden @ b_depth.t()
-        depth = torch.sum(z_depth * z_depth, dim=-1)
-        depth_vectors.append(depth)
+        if use_sp:
+            z_depth = layer_hidden @ b_depth.t()
+            depth = torch.sum(z_depth * z_depth, dim=-1)
+            depth_vectors.append(depth)
 
         if idx >= 1:
             prev = dist_mats[idx - 1]
@@ -184,7 +285,11 @@ def compute_layer_curves(
             epc = _fro_norm(curr - prev) / (_fro_norm(prev) + EPS)
             epc_values[idx] = float(epc.item())
 
-            sp_values[idx] = spearman_corr(depth_vectors[idx], depth_vectors[idx - 1])
+            if use_sp:
+                sp_values[idx] = spearman_corr(depth_vectors[idx], depth_vectors[idx - 1])
+
+            if use_betti and b1_values[idx - 1] is not None and b1_values[idx] is not None:
+                delta_b1[idx] = float(b1_values[idx] - b1_values[idx - 1])
 
             if h_values[idx - 1] is not None and h_values[idx] is not None:
                 delta_h[idx] = float(h_values[idx] - h_values[idx - 1])
@@ -192,16 +297,18 @@ def compute_layer_curves(
         if idx >= 2:
             if epc_values[idx] is not None and epc_values[idx - 1] is not None:
                 delta_epc[idx] = float(epc_values[idx] - epc_values[idx - 1])
-            if sp_values[idx] is not None and sp_values[idx - 1] is not None:
+            if use_sp and sp_values[idx] is not None and sp_values[idx - 1] is not None:
                 delta_sp[idx] = float(sp_values[idx] - sp_values[idx - 1])
 
     return LayerCurves(
         H=h_values,
         EPC=epc_values,
         SP=sp_values,
+        B1=b1_values,
         delta_H=delta_h,
         delta_EPC=delta_epc,
         delta_SP=delta_sp,
+        delta_B1=delta_b1,
     )
 
 
@@ -212,7 +319,11 @@ def compute_f_curve(
     lambda_param: float,
     gamma: float,
 ) -> List[Optional[float]]:
-    """Compute F(l) from delta components."""
+    """Compute F(l) from delta components.
+
+    Note: `delta_sp` is the structural term and may be either `delta_SP` or
+    `delta_B1`, depending on experiment configuration.
+    """
     if not (len(delta_epc) == len(delta_h) == len(delta_sp)):
         raise ValueError("all delta curves must have same length")
 

@@ -15,6 +15,8 @@ MAX_SAMPLES="${MAX_SAMPLES:-16}"
 MAX_LENGTH="${MAX_LENGTH:-128}"
 DEVICE="${DEVICE:-auto}"
 OUTPUT_BASE="${OUTPUT_BASE:-${SCRIPT_DIR}/results}"
+LOCAL_FILES_ONLY="${LOCAL_FILES_ONLY:-0}"
+PREFER_SAFETENSORS="${PREFER_SAFETENSORS:-0}"
 
 GRID_SEARCH="${GRID_SEARCH:-1}"
 SHUFFLE_CONTROL="${SHUFFLE_CONTROL:-1}"
@@ -24,6 +26,10 @@ SAVE_SAMPLES="${SAVE_SAMPLES:-1}"
 GRID_LAMBDA="${GRID_LAMBDA:-0.01,0.1,0.5,1,2,5,10}"
 GRID_GAMMA="${GRID_GAMMA:-0.01,0.1,0.5,1,2,5,10}"
 PROJ_DIM="${PROJ_DIM:-128}"
+SP_MODE="${SP_MODE:-both}"
+F_STRUCTURAL_TERM="${F_STRUCTURAL_TERM:-betti1}"
+BETTI_K_NEIGHBORS="${BETTI_K_NEIGHBORS:-5}"
+BETTI_THRESHOLD="${BETTI_THRESHOLD:-}"
 
 B_DIST="${B_DIST:-}"
 B_DEPTH="${B_DEPTH:-}"
@@ -63,7 +69,14 @@ for model in "${MODEL_ARRAY[@]}"; do
     --proj-dim "${PROJ_DIM}"
     --grid-lambda "${GRID_LAMBDA}"
     --grid-gamma "${GRID_GAMMA}"
+    --sp-mode "${SP_MODE}"
+    --f-structural-term "${F_STRUCTURAL_TERM}"
+    --betti-k-neighbors "${BETTI_K_NEIGHBORS}"
   )
+
+  if [[ -n "${BETTI_THRESHOLD}" ]]; then
+    cmd+=(--betti-threshold "${BETTI_THRESHOLD}")
+  fi
 
   if [[ "${GRID_SEARCH}" == "1" ]]; then
     cmd+=(--grid-search)
@@ -85,6 +98,12 @@ for model in "${MODEL_ARRAY[@]}"; do
   fi
   if [[ -n "${TEXT_FILE}" ]]; then
     cmd+=(--text-file "${TEXT_FILE}")
+  fi
+  if [[ "${LOCAL_FILES_ONLY}" == "1" ]]; then
+    cmd+=(--local-files-only)
+  fi
+  if [[ "${PREFER_SAFETENSORS}" == "1" ]]; then
+    cmd+=(--prefer-safetensors)
   fi
 
   if [[ "$#" -gt 0 ]]; then
