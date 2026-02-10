@@ -342,9 +342,9 @@
                     <span>🧠</span>
                     Try Live Demo (HF Spaces)
                 </a>
-                <a href="research/thinking/matchstick_figure_v2_en.html"
+                <a href="#intuition"
                     class="px-8 py-4 rounded-full bg-accent hover:bg-cyan-400 text-bg font-bold transition shadow-[0_0_20px_rgba(34,211,238,0.3)] text-center">
-                    Visual Intuition: Matchstick Figure
+                    Why Three Terms?
                 </a>
                 <a href="#resources"
                     class="px-8 py-4 rounded-full border border-slate-600 hover:border-white hover:bg-white/5 transition font-medium flex items-center justify-center gap-2 group">
@@ -460,26 +460,134 @@
 
     <section id="intuition" class="py-16 bg-panel/30 border-y border-white/5 backdrop-blur-sm">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="text-center mb-10">
+            <div class="text-center mb-6">
                 <h2 class="text-3xl font-bold text-white flex items-center justify-center gap-3 mb-4">
                     <span class="w-1 h-8 bg-accent rounded-full"></span>
                     Visual Intuition
                 </h2>
-                <p class="text-slate-400 max-w-2xl mx-auto leading-relaxed">
-                    Why does F need <em>three</em> terms? The
-                    <a href="research/thinking/matchstick_figure_v2_en.html" class="text-accent hover:underline font-semibold">Matchstick Figure</a>
-                    shows it in one glance: for the same edit cost (EPC&nbsp;=&nbsp;1),
-                    topology ($\Delta\beta_1$) and information ($\Delta H$) vary independently.
-                    One move can create a loop without changing entropy, or reduce entropy without changing topology.
+                <p class="text-slate-400 max-w-lg mx-auto leading-relaxed">
+                    Why does F need <em>three</em> terms?
+                    Same edit cost. Completely different outcomes.
                 </p>
-                <div class="mt-6 flex flex-col sm:flex-row justify-center gap-4">
+            </div>
+
+            <!-- Inline matchstick cases -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-8">
+
+                <!-- Case A: Insight -->
+                <div class="bg-bg border border-white/10 rounded-xl p-6 text-center hover:border-accent/40 transition">
+                    <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-3">Case A &mdash; Insight</div>
+                    <div class="flex items-center justify-center gap-4 mb-4">
+                        <svg width="80" height="65" viewBox="0 0 120 90">
+                            <line x1="20" y1="70" x2="60" y2="20" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
+                            <line x1="60" y1="20" x2="100" y2="70" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
+                            <line x1="20" y1="70" x2="100" y2="70" stroke="#475569" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.4"/>
+                            <circle cx="20" cy="70" r="4" fill="#94a3b8"/>
+                            <circle cx="60" cy="20" r="4" fill="#94a3b8"/>
+                            <circle cx="100" cy="70" r="4" fill="#94a3b8"/>
+                        </svg>
+                        <span class="text-slate-500 text-lg">&rarr;</span>
+                        <svg width="80" height="65" viewBox="0 0 120 90">
+                            <polygon points="20,70 60,20 100,70" fill="rgba(168,85,247,0.12)" stroke="rgba(168,85,247,0.25)" stroke-width="1"/>
+                            <line x1="20" y1="70" x2="60" y2="20" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
+                            <line x1="60" y1="20" x2="100" y2="70" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
+                            <line x1="20" y1="70" x2="100" y2="70" stroke="#22d3ee" stroke-width="2.5" stroke-linecap="round"/>
+                            <circle cx="20" cy="70" r="4" fill="#94a3b8"/>
+                            <circle cx="60" cy="20" r="4" fill="#94a3b8"/>
+                            <circle cx="100" cy="70" r="4" fill="#94a3b8"/>
+                        </svg>
+                    </div>
+                    <div class="space-y-1 text-[11px] font-mono">
+                        <div class="flex justify-between"><span class="text-slate-500">EPC</span><span class="text-slate-300">1</span></div>
+                        <div class="flex justify-between"><span class="text-purple-400">$\Delta\beta_1$</span><span class="text-emerald-400 font-bold">+1</span></div>
+                        <div class="flex justify-between"><span class="text-cyan-400">$\Delta H$</span><span class="text-slate-300">+0.4</span></div>
+                    </div>
+                    <div class="mt-3 text-[10px] text-emerald-400/70">Loop created &mdash; new path options</div>
+                </div>
+
+                <!-- Case B: Routine -->
+                <div class="bg-bg border border-white/10 rounded-xl p-6 text-center hover:border-white/20 transition">
+                    <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3">Case B &mdash; Routine</div>
+                    <div class="flex items-center justify-center gap-4 mb-4">
+                        <svg width="80" height="65" viewBox="0 0 120 90">
+                            <line x1="15" y1="45" x2="55" y2="45" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
+                            <line x1="55" y1="45" x2="95" y2="45" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
+                            <circle cx="15" cy="45" r="4" fill="#94a3b8"/>
+                            <circle cx="55" cy="45" r="4" fill="#94a3b8"/>
+                            <circle cx="95" cy="45" r="4" fill="#94a3b8"/>
+                            <circle cx="95" cy="75" r="3" fill="none" stroke="#475569" stroke-width="1.5" stroke-dasharray="3 2"/>
+                        </svg>
+                        <span class="text-slate-500 text-lg">&rarr;</span>
+                        <svg width="80" height="65" viewBox="0 0 120 90">
+                            <line x1="15" y1="45" x2="55" y2="45" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
+                            <line x1="55" y1="45" x2="95" y2="45" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
+                            <line x1="95" y1="45" x2="95" y2="75" stroke="#22d3ee" stroke-width="2.5" stroke-linecap="round"/>
+                            <circle cx="15" cy="45" r="4" fill="#94a3b8"/>
+                            <circle cx="55" cy="45" r="4" fill="#94a3b8"/>
+                            <circle cx="95" cy="45" r="4" fill="#94a3b8"/>
+                            <circle cx="95" cy="75" r="4" fill="#94a3b8"/>
+                        </svg>
+                    </div>
+                    <div class="space-y-1 text-[11px] font-mono">
+                        <div class="flex justify-between"><span class="text-slate-500">EPC</span><span class="text-slate-300">1</span></div>
+                        <div class="flex justify-between"><span class="text-purple-400">$\Delta\beta_1$</span><span class="text-slate-500">0</span></div>
+                        <div class="flex justify-between"><span class="text-cyan-400">$\Delta H$</span><span class="text-slate-300">+0.3</span></div>
+                    </div>
+                    <div class="mt-3 text-[10px] text-slate-500">No loop &mdash; information gained, topology unchanged</div>
+                </div>
+
+                <!-- Case C: Collapse -->
+                <div class="bg-bg border border-white/10 rounded-xl p-6 text-center hover:border-red-500/30 transition">
+                    <div class="text-[10px] font-bold text-red-400 uppercase tracking-wider mb-3">Case C &mdash; Collapse</div>
+                    <div class="flex items-center justify-center gap-4 mb-4">
+                        <svg width="80" height="65" viewBox="0 0 120 90">
+                            <polygon points="25,15 95,15 95,75 25,75" fill="rgba(168,85,247,0.12)" stroke="rgba(168,85,247,0.25)" stroke-width="1"/>
+                            <line x1="25" y1="15" x2="95" y2="15" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
+                            <line x1="95" y1="15" x2="95" y2="75" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
+                            <line x1="95" y1="75" x2="25" y2="75" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
+                            <line x1="25" y1="75" x2="25" y2="15" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
+                            <circle cx="25" cy="15" r="4" fill="#94a3b8"/>
+                            <circle cx="95" cy="15" r="4" fill="#94a3b8"/>
+                            <circle cx="95" cy="75" r="4" fill="#94a3b8"/>
+                            <circle cx="25" cy="75" r="4" fill="#94a3b8"/>
+                        </svg>
+                        <span class="text-slate-500 text-lg">&rarr;</span>
+                        <svg width="80" height="65" viewBox="0 0 120 90">
+                            <line x1="25" y1="15" x2="95" y2="15" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
+                            <line x1="95" y1="15" x2="95" y2="75" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
+                            <line x1="95" y1="75" x2="25" y2="75" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
+                            <line x1="25" y1="75" x2="25" y2="15" stroke="#ef4444" stroke-width="2" stroke-dasharray="5 3" opacity="0.5"/>
+                            <circle cx="25" cy="15" r="4" fill="#94a3b8"/>
+                            <circle cx="95" cy="15" r="4" fill="#94a3b8"/>
+                            <circle cx="95" cy="75" r="4" fill="#94a3b8"/>
+                            <circle cx="25" cy="75" r="4" fill="#94a3b8"/>
+                        </svg>
+                    </div>
+                    <div class="space-y-1 text-[11px] font-mono">
+                        <div class="flex justify-between"><span class="text-slate-500">EPC</span><span class="text-slate-300">1</span></div>
+                        <div class="flex justify-between"><span class="text-purple-400">$\Delta\beta_1$</span><span class="text-red-400 font-bold">&minus;1</span></div>
+                        <div class="flex justify-between"><span class="text-cyan-400">$\Delta H$</span><span class="text-slate-300">&minus;0.2</span></div>
+                    </div>
+                    <div class="mt-3 text-[10px] text-red-400/70">Loop destroyed &mdash; redundancy lost</div>
+                </div>
+
+            </div>
+
+            <div class="text-center mb-10">
+                <p class="text-slate-500 text-sm max-w-2xl mx-auto">
+                    All three cases have <strong class="text-slate-300">EPC = 1</strong>, yet
+                    <strong class="text-purple-400">$\Delta\beta_1$</strong> diverges to +1, 0, &minus;1.
+                    KL divergence sees only $\Delta H$ and cannot distinguish Case A from B.
+                    F sees all three.
+                </p>
+                <div class="mt-5 flex flex-col sm:flex-row justify-center gap-3">
                     <a href="research/thinking/matchstick_figure_v2_en.html"
-                        class="px-6 py-3 rounded-full bg-accent hover:bg-cyan-400 text-bg font-bold transition shadow-[0_0_20px_rgba(34,211,238,0.3)] text-center">
-                        Matchstick Figure (EN)
+                        class="text-sm text-accent hover:underline font-medium">
+                        Full interactive version (EN) &rarr;
                     </a>
                     <a href="research/thinking/matchstick_figure_v2.html"
-                        class="px-6 py-3 rounded-full border border-slate-600 hover:border-white hover:bg-white/5 transition font-medium text-center">
-                        Matchstick Figure (JA)
+                        class="text-sm text-slate-500 hover:text-slate-300 hover:underline font-medium">
+                        (JA) &rarr;
                     </a>
                 </div>
             </div>
