@@ -1,10 +1,11 @@
-# β₁ + 三層記憶検索 実装設計書
+# Betti 数 + 三層記憶検索 実装設計書
 
-**日付:** 2026-02-09
-**目的:** β₁（第一Betti数）の導入と三層記憶検索アーキテクチャの実装仕様
+**日付:** 2026-02-09（β₀ 拡張: 2026-02-10）
+**目的:** Betti 数（β₀, β₁）の導入と三層記憶検索アーキテクチャの実装仕様
 **方針:** 既存SP(ASP)を除去せず、β₁を並行記録 → 相関確認後に切替判断
-**β₁ステータス:** 実装済み（`--sp-mode both` で並行記録可能）。ASP vs β₁ 比較検証中。
-**三層検索ステータス:** 未実装（設計のみ）
+**β₁ステータス:** ✅ 実装済み（`--sp-mode both` で並行記録可能）。ASP vs β₁ 比較検証中。
+**β₀ステータス:** 未実装（設計のみ）→ §11 参照
+**三層検索ステータス:** ✅ 実装済み（`--search-mode threelayer`）
 
 ---
 
@@ -731,4 +732,216 @@ Phase 4: Transformer 版（Phase 3 完了後）
 
 ---
 
-*Generated: 2026-02-09*
+---
+
+## 11. β₀（連結成分数）の昇格
+
+**追記日:** 2026-02-10
+**動機:** HotPotQA v2 実験（`experiments/hotpotqa_v2/SPEC.md`）
+
+### 11.1 動機
+
+β₁（独立閉路数）は連結グラフ内のループを検出するが、**非連結グラフにおける島（connected components）の統合を検出できない**。
+
+RAG のナレッジグラフでは、検索結果が複数の孤立クラスタを形成することが一般的：
+
+```
+検索前:  [Q]                           β₀ = 1, β₁ = 0
+
+検索後:  [Q]---[Doc A]   [Doc B]---[Doc C]   β₀ = 2, β₁ = 0
+         ↑ 接続済み        ↑ 孤立した島
+
+橋渡し:  [Q]---[Doc A]---[Doc B]---[Doc C]   β₀ = 1, β₁ = 0
+                      ↑ 島が統合（Δβ₀ = -1）
+```
+
+HotPotQA の **bridge 型質問**は、まさに 2 つの独立文書の橋渡しを要求する。β₀ の減少はこの構造変化を直接捉える。
+
+**迷路実験との互換:** 迷路グラフは常に連結（β₀ = 1）のため、Δβ₀ = 0 → β₀ 項は自動的に消滅し、既存結果に影響しない。
+
+### 11.2 拡張ゲージ v5
+
+```
+F = ΔEPC_norm − λ ( ΔH_norm + γ₁·Δβ₁ − γ₀·Δβ₀ )
+```
+
+| イベント | Δβ₀ | Δβ₁ | 寄与 (−γ₀Δβ₀ + γ₁Δβ₁) | F への効果 |
+|---------|---:|---:|:----------------------:|:---------:|
+| 島の統合 | -1 | 0 | +γ₀ | F 減少（良い） |
+| ループ生成 | 0 | +1 | +γ₁ | F 減少（良い） |
+| 孤立島の追加 | +1 | 0 | -γ₀ | F 増加（悪い） |
+| ループ破壊 | 0 | -1 | -γ₁ | F 増加（悪い） |
+
+`structural_mode` パラメータで切替：
+
+| モード | ゲージ式 | 用途 |
+|--------|---------|------|
+| `"sp"` | F = ΔEPC − λ(ΔH + γ·ΔSP) | v4 互換（デフォルト） |
+| `"betti"` | F = ΔEPC − λ(ΔH + γ₁·Δβ₁) | β₁ のみ |
+| `"betti_full"` | F = ΔEPC − λ(ΔH + γ₁·Δβ₁ − γ₀·Δβ₀) | フル Betti |
+
+### 11.3 実装変更
+
+#### graph_utils.py: `compute_betti_numbers()`
+
+```python
+def compute_betti_numbers(g: nx.Graph) -> tuple[int, int]:
+    """Betti numbers β₀ (connected components) and β₁ (independent cycles).
+
+    β₀ = number of connected components
+    β₁ = E - V + β₀  (Euler relation for graphs)
+
+    Returns: (β₀, β₁)
+    Cost: O(V+E) for β₀ via union-find, O(1) for β₁ given β₀.
+    """
+    V = g.number_of_nodes()
+    if V == 0:
+        return (0, 0)
+    E = g.number_of_edges()
+    beta_0 = nx.number_connected_components(g)
+    beta_1 = E - V + beta_0
+    return (beta_0, beta_1)
+```
+
+既存の `compute_betti_1()` は互換のため残し、内部で `compute_betti_numbers()` を呼ぶ。
+
+#### types.py: GeDIGResult 拡張
+
+```python
+@dataclass
+class GeDIGResult:
+    # ... 既存フィールド ...
+    betti_0_before: int = 0    # NEW
+    betti_0_after: int = 0     # NEW
+    delta_betti_0: int = 0     # NEW
+    betti_1_before: int = 0    # 既存
+    betti_1_after: int = 0     # 既存
+    delta_betti_1: int = 0     # 既存
+```
+
+#### config: 新規パラメータ
+
+```python
+structural_mode: str = "sp"    # "sp" | "betti" | "betti_full"
+gamma_0: float = 0.0           # β₀ weight (default 0 = backward compat)
+gamma_1: float = 0.0           # β₁ weight (default 0 = use sp_beta with ΔSP)
+```
+
+- `structural_mode="sp"`: 現行動作。`sp_beta` と `ΔSP_rel` を使用
+- `structural_mode="betti"`: `gamma_1` と `Δβ₁` を使用
+- `structural_mode="betti_full"`: `gamma_0`, `gamma_1` と `Δβ₀`, `Δβ₁` を使用
+
+#### gedig_core.py: F 計算の分岐
+
+```python
+if structural_mode == "sp":
+    # v4 互換
+    f_value = delta_ged_norm - lambda_weight * (delta_h_norm + sp_beta * delta_sp_rel)
+elif structural_mode == "betti":
+    f_value = delta_ged_norm - lambda_weight * (delta_h_norm + gamma_1 * delta_beta_1)
+elif structural_mode == "betti_full":
+    topo_term = gamma_1 * delta_beta_1 - gamma_0 * delta_beta_0
+    f_value = delta_ged_norm - lambda_weight * (delta_h_norm + topo_term)
+```
+
+### 11.4 テスト
+
+```python
+def test_betti_numbers_empty():
+    assert compute_betti_numbers(nx.Graph()) == (0, 0)
+
+def test_betti_numbers_tree():
+    # Path: V=5, E=4, C=1 → β₀=1, β₁=0
+    assert compute_betti_numbers(nx.path_graph(5)) == (1, 0)
+
+def test_betti_numbers_cycle():
+    # Cycle: V=4, E=4, C=1 → β₀=1, β₁=1
+    assert compute_betti_numbers(nx.cycle_graph(4)) == (1, 1)
+
+def test_betti_numbers_two_islands():
+    g = nx.Graph()
+    g.add_edges_from([(0,1), (1,2)])       # Island 1: path
+    g.add_edges_from([(3,4), (4,5), (5,3)]) # Island 2: triangle
+    # V=6, E=5, C=2 → β₀=2, β₁=1
+    assert compute_betti_numbers(g) == (2, 1)
+
+def test_island_merge_decreases_f():
+    """β₀ 減少（島統合）→ F 減少を確認"""
+    # g_before: 2 islands → g_after: 1 island (bridge added)
+    # Δβ₀ = -1 → topo_term に +γ₀ → F 減少
+    ...
+
+def test_backward_compat_sp_mode():
+    """structural_mode='sp' で既存結果と一致"""
+    ...
+
+def test_connected_graph_beta0_neutral():
+    """連結グラフでは Δβ₀ = 0 → γ₀ 項消滅"""
+    ...
+```
+
+### 11.5 後方互換性
+
+| 変更箇所 | 互換性 | 理由 |
+|---------|--------|------|
+| `compute_betti_numbers()` | **安全** | 新規関数追加のみ |
+| `compute_betti_1()` | **安全** | 内部実装変更のみ、シグネチャ不変 |
+| `GeDIGResult` β₀ フィールド | **安全** | デフォルト=0、既存コード無影響 |
+| `structural_mode` | **安全** | デフォルト=`"sp"`で現行動作 |
+| `gamma_0`, `gamma_1` | **安全** | デフォルト=0.0 |
+
+### 11.6 gedig_spec.md v5 更新
+
+```markdown
+## ゲージ v5（Betti 拡張）
+
+F = ΔEPC_norm − λ ( ΔH_norm + γ₁·Δβ₁ − γ₀·Δβ₀ )
+
+β₀: 連結成分数（島の数）
+β₁: 独立閉路数（ループの数）
+β₁ = E − V + β₀（グラフのオイラー関係）
+
+structural_mode:
+- "sp":         F = ΔEPC − λ(ΔH + γ·ΔSP)           ← v4 互換
+- "betti":      F = ΔEPC − λ(ΔH + γ₁·Δβ₁)          ← β₁ のみ
+- "betti_full": F = ΔEPC − λ(ΔH + γ₁·Δβ₁ − γ₀·Δβ₀) ← フル Betti
+```
+
+---
+
+## 12. 実施順序（更新）
+
+```
+Phase 1: β₁ 並行記録 ✅
+  ├─ graph_utils.py に compute_betti_1 追加
+  ├─ types.py にフィールド追加
+  ├─ gedig_core.py に記録追加
+  └─ test_betti_1.py 作成・実行
+
+Phase 2: 三層検索の実装 ✅
+  ├─ hash_index.py, graph_walker.py, attention.py, search_engine.py
+  ├─ run_experiment_query.py への統合
+  └─ test_threelayer.py 作成・実行（23テスト）
+
+Phase 3: β₀ 昇格（NEW）
+  ├─ graph_utils.py に compute_betti_numbers 追加
+  ├─ types.py に β₀ フィールド追加
+  ├─ config に structural_mode, gamma_0, gamma_1 追加
+  ├─ gedig_core.py の F 計算を structural_mode で分岐
+  ├─ テスト追加（島統合・後方互換・連結グラフ中立性）
+  └─ gedig_spec.md を v5 に更新
+
+Phase 4: HotPotQA v2 実験
+  ├─ experiments/hotpotqa_v2/ にメインコード GeDIGCore を使う adapter
+  ├─ 5条件比較（SP / β₁ / β₀ / β₀+β₁ / tuned）
+  └─ bridge 型質問での β₀ 効果検証
+
+Phase 5: Transformer 版（Phase 3 完了後）
+  ├─ metrics.py に β₁ 計算追加
+  ├─ LayerCurves 拡張
+  └─ k パラメータ感度分析（k=3,5,7,10）
+```
+
+---
+
+*Generated: 2026-02-09, Updated: 2026-02-10 (§11-12 β₀ extension)*
