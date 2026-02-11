@@ -285,13 +285,14 @@
                 </div>
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-1">
-                        <a href="#demo"
-                            class="text-slate-300 hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition">Interactive
-                            Demo</a>
-                        <a href="#concept"
-                            class="text-slate-300 hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition">Concept</a>
+                        <a href="#intuition"
+                            class="text-slate-300 hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition">Intuition</a>
+                        <a href="#usecases"
+                            class="text-slate-300 hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition">Use Cases</a>
+                        <a href="#experiments"
+                            class="text-slate-300 hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition">Experiments</a>
                         <a href="#resources"
-                            class="text-slate-300 hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition">Downloads</a>
+                            class="text-slate-300 hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition">Resources</a>
                         <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI" target="_blank"
                             class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full text-sm font-bold ml-4 transition border border-white/10 flex items-center gap-2">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -355,88 +356,6 @@
                     </svg>
                     View Paper (Draft)
                 </a>
-            </div>
-
-            <!-- geDIG-driven amoeba: live gauge + tunable parameters -->
-            <div class="mt-10 max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 text-left">
-                <div class="bg-bg/70 backdrop-blur border border-white/10 rounded-2xl p-4 shadow-2xl">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-mono text-slate-400">Amoeba geDIG (live)</span>
-                        <span id="slime-state" class="text-[11px] font-bold text-slate-300">--</span>
-                    </div>
-                    <div class="mt-2 text-[11px] text-slate-500 font-mono leading-snug">
-                        <span class="text-slate-300">$F$</span> = $\Delta EPC$ − $\lambda(\Delta H + \gamma\Delta \beta_1)$
-                    </div>
-                    <div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] font-mono">
-                        <span class="text-slate-500">F</span><span id="slime-val-f" class="text-right text-slate-200">--</span>
-                        <span class="text-slate-500">ΔEPC</span><span id="slime-val-epc" class="text-right text-slate-300">--</span>
-                        <span class="text-slate-500">ΔH</span><span id="slime-val-h" class="text-right text-slate-300">--</span>
-                        <span class="text-slate-500">Δβ₁</span><span id="slime-val-sp" class="text-right text-slate-300">--</span>
-                    </div>
-                    <div class="mt-3 h-1.5 bg-white/5 rounded overflow-hidden border border-white/10">
-                        <div id="slime-bar" class="h-full w-1/2 bg-gradient-to-r from-danger via-warn to-success"></div>
-                    </div>
-                    <div class="mt-2 text-[10px] text-slate-500 leading-snug">
-                        High $F$ → <span class="text-danger">AG</span> (explore). Low $F$ → <span class="text-success">DG</span> (commit).
-                    </div>
-                    <div class="mt-3 text-[10px] text-slate-600 leading-snug">
-                        Tip: the bright dots are <span class="text-slate-400">nodes</span>; thick veins are <span class="text-slate-400">edges</span>.
-                    </div>
-                </div>
-
-                <div class="bg-bg/70 backdrop-blur border border-white/10 rounded-2xl p-4 shadow-2xl">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-mono text-slate-400">Tune parameters</span>
-                        <button id="slime-reroll" type="button"
-                            class="text-[11px] font-bold text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-3 py-1 transition">
-                            Reroll nodes
-                        </button>
-                    </div>
-
-                    <div class="mt-4 space-y-4">
-                        <div>
-                            <div class="flex items-center justify-between text-[11px] font-mono">
-                                <label for="slime-lambda" class="text-slate-400">$\lambda$ (temperature)</label>
-                                <span id="slime-lambda-val" class="text-slate-300">--</span>
-                            </div>
-                            <input id="slime-lambda" type="range" min="0" max="1" step="0.01" value="0.26" class="w-full">
-                        </div>
-                        <div>
-                            <div class="flex items-center justify-between text-[11px] font-mono">
-                                <label for="slime-gamma" class="text-slate-400">$\gamma$ (topology weight)</label>
-                                <span id="slime-gamma-val" class="text-slate-300">--</span>
-                            </div>
-                            <input id="slime-gamma" type="range" min="0" max="2" step="0.01" value="0.90" class="w-full">
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <div class="flex items-center justify-between text-[11px] font-mono">
-                                    <label for="slime-theta-ag" class="text-slate-400">$\theta_{AG}$</label>
-                                    <span id="slime-theta-ag-val" class="text-slate-300">--</span>
-                                </div>
-                                <input id="slime-theta-ag" type="range" min="-0.20" max="0.50" step="0.01" value="0.18" class="w-full">
-                            </div>
-                            <div>
-                                <div class="flex items-center justify-between text-[11px] font-mono">
-                                    <label for="slime-theta-dg" class="text-slate-400">$\theta_{DG}$</label>
-                                    <span id="slime-theta-dg-val" class="text-slate-300">--</span>
-                                </div>
-                                <input id="slime-theta-dg" type="range" min="-0.50" max="0.20" step="0.01" value="-0.08" class="w-full">
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex items-center justify-between text-[11px] font-mono">
-                                <label for="slime-hops" class="text-slate-400">lookahead (multi-hop)</label>
-                                <span id="slime-hops-val" class="text-slate-300">--</span>
-                            </div>
-                            <input id="slime-hops" type="range" min="1" max="12" step="1" value="7" class="w-full">
-                        </div>
-                    </div>
-
-                    <div class="mt-3 text-[10px] text-slate-600 leading-snug">
-                        This is a visualization: $\Delta H$ and $\Delta SP$ are local proxies, but the <span class="text-slate-400">equation is real</span>.
-                    </div>
-                </div>
             </div>
 
             <div class="mt-12 flex flex-wrap justify-center gap-2 text-xs text-slate-500 font-mono">
@@ -805,261 +724,283 @@
         </div>
     </section>
 
-    <section id="concept" class="py-24 bg-bg relative overflow-hidden">
+    <!-- Use Cases -->
+    <section id="usecases" class="py-24 bg-bg relative overflow-hidden">
         <div class="max-w-6xl mx-auto px-4 relative z-10">
-            <div class="text-center mb-20">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Conceptual Architecture</h2>
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-white flex items-center justify-center gap-3 mb-6">
+                    <span class="w-1 h-8 bg-accent rounded-full"></span>
+                    Use Cases
+                </h2>
                 <p class="text-slate-400 max-w-2xl mx-auto leading-relaxed">
-                    F unifies three independent mathematical structures into a single decision criterion.<br>
-                    When should a system commit a structural change to its knowledge?
+                    Where can a single thermodynamic gauge make a difference?
                 </p>
             </div>
 
-            <div class="space-y-20">
-                <div class="grid md:grid-cols-2 gap-12 items-center">
-                    <div class="order-2 md:order-1">
-                        <div class="bg-panel border border-white/5 rounded-xl p-1 relative">
-                            <div
-                                class="aspect-[4/3] bg-bg rounded-lg relative overflow-hidden flex items-center justify-center">
-                                <div
-                                    class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_50%,rgba(255,0,0,0.2),transparent_70%)]">
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-danger font-mono font-bold text-lg mb-2">Static RAG</div>
-                                    <div class="text-slate-500 text-xs">Always Retrieve -> Always Append</div>
-                                    <div class="mt-4 flex gap-2 justify-center opacity-50">
-                                        <div class="w-8 h-8 rounded-full bg-slate-700"></div>
-                                        <div class="w-8 h-8 rounded-full bg-slate-700"></div>
-                                        <div class="w-8 h-8 rounded-full bg-slate-700"></div>
-                                    </div>
-                                    <div class="mt-2 text-danger text-xs font-bold">Infinite Growth / Pollution</div>
-                                    <div class="mt-4 pt-4 border-t border-white/5 w-full px-4">
-                                        <div class="text-xs text-slate-500 mb-1">vs geDIG</div>
-                                        <div class="flex justify-between items-center text-[10px] font-mono">
-                                            <span class="text-slate-400">LLM $\to$ Retriever $\to$</span>
-                                            <span
-                                                class="px-1 py-0.5 rounded bg-accent/10 text-accent border border-accent/20">Gauge
-                                                $\mathcal{F}$</span>
-                                            <span class="text-slate-400">$\to$ [Accept/Reject]</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Card 1: Dynamic RAG -->
+                <div class="bg-panel border border-white/5 rounded-2xl p-8 hover:border-purple-500/30 transition group">
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Multi-Hop QA (RAG)</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                        F acts as an accept/reject gate for retrieved information.
+                        AG detects novelty; DG validates structural integration.
+                        Tested on HotPotQA with real LLM inference.
+                    </p>
+                    <div class="bg-bg border border-white/10 rounded-lg p-3 mb-4">
+                        <div class="text-[11px] text-slate-500 uppercase tracking-wider mb-2">Result (GPT-4o-mini, dev-500)</div>
+                        <div class="flex justify-between text-sm font-mono">
+                            <span class="text-slate-400">EM</span>
+                            <span class="text-purple-400 font-bold">38.0%</span>
+                        </div>
+                        <div class="flex justify-between text-sm font-mono">
+                            <span class="text-slate-400">F1</span>
+                            <span class="text-purple-400 font-bold">53.7%</span>
                         </div>
                     </div>
-                    <div class="order-1 md:order-2">
-                        <div class="text-accent font-mono text-sm mb-2">01. THE PROBLEM</div>
-                        <h3 class="text-2xl font-bold text-white mb-4">Blind Accumulation</h3>
-                        <p class="text-slate-400 leading-relaxed mb-4">
-                            Static RAG systems lack a norm for rejection. They accumulate noise, redundancies, and
-                            contradictions, leading to performance degradation over time (The "Context Window" trap).
-                        </p>
+                    <div class="flex flex-col gap-2">
+                        <a href="https://huggingface.co/spaces/miyaukaz/gedig-demo" target="_blank"
+                            class="text-xs text-accent hover:underline">Try Live Demo (HF Spaces) &rarr;</a>
+                        <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/docs/experiments/hotpotqa.md" target="_blank"
+                            class="text-xs text-slate-500 hover:text-slate-300">Experiment details &rarr;</a>
                     </div>
+                    <div class="mt-3 text-[10px] text-slate-600 font-mono">Status: Archived experiment</div>
                 </div>
 
-                <div class="grid md:grid-cols-2 gap-12 items-center">
-                    <div>
-                        <div class="text-success font-mono text-sm mb-2">02. THE SOLUTION</div>
-                        <h3 class="text-2xl font-bold text-white mb-4">One-Gauge Control ($\mathcal{F}$)</h3>
-                        <p class="text-slate-400 leading-relaxed mb-4">
-                            We unified Structural Cost (Graph Edit Distance) and Information Gain (Entropy + Topology)
-                            into a single dimensionless, scale-invariant scalar.
-                        </p>
-                        <ul class="space-y-3 text-slate-400 text-sm">
-                            <li class="flex items-start gap-3">
-                                <span class="w-1.5 h-1.5 bg-success rounded-full mt-2"></span>
-                                <span><strong>$\Delta EPC$:</strong> Cost of wiring. Penalizes complexity.</span>
-                            </li>
-                            <li class="flex items-start gap-3">
-                                <span class="w-1.5 h-1.5 bg-purple rounded-full mt-2"></span>
-                                <span><strong>$\Delta H$:</strong> Entropy reduction. Rewards order.</span>
-                            </li>
-                            <li class="flex items-start gap-3">
-                                <span class="w-1.5 h-1.5 bg-orange rounded-full mt-2"></span>
-                                <span><strong>$\Delta \beta_1$:</strong> Topology change. Rewards structural insight (loop formation/removal).</span>
-                            </li>
-                        </ul>
+                <!-- Card 2: Graph Exploration -->
+                <div class="bg-panel border border-white/5 rounded-2xl p-8 hover:border-emerald-500/30 transition group">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                        </svg>
                     </div>
-                    <div>
-                        <div class="bg-panel border border-white/5 rounded-xl p-1 relative">
-                            <div
-                                class="aspect-[4/3] bg-bg rounded-lg relative overflow-hidden flex items-center justify-center">
-                                <div
-                                    class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.2),transparent_70%)]">
-                                </div>
-                                <div class="text-3xl font-bold font-mono text-white">
-                                    $\mathcal{F} < \theta$ </div>
-                                        <div
-                                            class="absolute bottom-8 text-success text-xs font-bold uppercase tracking-widest">
-                                            Accept</div>
-                                        <div
-                                            class="absolute top-8 text-danger text-xs font-bold uppercase tracking-widest">
-                                            Reject</div>
-                                </div>
-                            </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Autonomous Graph Navigation</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                        A partial-observation maze agent builds a persistent knowledge graph.
+                        F decides when to explore (AG) vs. exploit (DG).
+                        Wake-Sleep-Wake cycle with three-layer search.
+                    </p>
+                    <div class="bg-bg border border-white/10 rounded-lg p-3 mb-4">
+                        <div class="text-[11px] text-slate-500 uppercase tracking-wider mb-2">Result (15&times;15 maze, 12 seeds)</div>
+                        <div class="flex justify-between text-sm font-mono">
+                            <span class="text-slate-400">Goal-reach</span>
+                            <span class="text-emerald-400 font-bold">98%</span>
+                        </div>
+                        <div class="flex justify-between text-sm font-mono">
+                            <span class="text-slate-400">Baseline</span>
+                            <span class="text-slate-500">~60%</span>
                         </div>
                     </div>
+                    <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/tree/main/experiments/maze" target="_blank"
+                        class="text-xs text-slate-500 hover:text-slate-300">Experiment code &rarr;</a>
+                    <div class="mt-3 text-[10px] text-emerald-400/70 font-mono">Status: Active &amp; reproducible</div>
+                </div>
 
-                    <div class="grid md:grid-cols-2 gap-12 items-start">
-                        <div>
-                            <div class="text-slate-500 font-mono text-sm mb-2">03. WHY BOTH</div>
-                            <h3 class="text-2xl font-bold text-white mb-4">Why Three Terms, Together</h3>
-                            <p class="text-slate-400 leading-relaxed">
-                                Metric alone cannot detect loops; measure alone cannot detect shortcuts;
-                                topology alone cannot measure cost. F evaluates all three to decide when to restructure.
-                            </p>
-                            <div class="mt-6 bg-bg border border-white/10 rounded-xl p-4">
-                                <div class="text-[11px] text-slate-500 uppercase tracking-wider mb-3">Quick Comparison
-                                </div>
-                                <table class="w-full text-left text-xs text-slate-400">
-                                    <thead class="text-[11px] uppercase tracking-wider text-slate-500">
-                                        <tr>
-                                            <th class="py-2">Method</th>
-                                            <th class="py-2">Probability</th>
-                                            <th class="py-2">Graph</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-white/5">
-                                        <tr>
-                                            <td class="py-2 text-slate-300">BM25 / Contriever</td>
-                                            <td class="py-2 text-success">Yes</td>
-                                            <td class="py-2 text-slate-500">No</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="py-2 text-slate-300">GraphRAG</td>
-                                            <td class="py-2 text-slate-500">No</td>
-                                            <td class="py-2 text-success">Yes</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="py-2 text-slate-300 font-bold">geDIG</td>
-                                            <td class="py-2 text-success font-bold">Yes</td>
-                                            <td class="py-2 text-success font-bold">Yes</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div>
-                            <details class="group bg-bg border border-white/10 rounded-xl p-4">
-                                <summary
-                                    class="cursor-pointer text-sm font-semibold text-slate-200 flex items-center justify-between">
-                                    <span>Rationale in the paper (expand)</span>
-                                    <span class="text-[11px] text-slate-500 group-open:hidden">Details</span>
-                                    <span class="text-[11px] text-slate-500 hidden group-open:inline">Close</span>
-                                </summary>
-                                <div class="mt-3 text-xs text-slate-400 leading-relaxed space-y-3">
-                                    <p>
-                                        geDIG measures structural cost (graph edit distance) and probabilistic gain
-                                        (entropy reduction + shortcut effect) in one gauge. This blocks false positives
-                                        that look structured but stay uncertain, and avoids redundant retrievals that
-                                        look
-                                        probable but add no structure.
-                                    </p>
-                                    <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/raw/main/docs/paper/geDIG_onegauge_improved_v6.pdf"
-                                        target="_blank" class="text-accent hover:underline">See the full explanation
-                                        (PDF,
-                                        §Why Both)</a>
-                                </div>
-                            </details>
+                <!-- Card 3: Transformer F-Trajectory -->
+                <div class="bg-panel border border-white/5 rounded-2xl p-8 hover:border-cyan-500/30 transition group">
+                    <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Transformer F-Trajectory</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                        Layer-by-layer $\mathcal{F}$ decomposition across hidden states.
+                        Tests whether F tracks model quality as a structural signature.
+                    </p>
+                    <div class="bg-bg border border-white/10 rounded-lg p-3 mb-4">
+                        <div class="text-[11px] text-slate-500 uppercase tracking-wider mb-2">Result (8 models)</div>
+                        <div class="text-sm text-slate-400 leading-relaxed">
+                            GPT series shows monotonic improvement in $\Delta R^2_{\text{struct}}$ with model scale.
                         </div>
                     </div>
-
-                    <div class="grid md:grid-cols-2 gap-12 items-center">
-                        <div class="order-2 md:order-1">
-                            <div class="bg-panel border border-white/5 rounded-xl p-8">
-                                <h4 class="text-white font-bold mb-4 border-b border-white/10 pb-2">FEP-MDL Bridge</h4>
-                                <div class="space-y-4 text-sm font-mono">
-                                    <div class="flex justify-between">
-                                        <span class="text-slate-400">0-hop (AG)</span>
-                                        <span class="text-danger">Ambiguity / Error</span>
-                                        <span class="text-slate-500">→ FEP</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-slate-400">Multi-hop (DG)</span>
-                                        <span class="text-success">Compression / Insight</span>
-                                        <span class="text-slate-500">→ MDL</span>
-                                    </div>
-                                    <div class="text-center pt-4 text-xs text-slate-500 italic">
-                                        "Operational Correspondence"
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="order-1 md:order-2">
-                            <div class="text-slate-500 font-mono text-sm mb-2">04. THEORETICAL BACKBONE</div>
-                            <h3 class="text-2xl font-bold text-white mb-4">Bridging FEP & MDL</h3>
-                            <p class="text-slate-400 leading-relaxed mb-4">
-                                geDIG provides an <strong>operational correspondence</strong> between the Free Energy
-                                Principle (minimizing surprise) and Minimum Description Length (maximizing compression).
-                            </p>
-                            <p class="text-slate-400 leading-relaxed">
-                                0-hop detects immediate prediction error (FEP), while Multi-hop validates global
-                                compression (MDL).
-                            </p>
-                            <p class="mt-4 text-xs text-slate-500 italic">
-                                *For readers familiar with FEP/MDL: This is an operational analogy, not a formal proof
-                                of equivalence.
-                            </p>
-                        </div>
-                    </div>
+                    <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/tree/main/experiments/transformer/inference_gedig_v2" target="_blank"
+                        class="text-xs text-slate-500 hover:text-slate-300">Experiment code &rarr;</a>
+                    <div class="mt-3 text-[10px] text-amber-400/70 font-mono">Status: Preliminary</div>
                 </div>
             </div>
+        </div>
     </section>
 
+    <!-- The Mechanism -->
+    <section id="mechanism" class="py-24 bg-panel/30 border-y border-white/5">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-white flex items-center justify-center gap-3 mb-6">
+                    <span class="w-1 h-8 bg-accent rounded-full"></span>
+                    The Mechanism
+                </h2>
+                <p class="text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                    Two gates govern intelligent processing. One equation drives both.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-12 items-start">
+                <!-- AG/DG Gating -->
+                <div>
+                    <h3 class="text-2xl font-bold text-white mb-6">AG/DG Gating</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-lg bg-danger/10 border border-danger/20 flex items-center justify-center flex-shrink-0 mt-1">
+                                <span class="text-danger font-bold text-sm">AG</span>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-semibold mb-1">Attention Gate</h4>
+                                <p class="text-slate-400 text-sm leading-relaxed">
+                                    <em>"Is this surprising?"</em> &mdash; 0-hop novelty detection.
+                                    When prediction diverges from input, AG fires and triggers processing.
+                                </p>
+                                <p class="text-xs text-slate-600 mt-1">Computational analogy: noradrenaline</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-lg bg-success/10 border border-success/20 flex items-center justify-center flex-shrink-0 mt-1">
+                                <span class="text-success font-bold text-sm">DG</span>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-semibold mb-1">Decision Gate</h4>
+                                <p class="text-slate-400 text-sm leading-relaxed">
+                                    <em>"Does $\mathcal{F}$ decrease?"</em> &mdash; Multi-hop structural validation.
+                                    If restructuring reduces F, the system commits the change.
+                                </p>
+                                <p class="text-xs text-slate-600 mt-1">Computational analogy: dopamine</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-6 text-xs text-slate-500 italic">
+                        *The neurotransmitter correspondence is a computational analogy, not a physiological claim.
+                    </p>
+                </div>
+
+                <!-- FEP-MDL Bridge -->
+                <div>
+                    <h3 class="text-2xl font-bold text-white mb-6">Theoretical Backbone</h3>
+                    <div class="bg-bg border border-white/10 rounded-xl p-8">
+                        <h4 class="text-white font-bold mb-4 border-b border-white/10 pb-2">FEP-MDL Bridge</h4>
+                        <div class="space-y-4 text-sm font-mono">
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">0-hop (AG)</span>
+                                <span class="text-danger">Ambiguity / Error</span>
+                                <span class="text-slate-500">&rarr; FEP</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Multi-hop (DG)</span>
+                                <span class="text-success">Compression / Insight</span>
+                                <span class="text-slate-500">&rarr; MDL</span>
+                            </div>
+                            <div class="text-center pt-4 text-xs text-slate-500 italic border-t border-white/5">
+                                "Operational Correspondence"
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-6 text-slate-400 text-sm leading-relaxed">
+                        geDIG provides an <strong class="text-white">operational correspondence</strong> between
+                        the Free Energy Principle (minimizing surprise) and Minimum Description Length (maximizing compression).
+                    </p>
+                    <p class="mt-4 text-xs text-slate-500 italic">
+                        *This is an operational analogy, not a formal proof of equivalence.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experiments & Results -->
+    <section id="experiments" class="py-24 bg-bg border-t border-white/5">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-white flex items-center justify-center gap-3 mb-6">
+                    <span class="w-1 h-8 bg-accent rounded-full"></span>
+                    Experiments & Results
+                </h2>
+                <p class="text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                    Empirical tests of F across different domains.
+                </p>
+            </div>
+
+            <!-- Results Table -->
+            <div class="overflow-x-auto mb-12">
+                <table class="w-full text-left text-sm">
+                    <thead class="text-[11px] uppercase tracking-wider text-slate-500 border-b border-white/10">
+                        <tr>
+                            <th class="py-3 pr-4">Experiment</th>
+                            <th class="py-3 pr-4">Scale</th>
+                            <th class="py-3 pr-4">Key Result</th>
+                            <th class="py-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5 text-slate-400">
+                        <tr>
+                            <td class="py-4 pr-4 text-white font-medium">Maze 15&times;15</td>
+                            <td class="py-4 pr-4 font-mono text-xs">12 seeds, 250 steps</td>
+                            <td class="py-4 pr-4"><span class="text-emerald-400 font-bold">98%</span> goal-reach (baseline ~60%)</td>
+                            <td class="py-4"><span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Reproducible</span></td>
+                        </tr>
+                        <tr>
+                            <td class="py-4 pr-4 text-white font-medium">Maze 25&times;25</td>
+                            <td class="py-4 pr-4 font-mono text-xs">Active</td>
+                            <td class="py-4 pr-4">Graph-persistent DG + 10D vector extension</td>
+                            <td class="py-4"><span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">In progress</span></td>
+                        </tr>
+                        <tr>
+                            <td class="py-4 pr-4 text-white font-medium">HotPotQA</td>
+                            <td class="py-4 pr-4 font-mono text-xs">dev-500, GPT-4o-mini</td>
+                            <td class="py-4 pr-4">EM=<span class="text-purple-400">38.0%</span>, F1=<span class="text-purple-400">53.7%</span></td>
+                            <td class="py-4"><span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-500/10 text-slate-400 border border-slate-500/20">Archived</span></td>
+                        </tr>
+                        <tr>
+                            <td class="py-4 pr-4 text-white font-medium">Transformer F-decomp</td>
+                            <td class="py-4 pr-4 font-mono text-xs">8 models</td>
+                            <td class="py-4 pr-4">GPT series: $\Delta R^2_{\text{struct}}$ improves with scale</td>
+                            <td class="py-4"><span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">Preliminary</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Reproduce -->
+            <div class="max-w-3xl mx-auto bg-panel border border-white/10 rounded-xl p-6">
+                <p class="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider">Reproduce (Maze 15&times;15)</p>
+                <div class="font-mono text-[11px] text-slate-300 space-y-2">
+                    <p class="text-slate-500">Requires .venv with networkx, numpy, etc.</p>
+                    <div class="bg-black/40 px-3 py-2 rounded border border-white/5 overflow-x-auto">
+                        .venv/bin/python3 experiments/maze/run_experiment_query.py \<br>
+                        &nbsp;&nbsp;--maze-size 15 --max-steps 250 --seeds 12 \<br>
+                        &nbsp;&nbsp;--search-mode threelayer --vector-mode extended
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-2">
+                        See <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/experiments/maze/README.md"
+                            class="text-accent hover:underline">experiments/maze/README.md</a> for full CLI reference.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resources -->
     <section id="resources" class="py-24 bg-panel/30 border-t border-white/5">
         <div class="max-w-5xl mx-auto px-4">
             <div class="text-center mb-16">
-                <h2 class="text-3xl font-bold text-white">Downloads, Code & Reproducibility</h2>
-                <p class="mt-2 text-slate-400">Draft papers, code entrypoints, and maze reproduction commands.</p>
-            </div>
-
-            <!-- HF Demo Card -->
-            <div
-                class="mb-10 bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-xl p-8 hover:border-purple-500/50 transition group">
-                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div class="flex-1">
-                        <span
-                            class="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-1 block">Interactive</span>
-                        <h3 class="text-2xl font-bold text-white mb-2">Live Demo with Knowledge Graph Visualization</h3>
-                        <p class="text-slate-400 text-sm mb-4">
-                            See geDIG in action on HotPotQA questions. Watch how the knowledge graph evolves
-                            before and after retrieval, and understand why geDIG accepts or rejects new information.
-                        </p>
-                        <ul class="text-xs text-slate-400 space-y-1 mb-4">
-                            <li class="flex items-center gap-2"><span class="text-purple-400">✓</span> Before/After
-                                Knowledge Graph comparison</li>
-                            <li class="flex items-center gap-2"><span class="text-purple-400">✓</span> Real-time F-score
-                                calculation</li>
-                            <li class="flex items-center gap-2"><span class="text-purple-400">✓</span> AG/DG gate status
-                                visualization</li>
-                        </ul>
-                    </div>
-                    <div class="flex-shrink-0">
-                        <a href="https://huggingface.co/spaces/miyaukaz/gedig-demo" target="_blank"
-                            class="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white font-bold transition shadow-lg hover:shadow-purple-500/25 text-lg">
-                            <span class="text-2xl">🧠</span>
-                            Try on Hugging Face
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
-                                </path>
-                            </svg>
-                        </a>
-                    </div>
-                </div>
+                <h2 class="text-3xl font-bold text-white flex items-center justify-center gap-3 mb-6">
+                    <span class="w-1 h-8 bg-accent rounded-full"></span>
+                    Resources
+                </h2>
+                <p class="mt-2 text-slate-400">Papers, code, and open questions.</p>
             </div>
 
             <div class="grid md:grid-cols-2 gap-8 mb-10">
+                <!-- Paper -->
                 <div class="bg-bg border border-white/10 rounded-xl p-8 hover:border-accent/30 transition group">
                     <div class="flex items-start justify-between mb-6">
                         <div>
-                            <span class="text-[10px] font-bold text-accent uppercase tracking-wider mb-1 block">For
-                                Researchers</span>
-                            <h3 class="text-xl font-bold text-white group-hover:text-accent transition">Research Paper
-                            </h3>
+                            <span class="text-[10px] font-bold text-accent uppercase tracking-wider mb-1 block">Paper</span>
+                            <h3 class="text-xl font-bold text-white group-hover:text-accent transition">Research Paper</h3>
                             <p class="text-sm text-slate-400 mt-2">"geDIG: Gauge what Knowledge Graph needs"</p>
-                            <span class="inline-block mt-3 text-xs bg-white/5 text-slate-400 px-2 py-1 rounded">v6.0
-                                Draft</span>
+                            <span class="inline-block mt-3 text-xs bg-white/5 text-slate-400 px-2 py-1 rounded">v6.0 Draft</span>
                         </div>
                         <svg class="w-8 h-8 text-slate-600 group-hover:text-accent transition" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
@@ -1098,15 +1039,14 @@
                     </div>
                 </div>
 
+                <!-- Source Code -->
                 <div class="bg-bg border border-white/10 rounded-xl p-8 hover:border-white/30 transition group">
                     <div class="flex items-start justify-between mb-6">
                         <div>
-                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">For
-                                Engineers</span>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">Code</span>
                             <h3 class="text-xl font-bold text-white">Source Code</h3>
                             <p class="text-sm text-slate-400 mt-2">miyauchikazuyoshi/InsightSpike-AI</p>
-                            <p class="text-xs text-slate-500 mt-3">Brain-Inspired Multi-Agent Architecture for “Spike of
-                                Insight”</p>
+                            <p class="text-xs text-slate-500 mt-3">Research framework for the thermodynamics of intelligence</p>
                         </div>
                         <svg class="w-8 h-8 text-slate-600 group-hover:text-white transition" fill="currentColor"
                             viewBox="0 0 24 24">
@@ -1119,39 +1059,20 @@
                         <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI" target="_blank"
                             class="block text-sm text-accent hover:underline">View Repository</a>
                         <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/tree/main/experiments"
-                            target="_blank" class="block text-sm text-slate-400 hover:text-white hover:underline">Browse
-                            Experiments & Logs</a>
+                            target="_blank" class="block text-sm text-slate-400 hover:text-white hover:underline">Browse Experiments</a>
                         <div class="mt-4 text-[11px] text-slate-400 font-mono">
                             <p class="mb-1 text-slate-300 uppercase tracking-wider text-[10px]">Quick Start</p>
                             <p><span class="text-slate-500">Install:</span> <code
-                                    class="bg-black/40 px-1 py-0.5 rounded border border-white/5">pip install -e .</code>
-                            </p>
+                                    class="bg-black/40 px-1 py-0.5 rounded border border-white/5">pip install -e .</code></p>
                             <p class="mt-1"><span class="text-slate-500">Test:</span> <code
-                                    class="bg-black/40 px-1 py-0.5 rounded border border-white/5">make test</code>
-                            </p>
-                            <p class="mt-1"><span class="text-slate-500">Maze:</span> <code
-                                    class="bg-black/40 px-1 py-0.5 rounded border border-white/5">.venv/bin/python3 experiments/maze/run_experiment_query.py --help</code>
-                            </p>
+                                    class="bg-black/40 px-1 py-0.5 rounded border border-white/5">make test</code></p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="grid md:grid-cols-2 gap-8 mt-4 mb-10">
-                <div class="bg-bg border border-white/10 rounded-xl p-6">
-                    <p class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Reproduce (Maze 15×15)</p>
-                    <div class="space-y-2 font-mono text-[11px] text-slate-300">
-                        <p class="text-slate-400 mb-1">Requires .venv with networkx, numpy, etc.</p>
-                        <p><span class="text-slate-500">Three-layer search (12 seeds):</span></p>
-                        <p class="bg-black/40 px-2 py-1 rounded border border-white/5">.venv/bin/python3
-                            experiments/maze/run_experiment_query.py --maze-size 15 --max-steps 250 --seeds 12
-                            --search-mode threelayer --vector-mode extended</p>
-                        <p class="mt-2"><span class="text-slate-500">Result:</span> 98% goal-reach rate (baseline ~60%)</p>
-                        <p class="mt-2 text-[10px] text-slate-500">See <code
-                                class="bg-black/40 px-1 py-0.5 rounded border border-white/5">experiments/maze/README.md</code>
-                            for full CLI reference.</p>
-                    </div>
-                </div>
+            <!-- Open Questions + Citation -->
+            <div class="grid md:grid-cols-2 gap-8 mb-10">
                 <div class="bg-bg border border-white/10 rounded-xl p-6">
                     <p class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Open Research Questions</p>
                     <div class="text-sm text-slate-300 space-y-2">
@@ -1176,30 +1097,27 @@
                             How to engage: open an Issue, PR, or DM on X:
                             <span class="font-mono text-slate-200">@kazuyoshim5436</span>.
                         </p>
-                        <p class="text-[10px] text-slate-500 mt-3">
-                            See also:
-                            <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/docs/gedig_spec.md"
-                                class="text-accent hover:underline">geDIG spec</a>,
-                            <a href="research/thinking/matchstick_figure_v2_en.html"
-                                class="text-accent hover:underline">Matchstick Figure</a>,
-                            <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/experiments/maze/README.md"
-                                class="text-accent hover:underline">Maze experiments</a>.
-                        </p>
                     </div>
                 </div>
-            </div>
-
-            <div class="mt-4 max-w-3xl mx-auto">
-                <p class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Citation (BibTeX)</p>
-                <div
-                    class="bg-black/40 p-4 rounded-lg border border-white/5 font-mono text-xs text-slate-400 overflow-x-auto select-all">
-                    @article{miyauchi2025gedig,
-                    title={geDIG: Gauge what Knowledge Graph needs},
-                    author={Miyauchi, Kazuyoshi},
-                    year={2025},
-                    journal={GitHub repository},
-                    url={https://github.com/miyauchikazuyoshi/InsightSpike-AI}
-                    }
+                <div class="bg-bg border border-white/10 rounded-xl p-6">
+                    <p class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Citation (BibTeX)</p>
+                    <div
+                        class="bg-black/40 p-4 rounded-lg border border-white/5 font-mono text-xs text-slate-400 overflow-x-auto select-all">
+                        @article{miyauchi2025gedig,<br>
+                        &nbsp;&nbsp;title={geDIG: Gauge what Knowledge Graph needs},<br>
+                        &nbsp;&nbsp;author={Miyauchi, Kazuyoshi},<br>
+                        &nbsp;&nbsp;year={2025},<br>
+                        &nbsp;&nbsp;journal={GitHub repository},<br>
+                        &nbsp;&nbsp;url={https://github.com/miyauchikazuyoshi/InsightSpike-AI}<br>
+                        }
+                    </div>
+                    <p class="mt-4 text-[10px] text-slate-500">
+                        See also:
+                        <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/docs/gedig_spec.md"
+                            class="text-accent hover:underline">geDIG spec</a>,
+                        <a href="research/thinking/matchstick_figure_v2_en.html"
+                            class="text-accent hover:underline">Matchstick Figure</a>.
+                    </p>
                 </div>
             </div>
         </div>
@@ -2124,7 +2042,7 @@
                 raf = requestAnimationFrame(loop);
             }
 
-            bindControls();
+            // bindControls() removed — HUD sliders no longer in DOM
             resize();
             window.addEventListener('resize', () => resize(), { passive: true });
             raf = requestAnimationFrame(loop);
