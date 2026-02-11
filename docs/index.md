@@ -1,26 +1,18 @@
 ---
 layout: default
-title: geDIG — The Thermodynamics of Intelligence
+title: geDIG — A Structural Fitness Score for Knowledge Graphs
 ---
 
 <div align="center">
 
 <br>
 
-# The Thermodynamics of Intelligence
+# $\mathcal{F} = \Delta\text{EPC} - \lambda(\Delta H + \gamma \Delta \beta_1)$
 
 <h2 style="font-weight: normal; color: #666;">
-Can a single dimensionless equation — spanning metric, measure, and topology —<br>
-describe how any information-bearing system restructures itself?
+A structural fitness score for knowledge graphs —<br>
+can one equation decide when to restructure?
 </h2>
-
-<br>
-
-<div style="font-size: 1.5em; font-family: 'Times New Roman', serif; letter-spacing: 0.05em;">
-
-**F = ΔEPC − λ(ΔH + γΔβ₁)**
-
-</div>
 
 <br>
 

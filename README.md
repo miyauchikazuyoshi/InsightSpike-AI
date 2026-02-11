@@ -1,8 +1,8 @@
 # InsightSpike-AI
 
-**A Research Framework for the Thermodynamics of Intelligence**
+**A structural fitness score for knowledge graphs — can one equation decide when to restructure?**
 
-> *Can a single dimensionless equation — spanning metric, measure, and topology — describe how any information-bearing system restructures itself?*
+$$\mathcal{F} = \underbrace{\Delta \text{EPC}}_{\text{Metric}} \;-\; \lambda \left( \underbrace{\Delta H}_{\text{Measure}} \;+\; \gamma\, \underbrace{\Delta \beta_1}_{\text{Topology}} \right)$$
 
 [![CI (Lite)](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci-lite.yml/badge.svg)](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci-lite.yml)
 [![Paper](https://img.shields.io/badge/paper-PDF-blue)](docs/paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf)
