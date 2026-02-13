@@ -1,0 +1,31 @@
+{
+  "config": {
+    "model_name": "EleutherAI/pythia-70m",
+    "checkpoints": [
+      0
+    ],
+    "num_samples": 1,
+    "lambda_param": 1.0,
+    "gamma": 0.5,
+    "entropy_sign": -1,
+    "structural_term": "betti1",
+    "betti_k_neighbors": 5,
+    "betti_threshold": null
+  },
+  "results": {
+    "0": {
+      "F_mean": 6.415416518847148,
+      "F_std": 0.0,
+      "H_mean": 1.4730015993118286,
+      "H_std": 0.0,
+      "SP_mean": 1.0,
+      "SP_std": 0.0,
+      "B1_mean": 22.583333333333332,
+      "B1_std": 0.0,
+      "delta_B1_mean": -3.4166666666666665,
+      "delta_B1_std": 0.0,
+      "EPC_mean": 5.536666711171468,
+      "EPC_std": 0.0
+    }
+  }
+}

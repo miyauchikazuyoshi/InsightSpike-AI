@@ -1,0 +1,40 @@
+{
+  "model": "gpt2",
+  "model_kind": "causal",
+  "text_file": "experiments/transformer/inference_gedig_v3_layerwise_redefine/data/hotpotqa_questions_128.txt",
+  "max_samples": 64,
+  "max_length": 128,
+  "layer_index": -1,
+  "proj_dim": 128,
+  "seed": 42,
+  "device": "mps",
+  "dataset": {
+    "used_samples": 64,
+    "skipped_samples": 0,
+    "n_pair_samples": 10099,
+    "n_depth_samples": 1116,
+    "hidden_dim": 768
+  },
+  "fit": {
+    "dist": {
+      "mse": 0.32542335987091064,
+      "pearson": 0.9784977143848969
+    },
+    "depth": {
+      "mse": 5.5706963539123535,
+      "pearson": 0.3913527323040038
+    }
+  },
+  "input_scaling": {
+    "dist_scale_mean": 0.6233506798744202,
+    "dist_scale_min": 0.01217217743396759,
+    "dist_scale_max": 45.39830780029297,
+    "depth_scale_mean": 0.4694392681121826,
+    "depth_scale_min": 0.009517892263829708,
+    "depth_scale_max": 33.87275695800781
+  },
+  "artifacts": {
+    "b_dist": "experiments/transformer/inference_gedig_v3_layerwise_redefine/artifacts/probe_b_lightweight/gpt2/layer_-1/proj_128/B_dist.npy",
+    "b_depth": "experiments/transformer/inference_gedig_v3_layerwise_redefine/artifacts/probe_b_lightweight/gpt2/layer_-1/proj_128/B_depth.npy"
+  }
+}
