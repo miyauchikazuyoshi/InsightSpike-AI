@@ -1,0 +1,46 @@
+# Condition Hybrid-E2: Adaptive Depth CoT (v4)
+#
+# Builds on Hybrid-E1 but adds dynamic CoT depth:
+#   cot_depth = clamp(ceil((F - theta_dg) / alpha), 1, max_depth)
+#
+# F value determines reasoning depth:
+#   F just above theta_dg  → 1 step  (light confirmation)
+#   F well above theta_dg  → 2 steps (standard CoT, same as E1)
+#   F far above theta_dg   → 3-4 steps (deep reasoning for hard questions)
+#
+# Key insight: harder questions produce larger F values (more information gap),
+#              and thus automatically receive deeper reasoning.
+#
+# With theta_dg=-0.5, alpha=0.5, max_depth=4:
+#   F = -0.3 → depth 1,  F = 0.0 → depth 1,
+#   F = 0.5  → depth 2,  F = 1.0 → depth 3,
+#   F = 1.5  → depth 4
+condition_name: condition_hybrid_e2_adaptive
+
+data_path: data/hotpotqa_distractor_dev.jsonl
+
+adapter:
+  structural_mode: betti_full
+  gamma_0: 0.3
+  gamma_1: 0.5
+  lambda_weight: 1.0
+  theta_ag: 0.4
+  theta_dg: -0.5
+  max_hops: 2
+  top_k: 5
+  max_expansions: 1
+  expansion_seeds: 2
+  tfidf_dim: 64
+  q_link_top_k: 3
+  entity_overlap_threshold: 0.3
+  llm_model: gpt-4o-mini
+  llm_temperature: 0.0
+  llm_max_tokens: 256
+  llm_retry_max: 3
+  # v3 Hybrid mode
+  hybrid_mode: true
+  max_cot_steps: 2       # fallback for non-adaptive mode (backward compat)
+  # v4 Adaptive Depth
+  adaptive_depth: true
+  depth_alpha: 0.5
+  max_depth: 4

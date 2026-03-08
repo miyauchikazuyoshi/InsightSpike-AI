@@ -1,4 +1,4 @@
-"""geDIG v2/v3 adapter for HotpotQA — extended gauge with Betti numbers.
+"""geDIG v2/v3/v4 adapter for HotpotQA — extended gauge with Betti numbers.
 
 This adapter wraps the main-codebase ``GeDIGCore`` and adds the
 extended F (gauge) formula:
@@ -20,10 +20,16 @@ v3 adds **Hybrid mode** (``hybrid_mode``):
     System 1 (DG fires) → single-call answer (fast, cheap)
     System 2 (DG not fires) → CoT reasoning with retrieval (accurate)
     Inspired by Dual Process Theory (Kahneman, 2011).
+
+v4 adds **Adaptive Depth** (``adaptive_depth``):
+    CoT depth is dynamically determined from the F value:
+        cot_depth = clamp(⌈(F - θ_dg) / α⌉, 1, max_depth)
+    Higher F (more information gap) → deeper reasoning.
 """
 
 from __future__ import annotations
 
+import math
 import os
 import re
 import sys
@@ -107,6 +113,7 @@ class GeDIGv2Result:
     # Hybrid (v3) diagnostics
     system_used: str = "system1"   # "system1" or "system2"
     cot_steps: int = 0
+    cot_depth: int = 0             # v4: planned depth (may differ from steps if early-stopped)
 
     metadata: dict = field(default_factory=dict)
 
@@ -158,6 +165,10 @@ class GeDIGv2Adapter:
         # Hybrid (v3) params
         hybrid_mode: bool = False,
         max_cot_steps: int = 2,
+        # Adaptive depth (v4) params
+        adaptive_depth: bool = False,
+        depth_alpha: float = 0.5,
+        max_depth: int = 4,
     ):
         self.structural_mode = structural_mode
         self.gamma_0 = gamma_0
@@ -170,6 +181,10 @@ class GeDIGv2Adapter:
         self.expansion_seeds = max(0, int(expansion_seeds))
         self.hybrid_mode = hybrid_mode
         self.max_cot_steps = max_cot_steps
+        # v4: Adaptive Depth — CoT depth = f(F)
+        self.adaptive_depth = adaptive_depth
+        self.depth_alpha = depth_alpha
+        self.max_depth = max_depth
 
         # GeDIGCore (main codebase)
         self.gedig_core = GeDIGCore(
@@ -308,6 +323,36 @@ class GeDIGv2Adapter:
         return queries or [question]
 
     # ------------------------------------------------------------------ #
+    # v4: Adaptive Depth — compute CoT depth from F value
+    # ------------------------------------------------------------------ #
+
+    def _compute_cot_depth(self, extended_f: float) -> int:
+        """Compute dynamic CoT depth from extended gauge F.
+
+        Formula::
+
+            cot_depth = clamp(⌈(F - θ_dg) / α⌉, 1, max_depth)
+
+        Intuition:
+        - F just above θ_dg → mild uncertainty → 1 step
+        - F well above θ_dg → large information gap → more steps
+        - α controls sensitivity (smaller α → more aggressive scaling)
+
+        If adaptive_depth is disabled, returns fixed max_cot_steps.
+        """
+        if not self.adaptive_depth:
+            return self.max_cot_steps
+
+        gap = extended_f - self.theta_dg
+        if gap <= 0:
+            # F is below θ_dg — shouldn't happen in System 2 path
+            # but handle gracefully with 1 step
+            return 1
+
+        raw = math.ceil(gap / self.depth_alpha)
+        return max(1, min(raw, self.max_depth))
+
+    # ------------------------------------------------------------------ #
     # System 2: CoT fallback (v3 Hybrid)
     # ------------------------------------------------------------------ #
 
@@ -366,11 +411,15 @@ Answer (shortest form, e.g., "Paris" not "The city of Paris"):"""
         retrieved: list[RetrievedFact],
         corpus: list,
         bm25: object,
-    ) -> tuple[str, int]:
+        extended_f: float = 0.0,
+    ) -> tuple[str, int, int]:
         """System 2: CoT reasoning with iterative BM25 retrieval.
 
-        Returns (answer, cot_steps).
+        Returns (answer, cot_steps_executed, cot_depth_planned).
         """
+        # v4: Compute dynamic depth from F value
+        cot_depth = self._compute_cot_depth(extended_f)
+
         # Working set of collected sentences
         collected: dict[tuple[str, int], str] = {}
         for f in retrieved:
@@ -379,7 +428,7 @@ Answer (shortest form, e.g., "Paris" not "The city of Paris"):"""
         cot_sentences: list[str] = []
         answer = None
 
-        for step in range(self.max_cot_steps):
+        for step in range(cot_depth):
             # Build context
             context_str = "\n".join(
                 f"[{title}] {text}" for (title, _), text in collected.items()
@@ -426,7 +475,7 @@ Answer (shortest form, e.g., "Paris" not "The city of Paris"):"""
         # Clean answer: strip trailing periods, quotes, leading articles
         answer = self._clean_answer(answer)
 
-        return answer, len(cot_sentences)
+        return answer, len(cot_sentences), cot_depth
 
     # ------------------------------------------------------------------ #
     # Main entry point
@@ -515,12 +564,14 @@ Answer (shortest form, e.g., "Paris" not "The city of Paris"):"""
 
         system_used = "system1"
         cot_steps = 0
+        cot_depth = 0
 
         if self.hybrid_mode and not (dg_fired and not ag_fired):
             # System 2: DG did NOT fire alone → needs deeper reasoning
             system_used = "system2"
-            answer, cot_steps = self._cot_fallback(
-                example.question, retrieved[:context_limit], corpus, bm25
+            answer, cot_steps, cot_depth = self._cot_fallback(
+                example.question, retrieved[:context_limit], corpus, bm25,
+                extended_f=ext_f,
             )
         else:
             # System 1: DG fired (high confidence) → direct answer
@@ -561,6 +612,7 @@ Answer (shortest form, e.g., "Paris" not "The city of Paris"):"""
             expansions=expansions,
             system_used=system_used,
             cot_steps=cot_steps,
+            cot_depth=cot_depth,
             metadata={
                 "structural_mode": self.structural_mode,
                 "gamma_0": self.gamma_0,
@@ -572,6 +624,8 @@ Answer (shortest form, e.g., "Paris" not "The city of Paris"):"""
                 "hybrid_mode": self.hybrid_mode,
                 "system_used": system_used,
                 "cot_steps": cot_steps,
+                "cot_depth": cot_depth,
+                "adaptive_depth": self.adaptive_depth,
             },
         )
 
