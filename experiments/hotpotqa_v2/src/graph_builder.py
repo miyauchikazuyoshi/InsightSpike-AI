@@ -311,6 +311,7 @@ class KnowledgeGraphBuilder:
                             f"F{a_idx}", f"F{b_idx}",
                             weight=w_ctx, edge_type="context",
                             w_ctx=w_ctx, w_sim=0.0,
+                            strength=w_ctx,
                         )
 
             # --- Similarity attention edges (cross-title, TF-IDF cosine + entity overlap) ---
@@ -338,6 +339,7 @@ class KnowledgeGraphBuilder:
                             f"F{i}", f"F{j}",
                             weight=w_sim, edge_type="similarity",
                             w_ctx=0.0, w_sim=w_sim,
+                            strength=w_sim,
                         )
         else:
             # ============================================================ #

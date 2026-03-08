@@ -30,6 +30,11 @@ v5 adds **Two-Edge Architecture** (``two_edge_mode``):
     Context attention edges (intra-title, distance-decay) +
     Similarity attention edges (cross-title, TF-IDF cosine + entity overlap).
     Graph-guided re-ranking blends BM25 + graph connectivity for context selection.
+
+v6 adds **Weighted Filtration** (``betti_threshold``):
+    Compute Betti numbers on subgraph with edge strength >= threshold.
+    This decouples graph enrichment (more edges for re-ranking) from
+    topological signal (Betti computed on strong edges only).
 """
 
 from __future__ import annotations
@@ -65,6 +70,10 @@ if "torch_geometric" not in sys.modules:
 
 from insightspike.algorithms.gedig_core import GeDIGCore  # noqa: E402
 from insightspike.algorithms.gating import decide_gates    # noqa: E402
+from insightspike.algorithms.gedig.graph_utils import (    # noqa: E402
+    compute_betti_0_filtered,
+    compute_betti_1_filtered,
+)
 
 from .answerer import LLMAnswerer      # noqa: E402
 from .graph_builder import (           # noqa: E402
@@ -181,6 +190,8 @@ class GeDIGv2Adapter:
         sim_alpha: float = 0.6,
         sim_beta: float = 0.4,
         sim_edge_threshold: float = 0.25,
+        # Weighted filtration (v6) params
+        betti_threshold: float = 0.0,
     ):
         self.structural_mode = structural_mode
         self.gamma_0 = gamma_0
@@ -200,6 +211,8 @@ class GeDIGv2Adapter:
         # v5: Two-Edge Architecture — graph-guided re-ranking
         self.two_edge_mode = two_edge_mode
         self.rerank_alpha = rerank_alpha
+        # v6: Weighted Filtration — Betti on strong edges only
+        self.betti_threshold = betti_threshold
 
         # GeDIGCore (main codebase)
         self.gedig_core = GeDIGCore(
@@ -289,6 +302,19 @@ class GeDIGv2Adapter:
             hop_results = core_result.hop_results or {}
             g0 = hop_results[0].gedig if 0 in hop_results else core_result.gedig_value
             gmin = min(hr.gedig for hr in hop_results.values()) if hop_results else g0
+
+            # v6: Override Betti with filtered computation if threshold > 0
+            if self.betti_threshold > 0.0:
+                fb0_before = compute_betti_0_filtered(g_prev, self.betti_threshold)
+                fb0_after = compute_betti_0_filtered(g_now, self.betti_threshold)
+                fb1_before = compute_betti_1_filtered(g_prev, self.betti_threshold)
+                fb1_after = compute_betti_1_filtered(g_now, self.betti_threshold)
+                core_result.betti_0_before = fb0_before
+                core_result.betti_0_after = fb0_after
+                core_result.delta_betti_0 = fb0_after - fb0_before
+                core_result.betti_1_before = fb1_before
+                core_result.betti_1_after = fb1_after
+                core_result.delta_betti_1 = fb1_after - fb1_before
 
             extended_f = self._compute_extended_f(g0, core_result)
 

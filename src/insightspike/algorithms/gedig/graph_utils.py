@@ -410,6 +410,20 @@ def compute_ged_min_proxy(g_before: nx.Graph, g_after: nx.Graph) -> float:
     return 0.0
 
 
+def compute_betti_0(g: nx.Graph) -> int:
+    """Zeroth Betti number: β₀ = number of connected components.
+
+    Measures graph fragmentation.  A decrease in β₀ (Δβ₀ < 0) signals
+    that previously disconnected knowledge islands have been merged —
+    critical for detecting bridge-type integration in RAG.
+
+    Computational cost: O(V+E).
+    """
+    if g.number_of_nodes() == 0:
+        return 0
+    return nx.number_connected_components(g)
+
+
 def compute_betti_1(g: nx.Graph) -> int:
     """First Betti number: β₁ = E - V + C.
 
@@ -426,6 +440,51 @@ def compute_betti_1(g: nx.Graph) -> int:
     return E - V + C
 
 
+def compute_betti_0_filtered(g: nx.Graph, threshold: float = 0.0) -> int:
+    """β₀ on subgraph with edge ``strength`` >= *threshold*.
+
+    When *threshold* <= 0 this falls back to :func:`compute_betti_0`
+    (zero overhead).  Otherwise a lightweight subgraph is built
+    containing only edges whose ``strength`` (or ``weight``) attribute
+    meets the threshold.  Node set is preserved so that isolated
+    nodes still count as separate components.
+
+    Used by the weighted-filtration gauge (v6) to decouple graph
+    enrichment from topological signal.
+    """
+    if threshold <= 0.0:
+        return compute_betti_0(g)
+    sub = nx.Graph()
+    sub.add_nodes_from(g.nodes())
+    for u, v, d in g.edges(data=True):
+        if d.get("strength", d.get("weight", 1.0)) >= threshold:
+            sub.add_edge(u, v)
+    if sub.number_of_nodes() == 0:
+        return 0
+    return nx.number_connected_components(sub)
+
+
+def compute_betti_1_filtered(g: nx.Graph, threshold: float = 0.0) -> int:
+    """β₁ on subgraph with edge ``strength`` >= *threshold*.
+
+    Same filtering logic as :func:`compute_betti_0_filtered`.
+    β₁ = E_sub - V + C_sub  (cycle rank of the filtered subgraph).
+    """
+    if threshold <= 0.0:
+        return compute_betti_1(g)
+    sub = nx.Graph()
+    sub.add_nodes_from(g.nodes())
+    for u, v, d in g.edges(data=True):
+        if d.get("strength", d.get("weight", 1.0)) >= threshold:
+            sub.add_edge(u, v)
+    V = sub.number_of_nodes()
+    if V == 0:
+        return 0
+    E = sub.number_of_edges()
+    C = nx.number_connected_components(sub)
+    return E - V + C
+
+
 __all__ = [
     "graph_efficiency",
     "spectral_score",
@@ -438,5 +497,8 @@ __all__ = [
     "extract_features",
     "filter_features",
     "compute_ged_min_proxy",
+    "compute_betti_0",
     "compute_betti_1",
+    "compute_betti_0_filtered",
+    "compute_betti_1_filtered",
 ]
