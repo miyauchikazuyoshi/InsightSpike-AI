@@ -113,6 +113,13 @@ def main() -> None:
         adaptive_depth=adapter_cfg.get("adaptive_depth", False),
         depth_alpha=adapter_cfg.get("depth_alpha", 0.5),
         max_depth=adapter_cfg.get("max_depth", 4),
+        # v5 Two-Edge Architecture
+        two_edge_mode=adapter_cfg.get("two_edge_mode", False),
+        rerank_alpha=adapter_cfg.get("rerank_alpha", 0.5),
+        ctx_max_sent_distance=adapter_cfg.get("ctx_max_sent_distance", 6),
+        sim_alpha=adapter_cfg.get("sim_alpha", 0.6),
+        sim_beta=adapter_cfg.get("sim_beta", 0.4),
+        sim_edge_threshold=adapter_cfg.get("sim_edge_threshold", 0.25),
     )
 
     # Evaluator
@@ -125,7 +132,10 @@ def main() -> None:
           f"hybrid={adapter.hybrid_mode}, "
           f"adaptive_depth={adapter.adaptive_depth}"
           + (f" (alpha={adapter.depth_alpha}, max_depth={adapter.max_depth})"
-             if adapter.adaptive_depth else ""))
+             if adapter.adaptive_depth else "")
+          + (f", two_edge_mode={adapter.two_edge_mode}"
+             f" (rerank_alpha={adapter.rerank_alpha})"
+             if adapter.two_edge_mode else ""))
     print(f"[run] Output: {output_dir}")
 
     total = len(examples)
@@ -181,6 +191,9 @@ def main() -> None:
                     "system_used": result.system_used,
                     "cot_steps": result.cot_steps,
                     "cot_depth": result.cot_depth,
+                    "two_edge_mode": adapter.two_edge_mode,
+                    "ctx_edges": result.metadata.get("ctx_edges", 0),
+                    "sim_edges": result.metadata.get("sim_edges", 0),
                     "latency_ms": result.latency_ms,
                 }
                 fout.write(json.dumps(record, ensure_ascii=False) + "\n")

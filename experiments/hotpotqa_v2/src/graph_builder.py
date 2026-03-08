@@ -52,6 +52,17 @@ class GraphBuildConfig:
     # Weight for cross-title entity overlap edges
     cross_title_weight: float = 0.5
 
+    # v5: Two-Edge Architecture
+    two_edge_mode: bool = False
+    # Context attention: max sent_id distance for intra-title edges
+    ctx_max_sent_distance: int = 6
+    # Similarity attention: TF-IDF cosine weight
+    sim_alpha: float = 0.6
+    # Similarity attention: entity overlap weight
+    sim_beta: float = 0.4
+    # Similarity attention: minimum score to create a cross-title edge
+    sim_edge_threshold: float = 0.25
+
 
 class KnowledgeGraphBuilder:
     """Build GeDIGCore-compatible knowledge graphs from retrieved facts.
@@ -157,6 +168,20 @@ class KnowledgeGraphBuilder:
         return base
 
     # ------------------------------------------------------------------ #
+    # Similarity helpers (v5)
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def _cosine_similarity(vec_a: list[float], vec_b: list[float]) -> float:
+        """Compute cosine similarity between two vectors."""
+        dot_val = sum(a * b for a, b in zip(vec_a, vec_b))
+        norm_a = math.sqrt(sum(a * a for a in vec_a))
+        norm_b = math.sqrt(sum(b * b for b in vec_b))
+        if norm_a < 1e-10 or norm_b < 1e-10:
+            return 0.0
+        return dot_val / (norm_a * norm_b)
+
+    # ------------------------------------------------------------------ #
     # Named entity extraction (lightweight heuristic)
     # ------------------------------------------------------------------ #
 
@@ -225,10 +250,12 @@ class KnowledgeGraphBuilder:
 
         max_score = max((f.score for f in facts), default=1.0)
 
-        # --- Add fact nodes ---
+        # --- Add fact nodes + collect TF-IDF vectors ---
+        tfidf_per_fact: dict[int, list[float]] = {}
         for i, fact in enumerate(facts):
             fact_tokens = self._tokenize(fact.title) + self._tokenize(fact.text)
             tfidf_vec = self._tfidf_vector(fact_tokens, idf_map, doc_count)
+            tfidf_per_fact[i] = tfidf_vec
             node_id = f"F{i}"
             g.add_node(
                 node_id,
@@ -246,35 +273,96 @@ class KnowledgeGraphBuilder:
             rank_weight = self.cfg.q_edge_base_weight * (1.0 - 0.1 * i)
             g.add_edge("Q", f"F{i}", weight=max(rank_weight, 0.1))
 
-        # --- Intra-title edges (same title, adjacent sent_id) ---
+        # --- Title groups (shared by both modes) ---
         title_groups: dict[str, list[int]] = {}
         for i, fact in enumerate(facts):
             title_groups.setdefault(fact.title, []).append(i)
 
-        for title, indices in title_groups.items():
-            # Sort by sent_id for adjacency
-            indices_sorted = sorted(indices, key=lambda idx: facts[idx].sent_id)
-            for a, b in zip(indices_sorted, indices_sorted[1:]):
-                if abs(facts[a].sent_id - facts[b].sent_id) <= 1:
-                    g.add_edge(f"F{a}", f"F{b}", weight=self.cfg.intra_title_weight)
-
-        # --- Cross-title edges (entity overlap gate) ---
+        # --- Entity extraction (shared by both modes) ---
         entities_per_fact: dict[int, set[str]] = {}
         for i, fact in enumerate(facts):
             entities_per_fact[i] = self._extract_entities(fact.text) | self._extract_entities(fact.title)
 
         titles = [f.title for f in facts]
-        for i in range(len(facts)):
-            for j in range(i + 1, len(facts)):
-                if titles[i] == titles[j]:
-                    continue  # already handled above
-                ent_i = entities_per_fact[i]
-                ent_j = entities_per_fact[j]
-                if not ent_i or not ent_j:
-                    continue
-                overlap = len(ent_i & ent_j) / min(len(ent_i), len(ent_j))
-                if overlap >= self.cfg.entity_overlap_threshold:
-                    g.add_edge(f"F{i}", f"F{j}", weight=self.cfg.cross_title_weight)
+
+        if self.cfg.two_edge_mode:
+            # ============================================================ #
+            # v5 Two-Edge Architecture
+            # ============================================================ #
+
+            # --- Context attention edges (intra-title, distance-decay) ---
+            for title, indices in title_groups.items():
+                indices_sorted = sorted(indices, key=lambda idx: facts[idx].sent_id)
+                for a_pos in range(len(indices_sorted)):
+                    a_idx = indices_sorted[a_pos]
+                    for b_pos in range(a_pos + 1, len(indices_sorted)):
+                        b_idx = indices_sorted[b_pos]
+                        sent_dist = abs(facts[a_idx].sent_id - facts[b_idx].sent_id)
+                        if sent_dist > self.cfg.ctx_max_sent_distance:
+                            break  # sorted by sent_id; all further are farther
+                        # Distance-decay weight
+                        if sent_dist <= 1:
+                            w_ctx = 0.9
+                        elif sent_dist <= 3:
+                            w_ctx = 0.6
+                        else:  # 4-6
+                            w_ctx = 0.3
+                        g.add_edge(
+                            f"F{a_idx}", f"F{b_idx}",
+                            weight=w_ctx, edge_type="context",
+                            w_ctx=w_ctx, w_sim=0.0,
+                        )
+
+            # --- Similarity attention edges (cross-title, TF-IDF cosine + entity overlap) ---
+            for i in range(len(facts)):
+                for j in range(i + 1, len(facts)):
+                    if titles[i] == titles[j]:
+                        continue  # handled by context attention above
+
+                    # TF-IDF cosine similarity
+                    cos_sim = self._cosine_similarity(tfidf_per_fact[i], tfidf_per_fact[j])
+
+                    # Entity overlap
+                    ent_i = entities_per_fact[i]
+                    ent_j = entities_per_fact[j]
+                    ent_overlap = 0.0
+                    if ent_i and ent_j:
+                        ent_overlap = len(ent_i & ent_j) / min(len(ent_i), len(ent_j))
+
+                    # Combined similarity score
+                    w_sim = (self.cfg.sim_alpha * max(cos_sim, 0.0)
+                             + self.cfg.sim_beta * ent_overlap)
+
+                    if w_sim >= self.cfg.sim_edge_threshold:
+                        g.add_edge(
+                            f"F{i}", f"F{j}",
+                            weight=w_sim, edge_type="similarity",
+                            w_ctx=0.0, w_sim=w_sim,
+                        )
+        else:
+            # ============================================================ #
+            # Legacy edge construction (v2-v4, backward compatible)
+            # ============================================================ #
+
+            # --- Intra-title edges (same title, adjacent sent_id) ---
+            for title, indices in title_groups.items():
+                indices_sorted = sorted(indices, key=lambda idx: facts[idx].sent_id)
+                for a, b in zip(indices_sorted, indices_sorted[1:]):
+                    if abs(facts[a].sent_id - facts[b].sent_id) <= 1:
+                        g.add_edge(f"F{a}", f"F{b}", weight=self.cfg.intra_title_weight)
+
+            # --- Cross-title edges (entity overlap gate) ---
+            for i in range(len(facts)):
+                for j in range(i + 1, len(facts)):
+                    if titles[i] == titles[j]:
+                        continue
+                    ent_i = entities_per_fact[i]
+                    ent_j = entities_per_fact[j]
+                    if not ent_i or not ent_j:
+                        continue
+                    overlap = len(ent_i & ent_j) / min(len(ent_i), len(ent_j))
+                    if overlap >= self.cfg.entity_overlap_threshold:
+                        g.add_edge(f"F{i}", f"F{j}", weight=self.cfg.cross_title_weight)
 
         return g
 

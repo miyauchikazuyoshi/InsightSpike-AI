@@ -25,6 +25,11 @@ v4 adds **Adaptive Depth** (``adaptive_depth``):
     CoT depth is dynamically determined from the F value:
         cot_depth = clamp(⌈(F - θ_dg) / α⌉, 1, max_depth)
     Higher F (more information gap) → deeper reasoning.
+
+v5 adds **Two-Edge Architecture** (``two_edge_mode``):
+    Context attention edges (intra-title, distance-decay) +
+    Similarity attention edges (cross-title, TF-IDF cosine + entity overlap).
+    Graph-guided re-ranking blends BM25 + graph connectivity for context selection.
 """
 
 from __future__ import annotations
@@ -169,6 +174,13 @@ class GeDIGv2Adapter:
         adaptive_depth: bool = False,
         depth_alpha: float = 0.5,
         max_depth: int = 4,
+        # Two-edge architecture (v5) params
+        two_edge_mode: bool = False,
+        rerank_alpha: float = 0.5,
+        ctx_max_sent_distance: int = 6,
+        sim_alpha: float = 0.6,
+        sim_beta: float = 0.4,
+        sim_edge_threshold: float = 0.25,
     ):
         self.structural_mode = structural_mode
         self.gamma_0 = gamma_0
@@ -185,6 +197,9 @@ class GeDIGv2Adapter:
         self.adaptive_depth = adaptive_depth
         self.depth_alpha = depth_alpha
         self.max_depth = max_depth
+        # v5: Two-Edge Architecture — graph-guided re-ranking
+        self.two_edge_mode = two_edge_mode
+        self.rerank_alpha = rerank_alpha
 
         # GeDIGCore (main codebase)
         self.gedig_core = GeDIGCore(
@@ -201,12 +216,18 @@ class GeDIGv2Adapter:
         # Retriever
         self.retriever = BM25Retriever()
 
-        # Graph builder (v2: β₀-sensitive)
+        # Graph builder (v2: β₀-sensitive, v5: two-edge)
         self.graph_builder = KnowledgeGraphBuilder(
             GraphBuildConfig(
                 q_link_top_k=q_link_top_k,
                 tfidf_dim=tfidf_dim,
                 entity_overlap_threshold=entity_overlap_threshold,
+                # v5 Two-Edge Architecture
+                two_edge_mode=two_edge_mode,
+                ctx_max_sent_distance=ctx_max_sent_distance,
+                sim_alpha=sim_alpha,
+                sim_beta=sim_beta,
+                sim_edge_threshold=sim_edge_threshold,
             )
         )
 
@@ -321,6 +342,64 @@ class GeDIGv2Adapter:
                 add(f"{title} {snippet}")
 
         return queries or [question]
+
+    # ------------------------------------------------------------------ #
+    # v5: Graph-guided re-ranking
+    # ------------------------------------------------------------------ #
+
+    def _rerank_by_graph(
+        self,
+        g: nx.Graph,
+        retrieved: list[RetrievedFact],
+        context_limit: int,
+    ) -> list[RetrievedFact]:
+        """Re-rank retrieved facts using graph connectivity scores.
+
+        For each fact node, compute:
+            graph_score = sum(w_ctx for context edges) + sum(w_sim for similarity edges)
+
+        Final rank = alpha * bm25_norm + (1 - alpha) * graph_norm
+        """
+        if not retrieved:
+            return []
+
+        max_bm25 = max((f.score for f in retrieved), default=1.0)
+        if max_bm25 < 1e-10:
+            max_bm25 = 1.0
+
+        # Compute per-fact graph connectivity scores
+        entries: list[tuple[int, float, float]] = []
+        for i, fact in enumerate(retrieved):
+            node_id = f"F{i}"
+            bm25_norm = fact.score / max_bm25
+
+            if node_id not in g:
+                entries.append((i, bm25_norm, 0.0))
+                continue
+
+            # Sum edge weights by type (exclude Q-edges)
+            graph_score = 0.0
+            for _, neighbor, data in g.edges(node_id, data=True):
+                if neighbor == "Q":
+                    continue
+                graph_score += data.get("w_ctx", 0.0) + data.get("w_sim", 0.0)
+
+            entries.append((i, bm25_norm, graph_score))
+
+        # Normalize graph scores
+        max_graph = max((e[2] for e in entries), default=1.0)
+        if max_graph < 1e-10:
+            max_graph = 1.0
+
+        # Combine and sort
+        combined = []
+        for idx, bm25_n, graph_n in entries:
+            final = (self.rerank_alpha * bm25_n
+                     + (1.0 - self.rerank_alpha) * (graph_n / max_graph))
+            combined.append((idx, final))
+
+        combined.sort(key=lambda x: -x[1])
+        return [retrieved[idx] for idx, _ in combined[:context_limit]]
 
     # ------------------------------------------------------------------ #
     # v4: Adaptive Depth — compute CoT depth from F value
@@ -560,7 +639,11 @@ Answer (shortest form, e.g., "Paris" not "The city of Paris"):"""
 
         # --- Step 5: Generate answer (System 1 / System 2 switch) ---
         context_limit = min(len(retrieved), self.top_k * (expansions + 1))
-        context_texts = [f.text for f in retrieved[:context_limit]]
+        if self.two_edge_mode:
+            reranked = self._rerank_by_graph(g_now, retrieved, context_limit)
+            context_texts = [f.text for f in reranked]
+        else:
+            context_texts = [f.text for f in retrieved[:context_limit]]
 
         system_used = "system1"
         cot_steps = 0
@@ -626,6 +709,15 @@ Answer (shortest form, e.g., "Paris" not "The city of Paris"):"""
                 "cot_steps": cot_steps,
                 "cot_depth": cot_depth,
                 "adaptive_depth": self.adaptive_depth,
+                "two_edge_mode": self.two_edge_mode,
+                "ctx_edges": sum(
+                    1 for _, _, d in g_now.edges(data=True)
+                    if d.get("edge_type") == "context"
+                ) if self.two_edge_mode else 0,
+                "sim_edges": sum(
+                    1 for _, _, d in g_now.edges(data=True)
+                    if d.get("edge_type") == "similarity"
+                ) if self.two_edge_mode else 0,
             },
         )
 
