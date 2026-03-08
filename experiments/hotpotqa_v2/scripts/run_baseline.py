@@ -48,6 +48,8 @@ def main() -> None:
     parser.add_argument("--top-k", type=int, default=5)
     parser.add_argument("--window", type=int, default=1, help="GraphRAG window size")
     parser.add_argument("--max-steps", type=int, default=None, help="Max steps for IRCoT/ReAct")
+    parser.add_argument("--model", type=str, default="gpt-4o-mini",
+                        help="LLM model name (default: gpt-4o-mini)")
     args = parser.parse_args()
 
     # Data — CLI paths resolve from repo root
@@ -78,19 +80,14 @@ def main() -> None:
     # Setup baseline
     cls = _BASELINES[args.baseline]
     if args.baseline == "graphrag":
-        baseline = cls(top_k=args.top_k, window=args.window)
-    elif args.baseline == "ircot":
-        kwargs = {"top_k": args.top_k}
-        if args.max_steps is not None:
-            kwargs["max_steps"] = args.max_steps
-        baseline = cls(**kwargs)
-    elif args.baseline == "react":
-        kwargs = {"top_k": args.top_k}
+        baseline = cls(top_k=args.top_k, window=args.window, model=args.model)
+    elif args.baseline in ("ircot", "react"):
+        kwargs = {"top_k": args.top_k, "model": args.model}
         if args.max_steps is not None:
             kwargs["max_steps"] = args.max_steps
         baseline = cls(**kwargs)
     else:
-        baseline = cls(top_k=args.top_k)
+        baseline = cls(top_k=args.top_k, model=args.model)
     baseline.setup(examples)
 
     evaluator = HotpotQAEvaluator()
