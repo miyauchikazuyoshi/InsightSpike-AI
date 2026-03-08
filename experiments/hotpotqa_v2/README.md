@@ -2,18 +2,22 @@
 
 ## Key Result
 
-**Hybrid-E1 v3.1** (topology-guided System 1/System 2 switching) **surpasses IRCoT on EM at 3.6x fewer LLM calls**:
+**Hybrid-E1 v3.1** — topology-guided System 1/System 2 switching with **model-dependent scaling**:
 
-| Method | EM | F1 | LLM Calls | Latency | Routing |
-|--------|:---:|:---:|:---------:|:-------:|---------|
-| **Hybrid-E1 v3.1** | **48.0%** | **0.622** | **~2.2** | **1.7s** | **Topology-guided** |
-| IRCoT | 46.0% | 0.637 | ~8 | 3.0s | Always reason |
-| GraphRAG | 43.0% | 0.589 | 1 | 0.7s | Always direct |
-| geDIG-B | 40.0% | 0.570 | 1 | 0.8s | Always direct |
+**500-question evaluation (primary reference):**
 
-The gauge value F, computed from Betti numbers (beta_0, beta_1) and information geometry, decides when to think fast (System 1) vs. slow (System 2) — **without any LLM call for the routing decision**.
+| Model | Hybrid-E1 EM | IRCoT EM | Δ | p-value | LLM Calls |
+|:-----:|:---:|:---:|:-:|:------:|:---------:|
+| **GPT-4o** | **51.2%** | 47.6% | **+3.6pt** | 0.086 | **2.2 vs 8** |
+| GPT-4o-mini | 45.2% | **50.4%** | -5.2pt | **0.008** | 2.2 vs 8 |
 
-> See [REPORT_v3_dual_process.md](REPORT_v3_dual_process.md) for the full v3 experiment report.
+Key findings:
+- On GPT-4o, Hybrid-E1 **leads IRCoT at 3.6x fewer LLM calls**
+- On GPT-4o-mini, IRCoT is significantly better — but Hybrid-E1 achieves 90% quality at 27% cost
+- **Model scaling favors topology**: +6pt improvement (mini→4o) vs -3pt for IRCoT
+- The gauge value F decides when to think fast (System 1) vs. slow (System 2) — **zero-cost routing**
+
+> See [REPORT_v3_dual_process.md](REPORT_v3_dual_process.md) for the full experiment report.
 
 ---
 

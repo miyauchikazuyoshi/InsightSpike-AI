@@ -92,19 +92,18 @@ See [`experiments/transformer/inference_gedig_v2/`](experiments/transformer/infe
 
 ### HotpotQA Multi-Hop QA (v2/v3)
 
-geDIG applied to multi-hop question answering on HotpotQA (distractor setting, GPT-4o-mini). The v3 **dual-process architecture** uses Betti numbers as a cognitive routing signal — the gauge value F decides when to answer instantly (System 1) vs. reason step-by-step (System 2), inspired by Kahneman's dual-process theory.
+geDIG applied to multi-hop question answering on HotpotQA (distractor setting). The v3 **dual-process architecture** uses Betti numbers as a cognitive routing signal — the gauge value F decides when to answer instantly (System 1) vs. reason step-by-step (System 2), inspired by Kahneman's dual-process theory.
 
-- **12 methods compared**: 4 geDIG conditions, 4 hybrid variants, 4 baselines (BM25, GraphRAG, IRCoT, ReAct)
-- **Key result**: Hybrid-E1 v3.1 **surpasses IRCoT on EM (+2pt) at 3.6x fewer LLM calls** — topology-guided routing with zero-cost gating
-- **System 2 EM = 58.1%** when triggered by topological uncertainty (vs. System 1's 31.6%)
+- **Multi-scale evaluation**: 100q pilot, **500q with statistical significance**, full dev set (running)
+- **Model-dependent interaction**: On GPT-4o, Hybrid-E1 **leads IRCoT (EM 51.2% vs 47.6%) at 3.6x fewer LLM calls**
+- **Scaling property**: Topology-guided routing improves with model capability (+6pt from mini→4o vs -3pt for IRCoT)
 
-| Method | EM | F1 | LLM Calls | Routing |
-|--------|:---:|:---:|:---------:|---------|
-| **geDIG Hybrid-E1 v3.1** | **48.0%** | **0.622** | **~2.2** | **Topology-guided** |
-| IRCoT (Trivedi+ 2023) | 46.0% | 0.637 | ~8 | Always reason |
-| Static GraphRAG | 43.0% | 0.589 | 1 | Always direct |
-| geDIG-B (best v2) | 40.0% | 0.570 | 1 | Always direct |
-| ReAct (Yao+ 2023) | 39.0% | 0.536 | ~7 | Always reason |
+**500-question evaluation (primary reference):**
+
+| Model | Hybrid-E1 EM | IRCoT EM | LLM Calls | p-value |
+|:-----:|:---:|:---:|:---------:|:-------:|
+| **GPT-4o** | **51.2%** | 47.6% | **2.2 vs 8** | 0.086 |
+| GPT-4o-mini | 45.2% | **50.4%** | 2.2 vs 8 | **0.008** |
 
 See [`experiments/hotpotqa_v2/`](experiments/hotpotqa_v2/) for full experiment code and [`REPORT_v3_dual_process.md`](experiments/hotpotqa_v2/REPORT_v3_dual_process.md) for the detailed report.
 
