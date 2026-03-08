@@ -109,6 +109,10 @@ def main() -> None:
         # v3 Hybrid mode
         hybrid_mode=adapter_cfg.get("hybrid_mode", False),
         max_cot_steps=adapter_cfg.get("max_cot_steps", 2),
+        # v4 Adaptive Depth
+        adaptive_depth=adapter_cfg.get("adaptive_depth", False),
+        depth_alpha=adapter_cfg.get("depth_alpha", 0.5),
+        max_depth=adapter_cfg.get("max_depth", 4),
     )
 
     # Evaluator
@@ -118,7 +122,10 @@ def main() -> None:
     print(f"[run] Condition: {condition_name}")
     print(f"[run] structural_mode={adapter.structural_mode}, "
           f"gamma_0={adapter.gamma_0}, gamma_1={adapter.gamma_1}, "
-          f"hybrid={adapter.hybrid_mode}")
+          f"hybrid={adapter.hybrid_mode}, "
+          f"adaptive_depth={adapter.adaptive_depth}"
+          + (f" (alpha={adapter.depth_alpha}, max_depth={adapter.max_depth})"
+             if adapter.adaptive_depth else ""))
     print(f"[run] Output: {output_dir}")
 
     total = len(examples)
@@ -173,6 +180,7 @@ def main() -> None:
                     "expansions": result.expansions,
                     "system_used": result.system_used,
                     "cot_steps": result.cot_steps,
+                    "cot_depth": result.cot_depth,
                     "latency_ms": result.latency_ms,
                 }
                 fout.write(json.dumps(record, ensure_ascii=False) + "\n")

@@ -1,4 +1,4 @@
-# geDIG v3: Topology-Guided Dual-Process RAG — Experiment Report
+# geDIG v3/v4: Topology-Guided Dual-Process RAG — Experiment Report
 
 **Date**: 2026-03-08 (updated)
 **Author**: Kazuyoshi Miyauchi (AI-assisted implementation)
@@ -9,7 +9,7 @@
 
 ## Abstract
 
-We augment geDIG (Generalized Differential Information Gain) with a **dual-process architecture** inspired by Kahneman's System 1/System 2 theory. The gauge value F — a topological confidence score derived from Betti numbers — determines whether a question is answered immediately (System 1, DG gate) or via chain-of-thought reasoning (System 2, CoT fallback). Multi-scale evaluation reveals a **model-dependent interaction**: on GPT-4o-mini (500q), IRCoT significantly outperforms Hybrid-E1 (EM=50.4% vs 45.2%, p<0.01), but on **GPT-4o (500q), Hybrid-E1 leads** (EM=51.2% vs 47.6%, p=0.086) — at **3.6x fewer LLM calls**. This establishes geDIG as the first topology-guided adaptive RAG framework with a favorable quality-cost trade-off that improves with model capability.
+We augment geDIG (Generalized Differential Information Gain) with a **dual-process architecture** inspired by Kahneman's System 1/System 2 theory. The gauge value F — a topological confidence score derived from Betti numbers — determines whether a question is answered immediately (System 1, DG gate) or via chain-of-thought reasoning (System 2, CoT fallback). Multi-scale evaluation reveals a **model-dependent interaction**: on GPT-4o-mini (500q), IRCoT significantly outperforms Hybrid-E1 (EM=50.4% vs 45.2%, p<0.01), but on **GPT-4o (500q), Hybrid-E1 leads** (EM=51.2% vs 47.6%, p=0.086) — at **3.6x fewer LLM calls**. We further investigate **Adaptive Depth (v4)**, using F to dynamically adjust CoT depth. Results show depth=2 is optimal; deeper reasoning (3-4 steps) degrades performance, demonstrating that the **bottleneck is retrieval quality, not reasoning depth**. This motivates v5: adaptive retrieval with a two-edge graph architecture.
 
 ---
 
@@ -85,7 +85,26 @@ Input: question Q, context paragraphs P
    Final: Generate answer from enriched context (LLM call)
 ```
 
-### 2.3 Why Topology Works as a Routing Signal
+### 2.3 v4: Adaptive Depth — F-Driven CoT Depth
+
+v4 extends v3 by making CoT depth dynamic based on the gauge value F:
+
+```
+cot_depth = clamp(ceil((F - theta_dg) / alpha), 1, max_depth)
+
+Parameters: theta_dg=-0.5, alpha=0.5, max_depth=4
+```
+
+| F range | Depth | Reasoning |
+|:--------|:-----:|:----------|
+| F < theta_dg | 0 | System 1 (DG fires, no CoT) |
+| F near theta_dg | 1 | Light confirmation |
+| F > theta_dg | 2 | Standard CoT (same as v3 E1) |
+| F >> theta_dg | 3-4 | Deep reasoning for hard questions |
+
+Hypothesis: harder questions produce larger F values (more information gap) and thus need deeper reasoning.
+
+### 2.4 Why Topology Works as a Routing Signal
 
 The gauge value F integrates three independent mathematical structures:
 
@@ -171,9 +190,40 @@ GPT-4o Hybrid-E1 achieves **67.0% EM on comparison questions** — a +27.6pt imp
 
 **Hybrid-E1 delivers 3.3-3.7x higher EM per LLM call** across both models.
 
+### 3.7 v4 Adaptive Depth Results (500q)
+
+v4 (Hybrid-E2) dynamically adjusts CoT depth based on F value.
+
+**E2 vs E1 (fixed depth=2):**
+
+| Model | E1 EM | E2 EM | Diff | p-value |
+|:------|:---:|:---:|:---:|:---:|
+| GPT-4o-mini | **45.1%** | 44.1% | -1.0pt | 0.47 (NS) |
+| GPT-4o | **51.2%** | 50.6% | -0.6pt | 0.74 (NS) |
+
+**Result: Adaptive Depth does NOT improve over fixed depth=2.**
+
+**Depth-stratified analysis (key finding):**
+
+| Depth | GPT-4o-mini EM | GPT-4o EM | n | LLM Calls |
+|:-----:|:-:|:-:|:---:|:---:|
+| 0 (System 1) | 34.6% | 47.6% | 191 | 1 |
+| 1 | 48.2% | 50.0% | 56 | 2 |
+| **2** | **57.0%** | **61.1%** | ~108 | 3 |
+| 3 | 45.5% | 50.0% | 22 | 4 |
+| 4 | 45.5% | 46.3% | ~122 | 5 |
+
+**Critical insight**: Depth 2 is optimal for BOTH models. Depth 3-4 hurts. This demonstrates:
+1. F value correctly identifies hard questions (high-F questions get depth 3-4)
+2. But deeper CoT does not solve them — extra steps introduce noise
+3. **The bottleneck is retrieval quality, not reasoning depth**
+4. Depth-0 (System 1) EM is low (34.6% mini, 47.6% 4o) — DG gate may be too aggressive
+
+**Implication**: F value should control retrieval strategy (graph density, search scope), not reasoning depth. This motivates v5: adaptive retrieval with a two-edge graph architecture.
+
 ---
 
-### 3.7 100-Question Pilot Results (Historical)
+### 3.8 100-Question Pilot Results (Historical)
 
 All methods evaluated on the same 100 HotpotQA questions with GPT-4o-mini.
 
@@ -196,7 +246,7 @@ All methods evaluated on the same 100 HotpotQA questions with GPT-4o-mini.
 
 **v3.1 improvement** (prompt-only fix over v3.0): Dedicated answer extraction prompt with conciseness constraints and post-processing cleanup. This increased System 2 EM from 43.5% to 58.1% (+14.6pt) with zero architecture change.
 
-### 3.8 System 1/System 2 Breakdown (100q pilot)
+### 3.9 System 1/System 2 Breakdown (100q pilot)
 
 | Configuration | System 1 (n) | System 1 EM | System 2 (n) | System 2 EM | Overall EM |
 |---------------|:------------:|:-----------:|:------------:|:-----------:|:----------:|
@@ -204,7 +254,7 @@ All methods evaluated on the same 100 HotpotQA questions with GPT-4o-mini.
 | Hybrid-E1 v3.0 | 38 | 34.2% | 62 | 43.5% | 40.0% |
 | **Hybrid-E1 v3.1** | **38** | **31.6%** | **62** | **58.1%** | **48.0%** |
 
-### 3.9 v3.1 Answer Extraction Fix
+### 3.10 v3.1 Answer Extraction Fix
 
 Analysis of v3.0 partial matches revealed that System 2 was finding the correct answer but wrapping it in extra words:
 
@@ -257,10 +307,13 @@ The model interaction can be explained by an "overthinking" effect:
 |----------|:--------------:|:----------:|:------:|
 | ~~500-question evaluation~~ | Statistical rigor | Low | **Done** |
 | ~~GPT-4o model independence~~ | Model generality | Low | **Done** |
+| ~~v4 Adaptive Depth CoT~~ | Dynamic reasoning | Medium | **Done (negative result)** |
 | Full dev set (7,405q) evaluation | Publishable numbers | Medium | **Running** |
-| System 1 retrieval improvement | +2pt EM on mini | Medium | Planned |
-| Adaptive theta per question type | +2-3pt EM | Medium | Planned |
-| GPT-4o-mini-specific prompt tuning | +2pt EM on mini | Low | Planned |
+| **v5 Two-Edge Architecture** | **Retrieval quality** | **High** | **Next priority** |
+| System 1 gate refinement | +5pt EM on depth-0 | Medium | Planned |
+| Adaptive graph density (F-driven) | +2-3pt EM | Medium | Planned |
+
+**v4 lesson**: Deeper reasoning does not help — the bottleneck is retrieval quality. v5 addresses this via a two-edge graph architecture (context attention + similarity attention) with fine-grained chunking.
 
 ---
 
@@ -384,6 +437,8 @@ python experiments/hotpotqa_v2/tools/statistical_test.py \
 | `condition_hybrid.yaml` | Hybrid(B): geDIG-B + CoT (untuned) |
 | `condition_hybrid_e1.yaml` | **Hybrid-E1**: Tuned Betti + CoT (GPT-4o-mini) |
 | `condition_hybrid_e1_gpt4o.yaml` | **Hybrid-E1**: Tuned Betti + CoT (GPT-4o) |
+| `condition_hybrid_e2_adaptive.yaml` | **Hybrid-E2**: Adaptive Depth CoT (GPT-4o-mini) |
+| `condition_hybrid_e2_adaptive_gpt4o.yaml` | **Hybrid-E2**: Adaptive Depth CoT (GPT-4o) |
 
 ---
 
