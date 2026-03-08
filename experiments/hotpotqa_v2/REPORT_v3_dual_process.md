@@ -1,6 +1,6 @@
-# geDIG v3/v4: Topology-Guided Dual-Process RAG — Experiment Report
+# geDIG v3/v4/v5: Topology-Guided Dual-Process RAG — Experiment Report
 
-**Date**: 2026-03-08 (updated)
+**Date**: 2026-03-09 (updated)
 **Author**: Kazuyoshi Miyauchi (AI-assisted implementation)
 **Dataset**: HotpotQA distractor dev set (100, 500, and full 7,405-question evaluations)
 **LLM**: GPT-4o-mini and GPT-4o (temperature=0.0)
@@ -9,7 +9,7 @@
 
 ## Abstract
 
-We augment geDIG (Generalized Differential Information Gain) with a **dual-process architecture** inspired by Kahneman's System 1/System 2 theory. The gauge value F — a topological confidence score derived from Betti numbers — determines whether a question is answered immediately (System 1, DG gate) or via chain-of-thought reasoning (System 2, CoT fallback). Multi-scale evaluation reveals a **model-dependent interaction**: on GPT-4o-mini (500q), IRCoT significantly outperforms Hybrid-E1 (EM=50.4% vs 45.2%, p<0.01), but on **GPT-4o (500q), Hybrid-E1 leads** (EM=51.2% vs 47.6%, p=0.086) — at **3.6x fewer LLM calls**. We further investigate **Adaptive Depth (v4)**, using F to dynamically adjust CoT depth. Results show depth=2 is optimal; deeper reasoning (3-4 steps) degrades performance, demonstrating that the **bottleneck is retrieval quality, not reasoning depth**. This motivates v5: adaptive retrieval with a two-edge graph architecture.
+We augment geDIG (Generalized Differential Information Gain) with a **dual-process architecture** inspired by Kahneman's System 1/System 2 theory. The gauge value F — a topological confidence score derived from Betti numbers — determines whether a question is answered immediately (System 1, DG gate) or via chain-of-thought reasoning (System 2, CoT fallback). Multi-scale evaluation reveals a **model-dependent interaction**: on GPT-4o-mini (500q), IRCoT significantly outperforms Hybrid-E1 (EM=50.4% vs 45.2%, p<0.01), but on **GPT-4o (500q), Hybrid-E1 leads** (EM=51.2% vs 47.6%, p=0.086) — at **3.6x fewer LLM calls**. We further investigate **Adaptive Depth (v4)** and **Two-Edge Architecture (v5)**. v4 (F-driven CoT depth) shows depth=2 is optimal; deeper reasoning degrades performance. v5 (context + similarity attention edges with graph-guided re-ranking) reveals a **topology collapse**: increased edges destroy Betti signals (DG fires 77% → S2 suppressed to 23%), causing EM to drop from 45.2% to 40.3%. Both negative results converge on the same insight: **the bottleneck is the gauge-topology coupling** — edge additions must respect the gauge's sensitivity to Betti numbers. This motivates v6: unified edge feature vectors with weighted filtration.
 
 ---
 
@@ -104,7 +104,32 @@ Parameters: theta_dg=-0.5, alpha=0.5, max_depth=4
 
 Hypothesis: harder questions produce larger F values (more information gap) and thus need deeper reasoning.
 
-### 2.4 Why Topology Works as a Routing Signal
+### 2.4 v5: Two-Edge Architecture — Graph-Guided Retrieval
+
+v4 demonstrated that the bottleneck is retrieval quality, not reasoning depth. v5 attacks this directly by enriching the graph structure with two types of attention edges and using graph connectivity to re-rank retrieved facts.
+
+**Two Edge Types (replacing legacy intra/cross-title edges):**
+
+1. **Context Attention Edges** (intra-title): Distance-decay within the same document.
+   - Legacy: only adjacent sentences (distance=1)
+   - v5: distance up to 6, with decay: dist 1→w=0.9, dist 2-3→w=0.6, dist 4-6→w=0.3
+
+2. **Similarity Attention Edges** (cross-title): TF-IDF cosine + entity overlap.
+   - Legacy: entity overlap only (binary gate at threshold=0.3)
+   - v5: `w_sim = 0.6*cos_sim(tfidf_i, tfidf_j) + 0.4*entity_overlap`, gate at threshold=0.25
+
+**Graph-Guided Re-Ranking:**
+
+Instead of using BM25 order alone for LLM context selection:
+```
+graph_score(fact) = sum(w_ctx + w_sim) across all non-Q edges of fact
+final_score = alpha * bm25_norm + (1-alpha) * graph_norm
+```
+With `rerank_alpha=0.5`, the final context order blends BM25 relevance with graph connectivity.
+
+**Key design note**: Edge weights (w_ctx, w_sim) are used only for re-ranking. The gauge formula computes Betti numbers from binary edge presence (exists/not), not from edge weights. This is the central limitation that v5 exposes.
+
+### 2.5 Why Topology Works as a Routing Signal
 
 The gauge value F integrates three independent mathematical structures:
 
@@ -223,7 +248,49 @@ v4 (Hybrid-E2) dynamically adjusts CoT depth based on F value.
 
 ---
 
-### 3.8 100-Question Pilot Results (Historical)
+### 3.8 v5 Two-Edge Results (E3, 139q partial, GPT-4o-mini)
+
+v5 (Hybrid-E3) was stopped early at 139/500 questions due to clearly negative trajectory.
+
+**E3 vs E1 (EM/F1):**
+
+| Method | n | EM | F1 | Bridge EM | Comparison EM |
+|--------|:-:|:---:|:---:|:---------:|:-------------:|
+| Hybrid-E1 (baseline) | 500 | **45.2%** | **0.616** | **45.1%** | **54.3%** |
+| Hybrid-E3 (two-edge) | 139 | 40.3% | 0.553 | 38.1% | 52.4% |
+| **Difference** | | **-4.9pt** | **-0.063** | **-7.0pt** | -1.9pt |
+
+**Result: Two-Edge Architecture DEGRADES performance.**
+
+**Root cause — Topology Collapse:**
+
+| Metric | E1 | E3 | Interpretation |
+|--------|:---:|:---:|:------|
+| Avg edges | 7.7 | 8.2 | More edges (+6.5%) |
+| β₀ after | **2.76** | **1.39** | Graph nearly always connected |
+| β₁ after | 2.26 | **3.12** | Too many cycles |
+| Δβ₀ | +1.03 | **+0.32** | β₀ signal destroyed |
+| Δβ₁ | +2.16 | **+3.09** | β₁ signal overwhelms gauge |
+| extended_F | -0.197 | **-1.536** | Gauge collapses to large negative |
+| DG fire rate | 38% | **77%** | DG fires on almost everything |
+| AG fire rate | 30% | **0%** | AG completely suppressed |
+| System 2 rate | **62%** | **23%** | CoT reasoning suppressed |
+
+**Failure mechanism (cascade):**
+
+```
+More edges → β₀ collapses to ~1 (always connected)
+          → β₁ explodes (many cycles)
+          → Δβ₁ dominates F → F << 0
+          → DG always fires → System 2 suppressed
+          → EM drops (S1 EM ≈ 38% vs S2 EM ≈ 52%)
+```
+
+Edge diagnostics: avg ctx_edges=1.2, sim_edges=3.9. The similarity edges (cross-title TF-IDF) add ~4 extra edges per question, creating enough cycles to collapse the topological signal.
+
+**Critical insight**: The gauge formula treats edges as binary (present/absent). Adding edges — even with low weights — changes the topology and destroys Betti-based routing. **Edge weights must participate in the gauge computation** (weighted filtration) for richer graph structures to be useful.
+
+### 3.9 100-Question Pilot Results (Historical)
 
 All methods evaluated on the same 100 HotpotQA questions with GPT-4o-mini.
 
@@ -246,7 +313,7 @@ All methods evaluated on the same 100 HotpotQA questions with GPT-4o-mini.
 
 **v3.1 improvement** (prompt-only fix over v3.0): Dedicated answer extraction prompt with conciseness constraints and post-processing cleanup. This increased System 2 EM from 43.5% to 58.1% (+14.6pt) with zero architecture change.
 
-### 3.9 System 1/System 2 Breakdown (100q pilot)
+### 3.10 System 1/System 2 Breakdown (100q pilot)
 
 | Configuration | System 1 (n) | System 1 EM | System 2 (n) | System 2 EM | Overall EM |
 |---------------|:------------:|:-----------:|:------------:|:-----------:|:----------:|
@@ -254,7 +321,7 @@ All methods evaluated on the same 100 HotpotQA questions with GPT-4o-mini.
 | Hybrid-E1 v3.0 | 38 | 34.2% | 62 | 43.5% | 40.0% |
 | **Hybrid-E1 v3.1** | **38** | **31.6%** | **62** | **58.1%** | **48.0%** |
 
-### 3.10 v3.1 Answer Extraction Fix
+### 3.11 v3.1 Answer Extraction Fix
 
 Analysis of v3.0 partial matches revealed that System 2 was finding the correct answer but wrapping it in extra words:
 
@@ -294,26 +361,49 @@ Analysis of v3.0 partial matches revealed that System 2 was finding the correct 
 
 3. **GPT-4o advantage is not yet statistically significant**: p=0.086 suggests a trend but falls short of conventional significance thresholds. Larger evaluations may resolve this.
 
-### 4.3 The "Overthinking" Hypothesis
+4. **v4 Adaptive Depth was ineffective**: F correctly identifies hard questions, but deeper CoT (3-4 steps) introduces noise rather than solving them. The bottleneck is retrieval quality, not reasoning depth.
+
+5. **v5 Two-Edge Architecture caused topology collapse**: Adding context and similarity edges destroyed the Betti signals that the gauge relies on. β₀ collapsed to ~1 (always connected), β₁ exploded (too many cycles), DG fired 77% of the time, and System 2 was suppressed from 62% to 23%. **The fundamental problem**: the gauge treats edges as binary, so any edge addition — regardless of weight — changes the topology. Edge weights were used only for re-ranking, not for Betti computation.
+
+### 4.3 The Gauge-Topology Coupling Problem
+
+v4 and v5 expose the same structural limitation from opposite directions:
+
+| Experiment | What we tried | Why it failed |
+|:----------:|:-------------|:-------------|
+| v4 | Use F to control reasoning depth | F identifies hard questions, but deeper reasoning doesn't solve them |
+| v5 | Enrich graph to improve retrieval | More edges destroy the Betti signals that F depends on |
+
+**Both failures point to the same bottleneck**: the coupling between graph structure and gauge computation is too fragile. The gauge relies on binary edge presence for Betti numbers, making it sensitive to any topological change. To enrich the graph without breaking the gauge, **edge weights must participate in Betti computation** via weighted filtration (persistent homology).
+
+This insight connects directly to the maze experiment's graph-persistent DG architecture, where edges carry multi-dimensional features (attention, dg_attention, propagation_weight) and evolve over time. Applying this pattern to HotpotQA requires:
+1. **Unified edge feature vectors**: `[w_ctx, w_sim, w_gauge, w_reward]` per edge
+2. **Weighted filtration**: compute Betti numbers at multiple edge-strength thresholds
+3. **Feedback loop**: strengthen edges that lead to correct answers, weaken others
+
+### 4.4 The "Overthinking" Hypothesis
 
 The model interaction can be explained by an "overthinking" effect:
 - **GPT-4o-mini + 8 iterations**: Each additional reasoning step adds value because the model benefits from iterative refinement
 - **GPT-4o + 8 iterations**: The stronger model often has the right answer early, but forced iterations can introduce errors or change correct initial reasoning
 - **GPT-4o + topology routing**: By limiting reasoning to 2-3 steps only when needed, Hybrid-E1 avoids the overthinking trap while still benefiting from the stronger model's base capabilities
 
-### 4.4 Updated Improvement Roadmap
+### 4.5 Updated Improvement Roadmap
 
 | Strategy | Expected Impact | Complexity | Status |
 |----------|:--------------:|:----------:|:------:|
 | ~~500-question evaluation~~ | Statistical rigor | Low | **Done** |
 | ~~GPT-4o model independence~~ | Model generality | Low | **Done** |
-| ~~v4 Adaptive Depth CoT~~ | Dynamic reasoning | Medium | **Done (negative result)** |
+| ~~v4 Adaptive Depth CoT~~ | Dynamic reasoning | Medium | **Done (negative)** |
+| ~~v5 Two-Edge Architecture~~ | Retrieval quality | High | **Done (negative)** |
 | Full dev set (7,405q) evaluation | Publishable numbers | Medium | **Running** |
-| **v5 Two-Edge Architecture** | **Retrieval quality** | **High** | **Next priority** |
-| System 1 gate refinement | +5pt EM on depth-0 | Medium | Planned |
-| Adaptive graph density (F-driven) | +2-3pt EM | Medium | Planned |
+| **v6 Weighted Filtration** | **Fix gauge-topology coupling** | **High** | **Next priority** |
+| Edge feature unification | Extensible edge model | Medium | Planned (with v6) |
+| Positive/negative feedback | Learning from errors | Medium | Planned (after v6) |
 
-**v4 lesson**: Deeper reasoning does not help — the bottleneck is retrieval quality. v5 addresses this via a two-edge graph architecture (context attention + similarity attention) with fine-grained chunking.
+**v4 lesson**: Deeper reasoning does not help — bottleneck is retrieval quality.
+**v5 lesson**: Richer graphs break the gauge — bottleneck is gauge-topology coupling. Edge weights must participate in Betti computation.
+**v6 direction**: Unified edge feature vectors `[w_ctx, w_sim, w_gauge, w_reward]` with weighted filtration. Inspired by the maze experiment's graph-persistent DG, where edges carry multi-dimensional features (attention, dg_attention, propagation_weight) that evolve based on outcomes.
 
 ---
 
@@ -439,6 +529,8 @@ python experiments/hotpotqa_v2/tools/statistical_test.py \
 | `condition_hybrid_e1_gpt4o.yaml` | **Hybrid-E1**: Tuned Betti + CoT (GPT-4o) |
 | `condition_hybrid_e2_adaptive.yaml` | **Hybrid-E2**: Adaptive Depth CoT (GPT-4o-mini) |
 | `condition_hybrid_e2_adaptive_gpt4o.yaml` | **Hybrid-E2**: Adaptive Depth CoT (GPT-4o) |
+| `condition_hybrid_e3_two_edge.yaml` | **Hybrid-E3**: Two-Edge Architecture (GPT-4o-mini) |
+| `condition_hybrid_e3_two_edge_gpt4o.yaml` | **Hybrid-E3**: Two-Edge Architecture (GPT-4o) |
 
 ---
 

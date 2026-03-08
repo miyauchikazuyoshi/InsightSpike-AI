@@ -155,3 +155,90 @@ class TestEntityExtraction:
     def test_empty_text(self):
         entities = KnowledgeGraphBuilder._extract_entities("")
         assert len(entities) == 0
+
+
+class TestTwoEdgeArchitecture:
+    """Tests for v5 Two-Edge Architecture (context + similarity attention edges)."""
+
+    def test_context_edges_wider_than_adjacent(self):
+        """v5: Context edges should connect non-adjacent same-title facts."""
+        cfg = GraphBuildConfig(two_edge_mode=True, ctx_max_sent_distance=6)
+        builder = KnowledgeGraphBuilder(cfg)
+        facts = [
+            RetrievedFact("Physics", 0, "Sentence zero about physics.", 5.0),
+            RetrievedFact("Physics", 1, "Sentence one about physics.", 4.0),
+            RetrievedFact("Physics", 3, "Sentence three about physics.", 3.0),
+        ]
+        g = builder.build_graph("test", facts)
+        # F0-F1 (dist=1), F1-F2 (dist=2), F0-F2 (dist=3) should all have edges
+        assert g.has_edge("F0", "F1"), "Adjacent sentences should be connected"
+        assert g.has_edge("F1", "F2"), "dist=2 should be connected in v5"
+        assert g.has_edge("F0", "F2"), "dist=3 should be connected in v5"
+
+    def test_context_edge_weights_decay(self):
+        """v5: Context edge weights should decay with distance."""
+        cfg = GraphBuildConfig(two_edge_mode=True, ctx_max_sent_distance=6)
+        builder = KnowledgeGraphBuilder(cfg)
+        facts = [
+            RetrievedFact("Doc", 0, "First sentence.", 5.0),
+            RetrievedFact("Doc", 1, "Second sentence.", 4.0),
+            RetrievedFact("Doc", 3, "Fourth sentence.", 3.0),
+            RetrievedFact("Doc", 7, "Eighth sentence.", 2.0),  # dist=4 from F2
+        ]
+        g = builder.build_graph("test", facts)
+        # Adjacent (dist=1) → w=0.9
+        w_adj = g.edges["F0", "F1"]["w_ctx"]
+        # dist=2 → w=0.6
+        w_near = g.edges["F1", "F2"]["w_ctx"]
+        # dist=4 → w=0.3
+        w_far = g.edges["F2", "F3"]["w_ctx"]
+        assert w_adj > w_near > w_far, f"Weights should decay: {w_adj} > {w_near} > {w_far}"
+
+    def test_similarity_edges_use_tfidf(self):
+        """v5: Cross-title edges should fire on TF-IDF similarity even without entities."""
+        cfg = GraphBuildConfig(
+            two_edge_mode=True,
+            sim_alpha=0.6,
+            sim_beta=0.4,
+            sim_edge_threshold=0.1,  # low threshold to catch TF-IDF matches
+        )
+        builder = KnowledgeGraphBuilder(cfg)
+        # Two facts sharing vocabulary but NO named entities (all lowercase context)
+        facts = [
+            RetrievedFact("Doc A", 0, "the quantum theory of light and photons in vacuum", 5.0),
+            RetrievedFact("Doc B", 0, "the quantum theory of waves and light propagation", 4.0),
+        ]
+        g = builder.build_graph("quantum light", facts)
+        # Should have a similarity edge because of shared vocabulary
+        assert g.has_edge("F0", "F1"), "TF-IDF similar facts should be connected"
+        data = g.edges["F0", "F1"]
+        assert data.get("edge_type") == "similarity"
+        assert data.get("w_sim", 0) > 0
+
+    def test_backward_compat_no_two_edge(self):
+        """When two_edge_mode=False, graph should match legacy behavior."""
+        cfg_legacy = GraphBuildConfig(two_edge_mode=False, q_link_top_k=3)
+        cfg_v5_off = GraphBuildConfig(two_edge_mode=False, q_link_top_k=3)
+        builder_a = KnowledgeGraphBuilder(cfg_legacy)
+        builder_b = KnowledgeGraphBuilder(cfg_v5_off)
+        facts = _make_facts()
+        q = "Who influenced Einstein?"
+        g_a = builder_a.build_graph(q, facts)
+        g_b = builder_b.build_graph(q, facts)
+        assert set(g_a.edges()) == set(g_b.edges())
+
+    def test_edge_type_annotation(self):
+        """v5: Fact-to-fact edges should carry edge_type metadata."""
+        cfg = GraphBuildConfig(
+            two_edge_mode=True,
+            sim_edge_threshold=0.1,
+            q_link_top_k=3,
+        )
+        builder = KnowledgeGraphBuilder(cfg)
+        facts = _make_facts()
+        g = builder.build_graph("Who influenced Einstein?", facts)
+        for u, v, data in g.edges(data=True):
+            if u == "Q" or v == "Q":
+                continue  # Q edges don't have edge_type
+            assert "edge_type" in data, f"Edge ({u},{v}) missing edge_type"
+            assert data["edge_type"] in ("context", "similarity")

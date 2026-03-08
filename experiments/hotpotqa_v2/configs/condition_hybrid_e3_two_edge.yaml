@@ -1,0 +1,41 @@
+# Condition Hybrid-E3: Two-Edge Architecture (v5)
+#
+# Builds on Hybrid-E1 (fixed depth=2, proven optimal in v4) but adds:
+#   - Context attention edges (intra-title, distance-decay up to 6 sentences)
+#   - Similarity attention edges (cross-title, TF-IDF cosine + entity overlap)
+#   - Graph-guided context re-ranking for LLM prompt
+#
+# Key insight from v4: bottleneck is retrieval quality, not reasoning depth.
+# v5 focuses on improving what depth-2 CoT receives, not adding more steps.
+condition_name: condition_hybrid_e3_two_edge
+
+data_path: data/hotpotqa_distractor_dev.jsonl
+
+adapter:
+  structural_mode: betti_full
+  gamma_0: 0.3
+  gamma_1: 0.5
+  lambda_weight: 1.0
+  theta_ag: 0.4
+  theta_dg: -0.5
+  max_hops: 2
+  top_k: 5
+  max_expansions: 1
+  expansion_seeds: 2
+  tfidf_dim: 64
+  q_link_top_k: 3
+  entity_overlap_threshold: 0.3
+  llm_model: gpt-4o-mini
+  llm_temperature: 0.0
+  llm_max_tokens: 256
+  llm_retry_max: 3
+  # v3 Hybrid mode (fixed depth=2, proven optimal in v4)
+  hybrid_mode: true
+  max_cot_steps: 2
+  # v5 Two-Edge Architecture
+  two_edge_mode: true
+  rerank_alpha: 0.5
+  ctx_max_sent_distance: 6
+  sim_alpha: 0.6
+  sim_beta: 0.4
+  sim_edge_threshold: 0.25

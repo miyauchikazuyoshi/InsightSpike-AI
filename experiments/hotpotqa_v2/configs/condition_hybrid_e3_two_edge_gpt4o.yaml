@@ -1,0 +1,35 @@
+# Condition Hybrid-E3: Two-Edge Architecture (v5) — GPT-4o
+#
+# Same as condition_hybrid_e3_two_edge.yaml but with GPT-4o model.
+condition_name: condition_hybrid_e3_two_edge_gpt4o
+
+data_path: data/hotpotqa_distractor_dev.jsonl
+
+adapter:
+  structural_mode: betti_full
+  gamma_0: 0.3
+  gamma_1: 0.5
+  lambda_weight: 1.0
+  theta_ag: 0.4
+  theta_dg: -0.5
+  max_hops: 2
+  top_k: 5
+  max_expansions: 1
+  expansion_seeds: 2
+  tfidf_dim: 64
+  q_link_top_k: 3
+  entity_overlap_threshold: 0.3
+  llm_model: gpt-4o
+  llm_temperature: 0.0
+  llm_max_tokens: 256
+  llm_retry_max: 3
+  # v3 Hybrid mode (fixed depth=2, proven optimal in v4)
+  hybrid_mode: true
+  max_cot_steps: 2
+  # v5 Two-Edge Architecture
+  two_edge_mode: true
+  rerank_alpha: 0.5
+  ctx_max_sent_distance: 6
+  sim_alpha: 0.6
+  sim_beta: 0.4
+  sim_edge_threshold: 0.25
