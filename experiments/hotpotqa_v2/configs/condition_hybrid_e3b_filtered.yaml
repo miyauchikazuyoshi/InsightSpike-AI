@@ -1,0 +1,43 @@
+# Condition Hybrid-E3B: Two-Edge with Weighted Filtration (v6)
+#
+# Same as E3 (two_edge_mode + re-ranking) but adds betti_threshold=0.5.
+# Betti numbers are computed on subgraph with edge strength >= 0.5.
+# This keeps weak similarity edges for re-ranking but hides them from
+# the gauge, preventing topology collapse.
+#
+# Key change from E3: gauge sees only strong edges (strength >= 0.5),
+# while re-ranking still uses all edges.
+condition_name: condition_hybrid_e3b_filtered
+
+data_path: data/hotpotqa_distractor_dev.jsonl
+
+adapter:
+  structural_mode: betti_full
+  gamma_0: 0.3
+  gamma_1: 0.5
+  lambda_weight: 1.0
+  theta_ag: 0.4
+  theta_dg: -0.5
+  max_hops: 2
+  top_k: 5
+  max_expansions: 1
+  expansion_seeds: 2
+  tfidf_dim: 64
+  q_link_top_k: 3
+  entity_overlap_threshold: 0.3
+  llm_model: gpt-4o-mini
+  llm_temperature: 0.0
+  llm_max_tokens: 256
+  llm_retry_max: 3
+  # v3 Hybrid mode (fixed depth=2, proven optimal in v4)
+  hybrid_mode: true
+  max_cot_steps: 2
+  # v5 Two-Edge Architecture
+  two_edge_mode: true
+  rerank_alpha: 0.5
+  ctx_max_sent_distance: 6
+  sim_alpha: 0.6
+  sim_beta: 0.4
+  sim_edge_threshold: 0.25   # Keep low — filtration handles topology
+  # v6 Weighted Filtration
+  betti_threshold: 0.5       # Only edges with strength >= 0.5 count for Betti
