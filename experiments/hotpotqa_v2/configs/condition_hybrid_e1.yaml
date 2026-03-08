@@ -1,0 +1,34 @@
+# Condition Hybrid-E1: Tuned Betti + System 1/2 dual-process
+#
+# Combines:
+#   - E1 tuning (γ₁=0.5, γ₀=0.3, θ_dg=-0.5)
+#   - Hybrid mode (System 2 CoT when DG doesn't fire alone)
+#
+# Expected: DG fires ~50% → System 1 handles easy questions fast
+#           Other ~50% → System 2 CoT for harder multi-hop questions
+#           Avg LLM calls ≈ 2.0 (still 4x cheaper than IRCoT)
+condition_name: condition_hybrid_e1
+
+data_path: data/hotpotqa_distractor_dev.jsonl
+
+adapter:
+  structural_mode: betti_full
+  gamma_0: 0.3
+  gamma_1: 0.5
+  lambda_weight: 1.0
+  theta_ag: 0.4
+  theta_dg: -0.5
+  max_hops: 2
+  top_k: 5
+  max_expansions: 1
+  expansion_seeds: 2
+  tfidf_dim: 64
+  q_link_top_k: 3
+  entity_overlap_threshold: 0.3
+  llm_model: gpt-4o-mini
+  llm_temperature: 0.0
+  llm_max_tokens: 256
+  llm_retry_max: 3
+  # v3 Hybrid mode
+  hybrid_mode: true
+  max_cot_steps: 2

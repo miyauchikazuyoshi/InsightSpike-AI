@@ -48,6 +48,7 @@ It is not a production library.
 | Component | Status | Location |
 |-----------|--------|----------|
 | geDIG theory (v6 paper) | Pre-print available | [`docs/paper/`](docs/paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf) |
+| HotpotQA multi-hop QA (v3) | **11-method benchmark complete** | [`experiments/hotpotqa_v2/`](experiments/hotpotqa_v2/) |
 | Maze navigation (Phase 2) | Prototype complete | [`experiments/maze/`](experiments/maze/) |
 | Transformer F decomposition | Exploratory (8+ models) | [`experiments/transformer/`](experiments/transformer/inference_gedig_v2/) |
 | Flash-geDIG (attention scorer) | Functional | [`src/insightspike/gedig/`](src/insightspike/gedig/) |
@@ -89,9 +90,27 @@ Layer-by-layer measurement of $\Delta\text{EPC}$, $\Delta H$, and $\Delta\beta_1
 
 See [`experiments/transformer/inference_gedig_v2/`](experiments/transformer/inference_gedig_v2/) for experiment design and results.
 
+### HotpotQA Multi-Hop QA (v2/v3)
+
+geDIG applied to multi-hop question answering on HotpotQA (distractor setting, GPT-4o-mini). The v3 **dual-process architecture** uses Betti numbers as a cognitive routing signal — the gauge value F decides when to answer instantly (System 1) vs. reason step-by-step (System 2), inspired by Kahneman's dual-process theory.
+
+- **11 methods compared**: 4 geDIG conditions, 3 hybrid variants, 4 baselines (BM25, GraphRAG, IRCoT, ReAct)
+- **Key result**: Hybrid-E1 achieves **94% of IRCoT's F1 at 3.6x fewer LLM calls** — topology-guided routing with zero-cost gating
+- **System 2 boosts accuracy by +9.3pt EM** when triggered by topological uncertainty
+
+| Method | EM | F1 | LLM Calls | Routing |
+|--------|:---:|:---:|:---------:|---------|
+| IRCoT (Trivedi+ 2023) | 46.0% | 0.637 | ~8 | Always reason |
+| **geDIG Hybrid-E1** | **40.0%** | **0.600** | **~2.2** | **Topology-guided** |
+| Static GraphRAG | 43.0% | 0.589 | 1 | Always direct |
+| geDIG-B (best v2) | 40.0% | 0.570 | 1 | Always direct |
+| ReAct (Yao+ 2023) | 39.0% | 0.536 | ~7 | Always reason |
+
+See [`experiments/hotpotqa_v2/`](experiments/hotpotqa_v2/) for full experiment code and [`REPORT_v3_dual_process.md`](experiments/hotpotqa_v2/REPORT_v3_dual_process.md) for the detailed report.
+
 ### Earlier Experiments
 
-HotpotQA (multi-hop QA) and cross-domain analogy experiments were conducted in earlier phases and informed the theory. These have not been reproduced under the current codebase and are archived.
+Cross-domain analogy experiments were conducted in earlier phases and informed the theory. These have not been reproduced under the current codebase and are archived.
 
 ---
 
@@ -134,6 +153,18 @@ $$\mathcal{F} = E - TS \quad\longleftrightarrow\quad \mathcal{F} = \Delta\text{E
 > *The neurotransmitter correspondence is a computational analogy, not a physiological claim.*
 
 For formal definitions, see [`docs/gedig_spec.md`](docs/gedig_spec.md). For the full paper, see the [v6 pre-print (PDF)](docs/paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf).
+
+---
+
+## Applied Research: TSD-OCR
+
+geDIG's principle — *"don't make the network learn what can be solved"* — is validated in visual cognition through [TSD-OCR](https://github.com/miyauchikazuyoshi/vector-based-cnn-ocr): a character recognition pipeline that replaces Conv1 with differential geometry.
+
+- **19K parameters** outperform **11M-parameter** pixel CNNs in cross-domain transfer
+- Hand-designed V1 (curvature κ, orientation θ) + learned V2-V4 (CNN) mirrors the brain's evolutionary solution
+- The Splatting-Attention duality discovered in TSD-OCR maps directly to geDIG's AG/DG gates
+
+**→ [TSD-OCR Origin Story](https://github.com/miyauchikazuyoshi/vector-based-cnn-ocr/blob/main/docs/research/origin_story.md)** (JA/EN)
 
 ---
 

@@ -1,0 +1,30 @@
+# Condition E1: Tuned Betti weights + lowered DG threshold
+#
+# Key changes from B:
+#   gamma_1: 1.0 → 0.5  (suppress β₁ penalty, reduce DG early-fire 73%→~50%)
+#   gamma_0: 0.0 → 0.3  (restore β₀ island-merge bonus for Comparison type)
+#   theta_dg: 0.0 → -0.5 (harder DG threshold, push more into "neither" zone)
+#
+# "neither" zone had EM=46.2% in Cond-B (best gate pattern)
+condition_name: condition_e1_tuned
+
+data_path: data/hotpotqa_distractor_dev.jsonl
+
+adapter:
+  structural_mode: betti_full
+  gamma_0: 0.3
+  gamma_1: 0.5
+  lambda_weight: 1.0
+  theta_ag: 0.4
+  theta_dg: -0.5
+  max_hops: 2
+  top_k: 5
+  max_expansions: 1
+  expansion_seeds: 2
+  tfidf_dim: 64
+  q_link_top_k: 3
+  entity_overlap_threshold: 0.3
+  llm_model: gpt-4o-mini
+  llm_temperature: 0.0
+  llm_max_tokens: 256
+  llm_retry_max: 3

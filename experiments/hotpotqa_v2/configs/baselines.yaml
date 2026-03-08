@@ -1,0 +1,10 @@
+# Baseline configurations
+baselines:
+  bm25:
+    top_k: 5
+    model: gpt-4o-mini
+
+  graphrag:
+    top_k: 5
+    window: 1
+    model: gpt-4o-mini

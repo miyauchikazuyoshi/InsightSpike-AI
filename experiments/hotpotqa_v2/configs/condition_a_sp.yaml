@@ -1,0 +1,24 @@
+# Condition A: SP baseline (v1 reproduction)
+# structural_mode=sp → no Betti correction, F = raw geDIG
+condition_name: condition_a_sp
+
+data_path: data/hotpotqa_distractor_dev.jsonl
+
+adapter:
+  structural_mode: sp
+  gamma_0: 0.0
+  gamma_1: 0.0
+  lambda_weight: 1.0
+  theta_ag: 0.4
+  theta_dg: 0.0
+  max_hops: 2
+  top_k: 5
+  max_expansions: 1
+  expansion_seeds: 2
+  tfidf_dim: 64
+  q_link_top_k: 3
+  entity_overlap_threshold: 0.3
+  llm_model: gpt-4o-mini
+  llm_temperature: 0.0
+  llm_max_tokens: 256
+  llm_retry_max: 3

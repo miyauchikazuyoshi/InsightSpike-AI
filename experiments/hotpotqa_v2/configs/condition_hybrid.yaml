@@ -1,0 +1,32 @@
+# Condition Hybrid: geDIG + CoT dual-process (System 1/2)
+#
+# System 1 (DG fires alone): Direct answer from initial retrieval (1 LLM call)
+# System 2 (otherwise):      CoT reasoning with BM25 retrieval (2-3 LLM calls)
+#
+# Base: Condition B (beta_1 only) — best geDIG condition from v2
+# Added: hybrid_mode=true, max_cot_steps=2
+condition_name: condition_hybrid
+
+data_path: data/hotpotqa_distractor_dev.jsonl
+
+adapter:
+  structural_mode: betti
+  gamma_0: 0.0
+  gamma_1: 1.0
+  lambda_weight: 1.0
+  theta_ag: 0.4
+  theta_dg: 0.0
+  max_hops: 2
+  top_k: 5
+  max_expansions: 1
+  expansion_seeds: 2
+  tfidf_dim: 64
+  q_link_top_k: 3
+  entity_overlap_threshold: 0.3
+  llm_model: gpt-4o-mini
+  llm_temperature: 0.0
+  llm_max_tokens: 256
+  llm_retry_max: 3
+  # v3 Hybrid mode
+  hybrid_mode: true
+  max_cot_steps: 2

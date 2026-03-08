@@ -1,0 +1,9 @@
+# Dataset files (large, downloaded via script)
+data/
+
+# Experiment results (generated, contains API outputs)
+results/
+
+# Python cache
+__pycache__/
+*.pyc
