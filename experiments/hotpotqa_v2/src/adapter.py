@@ -330,6 +330,36 @@ Next reasoning sentence:"""
         r"(?:the\s+)?answer\s+is[:\s]+(.+?)(?:\.|$)", re.IGNORECASE
     )
 
+    # Dedicated extraction prompt for System 2 final answer (v3.1)
+    _EXTRACT_PROMPT = """\
+Based on the context and reasoning below, answer the question.
+Give ONLY the answer — the shortest possible entity name or phrase.
+Do NOT explain. Do NOT add articles (a/an/the). Do NOT add periods.
+
+Context:
+{context}
+
+Reasoning: {reasoning}
+
+Question: {question}
+
+Answer (shortest form, e.g., "Paris" not "The city of Paris"):"""
+
+    @staticmethod
+    def _clean_answer(answer: str) -> str:
+        """Post-process answer to remove common LLM decorations."""
+        if not answer:
+            return answer
+        # Strip surrounding whitespace and quotes
+        answer = answer.strip().strip('"').strip("'").strip()
+        # Remove trailing period / sentence-enders
+        answer = answer.rstrip(".!,;:")
+        # Remove leading articles for short answers (< 5 words)
+        words = answer.split()
+        if len(words) <= 5 and words and words[0].lower() in ("a", "an", "the"):
+            answer = " ".join(words[1:])
+        return answer.strip()
+
     def _cot_fallback(
         self,
         question: str,
@@ -367,7 +397,7 @@ Next reasoning sentence:"""
             # Check if answer found
             match = self._ANSWER_RE.search(next_sentence)
             if match:
-                answer = match.group(1).strip().rstrip(".")
+                answer = self._clean_answer(match.group(1))
                 break
 
             # Use the CoT sentence as a new BM25 query
@@ -380,12 +410,21 @@ Next reasoning sentence:"""
                     if key not in collected and len(collected) < 15:
                         collected[key] = f.text
 
-        # If no answer extracted from CoT, generate final answer
+        # If no answer extracted from CoT, use dedicated extraction prompt
         if answer is None:
-            all_context = list(collected.values())
-            if cot_sentences:
-                all_context.append("Reasoning: " + " ".join(cot_sentences))
-            answer = self.answerer.generate(question, all_context)
+            context_str = "\n".join(
+                f"- {text}" for text in collected.values()
+            )
+            reasoning_str = " ".join(cot_sentences) if cot_sentences else ""
+            extract_prompt = self._EXTRACT_PROMPT.format(
+                context=context_str,
+                reasoning=reasoning_str,
+                question=question,
+            )
+            answer = self.answerer._llm_call_raw(extract_prompt, max_tokens=50)
+
+        # Clean answer: strip trailing periods, quotes, leading articles
+        answer = self._clean_answer(answer)
 
         return answer, len(cot_sentences)
 

@@ -94,14 +94,14 @@ See [`experiments/transformer/inference_gedig_v2/`](experiments/transformer/infe
 
 geDIG applied to multi-hop question answering on HotpotQA (distractor setting, GPT-4o-mini). The v3 **dual-process architecture** uses Betti numbers as a cognitive routing signal — the gauge value F decides when to answer instantly (System 1) vs. reason step-by-step (System 2), inspired by Kahneman's dual-process theory.
 
-- **11 methods compared**: 4 geDIG conditions, 3 hybrid variants, 4 baselines (BM25, GraphRAG, IRCoT, ReAct)
-- **Key result**: Hybrid-E1 achieves **94% of IRCoT's F1 at 3.6x fewer LLM calls** — topology-guided routing with zero-cost gating
-- **System 2 boosts accuracy by +9.3pt EM** when triggered by topological uncertainty
+- **12 methods compared**: 4 geDIG conditions, 4 hybrid variants, 4 baselines (BM25, GraphRAG, IRCoT, ReAct)
+- **Key result**: Hybrid-E1 v3.1 **surpasses IRCoT on EM (+2pt) at 3.6x fewer LLM calls** — topology-guided routing with zero-cost gating
+- **System 2 EM = 58.1%** when triggered by topological uncertainty (vs. System 1's 31.6%)
 
 | Method | EM | F1 | LLM Calls | Routing |
 |--------|:---:|:---:|:---------:|---------|
+| **geDIG Hybrid-E1 v3.1** | **48.0%** | **0.622** | **~2.2** | **Topology-guided** |
 | IRCoT (Trivedi+ 2023) | 46.0% | 0.637 | ~8 | Always reason |
-| **geDIG Hybrid-E1** | **40.0%** | **0.600** | **~2.2** | **Topology-guided** |
 | Static GraphRAG | 43.0% | 0.589 | 1 | Always direct |
 | geDIG-B (best v2) | 40.0% | 0.570 | 1 | Always direct |
 | ReAct (Yao+ 2023) | 39.0% | 0.536 | ~7 | Always reason |

@@ -2,12 +2,12 @@
 
 ## Key Result
 
-**Hybrid-E1** (topology-guided System 1/System 2 switching) achieves **94% of IRCoT's quality at 3.6x fewer LLM calls**:
+**Hybrid-E1 v3.1** (topology-guided System 1/System 2 switching) **surpasses IRCoT on EM at 3.6x fewer LLM calls**:
 
 | Method | EM | F1 | LLM Calls | Latency | Routing |
 |--------|:---:|:---:|:---------:|:-------:|---------|
+| **Hybrid-E1 v3.1** | **48.0%** | **0.622** | **~2.2** | **1.7s** | **Topology-guided** |
 | IRCoT | 46.0% | 0.637 | ~8 | 3.0s | Always reason |
-| **Hybrid-E1** | **40.0%** | **0.600** | **~2.2** | **1.7s** | **Topology-guided** |
 | GraphRAG | 43.0% | 0.589 | 1 | 0.7s | Always direct |
 | geDIG-B | 40.0% | 0.570 | 1 | 0.8s | Always direct |
 
@@ -56,16 +56,18 @@ Question → BM25 Retrieval → Build Knowledge Graph → Compute F (topology)
 
 | Rank | Method | Category | EM | F1 | LLM Calls |
 |:----:|--------|----------|:---:|:---:|:---------:|
-| 1 | IRCoT | Dynamic RAG | **46.0%** | **0.637** | ~8 |
-| 2 | **Hybrid-E1** | geDIG+CoT | 40.0% | 0.600 | ~2.2 |
+| 1 | **Hybrid-E1 v3.1** | **geDIG+CoT** | **48.0%** | **0.622** | **~2.2** |
+| 2 | IRCoT | Dynamic RAG | 46.0% | 0.637 | ~8 |
 | 3 | GraphRAG | Static RAG | 43.0% | 0.589 | 1 |
-| 4 | Hybrid(B) | geDIG+CoT | 39.0% | 0.572 | ~1.5 |
+| 4 | Hybrid-E1 v3.0 | geDIG+CoT | 40.0% | 0.600 | ~2.2 |
 | 5 | geDIG-B | geDIG | 40.0% | 0.570 | 1 |
-| 6 | E1-tuned | geDIG | 38.0% | 0.553 | 1 |
-| 7 | geDIG-C | geDIG | 38.0% | 0.553 | 1 |
-| 8 | geDIG-A | geDIG | 37.0% | 0.545 | 1 |
-| 9 | geDIG-D | geDIG | 37.0% | 0.544 | 1 |
-| 10 | BM25 | Baseline | 37.0% | 0.536 | 1 |
+| 6 | Hybrid(B) | geDIG+CoT | 39.0% | 0.572 | ~1.5 |
+| 7 | ReAct | Dynamic RAG | 39.0% | 0.536 | ~7 |
+| 8 | E1-tuned | geDIG | 38.0% | 0.553 | 1 |
+| 9 | geDIG-C | geDIG | 38.0% | 0.553 | 1 |
+| 10 | geDIG-A | geDIG | 37.0% | 0.545 | 1 |
+| 11 | geDIG-D | geDIG | 37.0% | 0.544 | 1 |
+| 12 | BM25 | Baseline | 37.0% | 0.536 | 1 |
 | 11 | ReAct | Dynamic RAG | 39.0% | 0.536 | ~7 |
 
 ---
