@@ -102,8 +102,8 @@ def _split_into_sentences(text: str) -> list[str]:
         else:
             sentences.append(s)
 
-    # Cap at ~50 sentences per article to keep context manageable
-    return sentences[:50]
+    # Cap at 150 sentences per article (increased from 50 for FRAMES)
+    return sentences[:150]
 
 
 def convert_frames_to_hotpotqa(
