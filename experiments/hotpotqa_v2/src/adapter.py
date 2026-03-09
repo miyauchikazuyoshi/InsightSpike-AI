@@ -193,6 +193,8 @@ class GeDIGv2Adapter:
         sim_edge_threshold: float = 0.25,
         # Weighted filtration (v6) params
         betti_threshold: float = 0.0,
+        # Query decomposition (v7) params
+        query_decomposition: bool = False,
     ):
         self.structural_mode = structural_mode
         self.gamma_0 = gamma_0
@@ -214,6 +216,8 @@ class GeDIGv2Adapter:
         self.rerank_alpha = rerank_alpha
         # v6: Weighted Filtration — Betti on strong edges only
         self.betti_threshold = betti_threshold
+        # v7: Query Decomposition — LLM splits question into sub-queries
+        self.query_decomposition = query_decomposition
 
         # GeDIGCore (main codebase)
         self.gedig_core = GeDIGCore(
@@ -324,6 +328,38 @@ class GeDIGv2Adapter:
 
         except Exception:
             return 0.0, 0.0, False, True, None
+
+    # ------------------------------------------------------------------ #
+    # v7: Query Decomposition — LLM-based sub-query generation
+    # ------------------------------------------------------------------ #
+
+    _DECOMPOSE_PROMPT = """\
+Break down this complex question into 2-4 simple sub-questions that can each be answered independently.
+Each sub-question should target a specific fact needed to answer the main question.
+
+Question: {question}
+
+Output ONLY the sub-questions, one per line, numbered 1-4. No explanations."""
+
+    def _decompose_query(self, question: str) -> list[str]:
+        """Use LLM to decompose a complex question into sub-queries."""
+        prompt = self._DECOMPOSE_PROMPT.format(question=question)
+
+        try:
+            answer = self.answerer._call_llm(prompt)
+        except Exception:
+            return [question]
+
+        sub_queries = []
+        for line in answer.strip().split("\n"):
+            line = line.strip()
+            # Remove numbering (1. or 1) or - )
+            cleaned = re.sub(r"^[\d]+[.)]\s*", "", line).strip()
+            cleaned = re.sub(r"^[-*]\s*", "", cleaned).strip()
+            if cleaned and len(cleaned) > 10:
+                sub_queries.append(cleaned)
+
+        return sub_queries[:4] if sub_queries else [question]
 
     # ------------------------------------------------------------------ #
     # Expansion query builder
@@ -608,10 +644,16 @@ Answer (shortest form, e.g., "Paris" not "The city of Paris"):"""
             example.question, idf_map, doc_count
         )
 
-        # --- Step 1: Initial retrieval ---
-        retrieved = self.retriever.retrieve(
-            example.question, corpus, bm25, self.top_k
-        )
+        # --- Step 1: Initial retrieval (with optional query decomposition) ---
+        if self.query_decomposition:
+            sub_queries = self._decompose_query(example.question)
+            retrieved = self.retriever.retrieve_multi_query(
+                [example.question] + sub_queries, corpus, bm25, self.top_k
+            )
+        else:
+            retrieved = self.retriever.retrieve(
+                example.question, corpus, bm25, self.top_k
+            )
 
         # --- Step 2: Build initial graphs ---
         g_prev = self.graph_builder.build_empty_graph(

@@ -122,6 +122,8 @@ def main() -> None:
         sim_edge_threshold=adapter_cfg.get("sim_edge_threshold", 0.25),
         # v6 Weighted Filtration
         betti_threshold=adapter_cfg.get("betti_threshold", 0.0),
+        # v7 Query Decomposition
+        query_decomposition=adapter_cfg.get("query_decomposition", False),
     )
 
     # Evaluator
@@ -139,7 +141,9 @@ def main() -> None:
              f" (rerank_alpha={adapter.rerank_alpha})"
              if adapter.two_edge_mode else "")
           + (f", betti_threshold={adapter.betti_threshold}"
-             if adapter.betti_threshold > 0.0 else ""))
+             if adapter.betti_threshold > 0.0 else "")
+          + (f", query_decomposition=True"
+             if adapter.query_decomposition else ""))
     print(f"[run] Output: {output_dir}")
 
     total = len(examples)
