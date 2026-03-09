@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from experiments.hotpotqa_v2.src.graph_builder import (
     GraphBuildConfig,
     KnowledgeGraphBuilder,
+    compute_edge_dg_scores,
 )
 from experiments.hotpotqa_v2.src.retriever import RetrievedFact
 
@@ -242,3 +243,96 @@ class TestTwoEdgeArchitecture:
                 continue  # Q edges don't have edge_type
             assert "edge_type" in data, f"Edge ({u},{v}) missing edge_type"
             assert data["edge_type"] in ("context", "similarity")
+
+
+class TestEdgeDGScore:
+    """Phase 1: Tests for compute_edge_dg_scores() structural importance."""
+
+    def test_bridge_gets_negative_dg_score(self):
+        """Bridge edges should get dg_score = -1.0 (structurally important)."""
+        # Linear chain: F0 - F1 - F2 (F1 is a bridge node, both edges are bridges)
+        g = nx.Graph()
+        g.add_node("Q", type="question")
+        g.add_node("F0", type="fact")
+        g.add_node("F1", type="fact")
+        g.add_node("F2", type="fact")
+        g.add_edge("Q", "F0", weight=0.9)
+        g.add_edge("F0", "F1", weight=0.8)
+        g.add_edge("F1", "F2", weight=0.6)
+
+        stats = compute_edge_dg_scores(g)
+        assert stats["dg_bridge_edges"] == 2, "Linear chain should have 2 bridges"
+
+        # Both fact-fact edges should have dg_score = -1.0
+        for u, v, data in g.edges(data=True):
+            if u == "Q" or v == "Q":
+                continue
+            assert data.get("dg_score") == -1.0, (
+                f"Bridge edge ({u},{v}) should have dg_score=-1.0"
+            )
+
+    def test_cycle_gets_positive_dg_score(self):
+        """Cycle edges should get dg_score = +1.0 (potentially noisy)."""
+        # Build a complete triangle: 3 nodes, 3 edges → 1 cycle
+        g = nx.Graph()
+        g.add_node("Q", type="question")
+        g.add_node("F0", type="fact")
+        g.add_node("F1", type="fact")
+        g.add_node("F2", type="fact")
+        g.add_edge("Q", "F0", weight=0.9)
+        g.add_edge("F0", "F1", weight=0.8)
+        g.add_edge("F1", "F2", weight=0.6)
+        g.add_edge("F0", "F2", weight=0.5)  # creates a cycle F0-F1-F2
+
+        stats = compute_edge_dg_scores(g)
+        assert stats["dg_cycle_edges"] > 0, "Triangle should have cycle edges"
+
+        # All fact-fact edges in a triangle are cycle edges (no bridges in a cycle)
+        for u, v, data in g.edges(data=True):
+            if u == "Q" or v == "Q":
+                continue
+            assert data.get("dg_score") == 1.0, (
+                f"Edge ({u},{v}) in triangle should be cycle (dg_score=+1.0)"
+            )
+
+    def test_q_edges_excluded(self):
+        """Q edges should NOT have dg_score attribute."""
+        builder = KnowledgeGraphBuilder()
+        facts = _make_facts()
+        g = builder.build_graph("test", facts)
+        compute_edge_dg_scores(g)
+
+        for u, v, data in g.edges(data=True):
+            if u == "Q" or v == "Q":
+                assert "dg_score" not in data, (
+                    f"Q edge ({u},{v}) should not have dg_score"
+                )
+
+    def test_empty_graph_returns_zeros(self):
+        """Graph with no fact-fact edges should return zero stats."""
+        g = nx.Graph()
+        g.add_node("Q", type="question")
+        g.add_node("F0", type="fact")
+        g.add_edge("Q", "F0", weight=0.9)
+
+        stats = compute_edge_dg_scores(g)
+        assert stats["dg_bridge_edges"] == 0
+        assert stats["dg_cycle_edges"] == 0
+        assert stats["dg_score_mean"] == 0.0
+
+    def test_dg_score_mean_correct(self):
+        """dg_score_mean should be (-bridges + cycles) / total."""
+        # Linear chain: F0-F1-F2 → 2 bridges, 0 cycles → mean = -1.0
+        g = nx.Graph()
+        g.add_node("Q", type="question")
+        g.add_node("F0", type="fact")
+        g.add_node("F1", type="fact")
+        g.add_node("F2", type="fact")
+        g.add_edge("Q", "F0", weight=0.9)
+        g.add_edge("F0", "F1", weight=0.8)
+        g.add_edge("F1", "F2", weight=0.6)
+
+        stats = compute_edge_dg_scores(g)
+        assert stats["dg_bridge_edges"] == 2
+        assert stats["dg_cycle_edges"] == 0
+        assert stats["dg_score_mean"] == -1.0

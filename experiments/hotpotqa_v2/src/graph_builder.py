@@ -31,6 +31,58 @@ from .retriever import RetrievedFact
 
 _TOKEN_RE = re.compile(r"[a-z0-9']+")
 
+
+# ---------------------------------------------------------------------- #
+# Phase 1: Edge structural importance (dg_score)
+# ---------------------------------------------------------------------- #
+
+
+def compute_edge_dg_scores(g: nx.Graph) -> dict:
+    """Compute per-edge structural importance and write ``dg_score`` attribute.
+
+    For each fact-to-fact edge (Q edges excluded):
+    - **Bridge** (removing it disconnects the graph): ``dg_score = -1.0``
+      → structurally critical, analogous to maze ``dg_attention < 0``.
+    - **Cycle edge** (part of a cycle): ``dg_score = +1.0``
+      → potentially noisy, removing it only reduces β₁.
+
+    This aligns with the gauge formula: bridge edges contribute to −Δβ₀
+    (good), cycle edges contribute to +Δβ₁ (bad).
+
+    Returns a summary dict with counts and mean for metadata logging.
+    """
+    # Subgraph of fact nodes only (exclude Q)
+    fact_nodes = [n for n in g.nodes if n != "Q"]
+    sub = g.subgraph(fact_nodes)
+
+    if sub.number_of_edges() == 0:
+        return {"dg_bridge_edges": 0, "dg_cycle_edges": 0, "dg_score_mean": 0.0}
+
+    # Find bridges: O(V + E) via chain decomposition
+    bridge_set = set(frozenset(e) for e in nx.bridges(sub))
+
+    bridge_count = 0
+    cycle_count = 0
+
+    for u, v in sub.edges():
+        is_bridge = frozenset((u, v)) in bridge_set
+        dg_score = -1.0 if is_bridge else 1.0
+        # Write to the original graph (sub is a view)
+        g[u][v]["dg_score"] = dg_score
+        if is_bridge:
+            bridge_count += 1
+        else:
+            cycle_count += 1
+
+    total = bridge_count + cycle_count
+    mean = (-bridge_count + cycle_count) / total if total > 0 else 0.0
+
+    return {
+        "dg_bridge_edges": bridge_count,
+        "dg_cycle_edges": cycle_count,
+        "dg_score_mean": round(mean, 4),
+    }
+
 # Simple named-entity proxy: capitalized word sequences
 _NE_RE = re.compile(r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b")
 

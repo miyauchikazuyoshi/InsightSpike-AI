@@ -79,6 +79,7 @@ from .answerer import LLMAnswerer      # noqa: E402
 from .graph_builder import (           # noqa: E402
     GraphBuildConfig,
     KnowledgeGraphBuilder,
+    compute_edge_dg_scores,
 )
 from .retriever import BM25Retriever, RetrievedFact  # noqa: E402
 
@@ -663,6 +664,9 @@ Answer (shortest form, e.g., "Paris" not "The city of Paris"):"""
             )
             g_now = g_expanded
 
+        # --- Step 4b: Compute per-edge dg_score (Phase 1 diagnostic) ---
+        dg_stats = compute_edge_dg_scores(g_now)
+
         # --- Step 5: Generate answer (System 1 / System 2 switch) ---
         context_limit = min(len(retrieved), self.top_k * (expansions + 1))
         if self.two_edge_mode:
@@ -744,6 +748,10 @@ Answer (shortest form, e.g., "Paris" not "The city of Paris"):"""
                     1 for _, _, d in g_now.edges(data=True)
                     if d.get("edge_type") == "similarity"
                 ) if self.two_edge_mode else 0,
+                # Phase 1: edge structural importance
+                "dg_bridge_edges": dg_stats.get("dg_bridge_edges", 0),
+                "dg_cycle_edges": dg_stats.get("dg_cycle_edges", 0),
+                "dg_score_mean": dg_stats.get("dg_score_mean", 0.0),
             },
         )
 
