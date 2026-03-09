@@ -198,6 +198,10 @@ def main() -> None:
                     "two_edge_mode": adapter.two_edge_mode,
                     "ctx_edges": result.metadata.get("ctx_edges", 0),
                     "sim_edges": result.metadata.get("sim_edges", 0),
+                    # Phase 1: edge structural importance
+                    "dg_bridge_edges": result.metadata.get("dg_bridge_edges", 0),
+                    "dg_cycle_edges": result.metadata.get("dg_cycle_edges", 0),
+                    "dg_score_mean": result.metadata.get("dg_score_mean", 0.0),
                     "latency_ms": result.latency_ms,
                 }
                 fout.write(json.dumps(record, ensure_ascii=False) + "\n")
