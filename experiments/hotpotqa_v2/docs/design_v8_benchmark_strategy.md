@@ -46,25 +46,42 @@ geDIGの gauge が価値を発揮する条件:
 
 | ベンチマーク | Distractor | 情報存在 | Hops | SF注釈 | Shortcut困難 | サイズ | geDIG適合度 |
 |------------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **MuSiQue-Full** | ✅ 20段落 | ✅ | 2-4 | ✅ | **✅** (設計上) | ~50K | **S** |
+| **IIRC** | △ (部分) | △ (部分欠損) | 1-3 | ✅ | ✅ | 13K | **S** |
 | **HotpotQA (distractor)** | ✅ 8段落 | ✅ | 2 | ✅ | △ | 7,405 | **A** |
-| **MuSiQue** | ✅ 20段落 | ✅ | 2-4 | ✅ | **✅** (設計上) | 2,417 | **S** |
-| **2WikiMultiHopQA** | ✅ | ✅ | 2-5 | ✅ | △ | 12,576 | **A** |
-| HoVer | ✅ | ✅ | 2-4 | ✅ | △ | 4,000 | B |
-| IIRC | △ (部分) | △ (要検索) | 1-3 | ✅ | ✅ | 1,300 | B+ |
+| **2WikiMultiHopQA** | ✅ | ✅ | 2-5 | ✅ KB triple | △ (cheatable) | 192K | **A-** |
+| HoVer | ✅ | ✅ | 2-4 | ✅ | △ | 26K | B+ |
+| CRAG (Meta) | △ | ✅ | mixed | △ | ✅ | 4,409 | B |
+| FanOutQA | △ | △ | fan-out | ❌ | ✅ | 1,000 | B- |
+| MultiHop-RAG | △ | ✅ | 2-4 | ✅ | △ | 2,556 | B- |
 | FRAMES | ❌ | ❌ (BM25限界) | 2-11 | ❌ | ✅ | 824 | **D** |
 | Bamboogle | ❌ (open) | ❌ (要検索) | 2 | ❌ | ✅ | 125 | D |
-| FanOutQA | △ | △ | fan-out | ❌ | ✅ | 1,000 | C |
 
-### 最優先: MuSiQue
+### Tier 1: MuSiQue + IIRC（geDIGの2つの強みに直対応）
 
-理由:
+#### MuSiQue — β₀による「接続性推論」のテスト
+
+geDIGのβ₀（連結成分）が直接テストされる:
 - **20段落のdistractor設定** → geDIGのβ₀フィルタリングが最大限活きる
 - **2-4 hops** → graph connectivity分析が不可欠
 - **Shortcut困難**: 設計上、disconnected reasoning（1段落だけ読んで答える）でF1が30pt低下
   - HotpotQA: shortcutでF1=68.8 → MuSiQue: shortcutでF1=37.8
-- **SF注釈あり** → 検索精度を定量評価
+  - single-paragraph baseline: HotpotQA F1=65 → MuSiQue F1=32 (半減)
+  - human-machine gap: HotpotQAの3倍
+- **MuSiQue-Fullにはunanswerable variants** → 推論チェーンの断絶を検出するテスト
+  → β₀が「情報が繋がっていない」ことを検出 → unanswerable判定
+- **SF注釈あり** (sub-question decomposition + answer spans + supporting paragraphs)
 - HuggingFace + GitHubで入手容易（StonyBrookNLP/musique）
 - HotpotQAと同じJSONL形式に変換容易
+
+#### IIRC — β₀による「情報充足性検出」のテスト
+
+geDIGのもう一つの強み「情報が足りているかの判定」に直対応:
+- **部分情報 → 欠損検出 → 追加検索** という3段階タスク
+- **30%がunanswerable** → 全情報を集めても答えられない場合を検出
+- baseline F1=31.1% vs human=88.4% → 巨大なgap (geDIGの入る余地)
+- 「β₀ > 1 → 情報断絶あり → 追加検索」のフロー検証に最適
+- geDIG-guided Iterative Retrievalの最初のテスト場
 
 ---
 
@@ -164,3 +181,31 @@ gauge信号は「情報が足りない」ことを検出するが、それを解
 
 **学び**: FRAMESはretrieval品質テスト。geDIGの土壌ではない。
 geDIGの強みは「情報がある中での構造分析」であり、MuSiQueのdistractor設定が最適。
+
+---
+
+## 6. ベンチマーク・ギャップ: geDIGが埋められる空白
+
+調査の結果、**「evidence graphのトポロジー分析」を直接評価するベンチマークは存在しない**。
+
+既存のベンチマークが測るもの:
+- 検索品質（BM25/embedding精度）
+- 回答生成品質（EM/F1）
+- 推論チェーン（supporting facts F1）
+
+測られていないもの:
+- **connected components検出**: 情報グラフの断絶を認識できるか
+- **bridge edge識別**: 推論に不可欠なエッジを特定できるか
+- **情報充足性判定**: いつ「もう十分」と判断するか
+- **トポロジー変化追跡**: 追加情報がグラフ構造をどう変えるか
+
+→ **geDIGの論文でこのギャップ自体を指摘し、MuSiQue-Full + IIRCで近似評価する**のが戦略。
+
+### 関連するフレームワーク
+
+- **Self-RAG** (ICLR 2024 Oral): retrieval/critique tokenでLLMが検索要否を判断
+  → geDIGとの違い: Self-RAGはLLM依存、geDIGはトポロジー依存
+- **RetrievalQA** (ACL Findings 2024): LLMが「検索すべきか」を判断するテスト (1,271問)
+- **BRIGHT** (ICLR 2025): 推論が必要な検索。best MTEB model = 18.0 nDCG@10 (通常59.0)
+  → 検索自体に構造推論が必要なタスク。geDIGの応用可能性
+- **CRAG** (Meta, KDD Cup 2024): false-premise question → β₁（サイクル）で矛盾検出
