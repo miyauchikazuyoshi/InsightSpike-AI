@@ -195,6 +195,9 @@ class GeDIGv2Adapter:
         betti_threshold: float = 0.0,
         # Query decomposition (v7) params
         query_decomposition: bool = False,
+        # Component Gap Query (v8) params
+        component_gap_query: bool = False,
+        max_gap_iterations: int = 2,
     ):
         self.structural_mode = structural_mode
         self.gamma_0 = gamma_0
@@ -218,6 +221,9 @@ class GeDIGv2Adapter:
         self.betti_threshold = betti_threshold
         # v7: Query Decomposition — LLM splits question into sub-queries
         self.query_decomposition = query_decomposition
+        # v8: Component Gap Query — β₀-driven iterative bridging
+        self.component_gap_query = component_gap_query
+        self.max_gap_iterations = max_gap_iterations
 
         # GeDIGCore (main codebase)
         self.gedig_core = GeDIGCore(
@@ -360,6 +366,130 @@ Output ONLY the sub-questions, one per line, numbered 1-4. No explanations."""
                 sub_queries.append(cleaned)
 
         return sub_queries[:4] if sub_queries else [question]
+
+    # ------------------------------------------------------------------ #
+    # v8: Component Gap Query — β₀-driven iterative bridging
+    # ------------------------------------------------------------------ #
+
+    _BRIDGE_PROMPT = """\
+Two groups of facts are disconnected. Identify the missing link.
+
+Group A (about "{topic_a}"):
+{facts_a}
+
+Group B (about "{topic_b}"):
+{facts_b}
+
+Question: {question}
+
+What entity or concept connects Group A and Group B for this question?
+Write a short search query (5-15 words) to find the bridging information."""
+
+    def _component_gap_retrieval(
+        self,
+        question: str,
+        g_now: nx.Graph,
+        retrieved: list[RetrievedFact],
+        corpus: list,
+        bm25: object,
+        idf_map: dict,
+        doc_count: int,
+        query_vector: list[float] | None,
+    ) -> tuple[nx.Graph, list[RetrievedFact], int]:
+        """Phase B: β₀-driven iterative retrieval to bridge disconnected components.
+
+        When β₀_after > 1 (multiple connected components), identify the gap
+        between components and generate targeted queries to bridge them.
+
+        Returns (updated_graph, updated_retrieved, gap_iterations_done).
+        """
+        gap_iters = 0
+
+        for _ in range(self.max_gap_iterations):
+            # Compute β₀ on current graph (exclude Q node for component analysis)
+            fact_nodes = [n for n in g_now.nodes() if n != "Q"]
+            if len(fact_nodes) < 2:
+                break
+
+            fact_subgraph = g_now.subgraph(fact_nodes)
+            components = list(nx.connected_components(fact_subgraph))
+
+            if len(components) <= 1:
+                break  # graph is connected — no gap
+
+            gap_iters += 1
+
+            # Sort by size, get two largest components
+            components.sort(key=len, reverse=True)
+            comp_a = components[0]
+            comp_b = components[1]
+
+            # Extract representative text from each component
+            def _component_summary(comp_nodes: set) -> tuple[str, str]:
+                titles = set()
+                texts = []
+                for node in sorted(comp_nodes):
+                    data = g_now.nodes[node]
+                    title = data.get("title", "")
+                    text = data.get("text", "")
+                    if title:
+                        titles.add(title)
+                    if text:
+                        texts.append(text[:100])
+                main_title = next(iter(titles)) if titles else "unknown"
+                snippet = " | ".join(texts[:3])
+                return main_title, snippet
+
+            topic_a, facts_a = _component_summary(comp_a)
+            topic_b, facts_b = _component_summary(comp_b)
+
+            # Generate bridge query via LLM
+            bridge_prompt = self._BRIDGE_PROMPT.format(
+                topic_a=topic_a,
+                facts_a=facts_a,
+                topic_b=topic_b,
+                facts_b=facts_b,
+                question=question,
+            )
+
+            try:
+                bridge_query = self.answerer._llm_call_raw(bridge_prompt, max_tokens=50)
+                # Clean: take first line only, strip quotes
+                bridge_query = bridge_query.strip().split("\n")[0].strip('"').strip("'")
+            except Exception:
+                bridge_query = f"{topic_a} {topic_b}"
+
+            # Retrieve with bridge query (search all available paragraphs)
+            bridge_facts = self.retriever.retrieve(
+                bridge_query, corpus, bm25, self.top_k * 2
+            )
+
+            # Also try direct title combination query
+            title_query = f"{topic_a} {topic_b} {question}"
+            title_facts = self.retriever.retrieve(
+                title_query, corpus, bm25, self.top_k
+            )
+
+            # Merge new facts into retrieved list
+            merged_map: dict[tuple[str, int], RetrievedFact] = {}
+            for f in list(retrieved) + bridge_facts + title_facts:
+                key = (f.title, f.sent_id)
+                if key not in merged_map or f.score > merged_map[key].score:
+                    merged_map[key] = f
+            new_retrieved = sorted(merged_map.values(), key=lambda f: -f.score)
+
+            if len(new_retrieved) == len(retrieved):
+                break  # no new facts found
+
+            retrieved = new_retrieved
+
+            # Rebuild graph with expanded facts
+            context_limit = min(len(retrieved), self.top_k * (gap_iters + 1) + self.top_k)
+            g_now = self.graph_builder.build_graph(
+                question, retrieved[:context_limit], idf_map, doc_count
+            )
+
+        return g_now, retrieved, gap_iters
 
     # ------------------------------------------------------------------ #
     # Expansion query builder
@@ -706,11 +836,24 @@ Answer (shortest form, e.g., "Paris" not "The city of Paris"):"""
             )
             g_now = g_expanded
 
-        # --- Step 4b: Compute per-edge dg_score (Phase 1 diagnostic) ---
+        # --- Step 4b: Component Gap Query (v8) ---
+        gap_iters = 0
+        if self.component_gap_query:
+            g_now, retrieved, gap_iters = self._component_gap_retrieval(
+                example.question, g_now, retrieved,
+                corpus, bm25, idf_map, doc_count, query_vector,
+            )
+            # Re-calculate gauge after gap retrieval
+            if gap_iters > 0:
+                ext_f, gmin, ag_fired, dg_fired, core_result = self._calculate_gedig(
+                    g_prev, g_now, query_vector=query_vector
+                )
+
+        # --- Step 4c: Compute per-edge dg_score (Phase 1 diagnostic) ---
         dg_stats = compute_edge_dg_scores(g_now)
 
         # --- Step 5: Generate answer (System 1 / System 2 switch) ---
-        context_limit = min(len(retrieved), self.top_k * (expansions + 1))
+        context_limit = min(len(retrieved), self.top_k * (expansions + gap_iters + 1))
         if self.two_edge_mode:
             reranked = self._rerank_by_graph(g_now, retrieved, context_limit)
             context_texts = [f.text for f in reranked]
@@ -794,6 +937,9 @@ Answer (shortest form, e.g., "Paris" not "The city of Paris"):"""
                 "dg_bridge_edges": dg_stats.get("dg_bridge_edges", 0),
                 "dg_cycle_edges": dg_stats.get("dg_cycle_edges", 0),
                 "dg_score_mean": dg_stats.get("dg_score_mean", 0.0),
+                # v8: Component Gap Query diagnostics
+                "component_gap_query": self.component_gap_query,
+                "gap_iterations": gap_iters,
             },
         )
 

@@ -124,6 +124,9 @@ def main() -> None:
         betti_threshold=adapter_cfg.get("betti_threshold", 0.0),
         # v7 Query Decomposition
         query_decomposition=adapter_cfg.get("query_decomposition", False),
+        # v8 Component Gap Query
+        component_gap_query=adapter_cfg.get("component_gap_query", False),
+        max_gap_iterations=adapter_cfg.get("max_gap_iterations", 2),
     )
 
     # Evaluator
@@ -143,7 +146,9 @@ def main() -> None:
           + (f", betti_threshold={adapter.betti_threshold}"
              if adapter.betti_threshold > 0.0 else "")
           + (f", query_decomposition=True"
-             if adapter.query_decomposition else ""))
+             if adapter.query_decomposition else "")
+          + (f", component_gap_query=True (max_iters={adapter.max_gap_iterations})"
+             if adapter.component_gap_query else ""))
     print(f"[run] Output: {output_dir}")
 
     total = len(examples)
@@ -206,6 +211,8 @@ def main() -> None:
                     "dg_bridge_edges": result.metadata.get("dg_bridge_edges", 0),
                     "dg_cycle_edges": result.metadata.get("dg_cycle_edges", 0),
                     "dg_score_mean": result.metadata.get("dg_score_mean", 0.0),
+                    # v8: Component Gap Query
+                    "gap_iterations": result.metadata.get("gap_iterations", 0),
                     "latency_ms": result.latency_ms,
                 }
                 fout.write(json.dumps(record, ensure_ascii=False) + "\n")
