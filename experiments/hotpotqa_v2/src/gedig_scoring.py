@@ -587,8 +587,15 @@ class GeDIGDocScorer:
             except Exception:
                 sp_from_query = {}
 
-        doc_scores: dict[str, float] = {}
+        # --- Pass 1: Collect raw components for all documents ---
+        raw_components: list[tuple[str, float, float, float]] = []
+        # (doc_id, local_gedig, mp_relevance, sp_proximity)
+        skip_docs: set[str] = set()
         diagnostics: dict[str, dict] = {}
+
+        D_feat = node_features_after.shape[1] if node_features_after.ndim == 2 else 0
+        D_q = qv.shape[1]
+        min_d = min(D_feat, D_q) if D_feat > 0 else 0
 
         for title in titles:
             doc_id = doc_id_map.get(title, title)
@@ -604,7 +611,7 @@ class GeDIGDocScorer:
             ]
 
             if not doc_nodes_before and not doc_nodes_after:
-                doc_scores[doc_id] = 0.0
+                skip_docs.add(doc_id)
                 continue
 
             # --- Component 1: Local geDIG ---
@@ -617,10 +624,7 @@ class GeDIGDocScorer:
 
             # --- Component 2: Message-passing relevance ---
             mp_relevance = 0.0
-            if doc_nodes_after:
-                D_feat = node_features_after.shape[1]
-                D_q = qv.shape[1]
-                min_d = min(D_feat, D_q)
+            if doc_nodes_after and min_d > 0:
                 mp_sims = []
                 for n in doc_nodes_after:
                     idx = node_to_idx_after.get(n)
@@ -644,20 +648,59 @@ class GeDIGDocScorer:
                 if min_sp < float("inf"):
                     sp_proximity = 1.0 / (1.0 + min_sp)
 
-            # --- Combined score ---
-            # Negative geDIG = high information integration = relevant
-            # mp_relevance and sp_proximity are [0, 1]
-            score = -local_gedig + mp_relevance + sp_proximity
+            raw_components.append((doc_id, local_gedig, mp_relevance, sp_proximity))
 
+        # --- Pass 2: Per-component min-max normalization ---
+        doc_scores: dict[str, float] = {}
+
+        if not raw_components:
+            for doc_id in skip_docs:
+                doc_scores[doc_id] = 0.0
+            return doc_scores, diagnostics
+
+        gedig_vals = [-c[1] for c in raw_components]   # negate: higher = better
+        mp_vals = [c[2] for c in raw_components]
+        sp_vals = [c[3] for c in raw_components]
+
+        def _minmax(vals: list[float]) -> list[float]:
+            """Normalize to [0, 1] with min-max scaling."""
+            lo, hi = min(vals), max(vals)
+            rng = hi - lo
+            if rng < 1e-10:
+                return [0.5] * len(vals)
+            return [(v - lo) / rng for v in vals]
+
+        gedig_norm = _minmax(gedig_vals)
+        mp_norm = _minmax(mp_vals)
+        sp_norm = _minmax(sp_vals)
+
+        # Component weights (tunable)
+        w_gedig = 0.35
+        w_mp = 0.40
+        w_sp = 0.25
+
+        for i, (doc_id, local_gedig, mp_relevance, sp_proximity) in enumerate(raw_components):
+            score = (
+                w_gedig * gedig_norm[i]
+                + w_mp * mp_norm[i]
+                + w_sp * sp_norm[i]
+            )
             doc_scores[doc_id] = score
             diagnostics[doc_id] = {
                 "local_gedig": round(local_gedig, 4),
+                "gedig_norm": round(gedig_norm[i], 4),
                 "mp_relevance": round(mp_relevance, 4),
+                "mp_norm": round(mp_norm[i], 4),
                 "sp_proximity": round(sp_proximity, 4),
+                "sp_norm": round(sp_norm[i], 4),
                 "raw_score": round(score, 4),
             }
 
-        # Normalize to [0, 1]
+        # Skipped docs get score 0
+        for doc_id in skip_docs:
+            doc_scores[doc_id] = 0.0
+
+        # Final normalization to [0, 1]
         if doc_scores:
             max_s = max(doc_scores.values())
             min_s = min(doc_scores.values())
