@@ -135,9 +135,10 @@ def main():
     parser.add_argument("--gedig-k-target", type=int, default=4,
                         help="Query episode cross-edge target count")
     # geDIG scoring parameters (Spec H)
-    parser.add_argument("--scoring-mode", choices=["classic", "gedig"],
+    parser.add_argument("--scoring-mode", choices=["classic", "gedig", "gedig_refine"],
                         default="classic",
-                        help="Scoring method: classic (5-component) or gedig (geDIG-based)")
+                        help="Scoring method: classic (5-component), gedig (geDIG-based), "
+                             "or gedig_refine (geDIG graph refinement + classic scoring)")
     parser.add_argument("--gedig-scoring-lambda", type=float, default=1.0,
                         help="geDIG scoring lambda weight (GED vs IG balance)")
     parser.add_argument("--gedig-scoring-sp-beta", type=float, default=0.5,
