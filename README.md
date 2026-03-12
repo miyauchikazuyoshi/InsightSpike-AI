@@ -49,6 +49,8 @@ It is not a production library.
 |-----------|--------|----------|
 | geDIG theory (v6 paper) | Pre-print available | [`docs/paper/`](docs/paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf) |
 | HotpotQA multi-hop QA (v3) | **11-method benchmark complete** | [`experiments/hotpotqa_v2/`](experiments/hotpotqa_v2/) |
+| MuSiQue entity-graph reorder (v10) | **500q 完了 — 有意差なし、知見確立** | [`experiments/hotpotqa_v2/docs/report_v10_entity_graph.md`](experiments/hotpotqa_v2/docs/report_v10_entity_graph.md) |
+| MuSiQue Pre-computed Topology Routing (v11) | **Phase 1 実験準備中** | [`experiments/hotpotqa_v2/docs/experiment_design_v11.md`](experiments/hotpotqa_v2/docs/experiment_design_v11.md) |
 | Maze navigation (Phase 2) | Prototype complete | [`experiments/maze/`](experiments/maze/) |
 | Transformer F decomposition | Exploratory (8+ models) | [`experiments/transformer/`](experiments/transformer/inference_gedig_v2/) |
 | Flash-geDIG (attention scorer) | Functional | [`src/insightspike/gedig/`](src/insightspike/gedig/) |
@@ -90,11 +92,40 @@ Layer-by-layer measurement of $\Delta\text{EPC}$, $\Delta H$, and $\Delta\beta_1
 
 See [`experiments/transformer/inference_gedig_v2/`](experiments/transformer/inference_gedig_v2/) for experiment design and results.
 
-### HotpotQA Multi-Hop QA (v2/v3)
+### Multi-Hop QA
+
+Two independent experiment lines targeting multi-hop question answering:
+
+#### v10: Entity-Graph Paragraph Reordering (MuSiQue) — Latest
+
+Entity-graph からの推論チェーンでパラグラフを並べ替え、LLM の注意力を暗黙的に誘導する試み。
+**500q フルランで統計的に有意な改善は確認できず** (+1.2pt, p>0.05)。
+ただし「guided テキストは GPT-4o に害」「暗黙的誘導 > 明示的指示」等の再利用可能な知見を確立。
+
+| 条件 | EM (500q) | 備考 |
+|------|-----------|------|
+| Baseline A (全20パラ + CoT) | 47.4% | ref |
+| v10d reorder_only | 48.6% | +1.2pt (有意でない) |
+
+根本原因: 20パラ (~2,500 tokens) は GPT-4o ウィンドウの 2% で、"Lost in the Middle" が発生しない。
+エラーの 45% は推論の誤り (distractor entity 選択) であり、パラ位置の問題ではない。
+
+See [`experiments/hotpotqa_v2/docs/report_v10_entity_graph.md`](experiments/hotpotqa_v2/docs/report_v10_entity_graph.md) for the full report.
+
+#### v11: Pre-computed Topology Routing (MuSiQue) — Current
+
+v10 と v2/v3 の知見を統合: コンテキストを 50 パラ (~6,000 tok) に拡大し、
+事前構築グラフからのサブグラフ抽出 + F 値ルーティング (System 1/2) で性能劣化を回復する試み。
+
+- **Offline**: 全パラから sentence-level 三層グラフを事前構築
+- **Online**: クエリからサブグラフ抽出 -> F 値 -> System 1 (サブグラフのみ) / System 2 (全パラ)
+
+See [`experiments/hotpotqa_v2/docs/experiment_design_v11.md`](experiments/hotpotqa_v2/docs/experiment_design_v11.md) for the experiment design.
+
+#### v2/v3: geDIG Dual-Process Architecture (HotpotQA)
 
 geDIG applied to multi-hop question answering on HotpotQA (distractor setting). The v3 **dual-process architecture** uses Betti numbers as a cognitive routing signal — the gauge value F decides when to answer instantly (System 1) vs. reason step-by-step (System 2), inspired by Kahneman's dual-process theory.
 
-- **Multi-scale evaluation**: 100q pilot, **500q with statistical significance**, full dev set (running)
 - **Model-dependent interaction**: On GPT-4o, Hybrid-E1 **leads IRCoT (EM 51.2% vs 47.6%) at 3.6x fewer LLM calls**
 - **Scaling property**: Topology-guided routing improves with model capability (+6pt from mini→4o vs -3pt for IRCoT)
 

@@ -55,6 +55,10 @@ archive/
 # Private research notes (pre-publication)
 docs/research/thinking/_private/
 
+# Sensitive patent drafts
+docs/patent/
+docs/patent/**
+
 # Misc
 .coverage
 .DS_Store

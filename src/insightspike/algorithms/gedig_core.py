@@ -33,6 +33,7 @@ from .gedig.graph_utils import (
     extract_features,
     filter_features,
     compute_ged_min_proxy,
+    compute_betti_0,
     compute_betti_1,
 )
 from .gedig.monitor import GeDIGMonitor
@@ -299,6 +300,11 @@ class GeDIGCore:
         g1 = ensure_networkx(g_prev)
         g2 = ensure_networkx(g_now)
 
+        # β₀ (zeroth Betti number: connected components)
+        _b0_before = compute_betti_0(g1)
+        _b0_after = compute_betti_0(g2)
+        _delta_b0 = _b0_after - _b0_before
+
         # β₁ (first Betti number)
         _b1_before = compute_betti_1(g1)
         _b1_after = compute_betti_1(g2)
@@ -405,6 +411,10 @@ class GeDIGCore:
                 ged_calculator=self._calculate_normalized_ged,
                 ig_calculator=self._calculate_entropy_variance_ig,
             )
+            # β₀ post-fill for multihop path
+            result.betti_0_before = _b0_before
+            result.betti_0_after = _b0_after
+            result.delta_betti_0 = _delta_b0
             # β₁ post-fill for multihop path
             result.betti_1_before = _b1_before
             result.betti_1_after = _b1_after
@@ -475,6 +485,7 @@ class GeDIGCore:
                 ig_delta=float(ig_result.get('delta_entropy', 0.0)),
                 ig_den=float(ig_result.get('normalization_den', ig_fixed_den if ig_fixed_den is not None else 1.0)),
                 variance_reduction=float(ig_result.get('variance_reduction', 0.0)),
+                betti_0=_b0_after,
                 betti_1=_b1_after,
             )
             result = GeDIGResult(
@@ -499,6 +510,9 @@ class GeDIGCore:
                 version="onegauge_v1",
                 hop_results={0: hop0},
                 ged_min_proxy=ged_min_proxy,
+                betti_0_before=_b0_before,
+                betti_0_after=_b0_after,
+                delta_betti_0=_delta_b0,
                 betti_1_before=_b1_before,
                 betti_1_after=_b1_after,
                 delta_betti_1=_delta_b1,

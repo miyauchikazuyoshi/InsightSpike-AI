@@ -8,10 +8,11 @@
 > ここで言う「演繹的」は、**明示された目的（F）と制約から“良い構造”を決める**、という意味での *operational* な演繹です。  
 > 厳密な全球最適証明というより、局所探索＋コミット（AG/DG）で近似します。
 
-関連:  
-- 読み物側の直感: `docs/research/gedig_origin_story.md`  
-- Phase 2 の制御メタファ: `docs/research/phase2/phase2_offline_appendix_ja_en.md`  
+関連:
+- 読み物側の直感: `docs/research/gedig_origin_story.md`
+- Phase 2 の制御メタファ: `docs/research/phase2/phase2_offline_appendix_ja_en.md`
 - エピソード自律設計: `docs/design/episode_memory_autodesign.md`
+- **実験的検証（視覚処理）**: [vector-based-cnn-ocr](https://github.com/miyauchikazuyoshi/vector-based-cnn-ocr) — §9 参照
 
 ---
 
@@ -144,4 +145,55 @@ geDIG 的に “最適” を言うなら、次のような定義が扱いやす
 - 表現（ベクトル）まで自律化すると、geDIG は **表現学習の教師信号生成器**になりうる  
 
 この立て付けで書くと、「演繹的に最適なNNを目指す」という主張が、実装とログ（検証可能性）に繋がります。
+
+---
+
+## 9. 実験的検証: 視覚処理における geDIG 原理の実証
+
+> **外部プロジェクト**: [vector-based-cnn-ocr](https://github.com/miyauchikazuyoshi/vector-based-cnn-ocr)
+> 詳細: `docs/notes/theory/nn_as_hypothesis_testing_apparatus_20260228.md`
+
+文字認識（Font→手書き cross-domain transfer）において、geDIG の原理が
+具体的に検証されている。標準 CNN が数百万パラメータで行う処理を、
+微分幾何で「構造を先に与える」ことで 18K パラメータに圧縮。
+
+### 9.1 geDIG 概念と実験結果の対応
+
+| geDIG 概念 | OCR プロジェクトでの実現 | 実験結果 |
+|-----------|----------------------|---------|
+| **§1 構造 first** | κ, θ フロー場を手設計で CNN に与える | 18K params で 73.53% (標準 CNN の数百万 params 相当) |
+| **§3 Wake-Sleep** | skeleton→Sleep→contour→Sleep→DANN カリキュラム | Round 2 で検証予定 |
+| **§4 正例/負例** | skeleton flow (正例) / skeleton error (負例) | error_map で +0.50pt |
+| **§5 固定ベクトル** | κ, θ を手設計で固定 → CNN は分類だけ | 「構造の発見コスト」を解析的に除去 |
+| **AG ゲート** | error_map (「テンプレートと違う、探索せよ」) | 11ch, +0.50pt |
+| **DG ゲート** | β₀β₁ side channel (「位相は確定、コミット」) | 2ch, +0.51pt (AG の 5 倍効率) |
+
+### 9.2 DG > AG の効率性
+
+β₀β₁ side channel (DG 的: 確定した位相情報) が error_map (AG 的: 探索的偏差情報) の
+**5 倍の情報効率** (0.26 pt/ch vs 0.05 pt/ch) を持つ。
+
+これは geDIG の設計原理と整合する:
+- DG はコミット（確定した構造）→ 圧縮された確定情報は効率的
+- AG は探索（未確定の方向）→ 拡散した探索情報は冗長性を含む
+
+### 9.3 BN = 暗黙的 predictive coding (AG 精度の破壊)
+
+BatchNorm が error_map の信号を吸収する現象が発見された:
+- BN あり: error_map で +0.50pt
+- BN なし: error_map で +0.75pt (+0.25pt 差)
+
+geDIG 的解釈: BN は暗黙的な「予測→偏差」計算を行っており、
+明示的な error_map (AG 信号) と干渉する。BN の variance normalization が
+AG の precision (「**どこが**曖昧か」の空間的精度) を破壊する。
+
+### 9.4 含意
+
+このプロジェクトは §5 の「ベクトルを固定手設計にする」側の実験であり、
+geDIG の原理が視覚処理ドメインで実験的に支持されることを示す。
+
+特に重要な知見:
+- **構造を先に与えれば、パラメータは桁違いに減る** (§1 の直接的証拠)
+- **DG 的信号は AG 的信号より効率的** (AG/DG 分離の設計的正しさ)
+- **暗黙的な正規化は明示的な構造信号と干渉する** (明示性の価値)
 
