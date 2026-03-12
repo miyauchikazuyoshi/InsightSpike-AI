@@ -47,6 +47,7 @@ class HopResult:
     ig_delta: float = 0.0
     ig_den: float = 1.0
     variance_reduction: float = 0.0
+    betti_0: int = 0
     betti_1: int = 0
 
     @property
@@ -109,6 +110,9 @@ class GeDIGResult:
     spike: bool = False
     linkset_metrics: Optional[LinksetMetrics] = None
     ged_min_proxy: float = 0.0
+    betti_0_before: int = 0
+    betti_0_after: int = 0
+    delta_betti_0: int = 0
     betti_1_before: int = 0
     betti_1_after: int = 0
     delta_betti_1: int = 0
