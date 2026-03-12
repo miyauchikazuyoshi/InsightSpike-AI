@@ -536,6 +536,16 @@ class BrightCoTPipeline:
             n_edges_removed = gedig_diag.get("n_edges_removed", 0)
             mp_iterations_run = gedig_diag.get("mp_iterations_run", 0)
             avg_gedig_local = gedig_diag.get("avg_gedig_local", 0.0)
+        elif self.scoring_mode == "gedig_refine":
+            # Use geDIG to refine graph structure, then classic scoring
+            graph_scores, gedig_diag = self._compute_gedig_refine_scores(
+                query, cot_text, all_cot_concepts, graph,
+                titles, sentences_list, doc_id_map
+            )
+            n_edges_discovered = gedig_diag.get("n_edges_discovered", 0)
+            n_edges_removed = gedig_diag.get("n_edges_removed", 0)
+            mp_iterations_run = gedig_diag.get("mp_iterations_run", 0)
+            avg_gedig_local = gedig_diag.get("avg_gedig_local", 0.0)
         else:
             graph_scores = self._compute_graph_scores(
                 query, cot_text, all_cot_concepts, graph,
@@ -998,7 +1008,7 @@ class BrightCoTPipeline:
             sim_thresh, new_thresh,
         )
 
-        # 6. Per-document scoring
+        # 6. Per-document scoring (geDIG: structural + message passing + SP)
         doc_scores, doc_diagnostics = scorer.score_documents(
             graph_before=graph_before,
             graph_after=graph_after,
@@ -1008,6 +1018,56 @@ class BrightCoTPipeline:
             titles=titles,
             doc_id_map=doc_id_map,
         )
+
+        # 7. CoT bridge bonus — docs connected to CoT nodes get a boost.
+        #    This is the most important signal from classic scoring (effective
+        #    weight 0.50 of the 1.25 total).  geDIG's message passing propagates
+        #    query relevance but doesn't explicitly track CoT connections.
+        cot_node_set = {
+            n for n in graph_after.nodes()
+            if graph_after.nodes[n].get("title") == "cot"
+        }
+        cot_bridge_scores: dict[str, float] = {}
+        for title in titles:
+            doc_id = doc_id_map.get(title, title)
+            doc_nodes = [
+                n for n in graph_after.nodes()
+                if graph_after.nodes[n].get("title") == title
+            ]
+            if not doc_nodes or not cot_node_set:
+                cot_bridge_scores[doc_id] = 0.0
+                continue
+            cot_count = sum(
+                1 for dn in doc_nodes
+                for nb in graph_after.neighbors(dn)
+                if nb in cot_node_set
+            )
+            cot_bridge_scores[doc_id] = min(
+                cot_count / max(len(cot_node_set), 1), 1.0
+            )
+
+        # Blend geDIG structural scores with CoT bridge signal
+        # w_struct: weight for geDIG structural score (mp + gedig + sp)
+        # w_cot: weight for CoT bridge bonus
+        w_struct = 0.55
+        w_cot = 0.45
+
+        blended: dict[str, float] = {}
+        for doc_id in doc_scores:
+            blended[doc_id] = (
+                w_struct * doc_scores[doc_id]
+                + w_cot * cot_bridge_scores.get(doc_id, 0.0) * self.cot_weight
+            )
+
+        # Normalize blended scores to [0, 1]
+        if blended:
+            max_b = max(blended.values())
+            min_b = min(blended.values())
+            rng_b = max_b - min_b
+            if rng_b > 1e-10:
+                blended = {k: (v - min_b) / rng_b for k, v in blended.items()}
+            elif max_b > 0:
+                blended = {k: v / max_b for k, v in blended.items()}
 
         # Compute average local geDIG for diagnostics
         local_gedigs = [
@@ -1022,7 +1082,103 @@ class BrightCoTPipeline:
             "avg_gedig_local": round(avg_local, 4),
         }
 
-        return doc_scores, diagnostics
+        return blended, diagnostics
+
+    def _compute_gedig_refine_scores(
+        self,
+        query: str,
+        cot_text: str,
+        cot_concepts: set[str],
+        graph: nx.Graph,
+        titles: list[str],
+        sentences_list: list[list[str]],
+        doc_id_map: dict[str, str],
+    ) -> tuple[dict[str, float], dict]:
+        """geDIG graph refinement + classic scoring (Spec H gedig_refine).
+
+        Uses geDIG message passing and edge reevaluation to REFINE the graph
+        structure, then applies the classic 5-component scoring formula to the
+        refined graph.  This is the "best of both worlds" approach:
+        - geDIG organizes the graph (discovers new edges, removes weak ones)
+        - Classic scoring (PageRank, entity, token, degree, CoT bridge) provides
+          well-calibrated document scores on the improved graph.
+        """
+        import numpy as np
+        import logging
+        from gedig_scoring import MessagePassingNX, EdgeReevaluatorNX, GeDIGDocScorer
+        from entity_graph import compute_node_tfidf_features
+
+        _log = logging.getLogger(__name__)
+
+        if graph.number_of_nodes() < 3:
+            scores = self._compute_graph_scores(
+                query, cot_text, cot_concepts, graph,
+                titles, sentences_list, doc_id_map,
+            )
+            return scores, {"fallback": True}
+
+        # 1. TF-IDF features
+        features, vectorizer = compute_node_tfidf_features(graph, max_features=500)
+
+        # 2. Query vector
+        query_combined = query + " " + cot_text
+        query_vec = vectorizer.transform([query_combined])[0].astype(np.float32)
+
+        # 3. Inject query node (needed for message passing)
+        scorer = GeDIGDocScorer(
+            lambda_weight=self.gedig_scoring_lambda,
+            sp_beta=self.gedig_scoring_sp_beta,
+            k_hop=self.gedig_scoring_k_hop,
+        )
+        graph_q, features_q, _ = scorer.inject_query_node(
+            graph, features, query_vec, cot_concepts
+        )
+
+        # 4. Message passing
+        mp = MessagePassingNX(
+            alpha=self.gedig_scoring_mp_alpha,
+            iterations=self.gedig_scoring_mp_iterations,
+        )
+        features_after = mp.forward(graph_q, features_q, query_vec)
+
+        # 5. Adaptive edge reevaluation
+        from sklearn.metrics.pairwise import cosine_similarity as _cos_sim
+        pairwise = _cos_sim(features_after)
+        upper_tri = pairwise[np.triu_indices_from(pairwise, k=1)]
+        if len(upper_tri) > 0:
+            sim_thresh = max(float(np.percentile(upper_tri, 50)), 0.01)
+            new_thresh = max(float(np.percentile(upper_tri, 95)), sim_thresh + 0.01)
+        else:
+            sim_thresh, new_thresh = 0.05, 0.15
+
+        er = EdgeReevaluatorNX(
+            similarity_threshold=sim_thresh,
+            new_edge_threshold=new_thresh,
+            max_new_edges_per_node=5,
+        )
+        refined_graph, n_discovered, n_removed = er.reevaluate(
+            graph_q, features_after, query_vec
+        )
+
+        _log.debug(
+            "geDIG refine: edges discovered=%d removed=%d",
+            n_discovered, n_removed,
+        )
+
+        # 6. Apply classic 5-component scoring to the REFINED graph
+        graph_scores = self._compute_graph_scores(
+            query, cot_text, cot_concepts, refined_graph,
+            titles, sentences_list, doc_id_map,
+        )
+
+        diagnostics = {
+            "n_edges_discovered": n_discovered,
+            "n_edges_removed": n_removed,
+            "mp_iterations_run": self.gedig_scoring_mp_iterations,
+            "avg_gedig_local": 0.0,
+        }
+
+        return graph_scores, diagnostics
 
 
     # ── LLM Listwise Reranking ──────────────────────────────────
