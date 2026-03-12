@@ -95,6 +95,14 @@ class BrightCoTResult(BrightResult):
     n_doc_episodes: int = 0
     n_query_episodes: int = 0
     n_episode_cross_edges: int = 0
+    # geDIG scoring fields (Spec H)
+    scoring_mode: str = "classic"
+    gedig_scoring_lambda: float = 0.0
+    gedig_scoring_sp_beta: float = 0.0
+    n_edges_discovered: int = 0
+    n_edges_removed: int = 0
+    mp_iterations_run: int = 0
+    avg_gedig_local: float = 0.0
 
 
 # ---------------------------------------------------------------------------
@@ -154,6 +162,13 @@ class BrightCoTPipeline:
         gedig_router=None,
         episode_index=None,
         episode_graph_builder=None,
+        # geDIG scoring parameters (Spec H)
+        scoring_mode: str = "classic",  # "classic" | "gedig"
+        gedig_scoring_lambda: float = 1.0,
+        gedig_scoring_sp_beta: float = 0.5,
+        gedig_scoring_k_hop: int = 2,
+        gedig_scoring_mp_iterations: int = 2,
+        gedig_scoring_mp_alpha: float = 0.3,
     ):
         self.llm = LLMAnswerer(model=model, temperature=0.0, max_tokens=300)
         self.initial_top_k = initial_top_k
@@ -184,6 +199,13 @@ class BrightCoTPipeline:
         self.gedig_router = gedig_router
         self.episode_index = episode_index
         self.episode_graph_builder = episode_graph_builder
+        # geDIG scoring (Spec H)
+        self.scoring_mode = scoring_mode
+        self.gedig_scoring_lambda = gedig_scoring_lambda
+        self.gedig_scoring_sp_beta = gedig_scoring_sp_beta
+        self.gedig_scoring_k_hop = gedig_scoring_k_hop
+        self.gedig_scoring_mp_iterations = gedig_scoring_mp_iterations
+        self.gedig_scoring_mp_alpha = gedig_scoring_mp_alpha
 
     def rerank(
         self,
@@ -435,6 +457,23 @@ class BrightCoTPipeline:
                     sents = _split_sentences(content, max_sentences=30)
                     if not sents:
                         sents = [content[:500]]
+            # Spec G: hybrid = sentence split + episode texts
+            elif self.graph_mode == "hybrid" and self.episode_index is not None:
+                sents = _split_sentences(content, max_sentences=30)
+                if not sents:
+                    sents = [content[:500]]
+                # Augment with episode texts
+                doc_eps_list = self.episode_index.get_doc_episodes(
+                    self.dense_domain, [doc["id"]]
+                )
+                ep_texts = [
+                    ep.text for ep in doc_eps_list[0].episodes if ep.text
+                ]
+                # Cap total nodes per doc to avoid explosion
+                max_total = 30
+                if len(sents) + len(ep_texts) > max_total:
+                    ep_texts = ep_texts[:max(max_total - len(sents), 3)]
+                sents = sents + ep_texts
             else:
                 sents = _split_sentences(content, max_sentences=30)
                 if not sents:
@@ -483,10 +522,25 @@ class BrightCoTPipeline:
             beta_0, beta_1 = 0, 0
 
         # ── Phase 5: Graph scoring with CoT boost ────────────────
-        graph_scores = self._compute_graph_scores(
-            query, cot_text, all_cot_concepts, graph,
-            titles, sentences_list, doc_id_map
-        )
+        n_edges_discovered = 0
+        n_edges_removed = 0
+        mp_iterations_run = 0
+        avg_gedig_local = 0.0
+
+        if self.scoring_mode == "gedig":
+            graph_scores, gedig_diag = self._compute_gedig_scores(
+                query, cot_text, all_cot_concepts, graph,
+                titles, sentences_list, doc_id_map
+            )
+            n_edges_discovered = gedig_diag.get("n_edges_discovered", 0)
+            n_edges_removed = gedig_diag.get("n_edges_removed", 0)
+            mp_iterations_run = gedig_diag.get("mp_iterations_run", 0)
+            avg_gedig_local = gedig_diag.get("avg_gedig_local", 0.0)
+        else:
+            graph_scores = self._compute_graph_scores(
+                query, cot_text, all_cot_concepts, graph,
+                titles, sentences_list, doc_id_map
+            )
 
         # ── Phase 6: Combined ranking ────────────────────────────
         # Score all candidates in merged pool
@@ -567,6 +621,14 @@ class BrightCoTPipeline:
             n_doc_episodes=n_doc_episodes,
             n_query_episodes=n_query_episodes,
             n_episode_cross_edges=n_episode_cross_edges,
+            # geDIG scoring (Spec H)
+            scoring_mode=self.scoring_mode,
+            gedig_scoring_lambda=self.gedig_scoring_lambda,
+            gedig_scoring_sp_beta=self.gedig_scoring_sp_beta,
+            n_edges_discovered=n_edges_discovered,
+            n_edges_removed=n_edges_removed,
+            mp_iterations_run=mp_iterations_run,
+            avg_gedig_local=avg_gedig_local,
         )
 
     def _compute_pre_beta0(
@@ -830,6 +892,137 @@ class BrightCoTPipeline:
                 doc_scores = {k: v / max_gs for k, v in doc_scores.items()}
 
         return doc_scores
+
+    def _compute_gedig_scores(
+        self,
+        query: str,
+        cot_text: str,
+        cot_concepts: set[str],
+        graph: nx.Graph,
+        titles: list[str],
+        sentences_list: list[list[str]],
+        doc_id_map: dict[str, str],
+    ) -> tuple[dict[str, float], dict]:
+        """geDIG-based document scoring (Spec H).
+
+        Flow:
+          1. Compute TF-IDF node features
+          2. Inject query node
+          3. Message passing (propagate query relevance)
+          4. Edge reevaluation (discover/remove edges)
+          5. Per-document local geDIG scoring
+
+        Returns:
+            (doc_scores, diagnostics) where doc_scores is {doc_id: score}
+            normalized to [0, 1].
+        """
+        import numpy as np
+        import logging
+        from gedig_scoring import MessagePassingNX, EdgeReevaluatorNX, GeDIGDocScorer
+        from entity_graph import compute_node_tfidf_features
+
+        _log = logging.getLogger(__name__)
+
+        # Edge case: tiny graph
+        if graph.number_of_nodes() < 3:
+            _log.debug("geDIG scoring: graph too small (%d nodes), "
+                       "falling back to classic.", graph.number_of_nodes())
+            scores = self._compute_graph_scores(
+                query, cot_text, cot_concepts, graph,
+                titles, sentences_list, doc_id_map,
+            )
+            return scores, {"fallback": True}
+
+        # 1. TF-IDF features
+        features_before, vectorizer = compute_node_tfidf_features(
+            graph, max_features=500
+        )
+
+        # 2. Query vector in same TF-IDF space
+        query_combined = query + " " + cot_text
+        query_vec = vectorizer.transform([query_combined])[0].astype(np.float32)
+
+        # Save graph state before modifications
+        graph_before = graph.copy()
+        features_before_copy = features_before.copy()
+
+        # 3. Inject query node
+        scorer = GeDIGDocScorer(
+            lambda_weight=self.gedig_scoring_lambda,
+            sp_beta=self.gedig_scoring_sp_beta,
+            k_hop=self.gedig_scoring_k_hop,
+        )
+        graph_with_query, features_with_query, query_node_id = (
+            scorer.inject_query_node(
+                graph, features_before, query_vec, cot_concepts
+            )
+        )
+
+        # 4. Message passing
+        mp = MessagePassingNX(
+            alpha=self.gedig_scoring_mp_alpha,
+            iterations=self.gedig_scoring_mp_iterations,
+        )
+        features_after = mp.forward(
+            graph_with_query, features_with_query, query_vec
+        )
+
+        # 5. Edge reevaluation (adaptive thresholds for TF-IDF features)
+        # TF-IDF cosine sims are much lower than dense embeddings (mean~0.05
+        # vs ~0.5), so we compute percentile-based thresholds from the data.
+        from sklearn.metrics.pairwise import cosine_similarity as _cos_sim
+        pairwise = _cos_sim(features_after)
+        upper_tri = pairwise[np.triu_indices_from(pairwise, k=1)]
+        if len(upper_tri) > 0:
+            sim_thresh = float(np.percentile(upper_tri, 50))   # retain top 50%
+            new_thresh = float(np.percentile(upper_tri, 95))   # discover top 5%
+            # Ensure minimum thresholds
+            sim_thresh = max(sim_thresh, 0.01)
+            new_thresh = max(new_thresh, sim_thresh + 0.01)
+        else:
+            sim_thresh, new_thresh = 0.05, 0.15
+
+        er = EdgeReevaluatorNX(
+            similarity_threshold=sim_thresh,
+            new_edge_threshold=new_thresh,
+            max_new_edges_per_node=5,
+        )
+        graph_after, n_discovered, n_removed = er.reevaluate(
+            graph_with_query, features_after, query_vec
+        )
+
+        _log.debug(
+            "geDIG scoring: MP iters=%d, edges discovered=%d removed=%d "
+            "(sim_thresh=%.4f new_thresh=%.4f)",
+            self.gedig_scoring_mp_iterations, n_discovered, n_removed,
+            sim_thresh, new_thresh,
+        )
+
+        # 6. Per-document scoring
+        doc_scores, doc_diagnostics = scorer.score_documents(
+            graph_before=graph_before,
+            graph_after=graph_after,
+            node_features_before=features_before_copy,
+            node_features_after=features_after,
+            query_vector=query_vec,
+            titles=titles,
+            doc_id_map=doc_id_map,
+        )
+
+        # Compute average local geDIG for diagnostics
+        local_gedigs = [
+            d.get("local_gedig", 0.0) for d in doc_diagnostics.values()
+        ]
+        avg_local = float(np.mean(local_gedigs)) if local_gedigs else 0.0
+
+        diagnostics = {
+            "n_edges_discovered": n_discovered,
+            "n_edges_removed": n_removed,
+            "mp_iterations_run": self.gedig_scoring_mp_iterations,
+            "avg_gedig_local": round(avg_local, 4),
+        }
+
+        return doc_scores, diagnostics
 
 
     # ── LLM Listwise Reranking ──────────────────────────────────

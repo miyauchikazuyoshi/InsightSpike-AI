@@ -116,9 +116,9 @@ def main():
     parser.add_argument("--llm-rerank-top-k", type=int, default=20,
                         help="LLM rerank candidate pool size")
     # Graph mode (Spec F: D+E integration)
-    parser.add_argument("--graph-mode", choices=["sentence", "episode"],
+    parser.add_argument("--graph-mode", choices=["sentence", "episode", "hybrid"],
                         default="sentence",
-                        help="Graph node text source: sentence (split) or episode (LLM decomposed)")
+                        help="Graph node text source: sentence (split), episode (LLM decomposed), or hybrid (sentence + episode)")
     # geDIG routing parameters (Spec E)
     parser.add_argument("--episode-index-dir", type=str, default=None,
                         help="Episode index directory (for gedig_routing or --graph-mode episode)")
@@ -134,6 +134,20 @@ def main():
                         help="geDIG AG threshold")
     parser.add_argument("--gedig-k-target", type=int, default=4,
                         help="Query episode cross-edge target count")
+    # geDIG scoring parameters (Spec H)
+    parser.add_argument("--scoring-mode", choices=["classic", "gedig"],
+                        default="classic",
+                        help="Scoring method: classic (5-component) or gedig (geDIG-based)")
+    parser.add_argument("--gedig-scoring-lambda", type=float, default=1.0,
+                        help="geDIG scoring lambda weight (GED vs IG balance)")
+    parser.add_argument("--gedig-scoring-sp-beta", type=float, default=0.5,
+                        help="geDIG scoring shortest-path component weight")
+    parser.add_argument("--gedig-scoring-k-hop", type=int, default=2,
+                        help="Local subgraph k-hop radius for per-document geDIG")
+    parser.add_argument("--gedig-scoring-mp-iterations", type=int, default=2,
+                        help="Message passing iterations for geDIG scoring")
+    parser.add_argument("--gedig-scoring-mp-alpha", type=float, default=0.3,
+                        help="Query influence weight in message passing")
 
     args = parser.parse_args()
 
@@ -154,6 +168,13 @@ def main():
         "limit": args.limit,
     }
     config["graph_mode"] = args.graph_mode
+    config["scoring_mode"] = args.scoring_mode
+    if args.scoring_mode == "gedig":
+        config["gedig_scoring_lambda"] = args.gedig_scoring_lambda
+        config["gedig_scoring_sp_beta"] = args.gedig_scoring_sp_beta
+        config["gedig_scoring_k_hop"] = args.gedig_scoring_k_hop
+        config["gedig_scoring_mp_iterations"] = args.gedig_scoring_mp_iterations
+        config["gedig_scoring_mp_alpha"] = args.gedig_scoring_mp_alpha
     if args.mode in ("cot_rerank", "cot_retrieval", "adaptive_retrieval", "unified", "gedig_routing"):
         config["model"] = args.model
         config["cot_weight"] = args.cot_weight
@@ -238,16 +259,16 @@ def main():
     elif args.mode in ("cot_rerank", "cot_retrieval", "adaptive_retrieval"):
         from bright_cot_pipeline import BrightCoTPipeline
 
-        # Episode index loading (for graph_mode=episode, Spec F)
+        # Episode index loading (for graph_mode=episode/hybrid, Spec F/G)
         episode_index_for_graph = None
-        if args.graph_mode == "episode":
+        if args.graph_mode in ("episode", "hybrid"):
             if not args.episode_index_dir:
-                print("ERROR: --episode-index-dir required for --graph-mode episode")
+                print(f"ERROR: --episode-index-dir required for --graph-mode {args.graph_mode}")
                 sys.exit(1)
             from episode_graph import EpisodeIndex
             episode_index_for_graph = EpisodeIndex(args.episode_index_dir)
 
-        if args.graph_mode == "episode":
+        if args.graph_mode in ("episode", "hybrid"):
             # Per-domain pipeline (needs dense_domain for episode lookup)
             pipeline = None
         else:
@@ -267,6 +288,13 @@ def main():
                 beta_high=args.beta_high,
                 aggressive_top_k=args.aggressive_top_k,
                 aggressive_max_concepts=args.aggressive_max_concepts,
+                # geDIG scoring (Spec H)
+                scoring_mode=args.scoring_mode,
+                gedig_scoring_lambda=args.gedig_scoring_lambda,
+                gedig_scoring_sp_beta=args.gedig_scoring_sp_beta,
+                gedig_scoring_k_hop=args.gedig_scoring_k_hop,
+                gedig_scoring_mp_iterations=args.gedig_scoring_mp_iterations,
+                gedig_scoring_mp_alpha=args.gedig_scoring_mp_alpha,
             )
     elif args.mode == "graph_rerank":
         pipeline = BrightPipeline(
@@ -394,9 +422,9 @@ def main():
             )
             print(f"  geDIG routing pipeline initialized for {domain}")
 
-        # Episode graph mode (Spec F): load episodes and create pipeline per-domain
-        if args.graph_mode == "episode" and args.mode in ("cot_rerank", "cot_retrieval", "adaptive_retrieval"):
-            print(f"  Loading episodes for {domain}...")
+        # Episode/hybrid graph mode (Spec F/G): load episodes and create pipeline per-domain
+        if args.graph_mode in ("episode", "hybrid") and args.mode in ("cot_rerank", "cot_retrieval", "adaptive_retrieval"):
+            print(f"  Loading episodes for {domain} (graph_mode={args.graph_mode})...")
             episode_index_for_graph.load_domain(domain)
             pipeline = BrightCoTPipeline(
                 model=args.model,
@@ -414,11 +442,18 @@ def main():
                 beta_high=args.beta_high,
                 aggressive_top_k=args.aggressive_top_k,
                 aggressive_max_concepts=args.aggressive_max_concepts,
-                graph_mode="episode",
+                graph_mode=args.graph_mode,
                 episode_index=episode_index_for_graph,
                 dense_domain=domain,
+                # geDIG scoring (Spec H)
+                scoring_mode=args.scoring_mode,
+                gedig_scoring_lambda=args.gedig_scoring_lambda,
+                gedig_scoring_sp_beta=args.gedig_scoring_sp_beta,
+                gedig_scoring_k_hop=args.gedig_scoring_k_hop,
+                gedig_scoring_mp_iterations=args.gedig_scoring_mp_iterations,
+                gedig_scoring_mp_alpha=args.gedig_scoring_mp_alpha,
             )
-            print(f"  Episode graph pipeline initialized for {domain}")
+            print(f"  {args.graph_mode.capitalize()} graph pipeline initialized for {domain}")
 
         # Results file (per-domain)
         domain_results_file = out_dir / f"{domain}_results.jsonl"
@@ -550,6 +585,16 @@ def main():
                     record["n_query_episodes"] = result.n_query_episodes
                     record["n_episode_cross_edges"] = result.n_episode_cross_edges
 
+                # geDIG scoring diagnostics (Spec H)
+                if args.scoring_mode == "gedig" and hasattr(result, "scoring_mode"):
+                    record["scoring_mode"] = result.scoring_mode
+                    record["gedig_scoring_lambda"] = result.gedig_scoring_lambda
+                    record["gedig_scoring_sp_beta"] = result.gedig_scoring_sp_beta
+                    record["n_edges_discovered"] = result.n_edges_discovered
+                    record["n_edges_removed"] = result.n_edges_removed
+                    record["mp_iterations_run"] = result.mp_iterations_run
+                    record["avg_gedig_local"] = round(result.avg_gedig_local, 4)
+
                 status = "+" if ndcg_10 > 0 else "-"
                 delta = ndcg_10 - bm25_ndcg
                 delta_str = f"Δ={delta:+.3f}" if args.mode != "bm25_only" else ""
@@ -569,6 +614,9 @@ def main():
                     extra += f" geDIG={result.gedig_value:.3f} T{result.routing_tier}({tier_label})"
                     extra += f" Δβ₀={result.gedig_delta_betti_0}"
                     extra += f" ep={result.n_doc_episodes}d+{result.n_query_episodes}q"
+                if args.scoring_mode == "gedig" and hasattr(result, "n_edges_discovered"):
+                    extra += f" geDIG-S:disc={result.n_edges_discovered},rm={result.n_edges_removed}"
+                    extra += f" avg_gDIG={result.avg_gedig_local:.3f}"
                 print(
                     f"    {status} nDCG@10={ndcg_10:.3f} R@10={recall_10:.3f} "
                     f"MRR={mrr:.3f} {delta_str} "

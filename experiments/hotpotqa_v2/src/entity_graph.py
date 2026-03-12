@@ -189,6 +189,101 @@ def _cosine_sim(vec_a: dict[str, float], vec_b: dict[str, float]) -> float:
 
 
 # ---------------------------------------------------------------------------
+# TF-IDF dense feature matrix for geDIG scoring (Spec H)
+# ---------------------------------------------------------------------------
+
+def compute_node_tfidf_features(
+    graph: nx.Graph,
+    max_features: int = 500,
+) -> tuple[np.ndarray, Any]:
+    """Compute TF-IDF dense feature vectors for all graph nodes.
+
+    Uses the same sparse TF-IDF approach as Tier 3, but converts to a dense
+    matrix suitable for message passing and geDIG scoring.
+
+    Args:
+        graph: Entity graph with ``text`` attributes on nodes.
+        max_features: Maximum vocabulary size (limits dimensionality).
+
+    Returns:
+        features: (N, D) float32 matrix (N = number of nodes, D <= max_features).
+        vectorizer: Object with a ``transform(texts) -> (M, D) ndarray`` method
+            so the caller can project new texts (e.g. query) into the same space.
+    """
+    node_list = sorted(graph.nodes())
+    texts = [graph.nodes[n].get("text", "") for n in node_list]
+
+    # Build vocabulary from node texts using existing tokenizer
+    tokenized = [_tokenize_for_tfidf(t) for t in texts]
+    n_docs = len(texts)
+
+    # Document frequency
+    df: dict[str, int] = defaultdict(int)
+    for tokens in tokenized:
+        for w in set(tokens):
+            df[w] += 1
+
+    # Select top-K features by document frequency (skip very rare ones)
+    feature_scores = {w: cnt for w, cnt in df.items() if cnt >= 2}
+    sorted_features = sorted(feature_scores, key=feature_scores.get, reverse=True)
+    vocab = sorted_features[:max_features]
+    word_to_idx = {w: i for i, w in enumerate(vocab)}
+    D = len(vocab)
+
+    if D == 0:
+        # Fallback: if no features, return zeros
+        features = np.zeros((n_docs, 1), dtype=np.float32)
+        return features, _TfidfDenseVectorizer(word_to_idx, df, n_docs, D)
+
+    # Build dense TF-IDF matrix
+    features = np.zeros((n_docs, D), dtype=np.float32)
+    for doc_i, tokens in enumerate(tokenized):
+        if not tokens:
+            continue
+        tf_counts: dict[str, int] = defaultdict(int)
+        for w in tokens:
+            tf_counts[w] += 1
+        for w, cnt in tf_counts.items():
+            idx = word_to_idx.get(w)
+            if idx is not None:
+                tf = 1.0 + math.log(cnt)
+                idf = math.log((n_docs + 1) / (df[w] + 1)) + 1.0
+                features[doc_i, idx] = tf * idf
+
+    return features, _TfidfDenseVectorizer(word_to_idx, df, n_docs, D)
+
+
+class _TfidfDenseVectorizer:
+    """Lightweight vectorizer that transforms new texts into the same TF-IDF space."""
+
+    def __init__(self, word_to_idx: dict[str, int], df: dict[str, int],
+                 n_docs: int, dim: int):
+        self._w2i = word_to_idx
+        self._df = df
+        self._n_docs = n_docs
+        self._dim = dim
+
+    def transform(self, texts: list[str]) -> np.ndarray:
+        """Transform texts into (M, D) dense TF-IDF matrix."""
+        D = max(self._dim, 1)
+        result = np.zeros((len(texts), D), dtype=np.float32)
+        for ti, text in enumerate(texts):
+            tokens = _tokenize_for_tfidf(text)
+            if not tokens:
+                continue
+            tf_counts: dict[str, int] = defaultdict(int)
+            for w in tokens:
+                tf_counts[w] += 1
+            for w, cnt in tf_counts.items():
+                idx = self._w2i.get(w)
+                if idx is not None:
+                    tf = 1.0 + math.log(cnt)
+                    idf = math.log((self._n_docs + 1) / (self._df.get(w, 0) + 1)) + 1.0
+                    result[ti, idx] = tf * idf
+        return result
+
+
+# ---------------------------------------------------------------------------
 # Sentence-level Three-Tier graph construction
 # ---------------------------------------------------------------------------
 
