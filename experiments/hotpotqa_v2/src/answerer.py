@@ -10,6 +10,16 @@ from __future__ import annotations
 import os
 import re
 import time
+from pathlib import Path
+
+# .env 自動読み込み（プロジェクトルートの .env を探す）
+try:
+    from dotenv import load_dotenv
+    _env_path = Path(__file__).resolve().parents[3] / ".env"  # src -> hotpotqa_v2 -> experiments -> root
+    if _env_path.is_file():
+        load_dotenv(_env_path, override=False)
+except ImportError:
+    pass  # python-dotenv が無くても動作する
 
 
 _RETRY_AFTER_RE = re.compile(r"try again in ([0-9]+(?:\.[0-9]+)?)s", re.IGNORECASE)
@@ -99,10 +109,14 @@ class LLMAnswerer:
                 raise ImportError("Please install openai: pip install openai")
 
             api_key = os.getenv("OPENAI_API_KEY")
+            base_url = os.getenv("OPENAI_API_BASE")  # Groq/Ollama/Together互換
             if not api_key:
                 raise ValueError("OPENAI_API_KEY environment variable not set")
 
-            self._client = OpenAI(api_key=api_key)
+            kwargs: dict = {"api_key": api_key}
+            if base_url:
+                kwargs["base_url"] = base_url
+            self._client = OpenAI(**kwargs)
         return self._client
 
     # ------------------------------------------------------------------ #

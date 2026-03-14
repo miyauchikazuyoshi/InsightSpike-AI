@@ -807,3 +807,255 @@ class GeDIGDocScorer:
             return np.empty((0, 0), dtype=np.float32)
 
         return np.vstack(vecs)
+
+
+# ---------------------------------------------------------------------------
+# Spec O: Entity Graph F-Evaluation (Cross-Doc DG/AG)
+# ---------------------------------------------------------------------------
+
+def entity_graph_feval_scores(
+    graph: nx.Graph,
+    query: str,
+    cot_text: str,
+    cot_concepts: set[str],
+    titles: list[str],
+    sentences_list: list[list[str]],
+    doc_id_map: dict[str, str],
+    f_lambda: float = 1.0,
+) -> tuple[dict[str, float], dict]:
+    """Compute cross-doc F-eval walk scores on entity graph (Spec O).
+
+    Applies DG/AG classification to entity graph edges using
+    f_eval = edge_cost - λ · query_relevance, then computes per-doc walk
+    scores with convergence bonus for multi-path AG convergence.
+
+    Parameters
+    ----------
+    graph : nx.Graph
+        Entity graph from ``build_sentence_graph()``.
+    query : str
+        User query.
+    cot_text : str
+        CoT reasoning text.
+    cot_concepts : set[str]
+        Extracted CoT concepts.
+    titles : list[str]
+        Paragraph titles (``doc_{idx}``).
+    sentences_list : list[list[str]]
+        Sentences per paragraph (used for entity extraction from full text).
+    doc_id_map : dict[str, str]
+        ``title -> doc_id`` mapping.
+    f_lambda : float
+        Lambda for F-eval: ``f = cost - lambda * relevance``.
+
+    Returns
+    -------
+    scores : dict[str, float]
+        ``doc_id -> entity_feval_score`` (higher = more relevant).
+    diagnostics : dict
+        Diagnostic information (n_ag, n_dg, f_theta, avg_convergence).
+    """
+    from entity_graph import compute_node_tfidf_features, extract_entities
+
+    if graph.number_of_nodes() < 3:
+        return {}, {"fallback": True, "reason": "too_few_nodes"}
+
+    # ── 1. TF-IDF features + query vector ──────────────────────
+    features, vectorizer = compute_node_tfidf_features(graph, max_features=500)
+    query_combined = query + " " + cot_text
+    query_vec = vectorizer.transform([query_combined])[0].astype(np.float32)
+    q_norm = np.linalg.norm(query_vec)
+    if q_norm < 1e-9:
+        return {}, {"fallback": True, "reason": "zero_query_vec"}
+
+    # ── 2. Message passing (light, 2 iterations) ───────────────
+    mp = MessagePassingNX(alpha=0.3, iterations=2)
+    features_mp = mp.forward(graph, features, query_vec)
+
+    # ── 3. Node index mapping ──────────────────────────────────
+    node_list = sorted(graph.nodes())
+    node_to_idx = {n: i for i, n in enumerate(node_list)}
+
+    # ── 4. Query entities ──────────────────────────────────────
+    query_ents = extract_entities(query + " " + cot_text)
+    for c in cot_concepts:
+        query_ents.add(c.lower())
+
+    # ── 5. Build node → para_idx mapping ───────────────────────
+    node_para = {}
+    for n in node_list:
+        node_para[n] = graph.nodes[n].get("para_idx", -1)
+
+    # Build full-text for entity extraction (not the truncated text attr)
+    # Use sentences_list for full text access
+    para_full_texts: dict[int, list[str]] = {}
+    for p_idx, sents in enumerate(sentences_list):
+        para_full_texts[p_idx] = sents
+
+    # ── 6. F-eval per edge ─────────────────────────────────────
+    f_vals = []
+    edge_data = []  # (u, v, f_val, edge_cost)
+
+    for u, v, data in graph.edges(data=True):
+        edge_cost = data.get("cost", 0.5)
+        u_idx = node_to_idx.get(u)
+        v_idx = node_to_idx.get(v)
+        if u_idx is None or v_idx is None:
+            continue
+
+        # (a) Endpoint cosine similarity with query (weight 0.5)
+        feat_u = features_mp[u_idx]
+        feat_v = features_mp[v_idx]
+        norm_u = np.linalg.norm(feat_u)
+        norm_v = np.linalg.norm(feat_v)
+        sim_u = float(np.dot(feat_u, query_vec) / (norm_u * q_norm)) if norm_u > 1e-9 else 0.0
+        sim_v = float(np.dot(feat_v, query_vec) / (norm_v * q_norm)) if norm_v > 1e-9 else 0.0
+        endpoint_sim = max(sim_u, sim_v, 0.0)
+
+        # (b) Entity overlap (weight 0.3)
+        u_text = graph.nodes[u].get("text", "")
+        v_text = graph.nodes[v].get("text", "")
+        # Try full text from sentences_list if available
+        u_para = node_para.get(u, -1)
+        v_para = node_para.get(v, -1)
+        u_sent_idx = graph.nodes[u].get("sent_idx", 0)
+        v_sent_idx = graph.nodes[v].get("sent_idx", 0)
+        if u_para >= 0 and u_para < len(sentences_list):
+            sents = sentences_list[u_para]
+            if u_sent_idx < len(sents):
+                u_text = sents[u_sent_idx]
+        if v_para >= 0 and v_para < len(sentences_list):
+            sents = sentences_list[v_para]
+            if v_sent_idx < len(sents):
+                v_text = sents[v_sent_idx]
+
+        ents_uv = extract_entities(u_text) | extract_entities(v_text)
+        if query_ents:
+            entity_density = min(len(ents_uv & query_ents) / len(query_ents), 1.0)
+        else:
+            entity_density = 0.0
+
+        # (c) 1-hop neighborhood query density (weight 0.2)
+        nbrs = set(graph.neighbors(u)) | set(graph.neighbors(v))
+        nbr_high = 0
+        for nb in nbrs:
+            nb_idx = node_to_idx.get(nb)
+            if nb_idx is not None:
+                feat_nb = features_mp[nb_idx]
+                norm_nb = np.linalg.norm(feat_nb)
+                if norm_nb > 1e-9:
+                    s = float(np.dot(feat_nb, query_vec) / (norm_nb * q_norm))
+                    if s > 0.3:
+                        nbr_high += 1
+        nbr_density = nbr_high / max(len(nbrs), 1)
+
+        # Combined query relevance
+        qrel = 0.5 * endpoint_sim + 0.3 * entity_density + 0.2 * nbr_density
+
+        # F-eval
+        f_val = edge_cost - f_lambda * qrel
+        f_vals.append(f_val)
+        edge_data.append((u, v, f_val, edge_cost))
+
+    if not f_vals:
+        return {}, {"fallback": True, "reason": "no_edges"}
+
+    # ── 7. Dynamic threshold (30th percentile) ─────────────────
+    f_theta = float(np.percentile(f_vals, 30))
+
+    # ── 8. Classify edges: AG vs DG ────────────────────────────
+    n_ag = 0
+    n_dg = 0
+    for u, v, f_val, edge_cost in edge_data:
+        if f_val < f_theta:
+            # AG: query-aligned edge — keep original cost
+            graph[u][v]["f_class"] = "AG"
+            graph[u][v]["f_weight"] = edge_cost
+            n_ag += 1
+        else:
+            # DG: uncertain edge — increase cost
+            penalty = f_val - f_theta
+            graph[u][v]["f_class"] = "DG"
+            graph[u][v]["f_weight"] = edge_cost + penalty
+            n_dg += 1
+
+    # ── 9. Walk score per document ─────────────────────────────
+    # Map: para_idx -> list of node IDs
+    para_nodes: dict[int, list[int]] = {}
+    for n in node_list:
+        p = node_para.get(n, -1)
+        if p >= 0:
+            para_nodes.setdefault(p, []).append(n)
+
+    # Find the node most relevant to query (proxy for query injection)
+    best_qnode = None
+    best_qsim = -1.0
+    for n in node_list:
+        idx = node_to_idx[n]
+        feat = features_mp[idx]
+        norm_f = np.linalg.norm(feat)
+        if norm_f > 1e-9:
+            s = float(np.dot(feat, query_vec) / (norm_f * q_norm))
+            if s > best_qsim:
+                best_qsim = s
+                best_qnode = n
+
+    if best_qnode is None:
+        return {}, {"fallback": True, "reason": "no_query_node"}
+
+    # Dijkstra shortest paths from query node using f_weight
+    try:
+        sp_lengths = dict(nx.single_source_dijkstra_path_length(
+            graph, best_qnode, weight="f_weight"
+        ))
+    except nx.NetworkXError:
+        sp_lengths = {best_qnode: 0.0}
+
+    scores: dict[str, float] = {}
+    convergence_vals = []
+
+    for p_idx, nodes_in_para in para_nodes.items():
+        if p_idx >= len(titles):
+            continue
+        title = titles[p_idx]
+        doc_id = doc_id_map.get(title)
+        if doc_id is None:
+            continue
+
+        # Minimum shortest path distance to any node in this doc
+        dists = [sp_lengths.get(n, float("inf")) for n in nodes_in_para]
+        min_sp = min(dists) if dists else float("inf")
+
+        # Convergence bonus: count AG edges incident to doc nodes
+        ag_count = 0
+        for n in nodes_in_para:
+            for nb in graph.neighbors(n):
+                if graph[n][nb].get("f_class") == "AG":
+                    ag_count += 1
+        convergence = min(ag_count / max(len(nodes_in_para), 1), 2.0)
+        convergence_vals.append(convergence)
+
+        # Score
+        proximity = 1.0 / (1.0 + min_sp)
+        score = proximity * (1.0 + 0.3 * convergence)
+        scores[doc_id] = score
+
+    # Normalize scores to [0, 1]
+    if scores:
+        max_s = max(scores.values())
+        if max_s > 0:
+            for doc_id in scores:
+                scores[doc_id] /= max_s
+
+    avg_convergence = float(np.mean(convergence_vals)) if convergence_vals else 0.0
+
+    diagnostics = {
+        "n_ag": n_ag,
+        "n_dg": n_dg,
+        "f_theta": round(f_theta, 4),
+        "avg_convergence": round(avg_convergence, 4),
+        "query_node": best_qnode,
+        "query_node_sim": round(best_qsim, 4),
+    }
+
+    return scores, diagnostics

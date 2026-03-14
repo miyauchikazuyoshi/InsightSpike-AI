@@ -103,6 +103,68 @@ class BrightCoTResult(BrightResult):
     n_edges_removed: int = 0
     mp_iterations_run: int = 0
     avg_gedig_local: float = 0.0
+    # Pointwise reranking fields (Spec J)
+    pointwise_rerank_applied: bool = False
+    pointwise_rerank_n_scored: int = 0
+    pointwise_rerank_n_calls: int = 0
+    pointwise_rerank_ms: float = 0.0
+    pointwise_rerank_avg_score: float = 0.0
+    # Query decomposition fields (Spec K)
+    query_decomp_applied: bool = False
+    n_sub_queries: int = 0
+    n_decomp_new_candidates: int = 0
+    n_decomp_new_gold: int = 0
+    query_decomp_ms: float = 0.0
+    # Reasoning reranking fields (Spec L)
+    reasoning_rerank_applied: bool = False
+    reasoning_rerank_model: str = ""
+    reasoning_rerank_n_scored: int = 0
+    reasoning_rerank_n_calls: int = 0
+    reasoning_rerank_ms: float = 0.0
+    reasoning_rerank_avg_score: float = 0.0
+    # RIA (Recursive Insight Architecture) fields (Spec M)
+    ria_applied: bool = False
+    ria_rounds: int = 0
+    ria_beta0_history: list[int] = field(default_factory=list)
+    ria_new_docs_per_round: list[int] = field(default_factory=list)
+    ria_new_gold_per_round: list[int] = field(default_factory=list)
+    ria_total_new_docs: int = 0
+    ria_total_new_gold: int = 0
+    ria_ms: float = 0.0
+
+    # Token-level graph fields (Spec N)
+    token_graph_applied: bool = False
+    token_graph_avg_coverage: float = 0.0
+    token_graph_avg_proximity: float = 0.0
+    token_graph_avg_score: float = 0.0
+    token_graph_n_docs: int = 0
+    token_graph_ms: float = 0.0
+    token_graph_spearman_bm25: float = 0.0
+    token_graph_walk_score: bool = False
+    token_graph_avg_beta1: float = 0.0
+    token_graph_f_eval: bool = False
+    token_graph_insight_mode: str = "none"
+    token_graph_avg_n_insights: float = 0.0
+    token_graph_avg_f_theta: float = 0.0
+
+    # Entity graph F-eval fields (Spec O)
+    entity_feval_applied: bool = False
+    entity_feval_n_ag: int = 0
+    entity_feval_n_dg: int = 0
+    entity_feval_f_theta: float = 0.0
+    entity_feval_avg_convergence: float = 0.0
+    # Ranking DG/AG routing fields (Spec O.2)
+    entity_feval_ranking_dg: float = 0.0
+    entity_feval_adaptive_weight: float = 0.0
+    # Multi-CoT Ensemble fields (Spec P)
+    ensemble_applied: bool = False
+    ensemble_n_cots: int = 0
+    ensemble_cot_cache_hit: bool = False
+    ensemble_ms: float = 0.0
+    ensemble_n_ag_docs: int = 0
+    ensemble_n_dg_docs: int = 0
+    ensemble_avg_agreement: float = 0.0
+    ensemble_score_variance_mean: float = 0.0
 
 
 # ---------------------------------------------------------------------------
@@ -169,6 +231,44 @@ class BrightCoTPipeline:
         gedig_scoring_k_hop: int = 2,
         gedig_scoring_mp_iterations: int = 2,
         gedig_scoring_mp_alpha: float = 0.3,
+        # Pointwise LLM reranking parameters (Spec J)
+        enable_pointwise_rerank: bool = False,
+        pointwise_rerank_top_k: int = 30,
+        pointwise_batch_size: int = 5,
+        pointwise_blend_weight: float = 0.4,  # pw weight in blend (0=ignore PW, 1=full replace)
+        # Query decomposition parameters (Spec K)
+        enable_query_decomp: bool = False,
+        query_decomp_top_k: int = 50,  # BM25 top-k per sub-query
+        query_decomp_max_sub: int = 5,  # max sub-questions
+        # Reasoning reranking parameters (Spec L)
+        enable_reasoning_rerank: bool = False,
+        rerank_model: str = "",  # empty = same as main model
+        reasoning_rerank_top_k: int = 20,
+        reasoning_rerank_doc_chars: int = 4000,
+        reasoning_rerank_blend_weight: float = 0.7,
+        # RIA iterative expansion parameters (Spec M)
+        enable_ria_loop: bool = False,
+        ria_max_rounds: int = 3,
+        ria_docs_per_round: int = 50,
+        ria_feedback_top_k: int = 5,
+        ria_beta0_target: int = 1,
+        # Token-level graph parameters (Spec N)
+        enable_token_graph: bool = False,
+        token_graph_weight: float = 0.15,
+        token_graph_max_tokens: int = 500,
+        token_graph_walk_score: bool = False,
+        token_graph_dg_penalty: float = 2.0,
+        token_graph_f_eval: bool = False,
+        token_graph_f_lambda: float = 1.0,
+        token_graph_insight_mode: str = "none",
+        # Entity graph F-eval parameters (Spec O)
+        enable_entity_feval: bool = False,
+        entity_feval_weight: float = 0.20,
+        entity_feval_lambda: float = 1.0,
+        # Multi-CoT Ensemble parameters (Spec P)
+        n_cot_ensemble: int = 1,
+        cot_cache_dir: str | None = None,
+        cot_temperature: float = 0.7,
     ):
         self.llm = LLMAnswerer(model=model, temperature=0.0, max_tokens=300)
         self.initial_top_k = initial_top_k
@@ -206,6 +306,64 @@ class BrightCoTPipeline:
         self.gedig_scoring_k_hop = gedig_scoring_k_hop
         self.gedig_scoring_mp_iterations = gedig_scoring_mp_iterations
         self.gedig_scoring_mp_alpha = gedig_scoring_mp_alpha
+        # Pointwise reranking (Spec J)
+        self.enable_pointwise_rerank = enable_pointwise_rerank
+        self.pointwise_rerank_top_k = pointwise_rerank_top_k
+        self.pointwise_batch_size = pointwise_batch_size
+        self.pointwise_blend_weight = pointwise_blend_weight
+        # Query decomposition (Spec K)
+        self.enable_query_decomp = enable_query_decomp
+        self.query_decomp_top_k = query_decomp_top_k
+        self.query_decomp_max_sub = query_decomp_max_sub
+        # Reasoning reranking (Spec L)
+        self.enable_reasoning_rerank = enable_reasoning_rerank
+        self.reasoning_rerank_top_k = reasoning_rerank_top_k
+        self.reasoning_rerank_doc_chars = reasoning_rerank_doc_chars
+        self.reasoning_rerank_blend_weight = reasoning_rerank_blend_weight
+        self.rerank_model = rerank_model or model
+        # RIA (Spec M)
+        self.enable_ria_loop = enable_ria_loop
+        self.ria_max_rounds = ria_max_rounds
+        self.ria_docs_per_round = ria_docs_per_round
+        self.ria_feedback_top_k = ria_feedback_top_k
+        self.ria_beta0_target = ria_beta0_target
+        # Token graph (Spec N)
+        self.enable_token_graph = enable_token_graph
+        self.token_graph_weight = token_graph_weight
+        self.token_graph_max_tokens = token_graph_max_tokens
+        self.token_graph_walk_score = token_graph_walk_score
+        self.token_graph_dg_penalty = token_graph_dg_penalty
+        self.token_graph_f_eval = token_graph_f_eval
+        self.token_graph_f_lambda = token_graph_f_lambda
+        self.token_graph_insight_mode = token_graph_insight_mode
+        # Entity graph F-eval (Spec O)
+        self.enable_entity_feval = enable_entity_feval
+        self.entity_feval_weight = entity_feval_weight
+        self.entity_feval_lambda = entity_feval_lambda
+        # Multi-CoT Ensemble (Spec P)
+        self.n_cot_ensemble = n_cot_ensemble
+        self.cot_cache_dir = cot_cache_dir
+        if n_cot_ensemble > 1:
+            self.llm_ensemble = LLMAnswerer(
+                model=model, temperature=cot_temperature, max_tokens=300
+            )
+        else:
+            self.llm_ensemble = self.llm
+        self._nlp = None  # lazy-load spaCy
+        # Create separate LLM for reranking if model differs
+        if self.rerank_model != model:
+            self.rerank_llm = LLMAnswerer(
+                model=self.rerank_model, temperature=0.0, max_tokens=500
+            )
+        else:
+            self.rerank_llm = self.llm
+
+    def _get_nlp(self):
+        """Lazy-load spaCy model (only when --token-graph enabled)."""
+        if self._nlp is None:
+            import spacy
+            self._nlp = spacy.load("en_core_web_sm", disable=["ner"])
+        return self._nlp
 
     def rerank(
         self,
@@ -241,6 +399,31 @@ class BrightCoTPipeline:
         n_dense_graph_edges = 0
         llm_rerank_applied = False
 
+        # ── Phase 0: Query Decomposition (Spec K) ─────────────────
+        query_decomp_applied = False
+        n_sub_queries = 0
+        n_decomp_new_candidates = 0
+        n_decomp_new_gold = 0
+        query_decomp_ms = 0.0
+        sub_queries: list[str] = []
+
+        if self.enable_query_decomp:
+            t_decomp = time.time()
+            try:
+                decomp_prompt = self._DECOMP_PROMPT.format(query=query[:500])
+                decomp_resp = self.llm._llm_call_raw(decomp_prompt, max_tokens=300)
+                sub_queries = [
+                    line.strip().lstrip("0123456789.-) ")
+                    for line in decomp_resp.strip().split("\n")
+                    if line.strip() and len(line.strip()) > 10
+                ]
+                sub_queries = sub_queries[: self.query_decomp_max_sub]
+                n_sub_queries = len(sub_queries)
+                query_decomp_applied = bool(sub_queries)
+            except Exception:
+                pass
+            query_decomp_ms = (time.time() - t_decomp) * 1000
+
         # ── Phase 1: BM25 retrieval ───────────────────────────────
         query_tokens = query.lower().split()
         bm25_scores = bm25_index.get_scores(query_tokens)
@@ -254,21 +437,79 @@ class BrightCoTPipeline:
         top_candidates = scored[: self.initial_top_k]
         bm25_doc_ids = [docs[i]["id"] for i, _ in top_candidates]
 
+        # ── Phase 1a: Sub-query retrieval (Spec K) ────────────────
+        # Strategy: use max(original_bm25, best_sub_query_bm25) per candidate.
+        # This gives sub-query candidates a fair BM25 score for Phase 6 ranking.
+        decomp_best_bm25: dict[int, float] = {}  # doc_idx → best sub-query BM25
+        if sub_queries:
+            existing_ids = {docs[i]["id"] for i, _ in top_candidates}
+            decomp_new_indices: set[int] = set()
+            for sq in sub_queries:
+                sq_tokens = sq.lower().split()
+                if not sq_tokens:
+                    continue
+                sq_scores = bm25_index.get_scores(sq_tokens)
+                sq_scored = [
+                    (i, float(sq_scores[i]))
+                    for i in range(len(docs))
+                    if docs[i]["id"] not in excluded
+                    and docs[i]["id"] not in existing_ids
+                ]
+                sq_scored.sort(key=lambda x: -x[1])
+                sq_top = sq_scored[: self.query_decomp_top_k]
+                for idx, sc in sq_top:
+                    decomp_new_indices.add(idx)
+                    existing_ids.add(docs[idx]["id"])
+                    # Track best sub-query BM25 score per candidate
+                    decomp_best_bm25[idx] = max(
+                        decomp_best_bm25.get(idx, 0.0), sc
+                    )
+                # Also track best sub-query scores for EXISTING candidates
+                for idx, _ in top_candidates:
+                    sc = float(sq_scores[idx])
+                    if sc > decomp_best_bm25.get(idx, 0.0):
+                        decomp_best_bm25[idx] = sc
+
+            # Use max(original_bm25, best_sub_query_bm25) for new candidates
+            decomp_candidates = [
+                (idx, max(float(bm25_scores[idx]), decomp_best_bm25.get(idx, 0.0)))
+                for idx in decomp_new_indices
+            ]
+            decomp_candidates.sort(key=lambda x: -x[1])
+            top_candidates += decomp_candidates
+
+            # Also boost existing candidates if sub-query BM25 is higher
+            top_candidates = [
+                (idx, max(sc, decomp_best_bm25.get(idx, 0.0)))
+                for idx, sc in top_candidates
+            ]
+
+            n_decomp_new_candidates = len(decomp_candidates)
+            if gold_ids:
+                # Count new gold from decomposition (not in original BM25 top-k)
+                orig_ids = set(bm25_doc_ids)
+                n_decomp_new_gold = sum(
+                    1 for idx, _ in decomp_candidates
+                    if docs[idx]["id"] in gold_ids and docs[idx]["id"] not in orig_ids
+                )
+
         # ── Phase 1b: Dense retrieval (parallel pool expansion) ───
         id_to_idx = {docs[i]["id"]: i for i in range(len(docs))}
+        dense_candidates: list[tuple[int, float]] = []  # tracked separately for graph slots
         if self.dense_retriever is not None:
             bm25_id_set = {docs[i]["id"] for i, _ in top_candidates}
             dense_results = self.dense_retriever.retrieve(
                 query, self.dense_domain, top_k=self.dense_top_k,
                 exclude_ids=excluded,
             )
-            dense_new = [
-                (id_to_idx[did], 0.0)
-                for did, _ in dense_results
+            dense_candidates = [
+                (id_to_idx[did], sim)
+                for did, sim in dense_results
                 if did not in bm25_id_set and did in id_to_idx
             ]
-            top_candidates = top_candidates + dense_new
-            n_dense_retrieved = len(dense_new)
+            # Append with bm25_score=0 to merged pool
+            top_candidates = top_candidates + [(idx, 0.0) for idx, _ in dense_candidates]
+            n_dense_retrieved = len(dense_candidates)
 
         # geDIG routing tracking
         gedig_value = 0.0
@@ -339,7 +580,8 @@ class BrightCoTPipeline:
                 cot_skipped = False
 
         # Unified mode: force aggressive (Tier 3), skip adaptive routing
-        elif self.dense_retriever is not None and self.gedig_router is None:
+        # (only for unified mode which sets enable_cot_retrieval + dense together)
+        elif self.dense_retriever is not None and self.gedig_router is None and self.enable_llm_rerank:
             routing_tier = 3
             cot_skipped = False
         elif self.enable_adaptive:
@@ -352,6 +594,9 @@ class BrightCoTPipeline:
                 routing_tier = 2   # standard
 
         # ── Phase 2: CoT reasoning (conditional) ─────────────────
+        cot_list: list[dict] = []
+        cot_cache_hit = False
+
         if self.enable_adaptive and routing_tier == 1 and self.dense_retriever is None:
             # Tier 1: Skip CoT entirely (System 1 — graph-only)
             cot_text = ""
@@ -361,15 +606,31 @@ class BrightCoTPipeline:
         else:
             # Tier 2/3 or non-adaptive: generate CoT
             t_cot = time.time()
-            prompt = _COT_PROMPT.format(query=query[:500])
-            try:
-                cot_text = self.llm._llm_call_raw(prompt, max_tokens=300)
-            except Exception as e:
-                cot_text = f"[CoT error: {e}]"
+            if self.n_cot_ensemble > 1:
+                # ── Spec P: Multi-CoT Ensemble ──
+                cot_list, cot_cache_hit = self._generate_or_load_cots(
+                    query, query_id
+                )
+                # Union all concepts for broad re-retrieval
+                all_cot_concepts: set[str] = set()
+                for ci in cot_list:
+                    all_cot_concepts |= ci["concepts"]
+                # Use first CoT as representative text
+                cot_text = cot_list[0]["text"]
+            else:
+                # N=1: original single-CoT path
+                prompt = _COT_PROMPT.format(query=query[:500])
+                try:
+                    cot_text = self.llm._llm_call_raw(prompt, max_tokens=300)
+                except Exception as e:
+                    cot_text = f"[CoT error: {e}]"
+                cot_entities = extract_entities(cot_text)
+                cot_terms = _extract_lowercase_concepts(cot_text)
+                all_cot_concepts = cot_entities | cot_terms
+                cot_list = [{"text": cot_text, "concepts": all_cot_concepts,
+                             "entities": cot_entities}]
+                cot_cache_hit = False
             cot_latency = (time.time() - t_cot) * 1000
-            cot_entities = extract_entities(cot_text)
-            cot_terms = _extract_lowercase_concepts(cot_text)
-            all_cot_concepts = cot_entities | cot_terms
 
         # ── Phase 2.5: CoT Re-retrieval (adaptive intensity) ─────
         do_retrieval = (
@@ -417,19 +678,146 @@ class BrightCoTPipeline:
                     )
 
             n_merged = len(merged_candidates)
-            # Aggressive/Unified: more graph slots (1/3 vs 1/5)
+            # Graph slot allocation: BM25 + CoT + QD (dense candidates stay in pool only)
             if routing_tier == 3:
                 cot_graph_slots = min(len(new_cands), self.graph_top_k // 3)
             else:
                 cot_graph_slots = min(len(new_cands), self.graph_top_k // 5)
+            # QD graph slots (Spec K): include top sub-query candidates in graph
+            qd_graph_slots = 0
+            qd_for_graph: list[tuple[int, float]] = []
+            if query_decomp_applied and n_decomp_new_candidates > 0:
+                qd_graph_slots = min(n_decomp_new_candidates, self.graph_top_k // 10)
+                # QD candidates are at the end of top_candidates
+                qd_cands = top_candidates[self.initial_top_k:]
+                qd_cands_sorted = sorted(qd_cands, key=lambda x: -x[1])
+                qd_for_graph = qd_cands_sorted[:qd_graph_slots]
+            # Use BM25 candidates (first initial_top_k) for graph, not dense
+            bm25_only = top_candidates[:self.initial_top_k]
+            bm25_graph_slots = self.graph_top_k - cot_graph_slots - qd_graph_slots
             graph_candidates = (
-                top_candidates[: self.graph_top_k - cot_graph_slots]
+                bm25_only[:bm25_graph_slots]
                 + new_cands[:cot_graph_slots]
+                + qd_for_graph
             )
         else:
             merged_candidates = top_candidates
             n_merged = len(top_candidates)
             graph_candidates = top_candidates[: self.graph_top_k]
+
+        # ── Phase 2.6: RIA Iterative Expansion (Spec M) ──────────
+        ria_applied = False
+        ria_rounds = 0
+        ria_beta0_history: list[int] = []
+        ria_new_docs_per_round: list[int] = []
+        ria_new_gold_per_round: list[int] = []
+        ria_ms = 0.0
+
+        if self.enable_ria_loop and do_retrieval and not cot_skipped:
+            import time as _time
+            ria_start = _time.time()
+            ria_applied = True
+
+            # Collect all existing doc IDs in pool
+            pool_ids = {docs[i]["id"] for i, _ in merged_candidates}
+
+            prev_beta0 = float("inf")
+
+            for ria_round in range(self.ria_max_rounds):
+                # 2.6a: Compute mini-graph β₀ from current pool
+                # Sort by score so top-k captures the best candidates including RIA additions
+                sorted_for_beta0 = sorted(merged_candidates, key=lambda x: -x[1])
+                cur_beta0 = self._compute_pre_beta0(sorted_for_beta0, docs)
+                ria_beta0_history.append(cur_beta0)
+
+                # 2.6b: Check stopping conditions
+                if cur_beta0 <= self.ria_beta0_target:
+                    break  # convergence
+                if ria_round > 0 and cur_beta0 >= prev_beta0:
+                    break  # β₀ not improving
+                prev_beta0 = cur_beta0
+
+                # 2.6c-d: LLM generates new search keywords from top docs
+                feedback_docs = []
+                sorted_pool = sorted(merged_candidates, key=lambda x: -x[1])
+                for fidx, (doc_idx, _score) in enumerate(
+                    sorted_pool[: self.ria_feedback_top_k]
+                ):
+                    doc = docs[doc_idx]
+                    content = doc["content"][:2000]
+                    feedback_docs.append(f"[Doc {fidx + 1}] {content}")
+
+                new_keywords = self._ria_expand_query(
+                    query, cot_text, feedback_docs, ria_round + 1
+                )
+
+                if not new_keywords:
+                    break  # LLM produced no new keywords
+
+                # 2.6e: BM25 re-retrieval with new keywords
+                keyword_query = " ".join(new_keywords)
+                keyword_tokens = keyword_query.lower().split()
+                if not keyword_tokens:
+                    break
+
+                ria_scores = bm25_index.get_scores(keyword_tokens)
+                new_scored = [
+                    (i, float(ria_scores[i]))
+                    for i in range(len(docs))
+                    if docs[i]["id"] not in pool_ids
+                    and docs[i]["id"] not in excluded
+                ]
+                new_scored.sort(key=lambda x: -x[1])
+                round_new_cands = new_scored[: self.ria_docs_per_round]
+
+                if not round_new_cands:
+                    ria_new_docs_per_round.append(0)
+                    ria_new_gold_per_round.append(0)
+                    break  # no new docs found
+
+                # 2.6f: Add to pool
+                merged_candidates += round_new_cands
+                for idx_r, _ in round_new_cands:
+                    pool_ids.add(docs[idx_r]["id"])
+
+                # Track gold hits
+                round_gold = 0
+                if gold_ids:
+                    round_gold = sum(
+                        1 for idx_r, _ in round_new_cands
+                        if docs[idx_r]["id"] in gold_ids
+                    )
+                ria_new_docs_per_round.append(len(round_new_cands))
+                ria_new_gold_per_round.append(round_gold)
+                ria_rounds = ria_round + 1
+
+            # Final β₀ after loop
+            if ria_rounds > 0:
+                sorted_final = sorted(merged_candidates, key=lambda x: -x[1])
+                final_beta0 = self._compute_pre_beta0(sorted_final, docs)
+                ria_beta0_history.append(final_beta0)
+
+            ria_ms = (_time.time() - ria_start) * 1000
+
+            # Recompute graph slot allocation with expanded pool
+            ria_total_new = sum(ria_new_docs_per_round)
+            if ria_total_new > 0:
+                n_merged = len(merged_candidates)
+                ria_graph_slots = min(ria_total_new, self.graph_top_k // 5)
+                bm25_graph_slots = (
+                    self.graph_top_k - cot_graph_slots - qd_graph_slots - ria_graph_slots
+                )
+                # RIA candidates are at the end of merged_candidates
+                ria_cands = merged_candidates[n_merged - ria_total_new :]
+                ria_cands_sorted = sorted(ria_cands, key=lambda x: -x[1])
+                ria_for_graph = ria_cands_sorted[:ria_graph_slots]
+                bm25_only = top_candidates[: self.initial_top_k]
+                graph_candidates = (
+                    bm25_only[:bm25_graph_slots]
+                    + new_cands[:cot_graph_slots]
+                    + qd_for_graph
+                    + ria_for_graph
+                )
 
         # ── Phase 3: Entity graph construction ────────────────────
         titles = []
@@ -482,9 +870,10 @@ class BrightCoTPipeline:
             titles.append(title)
             sentences_list.append(sents)
 
-        # Prepare Tier D embeddings if dense retriever is available
+        # Prepare Tier D embeddings only for unified mode (LLM rerank)
+        # For cot_retrieval + dense: Tier D edges hurt precision (see Spec I report)
         doc_embeddings = None
-        if self.dense_retriever is not None:
+        if self.dense_retriever is not None and self.enable_llm_rerank:
             doc_id_list = [doc_id_map[t] for t in titles]
             doc_embeddings_raw = self.dense_retriever.get_doc_embeddings(
                 self.dense_domain, doc_id_list
@@ -521,13 +910,167 @@ class BrightCoTPipeline:
         else:
             beta_0, beta_1 = 0, 0
 
+        # ── Phase 4.5: Per-document token graph scoring (Spec N) ──
+        token_graph_scores: dict[str, float] = {}
+        token_graph_applied = False
+        tg_avg_coverage = 0.0
+        tg_avg_proximity = 0.0
+        tg_avg_score = 0.0
+        tg_n_docs = 0
+        tg_ms = 0.0
+        tg_spearman_bm25 = 0.0
+        tg_avg_beta1 = 0.0
+        tg_avg_n_insights = 0.0
+        tg_avg_f_theta = 0.0
+
+        if self.enable_token_graph:
+            import time as _tg_time
+            _tg_t0 = _tg_time.time()
+
+            from token_graph import compute_token_scores_batch
+            nlp = self._get_nlp()
+
+            tg_texts: list[str] = []
+            tg_ids: list[str] = []
+            for idx, (doc_idx, _) in enumerate(graph_candidates):
+                tg_texts.append(docs[doc_idx]["content"])
+                title = f"doc_{idx}"
+                tg_ids.append(doc_id_map.get(title, title))
+
+            tg_scores_raw, tg_diags = compute_token_scores_batch(
+                query, tg_texts, nlp,
+                max_tokens=self.token_graph_max_tokens,
+                use_walk_score=self.token_graph_walk_score,
+                dg_penalty=self.token_graph_dg_penalty,
+                use_f_eval=self.token_graph_f_eval,
+                f_lambda=self.token_graph_f_lambda,
+                insight_mode=self.token_graph_insight_mode,
+            )
+
+            # Min-max normalize to [0, 1]
+            tg_max = max(tg_scores_raw) if tg_scores_raw else 1.0
+            tg_min = min(tg_scores_raw) if tg_scores_raw else 0.0
+            tg_range = tg_max - tg_min if tg_max > tg_min else 1.0
+            for i, doc_id in enumerate(tg_ids):
+                token_graph_scores[doc_id] = (tg_scores_raw[i] - tg_min) / tg_range
+
+            token_graph_applied = True
+            tg_n_docs = len(tg_ids)
+            coverages = [d["coverage"] for d in tg_diags]
+            proximities = [d["proximity_bonus"] for d in tg_diags]
+            tg_avg_coverage = sum(coverages) / len(coverages) if coverages else 0.0
+            tg_avg_proximity = sum(proximities) / len(proximities) if proximities else 0.0
+            tg_avg_score = sum(tg_scores_raw) / len(tg_scores_raw) if tg_scores_raw else 0.0
+            tg_avg_beta1 = sum(d.get("beta_1", 0) for d in tg_diags) / len(tg_diags) if tg_diags else 0.0
+            tg_avg_n_insights = sum(d.get("n_insights", 0) for d in tg_diags) / len(tg_diags) if tg_diags else 0.0
+            tg_avg_f_theta = sum(d.get("f_theta", 0) for d in tg_diags) / len(tg_diags) if tg_diags else 0.0
+
+            # Spearman rho vs BM25 (redundancy check)
+            if len(tg_ids) >= 5:
+                try:
+                    from scipy.stats import spearmanr
+                    bm25_order = list(range(len(tg_ids)))
+                    tg_order = [token_graph_scores[did] for did in tg_ids]
+                    rho, _ = spearmanr(bm25_order, tg_order)
+                    tg_spearman_bm25 = float(rho) if rho == rho else 0.0
+                except ImportError:
+                    pass  # scipy not available
+
+            tg_ms = (_tg_time.time() - _tg_t0) * 1000
+
         # ── Phase 5: Graph scoring with CoT boost ────────────────
         n_edges_discovered = 0
         n_edges_removed = 0
         mp_iterations_run = 0
         avg_gedig_local = 0.0
+        ensemble_applied = False
+        ensemble_ms = 0.0
+        ensemble_n_ag_docs = 0
+        ensemble_n_dg_docs = 0
+        ensemble_avg_agreement = 0.0
+        ensemble_score_variance_mean = 0.0
 
-        if self.scoring_mode == "gedig":
+        if self.n_cot_ensemble > 1 and len(cot_list) > 1 and not cot_skipped:
+            # ── Spec P: Multi-CoT Ensemble scoring ──
+            import numpy as _np
+            t_ens = time.time()
+            ensemble_applied = True
+
+            per_cot_scores: list[dict[str, float]] = []
+
+            for ci, cot_info in enumerate(cot_list):
+                graph_i = graph.copy()
+                self._inject_cot_nodes(
+                    graph_i, cot_info["text"], cot_info["concepts"],
+                    titles, sentences_list
+                )
+
+                if self.scoring_mode == "gedig":
+                    scores_i, diag_i = self._compute_gedig_scores(
+                        query, cot_info["text"], cot_info["concepts"],
+                        graph_i, titles, sentences_list, doc_id_map
+                    )
+                elif self.scoring_mode == "gedig_refine":
+                    scores_i, diag_i = self._compute_gedig_refine_scores(
+                        query, cot_info["text"], cot_info["concepts"],
+                        graph_i, titles, sentences_list, doc_id_map
+                    )
+                else:
+                    scores_i = self._compute_graph_scores(
+                        query, cot_info["text"], cot_info["concepts"],
+                        graph_i, titles, sentences_list, doc_id_map
+                    )
+                    diag_i = {}
+
+                per_cot_scores.append(scores_i)
+
+                if ci == len(cot_list) - 1:
+                    n_edges_discovered = diag_i.get("n_edges_discovered", 0)
+                    n_edges_removed = diag_i.get("n_edges_removed", 0)
+                    mp_iterations_run = diag_i.get("mp_iterations_run", 0)
+                    avg_gedig_local = diag_i.get("avg_gedig_local", 0.0)
+
+            # ── Ensemble aggregation ──
+            all_doc_ids: set[str] = set()
+            for s in per_cot_scores:
+                all_doc_ids.update(s.keys())
+
+            graph_scores: dict[str, float] = {}
+            doc_agreements: dict[str, float] = {}
+
+            variance_sum = 0.0
+            for doc_id in all_doc_ids:
+                arr = _np.array([s.get(doc_id, 0.0) for s in per_cot_scores])
+                mean_s = float(_np.mean(arr))
+                var_s = float(_np.var(arr))
+                graph_scores[doc_id] = mean_s
+                normalized_var = min(var_s / 0.25, 1.0)
+                doc_agreements[doc_id] = 1.0 - normalized_var
+                variance_sum += var_s
+
+            # Re-normalize to [0, 1]
+            if graph_scores:
+                gs_max = max(graph_scores.values())
+                gs_min = min(graph_scores.values())
+                gs_range = gs_max - gs_min
+                if gs_range > 1e-10:
+                    graph_scores = {k: (v - gs_min) / gs_range
+                                    for k, v in graph_scores.items()}
+
+            # DG/AG classification
+            for doc_id in all_doc_ids:
+                agr = doc_agreements.get(doc_id, 0.0)
+                if agr >= 0.8 and graph_scores.get(doc_id, 0) > 0.3:
+                    ensemble_n_ag_docs += 1
+                elif agr < 0.5:
+                    ensemble_n_dg_docs += 1
+
+            all_agr = list(doc_agreements.values())
+            ensemble_avg_agreement = float(_np.mean(all_agr)) if all_agr else 0.0
+            ensemble_score_variance_mean = variance_sum / len(all_doc_ids) if all_doc_ids else 0.0
+            ensemble_ms = (time.time() - t_ens) * 1000
+
+        elif self.scoring_mode == "gedig":
             graph_scores, gedig_diag = self._compute_gedig_scores(
                 query, cot_text, all_cot_concepts, graph,
                 titles, sentences_list, doc_id_map
@@ -551,6 +1094,73 @@ class BrightCoTPipeline:
                 query, cot_text, all_cot_concepts, graph,
                 titles, sentences_list, doc_id_map
             )
+
+        # ── Phase 5.25: Entity graph F-eval walk score (Spec O) ───
+        entity_feval_scores = {}
+        ef_diag: dict = {}
+        if self.enable_entity_feval:
+            from gedig_scoring import entity_graph_feval_scores
+            entity_feval_scores, ef_diag = entity_graph_feval_scores(
+                graph, query, cot_text, all_cot_concepts,
+                titles, sentences_list, doc_id_map,
+                f_lambda=self.entity_feval_lambda,
+            )
+
+        # ── Phase 5.5: Blend token graph + entity F-eval scores ──
+        if self.enable_token_graph and token_graph_scores:
+            w = self.token_graph_weight
+            for doc_id in graph_scores:
+                g = graph_scores[doc_id]
+                t = token_graph_scores.get(doc_id, 0.0)
+                graph_scores[doc_id] = (1.0 - w) * g + w * t
+
+        # ── Ranking DG/AG routing for entity F-eval (Spec O.2) ──
+        entity_feval_ranking_dg = 0.0
+        entity_feval_adaptive_weight = 0.0
+        if self.enable_entity_feval and entity_feval_scores:
+            import math as _math
+
+            # (a) Score dispersion DG: normalized entropy of top-10 graph_scores
+            sorted_gs = sorted(graph_scores.values(), reverse=True)
+            top_k_gs = sorted_gs[:10]
+            sum_topk = sum(top_k_gs)
+            if len(top_k_gs) >= 2 and sum_topk > 1e-12:
+                probs = [v / sum_topk for v in top_k_gs]
+                entropy = -sum(p * _math.log(p + 1e-10) for p in probs)
+                max_entropy = _math.log(len(top_k_gs))
+                score_dispersion_dg = entropy / max_entropy if max_entropy > 0 else 1.0
+            else:
+                score_dispersion_dg = 1.0  # all zero → maximum uncertainty
+
+            # (b) Rank disagreement: 1 - Jaccard(base_top10, ef_top10)
+            base_top10 = sorted(graph_scores, key=graph_scores.get, reverse=True)[:10]
+            ef_top10 = sorted(entity_feval_scores, key=entity_feval_scores.get, reverse=True)[:10]
+            overlap = len(set(base_top10) & set(ef_top10))
+            rank_agreement = overlap / 10.0 if len(base_top10) >= 10 else (
+                overlap / max(len(base_top10), 1)
+            )
+            rank_disagreement = 1.0 - rank_agreement
+
+            # (c) Convergence signal: avg_convergence from entity F-eval diagnostics
+            convergence_raw = ef_diag.get("avg_convergence", 0.0)
+            convergence_signal = min(convergence_raw / 2.0, 1.0)  # normalize ~[0, 1]
+
+            # 3-signal ranking DG (cf. main code 3-attention)
+            entity_feval_ranking_dg = score_dispersion_dg * rank_disagreement * convergence_signal
+
+            # Adaptive weight: base_weight × min(ranking_dg × max_factor, max_factor)
+            max_factor = 2.5
+            entity_feval_adaptive_weight = self.entity_feval_weight * min(
+                entity_feval_ranking_dg * max_factor, max_factor
+            )
+
+            # Apply adaptive blend
+            w = entity_feval_adaptive_weight
+            if w > 1e-6:
+                for doc_id in graph_scores:
+                    g = graph_scores[doc_id]
+                    ef = entity_feval_scores.get(doc_id, 0.0)
+                    graph_scores[doc_id] = (1.0 - w) * g + w * ef
 
         # ── Phase 6: Combined ranking ────────────────────────────
         # Score all candidates in merged pool
@@ -589,6 +1199,131 @@ class BrightCoTPipeline:
                 # LLM rerank failure is non-fatal
                 import logging
                 logging.getLogger(__name__).warning("LLM rerank failed: %s", e)
+
+        # ── Phase 7b: LLM Pointwise Rerank (Spec J) ──────────────
+        pointwise_rerank_applied = False
+        pointwise_n_scored = 0
+        pointwise_n_calls = 0
+        pointwise_ms = 0.0
+        pointwise_avg_score = 0.0
+
+        if self.enable_pointwise_rerank and not cot_skipped:
+            t_pw = time.time()
+            pw_pool = combined[: self.pointwise_rerank_top_k]
+            try:
+                pw_result = self._pointwise_rerank(
+                    query, cot_text, pw_pool, docs, id_to_idx
+                )
+                if pw_result:
+                    pw_scores, pw_n_calls_ = pw_result
+                    pointwise_n_calls = pw_n_calls_
+                    pointwise_n_scored = len(pw_scores)
+                    if pw_scores:
+                        pointwise_avg_score = sum(pw_scores.values()) / len(pw_scores)
+
+                    # ---- Normalize PW scores within scored pool (min-max) ----
+                    if len(pw_scores) >= 2:
+                        pw_vals = list(pw_scores.values())
+                        pw_min, pw_max = min(pw_vals), max(pw_vals)
+                        pw_range = pw_max - pw_min
+                        if pw_range > 1e-9:
+                            pw_scores = {
+                                did: (s - pw_min) / pw_range
+                                for did, s in pw_scores.items()
+                            }
+                        # else: all same score, normalization has no effect
+
+                    # ---- Blend PW with original combined scores ----
+                    w = self.pointwise_blend_weight  # PW weight
+                    scored_set = set(pw_scores.keys())
+                    # Build lookup for original combined scores
+                    orig_scores = {did: s for did, s in combined}
+                    blended = []
+                    for did, _ in pw_pool:
+                        if did in scored_set:
+                            orig = orig_scores.get(did, 0.0)
+                            pw = pw_scores[did]
+                            blended.append((did, w * pw + (1 - w) * orig))
+                    # Sort scored pool by blended score
+                    blended.sort(key=lambda x: -x[1])
+
+                    # ---- Cap unscored docs at min of scored pool ----
+                    min_scored = min(s for _, s in blended) if blended else 0.0
+                    remaining = []
+                    for did, s in combined:
+                        if did not in scored_set:
+                            remaining.append((did, min(s, min_scored)))
+                    remaining.sort(key=lambda x: -x[1])
+
+                    combined = blended + remaining
+                    pointwise_rerank_applied = True
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(
+                    "Pointwise rerank failed: %s", e
+                )
+            pointwise_ms = (time.time() - t_pw) * 1000
+
+        # ── Phase 7c: Reasoning LLM Rerank (Spec L) ──────────────
+        reasoning_rerank_applied = False
+        reasoning_n_scored = 0
+        reasoning_n_calls = 0
+        reasoning_ms = 0.0
+        reasoning_avg_score = 0.0
+
+        if self.enable_reasoning_rerank and not cot_skipped:
+            t_rr = time.time()
+            rr_pool = combined[: self.reasoning_rerank_top_k]
+            try:
+                rr_result = self._reasoning_rerank(
+                    query, cot_text, rr_pool, docs, id_to_idx
+                )
+                if rr_result:
+                    rr_scores, rr_n_calls_ = rr_result
+                    reasoning_n_calls = rr_n_calls_
+                    reasoning_n_scored = len(rr_scores)
+                    if rr_scores:
+                        reasoning_avg_score = sum(rr_scores.values()) / len(rr_scores)
+
+                    # ---- Normalize scores within scored pool (min-max) ----
+                    if len(rr_scores) >= 2:
+                        rr_vals = list(rr_scores.values())
+                        rr_min, rr_max = min(rr_vals), max(rr_vals)
+                        rr_range = rr_max - rr_min
+                        if rr_range > 1e-9:
+                            rr_scores = {
+                                did: (s - rr_min) / rr_range
+                                for did, s in rr_scores.items()
+                            }
+
+                    # ---- Blend reasoning scores with combined scores ----
+                    w = self.reasoning_rerank_blend_weight
+                    scored_set = set(rr_scores.keys())
+                    orig_scores = {did: s for did, s in combined}
+                    blended = []
+                    for did, _ in rr_pool:
+                        if did in scored_set:
+                            orig = orig_scores.get(did, 0.0)
+                            rr = rr_scores[did]
+                            blended.append((did, w * rr + (1 - w) * orig))
+                    blended.sort(key=lambda x: -x[1])
+
+                    # ---- Cap unscored docs at min of scored pool ----
+                    min_scored = min(s for _, s in blended) if blended else 0.0
+                    remaining = []
+                    for did, s in combined:
+                        if did not in scored_set:
+                            remaining.append((did, min(s, min_scored)))
+                    remaining.sort(key=lambda x: -x[1])
+
+                    combined = blended + remaining
+                    reasoning_rerank_applied = True
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(
+                    "Reasoning rerank failed: %s", e
+                )
+            reasoning_ms = (time.time() - t_rr) * 1000
 
         ranked_ids = [doc_id for doc_id, _ in combined[: self.rerank_top_k]]
         ranked_scores = [score for _, score in combined[: self.rerank_top_k]]
@@ -639,6 +1374,66 @@ class BrightCoTPipeline:
             n_edges_removed=n_edges_removed,
             mp_iterations_run=mp_iterations_run,
             avg_gedig_local=avg_gedig_local,
+            # Pointwise reranking (Spec J)
+            pointwise_rerank_applied=pointwise_rerank_applied,
+            pointwise_rerank_n_scored=pointwise_n_scored,
+            pointwise_rerank_n_calls=pointwise_n_calls,
+            pointwise_rerank_ms=pointwise_ms,
+            pointwise_rerank_avg_score=pointwise_avg_score,
+            # Query decomposition (Spec K)
+            query_decomp_applied=query_decomp_applied,
+            n_sub_queries=n_sub_queries,
+            n_decomp_new_candidates=n_decomp_new_candidates,
+            n_decomp_new_gold=n_decomp_new_gold,
+            query_decomp_ms=query_decomp_ms,
+            # Reasoning reranking (Spec L)
+            reasoning_rerank_applied=reasoning_rerank_applied,
+            reasoning_rerank_model=self.rerank_model if reasoning_rerank_applied else "",
+            reasoning_rerank_n_scored=reasoning_n_scored,
+            reasoning_rerank_n_calls=reasoning_n_calls,
+            reasoning_rerank_ms=reasoning_ms,
+            reasoning_rerank_avg_score=reasoning_avg_score,
+            # RIA iterative expansion (Spec M)
+            ria_applied=ria_applied,
+            ria_rounds=ria_rounds,
+            ria_beta0_history=ria_beta0_history,
+            ria_new_docs_per_round=ria_new_docs_per_round,
+            ria_new_gold_per_round=ria_new_gold_per_round,
+            ria_total_new_docs=sum(ria_new_docs_per_round),
+            ria_total_new_gold=sum(ria_new_gold_per_round),
+            ria_ms=ria_ms,
+            # Token graph (Spec N)
+            token_graph_applied=token_graph_applied,
+            token_graph_avg_coverage=tg_avg_coverage,
+            token_graph_avg_proximity=tg_avg_proximity,
+            token_graph_avg_score=tg_avg_score,
+            token_graph_n_docs=tg_n_docs,
+            token_graph_ms=tg_ms,
+            token_graph_spearman_bm25=tg_spearman_bm25,
+            token_graph_walk_score=self.token_graph_walk_score if self.enable_token_graph else False,
+            token_graph_avg_beta1=tg_avg_beta1,
+            token_graph_f_eval=self.token_graph_f_eval if self.enable_token_graph else False,
+            token_graph_insight_mode=self.token_graph_insight_mode if self.enable_token_graph else "none",
+            token_graph_avg_n_insights=tg_avg_n_insights,
+            token_graph_avg_f_theta=tg_avg_f_theta,
+            # Entity graph F-eval (Spec O)
+            entity_feval_applied=self.enable_entity_feval and bool(entity_feval_scores),
+            entity_feval_n_ag=ef_diag.get("n_ag", 0),
+            entity_feval_n_dg=ef_diag.get("n_dg", 0),
+            entity_feval_f_theta=ef_diag.get("f_theta", 0.0),
+            entity_feval_avg_convergence=ef_diag.get("avg_convergence", 0.0),
+            # Ranking DG/AG routing (Spec O.2)
+            entity_feval_ranking_dg=entity_feval_ranking_dg,
+            entity_feval_adaptive_weight=entity_feval_adaptive_weight,
+            # Multi-CoT Ensemble (Spec P)
+            ensemble_applied=ensemble_applied,
+            ensemble_n_cots=len(cot_list) if ensemble_applied else 0,
+            ensemble_cot_cache_hit=cot_cache_hit if ensemble_applied else False,
+            ensemble_ms=ensemble_ms,
+            ensemble_n_ag_docs=ensemble_n_ag_docs,
+            ensemble_n_dg_docs=ensemble_n_dg_docs,
+            ensemble_avg_agreement=ensemble_avg_agreement,
+            ensemble_score_variance_mean=ensemble_score_variance_mean,
         )
 
     def _compute_pre_beta0(
@@ -723,6 +1518,122 @@ class BrightCoTPipeline:
             )
 
         return new_candidates, n_new_gold, retrieval_query
+
+    def _ria_expand_query(
+        self,
+        query: str,
+        cot_text: str,
+        feedback_docs: list[str],
+        round_num: int,
+    ) -> list[str]:
+        """Generate new search keywords from top retrieved documents (Spec M).
+
+        Uses LLM to identify information gaps and suggest new search terms
+        based on the current retrieval results.
+
+        Returns
+        -------
+        keywords : list[str]
+            New search keywords/phrases (5-10 items).
+        """
+        docs_text = "\n\n".join(feedback_docs)
+        prompt = (
+            "You are a search expert analyzing retrieval results for a complex query.\n\n"
+            f"Query: {query}\n\n"
+            f"Previous reasoning: {cot_text[:1000]}\n\n"
+            f"Top retrieved documents (round {round_num}):\n"
+            f"{docs_text}\n\n"
+            "Based on these documents, identify:\n"
+            "1. What information gaps remain to fully answer the query?\n"
+            "2. What new search terms, concepts, or entities should we look for?\n"
+            "3. What related topics or domains might contain relevant documents?\n\n"
+            "Output 5-10 new search keywords/phrases, one per line.\n"
+            "Do NOT repeat the original query terms. Focus on NEW concepts found in the documents."
+        )
+
+        try:
+            response = self.llm._llm_call_raw(prompt, max_tokens=300)
+            # Parse: one keyword per line, filter empty
+            lines = [
+                line.strip().lstrip("0123456789.-) ")
+                for line in response.strip().split("\n")
+            ]
+            keywords = [line for line in lines if line and len(line) > 2]
+            return keywords[:10]
+        except Exception:
+            return []
+
+    # ── Multi-CoT Ensemble (Spec P) ─────────────────────────────
+
+    def _generate_or_load_cots(
+        self,
+        query: str,
+        query_id: str,
+    ) -> tuple[list[dict], bool]:
+        """Generate N CoTs or load from cache.
+
+        Returns (cot_list, cache_hit) where each item is
+        {"text": str, "concepts": set[str], "entities": set[str]}.
+        """
+        import json as _json
+        from pathlib import Path as _Path
+
+        N = self.n_cot_ensemble
+        cache_hit = False
+
+        # ── Try cache ──
+        if self.cot_cache_dir is not None:
+            cache_dir = _Path(self.cot_cache_dir)
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            cache_file = cache_dir / f"{query_id}.json"
+
+            if cache_file.exists():
+                with open(cache_file) as f:
+                    cached = _json.load(f)
+                if len(cached) >= N:
+                    cot_list = []
+                    for entry in cached[:N]:
+                        ents = set(entry.get("entities", []))
+                        terms = set(entry.get("terms", []))
+                        cot_list.append({
+                            "text": entry["text"],
+                            "concepts": ents | terms,
+                            "entities": ents,
+                        })
+                    return cot_list, True
+
+        # ── Generate N CoTs ──
+        prompt = _COT_PROMPT.format(query=query[:500])
+        cot_list = []
+
+        for i in range(N):
+            try:
+                text = self.llm_ensemble._llm_call_raw(prompt, max_tokens=300)
+            except Exception as e:
+                text = f"[CoT error {i}: {e}]"
+            entities = extract_entities(text)
+            terms = _extract_lowercase_concepts(text)
+            cot_list.append({
+                "text": text,
+                "concepts": entities | terms,
+                "entities": entities,
+            })
+
+        # ── Write cache ──
+        if self.cot_cache_dir is not None:
+            serializable = [
+                {
+                    "text": c["text"],
+                    "entities": sorted(c["entities"]),
+                    "terms": sorted(c["concepts"] - c["entities"]),
+                }
+                for c in cot_list
+            ]
+            cache_file = _Path(self.cot_cache_dir) / f"{query_id}.json"
+            with open(cache_file, "w") as f:
+                _json.dump(serializable, f, indent=2, ensure_ascii=False)
+
+        return cot_list, False
 
     def _inject_cot_nodes(
         self,
@@ -1181,6 +2092,112 @@ class BrightCoTPipeline:
         return graph_scores, diagnostics
 
 
+    # ── LLM Pointwise Reranking (Spec J) ────────────────────────
+
+    # ── Query Decomposition Prompt (Spec K) ─────────────────────
+    _DECOMP_PROMPT = """You are a search expert. Break this complex query into specific sub-questions that would each help find relevant documents.
+
+Query: {query}
+
+Generate 3-5 focused sub-questions. Each should:
+- Target a specific aspect, mechanism, or sub-topic
+- Use precise technical terms that would appear in relevant documents
+- Be answerable independently
+
+Output ONLY the sub-questions, one per line (no numbering, no explanation):"""
+
+    _POINTWISE_PROMPT = """You are a relevance expert. Rate how well each document helps answer the query.
+
+IMPORTANT: This is a reasoning-intensive query. Documents may be indirectly relevant — they might provide background knowledge, supporting evidence, or address a sub-question needed to answer the main query. Consider INDIRECT relevance highly.
+
+Query: {query}
+
+Key reasoning needed:
+{cot_text}
+
+Scoring guide (use the FULL 0-10 range, aim for spread):
+- 8-10: Directly answers the query or provides critical evidence
+- 5-7: Provides useful background, related mechanisms, or partial answers
+- 2-4: Loosely related topic, minimal useful information
+- 0-1: Completely irrelevant
+
+Documents:
+{doc_list}
+
+Output ONLY scores (one per line):
+D1: <score>
+D2: <score>
+...
+"""
+
+    def _pointwise_rerank(
+        self,
+        query: str,
+        cot_text: str,
+        candidates: list[tuple[str, float]],
+        docs: list[dict],
+        id_to_idx: dict[str, int],
+    ) -> tuple[dict[str, float], int] | None:
+        """LLM pointwise relevance scoring (Spec J).
+
+        Scores each candidate document individually using LLM reasoning.
+        Returns (doc_id -> normalized_score, n_api_calls) or None on failure.
+        """
+        if not candidates:
+            return None
+
+        batch_size = self.pointwise_batch_size
+        all_scores: dict[str, float] = {}
+        n_calls = 0
+
+        # Process in batches
+        for batch_start in range(0, len(candidates), batch_size):
+            batch = candidates[batch_start: batch_start + batch_size]
+
+            # Build document list with content snippets
+            doc_parts = []
+            for i, (doc_id, _score) in enumerate(batch):
+                idx = id_to_idx.get(doc_id)
+                if idx is not None:
+                    content = docs[idx]["content"][:1500]
+                else:
+                    content = "[content unavailable]"
+                doc_parts.append(f"D{i+1}: {content}")
+            doc_list = "\n\n".join(doc_parts)
+
+            prompt = self._POINTWISE_PROMPT.format(
+                query=query[:500],
+                cot_text=cot_text[:500],
+                doc_list=doc_list,
+            )
+
+            try:
+                response = self.llm._llm_call_raw(prompt, max_tokens=150)
+                n_calls += 1
+
+                # Parse "D1: 7\nD2: 3\n..." → scores
+                for line in response.strip().split("\n"):
+                    line = line.strip()
+                    if not line:
+                        continue
+                    # Match patterns like "D1: 7", "D1:7", "D1 - 7", "D1: 7/10"
+                    m = re.match(r"D(\d+)\s*[:\-]\s*(\d+(?:\.\d+)?)", line)
+                    if m:
+                        d_idx = int(m.group(1)) - 1  # 1-indexed → 0-indexed
+                        score = float(m.group(2))
+                        score = min(max(score, 0.0), 10.0)  # clamp 0-10
+                        if 0 <= d_idx < len(batch):
+                            doc_id = batch[d_idx][0]
+                            all_scores[doc_id] = score / 10.0  # normalize to [0, 1]
+            except Exception:
+                # Individual batch failure is non-fatal; continue with next
+                continue
+
+        if not all_scores:
+            return None
+
+        return all_scores, n_calls
+
     # ── LLM Listwise Reranking ──────────────────────────────────
 
     _RERANK_PROMPT = """Given a query and reasoning, rank the following documents by relevance.
@@ -1254,6 +2271,116 @@ Ranking:"""
             return reranked
         except Exception:
             return None
+
+    # ── Reasoning LLM Reranking (Spec L) ───────────────────────
+
+    _REASONING_RERANK_PROMPT = """You are an expert relevance assessor for reasoning-intensive information retrieval.
+
+Your task: Determine how relevant this document is for answering the query below.
+
+IMPORTANT: This query requires REASONING — the document may not directly answer the query but could provide essential background knowledge, mechanisms, evidence, or sub-answers needed for the full answer. Consider both DIRECT and INDIRECT relevance.
+
+Query: {query}
+
+Reasoning context (chain-of-thought about what information is needed):
+{cot_text}
+
+Document:
+{doc_content}
+
+Instructions:
+1. Think step-by-step about how this document relates to the query.
+2. Consider: Does it explain a mechanism? Provide evidence? Answer a sub-question? Give background needed to reason about the answer?
+3. Assign a relevance score from 0 to 10.
+
+Scoring guide:
+- 9-10: Directly answers the query or provides critical evidence for the answer
+- 7-8: Explains key mechanisms or provides strong supporting evidence
+- 5-6: Provides useful background or addresses a related sub-question
+- 3-4: Tangentially related, some useful context
+- 1-2: Loosely related topic, minimal useful information
+- 0: Completely irrelevant
+
+Output your reasoning (1-3 sentences) followed by your score on the last line in this exact format:
+SCORE: <number>"""
+
+    def _reasoning_rerank(
+        self,
+        query: str,
+        cot_text: str,
+        candidates: list[tuple[str, float]],
+        docs: list[dict],
+        id_to_idx: dict[str, int],
+    ) -> tuple[dict[str, float], int] | None:
+        """LLM reasoning-trace relevance scoring (Spec L).
+
+        Scores each candidate document individually using a stronger LLM
+        with chain-of-thought reasoning before score assignment.
+        One document per LLM call for maximum reasoning quality.
+
+        Returns (doc_id -> normalized_score, n_api_calls) or None on failure.
+        """
+        if not candidates:
+            return None
+
+        all_scores: dict[str, float] = {}
+        n_calls = 0
+        doc_chars = self.reasoning_rerank_doc_chars
+
+        for doc_id, _score in candidates:
+            idx = id_to_idx.get(doc_id)
+            if idx is not None:
+                content = docs[idx]["content"][:doc_chars]
+            else:
+                content = "[content unavailable]"
+
+            prompt = self._REASONING_RERANK_PROMPT.format(
+                query=query[:1000],
+                cot_text=cot_text[:1000],
+                doc_content=content,
+            )
+
+            try:
+                response = self.rerank_llm._llm_call_raw(prompt, max_tokens=300)
+                n_calls += 1
+
+                # Parse "SCORE: 7" from the response
+                score = self._parse_reasoning_score(response)
+                if score is not None:
+                    all_scores[doc_id] = score / 10.0  # normalize to [0, 1]
+            except Exception:
+                # Individual doc failure is non-fatal; continue
+                continue
+
+        if not all_scores:
+            return None
+
+        return all_scores, n_calls
+
+    @staticmethod
+    def _parse_reasoning_score(response: str) -> float | None:
+        """Extract score from reasoning rerank response.
+
+        Looks for "SCORE: <number>" pattern, falling back to last number
+        in the response if the pattern isn't found.
+        """
+        # Primary: look for "SCORE: 7" or "SCORE: 7.5"
+        m = re.search(r"SCORE\s*:\s*(\d+(?:\.\d+)?)", response, re.IGNORECASE)
+        if m:
+            score = float(m.group(1))
+            return min(max(score, 0.0), 10.0)
+
+        # Fallback: last number on its own line
+        lines = response.strip().split("\n")
+        for line in reversed(lines):
+            line = line.strip()
+            m = re.match(r"^(\d+(?:\.\d+)?)\s*$", line)
+            if m:
+                score = float(m.group(1))
+                if 0 <= score <= 10:
+                    return score
+
+        return None
 
 
 # ---------------------------------------------------------------------------

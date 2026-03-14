@@ -1,9 +1,352 @@
 # Multi-hop QA Experiments
 
-Two independent experiment lines in this directory:
+Four experiment lines in this directory:
 
 1. **v2/v3 (HotpotQA)**: geDIG + Betti numbers + dual-process architecture
 2. **v10 (MuSiQue)**: Entity-graph guided paragraph reordering
+3. **v11 (MuSiQue)**: Pre-computed topology routing (50-paragraph)
+4. **v12 (FRAMES / BRIGHT)**: Open-world topology-guided retrieval ← **active**
+
+---
+
+## v12 BRIGHT: Reasoning-Intensive Document Retrieval (Active)
+
+### 目標
+
+nDCG@10 = **0.45** (現在ベスト: 0.3181)
+
+BRIGHT ベンチマーク (ICLR 2025) の 3 ドメイン (biology, economics, stackoverflow) で、
+geDIG ベースのグラフ re-ranking パイプラインの性能を検証・改善する。
+
+### ベンチマーク概要
+
+- **BRIGHT**: 1,384 クエリ, 12 ドメイン, 1.33M 文書
+- 推論集約型 — 標準的な検索モデルは大幅に性能低下
+- BM25 baseline = 14.5, SOTA (INF-X-Retriever) = 63.4 nDCG@10
+- Leaderboard: https://brightbenchmark.github.io/
+
+### パイプライン アーキテクチャ
+
+```
+Phase 0:  [Optional] Query decomposition (LLM → 3-5 sub-questions) [Spec K]
+Phase 1:  BM25 initial retrieval (top-100)
+Phase 1a: [Optional] Sub-query BM25 retrieval (50/sub-query → ~250 new) [Spec K]
+Phase 1b: [Optional] Dense pool expansion (E5-base-v2 + FAISS) [Spec I]
+Phase 2:  LLM CoT reasoning → entity extraction
+Phase 2.5: CoT re-retrieval (BM25 + optional Dense)
+Phase 2.6: [Optional] RIA iterative expansion (β₀-gated, max 3 rounds) [Spec M]
+Phase 3:  Entity graph construction (sentence-level, three-tier edges)
+Phase 4:  CoT node injection (virtual nodes → bridge edges)
+Phase 4.5: [Optional] Per-document token graph scoring (spaCy dep parse + DG/AG walk) [Spec N/N.1]
+Phase 5:  Scoring
+  ├─ scoring_mode="classic"      → 5-component (PageRank+Entity+Token+Degree+CoT bridge)
+  ├─ scoring_mode="gedig"        → pure geDIG (MessagePassing + EdgeReevaluation)
+  └─ scoring_mode="gedig_refine" → geDIG graph refinement + classic scoring ★best
+Phase 5.5: [Optional] Token graph blend (external) [Spec N]
+Phase 6:  Combined ranking: α·BM25 + (1-α)·graph_score
+Phase 7:  [Optional] LLM listwise rerank
+Phase 7b: [Optional] LLM pointwise reasoning rerank (gpt-4o-mini) [Spec J]
+Phase 7c: [Optional] LLM reasoning rerank (gpt-4o, 1doc/call) [Spec L]
+```
+
+### 実験結果サマリー (Biology 50q, α=0.1)
+
+| Spec | Configuration | nDCG@10 | R@10 | MRR | Note |
+|------|---------------|---------|------|-----|------|
+| A | Classic (CoT re-retrieval) | 0.2438 | 0.2173 | 0.3740 | 5成分 baseline |
+| H | geDIG refine | **0.2496** | **0.2419** | **0.4183** | ★ ベスト |
+| H | geDIG (pure) | 0.1130 | 0.1629 | 0.1436 | CoT bridge なし |
+| I | Classic + Dense (full) | 0.1797 | 0.1950 | 0.2342 | -26% 劣化 |
+| I | geDIG refine + Dense (full) | 0.1509 | 0.1995 | 0.1969 | -38% 劣化 |
+| I | Classic + Dense (pool-only) | 0.2341 | 0.1969 | 0.4125 | ≈ baseline |
+| I | geDIG refine + Dense (pool-only) | 0.2297 | 0.2276 | 0.3648 | ≈ baseline |
+| J | PW rerank blend=0.2 | 0.2410 | 0.2299 | 0.3867 | -3.4% |
+| J | PW rerank blend=0.4 | 0.1971 | 0.1847 | 0.3189 | -21.0% |
+| J | PW rerank blend=0.6 | 0.2313 | 0.2430 | 0.3499 | -7.3% |
+| K | Query decomposition | 0.1978 | 0.1680 | 0.3457 | -1.3% (68 new gold 発見) |
+| L | gpt-4o reasoning rerank (w=0.7) | 0.2342 | 0.2159 | 0.3756 | -6.2% (pointwise の限界) |
+| M | RIA iterative expansion | 0.2564 | 0.2661 | 0.3815 | +2.7% (38 new gold via RIA) |
+| N | Token graph (Spec N only) | 0.2544 | 0.2486 | 0.3917 | +1.9% (independent ranking signal) |
+| M+N | RIA + Token Graph | 0.2707 | 0.2643 | 0.3972 | +8.5% (相乗効果) |
+| N.1 | Walk Score (dg=2.0, のみ) | 0.2238 | 0.2158 | 0.3489 | -10.3% (RIA なしでは逆効果) |
+| **M+N.1** | **RIA + Walk Score (dg=2.0)** | **0.3181** | **0.3139** | **0.4424** | **★ ベスト +27.4% (Wake-Sleep-Wake)** |
+| O | Entity F-eval | — | — | — | entity-feval 単体テスト未実施 |
+| P | Multi-CoT Ensemble (N=3) | 0.0829 | 0.1005 | 0.1211 | **-32% 劣化** (DG信号が発生しない) |
+| P+O | Multi-CoT Ensemble + Entity F-eval | 0.0788 | 0.0960 | 0.1183 | **-35% 劣化** |
+
+#### Spec P 詳細結果 (v19, 3ドメイン×50q = 150q)
+
+| # | 構成 | nDCG@10 | Bio | Econ | SO | 備考 |
+|---|------|---------|-----|------|----|------|
+| C1a | baseline N=1 run1 | **0.1184** | 0.165 | 0.100 | 0.090 | ベースライン |
+| C1b | baseline N=1 run2 | **0.1258** | 0.191 | 0.091 | 0.095 | CoT非決定性で6.3%ぶれ |
+| C2 | ensemble N=3 | 0.0829 | 0.133 | 0.055 | 0.061 | **-32%** (平均化で劣化) |
+| C3 | ensemble N=3 + feval | 0.0788 | 0.120 | 0.055 | 0.062 | **-35%** |
+
+**Spec P の教訓**:
+- temperature=0.7 の3本CoTでは agreement=0.97~1.00 → **DG信号が一切発生しない**
+- Ensemble 平均化がスコアを平坦化し、正解文書のランクが下がる
+- LLM は同じクエリに対して似た推論をするため、multi-CoT で多様性を得にくい
+- **結論: Spec P は保留。他のアプローチ（Retrieval Recall 改善）を優先**
+
+### Full 323q 結果 (3 domains, α=0.1)
+
+| Configuration | Biology | Economics | StackOverflow | Overall |
+|---------------|---------|-----------|---------------|---------|
+| Spec A (classic) | 0.1879 | 0.1240 | 0.1470 | 0.1520 |
+| Spec H (geDIG refine) | **0.2069** | 0.1187 | 0.1296 | 0.1508 |
+
+### Spec 進行状況
+
+| Spec | 内容 | 状態 | 結果 |
+|------|------|------|------|
+| A | CoT re-retrieval + entity graph | ✅ 完了 | nDCG=0.152 (323q) |
+| B-D | Adaptive routing, LLM rerank | ✅ 完了 | 微改善 (0.152→0.160) |
+| E | geDIG routing (tier selection) | ✅ 完了 | 効果なし |
+| F-G | Episode graph, Hybrid graph | ✅ 完了 | 効果なし |
+| H | geDIG scoring (graph refinement) | ✅ 完了 | ★ベスト biology +10% (0.2496) |
+| I | Dense retrieval integration | ✅ 完了 | 改善なし (-4%～-38%, 構造的限界) |
+| J | Pointwise LLM reranking | ✅ 完了 | 改善なし (-3%～-21%, gpt-4o-mini 限界) |
+| K | Query decomposition | ✅ 完了 | ≈中立 (-1.3%, recall改善/ranking未活用) |
+| L | Stronger LLM Reranking (gpt-4o) | ✅ 完了 | 改善なし (-6.2%, pointwise の限界) |
+| M | RIA Iterative Expansion | ✅ 完了 | ★ **初の正改善** +2.7% (nDCG=0.2564, R@10+10%) |
+| N | Token-level Graph Scoring | ✅ 完了 | M+Nで +8.5% (nDCG=0.2707, 独立ranking信号) |
+| **N.1** | **geDIG Walk Score** | ✅ 完了 | **★ M+N.1で最高 +27.4%** (nDCG=0.3181, Wake-Sleep-Wake) |
+| O | Entity F-eval scoring | ✅ 完了 | P との組合せで検証 |
+| P | Multi-CoT Ensemble (DG/AG) | ✅ 完了 | **-32% 劣化** (保留: CoT間の多様性不足) |
+
+### 学んだこと (Spec I-N.1 の統一的教訓)
+
+Spec I-L の 4 つの negative result → Spec M+N+N.1 で劇的改善:
+
+- **Pointwise reranking は BRIGHT に不適** — gpt-4o-mini (J) も gpt-4o (L) も改善せず
+- **候補プール拡張 (I, K)** は gold recovery に成功するが、scoring で活かせない
+- **反復的クエリ拡張 (M, RIA)** が Recall 改善 (+2.7% nDCG, +10% Recall)
+  - 38 個の新 gold 文書を発見 (19/50 クエリ)
+- **Token-level graph (N)** が Ranking 改善 (+1.9% 単体)
+  - BM25 と完全に独立したランキング信号 (Spearman ρ ≈ -0.38)
+- **geDIG Walk Score (N.1)** — DG/AG エッジ分類で構造的接続品質を評価
+  - 単体では逆効果 (-10.3%) — RIA なしでは gold doc がプールにない
+  - RIA 併用で **+27.4%** (0.2496 → 0.3181) — **Wake-Sleep-Wake アーキテクチャ**
+- **M+N.1 相乗効果**: **+27.4% nDCG** (0.2496 → 0.3181)
+  - RIA (Wake/探索) → Walk Score (Sleep/DG/AG分類) → proximity (Wake/確認)
+  - 迷路実験と同じ原理: 先に探索しないとループ検知は無意味
+
+### ボトルネック分析
+
+2 つの独立したボトルネックを特定:
+
+1. **Retrieval Recall**: Gold docs の 70-80% が BM25 top-100 に不在
+   - Dense retrieval (Spec I, E5-base-v2) は追加 gold ≈ 0 (biology)
+   - Query decomposition (Spec K) は 68 new gold / 50q — **recall 改善に成功**
+   - 理論上限 nDCG ≈ 0.60 (現在のプールで完璧にランキングした場合)
+2. **Ranking Quality**: プール内 gold の配置が理論上限の 35%
+   - 現在 0.21 / 理論上限 0.60 = 35%
+   - gpt-4o-mini pointwise reranking (Spec J) は改善なし
+   - gpt-4o reasoning reranking (Spec L) も改善なし — **pointwise アプローチ自体が BRIGHT に不適**
+   - 56% のクエリで gold が BM25 top-100 に 0 件 → reranking では解決不能
+
+**結論**: Pointwise reranking はモデル強度に関わらず BRIGHT に不適 (J, L で確認)。
+RIA (Spec M) は recall を改善 (+10%) し、初の正の改善を達成 (+2.7%)。
+Spec N.1 (geDIG Walk Score) で **ranking quality を大幅改善** — nDCG 0.2496 → **0.3181** (+27.4%)。
+
+### Quick Start (BRIGHT)
+
+**注意**: `answerer.py` が `.env` を自動読み込み (`python-dotenv`) するため、
+`export OPENAI_API_KEY=...` は不要。プロジェクトルートの `.env` に `OPENAI_API_KEY=sk-...` があれば OK。
+
+```bash
+# 1. データ準備 (初回のみ)
+PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
+    experiments/hotpotqa_v2/scripts/prepare_bright.py
+
+# 2. Dense index 構築 (初回のみ, ~10分)
+PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
+    experiments/hotpotqa_v2/scripts/build_dense_index.py \
+    --data-dir experiments/hotpotqa_v2/data/bright/ \
+    --output-dir experiments/hotpotqa_v2/data/bright/dense_index/
+
+# 3. Smoke test (10q, biology, geDIG refine)
+export $(cat .env | xargs) && \
+PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
+    experiments/hotpotqa_v2/scripts/run_bright.py \
+    --mode cot_retrieval --domains biology \
+    --data-dir experiments/hotpotqa_v2/data/bright/ \
+    --output experiments/hotpotqa_v2/results/smoke_test \
+    --limit 10 --graph-top-k 50 --rerank-alpha 0.1 \
+    --scoring-mode gedig_refine
+
+# 4. 50q biology (geDIG refine)
+export $(cat .env | xargs) && \
+PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
+    experiments/hotpotqa_v2/scripts/run_bright.py \
+    --mode cot_retrieval --domains biology \
+    --data-dir experiments/hotpotqa_v2/data/bright/ \
+    --output experiments/hotpotqa_v2/results/v12_bright_gedig_refine_50q \
+    --limit 50 --graph-top-k 50 --rerank-alpha 0.1 \
+    --scoring-mode gedig_refine
+
+# 5. 50q biology with Query Decomposition (Spec K)
+export $(cat .env | xargs) && \
+PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
+    experiments/hotpotqa_v2/scripts/run_bright.py \
+    --mode cot_retrieval --domains biology \
+    --data-dir experiments/hotpotqa_v2/data/bright/ \
+    --output experiments/hotpotqa_v2/results/v12_bright_qd_50q \
+    --limit 50 --graph-top-k 50 --rerank-alpha 0.1 \
+    --scoring-mode gedig_refine \
+    --query-decomp --query-decomp-top-k 50 --query-decomp-max-sub 5
+
+# 6. 50q biology with Reasoning Reranking (Spec L, gpt-4o)
+export $(cat .env | xargs) && \
+PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
+    experiments/hotpotqa_v2/scripts/run_bright.py \
+    --mode cot_retrieval --domains biology \
+    --data-dir experiments/hotpotqa_v2/data/bright/ \
+    --output experiments/hotpotqa_v2/results/v12_bright_reasoning_rerank_50q \
+    --limit 50 --graph-top-k 50 --rerank-alpha 0.1 \
+    --scoring-mode gedig_refine \
+    --reasoning-rerank --rerank-model gpt-4o \
+    --reasoning-rerank-top-k 20 --reasoning-rerank-blend-weight 0.7
+
+# 7. 50q biology with RIA iterative expansion (Spec M)
+export $(cat .env | xargs) && \
+PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
+    experiments/hotpotqa_v2/scripts/run_bright.py \
+    --mode cot_retrieval --domains biology \
+    --data-dir experiments/hotpotqa_v2/data/bright/ \
+    --output experiments/hotpotqa_v2/results/v13_bright_ria_50q \
+    --limit 50 --graph-top-k 50 --rerank-alpha 0.1 \
+    --scoring-mode gedig_refine \
+    --ria-loop --ria-max-rounds 3
+
+# 8. 50q biology with Token Graph scoring (Spec N)
+export $(cat .env | xargs) && \
+PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
+    experiments/hotpotqa_v2/scripts/run_bright.py \
+    --mode cot_retrieval --domains biology \
+    --data-dir experiments/hotpotqa_v2/data/bright/ \
+    --output experiments/hotpotqa_v2/results/v14_tg_50q \
+    --limit 50 --graph-top-k 50 --rerank-alpha 0.1 \
+    --scoring-mode gedig_refine \
+    --token-graph
+
+# 9. 50q biology with RIA + Token Graph (Spec M+N)
+export $(cat .env | xargs) && \
+PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
+    experiments/hotpotqa_v2/scripts/run_bright.py \
+    --mode cot_retrieval --domains biology \
+    --data-dir experiments/hotpotqa_v2/data/bright/ \
+    --output experiments/hotpotqa_v2/results/v14_tg_ria_50q \
+    --limit 50 --graph-top-k 50 --rerank-alpha 0.1 \
+    --scoring-mode gedig_refine \
+    --token-graph --ria-loop --ria-max-rounds 3
+
+# 10. 50q biology with RIA + Walk Score (★ best, Spec M+N.1, nDCG=0.3181)
+export $(cat .env | xargs) && \
+PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
+    experiments/hotpotqa_v2/scripts/run_bright.py \
+    --mode cot_retrieval --domains biology \
+    --data-dir experiments/hotpotqa_v2/data/bright/ \
+    --output experiments/hotpotqa_v2/results/v15_walk_ria_50q \
+    --limit 50 --graph-top-k 50 --rerank-alpha 0.1 \
+    --scoring-mode gedig_refine \
+    --token-graph --token-graph-walk-score --ria-loop --ria-max-rounds 3
+
+# 11. Full 323q (3 domains)
+export $(cat .env | xargs) && \
+PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
+    experiments/hotpotqa_v2/scripts/run_bright.py \
+    --mode cot_retrieval \
+    --domains biology,economics,stackoverflow \
+    --data-dir experiments/hotpotqa_v2/data/bright/ \
+    --output experiments/hotpotqa_v2/results/v12_bright_full \
+    --graph-top-k 50 --rerank-alpha 0.1 \
+    --scoring-mode gedig_refine
+```
+
+### CLI オプション一覧
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| **基本** | | |
+| `--mode` | — | `cot_retrieval` (graph+CoT), `unified` (dense+LLM) |
+| `--scoring-mode` | `classic` | `classic`, `gedig`, `gedig_refine` |
+| `--graph-top-k` | 50 | グラフ構築に使う文書数 |
+| `--rerank-alpha` | 0.1 | BM25 weight (低い = graph 重視) |
+| `--limit` | — | クエリ数制限 (smoke test 用) |
+| **geDIG Scoring (Spec H)** | | |
+| `--gedig-lambda` | 1.0 | geDIG: GED vs IG balance |
+| `--gedig-sp-beta` | 0.5 | geDIG: shortest-path weight |
+| `--gedig-k-hop` | 2 | Local subgraph k-hop radius |
+| `--gedig-mp-iterations` | 2 | Message passing iterations |
+| `--gedig-mp-alpha` | 0.3 | Query influence weight |
+| **Dense Retrieval (Spec I)** | | |
+| `--dense-index-dir` | — | Dense retrieval index directory |
+| **Pointwise Reranking (Spec J)** | | |
+| `--pointwise-rerank` | false | Enable pointwise LLM reranking |
+| `--pointwise-blend-weight` | 0.4 | PW weight in blend (0=ignore, 1=replace) |
+| **Query Decomposition (Spec K)** | | |
+| `--query-decomp` | false | Enable query decomposition |
+| `--query-decomp-top-k` | 50 | BM25 top-k per sub-query |
+| `--query-decomp-max-sub` | 5 | Max sub-questions |
+| **Reasoning Reranking (Spec L)** | | |
+| `--reasoning-rerank` | false | Enable gpt-4o reasoning reranking |
+| `--rerank-model` | (same as main) | Reranking LLM model (e.g. gpt-4o) |
+| `--reasoning-rerank-top-k` | 20 | Top-k candidates to rerank |
+| `--reasoning-rerank-doc-chars` | 4000 | Max chars per document |
+| `--reasoning-rerank-blend-weight` | 0.7 | Blend weight (0=ignore, 1=replace) |
+| **RIA Iterative Expansion (Spec M)** | | |
+| `--ria-loop` | false | Enable RIA iterative query expansion |
+| `--ria-max-rounds` | 3 | Maximum RIA iteration rounds |
+| `--ria-docs-per-round` | 50 | New docs to retrieve per RIA round |
+| `--ria-feedback-top-k` | 5 | Top-k docs to feed back to LLM per round |
+| `--ria-beta0-target` | 1 | Target β₀ for RIA convergence |
+| **Token Graph (Spec N/N.1)** | | |
+| `--token-graph` | false | Token graph scoring 有効化 (Spec N) |
+| `--token-graph-weight` | 0.15 | Graph scores とのブレンド比率 |
+| `--token-graph-max-tokens` | 500 | spaCy パース対象のトークン上限 |
+| `--token-graph-walk-score` | false | DG/AG 重み付き最短経路 (geDIG Walk Score, Spec N.1) |
+| `--token-graph-dg-penalty` | 2.0 | Bridge (DG) エッジのコストペナルティ |
+| **Entity F-eval (Spec O)** | | |
+| `--entity-feval` | false | Entity F-eval scoring 有効化 |
+| `--entity-feval-weight` | 0.1 | F-eval スコアのブレンド比率 |
+| `--entity-feval-lambda` | 1.0 | F-eval 内部 DG/AG バランス |
+| **Multi-CoT Ensemble (Spec P)** | | |
+| `--n-cot-ensemble` | 1 | CoT 生成本数 (1=従来, 3=ensemble) |
+| `--cot-cache-dir` | — | CoT キャッシュディレクトリ (再現性用) |
+| `--cot-temperature` | 0.7 | Ensemble CoT 生成 temperature |
+
+### BRIGHT 関連ファイル
+
+| ファイル | 説明 |
+|---------|------|
+| **Pipeline** | |
+| [src/bright_cot_pipeline.py](src/bright_cot_pipeline.py) | CoT × Graph re-ranking pipeline (main) |
+| [src/bright_pipeline.py](src/bright_pipeline.py) | BM25 baseline pipeline |
+| [src/entity_graph.py](src/entity_graph.py) | Three-tier entity graph + TF-IDF features |
+| [src/gedig_scoring.py](src/gedig_scoring.py) | MessagePassingNX + EdgeReevaluatorNX + GeDIGDocScorer |
+| [src/gedig_router.py](src/gedig_router.py) | geDIG routing (tier selection) |
+| [src/dense_retriever.py](src/dense_retriever.py) | E5-base-v2 + FAISS dense retrieval |
+| [src/episode_graph.py](src/episode_graph.py) | Episode-based graph construction |
+| [src/answerer.py](src/answerer.py) | LLM API handler (OpenAI) |
+| **Scripts** | |
+| [scripts/run_bright.py](scripts/run_bright.py) | BRIGHT 実験ランナー (全モード対応) |
+| [scripts/build_dense_index.py](scripts/build_dense_index.py) | Dense index 構築 |
+| [scripts/prepare_bright.py](scripts/prepare_bright.py) | BRIGHT データ準備 |
+| **Reports** | |
+| [results/REPORT_SPEC_H_geDIG_scoring.md](results/REPORT_SPEC_H_geDIG_scoring.md) | Spec H: geDIG scoring 実験レポート |
+| [results/REPORT_SPEC_I_dense_retrieval.md](results/REPORT_SPEC_I_dense_retrieval.md) | Spec I: Dense retrieval 実験レポート |
+| [results/REPORT_SPEC_J_pointwise_reranking.md](results/REPORT_SPEC_J_pointwise_reranking.md) | Spec J: Pointwise LLM reranking 実験レポート |
+| [results/REPORT_SPEC_K_query_decomposition.md](results/REPORT_SPEC_K_query_decomposition.md) | Spec K: Query decomposition 実験レポート |
+| [results/REPORT_SPEC_L_reasoning_reranking.md](results/REPORT_SPEC_L_reasoning_reranking.md) | Spec L: gpt-4o reasoning reranking 実験レポート |
+| [docs/spec_m_ria_report.md](docs/spec_m_ria_report.md) | Spec M: RIA iterative expansion 実験レポート |
+| [docs/experiment_design_spec_m_ria.md](docs/experiment_design_spec_m_ria.md) | Spec M: RIA iterative expansion 設計メモ |
+| [docs/spec_n_token_graph_report.md](docs/spec_n_token_graph_report.md) | Spec N: Token-level Graph Scoring 実験レポート |
+| [docs/experiment_design_spec_n_unified_graph.md](docs/experiment_design_spec_n_unified_graph.md) | Spec N: Unified Token-level Graph 設計メモ |
+| [docs/references_bright_sota.md](docs/references_bright_sota.md) | BRIGHT SOTA 手法リファレンス |
+| [docs/report_bright_cot_retrieval.md](docs/report_bright_cot_retrieval.md) | CoT retrieval 初期レポート |
+| [docs/report_bright_unified.md](docs/report_bright_unified.md) | Unified mode レポート |
 
 ---
 
