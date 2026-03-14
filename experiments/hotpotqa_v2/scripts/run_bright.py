@@ -149,6 +149,77 @@ def main():
                         help="Message passing iterations for geDIG scoring")
     parser.add_argument("--gedig-scoring-mp-alpha", type=float, default=0.3,
                         help="Query influence weight in message passing")
+    # Pointwise LLM reranking parameters (Spec J)
+    parser.add_argument("--pointwise-rerank", action="store_true",
+                        help="Enable LLM pointwise reasoning reranking (Spec J)")
+    parser.add_argument("--pointwise-rerank-top-k", type=int, default=30,
+                        help="Number of candidates for pointwise scoring")
+    parser.add_argument("--pointwise-batch-size", type=int, default=5,
+                        help="Documents per LLM call for pointwise scoring")
+    parser.add_argument("--pointwise-blend-weight", type=float, default=0.4,
+                        help="Pointwise score weight in blend (0=ignore PW, 1=full PW)")
+    # Query decomposition parameters (Spec K)
+    parser.add_argument("--query-decomp", action="store_true",
+                        help="Enable query decomposition (Spec K)")
+    parser.add_argument("--query-decomp-top-k", type=int, default=50,
+                        help="BM25 top-k per sub-query")
+    parser.add_argument("--query-decomp-max-sub", type=int, default=5,
+                        help="Max sub-questions to generate")
+    # Reasoning reranking parameters (Spec L)
+    parser.add_argument("--reasoning-rerank", action="store_true",
+                        help="Enable reasoning LLM reranking (Spec L)")
+    parser.add_argument("--rerank-model", type=str, default="",
+                        help="Model for reasoning reranking (default: same as --model)")
+    parser.add_argument("--reasoning-rerank-top-k", type=int, default=20,
+                        help="Number of candidates for reasoning reranking")
+    parser.add_argument("--reasoning-rerank-doc-chars", type=int, default=4000,
+                        help="Max document chars for reasoning reranking prompt")
+    parser.add_argument("--reasoning-rerank-blend-weight", type=float, default=0.7,
+                        help="Reasoning score weight in blend (0=ignore, 1=full replace)")
+    # RIA iterative expansion parameters (Spec M)
+    parser.add_argument("--ria-loop", action="store_true",
+                        help="Enable RIA iterative query expansion (Spec M)")
+    parser.add_argument("--ria-max-rounds", type=int, default=3,
+                        help="Maximum RIA iteration rounds")
+    parser.add_argument("--ria-docs-per-round", type=int, default=50,
+                        help="New docs to retrieve per RIA round")
+    parser.add_argument("--ria-feedback-top-k", type=int, default=5,
+                        help="Top-k docs to feed back to LLM per round")
+    parser.add_argument("--ria-beta0-target", type=int, default=1,
+                        help="Target beta0 for RIA convergence")
+
+    # Token-level graph parameters (Spec N)
+    parser.add_argument("--token-graph", action="store_true",
+                        help="Enable per-doc token-level graph scoring (Spec N)")
+    parser.add_argument("--token-graph-weight", type=float, default=0.15,
+                        help="Token graph weight in scoring blend")
+    parser.add_argument("--token-graph-max-tokens", type=int, default=500,
+                        help="Max tokens per doc for spaCy parsing")
+    parser.add_argument("--token-graph-walk-score", action="store_true",
+                        help="Use DG/AG weighted shortest paths (geDIG Walk Score)")
+    parser.add_argument("--token-graph-dg-penalty", type=float, default=2.0,
+                        help="Cost penalty for bridge (DG) edges in walk score")
+    parser.add_argument("--token-graph-f-eval", action="store_true",
+                        help="Use F-evaluation based DG/AG classification (Spec N.2)")
+    parser.add_argument("--token-graph-f-lambda", type=float, default=1.0,
+                        help="Lambda for F-evaluation: f = cost - lambda * relevance")
+    parser.add_argument("--token-graph-insight", type=str, default="none",
+                        choices=["none", "graph_agg", "path_bridge", "both"],
+                        help="Insight vector injection mode (Spec N.2)")
+    # Entity graph F-eval parameters (Spec O)
+    parser.add_argument("--entity-feval", action="store_true",
+                        help="Enable entity graph F-eval cross-doc walk score (Spec O)")
+    parser.add_argument("--entity-feval-weight", type=float, default=0.20,
+                        help="Blend weight for entity F-eval scores (default 0.20)")
+    parser.add_argument("--entity-feval-lambda", type=float, default=1.0,
+                        help="Lambda for entity F-eval: f = cost - lambda * relevance")
+    # Multi-CoT Ensemble parameters (Spec P)
+    parser.add_argument("--n-cot-ensemble", type=int, default=1,
+                        help="Number of CoT chains for ensemble scoring (1=no ensemble)")
+    parser.add_argument("--cot-cache-dir", type=str, default=None,
+                        help="Directory to cache CoT generations for reproducibility")
+    parser.add_argument("--cot-temperature", type=float, default=0.7,
+                        help="Temperature for ensemble CoT generation (diversity)")
 
     args = parser.parse_args()
 
@@ -170,12 +241,50 @@ def main():
     }
     config["graph_mode"] = args.graph_mode
     config["scoring_mode"] = args.scoring_mode
-    if args.scoring_mode == "gedig":
+    if args.scoring_mode in ("gedig", "gedig_refine"):
         config["gedig_scoring_lambda"] = args.gedig_scoring_lambda
         config["gedig_scoring_sp_beta"] = args.gedig_scoring_sp_beta
         config["gedig_scoring_k_hop"] = args.gedig_scoring_k_hop
         config["gedig_scoring_mp_iterations"] = args.gedig_scoring_mp_iterations
         config["gedig_scoring_mp_alpha"] = args.gedig_scoring_mp_alpha
+    if args.pointwise_rerank:
+        config["pointwise_rerank"] = True
+        config["pointwise_rerank_top_k"] = args.pointwise_rerank_top_k
+        config["pointwise_batch_size"] = args.pointwise_batch_size
+        config["pointwise_blend_weight"] = args.pointwise_blend_weight
+    if args.reasoning_rerank:
+        config["reasoning_rerank"] = True
+        config["rerank_model"] = args.rerank_model or args.model
+        config["reasoning_rerank_top_k"] = args.reasoning_rerank_top_k
+        config["reasoning_rerank_doc_chars"] = args.reasoning_rerank_doc_chars
+        config["reasoning_rerank_blend_weight"] = args.reasoning_rerank_blend_weight
+    if args.query_decomp:
+        config["query_decomp"] = True
+        config["query_decomp_top_k"] = args.query_decomp_top_k
+        config["query_decomp_max_sub"] = args.query_decomp_max_sub
+    if args.ria_loop:
+        config["ria_loop"] = True
+        config["ria_max_rounds"] = args.ria_max_rounds
+        config["ria_docs_per_round"] = args.ria_docs_per_round
+        config["ria_feedback_top_k"] = args.ria_feedback_top_k
+        config["ria_beta0_target"] = args.ria_beta0_target
+    if args.token_graph:
+        config["token_graph"] = True
+        config["token_graph_weight"] = args.token_graph_weight
+        config["token_graph_max_tokens"] = args.token_graph_max_tokens
+        config["token_graph_walk_score"] = args.token_graph_walk_score
+        config["token_graph_dg_penalty"] = args.token_graph_dg_penalty
+        config["token_graph_f_eval"] = args.token_graph_f_eval
+        config["token_graph_f_lambda"] = args.token_graph_f_lambda
+        config["token_graph_insight"] = args.token_graph_insight
+    if args.entity_feval:
+        config["entity_feval"] = True
+        config["entity_feval_weight"] = args.entity_feval_weight
+        config["entity_feval_lambda"] = args.entity_feval_lambda
+    if args.n_cot_ensemble > 1:
+        config["n_cot_ensemble"] = args.n_cot_ensemble
+        config["cot_cache_dir"] = args.cot_cache_dir
+        config["cot_temperature"] = args.cot_temperature
     if args.mode in ("cot_rerank", "cot_retrieval", "adaptive_retrieval", "unified", "gedig_routing"):
         config["model"] = args.model
         config["cot_weight"] = args.cot_weight
@@ -260,6 +369,16 @@ def main():
     elif args.mode in ("cot_rerank", "cot_retrieval", "adaptive_retrieval"):
         from bright_cot_pipeline import BrightCoTPipeline
 
+        # Dense retrieval for cot_retrieval mode (Spec I: dense pool expansion)
+        dense_retriever_cot = None
+        if args.dense_index_dir and args.mode in ("cot_retrieval", "adaptive_retrieval"):
+            from dense_retriever import DenseRetriever
+            dense_retriever_cot = DenseRetriever(index_dir=args.dense_index_dir)
+            config["dense_index_dir"] = args.dense_index_dir
+            config["dense_top_k"] = args.dense_top_k
+            config["dense_cot_top_k"] = args.dense_cot_top_k
+            config["dense_sim_threshold"] = args.dense_sim_threshold
+
         # Episode index loading (for graph_mode=episode/hybrid, Spec F/G)
         episode_index_for_graph = None
         if args.graph_mode in ("episode", "hybrid"):
@@ -269,8 +388,8 @@ def main():
             from episode_graph import EpisodeIndex
             episode_index_for_graph = EpisodeIndex(args.episode_index_dir)
 
-        if args.graph_mode in ("episode", "hybrid"):
-            # Per-domain pipeline (needs dense_domain for episode lookup)
+        if args.graph_mode in ("episode", "hybrid") or dense_retriever_cot is not None:
+            # Per-domain pipeline (needs dense_domain for episode/dense lookup)
             pipeline = None
         else:
             pipeline = BrightCoTPipeline(
@@ -296,6 +415,42 @@ def main():
                 gedig_scoring_k_hop=args.gedig_scoring_k_hop,
                 gedig_scoring_mp_iterations=args.gedig_scoring_mp_iterations,
                 gedig_scoring_mp_alpha=args.gedig_scoring_mp_alpha,
+                # Pointwise reranking (Spec J)
+                enable_pointwise_rerank=args.pointwise_rerank,
+                pointwise_rerank_top_k=args.pointwise_rerank_top_k,
+                pointwise_batch_size=args.pointwise_batch_size,
+                pointwise_blend_weight=args.pointwise_blend_weight,
+                # Query decomposition (Spec K)
+                enable_query_decomp=args.query_decomp,
+                query_decomp_top_k=args.query_decomp_top_k,
+                query_decomp_max_sub=args.query_decomp_max_sub,
+                # Reasoning reranking (Spec L)
+                enable_reasoning_rerank=args.reasoning_rerank,
+                rerank_model=args.rerank_model,
+                reasoning_rerank_top_k=args.reasoning_rerank_top_k,
+                reasoning_rerank_doc_chars=args.reasoning_rerank_doc_chars,
+                reasoning_rerank_blend_weight=args.reasoning_rerank_blend_weight,
+                # RIA expansion (Spec M)
+                enable_ria_loop=args.ria_loop,
+                ria_max_rounds=args.ria_max_rounds,
+                ria_docs_per_round=args.ria_docs_per_round,
+                ria_feedback_top_k=args.ria_feedback_top_k,
+                ria_beta0_target=args.ria_beta0_target,
+                enable_token_graph=args.token_graph,
+                token_graph_weight=args.token_graph_weight,
+                token_graph_max_tokens=args.token_graph_max_tokens,
+                token_graph_walk_score=args.token_graph_walk_score,
+                token_graph_dg_penalty=args.token_graph_dg_penalty,
+                token_graph_f_eval=args.token_graph_f_eval,
+                token_graph_f_lambda=args.token_graph_f_lambda,
+                token_graph_insight_mode=args.token_graph_insight,
+                enable_entity_feval=args.entity_feval,
+                entity_feval_weight=args.entity_feval_weight,
+                entity_feval_lambda=args.entity_feval_lambda,
+                # Multi-CoT Ensemble (Spec P)
+                n_cot_ensemble=args.n_cot_ensemble,
+                cot_cache_dir=args.cot_cache_dir,
+                cot_temperature=args.cot_temperature,
             )
     elif args.mode == "graph_rerank":
         pipeline = BrightPipeline(
@@ -375,6 +530,10 @@ def main():
                 dense_sim_threshold=args.dense_sim_threshold,
                 enable_llm_rerank=args.llm_rerank,
                 llm_rerank_top_k=args.llm_rerank_top_k,
+                # Multi-CoT Ensemble (Spec P)
+                n_cot_ensemble=args.n_cot_ensemble,
+                cot_cache_dir=args.cot_cache_dir,
+                cot_temperature=args.cot_temperature,
             )
 
         # geDIG routing mode: load episodes and create pipeline per-domain
@@ -420,6 +579,10 @@ def main():
                 gedig_router=gedig_router,
                 episode_index=episode_index,
                 episode_graph_builder=ep_builder,
+                # Multi-CoT Ensemble (Spec P)
+                n_cot_ensemble=args.n_cot_ensemble,
+                cot_cache_dir=args.cot_cache_dir,
+                cot_temperature=args.cot_temperature,
             )
             print(f"  geDIG routing pipeline initialized for {domain}")
 
@@ -446,6 +609,11 @@ def main():
                 graph_mode=args.graph_mode,
                 episode_index=episode_index_for_graph,
                 dense_domain=domain,
+                # Dense retrieval (if available)
+                dense_retriever=dense_retriever_cot,
+                dense_top_k=args.dense_top_k,
+                dense_cot_top_k=args.dense_cot_top_k,
+                dense_sim_threshold=args.dense_sim_threshold,
                 # geDIG scoring (Spec H)
                 scoring_mode=args.scoring_mode,
                 gedig_scoring_lambda=args.gedig_scoring_lambda,
@@ -453,8 +621,118 @@ def main():
                 gedig_scoring_k_hop=args.gedig_scoring_k_hop,
                 gedig_scoring_mp_iterations=args.gedig_scoring_mp_iterations,
                 gedig_scoring_mp_alpha=args.gedig_scoring_mp_alpha,
+                # Pointwise reranking (Spec J)
+                enable_pointwise_rerank=args.pointwise_rerank,
+                pointwise_rerank_top_k=args.pointwise_rerank_top_k,
+                pointwise_batch_size=args.pointwise_batch_size,
+                pointwise_blend_weight=args.pointwise_blend_weight,
+                # Query decomposition (Spec K)
+                enable_query_decomp=args.query_decomp,
+                query_decomp_top_k=args.query_decomp_top_k,
+                query_decomp_max_sub=args.query_decomp_max_sub,
+                # Reasoning reranking (Spec L)
+                enable_reasoning_rerank=args.reasoning_rerank,
+                rerank_model=args.rerank_model,
+                reasoning_rerank_top_k=args.reasoning_rerank_top_k,
+                reasoning_rerank_doc_chars=args.reasoning_rerank_doc_chars,
+                reasoning_rerank_blend_weight=args.reasoning_rerank_blend_weight,
+                # RIA expansion (Spec M)
+                enable_ria_loop=args.ria_loop,
+                ria_max_rounds=args.ria_max_rounds,
+                ria_docs_per_round=args.ria_docs_per_round,
+                ria_feedback_top_k=args.ria_feedback_top_k,
+                ria_beta0_target=args.ria_beta0_target,
+                enable_token_graph=args.token_graph,
+                token_graph_weight=args.token_graph_weight,
+                token_graph_max_tokens=args.token_graph_max_tokens,
+                token_graph_walk_score=args.token_graph_walk_score,
+                token_graph_dg_penalty=args.token_graph_dg_penalty,
+                token_graph_f_eval=args.token_graph_f_eval,
+                token_graph_f_lambda=args.token_graph_f_lambda,
+                token_graph_insight_mode=args.token_graph_insight,
+                enable_entity_feval=args.entity_feval,
+                entity_feval_weight=args.entity_feval_weight,
+                entity_feval_lambda=args.entity_feval_lambda,
+                # Multi-CoT Ensemble (Spec P)
+                n_cot_ensemble=args.n_cot_ensemble,
+                cot_cache_dir=args.cot_cache_dir,
+                cot_temperature=args.cot_temperature,
             )
             print(f"  {args.graph_mode.capitalize()} graph pipeline initialized for {domain}")
+
+        # Dense retrieval per-domain: load index and create pipeline
+        elif dense_retriever_cot is not None and args.mode in ("cot_retrieval", "adaptive_retrieval"):
+            print(f"  Loading dense index for {domain}...")
+            t_dense = time.time()
+            dense_retriever_cot.load_index(domain)
+            print(f"  Dense index loaded in {time.time() - t_dense:.1f}s")
+            pipeline = BrightCoTPipeline(
+                model=args.model,
+                initial_top_k=args.initial_top_k,
+                graph_top_k=args.graph_top_k,
+                rerank_top_k=args.rerank_top_k,
+                rerank_alpha=args.rerank_alpha,
+                max_para_freq=args.max_para_freq,
+                cot_weight=args.cot_weight,
+                cot_retrieval_top_k=args.cot_retrieval_top_k,
+                cot_retrieval_max_concepts=args.cot_retrieval_max_concepts,
+                enable_cot_retrieval=True,
+                enable_adaptive=(args.mode == "adaptive_retrieval"),
+                beta_low=args.beta_low,
+                beta_high=args.beta_high,
+                aggressive_top_k=args.aggressive_top_k,
+                aggressive_max_concepts=args.aggressive_max_concepts,
+                # Dense retrieval
+                dense_retriever=dense_retriever_cot,
+                dense_domain=domain,
+                dense_top_k=args.dense_top_k,
+                dense_cot_top_k=args.dense_cot_top_k,
+                dense_sim_threshold=args.dense_sim_threshold,
+                # geDIG scoring (Spec H)
+                scoring_mode=args.scoring_mode,
+                gedig_scoring_lambda=args.gedig_scoring_lambda,
+                gedig_scoring_sp_beta=args.gedig_scoring_sp_beta,
+                gedig_scoring_k_hop=args.gedig_scoring_k_hop,
+                gedig_scoring_mp_iterations=args.gedig_scoring_mp_iterations,
+                gedig_scoring_mp_alpha=args.gedig_scoring_mp_alpha,
+                # Pointwise reranking (Spec J)
+                enable_pointwise_rerank=args.pointwise_rerank,
+                pointwise_rerank_top_k=args.pointwise_rerank_top_k,
+                pointwise_batch_size=args.pointwise_batch_size,
+                pointwise_blend_weight=args.pointwise_blend_weight,
+                # Query decomposition (Spec K)
+                enable_query_decomp=args.query_decomp,
+                query_decomp_top_k=args.query_decomp_top_k,
+                query_decomp_max_sub=args.query_decomp_max_sub,
+                # Reasoning reranking (Spec L)
+                enable_reasoning_rerank=args.reasoning_rerank,
+                rerank_model=args.rerank_model,
+                reasoning_rerank_top_k=args.reasoning_rerank_top_k,
+                reasoning_rerank_doc_chars=args.reasoning_rerank_doc_chars,
+                reasoning_rerank_blend_weight=args.reasoning_rerank_blend_weight,
+                # RIA expansion (Spec M)
+                enable_ria_loop=args.ria_loop,
+                ria_max_rounds=args.ria_max_rounds,
+                ria_docs_per_round=args.ria_docs_per_round,
+                ria_feedback_top_k=args.ria_feedback_top_k,
+                ria_beta0_target=args.ria_beta0_target,
+                enable_token_graph=args.token_graph,
+                token_graph_weight=args.token_graph_weight,
+                token_graph_max_tokens=args.token_graph_max_tokens,
+                token_graph_walk_score=args.token_graph_walk_score,
+                token_graph_dg_penalty=args.token_graph_dg_penalty,
+                token_graph_f_eval=args.token_graph_f_eval,
+                token_graph_f_lambda=args.token_graph_f_lambda,
+                token_graph_insight_mode=args.token_graph_insight,
+                enable_entity_feval=args.entity_feval,
+                entity_feval_weight=args.entity_feval_weight,
+                entity_feval_lambda=args.entity_feval_lambda,
+                # Multi-CoT Ensemble (Spec P)
+                n_cot_ensemble=args.n_cot_ensemble,
+                cot_cache_dir=args.cot_cache_dir,
+                cot_temperature=args.cot_temperature,
+            )
+            print(f"  Dense+CoT pipeline initialized for {domain}")
 
         # Results file (per-domain)
         domain_results_file = out_dir / f"{domain}_results.jsonl"
@@ -572,6 +850,13 @@ def main():
                     record["routing_tier"] = result.routing_tier
                     record["cot_skipped"] = result.cot_skipped
 
+                # Dense retrieval diagnostics for cot_retrieval mode
+                if args.mode in ("cot_retrieval", "adaptive_retrieval") and args.dense_index_dir and hasattr(result, "n_dense_retrieved"):
+                    record["n_dense_retrieved"] = result.n_dense_retrieved
+                    record["n_dense_cot_retrieved"] = result.n_dense_cot_retrieved
+                    record["n_dense_new_gold"] = result.n_dense_new_gold
+                    record["n_dense_graph_edges"] = result.n_dense_graph_edges
+
                 # geDIG routing diagnostics
                 if args.mode == "gedig_routing" and hasattr(result, "gedig_value"):
                     record["gedig_value"] = round(result.gedig_value, 4)
@@ -587,7 +872,7 @@ def main():
                     record["n_episode_cross_edges"] = result.n_episode_cross_edges
 
                 # geDIG scoring diagnostics (Spec H)
-                if args.scoring_mode == "gedig" and hasattr(result, "scoring_mode"):
+                if args.scoring_mode in ("gedig", "gedig_refine") and hasattr(result, "scoring_mode"):
                     record["scoring_mode"] = result.scoring_mode
                     record["gedig_scoring_lambda"] = result.gedig_scoring_lambda
                     record["gedig_scoring_sp_beta"] = result.gedig_scoring_sp_beta
@@ -595,6 +880,75 @@ def main():
                     record["n_edges_removed"] = result.n_edges_removed
                     record["mp_iterations_run"] = result.mp_iterations_run
                     record["avg_gedig_local"] = round(result.avg_gedig_local, 4)
+
+                # Pointwise reranking diagnostics (Spec J)
+                if hasattr(result, "pointwise_rerank_applied"):
+                    record["pointwise_rerank_applied"] = result.pointwise_rerank_applied
+                    record["pointwise_rerank_n_scored"] = result.pointwise_rerank_n_scored
+                    record["pointwise_rerank_n_calls"] = result.pointwise_rerank_n_calls
+                    record["pointwise_rerank_ms"] = round(result.pointwise_rerank_ms, 1)
+                    record["pointwise_rerank_avg_score"] = round(result.pointwise_rerank_avg_score, 4)
+
+                # Query decomposition diagnostics (Spec K)
+                if hasattr(result, "query_decomp_applied"):
+                    record["query_decomp_applied"] = result.query_decomp_applied
+                    record["n_sub_queries"] = result.n_sub_queries
+                    record["n_decomp_new_candidates"] = result.n_decomp_new_candidates
+                    record["n_decomp_new_gold"] = result.n_decomp_new_gold
+                    record["query_decomp_ms"] = round(result.query_decomp_ms, 1)
+
+                # Reasoning reranking diagnostics (Spec L)
+                if hasattr(result, "reasoning_rerank_applied"):
+                    record["reasoning_rerank_applied"] = result.reasoning_rerank_applied
+                    record["reasoning_rerank_model"] = result.reasoning_rerank_model
+                    record["reasoning_rerank_n_scored"] = result.reasoning_rerank_n_scored
+                    record["reasoning_rerank_n_calls"] = result.reasoning_rerank_n_calls
+                    record["reasoning_rerank_ms"] = round(result.reasoning_rerank_ms, 1)
+                    record["reasoning_rerank_avg_score"] = round(result.reasoning_rerank_avg_score, 4)
+
+                # RIA diagnostics (Spec M)
+                if hasattr(result, "ria_applied"):
+                    record["ria_applied"] = result.ria_applied
+                    record["ria_rounds"] = result.ria_rounds
+                    record["ria_beta0_history"] = result.ria_beta0_history
+                    record["ria_new_docs_per_round"] = result.ria_new_docs_per_round
+                    record["ria_new_gold_per_round"] = result.ria_new_gold_per_round
+                    record["ria_total_new_docs"] = result.ria_total_new_docs
+                    record["ria_total_new_gold"] = result.ria_total_new_gold
+                    record["ria_ms"] = round(result.ria_ms, 1)
+
+                if hasattr(result, "token_graph_applied") and result.token_graph_applied:
+                    record["token_graph_avg_coverage"] = round(result.token_graph_avg_coverage, 4)
+                    record["token_graph_avg_proximity"] = round(result.token_graph_avg_proximity, 4)
+                    record["token_graph_n_docs"] = result.token_graph_n_docs
+                    record["token_graph_ms"] = round(result.token_graph_ms, 1)
+                    record["token_graph_spearman_bm25"] = round(result.token_graph_spearman_bm25, 4)
+                    record["token_graph_walk_score"] = result.token_graph_walk_score
+                    record["token_graph_avg_beta1"] = round(result.token_graph_avg_beta1, 2)
+                    if result.token_graph_f_eval:
+                        record["token_graph_f_eval"] = True
+                        record["token_graph_insight_mode"] = result.token_graph_insight_mode
+                        record["token_graph_avg_n_insights"] = round(result.token_graph_avg_n_insights, 2)
+                        record["token_graph_avg_f_theta"] = round(result.token_graph_avg_f_theta, 4)
+                if result.entity_feval_applied:
+                    record["entity_feval_applied"] = True
+                    record["entity_feval_n_ag"] = result.entity_feval_n_ag
+                    record["entity_feval_n_dg"] = result.entity_feval_n_dg
+                    record["entity_feval_f_theta"] = round(result.entity_feval_f_theta, 4)
+                    record["entity_feval_avg_convergence"] = round(result.entity_feval_avg_convergence, 4)
+                    record["entity_feval_ranking_dg"] = round(result.entity_feval_ranking_dg, 4)
+                    record["entity_feval_adaptive_weight"] = round(result.entity_feval_adaptive_weight, 4)
+
+                # Multi-CoT Ensemble diagnostics (Spec P)
+                if hasattr(result, "ensemble_applied") and result.ensemble_applied:
+                    record["ensemble_applied"] = True
+                    record["ensemble_n_cots"] = result.ensemble_n_cots
+                    record["ensemble_cot_cache_hit"] = result.ensemble_cot_cache_hit
+                    record["ensemble_ms"] = round(result.ensemble_ms, 1)
+                    record["ensemble_n_ag_docs"] = result.ensemble_n_ag_docs
+                    record["ensemble_n_dg_docs"] = result.ensemble_n_dg_docs
+                    record["ensemble_avg_agreement"] = round(result.ensemble_avg_agreement, 4)
+                    record["ensemble_score_variance_mean"] = round(result.ensemble_score_variance_mean, 6)
 
                 status = "+" if ndcg_10 > 0 else "-"
                 delta = ndcg_10 - bm25_ndcg
@@ -610,6 +964,9 @@ def main():
                     extra += f" tierD={result.n_dense_graph_edges}"
                     if result.llm_rerank_applied:
                         extra += " LLM-RR"
+                if args.mode in ("cot_retrieval", "adaptive_retrieval") and args.dense_index_dir and hasattr(result, "n_dense_retrieved"):
+                    extra += f" dense={result.n_dense_retrieved}+{result.n_dense_cot_retrieved}"
+                    extra += f" tierD={result.n_dense_graph_edges}"
                 if args.mode == "gedig_routing" and hasattr(result, "gedig_value"):
                     tier_label = {1: "DG", 2: "MOD", 3: "AG"}.get(result.routing_tier, "?")
                     extra += f" geDIG={result.gedig_value:.3f} T{result.routing_tier}({tier_label})"
@@ -618,6 +975,39 @@ def main():
                 if args.scoring_mode == "gedig" and hasattr(result, "n_edges_discovered"):
                     extra += f" geDIG-S:disc={result.n_edges_discovered},rm={result.n_edges_removed}"
                     extra += f" avg_gDIG={result.avg_gedig_local:.3f}"
+                if hasattr(result, "pointwise_rerank_applied") and result.pointwise_rerank_applied:
+                    extra += f" PW={result.pointwise_rerank_n_scored}docs/{result.pointwise_rerank_n_calls}calls"
+                    extra += f" avg={result.pointwise_rerank_avg_score:.2f}"
+                if hasattr(result, "query_decomp_applied") and result.query_decomp_applied:
+                    extra += f" QD={result.n_sub_queries}sq+{result.n_decomp_new_candidates}new"
+                    if result.n_decomp_new_gold > 0:
+                        extra += f"(+{result.n_decomp_new_gold}gold!)"
+                if hasattr(result, "reasoning_rerank_applied") and result.reasoning_rerank_applied:
+                    extra += f" RR={result.reasoning_rerank_n_scored}docs"
+                    extra += f" avg={result.reasoning_rerank_avg_score:.2f}"
+                    extra += f" {result.reasoning_rerank_ms:.0f}ms"
+                if hasattr(result, "ria_applied") and result.ria_applied:
+                    extra += f" RIA={result.ria_rounds}rnd"
+                    extra += f" +{result.ria_total_new_docs}docs"
+                    if result.ria_total_new_gold > 0:
+                        extra += f"(+{result.ria_total_new_gold}gold!)"
+                    extra += f" β₀={result.ria_beta0_history}"
+                if hasattr(result, "token_graph_applied") and result.token_graph_applied:
+                    extra += f" TG={result.token_graph_n_docs}docs"
+                    extra += f" cov={result.token_graph_avg_coverage:.2f}"
+                    extra += f" ρ={result.token_graph_spearman_bm25:.2f}"
+                    extra += f" {result.token_graph_ms:.0f}ms"
+                    if result.token_graph_walk_score:
+                        extra += f" β₁={result.token_graph_avg_beta1:.1f}"
+                    if result.token_graph_f_eval:
+                        extra += f" F-eval θ={result.token_graph_avg_f_theta:.3f}"
+                        if result.token_graph_insight_mode != "none":
+                            extra += f" ins={result.token_graph_avg_n_insights:.1f}"
+                if result.entity_feval_applied:
+                    extra += f" EF(AG={result.entity_feval_n_ag}/DG={result.entity_feval_n_dg} θ={result.entity_feval_f_theta:.3f} conv={result.entity_feval_avg_convergence:.2f} rdg={result.entity_feval_ranking_dg:.3f} aw={result.entity_feval_adaptive_weight:.3f})"
+                if hasattr(result, "ensemble_applied") and result.ensemble_applied:
+                    cache_tag = "C" if result.ensemble_cot_cache_hit else "G"
+                    extra += f" ENS(N={result.ensemble_n_cots}{cache_tag} AG={result.ensemble_n_ag_docs}/DG={result.ensemble_n_dg_docs} agr={result.ensemble_avg_agreement:.2f} var={result.ensemble_score_variance_mean:.4f} {result.ensemble_ms:.0f}ms)"
                 print(
                     f"    {status} nDCG@10={ndcg_10:.3f} R@10={recall_10:.3f} "
                     f"MRR={mrr:.3f} {delta_str} "
