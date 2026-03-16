@@ -13,7 +13,7 @@ Four experiment lines in this directory:
 
 ### 目標
 
-nDCG@10 = **0.45** (現在ベスト: 0.3181)
+nDCG@10 = **0.45** (現在ベスト: bio50q=0.3181, full323q=0.1898)
 
 BRIGHT ベンチマーク (ICLR 2025) の 3 ドメイン (biology, economics, stackoverflow) で、
 geDIG ベースのグラフ re-ranking パイプラインの性能を検証・改善する。
@@ -94,7 +94,10 @@ Phase 7c: [Optional] LLM reasoning rerank (gpt-4o, 1doc/call) [Spec L]
 | Configuration | Biology | Economics | StackOverflow | Overall |
 |---------------|---------|-----------|---------------|---------|
 | Spec A (classic) | 0.1879 | 0.1240 | 0.1470 | 0.1520 |
-| Spec H (geDIG refine) | **0.2069** | 0.1187 | 0.1296 | 0.1508 |
+| Spec H (geDIG refine) | 0.2069 | 0.1187 | 0.1296 | 0.1508 |
+| **M+N.1 (RIA + Walk Score)** | **0.2574** | **0.1402** | **0.1739** | **0.1898** |
+
+**M+N.1 vs Spec H**: Biology +24%, Economics +18%, StackOverflow +34%, **Overall +26%** 🔥
 
 ### Spec 進行状況
 
