@@ -111,6 +111,55 @@ def extract_entities(text: str) -> set[str]:
     }
 
 
+def extract_entities_spacy(text: str, nlp) -> set[str]:
+    """Extract entities using spaCy NER + noun chunks (Spec X).
+
+    Returns the union of:
+    - spaCy named entities
+    - spaCy noun chunk roots (NOUN/PROPN only)
+    - Regex-based entities (fallback)
+    All lowercased and stopword-filtered.
+    """
+    doc = nlp(text)
+    ents: set[str] = set()
+    # Named entities
+    for ent in doc.ents:
+        e = ent.text.strip().lower()
+        if e not in _STOP_ENTITIES and len(e) > 2:
+            ents.add(e)
+    # Noun chunk roots (head nouns only, avoids determiners)
+    for chunk in doc.noun_chunks:
+        root = chunk.root
+        if root.pos_ in ("NOUN", "PROPN") and len(root.lemma_) > 2:
+            lemma = root.lemma_.lower()
+            if lemma not in _STOP_ENTITIES:
+                ents.add(lemma)
+    # Union with regex fallback for robustness
+    ents |= extract_entities(text)
+    return ents
+
+
+def split_sentences_spacy(text: str, nlp, max_sentences: int = 30) -> list[str]:
+    """Split text into sentences using spaCy sentencizer (Spec X).
+
+    Falls back to regex splitting if spaCy returns no sentences.
+    """
+    if not text:
+        return []
+    text = re.sub(r"\s+", " ", text).strip()
+    doc = nlp(text)
+    sentences = [
+        sent.text.strip()
+        for sent in doc.sents
+        if len(sent.text.strip()) >= 10
+    ]
+    if not sentences:
+        # Fallback to regex
+        raw = re.split(r"(?<=[.!?])\s+", text)
+        sentences = [s.strip() for s in raw if len(s.strip()) >= 10]
+    return sentences[:max_sentences]
+
+
 # ---------------------------------------------------------------------------
 # TF-IDF helpers (lightweight, no sklearn dependency)
 # ---------------------------------------------------------------------------
@@ -314,6 +363,7 @@ def build_sentence_graph(
     max_para_freq: int = 3,
     doc_embeddings: dict[str, np.ndarray] | None = None,
     dense_sim_threshold: float = 0.5,
+    nlp=None,
 ) -> nx.Graph:
     """Build a sentence-level graph with Three-Tier edge hierarchy.
 
@@ -370,9 +420,14 @@ def build_sentence_graph(
                    text=text[:100])
 
     # --- Extract entities per sentence ---
-    sent_entities: list[set[str]] = [
-        extract_entities(nodes[i][3]) for i in range(n_nodes)
-    ]
+    if nlp is not None:
+        sent_entities: list[set[str]] = [
+            extract_entities_spacy(nodes[i][3], nlp) for i in range(n_nodes)
+        ]
+    else:
+        sent_entities: list[set[str]] = [
+            extract_entities(nodes[i][3]) for i in range(n_nodes)
+        ]
 
     # --- Discriminative entity filtering (by paragraph frequency) ---
     entity_para_freq: dict[str, set[int]] = defaultdict(set)

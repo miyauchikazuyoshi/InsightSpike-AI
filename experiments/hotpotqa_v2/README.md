@@ -13,7 +13,7 @@ Four experiment lines in this directory:
 
 ### 目標
 
-nDCG@10 = **0.45** (現在ベスト: bio50q=0.3181, full323q=0.1898)
+nDCG@10 = **0.45** (現在ベスト: bio50q=**0.4390** Pyserini+Enhanced Graph+Early TG+RIA [Spec X])
 
 BRIGHT ベンチマーク (ICLR 2025) の 3 ドメイン (biology, economics, stackoverflow) で、
 geDIG ベースのグラフ re-ranking パイプラインの性能を検証・改善する。
@@ -25,71 +25,249 @@ geDIG ベースのグラフ re-ranking パイプラインの性能を検証・�
 - BM25 baseline = 14.5, SOTA (INF-X-Retriever) = 63.4 nDCG@10
 - Leaderboard: https://brightbenchmark.github.io/
 
-### パイプライン アーキテクチャ
+---
+
+### パイプライン アーキテクチャ (v26 現行, Spec W)
 
 ```
-Phase 0:  [Optional] Query decomposition (LLM → 3-5 sub-questions) [Spec K]
-Phase 1:  BM25 initial retrieval (top-100)
-Phase 1a: [Optional] Sub-query BM25 retrieval (50/sub-query → ~250 new) [Spec K]
-Phase 1b: [Optional] Dense pool expansion (E5-base-v2 + FAISS) [Spec I]
-Phase 2:  LLM CoT reasoning → entity extraction
-Phase 2.5: CoT re-retrieval (BM25 + optional Dense)
-Phase 2.6: [Optional] RIA iterative expansion (β₀-gated, max 3 rounds) [Spec M]
-Phase 3:  Entity graph construction (sentence-level, three-tier edges)
-Phase 4:  CoT node injection (virtual nodes → bridge edges)
-Phase 4.5: [Optional] Per-document token graph scoring (spaCy dep parse + DG/AG walk) [Spec N/N.1]
-Phase 5:  Scoring
-  ├─ scoring_mode="classic"      → 5-component (PageRank+Entity+Token+Degree+CoT bridge)
-  ├─ scoring_mode="gedig"        → pure geDIG (MessagePassing + EdgeReevaluation)
-  └─ scoring_mode="gedig_refine" → geDIG graph refinement + classic scoring ★best
-Phase 5.5: [Optional] Token graph blend (external) [Spec N]
-Phase 6:  Combined ranking: α·BM25 + (1-α)·graph_score
-Phase 7:  [Optional] LLM listwise rerank
-Phase 7b: [Optional] LLM pointwise reasoning rerank (gpt-4o-mini) [Spec J]
-Phase 7c: [Optional] LLM reasoning rerank (gpt-4o, 1doc/call) [Spec L]
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ BM25 Engine Selection                                                      │
+│  --bm25-engine rank_bm25   → Python rank_bm25 (Porter stemmer + stopwords)│
+│  --bm25-engine pyserini    → Lucene BM25 via Pyserini (Java 21)     ★推奨 │
+│                              k1=0.9, b=0.4 (BRIGHT論文設定)               │
+│                              DefaultEnglishAnalyzer (内部トークナイズ)     │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Phase 1: BM25 Initial Retrieval (top-100)                                  │
+│  → bm25_tokenize(query) でトークナイズ                                     │
+│    - rank_bm25 モード: NLTK stopwords + Porter stemmer                     │
+│    - pyserini モード: raw split (Lucene が内部でトークナイズ)              │
+│  → BM25 scoring → top-100 候補を取得                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Phase 1.8: Early Token Graph (DG Gap Detection) [Spec W] ★NEW             │
+│  → BM25 top-20 文書に対して軽量 Token Graph を構築                        │
+│  → AG/DG エッジ分類 + Insight Pattern A/B で gap_lemmas を抽出            │
+│    - Pattern A: AG サブグラフの非連結クラスタを橋渡しする lemma            │
+│    - Pattern B: DG エッジを含む最短経路上の中間 lemma                      │
+│  → gap_lemmas = 「クエリと文書を繋ぐのに不足している概念」                 │
+│  → Phase 2 の CoT prompt と Phase 2.6 の RIA keywords に注入              │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Phase 2: LLM CoT Reasoning (gpt-4o-mini)                                  │
+│  → クエリに対する推論チェーンを生成                                        │
+│  → ★ gap_lemmas がある場合、CoT prompt に bridging concepts として注入    │
+│     「構造分析で特定された橋渡し概念: {gap_lemmas}」                       │
+│  → 推論エンティティ抽出 (NER + 大文字語)                                  │
+│  → [Optional] Multi-CoT Ensemble: N本生成 (temp=0.7) [Spec P]            │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Phase 2.5: CoT Re-retrieval                                                │
+│  → 抽出エンティティを BM25 クエリとして再検索 (top-50 新規文書)            │
+│  → Phase 1 候補とマージ → 拡張候補プール                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Phase 2.6: RIA Iterative Expansion [Spec M, --ria-loop]                   │
+│  → エンティティグラフから β₀ (連結成分数) を計算                           │
+│  → β₀ > target なら追加検索 (最大3ラウンド, 50docs/round)                 │
+│  → ★ 初回ラウンドで gap_lemmas を RIA keywords に追加 [Spec W]            │
+│  → 候補プールを段階的に拡大 → gold doc の recall 改善                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Phase 3: Entity Graph Construction                                         │
+│  → top-50 文書から文レベルの三層エンティティグラフを構築                   │
+│    Tier 1 (Context):    隣接文 (cost 0.05-0.10)                           │
+│    Tier 2 (Entity):     判別的エンティティ重複 (cost 0.20-0.50)            │
+│    Tier 3 (Similarity): TF-IDF cosine sim ≥ 0.30 (cost 0.50-0.80)        │
+│  → β₀ (連結成分), β₁ (サイクルランク) を計算                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Phase 4: CoT Virtual Node Injection                                        │
+│  → クエリを仮想ノードとしてグラフに追加                                    │
+│  → 関連ノードへのブリッジエッジを生成 → 推論ギャップを橋渡し              │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Phase 4.5: Per-Document Token Graph [Spec N, --token-graph]               │
+│  → 各文書を spaCy 依存構文解析 → トークンレベルグラフ構築                  │
+│  → エッジ分類: AG (Anchor-Generation) vs DG (Development)                 │
+│  → F-evaluation: f_theta = cost - λ·relevance                            │
+│  → Walk Score: DG ペナルティ付き重み付き最短経路 [Spec N.1]               │
+│  → Insight Vector 注入 (graph_agg / path_bridge / both)                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Phase 5: Scoring (--scoring-mode)                                          │
+│                                                                            │
+│  scoring_mode="gedig_refine" ★推奨                                        │
+│    1. MessagePassing: クエリ関連度をグラフ上で伝播                         │
+│    2. EdgeReevaluation: 更新された特徴量でエッジを再評価                   │
+│       → 類似度の低いエッジを除去、新しい接続を発見                         │
+│    3. 精錬されたグラフ上で classic 5-component scoring:                    │
+│       score = 0.4·PageRank + 0.3·entity_overlap                           │
+│             + 0.2·token_overlap + 0.1·degree + CoT_bridge                 │
+│                                                                            │
+│  [Optional] Entity F-eval blend [Spec O, --entity-feval]                  │
+│    → 文書間 AG/DG エッジ分類 + Δβ₁ 構造スコア                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Phase 5.5: Token Graph Blend [Spec N]                                      │
+│  → Walk Score / F-eval を最終ランキングにブレンド (weight=0.15)            │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Phase 6: Combined BM25 + Graph Ranking                                     │
+│  → final_score = α·BM25_norm + (1-α)·graph_score                          │
+│  → α = rerank_alpha (default 0.1 → graph 重視)                            │
+│  → Top-10 を選択 → nDCG@10, Recall@10, MRR を算出                        │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 実験結果サマリー (Biology 50q, α=0.1)
+#### Spec W: Early Token Graph の設計思想
+
+```
+問題: Token Graph (Phase 4.5) の AG/DG 分類は CoT (Phase 2) より後
+      → DG gap 情報が CoT 生成時に利用できない (循環依存)
+
+解決: 2-pass アプローチ
+      Pass 1: BM25 top-20 で軽量 TG → gap_lemmas 抽出 (Phase 1.8)
+      Pass 2: gap_lemmas で指向的 CoT + RIA → 本格 TG (Phase 4.5)
+
+教訓: Spec S の geDIG loop (Phase 5.75 → re-CoT → re-search) は
+      CoT 非決定性で -17.3% 劣化 → ループせず前方注入が安全
+```
+
+### BM25 エンジン比較
+
+| エンジン | トークナイズ | BM25 パラメータ | nDCG@10 (bio50q) |
+|----------|-------------|----------------|-------------------|
+| `rank_bm25` (旧) | NLTK stopwords + Porter stemmer (Python) | k1=1.5, b=0.75 | 0.175 |
+| **`pyserini` (新)** | **Lucene DefaultEnglishAnalyzer (Java)** | **k1=0.9, b=0.4** | **0.175** |
+
+BM25 only の nDCG は同等だが、Pyserini は BRIGHT 論文と同一エンジン・同一パラメータ。
+グラフ re-ranking と組み合わせた際に大幅な改善を実現。
+
+### 主要コンポーネント
+
+#### geDIG Graph Refinement (Spec H)
+```
+geDIG_local(doc) = Δ_GED − λ·(Δ_H + β·Δ_SP)
+```
+- **MessagePassingNX**: クエリ関連度をグラフ上で K 回反復伝播
+- **EdgeReevaluatorNX**: 更新特徴量に基づくエッジの動的追加/除去
+- **GeDIGDocScorer**: 文書ごとの局所 geDIG スコア算出
+- `gedig_refine` モード: geDIG でグラフを精錬 → classic scoring を適用 (★ベスト)
+
+#### Token Graph (Spec N / N.1)
+- spaCy 依存構文解析 → トークンレベル有向グラフ
+- エッジタイプ: `dep` (依存関係), `root_chain` (文間接続), `same_lemma` (語彙結束)
+- **F-evaluation**: f_theta < 0 → AG (関連), f_theta > 0 → DG (発見)
+- **Walk Score**: AG エッジを優遇、DG エッジにペナルティ → 構造的接続品質を評価
+
+#### RIA Iterative Expansion (Spec M)
+- エンティティグラフの β₀ (連結成分数) をゲート信号として使用
+- β₀ > target → CoT クエリで追加検索 → 候補プール拡大
+- 最大3ラウンド、各50文書 → gold doc の recall を +10% 改善
+
+#### Early Token Graph (Spec W)
+- BM25 top-20 文書に対して軽量 Token Graph を Phase 2 の前に実行
+- AG/DG 分類 → Insight Pattern A (非連結橋渡し) + Pattern B (DG 経路中間) で gap_lemmas 抽出
+- gap_lemmas を CoT prompt に注入 → 推論の指向性を改善
+- gap_lemmas を RIA 初回 keywords に追加 → 情報ギャップに対する直接的な検索
+- Spec S (geDIG loop) の教訓: ループ方式は CoT 非決定性で不安定 → 前方注入が安全
+
+#### Enhanced Graph Construction (Spec X)
+- spaCy sentencizer (regex → NLP ベースの文分割)
+- spaCy NER + noun chunks (大文字語 regex → 構造的エンティティ抽出)
+- Lemma matching (表層一致 → lemma 一致 + overlap 比例コスト)
+- AG クエリで +5.7%, DG クエリで ≈中立 → グラフの AG エッジ品質を改善
+
+#### AGHT: Analytical Heterogeneous Graph Transformer (Spec Z)
+```
+統合グラフ: Sentence ノード + Token ノード + クロスレベルエッジ
+
+QKV Edge Evaluation (内積ベース):
+  Q(u) = [w_q1·direct_match, w_q2·nbr_density, w_q3·cot_rel]
+  K(v) = [w_k1·importance,   w_k2·discriminativeness, w_k3·struct]
+  V(e) = [w_v1·base_cost,    w_v2·bridge_flag,  w_v3·level_cross]
+
+  α = dot(Q, K) / √d_k          ← attention weight
+  f = cost(e) - λ·α              ← AG/DG classification
+  flow = α · |V|                  ← message passing information flow
+
+AG (f < θ): high attention = confirmed edge
+DG (f ≥ θ): low attention = reasoning gap
+```
+- HGT (Heterogeneous Graph Transformer) と同構造だが学習不要 (10 パラメータ)
+- Sentence-Token 間に `contains` エッジ + 文書横断 `same_lemma_x` エッジ
+- Grid search で最適化: mp_alpha=0.1 (平滑化抑制) が文レベル精度の鍵
+
+#### Wake-Sleep-Wake アーキテクチャ (M + N.1)
+```
+Wake (RIA)        → 候補プールを反復的に拡大 (β₀-gated)
+Sleep (Walk Score) → DG/AG エッジ分類で構造品質を評価
+Wake (Confirmation) → 精錬されたスコアで最終ランキング
+```
+迷路実験と同じ原理: **先に探索しないとループ検知は無意味**
+
+---
+
+### 実験結果サマリー
+
+#### Pyserini BM25 + geDIG パイプライン (Biology 50q)
+
+| 構成 | nDCG@10 | 備考 |
+|------|---------|------|
+| Pyserini BM25 only | 0.175 | ベースライン |
+| Pyserini + graph rerank (CoT なし) | 0.238 | +36% |
+| Pyserini + CoT + TG + EF (RIA なし) | 0.376 | RIA なしベスト |
+| Pyserini + CoT + TG + EF + RIA (v25) | 0.410 | +135% |
+| Pyserini + Early TG + CoT + TG + EF + RIA (v26, Spec W) | 0.417 | +1.6% |
+| **Pyserini + Enhanced Graph + Early TG + RIA (v27, Spec X)** | **0.439** | **★ BRIGHT ベスト (+7.1%)** |
+
+#### 旧 BM25 (rank_bm25) 結果 (Biology 50q, α=0.1)
 
 | Spec | Configuration | nDCG@10 | R@10 | MRR | Note |
 |------|---------------|---------|------|-----|------|
 | A | Classic (CoT re-retrieval) | 0.2438 | 0.2173 | 0.3740 | 5成分 baseline |
-| H | geDIG refine | **0.2496** | **0.2419** | **0.4183** | ★ ベスト |
-| H | geDIG (pure) | 0.1130 | 0.1629 | 0.1436 | CoT bridge なし |
-| I | Classic + Dense (full) | 0.1797 | 0.1950 | 0.2342 | -26% 劣化 |
-| I | geDIG refine + Dense (full) | 0.1509 | 0.1995 | 0.1969 | -38% 劣化 |
-| I | Classic + Dense (pool-only) | 0.2341 | 0.1969 | 0.4125 | ≈ baseline |
-| I | geDIG refine + Dense (pool-only) | 0.2297 | 0.2276 | 0.3648 | ≈ baseline |
-| J | PW rerank blend=0.2 | 0.2410 | 0.2299 | 0.3867 | -3.4% |
-| J | PW rerank blend=0.4 | 0.1971 | 0.1847 | 0.3189 | -21.0% |
-| J | PW rerank blend=0.6 | 0.2313 | 0.2430 | 0.3499 | -7.3% |
-| K | Query decomposition | 0.1978 | 0.1680 | 0.3457 | -1.3% (68 new gold 発見) |
-| L | gpt-4o reasoning rerank (w=0.7) | 0.2342 | 0.2159 | 0.3756 | -6.2% (pointwise の限界) |
-| M | RIA iterative expansion | 0.2564 | 0.2661 | 0.3815 | +2.7% (38 new gold via RIA) |
-| N | Token graph (Spec N only) | 0.2544 | 0.2486 | 0.3917 | +1.9% (independent ranking signal) |
-| M+N | RIA + Token Graph | 0.2707 | 0.2643 | 0.3972 | +8.5% (相乗効果) |
-| N.1 | Walk Score (dg=2.0, のみ) | 0.2238 | 0.2158 | 0.3489 | -10.3% (RIA なしでは逆効果) |
-| **M+N.1** | **RIA + Walk Score (dg=2.0)** | **0.3181** | **0.3139** | **0.4424** | **★ ベスト +27.4% (Wake-Sleep-Wake)** |
-| O | Entity F-eval | — | — | — | entity-feval 単体テスト未実施 |
-| P | Multi-CoT Ensemble (N=3) | 0.0829 | 0.1005 | 0.1211 | **-32% 劣化** (DG信号が発生しない) |
-| P+O | Multi-CoT Ensemble + Entity F-eval | 0.0788 | 0.0960 | 0.1183 | **-35% 劣化** |
+| H | geDIG refine | 0.2496 | 0.2419 | 0.4183 | graph refinement |
+| M | RIA iterative expansion | 0.2564 | 0.2661 | 0.3815 | +2.7% |
+| N | Token graph (Spec N only) | 0.2544 | 0.2486 | 0.3917 | +1.9% |
+| M+N | RIA + Token Graph | 0.2707 | 0.2643 | 0.3972 | +8.5% |
+| **M+N.1** | **RIA + Walk Score** | **0.3181** | **0.3139** | **0.4424** | **+27.4% (WSW)** |
 
-#### Spec P 詳細結果 (v19, 3ドメイン×50q = 150q)
+#### BM25 エンジン × パイプライン構成の比較
 
-| # | 構成 | nDCG@10 | Bio | Econ | SO | 備考 |
-|---|------|---------|-----|------|----|------|
-| C1a | baseline N=1 run1 | **0.1184** | 0.165 | 0.100 | 0.090 | ベースライン |
-| C1b | baseline N=1 run2 | **0.1258** | 0.191 | 0.091 | 0.095 | CoT非決定性で6.3%ぶれ |
-| C2 | ensemble N=3 | 0.0829 | 0.133 | 0.055 | 0.061 | **-32%** (平均化で劣化) |
-| C3 | ensemble N=3 + feval | 0.0788 | 0.120 | 0.055 | 0.062 | **-35%** |
+| BM25 Engine | Pipeline | nDCG@10 | 旧比 |
+|-------------|----------|---------|------|
+| rank_bm25 | CoT + noRIA (ベスト旧構成) | 0.325 | — |
+| rank_bm25 | CoT + RIA + Walk Score | 0.318 | — |
+| pyserini | CoT + noRIA | 0.376 | +15.7% |
+| pyserini | CoT + RIA (v25) | 0.410 | +26.2% |
+| pyserini | Early TG + CoT + RIA (v26, Spec W) | 0.417 | +28.3% |
+| **pyserini** | **Enhanced Graph + Early TG + RIA (v27, Spec X)** | **0.439** | **★ +35.1%** |
 
-**Spec P の教訓**:
-- temperature=0.7 の3本CoTでは agreement=0.97~1.00 → **DG信号が一切発生しない**
-- Ensemble 平均化がスコアを平坦化し、正解文書のランクが下がる
-- LLM は同じクエリに対して似た推論をするため、multi-CoT で多様性を得にくい
-- **結論: Spec P は保留。他のアプローチ（Retrieval Recall 改善）を優先**
+**Pyserini BM25 への切替で全構成が大幅改善。** 論文同一エンジン・パラメータが鍵。
 
-### Full 323q 結果 (3 domains, α=0.1)
+#### Negative Results (効果なし/劣化した Spec)
+
+| Spec | 内容 | nDCG@10 | 変化 |
+|------|------|---------|------|
+| I | Dense retrieval (E5-base-v2) | 0.150-0.234 | -4%～-38% |
+| J | Pointwise LLM rerank (gpt-4o-mini) | 0.197-0.241 | -3%～-21% |
+| K | Query decomposition | 0.198 | -1.3% |
+| L | gpt-4o reasoning rerank | 0.234 | -6.2% |
+| P | Multi-CoT Ensemble (N=3) | 0.083 | -32% |
+
+### Full 323q 結果 (3 domains, rank_bm25, α=0.1)
 
 | Configuration | Biology | Economics | StackOverflow | Overall |
 |---------------|---------|-----------|---------------|---------|
@@ -97,7 +275,7 @@ Phase 7c: [Optional] LLM reasoning rerank (gpt-4o, 1doc/call) [Spec L]
 | Spec H (geDIG refine) | 0.2069 | 0.1187 | 0.1296 | 0.1508 |
 | **M+N.1 (RIA + Walk Score)** | **0.2574** | **0.1402** | **0.1739** | **0.1898** |
 
-**M+N.1 vs Spec H**: Biology +24%, Economics +18%, StackOverflow +34%, **Overall +26%** 🔥
+---
 
 ### Spec 進行状況
 
@@ -107,69 +285,88 @@ Phase 7c: [Optional] LLM reasoning rerank (gpt-4o, 1doc/call) [Spec L]
 | B-D | Adaptive routing, LLM rerank | ✅ 完了 | 微改善 (0.152→0.160) |
 | E | geDIG routing (tier selection) | ✅ 完了 | 効果なし |
 | F-G | Episode graph, Hybrid graph | ✅ 完了 | 効果なし |
-| H | geDIG scoring (graph refinement) | ✅ 完了 | ★ベスト biology +10% (0.2496) |
+| H | geDIG scoring (graph refinement) | ✅ 完了 | gedig_refine が最良 scoring mode |
 | I | Dense retrieval integration | ✅ 完了 | 改善なし (-4%～-38%, 構造的限界) |
-| J | Pointwise LLM reranking | ✅ 完了 | 改善なし (-3%～-21%, gpt-4o-mini 限界) |
-| K | Query decomposition | ✅ 完了 | ≈中立 (-1.3%, recall改善/ranking未活用) |
-| L | Stronger LLM Reranking (gpt-4o) | ✅ 完了 | 改善なし (-6.2%, pointwise の限界) |
-| M | RIA Iterative Expansion | ✅ 完了 | ★ **初の正改善** +2.7% (nDCG=0.2564, R@10+10%) |
-| N | Token-level Graph Scoring | ✅ 完了 | M+Nで +8.5% (nDCG=0.2707, 独立ranking信号) |
-| **N.1** | **geDIG Walk Score** | ✅ 完了 | **★ M+N.1で最高 +27.4%** (nDCG=0.3181, Wake-Sleep-Wake) |
+| J | Pointwise LLM reranking | ✅ 完了 | 改善なし (-3%～-21%) |
+| K | Query decomposition | ✅ 完了 | ≈中立 (-1.3%) |
+| L | Stronger LLM Reranking (gpt-4o) | ✅ 完了 | 改善なし (-6.2%) |
+| M | RIA Iterative Expansion | ✅ 完了 | +2.7% (初の正改善, R@10+10%) |
+| N | Token-level Graph Scoring | ✅ 完了 | M+Nで +8.5% |
+| **N.1** | **geDIG Walk Score** | ✅ 完了 | **M+N.1で +27.4% (Wake-Sleep-Wake)** |
 | O | Entity F-eval scoring | ✅ 完了 | P との組合せで検証 |
-| P | Multi-CoT Ensemble (DG/AG) | ✅ 完了 | **-32% 劣化** (保留: CoT間の多様性不足) |
+| P | Multi-CoT Ensemble | ✅ 完了 | -32% 劣化 (保留) |
+| S | geDIG CoT Loop (gap_lemmas → re-CoT) | ✅ 完了 | -17.3% 劣化 (CoT 非決定性) |
+| **V** | **Pyserini BM25 統合** | ✅ 完了 | **★ 全構成で +15-26% 改善** |
+| **W** | **Early Token Graph → DG-Guided CoT/RIA** | ✅ 完了 | **★ +1.6% (0.410→0.417, 安定改善)** |
+| **X** | **Enhanced Graph (spaCy NER + lemma match)** | ✅ 完了 | **★ +5.3% (0.417→0.439, R@10 +13%)** |
+| Y | Progressive DG Escalation | ✅ 完了 | 閾値調整中 (BRIGHT は全 DG のため要検証) |
+| **Z** | **AGHT: Unified Heterogeneous Graph Transformer** | ✅ 完了 | **★ HotpotQA R@2=0.405 (+170% vs Legacy)** |
 
-### 学んだこと (Spec I-N.1 の統一的教訓)
+#### Spec Z: AGHT — HotpotQA Paragraph Selection (100q)
 
-Spec I-L の 4 つの negative result → Spec M+N+N.1 で劇的改善:
+| | AGHT (ours) | Legacy (PageRank) | 改善 |
+|---|---|---|---|
+| **R@2** (段落) | **0.405** | 0.150 | **+170%** |
+| **MRR** | **0.659** | 0.346 | **+90%** |
+| **SF F1** (文) | **0.334** | — | ゼロショット |
 
+Bridge (DG) vs Comparison (AG) 分析:
+
+| | Bridge (n=86) | Comparison (n=14) |
+|---|---|---|
+| R@2 | 0.401 | 0.429 |
+| SF F1 | 0.335 | 0.327 |
+
+最適パラメータ (grid search 144 configs):
+`mp_alpha=0.1, mp_iterations=1, w_q1=0.5, f_lambda=0.5`
+
+**ゼロショット (10 パラメータ) で SF F1=33.4** — 教師ありモデル (DFGN: 81.1) の 41% を学習データなしで達成。
+
+---
+
+### 学んだこと
+
+#### BM25 エンジンの影響 (Spec V)
+- **Pyserini (Lucene) BM25** は BRIGHT 論文と同一実装 (k1=0.9, b=0.4)
+- BM25 only では rank_bm25 と同等だが、**グラフパイプラインとの相乗効果が大きい**
+- Lucene の DefaultEnglishAnalyzer が Python 側の NLTK tokenizer より高品質
+- **全構成で +15-26% の改善** — BM25 基盤品質がパイプライン全体に波及
+
+#### Early Token Graph の教訓 (Spec W vs Spec S)
+- **ループ方式 (Spec S)** は CoT 非決定性により -17.3% 劣化 — 毎回異なる CoT → 異なるグラフ → 不安定
+- **前方注入方式 (Spec W)** は +1.6% の安定改善 — BM25 top-20 で軽量 TG → gap_lemmas を CoT/RIA に注入
+- **2-pass で循環依存を解消**: Token Graph は graph 構築後 (Phase 4.5) に必要だが、CoT は Phase 2 → 軽量版を先行実行
+- 追加コストは ~700ms/query — 全体 23.6s の ~3% で再現性のある改善
+
+#### グラフ re-ranking の教訓 (Spec I-N.1)
 - **Pointwise reranking は BRIGHT に不適** — gpt-4o-mini (J) も gpt-4o (L) も改善せず
 - **候補プール拡張 (I, K)** は gold recovery に成功するが、scoring で活かせない
-- **反復的クエリ拡張 (M, RIA)** が Recall 改善 (+2.7% nDCG, +10% Recall)
-  - 38 個の新 gold 文書を発見 (19/50 クエリ)
-- **Token-level graph (N)** が Ranking 改善 (+1.9% 単体)
-  - BM25 と完全に独立したランキング信号 (Spearman ρ ≈ -0.38)
-- **geDIG Walk Score (N.1)** — DG/AG エッジ分類で構造的接続品質を評価
-  - 単体では逆効果 (-10.3%) — RIA なしでは gold doc がプールにない
-  - RIA 併用で **+27.4%** (0.2496 → 0.3181) — **Wake-Sleep-Wake アーキテクチャ**
-- **M+N.1 相乗効果**: **+27.4% nDCG** (0.2496 → 0.3181)
-  - RIA (Wake/探索) → Walk Score (Sleep/DG/AG分類) → proximity (Wake/確認)
-  - 迷路実験と同じ原理: 先に探索しないとループ検知は無意味
+- **RIA 反復拡張 (M)** が Recall 改善 (+10%) — 初の正改善
+- **Token Graph Walk Score (N.1)** が Ranking 改善 — DG/AG 構造品質評価
+- **M+N.1 相乗効果** = Wake-Sleep-Wake: 先に探索しないとループ検知は無意味
 
-### ボトルネック分析
-
-2 つの独立したボトルネックを特定:
-
-1. **Retrieval Recall**: Gold docs の 70-80% が BM25 top-100 に不在
-   - Dense retrieval (Spec I, E5-base-v2) は追加 gold ≈ 0 (biology)
-   - Query decomposition (Spec K) は 68 new gold / 50q — **recall 改善に成功**
-   - 理論上限 nDCG ≈ 0.60 (現在のプールで完璧にランキングした場合)
-2. **Ranking Quality**: プール内 gold の配置が理論上限の 35%
-   - 現在 0.21 / 理論上限 0.60 = 35%
-   - gpt-4o-mini pointwise reranking (Spec J) は改善なし
-   - gpt-4o reasoning reranking (Spec L) も改善なし — **pointwise アプローチ自体が BRIGHT に不適**
-   - 56% のクエリで gold が BM25 top-100 に 0 件 → reranking では解決不能
-
-**結論**: Pointwise reranking はモデル強度に関わらず BRIGHT に不適 (J, L で確認)。
-RIA (Spec M) は recall を改善 (+10%) し、初の正の改善を達成 (+2.7%)。
-Spec N.1 (geDIG Walk Score) で **ranking quality を大幅改善** — nDCG 0.2496 → **0.3181** (+27.4%)。
+---
 
 ### Quick Start (BRIGHT)
 
 **注意**: `answerer.py` が `.env` を自動読み込み (`python-dotenv`) するため、
-`export OPENAI_API_KEY=...` は不要。プロジェクトルートの `.env` に `OPENAI_API_KEY=sk-...` があれば OK。
+プロジェクトルートの `.env` に `OPENAI_API_KEY=sk-...` があれば OK。
+
+**前提条件**:
+- Python 3.11 (`.venv`)
+- Java 21 (Pyserini 用): `brew install openjdk@21`
+- Pyserini: `.venv/bin/pip install pyserini==0.25.0`
+- spaCy モデル: `.venv/bin/python3 -m spacy download en_core_web_sm`
 
 ```bash
 # 1. データ準備 (初回のみ)
 PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
     experiments/hotpotqa_v2/scripts/prepare_bright.py
 
-# 2. Dense index 構築 (初回のみ, ~10分)
-PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
-    experiments/hotpotqa_v2/scripts/build_dense_index.py \
-    --data-dir experiments/hotpotqa_v2/data/bright/ \
-    --output-dir experiments/hotpotqa_v2/data/bright/dense_index/
+# 2. Lucene index 構築 (初回のみ, Pyserini 使用時)
+#    → build_bm25_index() が自動で構築するため手動不要
 
-# 3. Smoke test (10q, biology, geDIG refine)
+# 3. Smoke test (10q, biology, Pyserini + Spec W)
 export $(cat .env | xargs) && \
 PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
     experiments/hotpotqa_v2/scripts/run_bright.py \
@@ -177,95 +374,45 @@ PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
     --data-dir experiments/hotpotqa_v2/data/bright/ \
     --output experiments/hotpotqa_v2/results/smoke_test \
     --limit 10 --graph-top-k 50 --rerank-alpha 0.1 \
-    --scoring-mode gedig_refine
-
-# 4. 50q biology (geDIG refine)
-export $(cat .env | xargs) && \
-PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
-    experiments/hotpotqa_v2/scripts/run_bright.py \
-    --mode cot_retrieval --domains biology \
-    --data-dir experiments/hotpotqa_v2/data/bright/ \
-    --output experiments/hotpotqa_v2/results/v12_bright_gedig_refine_50q \
-    --limit 50 --graph-top-k 50 --rerank-alpha 0.1 \
-    --scoring-mode gedig_refine
-
-# 5. 50q biology with Query Decomposition (Spec K)
-export $(cat .env | xargs) && \
-PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
-    experiments/hotpotqa_v2/scripts/run_bright.py \
-    --mode cot_retrieval --domains biology \
-    --data-dir experiments/hotpotqa_v2/data/bright/ \
-    --output experiments/hotpotqa_v2/results/v12_bright_qd_50q \
-    --limit 50 --graph-top-k 50 --rerank-alpha 0.1 \
+    --bm25-engine pyserini \
     --scoring-mode gedig_refine \
-    --query-decomp --query-decomp-top-k 50 --query-decomp-max-sub 5
+    --token-graph --token-graph-walk-score \
+    --token-graph-f-eval --token-graph-insight both \
+    --entity-feval --entity-feval-version v2 \
+    --early-token-graph
 
-# 6. 50q biology with Reasoning Reranking (Spec L, gpt-4o)
+# 4. ★推奨構成: Pyserini + Early TG + CoT + TG + EF + RIA (50q biology)
 export $(cat .env | xargs) && \
 PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
     experiments/hotpotqa_v2/scripts/run_bright.py \
     --mode cot_retrieval --domains biology \
     --data-dir experiments/hotpotqa_v2/data/bright/ \
-    --output experiments/hotpotqa_v2/results/v12_bright_reasoning_rerank_50q \
+    --output experiments/hotpotqa_v2/results/v26_best \
     --limit 50 --graph-top-k 50 --rerank-alpha 0.1 \
+    --bm25-engine pyserini \
     --scoring-mode gedig_refine \
-    --reasoning-rerank --rerank-model gpt-4o \
-    --reasoning-rerank-top-k 20 --reasoning-rerank-blend-weight 0.7
+    --token-graph --token-graph-walk-score \
+    --token-graph-f-eval --token-graph-insight both \
+    --entity-feval --entity-feval-version v2 \
+    --ria-loop --ria-max-rounds 3 \
+    --early-token-graph
 
-# 7. 50q biology with RIA iterative expansion (Spec M)
-export $(cat .env | xargs) && \
-PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
-    experiments/hotpotqa_v2/scripts/run_bright.py \
-    --mode cot_retrieval --domains biology \
-    --data-dir experiments/hotpotqa_v2/data/bright/ \
-    --output experiments/hotpotqa_v2/results/v13_bright_ria_50q \
-    --limit 50 --graph-top-k 50 --rerank-alpha 0.1 \
-    --scoring-mode gedig_refine \
-    --ria-loop --ria-max-rounds 3
-
-# 8. 50q biology with Token Graph scoring (Spec N)
-export $(cat .env | xargs) && \
-PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
-    experiments/hotpotqa_v2/scripts/run_bright.py \
-    --mode cot_retrieval --domains biology \
-    --data-dir experiments/hotpotqa_v2/data/bright/ \
-    --output experiments/hotpotqa_v2/results/v14_tg_50q \
-    --limit 50 --graph-top-k 50 --rerank-alpha 0.1 \
-    --scoring-mode gedig_refine \
-    --token-graph
-
-# 9. 50q biology with RIA + Token Graph (Spec M+N)
-export $(cat .env | xargs) && \
-PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
-    experiments/hotpotqa_v2/scripts/run_bright.py \
-    --mode cot_retrieval --domains biology \
-    --data-dir experiments/hotpotqa_v2/data/bright/ \
-    --output experiments/hotpotqa_v2/results/v14_tg_ria_50q \
-    --limit 50 --graph-top-k 50 --rerank-alpha 0.1 \
-    --scoring-mode gedig_refine \
-    --token-graph --ria-loop --ria-max-rounds 3
-
-# 10. 50q biology with RIA + Walk Score (★ best, Spec M+N.1, nDCG=0.3181)
-export $(cat .env | xargs) && \
-PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
-    experiments/hotpotqa_v2/scripts/run_bright.py \
-    --mode cot_retrieval --domains biology \
-    --data-dir experiments/hotpotqa_v2/data/bright/ \
-    --output experiments/hotpotqa_v2/results/v15_walk_ria_50q \
-    --limit 50 --graph-top-k 50 --rerank-alpha 0.1 \
-    --scoring-mode gedig_refine \
-    --token-graph --token-graph-walk-score --ria-loop --ria-max-rounds 3
-
-# 11. Full 323q (3 domains)
+# 5. Full 323q (3 domains, Pyserini)
 export $(cat .env | xargs) && \
 PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
     experiments/hotpotqa_v2/scripts/run_bright.py \
     --mode cot_retrieval \
     --domains biology,economics,stackoverflow \
     --data-dir experiments/hotpotqa_v2/data/bright/ \
-    --output experiments/hotpotqa_v2/results/v12_bright_full \
+    --output experiments/hotpotqa_v2/results/v26_full \
     --graph-top-k 50 --rerank-alpha 0.1 \
-    --scoring-mode gedig_refine
+    --bm25-engine pyserini \
+    --scoring-mode gedig_refine \
+    --token-graph --token-graph-walk-score \
+    --token-graph-f-eval --token-graph-insight both \
+    --entity-feval --entity-feval-version v2 \
+    --ria-loop --ria-max-rounds 3 \
+    --early-token-graph
 ```
 
 ### CLI オプション一覧
@@ -273,8 +420,11 @@ PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
 | Option | Default | Description |
 |--------|---------|-------------|
 | **基本** | | |
-| `--mode` | — | `cot_retrieval` (graph+CoT), `unified` (dense+LLM) |
-| `--scoring-mode` | `classic` | `classic`, `gedig`, `gedig_refine` |
+| `--mode` | — | `bm25_only`, `graph_rerank`, `cot_retrieval` |
+| `--scoring-mode` | `classic` | `classic`, `gedig`, `gedig_refine` ★ |
+| `--bm25-engine` | `rank_bm25` | `rank_bm25` (Python), `pyserini` (Lucene) ★ |
+| `--pyserini-k1` | 0.9 | Pyserini BM25 k1 パラメータ |
+| `--pyserini-b` | 0.4 | Pyserini BM25 b パラメータ |
 | `--graph-top-k` | 50 | グラフ構築に使う文書数 |
 | `--rerank-alpha` | 0.1 | BM25 weight (低い = graph 重視) |
 | `--limit` | — | クエリ数制限 (smoke test 用) |
@@ -284,37 +434,27 @@ PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
 | `--gedig-k-hop` | 2 | Local subgraph k-hop radius |
 | `--gedig-mp-iterations` | 2 | Message passing iterations |
 | `--gedig-mp-alpha` | 0.3 | Query influence weight |
-| **Dense Retrieval (Spec I)** | | |
-| `--dense-index-dir` | — | Dense retrieval index directory |
-| **Pointwise Reranking (Spec J)** | | |
-| `--pointwise-rerank` | false | Enable pointwise LLM reranking |
-| `--pointwise-blend-weight` | 0.4 | PW weight in blend (0=ignore, 1=replace) |
-| **Query Decomposition (Spec K)** | | |
-| `--query-decomp` | false | Enable query decomposition |
-| `--query-decomp-top-k` | 50 | BM25 top-k per sub-query |
-| `--query-decomp-max-sub` | 5 | Max sub-questions |
-| **Reasoning Reranking (Spec L)** | | |
-| `--reasoning-rerank` | false | Enable gpt-4o reasoning reranking |
-| `--rerank-model` | (same as main) | Reranking LLM model (e.g. gpt-4o) |
-| `--reasoning-rerank-top-k` | 20 | Top-k candidates to rerank |
-| `--reasoning-rerank-doc-chars` | 4000 | Max chars per document |
-| `--reasoning-rerank-blend-weight` | 0.7 | Blend weight (0=ignore, 1=replace) |
 | **RIA Iterative Expansion (Spec M)** | | |
-| `--ria-loop` | false | Enable RIA iterative query expansion |
-| `--ria-max-rounds` | 3 | Maximum RIA iteration rounds |
-| `--ria-docs-per-round` | 50 | New docs to retrieve per RIA round |
-| `--ria-feedback-top-k` | 5 | Top-k docs to feed back to LLM per round |
-| `--ria-beta0-target` | 1 | Target β₀ for RIA convergence |
+| `--ria-loop` | false | RIA 反復クエリ拡張を有効化 |
+| `--ria-max-rounds` | 3 | 最大 RIA ラウンド数 |
+| `--ria-docs-per-round` | 50 | ラウンドあたりの新規取得文書数 |
+| `--ria-feedback-top-k` | 5 | LLM フィードバック用 top-k 文書 |
+| `--ria-beta0-target` | 1 | RIA 収束目標 β₀ |
 | **Token Graph (Spec N/N.1)** | | |
-| `--token-graph` | false | Token graph scoring 有効化 (Spec N) |
+| `--token-graph` | false | Token graph scoring 有効化 |
 | `--token-graph-weight` | 0.15 | Graph scores とのブレンド比率 |
 | `--token-graph-max-tokens` | 500 | spaCy パース対象のトークン上限 |
-| `--token-graph-walk-score` | false | DG/AG 重み付き最短経路 (geDIG Walk Score, Spec N.1) |
-| `--token-graph-dg-penalty` | 2.0 | Bridge (DG) エッジのコストペナルティ |
+| `--token-graph-walk-score` | false | DG/AG 重み付き Walk Score |
+| `--token-graph-dg-penalty` | 2.0 | DG エッジのコストペナルティ |
+| `--token-graph-f-eval` | false | F-evaluation 有効化 |
+| `--token-graph-insight` | `none` | Insight 注入モード: `none`, `graph_agg`, `path_bridge`, `both` |
+| **Early Token Graph (Spec W)** | | |
+| `--early-token-graph` | false | Phase 1.8 Early TG 有効化 (DG gap → CoT/RIA 指向) |
+| `--early-tg-top-k` | 20 | Early TG に使う BM25 上位文書数 |
 | **Entity F-eval (Spec O)** | | |
 | `--entity-feval` | false | Entity F-eval scoring 有効化 |
 | `--entity-feval-weight` | 0.1 | F-eval スコアのブレンド比率 |
-| `--entity-feval-lambda` | 1.0 | F-eval 内部 DG/AG バランス |
+| `--entity-feval-version` | `v1` | `v1` (percentile), `v2` (structural Δβ₁) |
 | **Multi-CoT Ensemble (Spec P)** | | |
 | `--n-cot-ensemble` | 1 | CoT 生成本数 (1=従来, 3=ensemble) |
 | `--cot-cache-dir` | — | CoT キャッシュディレクトリ (再現性用) |
@@ -324,32 +464,34 @@ PYTHONPATH=experiments/hotpotqa_v2/src .venv/bin/python3 \
 
 | ファイル | 説明 |
 |---------|------|
-| **Pipeline** | |
-| [src/bright_cot_pipeline.py](src/bright_cot_pipeline.py) | CoT × Graph re-ranking pipeline (main) |
-| [src/bright_pipeline.py](src/bright_pipeline.py) | BM25 baseline pipeline |
+| **Pipeline Core** | |
+| [src/bright_cot_pipeline.py](src/bright_cot_pipeline.py) | CoT × Graph re-ranking pipeline (main, ~2900行) |
+| [src/bright_pipeline.py](src/bright_pipeline.py) | BM25 baseline + トークナイザ + グラフ rerank |
+| [src/pyserini_bm25.py](src/pyserini_bm25.py) | Pyserini (Lucene) BM25 ラッパー (drop-in replacement) |
 | [src/entity_graph.py](src/entity_graph.py) | Three-tier entity graph + TF-IDF features |
 | [src/gedig_scoring.py](src/gedig_scoring.py) | MessagePassingNX + EdgeReevaluatorNX + GeDIGDocScorer |
-| [src/gedig_router.py](src/gedig_router.py) | geDIG routing (tier selection) |
+| [src/token_graph.py](src/token_graph.py) | Per-document token graph + Walk Score + F-eval |
+| **Support Modules** | |
+| [src/answerer.py](src/answerer.py) | LLM API handler (OpenAI, python-dotenv) |
 | [src/dense_retriever.py](src/dense_retriever.py) | E5-base-v2 + FAISS dense retrieval |
+| [src/gedig_router.py](src/gedig_router.py) | geDIG routing (tier selection) |
 | [src/episode_graph.py](src/episode_graph.py) | Episode-based graph construction |
-| [src/answerer.py](src/answerer.py) | LLM API handler (OpenAI) |
 | **Scripts** | |
 | [scripts/run_bright.py](scripts/run_bright.py) | BRIGHT 実験ランナー (全モード対応) |
-| [scripts/build_dense_index.py](scripts/build_dense_index.py) | Dense index 構築 |
 | [scripts/prepare_bright.py](scripts/prepare_bright.py) | BRIGHT データ準備 |
+| [scripts/build_dense_index.py](scripts/build_dense_index.py) | Dense index 構築 |
+| **Data** | |
+| `data/bright/{domain}_docs.jsonl` | BRIGHT 文書コーパス |
+| `data/bright/{domain}_docs_lucene_index/` | Pyserini Lucene インデックス |
+| `data/bright/queries.jsonl` | BRIGHT クエリ + gold doc IDs |
 | **Reports** | |
-| [results/REPORT_SPEC_H_geDIG_scoring.md](results/REPORT_SPEC_H_geDIG_scoring.md) | Spec H: geDIG scoring 実験レポート |
-| [results/REPORT_SPEC_I_dense_retrieval.md](results/REPORT_SPEC_I_dense_retrieval.md) | Spec I: Dense retrieval 実験レポート |
-| [results/REPORT_SPEC_J_pointwise_reranking.md](results/REPORT_SPEC_J_pointwise_reranking.md) | Spec J: Pointwise LLM reranking 実験レポート |
-| [results/REPORT_SPEC_K_query_decomposition.md](results/REPORT_SPEC_K_query_decomposition.md) | Spec K: Query decomposition 実験レポート |
-| [results/REPORT_SPEC_L_reasoning_reranking.md](results/REPORT_SPEC_L_reasoning_reranking.md) | Spec L: gpt-4o reasoning reranking 実験レポート |
-| [docs/spec_m_ria_report.md](docs/spec_m_ria_report.md) | Spec M: RIA iterative expansion 実験レポート |
-| [docs/experiment_design_spec_m_ria.md](docs/experiment_design_spec_m_ria.md) | Spec M: RIA iterative expansion 設計メモ |
-| [docs/spec_n_token_graph_report.md](docs/spec_n_token_graph_report.md) | Spec N: Token-level Graph Scoring 実験レポート |
-| [docs/experiment_design_spec_n_unified_graph.md](docs/experiment_design_spec_n_unified_graph.md) | Spec N: Unified Token-level Graph 設計メモ |
-| [docs/references_bright_sota.md](docs/references_bright_sota.md) | BRIGHT SOTA 手法リファレンス |
-| [docs/report_bright_cot_retrieval.md](docs/report_bright_cot_retrieval.md) | CoT retrieval 初期レポート |
-| [docs/report_bright_unified.md](docs/report_bright_unified.md) | Unified mode レポート |
+| [results/REPORT_SPEC_H_geDIG_scoring.md](results/REPORT_SPEC_H_geDIG_scoring.md) | Spec H: geDIG scoring |
+| [results/REPORT_SPEC_I_dense_retrieval.md](results/REPORT_SPEC_I_dense_retrieval.md) | Spec I: Dense retrieval |
+| [results/REPORT_SPEC_J_pointwise_reranking.md](results/REPORT_SPEC_J_pointwise_reranking.md) | Spec J: Pointwise reranking |
+| [results/REPORT_SPEC_K_query_decomposition.md](results/REPORT_SPEC_K_query_decomposition.md) | Spec K: Query decomposition |
+| [results/REPORT_SPEC_L_reasoning_reranking.md](results/REPORT_SPEC_L_reasoning_reranking.md) | Spec L: Reasoning reranking |
+| [docs/spec_m_ria_report.md](docs/spec_m_ria_report.md) | Spec M: RIA |
+| [docs/spec_n_token_graph_report.md](docs/spec_n_token_graph_report.md) | Spec N: Token Graph |
 
 ---
 

@@ -31,6 +31,7 @@ from answerer import LLMAnswerer
 from entity_graph import extract_entities, build_sentence_graph
 from bright_pipeline import (
     BrightResult,
+    bm25_tokenize,
     compute_ndcg_at_k,
     compute_recall_at_k,
     compute_mrr,
@@ -132,6 +133,38 @@ class BrightCoTResult(BrightResult):
     ria_total_new_gold: int = 0
     ria_ms: float = 0.0
 
+    # Unified Heterogeneous Graph Transformer (Spec Z)
+    aght_applied: bool = False
+    aght_n_s_nodes: int = 0
+    aght_n_t_nodes: int = 0
+    aght_n_edges: int = 0
+    aght_n_ag: int = 0
+    aght_n_dg: int = 0
+    aght_f_theta: float = 0.0
+    aght_beta_1: int = 0
+    aght_build_ms: float = 0.0
+    aght_eval_ms: float = 0.0
+    aght_mp_ms: float = 0.0
+    aght_score_ms: float = 0.0
+
+    # Enhanced Graph (Spec X)
+    enhanced_graph: bool = False
+
+    # Early Token Graph fields (Spec W)
+    early_tg_applied: bool = False
+    early_tg_n_gap_lemmas: int = 0
+    early_tg_gap_lemmas: list[str] = field(default_factory=list)
+    early_tg_ms: float = 0.0
+
+    # Progressive DG Escalation fields (Spec Y)
+    progressive_routing: bool = False
+    progressive_tier: int = 0          # 1=AG, 2=DG-Shallow, 3=DG-Deep
+    progressive_dg_ratio: float = 0.0  # avg DG% from early TG
+    progressive_shallow_n_new: int = 0  # docs added in Tier 2 gap-fill
+    progressive_shallow_gaps_before: int = 0
+    progressive_shallow_gaps_after: int = 0
+    progressive_escalated: bool = False  # True if Tier 2 → Tier 3
+
     # Token-level graph fields (Spec N)
     token_graph_applied: bool = False
     token_graph_avg_coverage: float = 0.0
@@ -153,6 +186,16 @@ class BrightCoTResult(BrightResult):
     entity_feval_n_dg: int = 0
     entity_feval_f_theta: float = 0.0
     entity_feval_avg_convergence: float = 0.0
+    entity_feval_n_bridge: int = 0
+    entity_feval_beta1_global: int = 0
+    entity_feval_version: str = "v1"
+    # Adaptive AG diagnostics (v2.1+)
+    entity_feval_ag_threshold: float = 0.0
+    entity_feval_ag_density: float = 0.0
+    entity_feval_ag_n_query_edges: int = 0
+    entity_feval_delta_beta1_global: int = 0
+    entity_feval_avg_delta_beta1: float = 0.0
+    entity_feval_max_delta_beta1: int = 0
     # Ranking DG/AG routing fields (Spec O.2)
     entity_feval_ranking_dg: float = 0.0
     entity_feval_adaptive_weight: float = 0.0
@@ -165,6 +208,16 @@ class BrightCoTResult(BrightResult):
     ensemble_n_dg_docs: int = 0
     ensemble_avg_agreement: float = 0.0
     ensemble_score_variance_mean: float = 0.0
+
+    # geDIG CoT Loop fields (Spec R)
+    gedig_loop_applied: bool = False
+    gedig_loop_rounds: int = 0
+    gedig_loop_delta_beta1_history: list[int] = field(default_factory=list)
+    gedig_loop_n_bridge_nodes: int = 0
+    gedig_loop_n_new_docs: int = 0
+    gedig_loop_n_new_gold: int = 0
+    gedig_loop_converged: bool = False
+    gedig_loop_ms: float = 0.0
 
 
 # ---------------------------------------------------------------------------
@@ -265,10 +318,37 @@ class BrightCoTPipeline:
         enable_entity_feval: bool = False,
         entity_feval_weight: float = 0.20,
         entity_feval_lambda: float = 1.0,
+        entity_feval_version: str = "v1",
+        entity_feval_ag_threshold: float | None = None,
+        entity_feval_ag_max_k: int | None = None,
+        entity_feval_ag_min_k: int = 5,
+        entity_feval_beta1_weight: float = 0.3,
         # Multi-CoT Ensemble parameters (Spec P)
         n_cot_ensemble: int = 1,
         cot_cache_dir: str | None = None,
         cot_temperature: float = 0.7,
+        # Early Token Graph for DG-guided CoT/RIA (Spec W)
+        enable_early_token_graph: bool = False,
+        early_tg_top_k: int = 20,
+        # Enhanced Graph Construction (Spec X)
+        enable_enhanced_graph: bool = False,
+        # Progressive DG Escalation (Spec Y)
+        enable_progressive_routing: bool = False,
+        progressive_ag_threshold: float = 0.70,  # AG score above this → Tier 1 (AG, no CoT)
+        progressive_dg_shallow_threshold: float = 0.55,  # AG score above this → Tier 2 (gap-fill, no CoT)
+        # Unified Heterogeneous Graph Transformer (Spec Z)
+        enable_unified_graph: bool = False,
+        aght_lambda: float = 1.0,
+        aght_mp_iterations: int = 2,
+        aght_mp_alpha: float = 0.3,
+        aght_w_q1: float = 1.0,
+        aght_f_lambda: float = 1.0,
+        # geDIG CoT Loop parameters (Spec R/S)
+        enable_gedig_loop: bool = False,
+        gedig_loop_max_rounds: int = 2,
+        gedig_loop_delta_beta1_target: int = 1,
+        gedig_loop_directed: bool = True,
+        gedig_loop_max_new_docs: int = 15,
     ):
         self.llm = LLMAnswerer(model=model, temperature=0.0, max_tokens=300)
         self.initial_top_k = initial_top_k
@@ -340,6 +420,11 @@ class BrightCoTPipeline:
         self.enable_entity_feval = enable_entity_feval
         self.entity_feval_weight = entity_feval_weight
         self.entity_feval_lambda = entity_feval_lambda
+        self.entity_feval_version = entity_feval_version
+        self.entity_feval_ag_threshold = entity_feval_ag_threshold
+        self.entity_feval_ag_max_k = entity_feval_ag_max_k
+        self.entity_feval_ag_min_k = entity_feval_ag_min_k
+        self.entity_feval_beta1_weight = entity_feval_beta1_weight
         # Multi-CoT Ensemble (Spec P)
         self.n_cot_ensemble = n_cot_ensemble
         self.cot_cache_dir = cot_cache_dir
@@ -349,6 +434,28 @@ class BrightCoTPipeline:
             )
         else:
             self.llm_ensemble = self.llm
+        # Early Token Graph (Spec W)
+        self.enable_early_token_graph = enable_early_token_graph
+        self.early_tg_top_k = early_tg_top_k
+        # Enhanced Graph (Spec X)
+        self.enhanced_graph = enable_enhanced_graph
+        # Progressive DG Escalation (Spec Y)
+        self.enable_progressive_routing = enable_progressive_routing
+        self.progressive_ag_threshold = progressive_ag_threshold
+        self.progressive_dg_shallow_threshold = progressive_dg_shallow_threshold
+        # Unified Heterogeneous Graph Transformer (Spec Z)
+        self.enable_unified_graph = enable_unified_graph
+        self.aght_lambda = aght_lambda
+        self.aght_mp_iterations = aght_mp_iterations
+        self.aght_mp_alpha = aght_mp_alpha
+        self.aght_w_q1 = aght_w_q1
+        self.aght_f_lambda = aght_f_lambda
+        # geDIG CoT Loop (Spec R)
+        self.enable_gedig_loop = enable_gedig_loop
+        self.gedig_loop_max_rounds = gedig_loop_max_rounds
+        self.gedig_loop_delta_beta1_target = gedig_loop_delta_beta1_target
+        self.gedig_loop_directed = gedig_loop_directed
+        self.gedig_loop_max_new_docs = gedig_loop_max_new_docs
         self._nlp = None  # lazy-load spaCy
         # Create separate LLM for reranking if model differs
         if self.rerank_model != model:
@@ -359,10 +466,12 @@ class BrightCoTPipeline:
             self.rerank_llm = self.llm
 
     def _get_nlp(self):
-        """Lazy-load spaCy model (only when --token-graph enabled)."""
+        """Lazy-load spaCy model (token-graph / enhanced-graph)."""
         if self._nlp is None:
             import spacy
-            self._nlp = spacy.load("en_core_web_sm", disable=["ner"])
+            # Enable NER when enhanced_graph or unified_graph needs it
+            disable = [] if (self.enhanced_graph or self.enable_unified_graph) else ["ner"]
+            self._nlp = spacy.load("en_core_web_sm", disable=disable)
         return self._nlp
 
     def rerank(
@@ -425,7 +534,7 @@ class BrightCoTPipeline:
             query_decomp_ms = (time.time() - t_decomp) * 1000
 
         # ── Phase 1: BM25 retrieval ───────────────────────────────
-        query_tokens = query.lower().split()
+        query_tokens = bm25_tokenize(query)
         bm25_scores = bm25_index.get_scores(query_tokens)
 
         scored = [
@@ -445,7 +554,7 @@ class BrightCoTPipeline:
             existing_ids = {docs[i]["id"] for i, _ in top_candidates}
             decomp_new_indices: set[int] = set()
             for sq in sub_queries:
-                sq_tokens = sq.lower().split()
+                sq_tokens = bm25_tokenize(sq)
                 if not sq_tokens:
                     continue
                 sq_scores = bm25_index.get_scores(sq_tokens)
@@ -593,12 +702,148 @@ class BrightCoTPipeline:
             else:
                 routing_tier = 2   # standard
 
+        # ── Phase 1.8: Early Token Graph for DG gap detection (Spec W) ──
+        early_gap_lemmas: set[str] = set()
+        early_tg_ms = 0.0
+        etg_diags: list[dict] = []
+        etg_dg_ratio = 0.0  # avg DG% across early TG docs
+
+        # Progressive routing state (Spec Y)
+        progressive_tier = 0
+        progressive_shallow_n_new = 0
+        progressive_shallow_gaps_before = 0
+        progressive_shallow_gaps_after = 0
+        progressive_escalated = False
+
+        if self.enable_early_token_graph and self.enable_token_graph:
+            import time as _etg_time
+            _etg_t0 = _etg_time.time()
+
+            from token_graph import compute_token_scores_batch
+            nlp = self._get_nlp()
+
+            # Use top-K BM25 candidates for lightweight TG scan
+            etg_k = min(self.early_tg_top_k, len(top_candidates))
+            etg_texts = [docs[idx]["content"] for idx, _ in top_candidates[:etg_k]]
+
+            _, etg_diags = compute_token_scores_batch(
+                query, etg_texts, nlp,
+                max_tokens=self.token_graph_max_tokens,
+                use_walk_score=self.token_graph_walk_score,
+                dg_penalty=self.token_graph_dg_penalty,
+                use_f_eval=True,  # Need f_eval for AG/DG classification
+                f_lambda=self.token_graph_f_lambda,
+                insight_mode="both",  # Need insight_lemmas for gap detection
+            )
+
+            # Compute avg DG ratio across early TG docs
+            _total_ag = sum(d.get("n_ag", 0) for d in etg_diags)
+            _total_dg = sum(d.get("n_dg", 0) for d in etg_diags)
+            etg_dg_ratio = _total_dg / (_total_ag + _total_dg) if (_total_ag + _total_dg) > 0 else 0.0
+
+            # Extract query lemmas for gap detection
+            _CONTENT_POS = {"NOUN", "VERB", "ADJ", "PROPN"}
+            etg_query_lemmas = {
+                t.lemma_.lower()
+                for t in nlp(query)
+                if t.pos_ in _CONTENT_POS and len(t.lemma_) > 2
+            }
+
+            # Collect gap lemmas from early TG
+            early_gap_lemmas, _ = self._collect_dg_gaps(
+                etg_diags, etg_query_lemmas, top_k=min(10, etg_k)
+            )
+
+            early_tg_ms = (_etg_time.time() - _etg_t0) * 1000
+            if early_gap_lemmas:
+                print(f"    [Spec W] Early TG: {len(early_gap_lemmas)} gap lemmas "
+                      f"({', '.join(sorted(early_gap_lemmas)[:8])}) "
+                      f"in {early_tg_ms:.0f}ms")
+
+        # ── Phase 1.9: Progressive DG Escalation routing (Spec Y) ──
+        # Composite AG/DG classifier — benchmark-agnostic
+        # Signals:
+        #   (a) avg coverage from early TG  — high = AG (surface match)
+        #   (b) gap_lemmas count            — few = AG (no reasoning gap)
+        #   (c) BM25 top-1 score normalized — high = AG (strong lexical hit)
+        # AG score ∈ [0, 1]: high = more AG-like
+        if self.enable_progressive_routing and etg_diags:
+            n_gaps = len(early_gap_lemmas)
+            progressive_shallow_gaps_before = n_gaps
+
+            # (a) avg coverage from early TG (0-1, higher = better surface match)
+            avg_cov = sum(d.get("coverage", 0.0) for d in etg_diags) / max(len(etg_diags), 1)
+
+            # (b) gap signal: fewer gaps = more AG (normalize: 0 gaps→1.0, 50+→0.0)
+            gap_signal = max(0.0, 1.0 - n_gaps / 50.0)
+
+            # (c) BM25 top-1 score (normalize by max possible — use top-1/top-1 ratio)
+            bm25_top1 = top_candidates[0][1] if top_candidates else 0.0
+            # Normalize: typical BM25 scores range 0-50+; use sigmoid-like mapping
+            import math as _math
+            bm25_signal = 1.0 / (1.0 + _math.exp(-0.1 * (bm25_top1 - 20)))  # center at 20
+
+            # Composite AG score (weighted average)
+            ag_score = 0.4 * avg_cov + 0.35 * gap_signal + 0.25 * bm25_signal
+            etg_dg_ratio = 1.0 - ag_score  # store DG ratio (complement of AG)
+
+            # Route based on AG score
+            ag_th = self.progressive_ag_threshold       # e.g., 0.50
+            shallow_th = self.progressive_dg_shallow_threshold  # e.g., 0.30
+
+            if ag_score >= ag_th:
+                # Tier 1 (AG): high AG score → skip CoT, skip RIA
+                progressive_tier = 1
+                routing_tier = 1
+                cot_skipped = True
+                print(f"    [Spec Y] Tier 1 (AG): ag_score={ag_score:.3f} "
+                      f"(cov={avg_cov:.2f} gap={gap_signal:.2f} bm25={bm25_signal:.2f}) "
+                      f">= {ag_th} → skip CoT/RIA")
+
+            elif ag_score >= shallow_th:
+                # Tier 2 (DG-Shallow): moderate → gap-fill BM25, skip CoT
+                progressive_tier = 2
+                print(f"    [Spec Y] Tier 2 (DG-Shallow): ag_score={ag_score:.3f} "
+                      f"(cov={avg_cov:.2f} gap={gap_signal:.2f} bm25={bm25_signal:.2f}) "
+                      f">= {shallow_th} → gap-fill, skip CoT")
+
+                if early_gap_lemmas:
+                    gap_query = " ".join(sorted(early_gap_lemmas)[:10])
+                    gap_tokens = bm25_tokenize(gap_query)
+                    if gap_tokens:
+                        gap_scores = bm25_index.get_scores(gap_tokens)
+                        existing_ids = {docs[i]["id"] for i, _ in top_candidates}
+                        gap_scored = [
+                            (i, float(gap_scores[i]))
+                            for i in range(len(docs))
+                            if docs[i]["id"] not in existing_ids
+                            and docs[i]["id"] not in excluded
+                        ]
+                        gap_scored.sort(key=lambda x: -x[1])
+                        gap_new = gap_scored[:50]
+                        progressive_shallow_n_new = len(gap_new)
+                        if gap_new:
+                            top_candidates = top_candidates + gap_new
+                            progressive_shallow_gaps_after = n_gaps
+                            print(f"    [Spec Y] Tier 2: +{progressive_shallow_n_new} gap-fill docs")
+
+                # Tier 2: skip CoT, graph-only with expanded pool
+                routing_tier = 1
+                cot_skipped = True
+
+            else:
+                # Tier 3 (DG-Deep): low AG score → full CoT + RIA pipeline
+                progressive_tier = 3
+                print(f"    [Spec Y] Tier 3 (DG-Deep): ag_score={ag_score:.3f} "
+                      f"(cov={avg_cov:.2f} gap={gap_signal:.2f} bm25={bm25_signal:.2f}) "
+                      f"< {shallow_th} → full pipeline")
+
         # ── Phase 2: CoT reasoning (conditional) ─────────────────
         cot_list: list[dict] = []
         cot_cache_hit = False
 
-        if self.enable_adaptive and routing_tier == 1 and self.dense_retriever is None:
-            # Tier 1: Skip CoT entirely (System 1 — graph-only)
+        if cot_skipped or (self.enable_adaptive and routing_tier == 1 and self.dense_retriever is None):
+            # Skip CoT: progressive Tier 1/2 or adaptive routing Tier 1
             cot_text = ""
             all_cot_concepts: set[str] = set()
             cot_latency = 0.0
@@ -619,7 +864,19 @@ class BrightCoTPipeline:
                 cot_text = cot_list[0]["text"]
             else:
                 # N=1: original single-CoT path
-                prompt = _COT_PROMPT.format(query=query[:500])
+                # Spec W: Inject early TG gap lemmas into CoT prompt
+                if early_gap_lemmas:
+                    gap_hint = ", ".join(sorted(early_gap_lemmas)[:10])
+                    prompt = _COT_PROMPT.format(query=query[:500]) + (
+                        f"\n\nIMPORTANT: A structural analysis of top documents "
+                        f"identified these potentially missing bridging concepts "
+                        f"that may help connect the query to relevant documents: "
+                        f"{gap_hint}\n"
+                        f"Please incorporate these concepts in your reasoning "
+                        f"if they are relevant."
+                    )
+                else:
+                    prompt = _COT_PROMPT.format(query=query[:500])
                 try:
                     cot_text = self.llm._llm_call_raw(prompt, max_tokens=300)
                 except Exception as e:
@@ -754,9 +1011,16 @@ class BrightCoTPipeline:
                 if not new_keywords:
                     break  # LLM produced no new keywords
 
+                # Spec W: Augment RIA keywords with early TG gap lemmas
+                if early_gap_lemmas and ria_round == 0:
+                    # Only on first round — inject structural gap terms
+                    gap_kw = [lem for lem in early_gap_lemmas
+                              if lem not in set(new_keywords)]
+                    new_keywords = new_keywords + gap_kw[:5]
+
                 # 2.6e: BM25 re-retrieval with new keywords
                 keyword_query = " ".join(new_keywords)
-                keyword_tokens = keyword_query.lower().split()
+                keyword_tokens = bm25_tokenize(keyword_query)
                 if not keyword_tokens:
                     break
 
@@ -863,17 +1127,104 @@ class BrightCoTPipeline:
                     ep_texts = ep_texts[:max(max_total - len(sents), 3)]
                 sents = sents + ep_texts
             else:
-                sents = _split_sentences(content, max_sentences=30)
+                if self.enhanced_graph:
+                    from entity_graph import split_sentences_spacy
+                    sents = split_sentences_spacy(
+                        content, self._get_nlp(), max_sentences=30
+                    )
+                else:
+                    sents = _split_sentences(content, max_sentences=30)
                 if not sents:
                     sents = [content[:500]]
 
             titles.append(title)
             sentences_list.append(sents)
 
+        # ── Phase 3'-5': AGHT path (Spec Z) ─────────────────────
+        aght_applied = False
+        aght_n_s_nodes = 0
+        aght_n_t_nodes = 0
+        aght_n_edges = 0
+        aght_n_ag = 0
+        aght_n_dg = 0
+        aght_f_theta = 0.0
+        aght_beta_1 = 0
+        aght_build_ms = 0.0
+        aght_eval_ms = 0.0
+        aght_mp_ms = 0.0
+        aght_score_ms = 0.0
+        aght_edges_by_type: dict = {}
+
+        if self.enable_unified_graph:
+            import time as _aght_time
+            from unified_graph import run_aght, AGHTConfig
+
+            aght_config = AGHTConfig(
+                f_lambda=self.aght_f_lambda,
+                mp_iterations=self.aght_mp_iterations,
+                mp_alpha=self.aght_mp_alpha,
+                w_q1=self.aght_w_q1,
+                max_para_freq=self.max_para_freq,
+            )
+
+            # Build BM25 score dict for AGHT blending
+            _bm25_for_aght = {}
+            for idx, (doc_idx, bm25_s) in enumerate(graph_candidates):
+                doc_id = docs[doc_idx]["id"]
+                _bm25_for_aght[doc_id] = bm25_s
+
+            _aght_t0 = _aght_time.time()
+            graph_scores, aght_result, _aght_graph = run_aght(
+                titles, sentences_list, query,
+                nlp=self._get_nlp(),
+                doc_id_map=doc_id_map,
+                cot_concepts=all_cot_concepts if not cot_skipped else None,
+                config=aght_config,
+                bm25_scores=_bm25_for_aght,
+            )
+            aght_total_ms = (_aght_time.time() - _aght_t0) * 1000
+
+            aght_applied = True
+            aght_n_s_nodes = aght_result.n_s_nodes
+            aght_n_t_nodes = aght_result.n_t_nodes
+            aght_n_edges = aght_result.n_edges
+            aght_n_ag = aght_result.n_ag
+            aght_n_dg = aght_result.n_dg
+            aght_f_theta = aght_result.f_theta
+            aght_beta_1 = aght_result.beta_1
+            aght_build_ms = aght_result.build_ms
+            aght_eval_ms = aght_result.eval_ms
+            aght_mp_ms = aght_result.mp_ms
+            aght_score_ms = aght_result.score_ms
+            aght_edges_by_type = aght_result.n_edges_by_type
+
+            print(f"    [Spec Z] AGHT: {aght_n_s_nodes}S+{aght_n_t_nodes}T nodes, "
+                  f"{aght_n_edges} edges, AG={aght_n_ag} DG={aght_n_dg}, "
+                  f"{aght_total_ms:.0f}ms")
+
+        # When AGHT is active, skip legacy Phase 3-5.5
+        # Initialize legacy variables to defaults for result tracking
+        if self.enable_unified_graph:
+            n_dense_graph_edges = 0
+            n_injected, n_edges = 0, 0
+            n_nodes = aght_n_s_nodes + aght_n_t_nodes
+            n_edges_total = aght_n_edges
+            beta_0 = 1
+            beta_1 = aght_beta_1
+            token_graph_applied = False
+            token_graph_scores = {}
+            tg_diags = []
+            tg_avg_coverage = 0.0
+            tg_avg_beta1 = 0
+            entity_feval_scores = {}
+            ef_diag = {}
+            entity_feval_ranking_dg = 0.0
+            entity_feval_adaptive_weight = 0.0
+
         # Prepare Tier D embeddings only for unified mode (LLM rerank)
         # For cot_retrieval + dense: Tier D edges hurt precision (see Spec I report)
         doc_embeddings = None
-        if self.dense_retriever is not None and self.enable_llm_rerank:
+        if not self.enable_unified_graph and self.dense_retriever is not None and self.enable_llm_rerank:
             doc_id_list = [doc_id_map[t] for t in titles]
             doc_embeddings_raw = self.dense_retriever.get_doc_embeddings(
                 self.dense_domain, doc_id_list
@@ -885,30 +1236,32 @@ class BrightCoTPipeline:
                 if did in doc_embeddings_raw:
                     doc_embeddings[t] = doc_embeddings_raw[did]
 
-        graph = build_sentence_graph(
-            titles, sentences_list, max_para_freq=self.max_para_freq,
-            doc_embeddings=doc_embeddings,
-            dense_sim_threshold=self.dense_sim_threshold,
-        )
-        n_dense_graph_edges = graph.graph.get("n_tier_d_edges", 0)
-
-        # ── Phase 4: Inject CoT into graph (skip if Tier 1) ──────
-        if not cot_skipped:
-            n_injected, n_edges = self._inject_cot_nodes(
-                graph, cot_text, all_cot_concepts, titles, sentences_list
+        if not self.enable_unified_graph:
+            graph = build_sentence_graph(
+                titles, sentences_list, max_para_freq=self.max_para_freq,
+                doc_embeddings=doc_embeddings,
+                dense_sim_threshold=self.dense_sim_threshold,
+                nlp=self._get_nlp() if self.enhanced_graph else None,
             )
-        else:
-            n_injected, n_edges = 0, 0
+            n_dense_graph_edges = graph.graph.get("n_tier_d_edges", 0)
 
-        # Topology
-        n_nodes = graph.number_of_nodes()
-        n_edges_total = graph.number_of_edges()
-        if n_nodes > 0:
-            components = list(nx.connected_components(graph))
-            beta_0 = len(components)
-            beta_1 = n_edges_total - n_nodes + beta_0
-        else:
-            beta_0, beta_1 = 0, 0
+            # ── Phase 4: Inject CoT into graph (skip if Tier 1) ──
+            if not cot_skipped:
+                n_injected, n_edges = self._inject_cot_nodes(
+                    graph, cot_text, all_cot_concepts, titles, sentences_list
+                )
+            else:
+                n_injected, n_edges = 0, 0
+
+            # Topology
+            n_nodes = graph.number_of_nodes()
+            n_edges_total = graph.number_of_edges()
+            if n_nodes > 0:
+                components = list(nx.connected_components(graph))
+                beta_0 = len(components)
+                beta_1 = n_edges_total - n_nodes + beta_0
+            else:
+                beta_0, beta_1 = 0, 0
 
         # ── Phase 4.5: Per-document token graph scoring (Spec N) ──
         token_graph_scores: dict[str, float] = {}
@@ -920,10 +1273,11 @@ class BrightCoTPipeline:
         tg_ms = 0.0
         tg_spearman_bm25 = 0.0
         tg_avg_beta1 = 0.0
+        tg_diags: list[dict] = []
         tg_avg_n_insights = 0.0
         tg_avg_f_theta = 0.0
 
-        if self.enable_token_graph:
+        if self.enable_token_graph and not self.enable_unified_graph:
             import time as _tg_time
             _tg_t0 = _tg_time.time()
 
@@ -990,7 +1344,9 @@ class BrightCoTPipeline:
         ensemble_avg_agreement = 0.0
         ensemble_score_variance_mean = 0.0
 
-        if self.n_cot_ensemble > 1 and len(cot_list) > 1 and not cot_skipped:
+        if self.enable_unified_graph:
+            pass  # graph_scores already computed by AGHT in Phase 3'-5'
+        elif self.n_cot_ensemble > 1 and len(cot_list) > 1 and not cot_skipped:
             # ── Spec P: Multi-CoT Ensemble scoring ──
             import numpy as _np
             t_ens = time.time()
@@ -1098,16 +1454,21 @@ class BrightCoTPipeline:
         # ── Phase 5.25: Entity graph F-eval walk score (Spec O) ───
         entity_feval_scores = {}
         ef_diag: dict = {}
-        if self.enable_entity_feval:
+        if self.enable_entity_feval and not self.enable_unified_graph:
             from gedig_scoring import entity_graph_feval_scores
             entity_feval_scores, ef_diag = entity_graph_feval_scores(
                 graph, query, cot_text, all_cot_concepts,
                 titles, sentences_list, doc_id_map,
                 f_lambda=self.entity_feval_lambda,
+                version=self.entity_feval_version,
+                ag_threshold=self.entity_feval_ag_threshold,
+                ag_max_k=self.entity_feval_ag_max_k,
+                ag_min_k=self.entity_feval_ag_min_k,
+                beta1_weight=self.entity_feval_beta1_weight,
             )
 
         # ── Phase 5.5: Blend token graph + entity F-eval scores ──
-        if self.enable_token_graph and token_graph_scores:
+        if self.enable_token_graph and token_graph_scores and not self.enable_unified_graph:
             w = self.token_graph_weight
             for doc_id in graph_scores:
                 g = graph_scores[doc_id]
@@ -1117,7 +1478,7 @@ class BrightCoTPipeline:
         # ── Ranking DG/AG routing for entity F-eval (Spec O.2) ──
         entity_feval_ranking_dg = 0.0
         entity_feval_adaptive_weight = 0.0
-        if self.enable_entity_feval and entity_feval_scores:
+        if self.enable_entity_feval and entity_feval_scores and not self.enable_unified_graph:
             import math as _math
 
             # (a) Score dispersion DG: normalized entropy of top-10 graph_scores
@@ -1161,6 +1522,226 @@ class BrightCoTPipeline:
                     g = graph_scores[doc_id]
                     ef = entity_feval_scores.get(doc_id, 0.0)
                     graph_scores[doc_id] = (1.0 - w) * g + w * ef
+
+        # ── Phase 5.75: geDIG CoT Loop (Spec R) ──────────────────
+        gedig_loop_applied = False
+        gedig_loop_rounds = 0
+        gedig_loop_delta_beta1_history: list[int] = []
+        gedig_loop_n_bridge_nodes = 0
+        gedig_loop_n_new_docs = 0
+        gedig_loop_n_new_gold = 0
+        gedig_loop_converged = False
+        gedig_loop_ms = 0.0
+
+        if (self.enable_gedig_loop
+                and self.enable_entity_feval
+                and self.entity_feval_version.startswith("v2")):
+            import time as _time
+            loop_start = _time.time()
+            gedig_loop_applied = True
+
+            # ── 5.75a: Collect DG gaps from Token Graph (Spec S) ──
+            gap_lemmas: set[str] = set()
+            unmatched_terms: list[str] = []
+            query_lemmas_for_gap: set[str] = set()
+
+            if self.gedig_loop_directed and token_graph_applied and tg_diags:
+                # Extract query lemmas (reuse spaCy model)
+                nlp = self._get_nlp()
+                query_doc = nlp(query)
+                query_lemmas_for_gap = {
+                    t.lemma_.lower()
+                    for t in query_doc
+                    if t.pos_ in ("NOUN", "VERB", "ADJ", "PROPN")
+                    and len(t.lemma_) > 2
+                }
+                gap_lemmas, unmatched_terms = self._collect_dg_gaps(
+                    tg_diags, query_lemmas_for_gap, top_k=5,
+                )
+
+            max_new_docs = self.gedig_loop_max_new_docs
+
+            for loop_round in range(self.gedig_loop_max_rounds):
+                # 5.75b: Generate bridge CoT (directed or blind)
+                feedback_doc_summaries = []
+                sorted_by_score = sorted(
+                    graph_candidates, key=lambda x: -x[1]
+                )[:5]
+                for fidx, (doc_idx, _sc) in enumerate(sorted_by_score):
+                    doc = docs[doc_idx]
+                    content = doc["content"][:1000]
+                    feedback_doc_summaries.append(
+                        f"[Doc {fidx+1}] {content}"
+                    )
+
+                bridge_text = self._generate_bridge_cot(
+                    query, loop_round + 1,
+                    feedback_doc_summaries,
+                    prev_cot=cot_text,
+                    gap_lemmas=gap_lemmas if self.gedig_loop_directed else None,
+                    unmatched_terms=unmatched_terms if self.gedig_loop_directed else None,
+                )
+
+                if not bridge_text:
+                    break
+
+                # 5.75c: Extract concepts from bridge
+                bridge_entities = extract_entities(bridge_text)
+                bridge_terms = _extract_lowercase_concepts(bridge_text)
+                bridge_concepts = bridge_entities | bridge_terms
+
+                # 5.75d: Inject bridge nodes into graph
+                b_nodes, b_edges = self._inject_cot_nodes(
+                    graph, bridge_text, bridge_concepts,
+                    titles, sentences_list,
+                )
+                gedig_loop_n_bridge_nodes += b_nodes
+
+                # 5.75e: Directed re-retrieval (Spec S)
+                # Use gap_lemmas for keywords (not full bridge text)
+                if self.gedig_loop_directed and gap_lemmas:
+                    retrieval_keywords = list(gap_lemmas | bridge_concepts)[:10]
+                else:
+                    retrieval_keywords = list(bridge_concepts)[:20]
+
+                keyword_query = " ".join(retrieval_keywords)
+                keyword_tokens = bm25_tokenize(keyword_query)
+                round_new_doc_count = 0
+
+                if keyword_tokens:
+                    pool_ids_set = {docs[i]["id"] for i, _ in merged_candidates}
+                    bridge_scores = bm25_index.get_scores(keyword_tokens)
+                    new_bridge_cands = [
+                        (i, float(bridge_scores[i]))
+                        for i in range(len(docs))
+                        if docs[i]["id"] not in pool_ids_set
+                        and docs[i]["id"] not in excluded
+                    ]
+                    new_bridge_cands.sort(key=lambda x: -x[1])
+
+                    # ── Spec S: Filter by relevance ──
+                    if self.gedig_loop_directed and gap_lemmas:
+                        # Only keep docs containing at least one gap lemma
+                        filtered_cands = []
+                        for idx_c, score_c in new_bridge_cands:
+                            doc_lower = docs[idx_c]["content"][:2000].lower()
+                            if any(lem in doc_lower for lem in gap_lemmas):
+                                filtered_cands.append((idx_c, score_c))
+                            if len(filtered_cands) >= max_new_docs:
+                                break
+                        new_bridge_cands = filtered_cands
+                    else:
+                        new_bridge_cands = new_bridge_cands[:max_new_docs]
+
+                    if new_bridge_cands:
+                        # Add to pool
+                        merged_candidates += new_bridge_cands
+                        round_new_gold = 0
+                        if gold_ids:
+                            round_new_gold = sum(
+                                1 for idx_r, _ in new_bridge_cands
+                                if docs[idx_r]["id"] in gold_ids
+                            )
+                        round_new_doc_count = len(new_bridge_cands)
+                        gedig_loop_n_new_docs += round_new_doc_count
+                        gedig_loop_n_new_gold += round_new_gold
+
+                        # 5.75f: Add top new docs to graph
+                        bridge_graph_slots = min(
+                            len(new_bridge_cands),
+                            max(self.graph_top_k // 10, 3),
+                        )
+                        new_for_graph = sorted(
+                            new_bridge_cands, key=lambda x: -x[1]
+                        )[:bridge_graph_slots]
+
+                        for doc_idx, _ in new_for_graph:
+                            doc = docs[doc_idx]
+                            doc_id = doc["id"]
+                            if doc_id in doc_id_map.values():
+                                continue
+                            title_key = f"doc_{len(titles)}"
+                            doc_id_map[title_key] = doc_id
+                            titles.append(title_key)
+                            content = doc["content"]
+                            sents = _split_sentences(content, max_sentences=20)
+                            if not sents:
+                                sents = [content[:500]]
+                            sentences_list.append(sents)
+
+                            # Add nodes + connect by entity overlap
+                            base_node_id = max(graph.nodes()) + 1 if graph.nodes() else 0
+                            for si, sent_text in enumerate(sents):
+                                node_id = base_node_id + si
+                                graph.add_node(
+                                    node_id,
+                                    para_idx=len(titles) - 1,
+                                    sent_idx=si,
+                                    title=title_key,
+                                    text=sent_text,
+                                )
+                                new_ents = extract_entities(sent_text)
+                                new_terms = _extract_lowercase_concepts(sent_text)
+                                new_all = new_ents | new_terms
+                                for existing_node in list(graph.nodes()):
+                                    if existing_node == node_id:
+                                        continue
+                                    ex_text = graph.nodes[existing_node].get("text", "")
+                                    ex_ents = extract_entities(ex_text)
+                                    ex_terms = _extract_lowercase_concepts(ex_text)
+                                    overlap = new_all & (ex_ents | ex_terms)
+                                    if overlap:
+                                        olap_ratio = len(overlap) / max(len(new_all), len(ex_ents | ex_terms), 1)
+                                        w = 0.5 + 0.5 * olap_ratio
+                                        if not graph.has_edge(node_id, existing_node):
+                                            graph.add_edge(
+                                                node_id, existing_node,
+                                                edge_type="bridge_retrieval",
+                                                cost=0.15,
+                                                weight=w,
+                                                strength=w,
+                                            )
+
+                # 5.75g: Re-evaluate Δβ₁
+                from gedig_scoring import entity_graph_feval_scores
+                loop_ef_scores, loop_ef_diag = entity_graph_feval_scores(
+                    graph, query, cot_text + "\n" + bridge_text,
+                    all_cot_concepts | bridge_concepts,
+                    titles, sentences_list, doc_id_map,
+                    f_lambda=self.entity_feval_lambda,
+                    version="v2",
+                    ag_threshold=self.entity_feval_ag_threshold,
+                    ag_max_k=self.entity_feval_ag_max_k,
+                    ag_min_k=self.entity_feval_ag_min_k,
+                    beta1_weight=self.entity_feval_beta1_weight,
+                )
+                round_delta_beta1 = loop_ef_diag.get("delta_beta1_global", 0)
+                gedig_loop_delta_beta1_history.append(round_delta_beta1)
+                gedig_loop_rounds = loop_round + 1
+
+                # Check convergence: stop if no new docs found this round
+                if round_new_doc_count == 0:
+                    gedig_loop_converged = True
+                    break
+
+            # After loop: always update entity_feval scores with enriched graph
+            if gedig_loop_rounds > 0:
+                entity_feval_scores = loop_ef_scores
+                ef_diag = loop_ef_diag
+                # Re-blend with graph_scores (including new docs from loop)
+                w = entity_feval_adaptive_weight
+                if w > 1e-6:
+                    # Update existing docs
+                    for doc_id in graph_scores:
+                        g_orig = graph_scores[doc_id]
+                        ef = entity_feval_scores.get(doc_id, 0.0)
+                        graph_scores[doc_id] = (1.0 - w) * g_orig + w * ef
+                    # Add new docs that only exist in entity_feval_scores
+                    for doc_id, ef in entity_feval_scores.items():
+                        if doc_id not in graph_scores:
+                            graph_scores[doc_id] = w * ef
+
+            gedig_loop_ms = (_time.time() - loop_start) * 1000
 
         # ── Phase 6: Combined ranking ────────────────────────────
         # Score all candidates in merged pool
@@ -1402,6 +1983,34 @@ class BrightCoTPipeline:
             ria_total_new_docs=sum(ria_new_docs_per_round),
             ria_total_new_gold=sum(ria_new_gold_per_round),
             ria_ms=ria_ms,
+            # AGHT (Spec Z)
+            aght_applied=aght_applied,
+            aght_n_s_nodes=aght_n_s_nodes,
+            aght_n_t_nodes=aght_n_t_nodes,
+            aght_n_edges=aght_n_edges,
+            aght_n_ag=aght_n_ag,
+            aght_n_dg=aght_n_dg,
+            aght_f_theta=aght_f_theta,
+            aght_beta_1=aght_beta_1,
+            aght_build_ms=aght_build_ms,
+            aght_eval_ms=aght_eval_ms,
+            aght_mp_ms=aght_mp_ms,
+            aght_score_ms=aght_score_ms,
+            # Enhanced Graph (Spec X)
+            enhanced_graph=self.enhanced_graph,
+            # Early Token Graph (Spec W)
+            early_tg_applied=bool(early_gap_lemmas),
+            early_tg_n_gap_lemmas=len(early_gap_lemmas),
+            early_tg_gap_lemmas=sorted(early_gap_lemmas),
+            early_tg_ms=early_tg_ms,
+            # Progressive DG Escalation (Spec Y)
+            progressive_routing=self.enable_progressive_routing,
+            progressive_tier=progressive_tier,
+            progressive_dg_ratio=etg_dg_ratio,
+            progressive_shallow_n_new=progressive_shallow_n_new,
+            progressive_shallow_gaps_before=progressive_shallow_gaps_before,
+            progressive_shallow_gaps_after=progressive_shallow_gaps_after,
+            progressive_escalated=progressive_escalated,
             # Token graph (Spec N)
             token_graph_applied=token_graph_applied,
             token_graph_avg_coverage=tg_avg_coverage,
@@ -1422,6 +2031,16 @@ class BrightCoTPipeline:
             entity_feval_n_dg=ef_diag.get("n_dg", 0),
             entity_feval_f_theta=ef_diag.get("f_theta", 0.0),
             entity_feval_avg_convergence=ef_diag.get("avg_convergence", 0.0),
+            entity_feval_n_bridge=ef_diag.get("n_bridge", 0),
+            entity_feval_beta1_global=ef_diag.get("beta1_global", 0),
+            entity_feval_version=ef_diag.get("version", "v1"),
+            # Adaptive AG diagnostics (v2.1+)
+            entity_feval_ag_threshold=ef_diag.get("ag_adaptive_threshold", 0.0),
+            entity_feval_ag_density=ef_diag.get("ag_density", 0.0),
+            entity_feval_ag_n_query_edges=ef_diag.get("n_query_edges", 0),
+            entity_feval_delta_beta1_global=ef_diag.get("delta_beta1_global", 0),
+            entity_feval_avg_delta_beta1=ef_diag.get("avg_delta_beta1", 0.0),
+            entity_feval_max_delta_beta1=ef_diag.get("max_delta_beta1", 0),
             # Ranking DG/AG routing (Spec O.2)
             entity_feval_ranking_dg=entity_feval_ranking_dg,
             entity_feval_adaptive_weight=entity_feval_adaptive_weight,
@@ -1434,6 +2053,15 @@ class BrightCoTPipeline:
             ensemble_n_dg_docs=ensemble_n_dg_docs,
             ensemble_avg_agreement=ensemble_avg_agreement,
             ensemble_score_variance_mean=ensemble_score_variance_mean,
+            # geDIG CoT Loop (Spec R)
+            gedig_loop_applied=gedig_loop_applied,
+            gedig_loop_rounds=gedig_loop_rounds,
+            gedig_loop_delta_beta1_history=gedig_loop_delta_beta1_history,
+            gedig_loop_n_bridge_nodes=gedig_loop_n_bridge_nodes,
+            gedig_loop_n_new_docs=gedig_loop_n_new_docs,
+            gedig_loop_n_new_gold=gedig_loop_n_new_gold,
+            gedig_loop_converged=gedig_loop_converged,
+            gedig_loop_ms=gedig_loop_ms,
         )
 
     def _compute_pre_beta0(
@@ -1493,7 +2121,7 @@ class BrightCoTPipeline:
         top_concepts = sorted_concepts[: eff_max_concepts]
 
         retrieval_query = " ".join(top_concepts)
-        query_tokens = retrieval_query.lower().split()
+        query_tokens = bm25_tokenize(retrieval_query)
 
         if not query_tokens:
             return [], 0, ""
@@ -1562,6 +2190,145 @@ class BrightCoTPipeline:
             return keywords[:10]
         except Exception:
             return []
+
+    # ── geDIG CoT Loop (Spec R/S) ──────────────────────────────
+
+    def _collect_dg_gaps(
+        self,
+        tg_diags: list[dict],
+        query_lemmas: set[str],
+        top_k: int = 5,
+    ) -> tuple[set[str], list[str]]:
+        """Collect DG gap info from Token Graph diagnostics (Spec S).
+
+        Returns:
+            gap_lemmas: bridge lemmas needed (from Token Graph insights)
+            unmatched_terms: query lemmas not covered by top docs
+        """
+        gap_lemmas: set[str] = set()
+        matched_lemmas: set[str] = set()
+
+        for diag in tg_diags[:top_k]:
+            # Collect insight lemmas (DG bridge concepts)
+            gap_lemmas.update(diag.get("insight_lemmas", []))
+
+        # Find query lemmas poorly covered across top docs
+        # (= terms that documents struggle to connect to)
+        if tg_diags:
+            # Count how many top docs each query lemma appears in
+            lemma_doc_count: dict[str, int] = {lem: 0 for lem in query_lemmas}
+            for diag in tg_diags[:top_k]:
+                n_matched = diag.get("n_matched", 0)
+                coverage = diag.get("coverage", 0.0)
+                if coverage > 0 and n_matched > 0:
+                    # We don't have per-lemma match info, but if coverage is low
+                    # we know some query terms are missing
+                    pass
+
+        # Unmatched = query lemmas not found in gap_lemmas or common terms
+        unmatched = [lem for lem in query_lemmas if len(lem) > 3]
+
+        return gap_lemmas, unmatched[:5]
+
+    def _generate_bridge_cot(
+        self,
+        query: str,
+        round_num: int,
+        feedback_docs: list[str],
+        prev_cot: str = "",
+        gap_lemmas: set[str] | None = None,
+        unmatched_terms: list[str] | None = None,
+    ) -> str:
+        """Generate bridge CoT for geDIG loop (Spec R/S).
+
+        When gap_lemmas is provided (Spec S directed mode), the prompt
+        focuses on specific structural gaps found by Token Graph DG analysis.
+
+        Returns the bridge text, or empty string on failure.
+        """
+        # ── Spec S: Directed prompt using Token Graph DG gaps ──
+        if gap_lemmas and len(gap_lemmas) >= 2:
+            gap_str = ", ".join(sorted(gap_lemmas)[:10])
+            unmatched_str = ", ".join(unmatched_terms or [])
+
+            if round_num == 1:
+                prompt = (
+                    "You are a domain expert connecting concepts for a complex query.\n\n"
+                    f"Query: {query}\n\n"
+                    "STRUCTURAL ANALYSIS found these gaps in the knowledge graph:\n"
+                    f"- Bridge concepts identified: {gap_str}\n"
+                )
+                if unmatched_str:
+                    prompt += f"- Query terms needing connections: {unmatched_str}\n"
+                prompt += (
+                    "\nTop retrieved documents:\n"
+                    + "\n\n".join(feedback_docs[:2])
+                    + "\n\n"
+                    "Your task: Explain the SPECIFIC conceptual bridges between "
+                    "these terms and the query.\n"
+                    "Focus on:\n"
+                    "1. How these bridge concepts connect to the query topic\n"
+                    "2. Intermediate mechanisms or theories that link them\n"
+                    "3. Domain-specific terminology that fills the structural gaps\n\n"
+                    "Provide 3-5 sentences with precise technical terms."
+                )
+            else:
+                prompt = (
+                    "You are a domain expert finding ALTERNATIVE bridges.\n\n"
+                    f"Query: {query}\n\n"
+                    f"Round {round_num}: Previous bridges did not fully connect "
+                    "the query to relevant knowledge.\n"
+                    f"Known gap concepts: {gap_str}\n\n"
+                    "Top documents:\n"
+                    + "\n\n".join(feedback_docs[:2])
+                    + "\n\n"
+                    "Find DIFFERENT bridge concepts:\n"
+                    "1. Alternative pathways connecting the same ideas\n"
+                    "2. Broader or narrower terms that might bridge better\n"
+                    "3. Related mechanisms from adjacent fields\n\n"
+                    "Provide 3-5 sentences with NEW technical terms."
+                )
+        # ── Spec R fallback: Blind prompt ──
+        elif round_num == 1:
+            context_section = f"Initial reasoning: {prev_cot[:800]}" if prev_cot else ""
+            prompt = (
+                "You are a domain expert reasoning about a complex query.\n\n"
+                f"Query: {query}\n\n"
+                f"{context_section}\n\n"
+                "The initial search found some documents but couldn't establish "
+                "strong structural connections between the query and the knowledge base.\n\n"
+                "Top documents found:\n"
+                + "\n\n".join(feedback_docs[:3])
+                + "\n\n"
+                "What specific bridge concepts connect this query to potential answers?\n"
+                "Think about:\n"
+                "1. Domain-specific terms or theories that relate to this query\n"
+                "2. Intermediate concepts that bridge the query topic to the answer\n"
+                "3. Alternative phrasings or related fields\n\n"
+                "Provide your reasoning in 3-5 sentences with specific technical terms "
+                "and bridge concepts. Focus on concepts that BRIDGE the gap."
+            )
+        else:
+            prompt = (
+                "You are a domain expert trying a DIFFERENT reasoning angle.\n\n"
+                f"Query: {query}\n\n"
+                f"Previous reasoning attempts (round {round_num-1}) did not establish "
+                "structural connections to the knowledge base.\n\n"
+                "Top documents:\n"
+                + "\n\n".join(feedback_docs[:3])
+                + "\n\n"
+                "Try a COMPLETELY DIFFERENT approach:\n"
+                "1. Think of alternative interpretations of the query\n"
+                "2. Consider indirect connections through different domains\n"
+                "3. What would an expert in a DIFFERENT but related field think?\n\n"
+                "Provide 3-5 sentences with NEW concepts not tried before."
+            )
+
+        try:
+            response = self.llm._llm_call_raw(prompt, max_tokens=400)
+            return response.strip()
+        except Exception:
+            return ""
 
     # ── Multi-CoT Ensemble (Spec P) ─────────────────────────────
 
@@ -1648,24 +2415,54 @@ class BrightCoTPipeline:
         Each CoT sentence becomes a node (title="cot"). Edges are created
         to existing document nodes that share entities with the CoT.
 
+        When enhanced_graph is True (Spec X):
+        - Uses spaCy NER + noun chunks for entity extraction
+        - Matches on lemmatized forms (catches morphological variants)
+        - Edge cost is proportional to overlap quality (0.10-0.20)
+
         Returns (n_nodes_added, n_edges_added).
         """
         if not cot_concepts or graph.number_of_nodes() == 0:
             return 0, 0
 
+        enhanced = self.enhanced_graph
+        nlp = self._get_nlp() if enhanced else None
+
         # Split CoT into sentences
-        cot_sents = _split_sentences(cot_text, max_sentences=10)
+        if enhanced:
+            from entity_graph import split_sentences_spacy
+            cot_sents = split_sentences_spacy(cot_text, nlp, max_sentences=10)
+        else:
+            cot_sents = _split_sentences(cot_text, max_sentences=10)
         if not cot_sents:
             return 0, 0
 
         # Pre-compute entities per existing node
-        node_entities: dict[int, set[str]] = {}
-        for n in graph.nodes():
-            text = graph.nodes[n].get("text", "")
-            ents = extract_entities(text)
-            # Also extract lowercase terms from node text
-            terms = _extract_lowercase_concepts(text)
-            node_entities[n] = ents | terms
+        if enhanced:
+            from entity_graph import extract_entities_spacy
+            node_entities: dict[int, set[str]] = {}
+            for n in graph.nodes():
+                text = graph.nodes[n].get("text", "")
+                node_entities[n] = extract_entities_spacy(text, nlp)
+        else:
+            node_entities: dict[int, set[str]] = {}
+            for n in graph.nodes():
+                text = graph.nodes[n].get("text", "")
+                ents = extract_entities(text)
+                terms = _extract_lowercase_concepts(text)
+                node_entities[n] = ents | terms
+
+        # Build lemma cache for enhanced matching (Spec X)
+        lemma_cache: dict[str, str] = {}
+        if enhanced:
+            all_terms: set[str] = set()
+            for ents in node_entities.values():
+                all_terms |= ents
+            for term in all_terms:
+                doc = nlp(term)
+                lemma_cache[term] = " ".join(
+                    t.lemma_.lower() for t in doc
+                ).strip()
 
         n_added = 0
         n_edges = 0
@@ -1683,20 +2480,40 @@ class BrightCoTPipeline:
             n_added += 1
 
             # Extract entities from this CoT sentence
-            sent_ents = extract_entities(sent)
-            sent_terms = _extract_lowercase_concepts(sent)
-            sent_concepts = sent_ents | sent_terms
+            if enhanced:
+                sent_concepts = extract_entities_spacy(sent, nlp)
+                # Add to lemma cache
+                for term in sent_concepts:
+                    if term not in lemma_cache:
+                        doc = nlp(term)
+                        lemma_cache[term] = " ".join(
+                            t.lemma_.lower() for t in doc
+                        ).strip()
+            else:
+                sent_ents = extract_entities(sent)
+                sent_terms = _extract_lowercase_concepts(sent)
+                sent_concepts = sent_ents | sent_terms
 
             # Connect to existing doc nodes with shared entities
             for existing_node, existing_ents in node_entities.items():
-                overlap = sent_concepts & existing_ents
+                if enhanced:
+                    # Lemma-based matching (Spec X)
+                    sent_lemmas = {lemma_cache.get(c, c) for c in sent_concepts}
+                    existing_lemmas = {lemma_cache.get(e, e) for e in existing_ents}
+                    overlap = sent_lemmas & existing_lemmas
+                else:
+                    overlap = sent_concepts & existing_ents
                 if overlap:
                     # Edge weight proportional to overlap
                     overlap_ratio = len(overlap) / max(
                         len(sent_concepts), len(existing_ents), 1
                     )
                     weight = 0.5 + 0.5 * overlap_ratio  # range [0.5, 1.0]
-                    cost = 0.15  # Between Tier 1 (0.05-0.10) and Tier 2 (0.20-0.50)
+                    if enhanced:
+                        # Proportional cost: high overlap → low cost (Spec X)
+                        cost = 0.10 + 0.10 * (1.0 - overlap_ratio)  # [0.10, 0.20]
+                    else:
+                        cost = 0.15  # Fixed, between Tier 1 and Tier 2
 
                     if not graph.has_edge(node_id, existing_node):
                         graph.add_edge(
