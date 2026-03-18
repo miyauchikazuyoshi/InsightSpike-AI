@@ -47,6 +47,76 @@ class BrightResult:
     n_graph_edges: int = 0
     n_docs_in_graph: int = 0
     latency_ms: float = 0.0
+    entity_feval_applied: bool = False
+
+
+# ---------------------------------------------------------------------------
+# BM25 Tokenizer (shared between index and query)
+# ---------------------------------------------------------------------------
+
+import re as _re
+
+# Lazy-loaded globals for BM25 tokenization
+_bm25_stopwords: set[str] | None = None
+_bm25_stemmer = None
+
+
+def _get_bm25_stopwords() -> set[str]:
+    """Lazy-load NLTK English stopwords."""
+    global _bm25_stopwords
+    if _bm25_stopwords is None:
+        import nltk
+        nltk.download("stopwords", quiet=True)
+        from nltk.corpus import stopwords
+        _bm25_stopwords = set(stopwords.words("english"))
+    return _bm25_stopwords
+
+
+def _get_bm25_stemmer():
+    """Lazy-load Porter stemmer."""
+    global _bm25_stemmer
+    if _bm25_stemmer is None:
+        from nltk.stem import PorterStemmer
+        _bm25_stemmer = PorterStemmer()
+    return _bm25_stemmer
+
+
+# When using Pyserini, Lucene handles tokenization internally.
+# Set this to True to skip Python-side stemming/stopwords.
+_bm25_use_pyserini: bool = False
+
+
+def set_bm25_pyserini_mode(enabled: bool = True) -> None:
+    """Switch bm25_tokenize behavior for Pyserini (Lucene-native tokenization)."""
+    global _bm25_use_pyserini
+    _bm25_use_pyserini = enabled
+
+
+def bm25_tokenize(text: str) -> list[str]:
+    """Tokenize text for BM25 with stopword removal and stemming.
+
+    When Pyserini mode is enabled, performs minimal tokenization
+    (Lucene handles stemming and stopwords internally).
+
+    Steps (rank_bm25 mode):
+      1. Lowercase
+      2. Extract alphanumeric tokens (handles punctuation, hyphens)
+      3. Remove stopwords
+      4. Remove single-char tokens
+      5. Apply Porter stemming
+
+    Steps (pyserini mode):
+      1. Return words as-is (Lucene Analyzer handles the rest)
+    """
+    if _bm25_use_pyserini:
+        # Minimal tokenization — Lucene's DefaultEnglishAnalyzer
+        # handles lowercasing, stemming, and stopword removal
+        return text.split()
+
+    tokens = _re.findall(r"[a-z0-9]+", text.lower())
+    sw = _get_bm25_stopwords()
+    stemmer = _get_bm25_stemmer()
+    return [stemmer.stem(t) for t in tokens if t not in sw and len(t) > 1]
 
 
 # ---------------------------------------------------------------------------
@@ -55,6 +125,10 @@ class BrightResult:
 
 def build_bm25_index(
     docs_path: str,
+    engine: str = "rank_bm25",
+    lucene_index_path: str | None = None,
+    pyserini_k1: float = 0.9,
+    pyserini_b: float = 0.4,
 ) -> tuple[object, list[dict]]:
     """Build a BM25 index from a BRIGHT domain docs JSONL file.
 
@@ -62,25 +136,44 @@ def build_bm25_index(
     ----------
     docs_path : str
         Path to domain_docs.jsonl file.
+    engine : str
+        BM25 engine: "rank_bm25" (Python) or "pyserini" (Lucene).
+    lucene_index_path : str | None
+        Path for Lucene index (required if engine="pyserini").
+    pyserini_k1 : float
+        BM25 k1 parameter for Pyserini (default 0.9, BRIGHT paper setting).
+    pyserini_b : float
+        BM25 b parameter for Pyserini (default 0.4, BRIGHT paper setting).
 
     Returns
     -------
-    bm25 : BM25Okapi
-        The BM25 index.
+    bm25 : object
+        The BM25 index (BM25Okapi or PyseriniBM25).
     docs : list[dict]
         List of {"id": ..., "content": ...} dicts (aligned with index).
     """
-    from rank_bm25 import BM25Okapi
+    import json as _json
 
     docs = []
     with open(docs_path) as f:
         for line in f:
-            import json
-            doc = json.loads(line)
+            doc = _json.loads(line)
             docs.append(doc)
 
-    tokenized = [doc["content"].lower().split() for doc in docs]
-    bm25 = BM25Okapi(tokenized)
+    if engine == "pyserini":
+        set_bm25_pyserini_mode(True)
+        from pyserini_bm25 import build_pyserini_index, PyseriniBM25
+
+        if not lucene_index_path:
+            # Auto-derive from docs_path
+            lucene_index_path = docs_path.replace(".jsonl", "_lucene_index")
+
+        build_pyserini_index(docs_path, lucene_index_path)
+        bm25 = PyseriniBM25(lucene_index_path, docs, k1=pyserini_k1, b=pyserini_b)
+    else:
+        from rank_bm25 import BM25Okapi
+        tokenized = [bm25_tokenize(doc["content"]) for doc in docs]
+        bm25 = BM25Okapi(tokenized)
 
     return bm25, docs
 
@@ -205,7 +298,7 @@ class BrightPipeline:
         excluded = excluded_ids or set()
 
         # Phase 1: BM25 retrieval
-        query_tokens = query.lower().split()
+        query_tokens = bm25_tokenize(query)
         bm25_scores = bm25_index.get_scores(query_tokens)
 
         # Sort and get top-k (excluding excluded_ids)

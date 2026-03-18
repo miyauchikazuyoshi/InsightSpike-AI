@@ -35,6 +35,7 @@ from bright_pipeline import (
     BrightPipeline,
     BrightResult,
     build_bm25_index,
+    bm25_tokenize,
     compute_ndcg_at_k,
     compute_recall_at_k,
     compute_mrr,
@@ -72,6 +73,13 @@ def main():
                         help="Max queries per domain")
 
     # Pipeline parameters
+    parser.add_argument("--bm25-engine", type=str, default="rank_bm25",
+                        choices=["rank_bm25", "pyserini"],
+                        help="BM25 engine: rank_bm25 (Python) or pyserini (Lucene)")
+    parser.add_argument("--pyserini-k1", type=float, default=0.9,
+                        help="Pyserini BM25 k1 parameter (default: 0.9, BRIGHT paper)")
+    parser.add_argument("--pyserini-b", type=float, default=0.4,
+                        help="Pyserini BM25 b parameter (default: 0.4, BRIGHT paper)")
     parser.add_argument("--initial-top-k", type=int, default=100,
                         help="BM25 candidates to retrieve")
     parser.add_argument("--graph-top-k", type=int, default=30,
@@ -206,6 +214,34 @@ def main():
     parser.add_argument("--token-graph-insight", type=str, default="none",
                         choices=["none", "graph_agg", "path_bridge", "both"],
                         help="Insight vector injection mode (Spec N.2)")
+    # Early Token Graph for DG-guided CoT/RIA (Spec W)
+    parser.add_argument("--early-token-graph", action="store_true",
+                        help="Run lightweight Token Graph before CoT to detect DG gaps (Spec W)")
+    parser.add_argument("--early-tg-top-k", type=int, default=20,
+                        help="Number of BM25 docs for early Token Graph (default 20)")
+    # Enhanced Graph Construction (Spec X)
+    parser.add_argument("--enhanced-graph", action="store_true",
+                        help="spaCy sentencizer + NER entities + lemma matching (Spec X)")
+    # Progressive DG Escalation (Spec Y)
+    parser.add_argument("--progressive-routing", action="store_true",
+                        help="3-tier AG/DG escalation: AG→DG-Shallow→DG-Deep (Spec Y)")
+    parser.add_argument("--progressive-ag-threshold", type=float, default=0.70,
+                        help="AG score above this → Tier 1 AG, skip CoT/RIA (default 0.70)")
+    parser.add_argument("--progressive-dg-shallow-threshold", type=float, default=0.55,
+                        help="AG score above this → Tier 2 DG-Shallow, gap-fill only (default 0.55)")
+    # Unified Heterogeneous Graph Transformer (Spec Z)
+    parser.add_argument("--unified-graph", action="store_true",
+                        help="Enable AGHT: unified Sentence-Token graph with QKV attention (Spec Z)")
+    parser.add_argument("--aght-lambda", type=float, default=1.0,
+                        help="F-eval lambda for AGHT edge evaluation (default 1.0)")
+    parser.add_argument("--aght-mp-iterations", type=int, default=2,
+                        help="Message passing iterations for AGHT (default 2)")
+    parser.add_argument("--aght-mp-alpha", type=float, default=0.3,
+                        help="Message passing interpolation weight for AGHT (default 0.3)")
+    parser.add_argument("--aght-w-q1", type=float, default=1.0,
+                        help="Q direct match weight for AGHT (default 1.0)")
+    parser.add_argument("--aght-f-lambda", type=float, default=1.0,
+                        help="F-eval lambda for AGHT QKV attention (default 1.0)")
     # Entity graph F-eval parameters (Spec O)
     parser.add_argument("--entity-feval", action="store_true",
                         help="Enable entity graph F-eval cross-doc walk score (Spec O)")
@@ -213,6 +249,29 @@ def main():
                         help="Blend weight for entity F-eval scores (default 0.20)")
     parser.add_argument("--entity-feval-lambda", type=float, default=1.0,
                         help="Lambda for entity F-eval: f = cost - lambda * relevance")
+    parser.add_argument("--entity-feval-version", choices=["v1", "v2"], default="v1",
+                        help="v1: percentile threshold (Spec O), v2: structural AG/DG/Bridge with Δβ₁ (Spec Q)")
+    parser.add_argument("--ag-threshold", type=float, default=None,
+                        help="Fixed AG similarity threshold (default: 0.2). None=use 0.2")
+    parser.add_argument("--ag-max-k", type=int, default=None,
+                        help="Max query edges (default: None=unlimited)")
+    parser.add_argument("--ag-min-k", type=int, default=5,
+                        help="Min guaranteed query edges (default: 5)")
+    parser.add_argument("--beta1-weight", type=float, default=0.3,
+                        help="Weight for Δβ₁ bonus in scoring (default: 0.3)")
+    # geDIG CoT Loop (Spec R)
+    parser.add_argument("--gedig-loop", action="store_true",
+                        help="Enable geDIG CoT Loop (Spec R)")
+    parser.add_argument("--gedig-loop-max-rounds", type=int, default=2,
+                        help="Max rounds for geDIG CoT Loop")
+    parser.add_argument("--gedig-loop-delta-beta1-target", type=int, default=1,
+                        help="Δβ₁ target for convergence")
+    parser.add_argument("--gedig-loop-directed", action="store_true", default=True,
+                        help="Use Token Graph DG gaps for directed CoT (Spec S)")
+    parser.add_argument("--gedig-loop-no-directed", action="store_false", dest="gedig_loop_directed",
+                        help="Disable directed mode (use blind CoT)")
+    parser.add_argument("--gedig-loop-max-new-docs", type=int, default=15,
+                        help="Max new docs per loop round")
     # Multi-CoT Ensemble parameters (Spec P)
     parser.add_argument("--n-cot-ensemble", type=int, default=1,
                         help="Number of CoT chains for ensemble scoring (1=no ensemble)")
@@ -277,10 +336,39 @@ def main():
         config["token_graph_f_eval"] = args.token_graph_f_eval
         config["token_graph_f_lambda"] = args.token_graph_f_lambda
         config["token_graph_insight"] = args.token_graph_insight
+    if args.early_token_graph:
+        config["early_token_graph"] = True
+        config["early_tg_top_k"] = args.early_tg_top_k
+    if args.enhanced_graph:
+        config["enhanced_graph"] = True
+    if args.progressive_routing:
+        config["progressive_routing"] = True
+        config["progressive_ag_threshold"] = args.progressive_ag_threshold
+        config["progressive_dg_shallow_threshold"] = args.progressive_dg_shallow_threshold
+    if args.unified_graph:
+        config["unified_graph"] = True
+        config["aght_lambda"] = args.aght_lambda
+        config["aght_mp_iterations"] = args.aght_mp_iterations
+        config["aght_mp_alpha"] = args.aght_mp_alpha
+        config["aght_w_q1"] = args.aght_w_q1
+        config["aght_f_lambda"] = args.aght_f_lambda
     if args.entity_feval:
         config["entity_feval"] = True
         config["entity_feval_weight"] = args.entity_feval_weight
         config["entity_feval_lambda"] = args.entity_feval_lambda
+        config["entity_feval_version"] = args.entity_feval_version
+        if args.ag_threshold is not None:
+            config["ag_threshold"] = args.ag_threshold
+        if args.ag_max_k is not None:
+            config["ag_max_k"] = args.ag_max_k
+        config["ag_min_k"] = args.ag_min_k
+        config["beta1_weight"] = args.beta1_weight
+    if args.gedig_loop:
+        config["gedig_loop"] = args.gedig_loop
+        config["gedig_loop_max_rounds"] = args.gedig_loop_max_rounds
+        config["gedig_loop_delta_beta1_target"] = args.gedig_loop_delta_beta1_target
+        config["gedig_loop_directed"] = args.gedig_loop_directed
+        config["gedig_loop_max_new_docs"] = args.gedig_loop_max_new_docs
     if args.n_cot_ensemble > 1:
         config["n_cot_ensemble"] = args.n_cot_ensemble
         config["cot_cache_dir"] = args.cot_cache_dir
@@ -317,6 +405,7 @@ def main():
 
     # Initialize pipeline
     dense_retriever = None  # Will be set per-domain for unified mode
+    dense_retriever_cot = None  # Will be set for cot_retrieval/adaptive_retrieval modes
 
     # geDIG routing components (shared across domains)
     gedig_router = None
@@ -444,9 +533,36 @@ def main():
                 token_graph_f_eval=args.token_graph_f_eval,
                 token_graph_f_lambda=args.token_graph_f_lambda,
                 token_graph_insight_mode=args.token_graph_insight,
+                # Early Token Graph (Spec W)
+                enable_early_token_graph=args.early_token_graph,
+                early_tg_top_k=args.early_tg_top_k,
+                # Enhanced Graph (Spec X)
+                enable_enhanced_graph=args.enhanced_graph,
+                # Progressive DG Escalation (Spec Y)
+                enable_progressive_routing=args.progressive_routing,
+                progressive_ag_threshold=args.progressive_ag_threshold,
+                progressive_dg_shallow_threshold=args.progressive_dg_shallow_threshold,
+                # Unified Heterogeneous Graph Transformer (Spec Z)
+                enable_unified_graph=args.unified_graph,
+                aght_lambda=args.aght_lambda,
+                aght_mp_iterations=args.aght_mp_iterations,
+                aght_mp_alpha=args.aght_mp_alpha,
+                aght_w_q1=args.aght_w_q1,
+                aght_f_lambda=args.aght_f_lambda,
                 enable_entity_feval=args.entity_feval,
                 entity_feval_weight=args.entity_feval_weight,
                 entity_feval_lambda=args.entity_feval_lambda,
+                entity_feval_version=args.entity_feval_version,
+                entity_feval_ag_threshold=args.ag_threshold,
+                entity_feval_ag_max_k=args.ag_max_k,
+                entity_feval_ag_min_k=args.ag_min_k,
+                entity_feval_beta1_weight=args.beta1_weight,
+                # geDIG CoT Loop (Spec R)
+                enable_gedig_loop=args.gedig_loop,
+                gedig_loop_max_rounds=args.gedig_loop_max_rounds,
+                gedig_loop_delta_beta1_target=args.gedig_loop_delta_beta1_target,
+                gedig_loop_directed=args.gedig_loop_directed,
+                gedig_loop_max_new_docs=args.gedig_loop_max_new_docs,
                 # Multi-CoT Ensemble (Spec P)
                 n_cot_ensemble=args.n_cot_ensemble,
                 cot_cache_dir=args.cot_cache_dir,
@@ -499,9 +615,17 @@ def main():
         print(f"  Queries: {total}")
 
         # Build BM25 index
-        print(f"  Building BM25 index from {docs_path}...")
+        engine_label = f"({args.bm25_engine})" if args.bm25_engine != "rank_bm25" else ""
+        print(f"  Building BM25 index {engine_label} from {docs_path}...")
         t_idx = time.time()
-        bm25_index, docs = build_bm25_index(str(docs_path))
+        lucene_idx = str(docs_path).replace(".jsonl", "_lucene_index") if args.bm25_engine == "pyserini" else None
+        bm25_index, docs = build_bm25_index(
+            str(docs_path),
+            engine=args.bm25_engine,
+            lucene_index_path=lucene_idx,
+            pyserini_k1=args.pyserini_k1,
+            pyserini_b=args.pyserini_b,
+        )
         idx_time = time.time() - t_idx
         print(f"  Index built: {len(docs)} docs in {idx_time:.1f}s")
 
@@ -650,9 +774,36 @@ def main():
                 token_graph_f_eval=args.token_graph_f_eval,
                 token_graph_f_lambda=args.token_graph_f_lambda,
                 token_graph_insight_mode=args.token_graph_insight,
+                # Early Token Graph (Spec W)
+                enable_early_token_graph=args.early_token_graph,
+                early_tg_top_k=args.early_tg_top_k,
+                # Enhanced Graph (Spec X)
+                enable_enhanced_graph=args.enhanced_graph,
+                # Progressive DG Escalation (Spec Y)
+                enable_progressive_routing=args.progressive_routing,
+                progressive_ag_threshold=args.progressive_ag_threshold,
+                progressive_dg_shallow_threshold=args.progressive_dg_shallow_threshold,
+                # Unified Heterogeneous Graph Transformer (Spec Z)
+                enable_unified_graph=args.unified_graph,
+                aght_lambda=args.aght_lambda,
+                aght_mp_iterations=args.aght_mp_iterations,
+                aght_mp_alpha=args.aght_mp_alpha,
+                aght_w_q1=args.aght_w_q1,
+                aght_f_lambda=args.aght_f_lambda,
                 enable_entity_feval=args.entity_feval,
                 entity_feval_weight=args.entity_feval_weight,
                 entity_feval_lambda=args.entity_feval_lambda,
+                entity_feval_version=args.entity_feval_version,
+                entity_feval_ag_threshold=args.ag_threshold,
+                entity_feval_ag_max_k=args.ag_max_k,
+                entity_feval_ag_min_k=args.ag_min_k,
+                entity_feval_beta1_weight=args.beta1_weight,
+                # geDIG CoT Loop (Spec R)
+                enable_gedig_loop=args.gedig_loop,
+                gedig_loop_max_rounds=args.gedig_loop_max_rounds,
+                gedig_loop_delta_beta1_target=args.gedig_loop_delta_beta1_target,
+                gedig_loop_directed=args.gedig_loop_directed,
+                gedig_loop_max_new_docs=args.gedig_loop_max_new_docs,
                 # Multi-CoT Ensemble (Spec P)
                 n_cot_ensemble=args.n_cot_ensemble,
                 cot_cache_dir=args.cot_cache_dir,
@@ -724,9 +875,36 @@ def main():
                 token_graph_f_eval=args.token_graph_f_eval,
                 token_graph_f_lambda=args.token_graph_f_lambda,
                 token_graph_insight_mode=args.token_graph_insight,
+                # Early Token Graph (Spec W)
+                enable_early_token_graph=args.early_token_graph,
+                early_tg_top_k=args.early_tg_top_k,
+                # Enhanced Graph (Spec X)
+                enable_enhanced_graph=args.enhanced_graph,
+                # Progressive DG Escalation (Spec Y)
+                enable_progressive_routing=args.progressive_routing,
+                progressive_ag_threshold=args.progressive_ag_threshold,
+                progressive_dg_shallow_threshold=args.progressive_dg_shallow_threshold,
+                # Unified Heterogeneous Graph Transformer (Spec Z)
+                enable_unified_graph=args.unified_graph,
+                aght_lambda=args.aght_lambda,
+                aght_mp_iterations=args.aght_mp_iterations,
+                aght_mp_alpha=args.aght_mp_alpha,
+                aght_w_q1=args.aght_w_q1,
+                aght_f_lambda=args.aght_f_lambda,
                 enable_entity_feval=args.entity_feval,
                 entity_feval_weight=args.entity_feval_weight,
                 entity_feval_lambda=args.entity_feval_lambda,
+                entity_feval_version=args.entity_feval_version,
+                entity_feval_ag_threshold=args.ag_threshold,
+                entity_feval_ag_max_k=args.ag_max_k,
+                entity_feval_ag_min_k=args.ag_min_k,
+                entity_feval_beta1_weight=args.beta1_weight,
+                # geDIG CoT Loop (Spec R)
+                enable_gedig_loop=args.gedig_loop,
+                gedig_loop_max_rounds=args.gedig_loop_max_rounds,
+                gedig_loop_delta_beta1_target=args.gedig_loop_delta_beta1_target,
+                gedig_loop_directed=args.gedig_loop_directed,
+                gedig_loop_max_new_docs=args.gedig_loop_max_new_docs,
                 # Multi-CoT Ensemble (Spec P)
                 n_cot_ensemble=args.n_cot_ensemble,
                 cot_cache_dir=args.cot_cache_dir,
@@ -938,6 +1116,36 @@ def main():
                     record["entity_feval_avg_convergence"] = round(result.entity_feval_avg_convergence, 4)
                     record["entity_feval_ranking_dg"] = round(result.entity_feval_ranking_dg, 4)
                     record["entity_feval_adaptive_weight"] = round(result.entity_feval_adaptive_weight, 4)
+                    record["entity_feval_version"] = result.entity_feval_version
+                    if result.entity_feval_version.startswith("v2"):
+                        record["entity_feval_n_bridge"] = result.entity_feval_n_bridge
+                        record["entity_feval_beta1_global"] = result.entity_feval_beta1_global
+                        record["entity_feval_delta_beta1_global"] = result.entity_feval_delta_beta1_global
+                        record["entity_feval_avg_delta_beta1"] = result.entity_feval_avg_delta_beta1
+                        record["entity_feval_max_delta_beta1"] = result.entity_feval_max_delta_beta1
+                        record["entity_feval_ag_threshold"] = result.entity_feval_ag_threshold
+                        record["entity_feval_ag_density"] = result.entity_feval_ag_density
+                        record["entity_feval_ag_n_query_edges"] = result.entity_feval_ag_n_query_edges
+
+                # Progressive DG Escalation diagnostics (Spec Y)
+                if hasattr(result, "progressive_routing") and result.progressive_routing:
+                    record["progressive_tier"] = result.progressive_tier
+                    record["progressive_dg_ratio"] = round(result.progressive_dg_ratio, 4)
+                    record["progressive_shallow_n_new"] = result.progressive_shallow_n_new
+                    record["progressive_shallow_gaps_before"] = result.progressive_shallow_gaps_before
+                    record["progressive_shallow_gaps_after"] = result.progressive_shallow_gaps_after
+                    record["progressive_escalated"] = result.progressive_escalated
+
+                # geDIG CoT Loop diagnostics (Spec R)
+                if hasattr(result, "gedig_loop_applied") and result.gedig_loop_applied:
+                    record["gedig_loop_applied"] = True
+                    record["gedig_loop_rounds"] = result.gedig_loop_rounds
+                    record["gedig_loop_delta_beta1_history"] = result.gedig_loop_delta_beta1_history
+                    record["gedig_loop_n_bridge_nodes"] = result.gedig_loop_n_bridge_nodes
+                    record["gedig_loop_n_new_docs"] = result.gedig_loop_n_new_docs
+                    record["gedig_loop_n_new_gold"] = result.gedig_loop_n_new_gold
+                    record["gedig_loop_converged"] = result.gedig_loop_converged
+                    record["gedig_loop_ms"] = round(result.gedig_loop_ms, 1)
 
                 # Multi-CoT Ensemble diagnostics (Spec P)
                 if hasattr(result, "ensemble_applied") and result.ensemble_applied:
@@ -1004,7 +1212,15 @@ def main():
                         if result.token_graph_insight_mode != "none":
                             extra += f" ins={result.token_graph_avg_n_insights:.1f}"
                 if result.entity_feval_applied:
-                    extra += f" EF(AG={result.entity_feval_n_ag}/DG={result.entity_feval_n_dg} θ={result.entity_feval_f_theta:.3f} conv={result.entity_feval_avg_convergence:.2f} rdg={result.entity_feval_ranking_dg:.3f} aw={result.entity_feval_adaptive_weight:.3f})"
+                    if result.entity_feval_version == "v2.1":
+                        extra += f" EF-v2.1(AG={result.entity_feval_n_ag}/DG={result.entity_feval_n_dg} Δβ₁={result.entity_feval_delta_beta1_global} th={result.entity_feval_ag_threshold:.3f} d={result.entity_feval_ag_density:.4f})"
+                    elif result.entity_feval_version == "v2":
+                        extra += f" EF-v2(AG={result.entity_feval_n_ag}/DG={result.entity_feval_n_dg}/BR={result.entity_feval_n_bridge} β₁={result.entity_feval_beta1_global} conv={result.entity_feval_avg_convergence:.2f})"
+                    else:
+                        extra += f" EF(AG={result.entity_feval_n_ag}/DG={result.entity_feval_n_dg} θ={result.entity_feval_f_theta:.3f} conv={result.entity_feval_avg_convergence:.2f} rdg={result.entity_feval_ranking_dg:.3f} aw={result.entity_feval_adaptive_weight:.3f})"
+                if hasattr(result, "gedig_loop_applied") and result.gedig_loop_applied:
+                    conv_tag = "Y" if result.gedig_loop_converged else "N"
+                    extra += f" LOOP(R={result.gedig_loop_rounds} Δβ₁={result.gedig_loop_delta_beta1_history} +{result.gedig_loop_n_new_docs}docs +{result.gedig_loop_n_new_gold}gold conv={conv_tag} {result.gedig_loop_ms:.0f}ms)"
                 if hasattr(result, "ensemble_applied") and result.ensemble_applied:
                     cache_tag = "C" if result.ensemble_cot_cache_hit else "G"
                     extra += f" ENS(N={result.ensemble_n_cots}{cache_tag} AG={result.ensemble_n_ag_docs}/DG={result.ensemble_n_dg_docs} agr={result.ensemble_avg_agreement:.2f} var={result.ensemble_score_variance_mean:.4f} {result.ensemble_ms:.0f}ms)"
@@ -1145,7 +1361,7 @@ def _bm25_only_rerank(
     t0 = time.time()
     excluded = excluded_ids or set()
 
-    query_tokens = query.lower().split()
+    query_tokens = bm25_tokenize(query)
     bm25_scores = bm25_index.get_scores(query_tokens)
 
     scored = [

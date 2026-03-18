@@ -822,12 +822,48 @@ def entity_graph_feval_scores(
     sentences_list: list[list[str]],
     doc_id_map: dict[str, str],
     f_lambda: float = 1.0,
+    version: str = "v1",
+    ag_threshold: float | None = None,
+    ag_max_k: int | None = None,
+    ag_min_k: int = 5,
+    beta1_weight: float = 0.3,
 ) -> tuple[dict[str, float], dict]:
-    """Compute cross-doc F-eval walk scores on entity graph (Spec O).
+    """Dispatch to v1 or v2 entity F-eval.
+
+    v1: percentile threshold (original Spec O).
+    v2: structural AG/DG/Bridge with Δβ₁ (true geDIG, Spec Q).
+    """
+    if version == "v2":
+        return _entity_graph_feval_v2(
+            graph, query, cot_text, cot_concepts,
+            titles, sentences_list, doc_id_map, f_lambda,
+            ag_threshold=ag_threshold,
+            ag_max_k=ag_max_k,
+            ag_min_k=ag_min_k,
+            beta1_weight=beta1_weight,
+        )
+    return _entity_graph_feval_v1(
+        graph, query, cot_text, cot_concepts,
+        titles, sentences_list, doc_id_map, f_lambda,
+    )
+
+
+def _entity_graph_feval_v1(
+    graph: nx.Graph,
+    query: str,
+    cot_text: str,
+    cot_concepts: set[str],
+    titles: list[str],
+    sentences_list: list[list[str]],
+    doc_id_map: dict[str, str],
+    f_lambda: float = 1.0,
+) -> tuple[dict[str, float], dict]:
+    """Compute cross-doc F-eval walk scores on entity graph (Spec O, v1).
 
     Applies DG/AG classification to entity graph edges using
     f_eval = edge_cost - λ · query_relevance, then computes per-doc walk
     scores with convergence bonus for multi-path AG convergence.
+    NOTE: This uses a relative 30th percentile threshold (not true geDIG).
 
     Parameters
     ----------
@@ -1056,6 +1092,289 @@ def entity_graph_feval_scores(
         "avg_convergence": round(avg_convergence, 4),
         "query_node": best_qnode,
         "query_node_sim": round(best_qsim, 4),
+    }
+
+    return scores, diagnostics
+
+
+# ---------------------------------------------------------------------------
+# Spec Q: True geDIG AG/DG with Δβ₁ (v2)
+# ---------------------------------------------------------------------------
+
+def _compute_beta1(g: nx.Graph) -> int:
+    """β₁ = E - V + C (cycle rank / first Betti number)."""
+    return g.number_of_edges() - g.number_of_nodes() + nx.number_connected_components(g)
+
+
+def _entity_graph_feval_v2(
+    graph: nx.Graph,
+    query: str,
+    cot_text: str,
+    cot_concepts: set[str],
+    titles: list[str],
+    sentences_list: list[list[str]],
+    doc_id_map: dict[str, str],
+    f_lambda: float = 1.0,
+    ag_threshold: float | None = None,
+    ag_max_k: int | None = None,
+    ag_min_k: int = 5,
+    beta1_weight: float = 0.3,
+) -> tuple[dict[str, float], dict]:
+    """True geDIG scoring with Δβ₁ — query-induced cycle detection (Spec Q).
+
+    The core insight of geDIG/InsightSpike:
+    - Inject query as a virtual node into the entity graph
+    - Measure Δβ₁ = β₁(with query) - β₁(without query)
+    - Δβ₁ > 0 means new cycles were created through the query node
+    - Documents that participate in query-induced cycles have
+      structurally confirmed relevance (DG signal)
+
+    Per-document Δβ₁:
+    - For each document d, compute the Δβ₁ contribution in d's
+      local subgraph when the query node is added
+    - Higher Δβ₁ = more independent paths from query to document
+      = stronger structural confirmation
+
+    Parameters
+    ----------
+    graph : nx.Graph
+        Entity graph from ``build_sentence_graph()``.
+    query, cot_text, cot_concepts, titles, sentences_list, doc_id_map :
+        Same as v1.
+    f_lambda : float
+        Weight for Δβ₁ bonus (default 1.0).
+
+    Returns
+    -------
+    scores : dict[str, float]
+        ``doc_id -> score`` (higher = more relevant).
+    diagnostics : dict
+        Includes beta1_before, beta1_after, delta_beta1, per-doc stats.
+    """
+    from entity_graph import compute_node_tfidf_features, extract_entities
+
+    if graph.number_of_nodes() < 3:
+        return {}, {"fallback": True, "reason": "too_few_nodes"}
+
+    # ── 1. Features + query vector ───────────────────────────────
+    features, vectorizer = compute_node_tfidf_features(graph, max_features=500)
+    query_combined = query + " " + cot_text
+    query_vec = vectorizer.transform([query_combined])[0].astype(np.float32)
+    q_norm = np.linalg.norm(query_vec)
+    if q_norm < 1e-9:
+        return {}, {"fallback": True, "reason": "zero_query_vec"}
+
+    # ── 2. Message passing ───────────────────────────────────────
+    mp = MessagePassingNX(alpha=0.3, iterations=2)
+    features_mp = mp.forward(graph, features, query_vec)
+
+    # ── 3. Node mappings ─────────────────────────────────────────
+    node_list = sorted(graph.nodes())
+    node_to_idx = {n: i for i, n in enumerate(node_list)}
+
+    node_para: dict[int, int] = {}
+    for n in node_list:
+        node_para[n] = graph.nodes[n].get("para_idx", -1)
+
+    para_nodes: dict[int, list[int]] = {}
+    for n in node_list:
+        p = node_para.get(n, -1)
+        if p >= 0:
+            para_nodes.setdefault(p, []).append(n)
+
+    # ── 4. Compute query relevance per node ──────────────────────
+    node_qsim: dict[int, float] = {}
+    best_qnode = None
+    best_qsim = -1.0
+    for n in node_list:
+        idx = node_to_idx[n]
+        feat = features_mp[idx]
+        norm_f = np.linalg.norm(feat)
+        s = float(np.dot(feat, query_vec) / (norm_f * q_norm)) if norm_f > 1e-9 else 0.0
+        node_qsim[n] = s
+        if s > best_qsim:
+            best_qsim = s
+            best_qnode = n
+
+    if best_qnode is None:
+        return {}, {"fallback": True, "reason": "no_query_node"}
+
+    # ── 5. β₁ BEFORE query injection ─────────────────────────────
+    beta1_before = _compute_beta1(graph)
+
+    # ── 6. Inject query as virtual node (Adaptive AG) ───────────
+    # Human analogy: "選択肢がない時にもとりあえず結ぶ"
+    #   → top-k guaranteed connections regardless of similarity
+    # "グラフが豊かであればあるほど質の評価精度が向上する"
+    #   → adaptive threshold based on graph density
+    #
+    # This design also works for CoT concept injection (Q.2):
+    #   CoT concepts act as additional virtual nodes with the same
+    #   adaptive connection logic.
+
+    g_with_q = graph.copy()
+    Q_NODE = "__query__"
+    g_with_q.add_node(Q_NODE)
+
+    # Sort all nodes by query similarity (descending)
+    sorted_by_sim = sorted(node_list, key=lambda n: node_qsim.get(n, 0.0), reverse=True)
+
+    # AG connection parameters
+    AG_MIN_K = ag_min_k   # Always connect top-k (guaranteed: "とりあえず結ぶ")
+    AG_FLOOR = 0.05       # Absolute minimum sim to connect
+
+    # Threshold mode:
+    #   ag_threshold=None → use fixed 0.2 (original v2 behavior)
+    #   ag_threshold=value → use that fixed threshold
+    effective_threshold = ag_threshold if ag_threshold is not None else 0.2
+
+    # MAX_K:
+    #   ag_max_k=None → no cap (unlimited, original v2 behavior)
+    #   ag_max_k=N → cap at N
+    effective_max_k = ag_max_k if ag_max_k is not None else len(sorted_by_sim)
+
+    query_edges: list[tuple] = []
+    for rank, n in enumerate(sorted_by_sim):
+        sim = node_qsim.get(n, 0.0)
+
+        # Always connect top-k (guaranteed AG — "選択肢がなくても結ぶ")
+        if rank < AG_MIN_K:
+            connect = sim > AG_FLOOR  # only skip if truly zero
+        # Beyond top-k: threshold-based, with optional max_k cap
+        elif rank < effective_max_k and sim > effective_threshold:
+            connect = True
+        else:
+            connect = False
+
+        if connect:
+            # Edge cost: higher sim → lower cost (stronger connection)
+            cost = max(0.05, 0.5 * (1.0 - sim))
+            g_with_q.add_edge(Q_NODE, n, cost=cost, edge_type="query_bridge")
+            query_edges.append((n, sim, cost))
+
+    n_query_edges = len(query_edges)
+
+    # ── 7. β₁ AFTER query injection ──────────────────────────────
+    beta1_after = _compute_beta1(g_with_q)
+    delta_beta1_global = beta1_after - beta1_before
+
+    # ── 8. Per-document Δβ₁ ──────────────────────────────────────
+    # For each document, compute Δβ₁ in its local subgraph
+    # (2-hop neighborhood including the query node)
+    doc_delta_beta1: dict[int, int] = {}
+
+    for p_idx, p_nodes in para_nodes.items():
+        # 2-hop neighborhood from doc's nodes (on original graph)
+        khop_nodes = set(p_nodes)
+        for _hop in range(2):
+            frontier = set()
+            for n in khop_nodes:
+                if n in graph:
+                    frontier.update(graph.neighbors(n))
+            khop_nodes.update(frontier)
+
+        # β₁ of local subgraph WITHOUT query
+        sub_before = graph.subgraph(khop_nodes)
+        b1_before = _compute_beta1(sub_before)
+
+        # β₁ of local subgraph WITH query node
+        # (only if query connects to any node in this neighborhood)
+        local_with_q = set(khop_nodes)
+        has_q_connection = False
+        for n in khop_nodes:
+            if g_with_q.has_edge(Q_NODE, n):
+                has_q_connection = True
+                break
+
+        if has_q_connection:
+            local_with_q.add(Q_NODE)
+            sub_after = g_with_q.subgraph(local_with_q)
+            b1_after = _compute_beta1(sub_after)
+            doc_delta_beta1[p_idx] = max(b1_after - b1_before, 0)
+        else:
+            doc_delta_beta1[p_idx] = 0
+
+    # ── 9. Score per document ────────────────────────────────────
+    # Use Dijkstra on the query-injected graph for proximity
+    for u, v, data in g_with_q.edges(data=True):
+        if "cost" not in data:
+            data["cost"] = 0.5
+    try:
+        sp_lengths = dict(nx.single_source_dijkstra_path_length(
+            g_with_q, Q_NODE, weight="cost"
+        ))
+    except nx.NetworkXError:
+        sp_lengths = {}
+
+    scores: dict[str, float] = {}
+    delta_beta1_vals: list[int] = []
+
+    for p_idx, nodes_in_para in para_nodes.items():
+        if p_idx >= len(titles):
+            continue
+        title = titles[p_idx]
+        doc_id = doc_id_map.get(title)
+        if doc_id is None:
+            continue
+
+        # Proximity: shortest path from query node to doc
+        dists = [sp_lengths.get(n, float("inf")) for n in nodes_in_para]
+        min_sp = min(dists) if dists else float("inf")
+        proximity = 1.0 / (1.0 + min_sp)
+
+        # Δβ₁ bonus: new cycles created by query injection in this doc's neighborhood
+        db1 = doc_delta_beta1.get(p_idx, 0)
+        delta_beta1_vals.append(db1)
+
+        # Score = proximity × (1 + Δβ₁ bonus)
+        # Δβ₁ is normalized: cap contribution at reasonable level
+        beta1_bonus = min(db1 / 3.0, 2.0) * f_lambda
+        score = proximity * (1.0 + beta1_weight * beta1_bonus)
+        scores[doc_id] = score
+
+    # Normalize scores to [0, 1]
+    if scores:
+        max_s = max(scores.values())
+        if max_s > 0:
+            for doc_id in scores:
+                scores[doc_id] /= max_s
+
+    # ── 10. Classify edges for diagnostics ───────────────────────
+    # AG: query bridge edges (0-hop, direct query connection)
+    n_ag = n_query_edges
+    # DG: edges in query-induced cycles (Δβ₁ > 0 documents)
+    n_dg = sum(1 for db1 in delta_beta1_vals if db1 > 0)
+    # No structural confirmation
+    n_no_dg = sum(1 for db1 in delta_beta1_vals if db1 == 0)
+
+    avg_delta_beta1 = float(np.mean(delta_beta1_vals)) if delta_beta1_vals else 0.0
+    max_delta_beta1 = max(delta_beta1_vals) if delta_beta1_vals else 0
+
+    diagnostics = {
+        "n_ag": n_ag,  # query bridge edges (0-hop connections)
+        "n_dg": n_dg,  # docs with Δβ₁ > 0 (cycle-confirmed)
+        "n_bridge": n_no_dg,  # docs with Δβ₁ = 0 (no cycle confirmation)
+        "beta1_before": beta1_before,
+        "beta1_after": beta1_after,
+        "delta_beta1_global": delta_beta1_global,
+        "avg_delta_beta1": round(avg_delta_beta1, 2),
+        "max_delta_beta1": max_delta_beta1,
+        "n_query_edges": n_query_edges,
+        # AG parameters used
+        "ag_threshold": round(effective_threshold, 4),
+        "ag_max_k": effective_max_k,
+        "ag_min_k": AG_MIN_K,
+        "beta1_weight": beta1_weight,
+        "ag_min_sim_connected": round(min(s for _, s, _ in query_edges), 4) if query_edges else 0.0,
+        "ag_max_sim_connected": round(max(s for _, s, _ in query_edges), 4) if query_edges else 0.0,
+        # Schema compat
+        "beta1_global": beta1_after,
+        "avg_beta1_local": round(avg_delta_beta1, 2),
+        "f_theta": 0.0,
+        "avg_convergence": round(avg_delta_beta1, 4),
+        "query_node": best_qnode,
+        "query_node_sim": round(best_qsim, 4),
+        "version": "v2.2",  # parameterized AG
     }
 
     return scores, diagnostics
