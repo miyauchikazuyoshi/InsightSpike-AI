@@ -7,7 +7,7 @@
 | T1: 数値等価性 (SP) | ✅ pass | 100 samples, \|diff\| < 1e-4 |
 | T2: 数値等価性 (β₁) | ✅ pass | F_mean, delta_b1 both < 1e-4 |
 | T3: 勾配等価性 | ✅ pass | cosine sim > 0.99, grad norm reasonable |
-| T4: Exp4 再現 | ⏳ 実行中 | バックグラウンド ~1h |
+| T4: Exp4 再現 | ✅ pass | conclusion=negative_better 一致 |
 | T5: 速度回帰 | ✅ pass | 1.70x (< 2.0x 閾値) |
 
 **切り替え状態**: `use_unified=False` (デフォルト)
