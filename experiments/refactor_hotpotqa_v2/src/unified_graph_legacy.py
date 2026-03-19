@@ -524,54 +524,107 @@ def compute_qkv_attention(
         data["k_vec"] = k_vec
         data["q_score"] = float(np.linalg.norm(q_vec))
 
-    # ── Compute attention and F-eval for all edges (unified core) ──
+    # ── Compute attention and F-eval for all edges ──
     d_k = 3.0
     f_values = {}
 
-    from gedig.adapters.rag import RAGFEval
-    rag_feval = RAGFEval(f_lambda=config.f_lambda, d_k=d_k)
+    if config.use_unified_feval:
+        # ── Unified adapter path ──
+        from gedig.adapters.rag import RAGFEval
+        rag_feval = RAGFEval(f_lambda=config.f_lambda, d_k=d_k)
 
-    for u, v, edata in graph.edges(data=True):
-        q = graph.nodes[u]["q_vec"]
-        k = graph.nodes[v]["k_vec"]
-        base_cost = edata.get("cost", 0.5)
+        for u, v, edata in graph.edges(data=True):
+            q = graph.nodes[u]["q_vec"]
+            k = graph.nodes[v]["k_vec"]
+            base_cost = edata.get("cost", 0.5)
 
-        # F-eval via unified core
-        f_val = rag_feval.compute_edge_f(base_cost, q.tolist(), k.tolist())
-        alpha = float(np.dot(q, k) / math.sqrt(d_k))
+            # F-eval via unified adapter
+            f_val = rag_feval.compute_edge_f(base_cost, q.tolist(), k.tolist())
+            alpha = float(np.dot(q, k) / math.sqrt(d_k))
 
-        # V features
-        etype = edata.get("edge_type", "")
-        is_cross_level = etype in ("contains", "same_lemma_x")
-        is_bridge = etype in ("entity_overlap", "same_lemma_x")
-        v_vec = np.array([
-            config.w_v1 * base_cost,
-            config.w_v2 * (1.0 if is_bridge else 0.0),
-            config.w_v3 * (1.0 if is_cross_level else 0.0),
-        ])
+            # V features (same as legacy)
+            etype = edata.get("edge_type", "")
+            is_cross_level = etype in ("contains", "same_lemma_x")
+            is_bridge = etype in ("entity_overlap", "same_lemma_x")
+            v_vec = np.array([
+                config.w_v1 * base_cost,
+                config.w_v2 * (1.0 if is_bridge else 0.0),
+                config.w_v3 * (1.0 if is_cross_level else 0.0),
+            ])
 
-        f_values[(u, v)] = f_val
-        edata["alpha"] = alpha
-        edata["v_vec"] = v_vec
-        edata["f_value"] = f_val
+            f_values[(u, v)] = f_val
+            edata["alpha"] = alpha
+            edata["v_vec"] = v_vec
+            edata["f_value"] = f_val
 
-    # AG/DG classification via unified core
-    ag_dg_result = rag_feval.classify_edges(f_values)
-    theta = ag_dg_result.threshold
-    n_ag, n_dg = ag_dg_result.n_ag, ag_dg_result.n_dg
+        # AG/DG classification via unified adapter
+        ag_dg_result = rag_feval.classify_edges(f_values)
+        theta = ag_dg_result.threshold
+        n_ag, n_dg = ag_dg_result.n_ag, ag_dg_result.n_dg
 
-    ag_set = set(ag_dg_result.ag_edges)
-    for (u, v), fv in f_values.items():
-        edata = graph[u][v]
-        if (u, v) in ag_set:
-            edata["f_class"] = "AG"
-            edata["flow_cost"] = 1.0
+        ag_set = set(ag_dg_result.ag_edges)
+        for (u, v), fv in f_values.items():
+            edata = graph[u][v]
+            if (u, v) in ag_set:
+                edata["f_class"] = "AG"
+                edata["flow_cost"] = 1.0
+            else:
+                edata["f_class"] = "DG"
+                edata["flow_cost"] = 1.0 + (fv - theta)
+            alpha = edata["alpha"]
+            v_norm = float(np.linalg.norm(edata["v_vec"]))
+            edata["flow"] = max(alpha * v_norm, 0.0)
+    else:
+        # ── Legacy path ──
+        for u, v, edata in graph.edges(data=True):
+            q = graph.nodes[u]["q_vec"]
+            k = graph.nodes[v]["k_vec"]
+
+            # Scaled dot-product attention
+            alpha = float(np.dot(q, k) / math.sqrt(d_k))
+
+            # V features
+            base_cost = edata.get("cost", 0.5)
+            etype = edata.get("edge_type", "")
+            is_cross_level = etype in ("contains", "same_lemma_x")
+            is_bridge = etype in ("entity_overlap", "same_lemma_x")
+
+            v_vec = np.array([
+                config.w_v1 * base_cost,
+                config.w_v2 * (1.0 if is_bridge else 0.0),
+                config.w_v3 * (1.0 if is_cross_level else 0.0),
+            ])
+
+            # F-eval
+            f_val = base_cost - config.f_lambda * alpha
+            f_values[(u, v)] = f_val
+
+            edata["alpha"] = alpha
+            edata["v_vec"] = v_vec
+            edata["f_value"] = f_val
+
+        # ── Dynamic threshold (30th percentile) ──
+        if f_values:
+            sorted_f = sorted(f_values.values())
+            theta = sorted_f[int(len(sorted_f) * 0.3)]
         else:
-            edata["f_class"] = "DG"
-            edata["flow_cost"] = 1.0 + (fv - theta)
-        alpha = edata["alpha"]
-        v_norm = float(np.linalg.norm(edata["v_vec"]))
-        edata["flow"] = max(alpha * v_norm, 0.0)
+            theta = 0.0
+
+        n_ag, n_dg = 0, 0
+        for (u, v), fv in f_values.items():
+            edata = graph[u][v]
+            if fv < theta:
+                edata["f_class"] = "AG"
+                edata["flow_cost"] = 1.0
+                n_ag += 1
+            else:
+                edata["f_class"] = "DG"
+                edata["flow_cost"] = 1.0 + (fv - theta)
+                n_dg += 1
+            # Flow weight for message passing
+            alpha = edata["alpha"]
+            v_norm = float(np.linalg.norm(edata["v_vec"]))
+            edata["flow"] = max(alpha * v_norm, 0.0)
 
     # ── Betti number ──
     ug = graph.to_undirected()
@@ -598,11 +651,10 @@ def graph_attention_propagation(
     graph: nx.DiGraph,
     n_iterations: int = 2,
     mp_alpha: float = 0.3,
-    use_unified: bool = True,  # Kept for backward compat
+    use_unified: bool = False,
 ) -> None:
     """Attention-weighted message passing on unified graph.
 
-    Delegates to gedig.core.message_passing.AttentionPropagator.
     Updates node['relevance'] in-place.
     """
     # Initialize relevance from Q-score
@@ -612,11 +664,42 @@ def graph_attention_propagation(
         data["relevance"] = val
         init_rel[nid] = val
 
-    from gedig.adapters.rag import RAGFEval
-    rag = RAGFEval()
-    propagated = rag.propagate(graph, init_rel, n_iterations, mp_alpha)
-    for nid, rel in propagated.items():
-        graph.nodes[nid]["relevance"] = rel
+    if use_unified:
+        # ── Unified adapter path ──
+        from gedig.adapters.rag import RAGFEval
+        rag = RAGFEval()
+        propagated = rag.propagate(graph, init_rel, n_iterations, mp_alpha)
+        for nid, rel in propagated.items():
+            graph.nodes[nid]["relevance"] = rel
+    else:
+        # ── Legacy path ──
+        for _ in range(n_iterations):
+            new_rel = {}
+            for nid in graph.nodes:
+                preds = list(graph.predecessors(nid))
+                if not preds:
+                    new_rel[nid] = graph.nodes[nid]["relevance"]
+                    continue
+
+                total_flow = 0.0
+                weighted_sum = 0.0
+                for pred in preds:
+                    flow = graph[pred][nid].get("flow", 0.0)
+                    weighted_sum += flow * graph.nodes[pred]["relevance"]
+                    total_flow += flow
+
+                if total_flow > 1e-8:
+                    agg = weighted_sum / total_flow
+                else:
+                    agg = 0.0
+
+                new_rel[nid] = (
+                    (1 - mp_alpha) * graph.nodes[nid]["relevance"]
+                    + mp_alpha * agg
+                )
+
+            for nid, rel in new_rel.items():
+                graph.nodes[nid]["relevance"] = rel
 
 
 def score_documents(
