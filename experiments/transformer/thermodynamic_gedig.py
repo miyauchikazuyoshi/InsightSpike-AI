@@ -61,12 +61,14 @@ class DifferentiableGeDIG(nn.Module):
         gamma: float = 0.5,
         percentile: float = 0.9,
         temperature: float = 10.0,  # soft threshold の温度
+        use_betti: bool = False,  # True: β₁ を使用, False: SP (legacy)
     ):
         super().__init__()
         self.lambda_param = lambda_param
         self.gamma = gamma
         self.percentile = percentile
         self.temperature = temperature
+        self.use_betti = use_betti
 
     def _compute_soft_edges(
         self,
@@ -105,12 +107,66 @@ class DifferentiableGeDIG(nn.Module):
         soft_edges: torch.Tensor,
         max_edges: torch.Tensor,
     ) -> torch.Tensor:
-        """経路効率を計算（行列累乗で近似）"""
+        """経路効率を計算（行列累乗で近似）— Legacy, SPベース"""
         reach_2 = torch.matmul(soft_edges, soft_edges)
         reach_3 = torch.matmul(reach_2, soft_edges)
         efficiency = soft_edges + reach_2 / 2 + reach_3 / 3
         sp = efficiency.sum(dim=(-2, -1)) / (max_edges.unsqueeze(1) + 1e-9)
         return sp / 3  # 正規化
+
+    def _compute_betti_1(
+        self,
+        soft_edges: torch.Tensor,
+        valid_counts: torch.Tensor,
+    ) -> torch.Tensor:
+        """微分可能な β₁ (first Betti number) を計算.
+
+        β₁ = E - V + C  (edges - vertices + connected components)
+        = サイクル数 = 情報の冗長経路数
+
+        SPの本質は「穴による構造の短絡」→ β₁ そのもの。
+
+        C (connected components) は Graph Laplacian の零固有値数で近似:
+          L = D - A  (Laplacian)
+          C = #{λ_i ≈ 0}  ≈ Σ exp(-t·λ_i) for large t (heat kernel trace)
+
+        Returns: (B, H) — per batch, per head の β₁
+        """
+        B, H, S, _ = soft_edges.shape
+
+        # Symmetrize (undirected graph for β₁)
+        A = (soft_edges + soft_edges.transpose(-2, -1)) / 2
+
+        # Edge count: E = Σ A_ij / 2 (undirected)
+        E = A.sum(dim=(-2, -1)) / 2  # (B, H)
+
+        # Vertex count: V = valid tokens
+        V = valid_counts.squeeze(-1)  # (B,)
+
+        # Connected components via Laplacian spectrum
+        # D = diag(degree), L = D - A
+        degree = A.sum(dim=-1)  # (B, H, S)
+        # Build Laplacian: L_ij = degree_i * delta_ij - A_ij
+        L = torch.diag_embed(degree) - A  # (B, H, S, S)
+
+        # Eigenvalues of L (real symmetric → all real)
+        # Use soft counting of near-zero eigenvalues for differentiability
+        eigenvalues = torch.linalg.eigvalsh(L)  # (B, H, S), sorted ascending
+
+        # Soft count of zero eigenvalues: C ≈ Σ sigmoid(-t * (λ_i - ε))
+        # Large eigenvalues → sigmoid → 0, near-zero → sigmoid → 1
+        eps = 0.1  # threshold for "near zero"
+        t_soft = 20.0  # temperature for soft counting
+        C_soft = torch.sigmoid(t_soft * (eps - eigenvalues)).sum(dim=-1)  # (B, H)
+
+        # β₁ = E - V + C
+        beta_1 = E - V.unsqueeze(1) + C_soft  # (B, H)
+
+        # Normalize by max possible edges for scale consistency
+        max_edges = V ** 2
+        beta_1_norm = beta_1 / (max_edges.unsqueeze(1) + 1e-9)
+
+        return beta_1_norm
 
     def forward(
         self,
@@ -147,24 +203,34 @@ class DifferentiableGeDIG(nn.Module):
         h_after = self._compute_entropy(after_attention)
         delta_h = h_after - h_before  # (B, H)
 
-        # 3. ΔSP（経路効率の変化）
+        # 3. Third component: ΔSP (legacy) or ΔB (β₁)
         sp_before = self._compute_path_efficiency(edges_before, max_edges)
         sp_after = self._compute_path_efficiency(edges_after, max_edges)
         delta_sp = sp_after - sp_before  # (B, H)
 
-        # F値の計算: F = ΔEPC - λ(ΔH + γΔSP)
-        # 小さいFが「良い」変化を示す
-        # - ΔEPC小 = 構造変化が少ない（安定）
-        # - ΔH負 = エントロピー減少（秩序化）
-        # - ΔSP負 = 経路効率向上
-        F = delta_epc - self.lambda_param * (delta_h + self.gamma * delta_sp)
+        if self.use_betti:
+            # β₁ = E - V + C (サイクル数 = 情報の冗長経路数)
+            # SPの本質は「穴による構造の短絡」→ β₁ そのもの
+            b1_before = self._compute_betti_1(edges_before, valid_counts)
+            b1_after = self._compute_betti_1(edges_after, valid_counts)
+            delta_b1 = b1_after - b1_before  # (B, H)
+
+            # F = ΔEPC - λ(ΔH + γΔB)
+            F = delta_epc - self.lambda_param * (delta_h + self.gamma * delta_b1)
+        else:
+            delta_b1 = torch.zeros_like(delta_sp)
+
+            # F = ΔEPC - λ(ΔH + γΔSP)  [legacy]
+            F = delta_epc - self.lambda_param * (delta_h + self.gamma * delta_sp)
 
         return {
             "F": F,  # (B, H)
             "F_mean": F.mean(),  # scalar
             "delta_epc": delta_epc.mean(),
             "delta_h": delta_h.mean(),
-            "delta_sp": delta_sp.mean(),
+            "delta_sp": delta_sp.mean(),  # always computed for comparison
+            "delta_b1": delta_b1.mean(),  # β₁ (0 if use_betti=False)
+            "use_betti": self.use_betti,
         }
 
     def forward_single(
@@ -940,6 +1006,7 @@ def run_training_time_intervention_comparison(
     num_epochs: int = 3,
     beta: float = 0.1,
     output_dir: Optional[Path] = None,
+    use_betti: bool = False,
 ) -> Dict[str, Any]:
     """
     学習時介入による精度比較（循環論法を完全に避ける決定的実験）
@@ -1024,7 +1091,7 @@ def run_training_time_intervention_comparison(
         eval_loader = DataLoader(eval_dataset, batch_size=32, collate_fn=collator)
 
         optimizer = torch.optim.AdamW(model.parameters(), lr=2e-5)
-        gedig = DifferentiableGeDIG().to(device)
+        gedig = DifferentiableGeDIG(use_betti=use_betti).to(device)
 
         # 初期Attentionを取得（参照状態として使用）
         initial_attentions = {}  # バッチごとに異なるので、ここでは最初のforward時に取得
@@ -1155,6 +1222,8 @@ def run_training_time_intervention_comparison(
 
     results["conclusion"] = conclusion
     results["beta"] = beta
+    results["use_betti"] = use_betti
+    results["f_formula"] = "ΔEPC - λ(ΔH + γΔB)" if use_betti else "ΔEPC - λ(ΔH + γΔSP)"
 
     # 保存
     if output_dir:
@@ -1193,6 +1262,10 @@ def main():
                         help="Intervention strength for training experiment")
     parser.add_argument("--output-dir", type=Path,
                         default=Path("experiments/transformer/results/thermodynamic"))
+    parser.add_argument("--use-betti", action="store_true",
+                        help="Use β₁ (Betti number) instead of SP (path efficiency) in F computation")
+    parser.add_argument("--num-epochs", type=int, default=3,
+                        help="Number of training epochs for Experiment 4")
     args = parser.parse_args()
 
     if args.experiment in ["microscopic", "all"]:
@@ -1231,8 +1304,10 @@ def main():
         run_training_time_intervention_comparison(
             num_train_samples=args.num_samples * 10,  # More data for training
             num_eval_samples=args.num_samples,
+            num_epochs=args.num_epochs,
             beta=args.beta,
             output_dir=args.output_dir,
+            use_betti=args.use_betti,
         )
 
 
