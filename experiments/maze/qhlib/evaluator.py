@@ -473,9 +473,11 @@ def evaluate_multihop(
     added_edge_ops = 0  # EPC増分: 採用した追加エッジ数（prev_graph基準）
     if use_betti:
         b1_0 = _delta_betti_1_normalized(sub_b0, sub_a0)
-        sp0 = b1_0  # reuse sp0 slot for β₁ value
+        sp0 = b1_0  # β₁ value used in IG formula (same weight as sp_beta)
+        _b1_value_h0 = b1_0  # store separately for clean field mapping
     else:
         sp0 = 0.0
+        _b1_value_h0 = 0.0
     ig0 = base_ig + core.sp_beta * sp0
     g0v = float(ged0 - core.lambda_weight * ig0)
     records_h.append((0, g0v, ged0, ig0, sp0))
@@ -500,12 +502,12 @@ def evaluate_multihop(
                     best_hop=0,
                     delta_ged=float(delta_ged),
                     delta_ig=float(delta_ig),
-                    delta_sp=float(delta_sp),
+                    delta_sp=0.0 if use_betti else float(delta_sp),
                     gmin_mh=float(g0v),
                     delta_ged_min_mh=float(delta_ged),
                     delta_ig_min_mh=float(delta_ig),
-                    delta_sp_min_mh=float(delta_sp),
-                    delta_b1=float(delta_sp) if use_betti else 0.0,
+                    delta_sp_min_mh=0.0 if use_betti else float(delta_sp),
+                    delta_b1=float(_b1_value_h0),
                     use_betti=use_betti,
                     chosen_edges_by_hop=[],
                 )
@@ -513,8 +515,12 @@ def evaluate_multihop(
             pass
 
     # Prepare SP cached-incremental helpers (per-eff-hop state)
-    # Allow special value sp_pair_samples <= 0 to mean "use ALL pairs"
-    distcache = DistanceCache(mode="cached", pair_samples=int(sp_pair_samples))
+    # Skip entirely when using β₁ mode (no SP computation needed)
+    if not use_betti:
+        # Allow special value sp_pair_samples <= 0 to mean "use ALL pairs"
+        distcache = DistanceCache(mode="cached", pair_samples=int(sp_pair_samples))
+    else:
+        distcache = None  # β₁ mode: no DistanceCache needed
     pairs_by_eff: Dict[int, Any] = {}
     la_by_eff: Dict[int, List[float]] = {}
     lb_by_eff: Dict[int, float] = {}
@@ -837,7 +843,18 @@ def evaluate_multihop(
         ged_h = float(min(1.0, max(0.0, ged_h)))
         # β₁ mode: skip all SP computation, use Betti number instead
         if use_betti:
-            sp_h = _delta_betti_1_normalized(sub_b, sub_a)
+            # Apply scope/boundary policies (same as SP path)
+            scope = str(core.sp_scope_mode).lower()
+            bound = str(core.sp_boundary_mode).lower()
+            _sb, _sa = sub_b, sub_a
+            if scope in ("union", "merge", "superset"):
+                all_nodes = set(_sb.nodes()) | set(_sa.nodes())
+                _sb = _sb.subgraph(all_nodes).copy()
+                _sa = _sa.subgraph(all_nodes).copy()
+            if bound in ("trim", "terminal", "nodes"):
+                _sb = core._trim_terminal_edges(_sb, anchors_core, max(1, int(he)))
+                _sa = core._trim_terminal_edges(_sa, anchors_core, max(1, int(he)))
+            sp_h = _delta_betti_1_normalized(_sb, _sa)
             sp_mode_used = 'betti_1'
             sp_lb_val = None; sp_la_val = None; sp_pair_cnt = None
             sp_imp_cnt = 0; sp_imp_ex = []
@@ -1098,8 +1115,9 @@ def evaluate_multihop(
         h_mh, gmin_mh_val, ged_mh_val, ig_mh_val, sp_mh_val = (0, g0, delta_ged, delta_ig, delta_sp)
 
     # Persist SPafter pairset for next-step reuse (best-hop neighborhood)
+    # Skip entirely in β₁ mode — no pairsets needed
     try:
-        if pairset_service is not None and signature_builder is not None:
+        if pairset_service is not None and signature_builder is not None and not use_betti:
             he_best = max(1, int(h_best + int(max(0, int(getattr(core, 'sp_hop_expand', 0))))))
             nodes_b = before_nodes_by_h[he_best] if he_best < len(before_nodes_by_h) else before_nodes_by_h[-1]
             nodes_a = after_nodes_by_h[he_best] if he_best < len(after_nodes_by_h) else after_nodes_by_h[-1]
@@ -1122,6 +1140,11 @@ def evaluate_multihop(
     except Exception:
         pass
 
+    # β₁ mode: separate delta_b1 from delta_sp cleanly
+    _final_b1 = float(sp_mh_val) if use_betti else 0.0
+    _final_sp = 0.0 if use_betti else float(delta_sp)
+    _final_sp_mh = 0.0 if use_betti else float(sp_mh_val)
+
     return EvalResult(
         hop_series=hop_series,
         g0=g0,
@@ -1129,17 +1152,17 @@ def evaluate_multihop(
         best_hop=int(h_best),
         delta_ged=float(delta_ged),
         delta_ig=float(delta_ig),
-        delta_sp=float(delta_sp),
+        delta_sp=_final_sp,
         gmin_mh=float(gmin_mh_val),
         delta_ged_min_mh=float(ged_mh_val),
         delta_ig_min_mh=float(ig_mh_val),
-        delta_sp_min_mh=float(sp_mh_val),
-        delta_b1=float(delta_sp) if use_betti else 0.0,
+        delta_sp_min_mh=_final_sp_mh,
+        delta_b1=_final_b1,
         use_betti=use_betti,
         chosen_edges_by_hop=chosen_edges_by_hop,
-        sssp_calls_du=int(sssp_calls_du_ct),
-        sssp_calls_dv=int(sssp_calls_dv_ct),
-        dv_leaf_skips=int(dv_leaf_skips_ct),
-        cycle_verifies=int(cycle_verifies_ct),
-        apsp_carry=apsp_state if sp_allpairs_exact else None,
+        sssp_calls_du=int(sssp_calls_du_ct) if not use_betti else 0,
+        sssp_calls_dv=int(sssp_calls_dv_ct) if not use_betti else 0,
+        dv_leaf_skips=int(dv_leaf_skips_ct) if not use_betti else 0,
+        cycle_verifies=int(cycle_verifies_ct) if not use_betti else 0,
+        apsp_carry=apsp_state if (sp_allpairs_exact and not use_betti) else None,
     )
