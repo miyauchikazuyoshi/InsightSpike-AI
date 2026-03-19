@@ -194,13 +194,13 @@ geDIG_local(doc) = Δ_GED − λ·(Δ_H + β·Δ_SP)
 ```
 統合グラフ: Sentence ノード + Token ノード + クロスレベルエッジ
 
-QKV Edge Evaluation (内積ベース):
+QKV Edge Evaluation (内積ベース) → src/gedig/core/f_eval.py に統一:
   Q(u) = [w_q1·direct_match, w_q2·nbr_density, w_q3·cot_rel]
   K(v) = [w_k1·importance,   w_k2·discriminativeness, w_k3·struct]
   V(e) = [w_v1·base_cost,    w_v2·bridge_flag,  w_v3·level_cross]
 
   α = dot(Q, K) / √d_k          ← attention weight
-  f = cost(e) - λ·α              ← AG/DG classification
+  f = cost(e) - λ·α              ← AG/DG classification (= F-eval)
   flow = α · |V|                  ← message passing information flow
 
 AG (f < θ): high attention = confirmed edge
@@ -209,6 +209,22 @@ DG (f ≥ θ): low attention = reasoning gap
 - HGT (Heterogeneous Graph Transformer) と同構造だが学習不要 (10 パラメータ)
 - Sentence-Token 間に `contains` エッジ + 文書横断 `same_lemma_x` エッジ
 - Grid search で最適化: mp_alpha=0.1 (平滑化抑制) が文レベル精度の鍵
+
+#### Unified geDIG Core (`src/gedig/`)
+```
+3実験 (maze, RAG, transformer) の F-eval を統一:
+
+  F = ΔEPC - λ(ΔH + γΔB)
+
+  src/gedig/
+  ├── core/          protocols.py, f_eval.py, ag_dg.py, message_passing.py
+  ├── backends/      networkx_backend.py (maze+RAG), torch_backend.py (transformer)
+  ├── adapters/      maze.py, rag.py, transformer.py
+  └── tests/         71 tests pass
+
+Transformer Exp4 で実証: F最大化(DG保持) > Baseline > F最小化(DG破壊)
+→ DG構造は「罰する」のではなく「保存する」= attention の多様性が学習に必要
+```
 
 #### Wake-Sleep-Wake アーキテクチャ (M + N.1)
 ```
@@ -301,6 +317,7 @@ Wake (Confirmation) → 精錬されたスコアで最終ランキング
 | **X** | **Enhanced Graph (spaCy NER + lemma match)** | ✅ 完了 | **★ +5.3% (0.417→0.439, R@10 +13%)** |
 | Y | Progressive DG Escalation | ✅ 完了 | 閾値調整中 (BRIGHT は全 DG のため要検証) |
 | **Z** | **AGHT: Unified Heterogeneous Graph Transformer** | ✅ 完了 | **★ HotpotQA R@2=0.405 (+170% vs Legacy)** |
+| **Core** | **Unified geDIG Core (src/gedig/)** | ✅ 完了 | **3実験統合, 71 tests, 旧コード refactor_ にアーカイブ** |
 
 #### Spec Z: AGHT — HotpotQA Paragraph Selection (100q)
 
@@ -321,6 +338,17 @@ Bridge (DG) vs Comparison (AG) 分析:
 `mp_alpha=0.1, mp_iterations=1, w_q1=0.5, f_lambda=0.5`
 
 **ゼロショット (10 パラメータ) で SF F1=33.4** — 教師ありモデル (DFGN: 81.1) の 41% を学習データなしで達成。
+
+#### Transformer Experiment 4: F-Regularized Training
+
+| Condition | SP版 | β₁版 | 結論 |
+|-----------|------|------|------|
+| Baseline (CE only) | 88.1% | 88.5% | 対照 |
+| Positive (CE + F_min) | 87.2% | 83.5% | **F最小化で劣化** |
+| Negative (CE + F_max) | **89.4%** | 85.5% | **F最大化で改善** |
+
+**結論**: `negative_better` — DG 構造 (attention の多様性) を保持した方が学習が良い。
+事前学習で獲得した attention トポロジーを F 最小化が破壊 → 表現力が失われる。
 
 ---
 
