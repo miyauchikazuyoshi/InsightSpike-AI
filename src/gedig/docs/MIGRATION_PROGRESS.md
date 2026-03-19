@@ -42,9 +42,22 @@
 
 ---
 
-## Phase 4c: Maze ⏳
+## Phase 4c: Maze 🔧 (2026-03-19)
 
-(未着手)
+### テスト計画
+
+| テスト | 合格基準 | 状態 |
+|--------|---------|------|
+| M1: g-value = F formula | f = ΔEPC - λ(ΔH + γΔB) 一致 | ✅ pass |
+| M2: AG/DG classification | threshold logic 100% 一致 | ✅ pass |
+| M3: sleep propagation | Q-learning 手計算と一致 | ✅ pass |
+| M4: 15x15 success rate | \|Δ\| < 5% | ⏳ E2E 要実行 |
+| M5: 25x25 avg steps | \|Δ\| < 10% | ⏳ E2E 要実行 |
+
+### 進捗
+- [x] MazeFEval adapter テスト (M1-M3) ✅
+- [ ] evaluator.py に use_unified フラグ追加 (次セッション)
+- [ ] M4-M5 E2E テスト
 
 ---
 
@@ -57,4 +70,5 @@
 | Transformer equiv | 11 | 11 | 0 |
 | RAG equiv | - | - | - |
 | RAG equiv | 4 | 4 | 0 |
-| **Total** | **59** | **59** | **0** |
+| Maze equiv | 12 | 12 | 0 |
+| **Total** | **71** | **71** | **0** |
