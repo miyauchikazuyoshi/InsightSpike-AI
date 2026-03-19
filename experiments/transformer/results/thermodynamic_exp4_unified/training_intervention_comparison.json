@@ -1,0 +1,31 @@
+{
+  "baseline": {
+    "final_accuracy": 0.825,
+    "eval_accuracy_history": [
+      0.82,
+      0.83,
+      0.825
+    ]
+  },
+  "positive": {
+    "final_accuracy": 0.845,
+    "eval_accuracy_history": [
+      0.765,
+      0.85,
+      0.845
+    ]
+  },
+  "negative": {
+    "final_accuracy": 0.86,
+    "eval_accuracy_history": [
+      0.8,
+      0.84,
+      0.86
+    ]
+  },
+  "conclusion": "negative_better",
+  "beta": 0.1,
+  "use_betti": false,
+  "use_unified": true,
+  "f_formula": "\u0394EPC - \u03bb(\u0394H + \u03b3\u0394SP)"
+}
