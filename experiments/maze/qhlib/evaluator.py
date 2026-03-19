@@ -833,8 +833,13 @@ def evaluate_multihop(
         # Build subgraphs from cached node sets
         nodes_b = before_nodes_by_h[he] if he < len(before_nodes_by_h) else before_nodes_by_h[-1]
         nodes_a = after_nodes_by_h[he] if he < len(after_nodes_by_h) else after_nodes_by_h[-1]
-        sub_b = g_before_for_expansion.subgraph(nodes_b).copy()
-        sub_a = h_graph.subgraph(nodes_a).copy()
+        # β₁ mode: use views (no copy) to save memory; SP mode needs copies for mutation
+        if use_betti:
+            sub_b = g_before_for_expansion.subgraph(nodes_b)  # view, no copy
+            sub_a = h_graph.subgraph(nodes_a)                  # view, no copy
+        else:
+            sub_b = g_before_for_expansion.subgraph(nodes_b).copy()
+            sub_a = h_graph.subgraph(nodes_a).copy()
         # EPC増分（式(12)）: ΔGED(h) = (raw_ged0 + added_edge_ops * edge_cost) / Cmax
         if not ged_hop0_const and denom_cmax_base > 0:
             ged_h = float((raw_ged0 + added_edge_ops * float(getattr(core, 'edge_cost', 1.0))) / float(denom_cmax_base))
@@ -843,17 +848,10 @@ def evaluate_multihop(
         ged_h = float(min(1.0, max(0.0, ged_h)))
         # β₁ mode: skip all SP computation, use Betti number instead
         if use_betti:
-            # Apply scope/boundary policies (same as SP path)
-            scope = str(core.sp_scope_mode).lower()
-            bound = str(core.sp_boundary_mode).lower()
+            # Apply scope/boundary policies
+            # β₁ only needs node/edge counts — skip scope/boundary for memory efficiency
+            # (scope/boundary primarily affects SP pair sampling, not β₁ calculation)
             _sb, _sa = sub_b, sub_a
-            if scope in ("union", "merge", "superset"):
-                all_nodes = set(_sb.nodes()) | set(_sa.nodes())
-                _sb = _sb.subgraph(all_nodes).copy()
-                _sa = _sa.subgraph(all_nodes).copy()
-            if bound in ("trim", "terminal", "nodes"):
-                _sb = core._trim_terminal_edges(_sb, anchors_core, max(1, int(he)))
-                _sa = core._trim_terminal_edges(_sa, anchors_core, max(1, int(he)))
             sp_h = _delta_betti_1_normalized(_sb, _sa)
             sp_mode_used = 'betti_1'
             sp_lb_val = None; sp_la_val = None; sp_pair_cnt = None

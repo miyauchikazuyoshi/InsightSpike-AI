@@ -4437,6 +4437,34 @@ def main() -> None:
                     for record in artifacts.steps:
                         append_record(record, phase="main")
 
+                    # Incremental persistence: write per-seed summary to JSONL
+                    if args.output:
+                        _incr_path = Path(args.output).with_suffix('.incremental.jsonl')
+                        try:
+                            with open(_incr_path, 'a') as _incr_f:
+                                _incr_f.write(json.dumps(dict(
+                                    artifacts.summary,
+                                    seed=seed,
+                                    episode_phase="main",
+                                )) + '\n')
+                                _incr_f.flush()
+                        except Exception:
+                            pass
+                    # Incremental step log: flush all_steps to JSONL per seed
+                    if step_log_base and all_steps:
+                        _step_incr = step_log_base.with_suffix('.incremental.jsonl')
+                        try:
+                            with open(_step_incr, 'a') as _sf:
+                                for _row in all_steps:
+                                    _sf.write(json.dumps(_row) + '\n')
+                                _sf.flush()
+                        except Exception:
+                            pass
+                    # Free memory: clear step data for completed seed
+                    all_steps.clear()
+                    del artifacts
+                    import gc; gc.collect()
+
         summary = aggregate(runs)
         summary["lambda_weight"] = float(lambda_weight)
         warmup_summary: Optional[Dict[str, Any]] = None
