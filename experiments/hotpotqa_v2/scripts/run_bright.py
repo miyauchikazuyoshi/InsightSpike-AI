@@ -242,6 +242,8 @@ def main():
                         help="Q direct match weight for AGHT (default 1.0)")
     parser.add_argument("--aght-f-lambda", type=float, default=1.0,
                         help="F-eval lambda for AGHT QKV attention (default 1.0)")
+    parser.add_argument("--aght-use-unified", action="store_true",
+                        help="Use unified gedig core (src/gedig/) for AGHT F-eval")
     # Entity graph F-eval parameters (Spec O)
     parser.add_argument("--entity-feval", action="store_true",
                         help="Enable entity graph F-eval cross-doc walk score (Spec O)")
@@ -549,6 +551,7 @@ def main():
                 aght_mp_alpha=args.aght_mp_alpha,
                 aght_w_q1=args.aght_w_q1,
                 aght_f_lambda=args.aght_f_lambda,
+                aght_use_unified_feval=getattr(args, "aght_use_unified", False),
                 enable_entity_feval=args.entity_feval,
                 entity_feval_weight=args.entity_feval_weight,
                 entity_feval_lambda=args.entity_feval_lambda,
@@ -790,6 +793,7 @@ def main():
                 aght_mp_alpha=args.aght_mp_alpha,
                 aght_w_q1=args.aght_w_q1,
                 aght_f_lambda=args.aght_f_lambda,
+                aght_use_unified_feval=getattr(args, "aght_use_unified", False),
                 enable_entity_feval=args.entity_feval,
                 entity_feval_weight=args.entity_feval_weight,
                 entity_feval_lambda=args.entity_feval_lambda,
@@ -891,6 +895,7 @@ def main():
                 aght_mp_alpha=args.aght_mp_alpha,
                 aght_w_q1=args.aght_w_q1,
                 aght_f_lambda=args.aght_f_lambda,
+                aght_use_unified_feval=getattr(args, "aght_use_unified", False),
                 enable_entity_feval=args.entity_feval,
                 entity_feval_weight=args.entity_feval_weight,
                 entity_feval_lambda=args.entity_feval_lambda,

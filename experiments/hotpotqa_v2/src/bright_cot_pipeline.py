@@ -343,6 +343,7 @@ class BrightCoTPipeline:
         aght_mp_alpha: float = 0.3,
         aght_w_q1: float = 1.0,
         aght_f_lambda: float = 1.0,
+        aght_use_unified_feval: bool = False,
         # geDIG CoT Loop parameters (Spec R/S)
         enable_gedig_loop: bool = False,
         gedig_loop_max_rounds: int = 2,
@@ -450,6 +451,7 @@ class BrightCoTPipeline:
         self.aght_mp_alpha = aght_mp_alpha
         self.aght_w_q1 = aght_w_q1
         self.aght_f_lambda = aght_f_lambda
+        self.aght_use_unified_feval = aght_use_unified_feval
         # geDIG CoT Loop (Spec R)
         self.enable_gedig_loop = enable_gedig_loop
         self.gedig_loop_max_rounds = gedig_loop_max_rounds
@@ -1165,6 +1167,7 @@ class BrightCoTPipeline:
                 mp_alpha=self.aght_mp_alpha,
                 w_q1=self.aght_w_q1,
                 max_para_freq=self.max_para_freq,
+                use_unified_feval=self.aght_use_unified_feval,
             )
 
             # Build BM25 score dict for AGHT blending
