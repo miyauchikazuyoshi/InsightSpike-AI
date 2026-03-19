@@ -62,7 +62,7 @@ class DifferentiableGeDIG(nn.Module):
         percentile: float = 0.9,
         temperature: float = 10.0,  # soft threshold の温度
         use_betti: bool = False,  # True: β₁ を使用, False: SP (legacy)
-        use_unified: bool = True,  # Kept for backward compat, always True
+        use_unified: bool = False,  # True: gedig.adapters.transformer を使用
     ):
         super().__init__()
         self.lambda_param = lambda_param
@@ -70,7 +70,7 @@ class DifferentiableGeDIG(nn.Module):
         self.percentile = percentile
         self.temperature = temperature
         self.use_betti = use_betti
-        self.use_unified = True  # Always use unified core
+        self.use_unified = use_unified
         self._unified_adapter = None
 
     def _compute_soft_edges(
@@ -188,22 +188,72 @@ class DifferentiableGeDIG(nn.Module):
         Returns:
             Dict with F, delta_epc, delta_h, delta_sp (all differentiable)
         """
-        # Delegate to unified geDIG core (src/gedig/)
-        if self._unified_adapter is None:
-            from gedig.adapters.transformer import TransformerFEval
-            self._unified_adapter = TransformerFEval(
-                lambda_param=self.lambda_param,
-                gamma=self.gamma,
-                percentile=self.percentile,
-                temperature=self.temperature,
-                use_betti=self.use_betti,
-            )
-        r = self._unified_adapter.compute(before_attention, after_attention, mask)
+        # ── Unified adapter path ──
+        if self.use_unified:
+            if self._unified_adapter is None:
+                from gedig.adapters.transformer import TransformerFEval
+                self._unified_adapter = TransformerFEval(
+                    lambda_param=self.lambda_param,
+                    gamma=self.gamma,
+                    percentile=self.percentile,
+                    temperature=self.temperature,
+                    use_betti=self.use_betti,
+                )
+            r = self._unified_adapter.compute(before_attention, after_attention, mask)
+            return {
+                "F": r.F, "F_mean": r.F_mean,
+                "delta_epc": r.delta_epc, "delta_h": r.delta_h,
+                "delta_sp": r.delta_sp, "delta_b1": r.delta_b1,
+                "use_betti": r.use_betti,
+            }
+
+        # ── Legacy path ──
+        B, H, S, _ = after_attention.shape
+
+        # Before/After のエッジを計算
+        edges_before, valid_counts = self._compute_soft_edges(before_attention, mask)
+        edges_after, _ = self._compute_soft_edges(after_attention, mask)
+
+        max_edges = valid_counts.squeeze(-1) ** 2  # (B,)
+
+        # 1. ΔEPC（グラフ編集距離）
+        # 追加されたエッジ + 削除されたエッジ（soft版）
+        edge_diff = torch.abs(edges_after - edges_before)
+        delta_epc = edge_diff.sum(dim=(-2, -1)) / (max_edges.unsqueeze(1) + 1e-9)  # (B, H)
+
+        # 2. ΔH（エントロピーの変化）
+        h_before = self._compute_entropy(before_attention)
+        h_after = self._compute_entropy(after_attention)
+        delta_h = h_after - h_before  # (B, H)
+
+        # 3. Third component: ΔSP (legacy) or ΔB (β₁)
+        sp_before = self._compute_path_efficiency(edges_before, max_edges)
+        sp_after = self._compute_path_efficiency(edges_after, max_edges)
+        delta_sp = sp_after - sp_before  # (B, H)
+
+        if self.use_betti:
+            # β₁ = E - V + C (サイクル数 = 情報の冗長経路数)
+            # SPの本質は「穴による構造の短絡」→ β₁ そのもの
+            b1_before = self._compute_betti_1(edges_before, valid_counts)
+            b1_after = self._compute_betti_1(edges_after, valid_counts)
+            delta_b1 = b1_after - b1_before  # (B, H)
+
+            # F = ΔEPC - λ(ΔH + γΔB)
+            F = delta_epc - self.lambda_param * (delta_h + self.gamma * delta_b1)
+        else:
+            delta_b1 = torch.zeros_like(delta_sp)
+
+            # F = ΔEPC - λ(ΔH + γΔSP)  [legacy]
+            F = delta_epc - self.lambda_param * (delta_h + self.gamma * delta_sp)
+
         return {
-            "F": r.F, "F_mean": r.F_mean,
-            "delta_epc": r.delta_epc, "delta_h": r.delta_h,
-            "delta_sp": r.delta_sp, "delta_b1": r.delta_b1,
-            "use_betti": r.use_betti,
+            "F": F,  # (B, H)
+            "F_mean": F.mean(),  # scalar
+            "delta_epc": delta_epc.mean(),
+            "delta_h": delta_h.mean(),
+            "delta_sp": delta_sp.mean(),  # always computed for comparison
+            "delta_b1": delta_b1.mean(),  # β₁ (0 if use_betti=False)
+            "use_betti": self.use_betti,
         }
 
     def forward_single(
