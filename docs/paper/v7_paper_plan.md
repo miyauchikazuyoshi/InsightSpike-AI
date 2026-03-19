@@ -160,11 +160,37 @@
 
 ## 検証の優先順位 (実行順)
 
+### Phase 0: PREREQUISITE (β₁ ベースへの書き換え)
+```
+全実験の前提条件。SP → β₁ に統一してから検証を開始する。
+
+0-1: maze evaluator.py — SP 計算 (350行) → β₁ (10行) に置換
+     - _sp_gain_fixed_pairs_strict() → _compute_delta_betti_1()
+     - DistanceCache 削除 (不要になる)
+     - EvalResult: delta_sp → delta_b1
+     - ig = delta_h + gamma * delta_b1
+
+0-2: transformer adapter — use_betti=True をデフォルトに
+     - SP は legacy comparison として残す (delta_sp フィールドは保持)
+     - F = ΔEPC - λ(ΔH + γΔβ₁) がデフォルト
+
+0-3: gedig_spec.md — 仕様書更新 (SP → β₁)
+
+0-4: maze 60 seeds 再現テスト (β₁ ベース)
+     - 既存 40 seeds と同等以上のゴール到達率
+     - paired comparison (同一 seed で SP vs β₁)
+     - p値算出
+
+判定基準: β₁ ベースで maze ゴール到達率 ≥ 95% (15x15)
+失敗条件: β₁ で大幅劣化 → SP に戻してβ₁ は理論的議論のみ
+```
+
 ### Phase 1: CRITICAL (論文の成否を決める)
 ```
-T1+T2: Exp4 3-seed 再現 (SP + β₁)           → ~6時間
-       結論: negative_better が 3/3 で再現するか？
-       失敗条件: 2/3 以下なら v7 から Exp4 を外す
+T1: Exp4 3-seed 再現 (β₁ ベース)             → ~6時間
+    結論: negative_better が 3/3 で再現するか？
+    失敗条件: 2/3 以下なら v7 から Exp4 を外す
+    ※ SP 版は legacy comparison として 1 seed のみ
 ```
 
 ### Phase 2: HIGH (論文の説得力)
