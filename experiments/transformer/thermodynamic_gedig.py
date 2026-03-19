@@ -62,6 +62,7 @@ class DifferentiableGeDIG(nn.Module):
         percentile: float = 0.9,
         temperature: float = 10.0,  # soft threshold の温度
         use_betti: bool = False,  # True: β₁ を使用, False: SP (legacy)
+        use_unified: bool = False,  # True: gedig.adapters.transformer を使用
     ):
         super().__init__()
         self.lambda_param = lambda_param
@@ -69,6 +70,8 @@ class DifferentiableGeDIG(nn.Module):
         self.percentile = percentile
         self.temperature = temperature
         self.use_betti = use_betti
+        self.use_unified = use_unified
+        self._unified_adapter = None
 
     def _compute_soft_edges(
         self,
@@ -185,6 +188,26 @@ class DifferentiableGeDIG(nn.Module):
         Returns:
             Dict with F, delta_epc, delta_h, delta_sp (all differentiable)
         """
+        # ── Unified adapter path ──
+        if self.use_unified:
+            if self._unified_adapter is None:
+                from gedig.adapters.transformer import TransformerFEval
+                self._unified_adapter = TransformerFEval(
+                    lambda_param=self.lambda_param,
+                    gamma=self.gamma,
+                    percentile=self.percentile,
+                    temperature=self.temperature,
+                    use_betti=self.use_betti,
+                )
+            r = self._unified_adapter.compute(before_attention, after_attention, mask)
+            return {
+                "F": r.F, "F_mean": r.F_mean,
+                "delta_epc": r.delta_epc, "delta_h": r.delta_h,
+                "delta_sp": r.delta_sp, "delta_b1": r.delta_b1,
+                "use_betti": r.use_betti,
+            }
+
+        # ── Legacy path ──
         B, H, S, _ = after_attention.shape
 
         # Before/After のエッジを計算
@@ -1007,6 +1030,7 @@ def run_training_time_intervention_comparison(
     beta: float = 0.1,
     output_dir: Optional[Path] = None,
     use_betti: bool = False,
+    use_unified: bool = False,
 ) -> Dict[str, Any]:
     """
     学習時介入による精度比較（循環論法を完全に避ける決定的実験）
@@ -1091,7 +1115,7 @@ def run_training_time_intervention_comparison(
         eval_loader = DataLoader(eval_dataset, batch_size=32, collate_fn=collator)
 
         optimizer = torch.optim.AdamW(model.parameters(), lr=2e-5)
-        gedig = DifferentiableGeDIG(use_betti=use_betti).to(device)
+        gedig = DifferentiableGeDIG(use_betti=use_betti, use_unified=use_unified).to(device)
 
         # 初期Attentionを取得（参照状態として使用）
         initial_attentions = {}  # バッチごとに異なるので、ここでは最初のforward時に取得
@@ -1223,6 +1247,7 @@ def run_training_time_intervention_comparison(
     results["conclusion"] = conclusion
     results["beta"] = beta
     results["use_betti"] = use_betti
+    results["use_unified"] = use_unified
     results["f_formula"] = "ΔEPC - λ(ΔH + γΔB)" if use_betti else "ΔEPC - λ(ΔH + γΔSP)"
 
     # 保存
@@ -1266,6 +1291,8 @@ def main():
                         help="Use β₁ (Betti number) instead of SP (path efficiency) in F computation")
     parser.add_argument("--num-epochs", type=int, default=3,
                         help="Number of training epochs for Experiment 4")
+    parser.add_argument("--use-unified", action="store_true",
+                        help="Use unified gedig core (src/gedig/) instead of local implementation")
     args = parser.parse_args()
 
     if args.experiment in ["microscopic", "all"]:
@@ -1308,6 +1335,7 @@ def main():
             beta=args.beta,
             output_dir=args.output_dir,
             use_betti=args.use_betti,
+            use_unified=getattr(args, 'use_unified', False),
         )
 
 
