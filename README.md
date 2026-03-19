@@ -47,14 +47,30 @@ It is not a production library.
 
 | Component | Status | Location |
 |-----------|--------|----------|
+| **Unified geDIG Core** | **71 tests pass, 3-domain verified** | [`src/gedig/`](src/gedig/) |
 | geDIG theory (v6 paper) | Pre-print available | [`docs/paper/`](docs/paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf) |
-| HotpotQA multi-hop QA (v3) | **11-method benchmark complete** | [`experiments/hotpotqa_v2/`](experiments/hotpotqa_v2/) |
-| MuSiQue entity-graph reorder (v10) | **500q 完了 — 有意差なし、知見確立** | [`experiments/hotpotqa_v2/docs/report_v10_entity_graph.md`](experiments/hotpotqa_v2/docs/report_v10_entity_graph.md) |
-| MuSiQue Pre-computed Topology Routing (v11) | **Phase 1 実験準備中** | [`experiments/hotpotqa_v2/docs/experiment_design_v11.md`](experiments/hotpotqa_v2/docs/experiment_design_v11.md) |
-| Maze navigation (Phase 2) | Prototype complete | [`experiments/maze/`](experiments/maze/) |
-| Transformer F decomposition | Exploratory (8+ models) | [`experiments/transformer/`](experiments/transformer/inference_gedig_v2/) |
-| Flash-geDIG (attention scorer) | Functional | [`src/insightspike/gedig/`](src/insightspike/gedig/) |
+| BRIGHT reasoning-intensive retrieval | **nDCG@10 = 0.439 (Spec X)** | [`experiments/hotpotqa_v2/`](experiments/hotpotqa_v2/) |
+| AGHT (Graph Transformer) | **HotpotQA R@2 = 0.405 (+170%)** | [`experiments/hotpotqa_v2/src/unified_graph.py`](experiments/hotpotqa_v2/src/unified_graph.py) |
+| Transformer F-regularization (Exp4) | **negative_better confirmed (β₁)** | [`experiments/transformer/`](experiments/transformer/) |
+| Maze Wake-Sleep-Wake | 98% goal-reach (15x15) | [`experiments/maze/`](experiments/maze/) |
+| HotpotQA dual-process (v3) | **GPT-4o EM 51.2% @ 3.6x fewer calls** | [`experiments/hotpotqa_v2/REPORT_v3_dual_process.md`](experiments/hotpotqa_v2/REPORT_v3_dual_process.md) |
 | Visual proof (matchstick figure) | Interactive HTML | [EN](https://miyauchikazuyoshi.github.io/InsightSpike-AI/research/thinking/matchstick_figure_v2_en.html) / [JA](https://miyauchikazuyoshi.github.io/InsightSpike-AI/research/thinking/matchstick_figure_v2.html) |
+
+---
+
+## Unified Core
+
+Three independent experiment streams share a single F-eval implementation:
+
+```
+src/gedig/core/f_eval.py  →  F = ΔEPC - λ(ΔH + γΔB)
+         │
+    ┌────┼────┐
+    ▼    ▼    ▼
+  Maze  RAG  Transformer
+```
+
+See [`docs/architecture/unified_core_architecture.md`](docs/architecture/unified_core_architecture.md) for full architecture.
 
 ---
 
@@ -88,9 +104,33 @@ Layer-by-layer measurement of $\Delta\text{EPC}$, $\Delta H$, and $\Delta\beta_1
   - [Gao et al. (2025)](https://arxiv.org/abs/2511.13653) sparse-circuit interpretability corresponds to $\beta_1$ reduction in $\mathcal{F}$
   - [Hewitt & Manning (2019)](https://aclanthology.org/N19-1419/) structural probes provide the measurement basis for EPC
 
-**Status**: Preliminary. $\Delta R^2_{\text{struct}}$ is still negative for all models (random-init outperforms baseline), but trending toward zero with model quality. Large-scale model verification (70B+) is future work.
+**Experiment 4 — F-Regularization (Training Intervention)**:
 
-See [`experiments/transformer/inference_gedig_v2/`](experiments/transformer/inference_gedig_v2/) for experiment design and results.
+| Condition | Final Accuracy | Interpretation |
+|-----------|---------------|----------------|
+| Baseline (CE only) | 88.1% | Standard training |
+| Positive (CE + F minimize) | 87.2% | Flattens attention structure — hurts |
+| **Negative (CE + F maximize)** | **89.4%** | **Preserves DG topology — helps** |
+
+**Conclusion: `negative_better`** — Transformer learns better when DG (derivation/uncertainty) structure is explicitly preserved. This finding holds under both SP-based and β₁-based F definitions.
+
+See [`experiments/transformer/`](experiments/transformer/) for experiment design and results.
+
+### BRIGHT Reasoning-Intensive Retrieval
+
+AGHT (Analytical Heterogeneous Graph Transformer) applied to BRIGHT benchmark (ICLR 2025) — document retrieval requiring multi-hop reasoning.
+
+- **Architecture**: Unified Sentence-Token heterogeneous graph with QKV attention (10 analytical parameters, zero-shot)
+- **BRIGHT biology 50q**: nDCG@10 = 0.439 (Spec X: Enhanced Graph + Early Token Graph)
+- **HotpotQA paragraph selection**: R@2 = 0.405 (+170% vs Legacy), SF F1 = 0.334
+
+| Benchmark | Metric | AGHT (ours) | Legacy | Delta |
+|-----------|--------|-------------|--------|-------|
+| HotpotQA (comparison/AG) | R@2 | **0.429** | 0.143 | **+200%** |
+| HotpotQA (bridge/DG) | R@2 | **0.256** | 0.151 | **+70%** |
+| HotpotQA (all) | SF F1 | **0.334** | — | zero-shot |
+
+See [`experiments/hotpotqa_v2/`](experiments/hotpotqa_v2/) and [`docs/architecture/unified_core_architecture.md`](docs/architecture/unified_core_architecture.md).
 
 ### Multi-Hop QA
 
