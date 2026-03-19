@@ -46,6 +46,9 @@ class EvalResult:
     delta_ig_min_mh: float
     delta_sp_min_mh: float
     chosen_edges_by_hop: List[Tuple[Node, Node]]
+    # β₁ mode fields
+    delta_b1: float = 0.0
+    use_betti: bool = False
     # Diagnostics: SP evaluation cost proxies
     sssp_calls_du: int = 0
     sssp_calls_dv: int = 0
@@ -53,6 +56,23 @@ class EvalResult:
     cycle_verifies: int = 0
     # Optional carry-over state for ALL-PAIRS-EXACT (per eff-hop APSP matrices)
     apsp_carry: Optional[Dict[int, Dict[str, Any]]] = None
+
+
+def _compute_betti_1(g: nx.Graph) -> int:
+    """Compute first Betti number β₁ = E - V + C."""
+    n_comp = nx.number_connected_components(g)
+    return g.number_of_edges() - g.number_of_nodes() + n_comp
+
+
+def _delta_betti_1_normalized(sub_before: nx.Graph, sub_after: nx.Graph) -> float:
+    """Compute normalized Δβ₁ = (β₁_after - β₁_before) / max(β₁_before, 1).
+
+    Returns value in roughly [-1, +∞). Positive = more cycles added.
+    """
+    b1_before = _compute_betti_1(sub_before)
+    b1_after = _compute_betti_1(sub_after)
+    denom = max(b1_before, 1)
+    return (b1_after - b1_before) / denom
 
 
 def evaluate_multihop(
@@ -94,6 +114,8 @@ def evaluate_multihop(
     sp_exact_stable_nodes: bool = False,
     # Treat ΔSP as signed (no clamp to [0,1]) when True
     sp_signed: bool = False,
+    # β₁ mode: replace SP with Betti number
+    use_betti: bool = False,
 ) -> EvalResult:
     """Compute per-hop g(h) with greedy selection and return hop series and minima.
 
@@ -449,7 +471,11 @@ def evaluate_multihop(
     ged0 = float(min(1.0, max(0.0, ged0)))
     raw_ged0 = float(res0.get("raw_ged", 0.0))
     added_edge_ops = 0  # EPC増分: 採用した追加エッジ数（prev_graph基準）
-    sp0 = 0.0
+    if use_betti:
+        b1_0 = _delta_betti_1_normalized(sub_b0, sub_a0)
+        sp0 = b1_0  # reuse sp0 slot for β₁ value
+    else:
+        sp0 = 0.0
     ig0 = base_ig + core.sp_beta * sp0
     g0v = float(ged0 - core.lambda_weight * ig0)
     records_h.append((0, g0v, ged0, ig0, sp0))
@@ -479,6 +505,8 @@ def evaluate_multihop(
                     delta_ged_min_mh=float(delta_ged),
                     delta_ig_min_mh=float(delta_ig),
                     delta_sp_min_mh=float(delta_sp),
+                    delta_b1=float(delta_sp) if use_betti else 0.0,
+                    use_betti=use_betti,
                     chosen_edges_by_hop=[],
                 )
         except Exception:
@@ -807,7 +835,30 @@ def evaluate_multihop(
         else:
             ged_h = float(ged0)
         ged_h = float(min(1.0, max(0.0, ged_h)))
-        # SP gain
+        # β₁ mode: skip all SP computation, use Betti number instead
+        if use_betti:
+            sp_h = _delta_betti_1_normalized(sub_b, sub_a)
+            sp_mode_used = 'betti_1'
+            sp_lb_val = None; sp_la_val = None; sp_pair_cnt = None
+            sp_imp_cnt = 0; sp_imp_ex = []
+            # Skip to ig/g computation (jump past SP legacy block)
+            ig_h = ig_h_val + core.sp_beta * sp_h
+            g_h = float(ged_h - core.lambda_weight * ig_h)
+            records_h.append((h, g_h, ged_h, ig_h, sp_h))
+            dh_values.append(float(ig_h_val))
+            h_before_vals.append(0.0)
+            h_after_vals.append(0.0)
+            if g_best is None or g_h < g_best:
+                g_best = g_h; h_best = h
+            # Early stop on DG threshold
+            try:
+                if (not eval_all_hops) and (theta_dg is not None) and (float(g_h) < float(theta_dg)):
+                    break
+            except Exception:
+                pass
+            continue  # skip SP legacy block below
+
+        # SP gain (legacy path)
         sp_mode_used = 'fp'
         sp_lb_val = None  # type: Optional[float]
         sp_la_val = None  # type: Optional[float]
@@ -1083,6 +1134,8 @@ def evaluate_multihop(
         delta_ged_min_mh=float(ged_mh_val),
         delta_ig_min_mh=float(ig_mh_val),
         delta_sp_min_mh=float(sp_mh_val),
+        delta_b1=float(delta_sp) if use_betti else 0.0,
+        use_betti=use_betti,
         chosen_edges_by_hop=chosen_edges_by_hop,
         sssp_calls_du=int(sssp_calls_du_ct),
         sssp_calls_dv=int(sssp_calls_dv_ct),

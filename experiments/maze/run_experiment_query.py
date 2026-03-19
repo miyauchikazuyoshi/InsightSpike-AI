@@ -2057,6 +2057,7 @@ def run_episode_query(
                 sp_signed=bool(getattr(config, 'sp_signed', False)),
                 pairset_service=sp_svc,
                 signature_builder=sig_builder,
+                use_betti=(str(getattr(config, 'sp_mode', 'asp')).lower() == 'betti1'),
                 )
                 try:
                     if getattr(eval_res, 'apsp_carry', None) is not None:
