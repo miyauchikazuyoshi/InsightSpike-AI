@@ -44,7 +44,8 @@ experiments/rag_cross_genre/
 pruned_model/
 
 # Archived content (code/docs/experiments)
-archive/
+/archive/
+!docs/archive/
 
 # Caches
 .mypy_cache/
