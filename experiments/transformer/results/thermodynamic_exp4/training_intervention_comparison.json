@@ -1,0 +1,28 @@
+{
+  "baseline": {
+    "final_accuracy": 0.8807339449541285,
+    "eval_accuracy_history": [
+      0.8944954128440367,
+      0.8944954128440367,
+      0.8807339449541285
+    ]
+  },
+  "positive": {
+    "final_accuracy": 0.8715596330275229,
+    "eval_accuracy_history": [
+      0.8944954128440367,
+      0.8853211009174312,
+      0.8715596330275229
+    ]
+  },
+  "negative": {
+    "final_accuracy": 0.8944954128440367,
+    "eval_accuracy_history": [
+      0.8967889908256881,
+      0.8944954128440367,
+      0.8944954128440367
+    ]
+  },
+  "conclusion": "negative_better",
+  "beta": 0.1
+}
