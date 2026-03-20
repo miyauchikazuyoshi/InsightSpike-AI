@@ -350,6 +350,10 @@ class QueryHubConfig:
     sleep_propagate_iters: int = 50
     # SP definition mode: asp (default), betti1, both (parallel recording)
     sp_mode: str = "asp"
+    # Two-graph mode: skip hop loop, compare prev vs full graph (β₁ only)
+    two_graph_mode: bool = False
+    # Scale-invariant β₁ normalization (SP-parity)
+    betti_scale_invariant: bool = False
     # Three-layer search mode
     search_mode: str = "legacy"            # 'legacy' or 'threelayer'
     theta_attention: float = 0.3           # attention threshold for L1
