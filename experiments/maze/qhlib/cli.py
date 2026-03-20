@@ -31,6 +31,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--sp-beta", type=float, default=1.0)
     parser.add_argument("--sp-mode", type=str, default="asp", choices=["asp", "betti1", "both"],
                         help="SP definition: asp (default), betti1, or both (parallel recording)")
+    parser.add_argument("--two-graph", action="store_true", default=False,
+                        help="Two-graph mode: skip hop loop, compare prev vs full graph (β₁ only, O(V+E))")
+    parser.add_argument("--betti-scale-invariant", action="store_true", default=False,
+                        help="Use scale-invariant β₁ normalization (SP-parity: normalize by max possible β₁)")
     parser.add_argument("--linkset-mode", action="store_true", default=True, help="Use linkset-based entropy calculation (paper mode, default: on)")
     parser.add_argument("--no-linkset-mode", dest="linkset_mode", action="store_false", help="Disable linkset-based entropy calculation")
     parser.add_argument("--linkset-base", type=str, default="mem", choices=["link","mem","pool"], help="Base set for linkset IG before: link=S_link, mem=memory candidates, pool=all candidates")
@@ -391,4 +395,7 @@ def build_config(
         l1_tau_reward=float(getattr(args, "l1_tau_reward", 0.3)),
         l1_score_mode=str(getattr(args, "l1_score_mode", "legacy")),
         l1_score_switch_step=int(getattr(args, "l1_score_switch_step", 0)),
+        sp_mode=str(getattr(args, "sp_mode", "asp")),
+        two_graph_mode=bool(getattr(args, "two_graph", False)),
+        betti_scale_invariant=bool(getattr(args, "betti_scale_invariant", False)),
     )

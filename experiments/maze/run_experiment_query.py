@@ -2058,6 +2058,8 @@ def run_episode_query(
                 pairset_service=sp_svc,
                 signature_builder=sig_builder,
                 use_betti=(str(getattr(config, 'sp_mode', 'asp')).lower() == 'betti1'),
+                betti_scale_invariant=bool(getattr(config, 'betti_scale_invariant', False)),
+                two_graph_mode=bool(getattr(config, 'two_graph_mode', False)),
                 )
                 try:
                     if getattr(eval_res, 'apsp_carry', None) is not None:

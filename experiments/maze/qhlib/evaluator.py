@@ -64,14 +64,31 @@ def _compute_betti_1(g: nx.Graph) -> int:
     return g.number_of_edges() - g.number_of_nodes() + n_comp
 
 
-def _delta_betti_1_normalized(sub_before: nx.Graph, sub_after: nx.Graph) -> float:
-    """Compute normalized Δβ₁ = (β₁_after - β₁_before) / max(β₁_before, 1).
+def _delta_betti_1_normalized(sub_before: nx.Graph, sub_after: nx.Graph,
+                               scale_invariant: bool = False) -> float:
+    """Compute normalized Δβ₁.
 
-    Returns value in roughly [-1, +∞). Positive = more cycles added.
+    Two modes:
+      scale_invariant=False (default, legacy):
+        Δβ₁ = (β₁_after - β₁_before) / max(β₁_before, 1)
+        Problem: β₁_before=0 → raw absolute value, saturates on large graphs.
+
+      scale_invariant=True (SP-parity):
+        Δβ₁ = (β₁_after - β₁_before) / max(E_after - V_after + 1, 1)
+        Normalizes by max possible β₁ of the after graph (= E - V + 1 when connected).
+        Analogous to SP's (Lb - La) / Lb which is graph-size invariant.
+
+    Returns value in roughly [-1, +1]. Positive = more cycles added.
     """
     b1_before = _compute_betti_1(sub_before)
     b1_after = _compute_betti_1(sub_after)
-    denom = max(b1_before, 1)
+    if scale_invariant:
+        # Max possible β₁ for after graph (fully connected: C=1 → β₁_max = E - V + 1)
+        e_after = sub_after.number_of_edges()
+        v_after = sub_after.number_of_nodes()
+        denom = max(e_after - v_after + 1, 1)
+    else:
+        denom = max(b1_before, 1)
     return (b1_after - b1_before) / denom
 
 
@@ -116,6 +133,10 @@ def evaluate_multihop(
     sp_signed: bool = False,
     # β₁ mode: replace SP with Betti number
     use_betti: bool = False,
+    # Scale-invariant β₁ normalization (SP-parity): normalize by max possible β₁
+    betti_scale_invariant: bool = False,
+    # Two-graph mode: skip hop loop, compare prev vs full graph directly (β₁ only)
+    two_graph_mode: bool = False,
 ) -> EvalResult:
     """Compute per-hop g(h) with greedy selection and return hop series and minima.
 
@@ -472,7 +493,7 @@ def evaluate_multihop(
     raw_ged0 = float(res0.get("raw_ged", 0.0))
     added_edge_ops = 0  # EPC増分: 採用した追加エッジ数（prev_graph基準）
     if use_betti:
-        b1_0 = _delta_betti_1_normalized(sub_b0, sub_a0)
+        b1_0 = _delta_betti_1_normalized(sub_b0, sub_a0, scale_invariant=betti_scale_invariant)
         sp0 = b1_0  # β₁ value used in IG formula (same weight as sp_beta)
         _b1_value_h0 = b1_0  # store separately for clean field mapping
     else:
@@ -513,6 +534,69 @@ def evaluate_multihop(
                 )
         except Exception:
             pass
+
+    # ── β₁ two-graph mode: skip hop loop entirely ──
+    # Compare prev_graph vs full inherited_graph directly.
+    # AG judgment already done at hop=0 above.
+    # DG judgment: does the full graph (all accumulated knowledge) improve over local?
+    if use_betti and two_graph_mode:
+        # Full graph = g_before_for_expansion with ALL candidate edges added
+        full_graph = h_graph.copy()
+        for (eu, ev, edata) in ecand:
+            if not full_graph.has_edge(eu, ev):
+                full_graph.add_edge(eu, ev, **(edata if isinstance(edata, dict) else {}))
+
+        # Compute F on full graph vs prev
+        sub_b_full = g_before_for_expansion  # no subgraph needed — use entire graph
+        sub_a_full = full_graph
+        res_full = _norm_ged(sub_b_full, sub_a_full,
+                             node_cost=core.node_cost, edge_cost=core.edge_cost,
+                             normalization=core.normalization,
+                             efficiency_weight=core.efficiency_weight,
+                             enable_spectral=core.enable_spectral,
+                             spectral_weight=core.spectral_weight,
+                             norm_override=denom_cmax_base) if denom_cmax_base > 0 else {
+                                 "normalized_ged": 0.0, "raw_ged": 0.0}
+        ged_full = float(min(1.0, max(0.0, res_full.get("normalized_ged", 0.0))))
+        b1_full = _delta_betti_1_normalized(sub_b_full, sub_a_full, scale_invariant=betti_scale_invariant)
+
+        # Entropy: reuse base_ig (hop-0 entropy delta)
+        # In 2-graph mode, H is the same as hop-0 since we compare same before/after
+        h_full = base_ig
+
+        ig_full = h_full + core.sp_beta * b1_full
+        g_full = float(ged_full - core.lambda_weight * ig_full)
+
+        # Pick better of g0 (local) vs g_full (global DG)
+        if g_full < g0v:
+            gmin_val = g_full
+            best_hop_val = 1  # mark as DG-resolved
+        else:
+            gmin_val = g0v
+            best_hop_val = 0
+
+        hop_series = [
+            {"hop": 0, "g": float(g0v), "ged": float(ged0), "ig": float(ig0),
+             "h": float(base_ig), "sp": float(sp0)},
+            {"hop": 1, "g": float(g_full), "ged": float(ged_full), "ig": float(ig_full),
+             "h": float(h_full), "sp": float(b1_full), "two_graph": True},
+        ]
+        return EvalResult(
+            hop_series=hop_series,
+            g0=float(g0v),
+            gmin=float(gmin_val),
+            best_hop=best_hop_val,
+            delta_ged=float(ged0),
+            delta_ig=float(ig0),
+            delta_sp=0.0,
+            gmin_mh=float(gmin_val),
+            delta_ged_min_mh=float(ged_full) if g_full < g0v else float(ged0),
+            delta_ig_min_mh=float(ig_full) if g_full < g0v else float(ig0),
+            delta_sp_min_mh=0.0,
+            delta_b1=float(b1_full),
+            use_betti=True,
+            chosen_edges_by_hop=[],
+        )
 
     # Prepare SP cached-incremental helpers (per-eff-hop state)
     # Skip entirely when using β₁ mode (no SP computation needed)
@@ -852,7 +936,7 @@ def evaluate_multihop(
             # β₁ only needs node/edge counts — skip scope/boundary for memory efficiency
             # (scope/boundary primarily affects SP pair sampling, not β₁ calculation)
             _sb, _sa = sub_b, sub_a
-            sp_h = _delta_betti_1_normalized(_sb, _sa)
+            sp_h = _delta_betti_1_normalized(_sb, _sa, scale_invariant=betti_scale_invariant)
             sp_mode_used = 'betti_1'
             sp_lb_val = None; sp_la_val = None; sp_pair_cnt = None
             sp_imp_cnt = 0; sp_imp_ex = []
