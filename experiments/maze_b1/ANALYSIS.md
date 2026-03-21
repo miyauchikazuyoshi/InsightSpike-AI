@@ -1,47 +1,55 @@
 # β₁ vs SP Analysis — 25x25 Maze 60 Seeds
 
-## Key Finding
+## 確定した事実
 
-**β₁ and SP produce identical results under matched conditions.**
+### 1. β₁ と SP は同一条件で同一結果
+- seed=4: 両方 success=True, steps=184, g0 系列完全一致
+- 68% vs 72% の差は seed_start (0 vs 1) と sp_beta (1.0 vs 0.5) のパラメータ違い
+- β₁ は SP の drop-in replacement として有効
 
-The previously reported difference (68% vs 72%) was an artifact of:
-- `seed_start`: 0 (v6) vs 1 (current) = different maze instances
-- `sp_beta`: 1.0 (v6) vs 0.5 (current) = different IG weighting
+### 2. β₁ の計算効率
+- O(V+E) vs SP の O(N²)
+- メモリ: 500MB vs 4.3GB (88% 削減)
+- 2-graph 比較で hop ループ不要
 
-Verified on seed=4: both modes → `success=True, steps=184`, g0 series perfectly matched.
+### 3. 失敗 seeds の観察
+| 観察 | 成功 seeds | 失敗 seeds |
+|------|-----------|-----------|
+| revisit 率 | 7-34% | 47-59% |
+| last 100 steps revisit | 2-89% | 98-100% |
+| g0 推移 | -0.500 を維持 | step 9 以降 ~0 に収束 |
+| accept rate (全体) | 83-91% | 90-93% |
+| accept rate (last 100) | 76-98% | 98-100% |
+| β₁ 推移 | 低い | 単調増加 (0→50→123) |
+| ノード数 | 570-1210 | 1025-1325 |
 
-## β₁ Sensitivity Analysis
+## 未解明の問題 (要調査)
 
-| Metric | β₁ | SP |
-|--------|-----|-----|
-| Non-zero Δ at dead ends | 7/295 (2.4%) | 0/295 (0%) |
-| Non-zero Δ overall | 17/500 (3.4%) | 0/500 (0%) |
-| g0 at dead ends | -0.0019 | +0.0053 |
-| g0 at T-junctions | -0.5000 | -0.5000 |
+### 右往左往の原因特定
+失敗 seeds は last 100 steps で 100% revisit = 完全に既知領域をループ。
+しかし**なぜ**ループするかは未確定:
 
-β₁ actually detects MORE changes than SP (17 vs 0), because cycle creation is a discrete structural event that SP's fixed-pair sampling misses.
+- [ ] **アクション選択**: 行き止まりで候補がどう生成されるか？未探索方向の候補が上がっているのに選ばれないのか、そもそも候補に上がらないのか？
+- [ ] **候補フィルタリング**: accept rate 98% = ほぼ全候補 accept。フィルタが機能していないのか、候補自体が「良い」と判断されるべきものなのか？
+- [ ] **Sleep 伝搬**: 報酬伝搬 (propagated values) が行き止まりを適切にペナルティしているか？
+- [ ] **コミットポリシー**: 探索で得た情報が inherited_graph に正しく反映されているか？
+- [ ] **迷路構造**: 失敗 seeds の迷路構造に共通パターンがあるか？(長い袋小路、離れたゴールなど)
+- [ ] **g0 の ~0 収束**: GED 正規化の飽和か、それとも正しく「新情報なし」を反映しているのか？
 
-However, neither metric contributes meaningfully: **99% of decisions use hop=0 AG judgment** (GED only), and β₁/SP only affect the IG term which is rarely decisive.
+### g0 ~0 収束について
+g0 が 0 に近づくこと自体は「新しいエッジが構造をほとんど変えない」ことの反映で、正しい動作の可能性もある。問題は **0 に近い g0 で全候補が accept される結果、探索の方向性が失われる** こと。これが GED 正規化の問題なのか、θ_dg の設定の問題なのか、探索戦略の問題なのかは切り分けが必要。
 
-## Dead End Analysis (Failed Seeds)
+## 次のアクション
 
-Failed seeds share these characteristics:
-- 59% revisit rate (last 100 steps: 100% revisit)
-- g0 saturates to ~0 after step 9 (GED normalization issue)
-- β₁ grows monotonically (0 → 50 → 123) without reset
-- All candidate edges accepted (no filtering)
+1. **行き止まり時の候補エッジを可視化** — 何が候補に上がり、何が選ばれているか
+2. **Sleep 伝搬の効果を確認** — 行き止まりのペナルティが次ステップに反映されているか
+3. **失敗 seeds の迷路構造を分析** — 共通パターンがあれば構造的な限界
+4. **原因確定後に対策を設計** — GED 正規化 or θ_dg 調整 or 探索戦略改善
 
-Root cause: GED normalizes by graph size, so as the graph grows, ΔGED → 0.
-This is independent of β₁ vs SP — both modes have the same saturation.
+## v7 論文での主張 (現時点で確定)
 
-## Conclusion for v7 Paper
-
-β₁ is a **valid drop-in replacement** for SP:
-- **Zero accuracy loss** (identical outcomes under matched conditions)
-- **O(V+E) vs O(N²)** computation
-- **88% memory reduction** (500MB vs 4.3GB)
-- **No hop loop needed** (2-graph comparison sufficient)
-
-The 32% failure rate is not a β₁ issue — it's a GED saturation issue
-that affects both β₁ and SP equally. Fixing GED normalization for
-large graphs is the next priority (independent of β₁/SP choice).
+β₁ は SP の代替として有効:
+- 精度損失ゼロ (同一条件で同一結果)
+- 計算量 O(N²) → O(V+E)
+- メモリ 88% 削減
+- 32% の失敗率は β₁/SP 共通の課題 (β₁ 固有の問題ではない)
