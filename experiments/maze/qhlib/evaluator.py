@@ -777,8 +777,35 @@ def evaluate_multihop(
         best_delta = 0.0
         best_item: Optional[Tuple[Node, Node, Dict[str, Any]]] = None
         eff_hop = h + int(max(0, int(getattr(core, 'sp_hop_expand', 0))))
-        # evaluate δSP for each candidate
-        if sp_allpairs_exact:
+        # evaluate δSP (or Δβ₁) for each candidate
+        if use_betti:
+            # β₁ mode: evaluate candidates by Δβ₁ (replaces SP candidate evaluation entirely)
+            eff_hop_sel = h + int(max(0, int(getattr(core, 'sp_hop_expand', 0))))
+            he_sel = max(1, eff_hop_sel)
+            nodes_b_sel = before_nodes_by_h[he_sel] if he_sel < len(before_nodes_by_h) else before_nodes_by_h[-1]
+            nodes_a_sel = after_nodes_by_h[he_sel] if he_sel < len(after_nodes_by_h) else after_nodes_by_h[-1]
+            sub_b_sel = g_before_for_expansion.subgraph(nodes_b_sel)
+
+            for e_u, e_v, meta in ecand:
+                key = (min(e_u, e_v), max(e_u, e_v))
+                if key in used_edges:
+                    continue
+                # Tentatively add edge and compute Δβ₁
+                g_try = h_graph.copy()
+                if not g_try.has_node(e_u):
+                    g_try.add_node(e_u)
+                if not g_try.has_node(e_v):
+                    g_try.add_node(e_v)
+                if not g_try.has_edge(e_u, e_v):
+                    g_try.add_edge(e_u, e_v)
+                sub_a_try = g_try.subgraph(nodes_a_sel | {e_u, e_v})
+                de = _delta_betti_1_normalized(sub_b_sel, sub_a_try,
+                                               scale_invariant=betti_scale_invariant)
+                if de > best_delta:
+                    best_delta = de
+                    best_item = (e_u, e_v, meta)
+
+        elif sp_allpairs_exact:
             # Build evaluation subgraphs for current eff-hop
             sb = _union_khop_subgraph(g_before_for_expansion, anchors_core, anchors_top_before, max(1, eff_hop))
             sa = _union_khop_subgraph(h_graph, anchors_core, anchors_top_after, max(1, eff_hop))
@@ -911,6 +938,8 @@ def evaluate_multihop(
                 if sp_early_stop:
                     break
 
+        # (β₁ candidate selection is now at the top of the hop loop, before SP block)
+
         # compute g(h)
         eff_hop_eval = h + int(max(0, int(getattr(core, 'sp_hop_expand', 0))))
         he = max(1, eff_hop_eval)
@@ -930,17 +959,14 @@ def evaluate_multihop(
         else:
             ged_h = float(ged0)
         ged_h = float(min(1.0, max(0.0, ged_h)))
-        # β₁ mode: skip all SP computation, use Betti number instead
+        # β₁ mode: compute Betti number on updated subgraphs (after candidate edge selection)
         if use_betti:
-            # Apply scope/boundary policies
-            # β₁ only needs node/edge counts — skip scope/boundary for memory efficiency
-            # (scope/boundary primarily affects SP pair sampling, not β₁ calculation)
             _sb, _sa = sub_b, sub_a
             sp_h = _delta_betti_1_normalized(_sb, _sa, scale_invariant=betti_scale_invariant)
             sp_mode_used = 'betti_1'
             sp_lb_val = None; sp_la_val = None; sp_pair_cnt = None
             sp_imp_cnt = 0; sp_imp_ex = []
-            # Skip to ig/g computation (jump past SP legacy block)
+            # ig/g computation
             ig_h = ig_h_val + core.sp_beta * sp_h
             g_h = float(ged_h - core.lambda_weight * ig_h)
             records_h.append((h, g_h, ged_h, ig_h, sp_h))

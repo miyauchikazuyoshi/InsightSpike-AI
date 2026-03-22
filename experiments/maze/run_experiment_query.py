@@ -1911,12 +1911,14 @@ def run_episode_query(
             print(f"[DEBUG] run_experiment_query: Before external evaluator try block, step={step}", flush=True)
         try:
             # Dynamic θAG: use percentile of past g0 if enabled and history present
-            theta_ag_used = float(getattr(config, 'theta_ag', 0.0))
+            # None = disable AG gate (always run multi-hop, v6 behavior)
+            _theta_ag_raw = getattr(config, 'theta_ag', None)
+            theta_ag_used = float(_theta_ag_raw) if _theta_ag_raw is not None else None
             if bool(getattr(config, 'ag_auto', False)) and len(g0_history) > 0:
                 try:
                     theta_ag_used = float(np.quantile(np.array(g0_history, dtype=float), float(getattr(config, 'ag_quantile', 0.9))))
                 except Exception:
-                    theta_ag_used = float(getattr(config, 'theta_ag', 0.0))
+                    pass  # keep theta_ag_used as None
 
             t_eval_run_start = time.perf_counter()
             # Optional DS-backed SP pairsets
@@ -1941,8 +1943,10 @@ def run_episode_query(
             if os.getenv('INSIGHTSPIKE_DEBUG_EVAL'):
                 print(f"[DEBUG] run_experiment_query: local_max_hops={local_max_hops} config.gedig['max_hops']={config.gedig.get('max_hops', 'NOT_SET')}", flush=True)
 
-            if bool(getattr(config, 'use_main_l3', False)) and str(getattr(config, 'sp_cache_mode', 'core')).lower() in ('cached','cached_incr'):
+            _use_betti = str(getattr(config, 'sp_mode', 'asp')).lower() == 'betti1'
+            if bool(getattr(config, 'use_main_l3', False)) and str(getattr(config, 'sp_cache_mode', 'core')).lower() in ('cached','cached_incr') and not _use_betti:
                 # Lightweight path: query-centric eval via main L3 (hop0)
+                # Skip L3 for β₁ mode — need full evaluate_multihop for candidate edge evaluation
                 try:
                     from qhlib.l3_adapter import eval_query_centric_via_l3
                     # Centers: anchors_core (Q nodes)
@@ -2042,7 +2046,7 @@ def run_episode_query(
             pre_linkset_info=pre_linkset_info,
             query_vec=query_vec_list,
             ig_fixed_den=ig_fixed_den,
-                theta_ag=float(theta_ag_used),
+                theta_ag=float(theta_ag_used) if theta_ag_used is not None else None,
                 theta_dg=float(getattr(config, 'theta_dg', 0.0)),
                 eval_all_hops=bool(getattr(config, 'eval_all_hops', False)),
                 sp_early_stop=False,
@@ -2433,7 +2437,8 @@ def run_episode_query(
             sp_diagnostics = []
 
         # DG実コミット（貪欲）: geDIG計算終了後に、best_hop までの仮想採用セットを実コミット
-        ag_fire = bool(g0 > float(locals().get('theta_ag_used', getattr(config, 'theta_ag', 0.0))))
+        _ag_th = locals().get('theta_ag_used') if locals().get('theta_ag_used') is not None else getattr(config, 'theta_ag', None)
+        ag_fire = bool(g0 > float(_ag_th)) if _ag_th is not None else False
         # DG判定は multi-hop のみ: best_hop>=1 かつ gmin_mh < θDG
         dg_fire = bool(int(best_hop) >= 1 and float(gmin_mh_val) < float(config.theta_dg))
         if cortisol_mode != "off":
@@ -3550,7 +3555,7 @@ def run_episode_query(
                 query_node_post=[int(current_query_node[0]), int(current_query_node[1]), int(current_query_node[2])],
                 ag_fire=bool(ag_fire),
                 dg_fire=bool(dg_fire),
-                theta_ag=float(locals().get('theta_ag_used', getattr(config, 'theta_ag', 0.0))),
+                theta_ag=float(theta_ag_used) if theta_ag_used is not None else 0.0,
                 ag_auto=bool(getattr(config, 'ag_auto', False)),
                 ag_quantile=float(getattr(config, 'ag_quantile', 0.9)),
                 g0_history_len=int(len(g0_history)),
