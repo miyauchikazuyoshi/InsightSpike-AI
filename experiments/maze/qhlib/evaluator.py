@@ -780,12 +780,9 @@ def evaluate_multihop(
         # evaluate δSP (or Δβ₁) for each candidate
         if use_betti:
             # β₁ mode: evaluate candidates by Δβ₁ (replaces SP candidate evaluation entirely)
-            eff_hop_sel = h + int(max(0, int(getattr(core, 'sp_hop_expand', 0))))
-            he_sel = max(1, eff_hop_sel)
-            nodes_b_sel = before_nodes_by_h[he_sel] if he_sel < len(before_nodes_by_h) else before_nodes_by_h[-1]
-            nodes_a_sel = after_nodes_by_h[he_sel] if he_sel < len(after_nodes_by_h) else after_nodes_by_h[-1]
-            sub_b_sel = g_before_for_expansion.subgraph(nodes_b_sel)
-
+            # CRITICAL: use _union_khop_subgraph (same as SP) to dynamically rebuild
+            # subgraphs after adding candidate edge. Pre-computed node sets miss nodes
+            # reachable through the candidate edge.
             for e_u, e_v, meta in ecand:
                 key = (min(e_u, e_v), max(e_u, e_v))
                 if key in used_edges:
@@ -798,8 +795,10 @@ def evaluate_multihop(
                     g_try.add_node(e_v)
                 if not g_try.has_edge(e_u, e_v):
                     g_try.add_edge(e_u, e_v)
-                sub_a_try = g_try.subgraph(nodes_a_sel | {e_u, e_v})
-                de = _delta_betti_1_normalized(sub_b_sel, sub_a_try,
+                # Dynamic k-hop subgraph construction (matches SP flow exactly)
+                sub_b = _union_khop_subgraph(g_before_for_expansion, anchors_core, anchors_top_before, max(1, eff_hop))
+                sub_a = _union_khop_subgraph(g_try, anchors_core, anchors_top_after, max(1, eff_hop))
+                de = _delta_betti_1_normalized(sub_b, sub_a,
                                                scale_invariant=betti_scale_invariant)
                 if de > best_delta:
                     best_delta = de
@@ -966,7 +965,8 @@ def evaluate_multihop(
             sp_mode_used = 'betti_1'
             sp_lb_val = None; sp_la_val = None; sp_pair_cnt = None
             sp_imp_cnt = 0; sp_imp_ex = []
-            # ig/g computation
+            # ig/g computation (ig_h_val = base_ig for β₁ mode, same as hop=0)
+            ig_h_val = base_ig
             ig_h = ig_h_val + core.sp_beta * sp_h
             g_h = float(ged_h - core.lambda_weight * ig_h)
             records_h.append((h, g_h, ged_h, ig_h, sp_h))
