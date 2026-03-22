@@ -2022,7 +2022,8 @@ def run_episode_query(
                 theta_ag_cfg = float(getattr(config, 'theta_ag', 0.0))
             except Exception:
                 theta_ag_cfg = 0.0
-            ag_wants_hops = bool(getattr(config, 'eval_per_hop_on_ag', False)) and bool(g0 > theta_ag_cfg)
+            _g0_for_ag = locals().get('g0', records_h[0][1] if records_h else 0.0)
+            ag_wants_hops = bool(getattr(config, 'eval_per_hop_on_ag', False)) and bool(_g0_for_ag > theta_ag_cfg)
             # DEBUG: Print eval conditions
             if os.getenv('INSIGHTSPIKE_DEBUG_EVAL'):
                 print(f"[DEBUG] run_experiment_query: eval_applied={eval_applied} force_per_hop={getattr(config, 'force_per_hop', False)} ag_wants_hops={ag_wants_hops}", flush=True)
@@ -2178,9 +2179,12 @@ def run_episode_query(
             except Exception:
                 pass
             eval_applied = True
-        except Exception:
+        except Exception as _eval_exc:
             # fall back to inline results if evaluator fails
-            pass
+            import traceback
+            if os.getenv('INSIGHTSPIKE_DEBUG_EVAL'):
+                print(f"[DEBUG] evaluate_multihop FAILED: {_eval_exc}", flush=True)
+                traceback.print_exc()
 
         # 最終値の反映
         if not eval_applied:
