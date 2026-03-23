@@ -949,10 +949,12 @@ def evaluate_multihop(
         # Build subgraphs from cached node sets
         nodes_b = before_nodes_by_h[he] if he < len(before_nodes_by_h) else before_nodes_by_h[-1]
         nodes_a = after_nodes_by_h[he] if he < len(after_nodes_by_h) else after_nodes_by_h[-1]
-        # β₁ mode: use views (no copy) to save memory; SP mode needs copies for mutation
+        # β₁ mode: MUST rebuild subgraphs dynamically to include nodes added by
+        # candidate edge selection. Pre-computed nodes_b/nodes_a miss these nodes,
+        # causing Δβ₁ to always be 0 in g(h) computation.
         if use_betti:
-            sub_b = g_before_for_expansion.subgraph(nodes_b)  # view, no copy
-            sub_a = h_graph.subgraph(nodes_a)                  # view, no copy
+            sub_b = _union_khop_subgraph(g_before_for_expansion, anchors_core, anchors_top_before, he)
+            sub_a = _union_khop_subgraph(h_graph, anchors_core, anchors_top_after, he)
         else:
             sub_b = g_before_for_expansion.subgraph(nodes_b).copy()
             sub_a = h_graph.subgraph(nodes_a).copy()
@@ -966,6 +968,10 @@ def evaluate_multihop(
         if use_betti:
             _sb, _sa = sub_b, sub_a
             sp_h = _delta_betti_1_normalized(_sb, _sa, scale_invariant=betti_scale_invariant)
+            if os.getenv('INSIGHTSPIKE_DEBUG_EVAL'):
+                b1_b = _compute_betti_1(_sb)
+                b1_a = _compute_betti_1(_sa)
+                print(f"[DEBUG] g(h={h}) sub_b: N={_sb.number_of_nodes()} E={_sb.number_of_edges()} β₁={b1_b} | sub_a: N={_sa.number_of_nodes()} E={_sa.number_of_edges()} β₁={b1_a} | Δβ₁={sp_h:.4f} ged_h={ged_h:.4f}", flush=True)
             sp_mode_used = 'betti_1'
             sp_lb_val = None; sp_la_val = None; sp_pair_cnt = None
             sp_imp_cnt = 0; sp_imp_ex = []

@@ -1423,6 +1423,15 @@ def run_episode_query(
         anchors_top_after: Set[Tuple[int,int,int]] = set()
         anchors_top_before: Set[Tuple[int,int,int]] = set()
         g_before_for_expansion = prev_graph.copy()
+        # Ensure current_query_node is connected in g_before (critical for β₁ mode).
+        # Without this, k-hop expansion from current_query_node finds almost nothing
+        # in g_before because the query node moved since prev_graph was built.
+        # Mirror the connections that stage_graph has for current_query_node.
+        if current_query_node not in g_before_for_expansion:
+            g_before_for_expansion.add_node(current_query_node)
+        for nbr in stage_graph.neighbors(current_query_node):
+            if nbr in g_before_for_expansion and not g_before_for_expansion.has_edge(current_query_node, nbr):
+                g_before_for_expansion.add_edge(current_query_node, nbr)
         for it in commit_items:
             anchor_source = it.get("anchor_position") or it.get("position") or [anchor_position[0], anchor_position[1]]
             at = (int(anchor_source[0]), int(anchor_source[1]))
