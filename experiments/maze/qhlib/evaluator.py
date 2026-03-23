@@ -148,7 +148,7 @@ def evaluate_multihop(
     # DEBUG: Print entry info
     import os
     if os.getenv('INSIGHTSPIKE_DEBUG_EVAL'):
-        print(f"[DEBUG] evaluate_multihop ENTRY max_hops={max_hops} len(ecand)={len(ecand)} len(anchors_core)={len(anchors_core)}", flush=True)
+        print(f"[DEBUG] evaluate_multihop ENTRY max_hops={max_hops} len(ecand)={len(ecand)} len(anchors_core)={len(anchors_core)} g_before N={g_before_for_expansion.number_of_nodes()} E={g_before_for_expansion.number_of_edges()} h_graph N={stage_graph.number_of_nodes()} E={stage_graph.number_of_edges()} prev N={prev_graph.number_of_nodes()} E={prev_graph.number_of_edges()}", flush=True)
         print(f"[DEBUG] g_before_for_expansion nodes={g_before_for_expansion.number_of_nodes()} edges={g_before_for_expansion.number_of_edges()}", flush=True)
         print(f"[DEBUG] anchors_core={anchors_core}", flush=True)
         print(f"[DEBUG] anchors_top_before={anchors_top_before}", flush=True)
@@ -800,6 +800,10 @@ def evaluate_multihop(
                 sub_a = _union_khop_subgraph(g_try, anchors_core, anchors_top_after, max(1, eff_hop))
                 de = _delta_betti_1_normalized(sub_b, sub_a,
                                                scale_invariant=betti_scale_invariant)
+                if os.getenv('INSIGHTSPIKE_DEBUG_EVAL'):
+                    b1_b = _compute_betti_1(sub_b)
+                    b1_a = _compute_betti_1(sub_a)
+                    print(f"[DEBUG] b1_cand h={h} edge=({e_u},{e_v}) sub_b: N={sub_b.number_of_nodes()} E={sub_b.number_of_edges()} β₁={b1_b} | sub_a: N={sub_a.number_of_nodes()} E={sub_a.number_of_edges()} β₁={b1_a} | Δβ₁={de:.4f}")
                 if de > best_delta:
                     best_delta = de
                     best_item = (e_u, e_v, meta)
