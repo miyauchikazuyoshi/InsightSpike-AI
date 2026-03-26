@@ -779,15 +779,21 @@ def evaluate_multihop(
         eff_hop = h + int(max(0, int(getattr(core, 'sp_hop_expand', 0))))
         # evaluate δSP (or Δβ₁) for each candidate
         if use_betti:
-            # β₁ mode: evaluate candidates by Δβ₁ (replaces SP candidate evaluation entirely)
-            # CRITICAL: use _union_khop_subgraph (same as SP) to dynamically rebuild
-            # subgraphs after adding candidate edge. Pre-computed node sets miss nodes
-            # reachable through the candidate edge.
+            # β₁ mode: evaluate candidates by Δβ₁ (replaces SP candidate evaluation)
+            # Uses IDENTICAL subgraph construction as SP else-branch (line 883-888):
+            #   sub_b = _union_khop_subgraph(g_before, anchors, eff_hop)
+            #   sub_a = _union_khop_subgraph(g_try, anchors, eff_hop)
+            # Plus SP's scope/boundary policies for boundary node handling.
+            # β₁ is O(V+E): use full graph for accurate cycle detection.
+            # Subgraph approach cuts boundary edges, making cycles at graph
+            # periphery invisible. Full graph avoids this entirely.
+            # Flag betti_full_graph controls this (default True for β₁).
+            _use_full = bool(getattr(core, 'betti_full_graph', True))
+
             for e_u, e_v, meta in ecand:
                 key = (min(e_u, e_v), max(e_u, e_v))
                 if key in used_edges:
                     continue
-                # Tentatively add edge and compute Δβ₁
                 g_try = h_graph.copy()
                 if not g_try.has_node(e_u):
                     g_try.add_node(e_u)
@@ -795,15 +801,40 @@ def evaluate_multihop(
                     g_try.add_node(e_v)
                 if not g_try.has_edge(e_u, e_v):
                     g_try.add_edge(e_u, e_v)
-                # Dynamic k-hop subgraph construction (matches SP flow exactly)
-                sub_b = _union_khop_subgraph(g_before_for_expansion, anchors_core, anchors_top_before, max(1, eff_hop))
-                sub_a = _union_khop_subgraph(g_try, anchors_core, anchors_top_after, max(1, eff_hop))
-                de = _delta_betti_1_normalized(sub_b, sub_a,
+
+                if _use_full:
+                    # Local subgraph around candidate edge endpoints.
+                    # Full graph: always creates cycle (both ends connected) → 99% DG
+                    # k-hop from anchors: too small (3-4 nodes) → 0% DG
+                    # Candidate-local: subgraph around e_u/e_v with radius
+                    _radius = max(1, eff_hop)
+                    _local_anchors = {e_u, e_v}
+                    _sb_local, _ = extract_k_hop_subgraph(h_graph, _local_anchors, _radius)
+                    _sa_local, _ = extract_k_hop_subgraph(g_try, _local_anchors, _radius)
+                    _sb = _sb_local
+                    _sa = _sa_local
+                else:
+                    sub_b_cand = _union_khop_subgraph(g_before_for_expansion, anchors_core, anchors_top_before, max(1, eff_hop))
+                    sub_a_cand = _union_khop_subgraph(g_try, anchors_core, anchors_top_after, max(1, eff_hop))
+                    scope = str(core.sp_scope_mode).lower()
+                    bound = str(core.sp_boundary_mode).lower()
+                    _sb, _sa = sub_b_cand, sub_a_cand
+                    if scope in ("union", "merge", "superset"):
+                        all_nodes_cand = set(_sb.nodes()) | set(_sa.nodes())
+                        _sb = g_before_for_expansion.subgraph(all_nodes_cand)
+                        _sa = g_try.subgraph(all_nodes_cand)
+                    if bound in ("trim", "terminal", "nodes"):
+                        try:
+                            _sb = core._trim_terminal_edges(_sb, anchors_core, max(1, eff_hop))
+                            _sa = core._trim_terminal_edges(_sa, anchors_core, max(1, eff_hop))
+                        except Exception:
+                            pass
+                de = _delta_betti_1_normalized(_sb, _sa,
                                                scale_invariant=betti_scale_invariant)
                 if os.getenv('INSIGHTSPIKE_DEBUG_EVAL'):
-                    b1_b = _compute_betti_1(sub_b)
-                    b1_a = _compute_betti_1(sub_a)
-                    print(f"[DEBUG] b1_cand h={h} edge=({e_u},{e_v}) sub_b: N={sub_b.number_of_nodes()} E={sub_b.number_of_edges()} β₁={b1_b} | sub_a: N={sub_a.number_of_nodes()} E={sub_a.number_of_edges()} β₁={b1_a} | Δβ₁={de:.4f}")
+                    b1_b = _compute_betti_1(_sb)
+                    b1_a = _compute_betti_1(_sa)
+                    print(f"[DEBUG] b1_cand h={h} edge=({e_u},{e_v}) sub_b: N={_sb.number_of_nodes()} E={_sb.number_of_edges()} β₁={b1_b} | sub_a: N={_sa.number_of_nodes()} E={_sa.number_of_edges()} β₁={b1_a} | Δβ₁={de:.4f}")
                 if de > best_delta:
                     best_delta = de
                     best_item = (e_u, e_v, meta)
@@ -953,8 +984,32 @@ def evaluate_multihop(
         # candidate edge selection. Pre-computed nodes_b/nodes_a miss these nodes,
         # causing Δβ₁ to always be 0 in g(h) computation.
         if use_betti:
-            sub_b = _union_khop_subgraph(g_before_for_expansion, anchors_core, anchors_top_before, he)
-            sub_a = _union_khop_subgraph(h_graph, anchors_core, anchors_top_after, he)
+            _use_full_gh = bool(getattr(core, 'betti_full_graph', True))
+            if _use_full_gh:
+                # Use candidate-local subgraph for g(h) too
+                # Anchors: edges chosen at this and previous hops
+                _gh_anchors = set(anchors_core)
+                for _eu, _ev in chosen_edges_by_hop:
+                    _gh_anchors.add(_eu)
+                    _gh_anchors.add(_ev)
+                _gh_radius = max(1, he)
+                sub_b, _ = extract_k_hop_subgraph(g_before_for_expansion, _gh_anchors, _gh_radius)
+                sub_a, _ = extract_k_hop_subgraph(h_graph, _gh_anchors, _gh_radius)
+            else:
+                sub_b = _union_khop_subgraph(g_before_for_expansion, anchors_core, anchors_top_before, he)
+                sub_a = _union_khop_subgraph(h_graph, anchors_core, anchors_top_after, he)
+                _scope = str(core.sp_scope_mode).lower()
+                _bound = str(core.sp_boundary_mode).lower()
+                if _scope in ("union", "merge", "superset"):
+                    _all = set(sub_b.nodes()) | set(sub_a.nodes())
+                    sub_b = g_before_for_expansion.subgraph(_all)
+                    sub_a = h_graph.subgraph(_all)
+                if _bound in ("trim", "terminal", "nodes"):
+                    try:
+                        sub_b = core._trim_terminal_edges(sub_b, anchors_core, he)
+                        sub_a = core._trim_terminal_edges(sub_a, anchors_core, he)
+                    except Exception:
+                        pass
         else:
             sub_b = g_before_for_expansion.subgraph(nodes_b).copy()
             sub_a = h_graph.subgraph(nodes_a).copy()
@@ -966,7 +1021,15 @@ def evaluate_multihop(
         ged_h = float(min(1.0, max(0.0, ged_h)))
         # β₁ mode: compute Betti number on updated subgraphs (after candidate edge selection)
         if use_betti:
-            _sb, _sa = sub_b, sub_a
+            # Apply union scope (same as SP): ensure sub_b and sub_a cover same nodes
+            # Without this, boundary edges are invisible → cycles can't be detected
+            scope = str(core.sp_scope_mode).lower()
+            if scope in ("union", "merge", "superset"):
+                all_nodes = set(sub_b.nodes()) | set(sub_a.nodes())
+                _sb = g_before_for_expansion.subgraph(all_nodes)
+                _sa = h_graph.subgraph(all_nodes)
+            else:
+                _sb, _sa = sub_b, sub_a
             sp_h = _delta_betti_1_normalized(_sb, _sa, scale_invariant=betti_scale_invariant)
             if os.getenv('INSIGHTSPIKE_DEBUG_EVAL'):
                 b1_b = _compute_betti_1(_sb)
