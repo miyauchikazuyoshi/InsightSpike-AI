@@ -1448,6 +1448,13 @@ def run_episode_query(
             nid_before = make_direction_node(at, int(d))
             if nid_before not in g_before_for_expansion:
                 g_before_for_expansion.add_node(nid_before)
+            # β₁ mode: mirror connections from stage_graph so k-hop expansion works
+            # Without this, anchors_top_before are isolated → BFS finds nothing
+            _is_betti = str(getattr(config, 'sp_mode', 'asp')).lower() == 'betti1'
+            if _is_betti and nid_before in stage_graph:
+                for nbr in stage_graph.neighbors(nid_before):
+                    if nbr in g_before_for_expansion and not g_before_for_expansion.has_edge(nid_before, nbr):
+                        g_before_for_expansion.add_edge(nid_before, nbr)
             anchors_top_before.add(nid_before)
 
         def _union_khop_subgraph(graph_obj: nx.Graph,
