@@ -1,10 +1,12 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite as below."
-title: "InsightSpike-AI: Brain-inspired Multi-Agent Discovery"
-version: "0.1.0"
+title: "A Unified Gauge Framework for Dynamic Knowledge Graphs: geDIG"
+version: "0.6.0"
+doi: "10.5281/zenodo.19454110"
 authors:
   - family-names: "Miyauchi"
     given-names: "Kazuyoshi"
-date-released: 2025-04-07
+date-released: 2026-04-07
 license: Apache-2.0
 repository-code: "https://github.com/miyauchikazuyoshi/InsightSpike-AI"
+url: "https://zenodo.org/record/19454110"
