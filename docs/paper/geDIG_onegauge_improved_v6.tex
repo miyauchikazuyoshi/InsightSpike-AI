@@ -108,7 +108,8 @@ Dynamic knowledge graphs lack a normative criterion for \emph{when} to accept ne
 洞察（insight）を「離散的エピソードが瞬時に連結される現象」とする作業仮説との対応や、海馬リプレイに関する先行研究\,\cite{Buzsaki2015,Carr2011,Pfeiffer2013} とのアナロジーは、後半の理論節（FEP--MDL ブリッジ）で\,\emph{操作的比喩}として簡潔に触れるに留める。
 実装や実験を理解するうえで、神経科学的な背景知識は前提としない。
 
-ここで geDIG（ジーディグ）は \textit{graph edit Distance and Information Gain} の略であり、既存グラフに対する\,\textbf{編集経路コストの変化}と\,\textbf{情報利得（エントロピー差＋経路短縮）}を一つのゲージ $\F$ に束ね、静的RAGでは\emph{再ランキングスコア}として、動的RAGでは\emph{更新ゲート}として「いつ受容するか（When）」を判定する枠組みである。
+ここで geDIG（ジーディグ）は \textit{graph edit Distance and Information Gain} の略であり、既存グラフに対する\,\textbf{編集経路コストの変化}と\,\textbf{情報利得}を一つのゲージ $\F$ に束ね、静的RAGでは\emph{再ランキングスコア}として、動的RAGでは\emph{更新ゲート}として「いつ受容するか（When）」を判定する枠組みである。
+ここで「情報利得」は、\emph{確率的}情報利得（Shannonエントロピー差 $\Delta H$）と\emph{位相的}情報利得（ベッチ数変化 $\Delta\beta_1$；知識グラフにおける独立サイクルの生成・消滅を捉える）の双方を広義に包含する。
 
 \paragraph{用語の最小導入}
 本稿で用いる主要語を、序論時点で最小限だけ導入しておく：

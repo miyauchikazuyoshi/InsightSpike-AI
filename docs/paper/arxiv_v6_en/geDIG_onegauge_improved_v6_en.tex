@@ -147,7 +147,8 @@ Intuitively, it can be read as ``detection of deterioration at the point of tent
 The correspondence with the working hypothesis that insight is ``a phenomenon where discrete episodes are instantly connected'' and the analogy with previous studies on hippocampal replay~\cite{Buzsaki2015,Carr2011,Pfeiffer2013} is kept as an \emph{operational metaphor} in the theoretical section (FEP--MDL bridge) later.
 Neuroscientific background knowledge is not assumed for understanding implementation and experiments.
 
-Here, geDIG stands for \textit{graph edit Distance and Information Gain}, and is a framework that bundles \textbf{change in edit-path cost} to the existing graph and \textbf{information gain (entropy difference + path shortening)} into a single gauge $\F$, judging ``When to accept'' as a \emph{re-ranking score} in static RAG and an \emph{update gate} in dynamic RAG.
+Here, geDIG stands for \textit{graph edit Distance and Information Gain}, and is a framework that bundles \textbf{change in edit-path cost} to the existing graph and \textbf{information gain} into a single gauge $\F$, judging ``When to accept'' as a \emph{re-ranking score} in static RAG and an \emph{update gate} in dynamic RAG.
+We use ``Information Gain'' in a broad sense encompassing both \emph{probabilistic} information gain (Shannon entropy difference $\Delta H$) and \emph{topological} information gain (Betti number change $\Delta\beta_1$, capturing the creation or destruction of independent cycles in the knowledge graph).
 
 % -----------------------------------------------------------
 \subsection{Definition of Unified Gauge \texorpdfstring{$\F$}{F}}
