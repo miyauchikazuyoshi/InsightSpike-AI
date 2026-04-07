@@ -2,8 +2,9 @@ cff-version: 1.2.0
 message: "If you use this software, please cite as below."
 title: "InsightSpike-AI: Brain-inspired Multi-Agent Discovery"
 version: "0.1.0"
-doi: "10.48550/arXiv.XXXX.XXXXX"
 authors:
   - family-names: "Miyauchi"
     given-names: "Kazuyoshi"
-date-released: 2025-05-XX
+date-released: 2025-04-07
+license: Apache-2.0
+repository-code: "https://github.com/miyauchikazuyoshi/InsightSpike-AI"
