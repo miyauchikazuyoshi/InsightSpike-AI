@@ -29,7 +29,7 @@ Three independent mathematical structures. One dimensionless, scale-invariant sc
 
 <br>
 
-[Paper (PDF)](paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf) ・ [GitHub](https://github.com/miyauchikazuyoshi/InsightSpike-AI) ・ [Demo](https://huggingface.co/spaces/miyaukaz/gedig-demo) ・ [Interactive Visualizer](demo.html)
+[Paper (PDF)](paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf) ・ [DOI: 10.5281/zenodo.19454110](https://zenodo.org/record/19454110) ・ [GitHub](https://github.com/miyauchikazuyoshi/InsightSpike-AI) ・ [Demo](https://huggingface.co/spaces/miyaukaz/gedig-demo) ・ [Interactive Visualizer](demo.html)
 
 ---
 
@@ -123,44 +123,66 @@ Input
 
 ## Experiments
 
-### Maze Navigation
+### Maze Navigation (v0.6.0)
 
 A partial-observation maze agent that builds a persistent knowledge graph and uses geDIG to decide when to explore vs. exploit.
 
 | Experiment | Result |
 |:-----------|:-------|
 | **15×15 Maze** (Dynamic Gating) | 60% → **98%** goal-reach rate |
-| **25×25 Maze** (Graph-Persistent DG) | Active experimentation with 10D vector extension |
+| **25×25 Maze** (β₁ mode, 60 seeds) | **68%** goal-reach, avg 243 steps |
+| **25×25 β₁ vs SP** | p=0.69 (no significant difference), **88% less memory** |
 
 Architecture: Wake-Sleep-Wake cycle with three-layer search (L0: O(1) hash, L1: O(degree) attention walk, L2: O(N log N) full sort).
 
+β₁ replaces shortest-path (SP) as the structural term: O(V+E) vs O(N²) complexity, 500MB vs 4.3GB peak memory.
+
 ```bash
-# Reproduce (requires .venv with networkx, numpy, etc.)
+# Reproduce β₁ maze (requires .venv with networkx, numpy, etc.)
 .venv/bin/python3 experiments/maze/run_experiment_query.py \
-  --maze-size 15 --max-steps 250 --seeds 12 \
-  --search-mode threelayer --vector-mode extended
+  --maze-size 25 --max-steps 500 --seeds 60 --seed-start 1 \
+  --sp-mode betti1 --max-hops 10 --sp-cand-topk 5 --snapshot-level minimal
 ```
+
+### Transformer F-Regularization (Experiment 4)
+
+Training-time intervention: does adding F as a regularizer improve downstream performance?
+
+| Condition | Accuracy | Interpretation |
+|:----------|:---------|:---------------|
+| Baseline (CE only) | 88.1% | Standard training |
+| Positive (CE + F minimization) | 87.2% | Flattens attention structure → **worse** |
+| **Negative (CE + F maximization)** | **89.4%** | Preserves attention topology → **best** |
+
+**Key finding**: Preserving DG (topological diversity in attention) during training improves learning. This supports the hypothesis that geDIG F measures a meaningful structural property of Transformers.
+
+### RAG: AGHT on HotpotQA (v0.6.0)
+
+Analytical Heterogeneous Graph Transformer — QKV attention on unified sentence-token graphs, with zero-shot 10-parameter design.
+
+| Metric | AGHT | Legacy (PageRank) | Improvement |
+|:-------|:-----|:------------------|:------------|
+| **R@2** (paragraph) | **0.405** | 0.150 | **+170%** |
+| **SF F1** (sentence) | **0.334** | — | zero-shot |
+| **MRR** | **0.659** | 0.346 | **+90%** |
+
+### BRIGHT Document Retrieval (v0.6.0)
+
+Reasoning-intensive retrieval on the BRIGHT benchmark (biology, 50 queries).
+
+| Configuration | nDCG@10 |
+|:-------------|:--------|
+| Pyserini BM25 + CoT | 0.325 |
+| + RIA (Spec M) | 0.410 |
+| + Early Token Graph (Spec W) | 0.417 |
+| **+ Enhanced Graph (Spec X)** | **0.439** |
 
 ### Transformer Inference F-Trajectory
 
-Layer-by-layer measurement of ΔEPC, ΔH, and Δβ₁ across Transformer hidden states, testing whether F tracks model quality.
+Layer-by-layer measurement of ΔEPC, ΔH, and Δβ₁ across Transformer hidden states.
 
-- **8 token-level models tested**: BERT, DistilBERT, GPT-2, GPT-2 Medium, DistilGPT2, TinyLlama (2 checkpoints)
-- **Key finding**: GPT series shows monotonic improvement in ΔR²_struct with model scale
-
-```
-distilgpt2:    ΔR²_struct = -0.777
-gpt2:          ΔR²_struct = -0.086
-gpt2-medium:   ΔR²_struct = -0.065
-```
-
-F has sensitivity to model quality — better models produce more structured F-trajectories.
-
-**Status**: Preliminary. ΔR²_struct is still negative for all models (random-init outperforms baseline), but trending toward zero with scale. Large-scale model verification (70B+) is future work.
-
-### Earlier Experiments
-
-HotpotQA (multi-hop QA) and cross-domain analogy experiments were conducted in earlier phases and informed the theory. These have not been reproduced under the current codebase and are archived.
+- **8 token-level models tested**: BERT, DistilBERT, GPT-2, GPT-2 Medium, DistilGPT2, TinyLlama
+- **Status**: Preliminary. F-trajectories show sensitivity to model quality but ΔR²_struct remains negative. Large-scale verification (70B+) is future work.
 
 <br>
 
@@ -197,13 +219,15 @@ Related: Gao et al. (2025), [Weight-sparse transformers have interpretable circu
 
 We are exploring specific, actionable research questions:
 
-1. **Independent F-trajectory reproduction** — Does F show structured layer-wise behavior on models we haven't tested?
+1. **β₁ normalization for maze DG** — β₁ is discrete (cycles only), causing 96.6% of steps to have zero signal. Can a continuous proxy (Fiedler value, β₁ density) improve DG detection without losing topological meaning?
 
-2. **β₁ vs SP as structural term** — Under what conditions does topological Δβ₁ outperform metric ΔSP? Expertise in topological data analysis (TDA) welcome.
+2. **F-regularization robustness** — Experiment 4 shows F maximization (preserving attention topology) improves learning on SST-2. Is this robust across tasks, model sizes, and seeds?
 
-3. **Scaling to 70B+ models** — We hypothesize that (λ, γ) converge across model families at sufficient scale. Verification requires GPU resources beyond our current individual setup.
+3. **AGHT scaling** — The Analytical Heterogeneous Graph Transformer achieves +170% on HotpotQA with 10 parameters. Does this approach scale to larger document collections?
 
-4. **F-regularization robustness** — The v6 paper shows weak F-regularization improves downstream performance (+0.33pt on SST-2). Is this robust across tasks and model families?
+4. **Bayesian interpretation** — geDIG F can be interpreted as non-parametric Bayesian inference at graph endpoints (AG = posterior confirmation, DG = posterior divergence). Can this be formalized?
+
+5. **Scaling to 70B+ models** — We hypothesize that (λ, γ) converge across model families at sufficient scale. Verification requires GPU resources beyond our current setup.
 
 These are **open research questions**, not claims. We welcome critical feedback.
 
@@ -217,7 +241,9 @@ These are **open research questions**, not claims. We welcome critical feedback.
 |:-----|:-----|
 | **Paper (English)** | [geDIG v6 (PDF)](paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf) |
 | **Paper (Japanese)** | [geDIG v6 (PDF)](paper/geDIG_onegauge_improved_v6.pdf) |
+| **DOI** | [10.5281/zenodo.19454110](https://zenodo.org/record/19454110) |
 | **GitHub** | [InsightSpike-AI](https://github.com/miyauchikazuyoshi/InsightSpike-AI) |
+| **Release** | [v0.6.0](https://github.com/miyauchikazuyoshi/InsightSpike-AI/releases/tag/v0.6.0) |
 | **Live Demo** | [HuggingFace Space](https://huggingface.co/spaces/miyaukaz/gedig-demo) |
 | **Interactive Visualizer** | [geDIG Graph Demo](demo.html) |
 | **Matchstick Figure** | [EN](research/thinking/matchstick_figure_v2_en.html) / [JA](research/thinking/matchstick_figure_v2.html) |
