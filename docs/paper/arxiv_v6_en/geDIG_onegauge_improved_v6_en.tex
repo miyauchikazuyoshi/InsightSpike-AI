@@ -65,7 +65,7 @@
 
 \begin{abstract}
 Dynamic knowledge graphs (KGs) lack a normative criterion for \emph{when} to accept new information, even as Retrieval-Augmented Generation (RAG) systems excel at optimizing \emph{what} to retrieve.
-We propose \textbf{geDIG}, a unified control framework that uses a \emph{single gauge} $\F$ combining normalized structural cost (edit-path cost; $\gednorm$) and information gain (Shannon entropy difference and path shortening; $\ignorm$), and a \textbf{two-stage gating mechanism} (AG at 0-hop for ambiguity detection; DG via multi-hop for shortcut confirmation) to control exploration and integration decisions in an event-driven manner.
+We propose \textbf{geDIG}, a unified control framework that uses a \emph{single gauge} $\F$ combining normalized structural cost (edit-path cost; $\gednorm$) and information gain (Shannon entropy difference and path shortening; $\ignorm$), and a \textbf{two-stage gating mechanism}---AG at 0-hop for ambiguity detection and DG via multi-hop for shortcut confirmation---to control exploration and integration decisions in an event-driven manner.
 Evaluations on a partial-observation maze PoC and a practical RAG pipeline show that geDIG consistently reduces redundant exploration and knowledge contamination (False Merge Rate) while maintaining or improving success rates and answer quality.
 We further introduce \textbf{PSZ (Perfect Scaling Zone)}, a target operating band defined by Acceptance $\ge 95\%$, FMR $\le 2\%$, and additional P50 latency $\le 200$\,ms, to guide operational tuning.
 Finally, we discuss the design's relation to the Free Energy Principle (FEP) and Minimum Description Length (MDL) as an operational correspondence.
@@ -100,7 +100,7 @@ Details are provided in \cref{sec:gauge_theory} (Definition of Unified Gauge $\F
 \subsection*{Short Forms and Sign Conventions}
 We use the following short forms and sign conventions (see \cref{sec:gauge_theory}):\\
 \noindent\textbf{Short form}: $\F=\gednorm-\lambda\bigl(\Delta H_{\mathrm{norm}}+\gamma\,\Delta\mathrm{SP}_{\mathrm{rel}}\bigr)$.\\
-\noindent\textbf{Sign convention}: $\Delta H_{\mathrm{norm}}=(H_{\mathrm{after}}-H_{\mathrm{before}})/\log K$ (ordering = decrease is \emph{negative}), $\;\Delta\mathrm{SP}_{\mathrm{rel}}=(L_{\mathrm{before}}-L_{\mathrm{after}})/\max\{L_{\mathrm{before}},\varepsilon\}$ (shortening is \emph{positive}).
+\noindent\textbf{Sign convention}: $\Delta H_{\mathrm{norm}}=(H_{\mathrm{after}}-H_{\mathrm{before}})/\log K$ (ordering: a decrease is \emph{negative}), $\;\Delta\mathrm{SP}_{\mathrm{rel}}=(L_{\mathrm{before}}-L_{\mathrm{after}})/\max\{L_{\mathrm{before}},\varepsilon\}$ (shortening is \emph{positive}).
 Smaller $\F$ is \textbf{better} (lower structural cost and larger $\Delta\mathrm{IG}_{\mathrm{norm}}$).
 \textit{Note}: The gain from ordering can be read as $-\Delta H_{\mathrm{norm}}>0$.
 
@@ -119,7 +119,7 @@ We summarize the main contributions of this paper:
   \item \textbf{New operational metrics and evaluation framework for dynamic RAG}: We introduce False Merge Rate (FMR), Zero-Search Rate (ZSR), and the target band PSZ (Perfect Scaling Zone) consisting of Acc/FMR/additional P50 latency, proposing to minimize the shortfall $s_{\mathrm{PSZ}}$ as a \emph{standard specialized for dynamic KG updates}.
   \item \textbf{Principle verification and demonstration in Maze and RAG}: In both partial-observation maze PoC and 50-domain/500-query scale RAG experiments, we confirmed trends where geDIG suppresses redundant exploration and false acceptance while maintaining or improving success rates, EM/F1, and evidence consistency, identifying contributions of each component via ablation.
   \item \textbf{Operational presentation of theoretical interpretation (FEP--MDL Bridge)}: We organize readings by Free Energy Principle and MDL as \emph{operational propositions}, showing the correspondence $\F\propto\Delta\mathrm{MDL}{+}O(1/N)$ (details in later sections). While not essential for implementation or operation, this gives theoretical intuition behind the design.
-  \item \textbf{Causal Validation (Phase 5)}: We demonstrate that minimizing geDIG F during Transformer training (via F-regularization) causally improves downstream performance, providing strong evidence for the thermodynamic inference hypothesis. (New in v6)
+  \item \textbf{Semantic Alignment (Phase 5)}: We demonstrate that DG-confirmed subgraphs align with LLM answer directions (Insight Vector Alignment), providing evidence that minimizing geDIG $\F$ structurally corresponds to reasoning. (New in v6)
 \end{itemize}
 
 \paragraph{PSZ / SLO definition and aggregation}
@@ -144,7 +144,7 @@ The central issue addressed in this paper is the lack of a norm for \textbf{``Wh
 Existing Retrieval-Augmented Generation (RAG) excels at optimizing \textbf{what to retrieve (What)}, but without an explicit criterion for ``which updates to accept and which to forego'', trade-offs between knowledge contamination, redundancy, and latency deterioration tend to become ad-hoc.
 In this paper, we propose geDIG, a framework that controls \emph{``When to update'' with a consistent principle} in both static and dynamic RAG using a \textbf{single gauge $\F$ and two-stage gates (AG/DG)} integrating edit-path cost and information gain.
 Intuitively, it can be read as ``detection of deterioration at the point of tentative connection'' at 0-hop (local), and ``confirmation of whether it truly becomes a shortcut when traced a little further'' at multi-hop.
-The correspondence with the working hypothesis that insight is ``a phenomenon where discrete episodes are instantly connected'' and the analogy with previous studies on hippocampal replay~\cite{Buzsaki2015,Carr2011,Pfeiffer2013} are kept as \emph{operational metaphors} in the theoretical section (FEP--MDL bridge) later.
+The correspondence with the working hypothesis that insight is ``a phenomenon where discrete episodes are instantly connected'' and the analogy with previous studies on hippocampal replay~\cite{Buzsaki2015,Carr2011,Pfeiffer2013} is kept as an \emph{operational metaphor} in the theoretical section (FEP--MDL bridge) later.
 Neuroscientific background knowledge is not assumed for understanding implementation and experiments.
 
 Here, geDIG stands for \textit{graph edit Distance and Information Gain}, and is a framework that bundles \textbf{change in edit-path cost} to the existing graph and \textbf{information gain (entropy difference + path shortening)} into a single gauge $\F$, judging ``When to accept'' as a \emph{re-ranking score} in static RAG and an \emph{update gate} in dynamic RAG.
@@ -291,7 +291,7 @@ This design provides the following falsifiable predictions:
 
 These predictions are verified in Experiments \S\ref{sec:maze_experiment} and \S\ref{sec:rag_experiment}.
 \\[0.2em]
-\noindent\textit{Note (Transformer Internalization)}\; The unified metric $\F$ can also be reinterpreted as a \textbf{free energy-type evaluator in inter-layer inference}. by measuring $\Delta$EPC/$\Delta$IG on the attention graph and introducing AG/DG, the \textbf{process separation of 0-hop error detection and multi-hop minimization} can be incorporated into implementation design even in internal computation.
+\noindent\textit{Note (Transformer Internalization)}\; The unified metric $\F$ can also be reinterpreted as a \textbf{free energy-type evaluator in inter-layer inference}. By measuring $\Delta$EPC/$\Delta$IG on the attention graph and introducing AG/DG, the \textbf{process separation of 0-hop error detection and multi-hop minimization} can be incorporated into implementation design even in internal computation.
 
 \subsection{FEP--MDL Bridge (Operational Proposition; Overview)}
 
@@ -381,7 +381,7 @@ Exploration strategy, candidate branching, backtracking, and memory eviction are
 \paragraph{Intuitive Reading of 0-hop and Multi-hop}
 0-hop evaluation $g_0$ is a \emph{local check} determining if things are worsening by looking only at the \emph{immediate vicinity} right after provisionally connecting a new branch. In maze metaphor, it corresponds to "taking one step and checking if heading immediately towards a dead end". On the other hand, multi-hop evaluation $g_{\min}$ is a \emph{path check} determining if \emph{it really is a shortcut} (mean shortest path length shortens) when tracing that branch several steps ahead. Mapping to RAG, 0-hop interprets as \textbf{immediate detection of local structure deterioration} around new node, and multi-hop as \textbf{confirmation of actual utility of multi-hop path} via that node. AG corresponds to the former (deterioration detection), DG to the latter (shortcut confirmation and integration determination).
 
-\paragraph{Generalizability}\; Environment-dependent conditions in pseudo-code (e.g., wall check in maze) are kept in \emph{preprocessing/representation layer}, while \textbf{decision criteria for acceptance/exploration/pruning themselves are commonized by $\F$ and AG/DG rules}. By replacing representation design, the same control principle can be applied to other domains (RAG, etc.).
+\paragraph{Generalizability}\; Environment-dependent conditions in pseudo-code (e.g., wall check in maze) are kept in \emph{preprocessing/representation layer}, while \textbf{decision criteria for acceptance/exploration/pruning themselves are commonized by $\F$ and AG/DG rules}. By replacing representation design, the same control principle can be applied to other domains, as demonstrated in the RAG experiments below.
 
 \subsection{Implementation Guidance (Phase~1)}
 \noindent We set $\lambda$ and $\gamma$ as follows. $\lambda$ is determined by variance balancing with $\lambda_0:=\mathrm{Std}[\gednorm]/\max\{\mathrm{Std}[\ignorm],\varepsilon\}$ and a small grid $\{\tfrac{1}{2}\lambda_0,\lambda_0,2\lambda_0\}$ evaluated by PSZ and latency.
@@ -499,7 +499,7 @@ When moving straight, $\Delta\mathrm{EPC}$ is constant (add 1 node) and $\Delta\
 $\to$ \textbf{Result}: Fast traversal, trace left in memory (later compressed).
 
 \paragraph{Scenario 2: Dead End (Ambiguity/Error)}
-Entering a dead end, observed options vanish. $\Delta\mathrm{EPC}$ increases (wall/collision cost), or $\Delta\mathrm{IG}$ drops (no entropy reduction). $g_0$ shoots up, exceeding $\theta_{\mathrm{AG}}$.
+Upon entering a dead end, observed options vanish. $\Delta\mathrm{EPC}$ increases (wall/collision cost), or $\Delta\mathrm{IG}$ drops (no entropy reduction). $g_0$ shoots up, exceeding $\theta_{\mathrm{AG}}$.
 $\to$ \textbf{AG Firing}: ``Something is wrong''. Trigger backtrack or random walk to escape.
 $\to$ \textbf{Observation}: In logs, AG spikes exactly at dead ends (delay 0--2 steps).
 
@@ -530,9 +530,9 @@ We measured the ``hesitation'' steps between hitting a dead end and initiating a
 \begin{itemize}
     \item \textbf{Random}: $\approx 8.5$ steps (wanders around).
     \item \textbf{Greedy}: $\approx 1.0$ step (immediate algorithmic turn).
-    \item \textbf{geDIG}: $\approx 1.4$ steps. Slightly slower than hard-coded Greedy, but \textbf{emergent behavior} via threshold $\theta_{\mathrm{AG}}$ without explicit ``if dead-end'' rule.
+    \item \textbf{geDIG}: $\approx 1.4$ steps. Slightly slower than hard-coded Greedy, but this is \textbf{emergent behavior} via threshold $\theta_{\mathrm{AG}}$ without an explicit ``if dead-end'' rule.
 \end{itemize}
-This confirms that $\F$-based control can autonomously learn/decide to switch modes based on ambiguity, acting as a soft error detection mechanism.
+This confirms that $\F$-based control can autonomously detect and decide to switch modes based on ambiguity, acting as a soft error detection mechanism.
 
 \subsection{Robustness to Noise (Jitter Stability)}
 To verify \verb|StabilityAudit|, we injected random noise ($\pm 5\%$) to edge costs and thresholds.
@@ -546,7 +546,7 @@ The maze experiment confirmed that:
     \item \textbf{Compression is evident}: 95\% compression indicates it accurately captures the topological skeleton.
     \item \textbf{Scalable}: Performance holds from $15{\times}15$ to $25{\times}25$ (and preliminarily $50{\times}50$).
 \end{enumerate}
-This justifies proceeding to the RAG experiment. We map ``Dead-end'' to ``Unknown/Hallucination'' and ``Shortcut'' to ``Insight/Logical Connection''.
+This justifies proceeding to the RAG experiment. Although spatial and semantic graphs differ in structure, they share the common framework of structural cost versus information gain. We map ``Dead-end'' to ``Unknown/Hallucination'' and ``Shortcut'' to ``Insight/Logical Connection''.
 
 % -----------------------------------------------------------
 \section{Experiment II: Static RAG (Baseline Establishment)}
@@ -614,7 +614,7 @@ We apply geDIG (AG/DG control) to the same dataset.
 \textbf{Mechanism}:
 \begin{itemize}
     \item \textbf{Initial}: Compute embedding similarity (0-hop proxy).
-    \item \textbf{AG Fire}: If ambiguity high ($\theta_{\mathrm{AG}}$), expand expansion (retrieve neighbors).
+    \item \textbf{AG Fire}: If ambiguity is high ($g_0 > \theta_{\mathrm{AG}}$), expand retrieval (retrieve neighbors).
     \item \textbf{DG Fire}: If multi-hop gain high ($\F < \theta_{\mathrm{DG}}$), \textbf{commit} to context.
 \end{itemize}
 
@@ -622,7 +622,7 @@ We apply geDIG (AG/DG control) to the same dataset.
 (See Figure~\ref{fig:psz_operating_curves_lite_ja} in Summary of Results).
 \begin{itemize}
     \item \textbf{Pareto Improvement}: geDIG shifts the operating curve towards the top-left (High Acc, Low FMR).
-    \item \textbf{PSZ Proximity}: Achieved \textbf{Acc $\approx$ 97.1\%, FMR $\approx$ 2.0\%}. Ideally consistent with PSZ requirements.
+    \item \textbf{PSZ Proximity}: Achieved \textbf{Acc $\approx$ 97.1\%, FMR $\approx$ 2.0\%}. Nearly consistent with PSZ requirements.
     \item \textbf{Latency Cost}: P50 increased from 45ms to \textbf{240ms}. This is the cost of graph reasoning, but stays within interactive range ($<350$ms).
 \end{itemize}
 
@@ -681,7 +681,7 @@ This experiment verifies this hypothesis (Phase 5: Causal Validation).
     \item \textbf{Significance}: $\Delta s > 0$ observed in \textbf{>80\% of cases}. Sign test $p \ll 0.001$.
     \item \textbf{Effect Size}: Cohen's $d \approx 1.0$ (Large effect).
     \item \textbf{Interpretation}: The subgraph selected by geDIG ($\approx 30$ nodes) points to the answer direction significantly better than random chance.
-    \item \textbf{Implication}: This suggests that minimizing geDIG $\F$ structurally aligns with ``getting closer to the answer'' in the semantic space. This supports the \textbf{Thermodynamic Inference Hypothesis} (minimizing free energy = reasoning).
+    \item \textbf{Implication}: This suggests that minimizing geDIG $\F$ structurally aligns with ``getting closer to the answer'' in the semantic space. This supports the \textbf{Thermodynamic Inference Hypothesis} (minimizing free energy corresponds to reasoning).
 \end{enumerate}
 
 \section{Ablation Analysis and Component Evaluation}
