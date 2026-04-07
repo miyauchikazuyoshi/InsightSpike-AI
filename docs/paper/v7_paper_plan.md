@@ -227,6 +227,32 @@ M4: L1 attention × F 相関
 
 ---
 
+## Zenodo v7 更新メモ
+
+v7 公開時に Zenodo メタデータも更新する:
+
+### Keywords 追加 (v6 の 6 個 → v7 で 12 個)
+```
+現在 (v6):
+  knowledge graphs, retrieval-augmented generation, graph edit distance,
+  information gain, Betti number, free energy principle
+
+追加 (v7):
+  topological data analysis     ← β₁ の数学的文脈
+  graph transformer             ← AGHT の文脈
+  maze navigation               ← 実験ドメイン
+  minimum description length    ← 理論的対応 (FEP とペア)
+  attention mechanism           ← Transformer 実験の文脈
+  AG/DG gating                  ← 独自概念、検索性向上
+```
+
+### その他メタデータ
+- Subjects: cs.AI, cs.IR, cs.LG を追加
+- Communities: 該当する Zenodo コミュニティがあれば参加
+- Related identifiers: arXiv ID (endorse 取得後)
+
+---
+
 ## v6 → v7 の差分サマリ
 
 ```
