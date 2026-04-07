@@ -59,7 +59,7 @@
 
 \par\medskip
 \noindent\textbf{Abstract (English).}\;
-Dynamic knowledge graphs lack a normative criterion for \emph{when} to accept new information, even as RAG systems excel at optimizing \emph{what} to retrieve. We propose \textbf{geDIG}, a unified control framework that uses a single gauge $\F$ combining normalized structural cost (edit-path cost) and information gain (Shannon entropy difference and path shortening), and a two-stage gating mechanism (AG at 0-hop; DG via multi-hop) to control exploration and integration decisions. We evaluate geDIG on a maze proof-of-concept and a practical RAG pipeline, and report consistent reductions in redundant exploration and knowledge contamination under an operating-curve protocol (PSZ). We release a reproducible implementation and scripts.
+Dynamic knowledge graphs lack a normative criterion for \emph{when} to accept new information, even as RAG systems excel at optimizing \emph{what} to retrieve. We propose \textbf{geDIG}, a unified control framework that uses a single gauge $\F$ combining normalized structural cost (edit-path cost) and information gain (Shannon entropy difference and path shortening), and a two-stage gating mechanism---AG at 0-hop and DG via multi-hop---to control exploration and integration decisions. We evaluate geDIG on a maze proof-of-concept and a practical RAG pipeline, and report consistent reductions in redundant exploration and knowledge contamination under an operating-curve protocol (PSZ). We release a reproducible implementation and scripts.
 \end{abstract}
 
 \subsection*{用語と記号（早見表）}
@@ -132,14 +132,13 @@ Phase~1 では、RAG における\,\textbf{クエリ中心の評価と制御}を
 Phase~2 では、FEP–MDL ブリッジに基づく\,\textbf{大域再配線}という理論課題を開く（本稿では設計スケッチを提示）。
 
 \subsection{課題のコア}\label{sec:intro_core}
-静的RAGは\,\textbf{何を取るか（What）}の最適化に長ける一方、\,\textbf{いつ受け入れるか（When）}の規範がなく、汚染/冗長/遅延のトレードオフが場当たり化しやすい。
-geDIG は単一ゲージ $\F$（定義は §\ref{sec:gauge_theory}）と二段ゲート（AG/DG）により、“曖昧なら探索を深化（AG）／短絡が確認された時だけ統合（DG）” をイベント駆動で行う。
+前節で述べた「When」の課題に対し、geDIG は単一ゲージ $\F$（定義は §\ref{sec:gauge_theory}）と二段ゲート（AG/DG）により、”曖昧なら探索を深化（AG）／短絡が確認された時だけ統合（DG）” をイベント駆動で行う。
 RAG へ写すと、\textbf{FMR$\downarrow$（偽受理率の低減）}・\textbf{PSZ 近傍への接近}・\textbf{多ホップ選別}が同一ロジックで駆動される。
 
 \section{背景と概要}\label{sec:background_overview}
 
 \subsection{動的RAGの文脈}
-静的な Retrieval\,\mbox{-}Augmented Generation (RAG) は\,\textbf{何を取るか（What）}の最適化に長ける一方、\,\textbf{いつ受け入れるか（When）}の規範を欠くため、知識汚染や冗長化、応答遅延といったトレードオフが場当たり化しやすい。
+静的な Retrieval\,\mbox{-}Augmented Generation (RAG) は\,\textbf{何を取るか（What）}の最適化に長ける一方、\,\textbf{いつ受け入れるか（When）}の規範を欠くため、知識汚染や冗長化、応答遅延といったトレードオフが場当たり的になりやすい。
 本稿では、静的RAG（常時検索）と動的RAG（不確実時のみ検索／確証時のみ更新）の役割分担を図\ref{fig:static_dynamic_pipeline} と表\ref{tab:static_dynamic_responsibility} に整理し、動的側で When を明示的に制御する必要性を前提とする。
 \\
 \noindent\textit{図表の要点}\; 図\ref{fig:static_dynamic_pipeline} は、\,\textbf{静的RAG（単一ラウンド）}と\,\textbf{動的RAG（イベント駆動）}の処理フローを並置する。
