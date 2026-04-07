@@ -46,6 +46,9 @@ class EvalResult:
     delta_ig_min_mh: float
     delta_sp_min_mh: float
     chosen_edges_by_hop: List[Tuple[Node, Node]]
+    # β₁ mode fields
+    delta_b1: float = 0.0
+    use_betti: bool = False
     # Diagnostics: SP evaluation cost proxies
     sssp_calls_du: int = 0
     sssp_calls_dv: int = 0
@@ -53,6 +56,40 @@ class EvalResult:
     cycle_verifies: int = 0
     # Optional carry-over state for ALL-PAIRS-EXACT (per eff-hop APSP matrices)
     apsp_carry: Optional[Dict[int, Dict[str, Any]]] = None
+
+
+def _compute_betti_1(g: nx.Graph) -> int:
+    """Compute first Betti number β₁ = E - V + C."""
+    n_comp = nx.number_connected_components(g)
+    return g.number_of_edges() - g.number_of_nodes() + n_comp
+
+
+def _delta_betti_1_normalized(sub_before: nx.Graph, sub_after: nx.Graph,
+                               scale_invariant: bool = False) -> float:
+    """Compute normalized Δβ₁.
+
+    Two modes:
+      scale_invariant=False (default, legacy):
+        Δβ₁ = (β₁_after - β₁_before) / max(β₁_before, 1)
+        Problem: β₁_before=0 → raw absolute value, saturates on large graphs.
+
+      scale_invariant=True (SP-parity):
+        Δβ₁ = (β₁_after - β₁_before) / max(E_after - V_after + 1, 1)
+        Normalizes by max possible β₁ of the after graph (= E - V + 1 when connected).
+        Analogous to SP's (Lb - La) / Lb which is graph-size invariant.
+
+    Returns value in roughly [-1, +1]. Positive = more cycles added.
+    """
+    b1_before = _compute_betti_1(sub_before)
+    b1_after = _compute_betti_1(sub_after)
+    if scale_invariant:
+        # Max possible β₁ for after graph (fully connected: C=1 → β₁_max = E - V + 1)
+        e_after = sub_after.number_of_edges()
+        v_after = sub_after.number_of_nodes()
+        denom = max(e_after - v_after + 1, 1)
+    else:
+        denom = max(b1_before, 1)
+    return (b1_after - b1_before) / denom
 
 
 def evaluate_multihop(
@@ -94,6 +131,12 @@ def evaluate_multihop(
     sp_exact_stable_nodes: bool = False,
     # Treat ΔSP as signed (no clamp to [0,1]) when True
     sp_signed: bool = False,
+    # β₁ mode: replace SP with Betti number
+    use_betti: bool = False,
+    # Scale-invariant β₁ normalization (SP-parity): normalize by max possible β₁
+    betti_scale_invariant: bool = False,
+    # Two-graph mode: skip hop loop, compare prev vs full graph directly (β₁ only)
+    two_graph_mode: bool = False,
 ) -> EvalResult:
     """Compute per-hop g(h) with greedy selection and return hop series and minima.
 
@@ -105,7 +148,7 @@ def evaluate_multihop(
     # DEBUG: Print entry info
     import os
     if os.getenv('INSIGHTSPIKE_DEBUG_EVAL'):
-        print(f"[DEBUG] evaluate_multihop ENTRY max_hops={max_hops} len(ecand)={len(ecand)} len(anchors_core)={len(anchors_core)}", flush=True)
+        print(f"[DEBUG] evaluate_multihop ENTRY max_hops={max_hops} len(ecand)={len(ecand)} len(anchors_core)={len(anchors_core)} g_before N={g_before_for_expansion.number_of_nodes()} E={g_before_for_expansion.number_of_edges()} h_graph N={stage_graph.number_of_nodes()} E={stage_graph.number_of_edges()} prev N={prev_graph.number_of_nodes()} E={prev_graph.number_of_edges()}", flush=True)
         print(f"[DEBUG] g_before_for_expansion nodes={g_before_for_expansion.number_of_nodes()} edges={g_before_for_expansion.number_of_edges()}", flush=True)
         print(f"[DEBUG] anchors_core={anchors_core}", flush=True)
         print(f"[DEBUG] anchors_top_before={anchors_top_before}", flush=True)
@@ -449,7 +492,13 @@ def evaluate_multihop(
     ged0 = float(min(1.0, max(0.0, ged0)))
     raw_ged0 = float(res0.get("raw_ged", 0.0))
     added_edge_ops = 0  # EPC増分: 採用した追加エッジ数（prev_graph基準）
-    sp0 = 0.0
+    if use_betti:
+        b1_0 = _delta_betti_1_normalized(sub_b0, sub_a0, scale_invariant=betti_scale_invariant)
+        sp0 = b1_0  # β₁ value used in IG formula (same weight as sp_beta)
+        _b1_value_h0 = b1_0  # store separately for clean field mapping
+    else:
+        sp0 = 0.0
+        _b1_value_h0 = 0.0
     ig0 = base_ig + core.sp_beta * sp0
     g0v = float(ged0 - core.lambda_weight * ig0)
     records_h.append((0, g0v, ged0, ig0, sp0))
@@ -474,19 +523,88 @@ def evaluate_multihop(
                     best_hop=0,
                     delta_ged=float(delta_ged),
                     delta_ig=float(delta_ig),
-                    delta_sp=float(delta_sp),
+                    delta_sp=0.0 if use_betti else float(delta_sp),
                     gmin_mh=float(g0v),
                     delta_ged_min_mh=float(delta_ged),
                     delta_ig_min_mh=float(delta_ig),
-                    delta_sp_min_mh=float(delta_sp),
+                    delta_sp_min_mh=0.0 if use_betti else float(delta_sp),
+                    delta_b1=float(_b1_value_h0),
+                    use_betti=use_betti,
                     chosen_edges_by_hop=[],
                 )
         except Exception:
             pass
 
+    # ── β₁ two-graph mode: skip hop loop entirely ──
+    # Compare prev_graph vs full inherited_graph directly.
+    # AG judgment already done at hop=0 above.
+    # DG judgment: does the full graph (all accumulated knowledge) improve over local?
+    if use_betti and two_graph_mode:
+        # Full graph = g_before_for_expansion with ALL candidate edges added
+        full_graph = h_graph.copy()
+        for (eu, ev, edata) in ecand:
+            if not full_graph.has_edge(eu, ev):
+                full_graph.add_edge(eu, ev, **(edata if isinstance(edata, dict) else {}))
+
+        # Compute F on full graph vs prev
+        sub_b_full = g_before_for_expansion  # no subgraph needed — use entire graph
+        sub_a_full = full_graph
+        res_full = _norm_ged(sub_b_full, sub_a_full,
+                             node_cost=core.node_cost, edge_cost=core.edge_cost,
+                             normalization=core.normalization,
+                             efficiency_weight=core.efficiency_weight,
+                             enable_spectral=core.enable_spectral,
+                             spectral_weight=core.spectral_weight,
+                             norm_override=denom_cmax_base) if denom_cmax_base > 0 else {
+                                 "normalized_ged": 0.0, "raw_ged": 0.0}
+        ged_full = float(min(1.0, max(0.0, res_full.get("normalized_ged", 0.0))))
+        b1_full = _delta_betti_1_normalized(sub_b_full, sub_a_full, scale_invariant=betti_scale_invariant)
+
+        # Entropy: reuse base_ig (hop-0 entropy delta)
+        # In 2-graph mode, H is the same as hop-0 since we compare same before/after
+        h_full = base_ig
+
+        ig_full = h_full + core.sp_beta * b1_full
+        g_full = float(ged_full - core.lambda_weight * ig_full)
+
+        # Pick better of g0 (local) vs g_full (global DG)
+        if g_full < g0v:
+            gmin_val = g_full
+            best_hop_val = 1  # mark as DG-resolved
+        else:
+            gmin_val = g0v
+            best_hop_val = 0
+
+        hop_series = [
+            {"hop": 0, "g": float(g0v), "ged": float(ged0), "ig": float(ig0),
+             "h": float(base_ig), "sp": float(sp0)},
+            {"hop": 1, "g": float(g_full), "ged": float(ged_full), "ig": float(ig_full),
+             "h": float(h_full), "sp": float(b1_full), "two_graph": True},
+        ]
+        return EvalResult(
+            hop_series=hop_series,
+            g0=float(g0v),
+            gmin=float(gmin_val),
+            best_hop=best_hop_val,
+            delta_ged=float(ged0),
+            delta_ig=float(ig0),
+            delta_sp=0.0,
+            gmin_mh=float(gmin_val),
+            delta_ged_min_mh=float(ged_full) if g_full < g0v else float(ged0),
+            delta_ig_min_mh=float(ig_full) if g_full < g0v else float(ig0),
+            delta_sp_min_mh=0.0,
+            delta_b1=float(b1_full),
+            use_betti=True,
+            chosen_edges_by_hop=[],
+        )
+
     # Prepare SP cached-incremental helpers (per-eff-hop state)
-    # Allow special value sp_pair_samples <= 0 to mean "use ALL pairs"
-    distcache = DistanceCache(mode="cached", pair_samples=int(sp_pair_samples))
+    # Skip entirely when using β₁ mode (no SP computation needed)
+    if not use_betti:
+        # Allow special value sp_pair_samples <= 0 to mean "use ALL pairs"
+        distcache = DistanceCache(mode="cached", pair_samples=int(sp_pair_samples))
+    else:
+        distcache = None  # β₁ mode: no DistanceCache needed
     pairs_by_eff: Dict[int, Any] = {}
     la_by_eff: Dict[int, List[float]] = {}
     lb_by_eff: Dict[int, float] = {}
@@ -659,8 +777,69 @@ def evaluate_multihop(
         best_delta = 0.0
         best_item: Optional[Tuple[Node, Node, Dict[str, Any]]] = None
         eff_hop = h + int(max(0, int(getattr(core, 'sp_hop_expand', 0))))
-        # evaluate δSP for each candidate
-        if sp_allpairs_exact:
+        # evaluate δSP (or Δβ₁) for each candidate
+        if use_betti:
+            # β₁ mode: evaluate candidates by Δβ₁ (replaces SP candidate evaluation)
+            # Uses IDENTICAL subgraph construction as SP else-branch (line 883-888):
+            #   sub_b = _union_khop_subgraph(g_before, anchors, eff_hop)
+            #   sub_a = _union_khop_subgraph(g_try, anchors, eff_hop)
+            # Plus SP's scope/boundary policies for boundary node handling.
+            # β₁ is O(V+E): use full graph for accurate cycle detection.
+            # Subgraph approach cuts boundary edges, making cycles at graph
+            # periphery invisible. Full graph avoids this entirely.
+            # Flag betti_full_graph controls this (default True for β₁).
+            _use_full = bool(getattr(core, 'betti_full_graph', True))
+
+            for e_u, e_v, meta in ecand:
+                key = (min(e_u, e_v), max(e_u, e_v))
+                if key in used_edges:
+                    continue
+                g_try = h_graph.copy()
+                if not g_try.has_node(e_u):
+                    g_try.add_node(e_u)
+                if not g_try.has_node(e_v):
+                    g_try.add_node(e_v)
+                if not g_try.has_edge(e_u, e_v):
+                    g_try.add_edge(e_u, e_v)
+
+                if _use_full:
+                    # Local subgraph around candidate edge endpoints.
+                    # Full graph: always creates cycle (both ends connected) → 99% DG
+                    # k-hop from anchors: too small (3-4 nodes) → 0% DG
+                    # Candidate-local: subgraph around e_u/e_v with radius
+                    _radius = max(1, eff_hop)
+                    _local_anchors = {e_u, e_v}
+                    _sb_local, _ = extract_k_hop_subgraph(h_graph, _local_anchors, _radius)
+                    _sa_local, _ = extract_k_hop_subgraph(g_try, _local_anchors, _radius)
+                    _sb = _sb_local
+                    _sa = _sa_local
+                else:
+                    sub_b_cand = _union_khop_subgraph(g_before_for_expansion, anchors_core, anchors_top_before, max(1, eff_hop))
+                    sub_a_cand = _union_khop_subgraph(g_try, anchors_core, anchors_top_after, max(1, eff_hop))
+                    scope = str(core.sp_scope_mode).lower()
+                    bound = str(core.sp_boundary_mode).lower()
+                    _sb, _sa = sub_b_cand, sub_a_cand
+                    if scope in ("union", "merge", "superset"):
+                        all_nodes_cand = set(_sb.nodes()) | set(_sa.nodes())
+                        _sb = g_before_for_expansion.subgraph(all_nodes_cand)
+                        _sa = g_try.subgraph(all_nodes_cand)
+                    if bound in ("trim", "terminal", "nodes"):
+                        try:
+                            _sb = core._trim_terminal_edges(_sb, anchors_core, max(1, eff_hop))
+                            _sa = core._trim_terminal_edges(_sa, anchors_core, max(1, eff_hop))
+                        except Exception:
+                            pass
+                de = _delta_betti_1_normalized(_sb, _sa,
+                                               scale_invariant=betti_scale_invariant)
+                if os.getenv('INSIGHTSPIKE_DEBUG_EVAL'):
+                    b1_b = _compute_betti_1(_sb)
+                    b1_a = _compute_betti_1(_sa)
+                    print(f"[DEBUG] b1_cand h={h} edge=({e_u},{e_v}) sub_b: N={_sb.number_of_nodes()} E={_sb.number_of_edges()} β₁={b1_b} | sub_a: N={_sa.number_of_nodes()} E={_sa.number_of_edges()} β₁={b1_a} | Δβ₁={de:.4f}")
+                if de > best_delta:
+                    best_delta = de
+                    best_item = (e_u, e_v, meta)
+
+        elif sp_allpairs_exact:
             # Build evaluation subgraphs for current eff-hop
             sb = _union_khop_subgraph(g_before_for_expansion, anchors_core, anchors_top_before, max(1, eff_hop))
             sa = _union_khop_subgraph(h_graph, anchors_core, anchors_top_after, max(1, eff_hop))
@@ -793,21 +972,91 @@ def evaluate_multihop(
                 if sp_early_stop:
                     break
 
+        # (β₁ candidate selection is now at the top of the hop loop, before SP block)
+
         # compute g(h)
         eff_hop_eval = h + int(max(0, int(getattr(core, 'sp_hop_expand', 0))))
         he = max(1, eff_hop_eval)
         # Build subgraphs from cached node sets
         nodes_b = before_nodes_by_h[he] if he < len(before_nodes_by_h) else before_nodes_by_h[-1]
         nodes_a = after_nodes_by_h[he] if he < len(after_nodes_by_h) else after_nodes_by_h[-1]
-        sub_b = g_before_for_expansion.subgraph(nodes_b).copy()
-        sub_a = h_graph.subgraph(nodes_a).copy()
+        # β₁ mode: MUST rebuild subgraphs dynamically to include nodes added by
+        # candidate edge selection. Pre-computed nodes_b/nodes_a miss these nodes,
+        # causing Δβ₁ to always be 0 in g(h) computation.
+        if use_betti:
+            _use_full_gh = bool(getattr(core, 'betti_full_graph', True))
+            if _use_full_gh:
+                # Use candidate-local subgraph for g(h) too
+                # Anchors: edges chosen at this and previous hops
+                _gh_anchors = set(anchors_core)
+                for _eu, _ev in chosen_edges_by_hop:
+                    _gh_anchors.add(_eu)
+                    _gh_anchors.add(_ev)
+                _gh_radius = max(1, he)
+                sub_b, _ = extract_k_hop_subgraph(g_before_for_expansion, _gh_anchors, _gh_radius)
+                sub_a, _ = extract_k_hop_subgraph(h_graph, _gh_anchors, _gh_radius)
+            else:
+                sub_b = _union_khop_subgraph(g_before_for_expansion, anchors_core, anchors_top_before, he)
+                sub_a = _union_khop_subgraph(h_graph, anchors_core, anchors_top_after, he)
+                _scope = str(core.sp_scope_mode).lower()
+                _bound = str(core.sp_boundary_mode).lower()
+                if _scope in ("union", "merge", "superset"):
+                    _all = set(sub_b.nodes()) | set(sub_a.nodes())
+                    sub_b = g_before_for_expansion.subgraph(_all)
+                    sub_a = h_graph.subgraph(_all)
+                if _bound in ("trim", "terminal", "nodes"):
+                    try:
+                        sub_b = core._trim_terminal_edges(sub_b, anchors_core, he)
+                        sub_a = core._trim_terminal_edges(sub_a, anchors_core, he)
+                    except Exception:
+                        pass
+        else:
+            sub_b = g_before_for_expansion.subgraph(nodes_b).copy()
+            sub_a = h_graph.subgraph(nodes_a).copy()
         # EPC増分（式(12)）: ΔGED(h) = (raw_ged0 + added_edge_ops * edge_cost) / Cmax
         if not ged_hop0_const and denom_cmax_base > 0:
             ged_h = float((raw_ged0 + added_edge_ops * float(getattr(core, 'edge_cost', 1.0))) / float(denom_cmax_base))
         else:
             ged_h = float(ged0)
         ged_h = float(min(1.0, max(0.0, ged_h)))
-        # SP gain
+        # β₁ mode: compute Betti number on updated subgraphs (after candidate edge selection)
+        if use_betti:
+            # Apply union scope (same as SP): ensure sub_b and sub_a cover same nodes
+            # Without this, boundary edges are invisible → cycles can't be detected
+            scope = str(core.sp_scope_mode).lower()
+            if scope in ("union", "merge", "superset"):
+                all_nodes = set(sub_b.nodes()) | set(sub_a.nodes())
+                _sb = g_before_for_expansion.subgraph(all_nodes)
+                _sa = h_graph.subgraph(all_nodes)
+            else:
+                _sb, _sa = sub_b, sub_a
+            sp_h = _delta_betti_1_normalized(_sb, _sa, scale_invariant=betti_scale_invariant)
+            if os.getenv('INSIGHTSPIKE_DEBUG_EVAL'):
+                b1_b = _compute_betti_1(_sb)
+                b1_a = _compute_betti_1(_sa)
+                print(f"[DEBUG] g(h={h}) sub_b: N={_sb.number_of_nodes()} E={_sb.number_of_edges()} β₁={b1_b} | sub_a: N={_sa.number_of_nodes()} E={_sa.number_of_edges()} β₁={b1_a} | Δβ₁={sp_h:.4f} ged_h={ged_h:.4f}", flush=True)
+            sp_mode_used = 'betti_1'
+            sp_lb_val = None; sp_la_val = None; sp_pair_cnt = None
+            sp_imp_cnt = 0; sp_imp_ex = []
+            # ig/g computation (ig_h_val = base_ig for β₁ mode, same as hop=0)
+            ig_h_val = base_ig
+            ig_h = ig_h_val + core.sp_beta * sp_h
+            g_h = float(ged_h - core.lambda_weight * ig_h)
+            records_h.append((h, g_h, ged_h, ig_h, sp_h))
+            dh_values.append(float(ig_h_val))
+            h_before_vals.append(0.0)
+            h_after_vals.append(0.0)
+            if g_best is None or g_h < g_best:
+                g_best = g_h; h_best = h
+            # Early stop on DG threshold
+            try:
+                if (not eval_all_hops) and (theta_dg is not None) and (float(g_h) < float(theta_dg)):
+                    break
+            except Exception:
+                pass
+            continue  # skip SP legacy block below
+
+        # SP gain (legacy path)
         sp_mode_used = 'fp'
         sp_lb_val = None  # type: Optional[float]
         sp_la_val = None  # type: Optional[float]
@@ -1047,8 +1296,9 @@ def evaluate_multihop(
         h_mh, gmin_mh_val, ged_mh_val, ig_mh_val, sp_mh_val = (0, g0, delta_ged, delta_ig, delta_sp)
 
     # Persist SPafter pairset for next-step reuse (best-hop neighborhood)
+    # Skip entirely in β₁ mode — no pairsets needed
     try:
-        if pairset_service is not None and signature_builder is not None:
+        if pairset_service is not None and signature_builder is not None and not use_betti:
             he_best = max(1, int(h_best + int(max(0, int(getattr(core, 'sp_hop_expand', 0))))))
             nodes_b = before_nodes_by_h[he_best] if he_best < len(before_nodes_by_h) else before_nodes_by_h[-1]
             nodes_a = after_nodes_by_h[he_best] if he_best < len(after_nodes_by_h) else after_nodes_by_h[-1]
@@ -1071,6 +1321,11 @@ def evaluate_multihop(
     except Exception:
         pass
 
+    # β₁ mode: separate delta_b1 from delta_sp cleanly
+    _final_b1 = float(sp_mh_val) if use_betti else 0.0
+    _final_sp = 0.0 if use_betti else float(delta_sp)
+    _final_sp_mh = 0.0 if use_betti else float(sp_mh_val)
+
     return EvalResult(
         hop_series=hop_series,
         g0=g0,
@@ -1078,15 +1333,17 @@ def evaluate_multihop(
         best_hop=int(h_best),
         delta_ged=float(delta_ged),
         delta_ig=float(delta_ig),
-        delta_sp=float(delta_sp),
+        delta_sp=_final_sp,
         gmin_mh=float(gmin_mh_val),
         delta_ged_min_mh=float(ged_mh_val),
         delta_ig_min_mh=float(ig_mh_val),
-        delta_sp_min_mh=float(sp_mh_val),
+        delta_sp_min_mh=_final_sp_mh,
+        delta_b1=_final_b1,
+        use_betti=use_betti,
         chosen_edges_by_hop=chosen_edges_by_hop,
-        sssp_calls_du=int(sssp_calls_du_ct),
-        sssp_calls_dv=int(sssp_calls_dv_ct),
-        dv_leaf_skips=int(dv_leaf_skips_ct),
-        cycle_verifies=int(cycle_verifies_ct),
-        apsp_carry=apsp_state if sp_allpairs_exact else None,
+        sssp_calls_du=int(sssp_calls_du_ct) if not use_betti else 0,
+        sssp_calls_dv=int(sssp_calls_dv_ct) if not use_betti else 0,
+        dv_leaf_skips=int(dv_leaf_skips_ct) if not use_betti else 0,
+        cycle_verifies=int(cycle_verifies_ct) if not use_betti else 0,
+        apsp_carry=apsp_state if (sp_allpairs_exact and not use_betti) else None,
     )

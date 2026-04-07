@@ -62,6 +62,7 @@ class DifferentiableGeDIG(nn.Module):
         percentile: float = 0.9,
         temperature: float = 10.0,  # soft threshold の温度
         use_betti: bool = False,  # True: β₁ を使用, False: SP (legacy)
+        use_unified: bool = True,  # Kept for backward compat, always True
     ):
         super().__init__()
         self.lambda_param = lambda_param
@@ -69,6 +70,8 @@ class DifferentiableGeDIG(nn.Module):
         self.percentile = percentile
         self.temperature = temperature
         self.use_betti = use_betti
+        self.use_unified = True  # Always use unified core
+        self._unified_adapter = None
 
     def _compute_soft_edges(
         self,
@@ -185,52 +188,22 @@ class DifferentiableGeDIG(nn.Module):
         Returns:
             Dict with F, delta_epc, delta_h, delta_sp (all differentiable)
         """
-        B, H, S, _ = after_attention.shape
-
-        # Before/After のエッジを計算
-        edges_before, valid_counts = self._compute_soft_edges(before_attention, mask)
-        edges_after, _ = self._compute_soft_edges(after_attention, mask)
-
-        max_edges = valid_counts.squeeze(-1) ** 2  # (B,)
-
-        # 1. ΔEPC（グラフ編集距離）
-        # 追加されたエッジ + 削除されたエッジ（soft版）
-        edge_diff = torch.abs(edges_after - edges_before)
-        delta_epc = edge_diff.sum(dim=(-2, -1)) / (max_edges.unsqueeze(1) + 1e-9)  # (B, H)
-
-        # 2. ΔH（エントロピーの変化）
-        h_before = self._compute_entropy(before_attention)
-        h_after = self._compute_entropy(after_attention)
-        delta_h = h_after - h_before  # (B, H)
-
-        # 3. Third component: ΔSP (legacy) or ΔB (β₁)
-        sp_before = self._compute_path_efficiency(edges_before, max_edges)
-        sp_after = self._compute_path_efficiency(edges_after, max_edges)
-        delta_sp = sp_after - sp_before  # (B, H)
-
-        if self.use_betti:
-            # β₁ = E - V + C (サイクル数 = 情報の冗長経路数)
-            # SPの本質は「穴による構造の短絡」→ β₁ そのもの
-            b1_before = self._compute_betti_1(edges_before, valid_counts)
-            b1_after = self._compute_betti_1(edges_after, valid_counts)
-            delta_b1 = b1_after - b1_before  # (B, H)
-
-            # F = ΔEPC - λ(ΔH + γΔB)
-            F = delta_epc - self.lambda_param * (delta_h + self.gamma * delta_b1)
-        else:
-            delta_b1 = torch.zeros_like(delta_sp)
-
-            # F = ΔEPC - λ(ΔH + γΔSP)  [legacy]
-            F = delta_epc - self.lambda_param * (delta_h + self.gamma * delta_sp)
-
+        # Delegate to unified geDIG core (src/gedig/)
+        if self._unified_adapter is None:
+            from gedig.adapters.transformer import TransformerFEval
+            self._unified_adapter = TransformerFEval(
+                lambda_param=self.lambda_param,
+                gamma=self.gamma,
+                percentile=self.percentile,
+                temperature=self.temperature,
+                use_betti=self.use_betti,
+            )
+        r = self._unified_adapter.compute(before_attention, after_attention, mask)
         return {
-            "F": F,  # (B, H)
-            "F_mean": F.mean(),  # scalar
-            "delta_epc": delta_epc.mean(),
-            "delta_h": delta_h.mean(),
-            "delta_sp": delta_sp.mean(),  # always computed for comparison
-            "delta_b1": delta_b1.mean(),  # β₁ (0 if use_betti=False)
-            "use_betti": self.use_betti,
+            "F": r.F, "F_mean": r.F_mean,
+            "delta_epc": r.delta_epc, "delta_h": r.delta_h,
+            "delta_sp": r.delta_sp, "delta_b1": r.delta_b1,
+            "use_betti": r.use_betti,
         }
 
     def forward_single(
@@ -1007,6 +980,7 @@ def run_training_time_intervention_comparison(
     beta: float = 0.1,
     output_dir: Optional[Path] = None,
     use_betti: bool = False,
+    use_unified: bool = False,
 ) -> Dict[str, Any]:
     """
     学習時介入による精度比較（循環論法を完全に避ける決定的実験）
@@ -1091,7 +1065,7 @@ def run_training_time_intervention_comparison(
         eval_loader = DataLoader(eval_dataset, batch_size=32, collate_fn=collator)
 
         optimizer = torch.optim.AdamW(model.parameters(), lr=2e-5)
-        gedig = DifferentiableGeDIG(use_betti=use_betti).to(device)
+        gedig = DifferentiableGeDIG(use_betti=use_betti, use_unified=use_unified).to(device)
 
         # 初期Attentionを取得（参照状態として使用）
         initial_attentions = {}  # バッチごとに異なるので、ここでは最初のforward時に取得
@@ -1223,6 +1197,7 @@ def run_training_time_intervention_comparison(
     results["conclusion"] = conclusion
     results["beta"] = beta
     results["use_betti"] = use_betti
+    results["use_unified"] = use_unified
     results["f_formula"] = "ΔEPC - λ(ΔH + γΔB)" if use_betti else "ΔEPC - λ(ΔH + γΔSP)"
 
     # 保存
@@ -1266,6 +1241,8 @@ def main():
                         help="Use β₁ (Betti number) instead of SP (path efficiency) in F computation")
     parser.add_argument("--num-epochs", type=int, default=3,
                         help="Number of training epochs for Experiment 4")
+    parser.add_argument("--use-unified", action="store_true",
+                        help="Use unified gedig core (src/gedig/) instead of local implementation")
     args = parser.parse_args()
 
     if args.experiment in ["microscopic", "all"]:
@@ -1308,6 +1285,7 @@ def main():
             beta=args.beta,
             output_dir=args.output_dir,
             use_betti=args.use_betti,
+            use_unified=getattr(args, 'use_unified', False),
         )
 
 

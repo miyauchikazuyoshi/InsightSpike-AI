@@ -1423,6 +1423,15 @@ def run_episode_query(
         anchors_top_after: Set[Tuple[int,int,int]] = set()
         anchors_top_before: Set[Tuple[int,int,int]] = set()
         g_before_for_expansion = prev_graph.copy()
+        # Ensure current_query_node is connected in g_before (critical for β₁ mode).
+        # Without this, k-hop expansion from current_query_node finds almost nothing
+        # in g_before because the query node moved since prev_graph was built.
+        # Mirror the connections that stage_graph has for current_query_node.
+        if current_query_node not in g_before_for_expansion:
+            g_before_for_expansion.add_node(current_query_node)
+        for nbr in stage_graph.neighbors(current_query_node):
+            if nbr in g_before_for_expansion and not g_before_for_expansion.has_edge(current_query_node, nbr):
+                g_before_for_expansion.add_edge(current_query_node, nbr)
         for it in commit_items:
             anchor_source = it.get("anchor_position") or it.get("position") or [anchor_position[0], anchor_position[1]]
             at = (int(anchor_source[0]), int(anchor_source[1]))
@@ -1439,6 +1448,13 @@ def run_episode_query(
             nid_before = make_direction_node(at, int(d))
             if nid_before not in g_before_for_expansion:
                 g_before_for_expansion.add_node(nid_before)
+            # β₁ mode: mirror connections from stage_graph so k-hop expansion works
+            # Without this, anchors_top_before are isolated → BFS finds nothing
+            _is_betti = str(getattr(config, 'sp_mode', 'asp')).lower() == 'betti1'
+            if _is_betti and nid_before in stage_graph:
+                for nbr in stage_graph.neighbors(nid_before):
+                    if nbr in g_before_for_expansion and not g_before_for_expansion.has_edge(nid_before, nbr):
+                        g_before_for_expansion.add_edge(nid_before, nbr)
             anchors_top_before.add(nid_before)
 
         def _union_khop_subgraph(graph_obj: nx.Graph,
@@ -1911,12 +1927,14 @@ def run_episode_query(
             print(f"[DEBUG] run_experiment_query: Before external evaluator try block, step={step}", flush=True)
         try:
             # Dynamic θAG: use percentile of past g0 if enabled and history present
-            theta_ag_used = float(getattr(config, 'theta_ag', 0.0))
+            # None = disable AG gate (always run multi-hop, v6 behavior)
+            _theta_ag_raw = getattr(config, 'theta_ag', None)
+            theta_ag_used = float(_theta_ag_raw) if _theta_ag_raw is not None else None
             if bool(getattr(config, 'ag_auto', False)) and len(g0_history) > 0:
                 try:
                     theta_ag_used = float(np.quantile(np.array(g0_history, dtype=float), float(getattr(config, 'ag_quantile', 0.9))))
                 except Exception:
-                    theta_ag_used = float(getattr(config, 'theta_ag', 0.0))
+                    pass  # keep theta_ag_used as None
 
             t_eval_run_start = time.perf_counter()
             # Optional DS-backed SP pairsets
@@ -1941,8 +1959,10 @@ def run_episode_query(
             if os.getenv('INSIGHTSPIKE_DEBUG_EVAL'):
                 print(f"[DEBUG] run_experiment_query: local_max_hops={local_max_hops} config.gedig['max_hops']={config.gedig.get('max_hops', 'NOT_SET')}", flush=True)
 
-            if bool(getattr(config, 'use_main_l3', False)) and str(getattr(config, 'sp_cache_mode', 'core')).lower() in ('cached','cached_incr'):
+            _use_betti = str(getattr(config, 'sp_mode', 'asp')).lower() == 'betti1'
+            if bool(getattr(config, 'use_main_l3', False)) and str(getattr(config, 'sp_cache_mode', 'core')).lower() in ('cached','cached_incr') and not _use_betti:
                 # Lightweight path: query-centric eval via main L3 (hop0)
+                # Skip L3 for β₁ mode — need full evaluate_multihop for candidate edge evaluation
                 try:
                     from qhlib.l3_adapter import eval_query_centric_via_l3
                     # Centers: anchors_core (Q nodes)
@@ -2018,7 +2038,8 @@ def run_episode_query(
                 theta_ag_cfg = float(getattr(config, 'theta_ag', 0.0))
             except Exception:
                 theta_ag_cfg = 0.0
-            ag_wants_hops = bool(getattr(config, 'eval_per_hop_on_ag', False)) and bool(g0 > theta_ag_cfg)
+            _g0_for_ag = locals().get('g0', records_h[0][1] if records_h else 0.0)
+            ag_wants_hops = bool(getattr(config, 'eval_per_hop_on_ag', False)) and bool(_g0_for_ag > theta_ag_cfg)
             # DEBUG: Print eval conditions
             if os.getenv('INSIGHTSPIKE_DEBUG_EVAL'):
                 print(f"[DEBUG] run_experiment_query: eval_applied={eval_applied} force_per_hop={getattr(config, 'force_per_hop', False)} ag_wants_hops={ag_wants_hops}", flush=True)
@@ -2042,7 +2063,7 @@ def run_episode_query(
             pre_linkset_info=pre_linkset_info,
             query_vec=query_vec_list,
             ig_fixed_den=ig_fixed_den,
-                theta_ag=float(theta_ag_used),
+                theta_ag=float(theta_ag_used) if theta_ag_used is not None else None,
                 theta_dg=float(getattr(config, 'theta_dg', 0.0)),
                 eval_all_hops=bool(getattr(config, 'eval_all_hops', False)),
                 sp_early_stop=False,
@@ -2057,6 +2078,9 @@ def run_episode_query(
                 sp_signed=bool(getattr(config, 'sp_signed', False)),
                 pairset_service=sp_svc,
                 signature_builder=sig_builder,
+                use_betti=(str(getattr(config, 'sp_mode', 'asp')).lower() == 'betti1'),
+                betti_scale_invariant=bool(getattr(config, 'betti_scale_invariant', False)),
+                two_graph_mode=bool(getattr(config, 'two_graph_mode', False)),
                 )
                 try:
                     if getattr(eval_res, 'apsp_carry', None) is not None:
@@ -2171,9 +2195,12 @@ def run_episode_query(
             except Exception:
                 pass
             eval_applied = True
-        except Exception:
+        except Exception as _eval_exc:
             # fall back to inline results if evaluator fails
-            pass
+            import traceback
+            if os.getenv('INSIGHTSPIKE_DEBUG_EVAL'):
+                print(f"[DEBUG] evaluate_multihop FAILED: {_eval_exc}", flush=True)
+                traceback.print_exc()
 
         # 最終値の反映
         if not eval_applied:
@@ -2430,7 +2457,8 @@ def run_episode_query(
             sp_diagnostics = []
 
         # DG実コミット（貪欲）: geDIG計算終了後に、best_hop までの仮想採用セットを実コミット
-        ag_fire = bool(g0 > float(locals().get('theta_ag_used', getattr(config, 'theta_ag', 0.0))))
+        _ag_th = locals().get('theta_ag_used') if locals().get('theta_ag_used') is not None else getattr(config, 'theta_ag', None)
+        ag_fire = bool(g0 > float(_ag_th)) if _ag_th is not None else False
         # DG判定は multi-hop のみ: best_hop>=1 かつ gmin_mh < θDG
         dg_fire = bool(int(best_hop) >= 1 and float(gmin_mh_val) < float(config.theta_dg))
         if cortisol_mode != "off":
@@ -3547,7 +3575,7 @@ def run_episode_query(
                 query_node_post=[int(current_query_node[0]), int(current_query_node[1]), int(current_query_node[2])],
                 ag_fire=bool(ag_fire),
                 dg_fire=bool(dg_fire),
-                theta_ag=float(locals().get('theta_ag_used', getattr(config, 'theta_ag', 0.0))),
+                theta_ag=float(theta_ag_used) if theta_ag_used is not None else 0.0,
                 ag_auto=bool(getattr(config, 'ag_auto', False)),
                 ag_quantile=float(getattr(config, 'ag_quantile', 0.9)),
                 g0_history_len=int(len(g0_history)),
@@ -4435,6 +4463,34 @@ def main() -> None:
                     maze_data[str(seed)] = artifacts.maze_snapshot
                     for record in artifacts.steps:
                         append_record(record, phase="main")
+
+                    # Incremental persistence: write per-seed summary to JSONL
+                    if args.output:
+                        _incr_path = Path(args.output).with_suffix('.incremental.jsonl')
+                        try:
+                            with open(_incr_path, 'a') as _incr_f:
+                                _incr_f.write(json.dumps(dict(
+                                    artifacts.summary,
+                                    seed=seed,
+                                    episode_phase="main",
+                                )) + '\n')
+                                _incr_f.flush()
+                        except Exception:
+                            pass
+                    # Incremental step log: flush all_steps to JSONL per seed
+                    if step_log_base and all_steps:
+                        _step_incr = step_log_base.with_suffix('.incremental.jsonl')
+                        try:
+                            with open(_step_incr, 'a') as _sf:
+                                for _row in all_steps:
+                                    _sf.write(json.dumps(_row) + '\n')
+                                _sf.flush()
+                        except Exception:
+                            pass
+                    # Free memory: clear step data for completed seed
+                    all_steps.clear()
+                    del artifacts
+                    import gc; gc.collect()
 
         summary = aggregate(runs)
         summary["lambda_weight"] = float(lambda_weight)

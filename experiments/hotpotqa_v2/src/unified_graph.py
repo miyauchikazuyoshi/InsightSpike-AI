@@ -82,6 +82,9 @@ class AGHTConfig:
     sim_threshold: float = 0.30
     max_para_freq: int = 5
 
+    # Unified core
+    use_unified_feval: bool = False  # True: use gedig.adapters.rag
+
 
 @dataclass
 class AGHTResult:
@@ -521,57 +524,51 @@ def compute_qkv_attention(
         data["k_vec"] = k_vec
         data["q_score"] = float(np.linalg.norm(q_vec))
 
-    # ── Compute attention and F-eval for all edges ──
+    # ── Compute attention and F-eval for all edges (unified core) ──
     d_k = 3.0
     f_values = {}
+
+    from gedig.adapters.rag import RAGFEval
+    rag_feval = RAGFEval(f_lambda=config.f_lambda, d_k=d_k)
 
     for u, v, edata in graph.edges(data=True):
         q = graph.nodes[u]["q_vec"]
         k = graph.nodes[v]["k_vec"]
+        base_cost = edata.get("cost", 0.5)
 
-        # Scaled dot-product attention
+        # F-eval via unified core
+        f_val = rag_feval.compute_edge_f(base_cost, q.tolist(), k.tolist())
         alpha = float(np.dot(q, k) / math.sqrt(d_k))
 
         # V features
-        base_cost = edata.get("cost", 0.5)
-        # Bridge detection (simplified: cross-level edges)
         etype = edata.get("edge_type", "")
         is_cross_level = etype in ("contains", "same_lemma_x")
         is_bridge = etype in ("entity_overlap", "same_lemma_x")
-
         v_vec = np.array([
             config.w_v1 * base_cost,
             config.w_v2 * (1.0 if is_bridge else 0.0),
             config.w_v3 * (1.0 if is_cross_level else 0.0),
         ])
 
-        # F-eval
-        f_val = base_cost - config.f_lambda * alpha
         f_values[(u, v)] = f_val
-
         edata["alpha"] = alpha
         edata["v_vec"] = v_vec
         edata["f_value"] = f_val
 
-    # ── Dynamic threshold (30th percentile) ──
-    if f_values:
-        sorted_f = sorted(f_values.values())
-        theta = sorted_f[int(len(sorted_f) * 0.3)]
-    else:
-        theta = 0.0
+    # AG/DG classification via unified core
+    ag_dg_result = rag_feval.classify_edges(f_values)
+    theta = ag_dg_result.threshold
+    n_ag, n_dg = ag_dg_result.n_ag, ag_dg_result.n_dg
 
-    n_ag, n_dg = 0, 0
+    ag_set = set(ag_dg_result.ag_edges)
     for (u, v), fv in f_values.items():
         edata = graph[u][v]
-        if fv < theta:
+        if (u, v) in ag_set:
             edata["f_class"] = "AG"
             edata["flow_cost"] = 1.0
-            n_ag += 1
         else:
             edata["f_class"] = "DG"
             edata["flow_cost"] = 1.0 + (fv - theta)
-            n_dg += 1
-        # Flow weight for message passing
         alpha = edata["alpha"]
         v_norm = float(np.linalg.norm(edata["v_vec"]))
         edata["flow"] = max(alpha * v_norm, 0.0)
@@ -601,43 +598,25 @@ def graph_attention_propagation(
     graph: nx.DiGraph,
     n_iterations: int = 2,
     mp_alpha: float = 0.3,
+    use_unified: bool = True,  # Kept for backward compat
 ) -> None:
     """Attention-weighted message passing on unified graph.
 
+    Delegates to gedig.core.message_passing.AttentionPropagator.
     Updates node['relevance'] in-place.
     """
     # Initialize relevance from Q-score
+    init_rel = {}
     for nid, data in graph.nodes(data=True):
-        data["relevance"] = data.get("q_score", 0.0)
+        val = data.get("q_score", 0.0)
+        data["relevance"] = val
+        init_rel[nid] = val
 
-    for _ in range(n_iterations):
-        new_rel = {}
-        for nid in graph.nodes:
-            # Aggregate from incoming edges (attention-weighted)
-            preds = list(graph.predecessors(nid))
-            if not preds:
-                new_rel[nid] = graph.nodes[nid]["relevance"]
-                continue
-
-            total_flow = 0.0
-            weighted_sum = 0.0
-            for pred in preds:
-                flow = graph[pred][nid].get("flow", 0.0)
-                weighted_sum += flow * graph.nodes[pred]["relevance"]
-                total_flow += flow
-
-            if total_flow > 1e-8:
-                agg = weighted_sum / total_flow
-            else:
-                agg = 0.0
-
-            new_rel[nid] = (
-                (1 - mp_alpha) * graph.nodes[nid]["relevance"]
-                + mp_alpha * agg
-            )
-
-        for nid, rel in new_rel.items():
-            graph.nodes[nid]["relevance"] = rel
+    from gedig.adapters.rag import RAGFEval
+    rag = RAGFEval()
+    propagated = rag.propagate(graph, init_rel, n_iterations, mp_alpha)
+    for nid, rel in propagated.items():
+        graph.nodes[nid]["relevance"] = rel
 
 
 def score_documents(
@@ -762,6 +741,7 @@ def run_aght(
         graph,
         n_iterations=config.mp_iterations,
         mp_alpha=config.mp_alpha,
+        use_unified=config.use_unified_feval,
     )
     mp_ms = (time.time() - t0) * 1000
 
