@@ -18,9 +18,9 @@ if _DIAG_IMPORT:
         faulthandler.enable()
         # Dump every 12s (repeat) while diagnosing
         faulthandler.dump_traceback_later(12, repeat=True)
-        print('[main_agent][diag] faulthandler periodic dump scheduled (12s)', flush=True)
+        _logger.debug('[main_agent][diag] faulthandler periodic dump scheduled (12s)')
     except Exception as _fh_e:  # pragma: no cover
-        print('[main_agent][diag] faulthandler setup failed:', _fh_e, flush=True)
+        _logger.debug('[main_agent][diag] faulthandler setup failed:', _fh_e)
 import time
 
 # Provide a lightweight indirection so unit tests can patch
@@ -99,7 +99,7 @@ if TYPE_CHECKING:  # type hints only
 
 _LEARNING_IMPORT_DIAG = os.getenv('INSIGHTSPIKE_DIAG_IMPORT') == '1'
 if _LEARNING_IMPORT_DIAG:
-    print('[main_agent] (diag) will lazy-load learning components', flush=True)
+    _logger.debug('[main_agent] (diag) will lazy-load learning components')
 
 # Inline minimal safe_attr / safe_has to avoid potential utils/config_access import deadlock during diagnostics
 def safe_attr(obj, path, default=None):  # type: ignore
@@ -157,7 +157,7 @@ except Exception:  # pragma: no cover
 # --- Layer 1 import (always) -------------------------------------------------
 if _DIAG_IMPORT:
     _t0 = time.time()
-    print('[main_agent] importing layer1_error_monitor...', flush=True)
+    _logger.debug('[main_agent] importing layer1_error_monitor...')
 from ..layers.layer1_error_monitor import ErrorMonitor as _L1ErrorMonitor
 ErrorMonitor = _L1ErrorMonitor  # alias to allow timing capture
 if _DIAG_IMPORT:
@@ -168,7 +168,7 @@ Memory = None  # type: ignore
 if _IMPORT_MAX_LAYER >= 2:
     if _DIAG_IMPORT:
         _t1 = time.time()
-        print('[main_agent] importing layer2_compatibility (gated)...', flush=True)
+        _logger.debug('[main_agent] importing layer2_compatibility (gated)...')
     try:
         from ..layers.layer2_compatibility import (
             CompatibleL2MemoryManager as Memory,  # Layer 2: Memory Manager
@@ -191,7 +191,7 @@ if _IMPORT_MAX_LAYER >= 3:
     try:
         if _DIAG_IMPORT:
             _t2 = time.time()
-            print('[main_agent] importing layer3_graph_reasoner (gated)...', flush=True)
+            _logger.debug('[main_agent] importing layer3_graph_reasoner (gated)...')
         from ..layers.layer3_graph_reasoner import L3GraphReasoner
         GRAPH_REASONER_AVAILABLE = True
         if _DIAG_IMPORT:
@@ -446,11 +446,11 @@ class MainAgent:
         try:
             start_t = time.time()
             if _LEARNING_IMPORT_DIAG:
-                print('[main_agent] (diag) importing PatternLogger/StrategyOptimizer...', flush=True)
+                _logger.debug('[main_agent] (diag) importing PatternLogger/StrategyOptimizer...')
             from insightspike.learning.pattern_logger import PatternLogger  # local import
             from insightspike.learning.strategy_optimizer import StrategyOptimizer  # local import
             if _LEARNING_IMPORT_DIAG:
-                print('[main_agent] (diag) learning modules imported', flush=True)
+                _logger.debug('[main_agent] (diag) learning modules imported')
             self.pattern_logger = PatternLogger(self.config)
             self.strategy_optimizer = StrategyOptimizer(self.config, self.pattern_logger)
             if _LEARNING_IMPORT_DIAG:
