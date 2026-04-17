@@ -2,7 +2,7 @@
 
 ## 1. 概要 (Overview)
 
-本ドキュメントは、geDIG (Generalized Differential Information Gain) のグラフ力学を、Transformer の内部動作（Attention/FFN）と数学的に対応付け、**「推論しながら自らの構造を最適化する次世代 Transformer (Dynamic Transformer)」** の設計仕様を定義するものです。
+本ドキュメントは、geDIG (graph edit Distance and Information Gain) のグラフ力学を、Transformer の内部動作（Attention/FFN）と数学的に対応付け、**「推論しながら自らの構造を最適化する次世代 Transformer (Dynamic Transformer)」** の設計仕様を定義するものです。
 
 ## 2. コア・アイソモーフィズム (Core Isomorphism)
 

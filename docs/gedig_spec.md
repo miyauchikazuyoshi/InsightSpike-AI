@@ -4,7 +4,7 @@ title: geDIG Spec
 permalink: /gedig_spec/
 ---
 
-# geDIG (Generalized Differential Information Gain) — v4 One‑Gauge Spec
+# geDIG (graph edit Distance and Information Gain) — v4 One‑Gauge Spec
 
 This document provides the canonical definition consistent with Paper v4 (One-Gauge + Two-Stage Gating) and the current implementation specifications.
 
@@ -71,7 +71,7 @@ Approximation for educational purposes. Since it differs from the formal gauge i
 
 ---
 
-# (Japanese Original) geDIG (Generalized Differential Information Gain) — v4 One‑Gauge Spec
+# (Japanese Original) geDIG (graph edit Distance and Information Gain) — v4 One‑Gauge Spec
 
 このドキュメントは、論文 v4（One‑Gauge + 二段ゲート）および実装の現行仕様に整合する正準定義を示します。
 

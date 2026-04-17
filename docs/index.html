@@ -879,33 +879,41 @@
                     </p>
                 </div>
 
-                <!-- FEP-MDL Bridge -->
+                <!-- Helmholtz Correspondence -->
                 <div>
                     <h3 class="text-2xl font-bold text-white mb-6">Theoretical Backbone</h3>
                     <div class="bg-bg border border-white/10 rounded-xl p-8">
-                        <h4 class="text-white font-bold mb-4 border-b border-white/10 pb-2">FEP-MDL Bridge</h4>
-                        <div class="space-y-4 text-sm font-mono">
+                        <h4 class="text-white font-bold mb-4 border-b border-white/10 pb-2">Helmholtz Correspondence</h4>
+                        <p class="text-xs text-slate-500 mb-4">
+                            The canonical reading $\mathcal{F} = \Delta EPC - \lambda(\Delta H + \gamma \Delta \beta_1)$ is <em>cost − gain</em> (economic).
+                            A second reading $(\Delta EPC - \Delta \beta_1) - \Delta H$ exposes a Helmholtz-like structure:
+                        </p>
+                        <div class="space-y-3 text-sm font-mono">
                             <div class="flex justify-between">
-                                <span class="text-slate-400">0-hop (AG)</span>
-                                <span class="text-danger">Ambiguity / Error</span>
-                                <span class="text-slate-500">&rarr; FEP</span>
+                                <span class="text-slate-400">$U$ (internal energy)</span>
+                                <span class="text-cyan-400">&harr; $\Delta EPC - \Delta \beta_1$</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-slate-400">Multi-hop (DG)</span>
-                                <span class="text-success">Compression / Insight</span>
-                                <span class="text-slate-500">&rarr; MDL</span>
+                                <span class="text-slate-400">$T$ (temperature)</span>
+                                <span class="text-cyan-400">&harr; $\lambda$ (information temperature)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">$S$ (entropy)</span>
+                                <span class="text-cyan-400">&harr; $\Delta H$ (Shannon)</span>
                             </div>
                             <div class="text-center pt-4 text-xs text-slate-500 italic border-t border-white/5">
-                                "Operational Correspondence"
+                                Same equation, different bracketing. One equation, multiple readings, one canonical.
                             </div>
                         </div>
                     </div>
                     <p class="mt-6 text-slate-400 text-sm leading-relaxed">
-                        geDIG provides an <strong class="text-white">operational correspondence</strong> between
-                        the Free Energy Principle (minimizing surprise) and Minimum Description Length (maximizing compression).
+                        geDIG exposes an <strong class="text-white">operational correspondence</strong> to the Helmholtz free energy $F = U - TS$,
+                        as well as to FEP (minimizing surprise) and MDL (maximizing compression). These are secondary interpretations &mdash;
+                        the paper body uses the economic reading (cost − gain) as canonical.
                     </p>
                     <p class="mt-4 text-xs text-slate-500 italic">
-                        *This is an operational analogy, not a formal proof of equivalence.
+                        *Open problem: whether <em>structure ≡ probability</em> admits a rigorous mathematical equivalence is left to theorists (information geometry, MDL, MaxEnt).
+                        This work commits only to engineering validation of the scalar $\mathcal{F}$.
                     </p>
                 </div>
             </div>
@@ -948,6 +956,15 @@
                             <td class="py-4 pr-4 font-mono text-xs">Active</td>
                             <td class="py-4 pr-4">Graph-persistent DG + 10D vector extension</td>
                             <td class="py-4"><span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">In progress</span></td>
+                        </tr>
+                        <tr>
+                            <td class="py-4 pr-4 text-white font-medium">OCR (vector-based-cnn-ocr)</td>
+                            <td class="py-4 pr-4 font-mono text-xs">Font&rarr;handwriting</td>
+                            <td class="py-4 pr-4">
+                                <span class="text-emerald-400 font-bold">18K params</span> / <span class="text-emerald-400 font-bold">73.53%</span>
+                                acc. &mdash; DG channel is <span class="text-emerald-400 font-bold">5&times;</span> more info-efficient than AG
+                            </td>
+                            <td class="py-4"><span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><a href="https://github.com/miyauchikazuyoshi/vector-based-cnn-ocr" target="_blank" class="hover:underline">External repo</a></span></td>
                         </tr>
                         <tr>
                             <td class="py-4 pr-4 text-white font-medium">HotPotQA</td>
@@ -1106,20 +1123,28 @@
                     <p class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Citation (BibTeX)</p>
                     <div
                         class="bg-black/40 p-4 rounded-lg border border-white/5 font-mono text-xs text-slate-400 overflow-x-auto select-all">
-                        @article{miyauchi2025gedig,<br>
-                        &nbsp;&nbsp;title={geDIG: Gauge what Knowledge Graph needs},<br>
+                        @software{miyauchi2026gedig,<br>
+                        &nbsp;&nbsp;title={geDIG: graph edit Distance and Information Gain},<br>
                         &nbsp;&nbsp;author={Miyauchi, Kazuyoshi},<br>
-                        &nbsp;&nbsp;year={2025},<br>
-                        &nbsp;&nbsp;journal={GitHub repository},<br>
-                        &nbsp;&nbsp;url={https://github.com/miyauchikazuyoshi/InsightSpike-AI}<br>
+                        &nbsp;&nbsp;year={2026},<br>
+                        &nbsp;&nbsp;publisher={Zenodo},<br>
+                        &nbsp;&nbsp;doi={10.5281/zenodo.19454110},<br>
+                        &nbsp;&nbsp;url={https://doi.org/10.5281/zenodo.19454110}<br>
                         }
                     </div>
+                    <p class="mt-3 text-[10px] text-slate-500">
+                        <span class="text-slate-400">DOI:</span>
+                        <a href="https://doi.org/10.5281/zenodo.19454110" target="_blank"
+                            class="text-accent hover:underline font-mono">10.5281/zenodo.19454110</a>
+                    </p>
                     <p class="mt-4 text-[10px] text-slate-500">
                         See also:
                         <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/docs/gedig_spec.md"
                             class="text-accent hover:underline">geDIG spec</a>,
                         <a href="research/thinking/matchstick_figure_v2_en.html"
-                            class="text-accent hover:underline">Matchstick Figure</a>.
+                            class="text-accent hover:underline">Matchstick Figure</a>,
+                        <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/blob/main/docs/research/overview.md"
+                            class="text-accent hover:underline">1-page Overview</a>.
                     </p>
                 </div>
             </div>

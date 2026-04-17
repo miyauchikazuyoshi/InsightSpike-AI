@@ -85,8 +85,9 @@ spike = (delta_ged < ged_threshold) and (delta_ig > ig_threshold)
 
 ## 評価指標
 
-### geDIG (Generalized Differential Information Gain)
-**定義**: `GED - IG`。グラフ編集距離と情報利得の差分。
+### geDIG (graph edit Distance and Information Gain)
+**定義**: `F = ΔEPC - λ·ΔIG`。グラフ編集距離（構造コスト）と情報利得の二項収支を単一スカラー F で表現。
+正準展開は論文 arxiv_v5, v6 に準拠。`Generalized Differential Information Gain` は旧表記（非推奨）。
 
 **解釈**:
 - geDIG < 0: 良好な学習（情報利得が編集距離を上回る）
