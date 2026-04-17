@@ -129,8 +129,10 @@ RAG (HotpotQA) / Transformer 層別解析。
 | ☀ [thinking/insight_bourbaki_three_structures.md](thinking/insight_bourbaki_three_structures.md) | 三項（EPC/ΔH/Δβ₁）と**現代数学の3つの基本空間**（計量/測度/位相）の対応 | **気づきメモ（2026-04-17）** |
 | ☀ [thinking/insight_beta1_dimension_free.md](thinking/insight_beta1_dimension_free.md) | β₁ の**次元フリー性**と curse of dimensionality の回避 — Part 4 Transformer 統合の理論的正当化 | **気づきメモ（2026-04-17）** |
 | ☀ [thinking/insight_three_terms_orthogonality.md](thinking/insight_three_terms_orthogonality.md) | 三項独立性の厳密化は**open problem**（例示的独立 → 統計的独立 → 情報幾何的直交の3段階） | **気づきメモ（2026-04-17）** |
+| 💭 [thinking/insight_morphogenetic_generality.md](thinking/insight_morphogenetic_generality.md) | **妄想メモ（作者自身が疑いながら書いている）**: 樹木・脳細胞・粘菌の形態形成と geDIG の同型可能性。射程が広すぎてスケールの幅が見えない、工学的実証範囲外 | **妄想メモ（2026-04-17）** |
 
-> **注記**: Helmholtz 対応（気づき 3 相当）は独立メモ化せず、[thinking/gedig_formula_three_readings_20260306.md](thinking/gedig_formula_three_readings_20260306.md) §4.3-4.4 に統合（`(EPC - B) - H` の形が Helmholtz 対応として正しい）。
+> **注記**: Helmholtz 対応（気づき 3 相当）は独立メモ化せず、[thinking/gedig_formula_three_readings_20260306.md](thinking/gedig_formula_three_readings_20260306.md) §4.3-4.4 に統合（`(EPC - B) - H` の形が Helmholtz 対応として正しい）。  
+> **注記2**: ☀ = 工学的実証に接続する気づき。💭 = 射程が広すぎて作者も疑っている妄想メモ（長期構想の種、論文では主張しない）。
 
 ### Part 2: 認知・推論アーキテクチャ
 
