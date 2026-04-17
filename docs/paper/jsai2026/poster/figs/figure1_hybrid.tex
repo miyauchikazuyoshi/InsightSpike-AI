@@ -1,0 +1,99 @@
+%%
+%% Figure 1 Hybrid: AG/DG 二段ゲートと When 問題の 3 判定
+%% orbit (空間フレーム) + matchstick (3 ケース) の統合版
+%%
+%% 外側円 = Multi-hop Reach (DG 領域、ΔSP で評価)
+%% 内側円 = 0-hop Orbit (AG 領域、ΔEPC, ΔH で評価)
+%% 3 ケース = Case A (Insight) / B (力仕事) / C (崩壊)
+%%
+
+\begin{tikzpicture}[scale=0.85, every node/.style={transform shape}]
+
+  %% ============ 背景の 2 つの円 ============
+
+  % Multi-hop Reach (DG 領域): 外側円、薄い赤背景
+  \fill[red!5] (0,0) circle (6.5cm);
+  \draw[red!60, thick] (0,0) circle (6.5cm);
+
+  % 0-hop Orbit (AG 領域): 内側円、薄い青背景
+  \fill[blue!8] (0,0) circle (3.0cm);
+  \draw[blue!60, thick, dashed] (0,0) circle (3.0cm);
+
+  %% ============ 領域ラベル ============
+
+  \node[red!70, font=\small\bfseries] at (0, 6.9) {Multi-hop Reach (DG)};
+  \node[red!70, font=\footnotesize] at (0, 6.3) {評価: $\Delta \mathrm{SP}$};
+
+  \node[blue!70, font=\small\bfseries] at (0, 2.4) {0-hop Orbit (AG)};
+  \node[blue!70, font=\footnotesize] at (0, 1.9) {評価: $\Delta \mathrm{EPC}, \Delta H$};
+
+  %% ============ Query (中心) ============
+
+  \node[star, star points=5, fill=red, draw=red!80, inner sep=4pt,
+        label={[font=\small\bfseries, red!80]below:Query $Q$}] (Q) at (0,0) {};
+
+  %% ============ Case A: Insight (Multi-hop 圏で赤太線) ============
+
+  % ノード
+  \node[circle, draw=black, fill=white, inner sep=2.5pt] (A1) at (-4.8, 3.8) {};
+  \node[circle, draw=black!60, fill=white, inner sep=1.5pt] (A2) at (-5.5, 4.2) {};
+  \node[circle, draw=black!60, fill=white, inner sep=1.5pt] (A3) at (-4.5, 4.8) {};
+  \draw[black!60] (A1) -- (A2);
+  \draw[black!60] (A1) -- (A3);
+
+  % 赤太線で Multi-hop 短絡
+  \draw[red, line width=2.5pt, -{Latex[length=4mm]}] (A1) -- (Q);
+
+  % ラベル
+  \node[align=center, font=\small, fill=white, draw=red!40, rounded corners,
+        inner sep=3pt] at (-5.0, 2.3)
+       {\textbf{Case A: Insight}\\
+        $\Delta \mathrm{SP}{=}+1,\ F{<}0$\\
+        \textcolor{red!80}{\textbf{DG 発火 → 受け入れ}}};
+
+  %% ============ Case B: 力仕事 (0-hop 圏内で編集) ============
+
+  % 0-hop 圏内のノード
+  \node[circle, draw=black, fill=white, inner sep=2.5pt] (B1) at (1.4, 1.3) {};
+  \node[circle, draw=black, fill=white, inner sep=2.5pt] (B2) at (1.4, -0.3) {};
+
+  % 普通の黒エッジ (Q に届かない編集)
+  \draw[black, line width=1.2pt] (B1) -- (B2);
+
+  % ラベル
+  \node[align=center, font=\small, fill=white, draw=black!30, rounded corners,
+        inner sep=3pt] at (4.2, 0.5)
+       {\textbf{Case B: 力仕事}\\
+        $\Delta \mathrm{SP}{=}0,\ F{\approx}0$\\
+        \textcolor{black!60}{\textbf{発火なし → 保留}}};
+
+  %% ============ Case C: 崩壊 (Multi-hop 既存短絡の消失) ============
+
+  % 外側のノード (元々 Q と短絡していた)
+  \node[circle, draw=black, fill=white, inner sep=2.5pt] (C1) at (4.5, -4.5) {};
+  \node[circle, draw=black!60, fill=white, inner sep=1.5pt] at (5.3, -4.0) {};
+  \node[circle, draw=black!60, fill=white, inner sep=1.5pt] at (5.0, -5.3) {};
+
+  % 薄い点線で元の短絡を示す (削除されたことを表現)
+  \draw[red!30, line width=2.5pt, dashed] (C1) -- (Q);
+
+  % 削除マーク (×)
+  \node[red, font=\LARGE\bfseries] at (2.3, -2.3) {\texttimes};
+
+  % ラベル
+  \node[align=center, font=\small, fill=white, draw=red!40, rounded corners,
+        inner sep=3pt] at (5.5, -6.0)
+       {\textbf{Case C: 崩壊}\\
+        $\Delta \mathrm{SP}{=}-1,\ F{>}0$\\
+        \textcolor{red!80}{\textbf{逆発火 → 拒否}}};
+
+  %% ============ 凡例 (共通) ============
+
+  \node[align=left, font=\scriptsize, fill=white, draw=black!20,
+        rounded corners, inner sep=4pt] at (-5.5, -5.5)
+       {\textbf{凡例}\\
+        \textcolor{red}{\rule[0.5mm]{5mm}{1.2mm}} 有効短絡 $(\Delta \mathrm{SP}{\gg}0)$\\
+        \textcolor{red!40}{\rule[0.5mm]{5mm}{0.6mm}}$\,\cdots$ 消失した短絡\\
+        \rule[0.5mm]{5mm}{0.4mm} 通常の編集};
+
+\end{tikzpicture}

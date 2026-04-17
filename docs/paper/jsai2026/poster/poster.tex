@@ -1,0 +1,382 @@
+%%============================================================
+%% JSAI 2026 Poster
+%% geDIG: Gauge what Knowledge Graph needs.
+%%
+%% Build: uplatex poster.tex && dvipdfmx poster.dvi
+%% (or lualatex poster.tex with luatexja setup)
+%%
+%% Paper v3 (accepted): ../v3/main.tex
+%% Figure 1 hybrid: figs/figure1_hybrid.tex
+%%============================================================
+
+\documentclass[a0paper, portrait, 25pt, margin=1.5cm]{tikzposter}
+
+%% ---- 日本語 (uplatex + dvipdfmx) ----
+\usepackage[deluxe, uplatex]{otf}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage[dvipdfmx]{hyperref}
+\usepackage[dvipdfmx]{xcolor}
+
+%% ---- 数式・表 ----
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+
+%% ---- TikZ ----
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, fit, calc}
+
+%% ---- コマンド定義 ----
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\gednorm}{\Delta \mathrm{EPC}}
+\newcommand{\ignorm}{\Delta H}
+\newcommand{\spnorm}{\Delta \mathrm{SP}}
+\newcommand{\btnorm}{\Delta \beta_1}
+
+%% ---- ポスターテーマ ----
+\usetheme{Simple}
+\usecolorstyle[colorOne=white, colorTwo=white,
+               colorThree=blue!70!black]{Default}
+\useblockstyle{Default}
+\usetitlestyle{Default}
+
+%% ---- タイトル設定 ----
+\title{\parbox{0.92\linewidth}{\centering
+  動的知識グラフの探索・統合を制御する統一ゲージの提案\\[3mm]
+  \normalsize \textit{Gauge what Knowledge Graph needs.}
+}}
+\author{宮内 和義 \quad (Kazuyoshi Miyauchi)}
+\institute{Independent Researcher \quad
+  \texttt{miyauchikazuyoshi@gmail.com} \quad
+  \href{https://github.com/miyauchikazuyoshi/InsightSpike-AI}
+       {\texttt{github.com/miyauchikazuyoshi/InsightSpike-AI}}}
+\titlegraphic{}
+
+%%============================================================
+\begin{document}
+%%============================================================
+
+\maketitle
+
+%%============================================================
+%% 1. Introduction (When 問題)
+%%============================================================
+\block[bodyverticalshift=0mm]{1. Introduction: When 問題}{
+\begin{minipage}[t]{0.62\linewidth}
+\textbf{動的知識グラフにおける根本問題}:\\
+エージェントが新しい情報に出会ったとき,
+「いつ受け入れ,いつ探索を続けるべきか?」.
+
+\medskip
+従来手法は主に\textbf{確率的評価}
+(KL divergence, ELBO, 自由エネルギー原理 (FEP), MDL など)
+を用いてきた. しかしこれらは\textbf{構造項}と\textbf{確率項}を
+分離せず,グラフ編集に伴う\textbf{位相的変化}を暗黙的にしか扱えない.
+
+\medskip
+\textbf{本研究の提案}:
+構造コストと情報利得を\textbf{独立項としてスカラー化}し,
+単一ゲージ \(\F\) で When 問題を定量化する:
+\[
+  \F = \gednorm - \lambda \bigl( s \cdot \ignorm + \gamma \cdot \spnorm \bigr)
+\]
+ただし \(s\) は学習フェーズ適応パラメータ (後述).
+
+\medskip
+2 段ゲート AG/DG により,\(\F\) の符号に応じて
+\textbf{受け入れ / 保留 / 拒否}の 3 判定を実現する.
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.35\linewidth}
+\textbf{貢献}
+\begin{enumerate}\setlength\itemsep{1mm}
+  \item \textbf{SP 定義の改善} \\
+  全ペア到達性 $\to$ クエリアンカー (CLS) への経路集中度
+  \item \textbf{entropy\_sign \(s\) の導入} \\
+  学習フェーズ(構築 $s=+1$ / 特化 $s=-1$)適応
+  \item \textbf{介入実験による因果検証} \\
+  Positive介入 vs Negative介入で精度差 4.6\%
+\end{enumerate}
+\end{minipage}
+}
+
+%%============================================================
+%% 2. Why three terms? (Figure 1 hybrid)
+%%============================================================
+\block{2. Why three terms? \textemdash{} AG/DG 二段ゲートと 3 判定}{
+\vspace{-3mm}
+\begin{minipage}[t]{0.58\linewidth}
+  \centering
+  \vspace{2mm}
+  \resizebox{0.98\linewidth}{!}{\input{figs/figure1_hybrid}}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.40\linewidth}
+  \textbf{Figure 1: AG/DG 二段ゲートと 3 判定}
+
+  \medskip
+  Query $Q$ を中心に,geDIG は 2 段階で判定する:
+  \begin{itemize}\setlength\itemsep{1mm}
+    \item \textcolor{blue!70!black}{\textbf{AG (内側円, 0-hop)}}\\
+      近傍の曖昧性を \(\gednorm, \ignorm\) で検知
+    \item \textcolor{red!70!black}{\textbf{DG (外側円, multi-hop)}}\\
+      遠方への短絡 \(\spnorm \gg 0\) を確認
+  \end{itemize}
+
+  \medskip
+  \textbf{3 ケースの判定}:
+  \begin{itemize}\setlength\itemsep{1mm}
+    \item \textbf{A: Insight} --- Multi-hop 圏で新短絡\\
+      \(\spnorm{=}+1, F{<}0\) $\to$ \textcolor{red!80}{\textbf{受け入れ}}
+    \item \textbf{B: 力仕事} --- 0-hop 内の無関係編集\\
+      \(\spnorm{=}0, F{\approx}0\) $\to$ 保留
+    \item \textbf{C: 崩壊} --- 既存短絡の消失\\
+      \(\spnorm{=}-1, F{>}0\) $\to$ \textcolor{red!80}{\textbf{拒否}}
+  \end{itemize}
+
+  \medskip
+  同一の編集コスト(\(\gednorm{=}1\))と類似の情報量変化
+  (\(\ignorm\))でも,位相項 \(\spnorm\) と 2 段ゲートを
+  組み合わせることで\textbf{質的に異なる 3 判定}が可能になる.
+  \textbf{これが geDIG の When 問題への解法}.
+\end{minipage}
+}
+
+%%============================================================
+%% 3. Formulation
+%%============================================================
+\block{3. Formulation: \(\F\) の定義と entropy\_sign}{
+\begin{minipage}[t]{0.48\linewidth}
+\textbf{正準形}
+\[
+  \F = \gednorm - \lambda \bigl( s \cdot \ignorm + \gamma \cdot \spnorm \bigr)
+\]
+
+\begin{tabular}{ll}
+\toprule
+項 & 意味 \\
+\midrule
+\(\gednorm\) & 構造変更コスト (グラフ編集距離) \\
+\(\ignorm\) & 情報量変化 (Shannon) \\
+\(\spnorm\) & Shortcut Purity 変化 (CLS 集中度) \\
+\(\lambda, \gamma\) & 重み係数 (分位点校正) \\
+\(s\) & entropy\_sign (\(\pm 1\)) \\
+\bottomrule
+\end{tabular}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.48\linewidth}
+\textbf{entropy\_sign \(s\) の役割}
+
+\medskip
+学習フェーズによって \(\ignorm\) の「望ましい方向」が異なる:
+
+\begin{center}
+\begin{tabular}{lcl}
+\toprule
+フェーズ & \(s\) & 解釈 \\
+\midrule
+構築 (迷路 / 事前学習) & \(+1\) & 延伸 = 利得 \\
+特化 (Fine-tuning) & \(-1\) & 集中 = 利得 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+これにより, \textbf{空間 KG (迷路, 構築)} と
+\textbf{意味 KG (Transformer, 特化)} の両方を
+同一ゲージで評価できる.
+\end{minipage}
+}
+
+%%============================================================
+%% 4. Experiments
+%%============================================================
+\block{4. Experiments: 2 ドメイン検証}{
+\begin{minipage}[t]{0.48\linewidth}
+\textbf{(A) Spatial KG: 迷路ナビゲーション}
+
+\medskip
+\begin{itemize}\setlength\itemsep{1mm}
+  \item 設定: 15×15 grid, 部分観測, 250 steps
+  \item \(s=+1\) (構築フェーズ)
+  \item ベースライン: ランダム探索等
+\end{itemize}
+
+\medskip
+\textbf{結果}:
+\begin{itemize}\setlength\itemsep{1mm}
+  \item ゴール到達率: \textbf{98\%}
+  \item 候補エッジ拒否率: \textbf{98\%}
+  \item AG/DG 発火タイミングが
+    デッドエンド/ループ閉鎖と一致
+\end{itemize}
+
+\textit{\small 注: 単一設定 (15×15) における結果. 統計的な seed 間分散の
+追加検証を計画中 (Future Work).}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.48\linewidth}
+\textbf{(B) Semantic KG: Transformer 介入実験}
+
+\medskip
+\begin{itemize}\setlength\itemsep{1mm}
+  \item モデル: DistilBERT
+  \item タスク: SST-2 (感情分類)
+  \item \(s=-1\) (特化フェーズ)
+  \item Positive/Negative 介入で \(\F\) の方向を操作
+\end{itemize}
+
+\medskip
+\textbf{結果 (介入実験)}:
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+条件 & 精度 & \(\spnorm\) \\
+\midrule
+Baseline & 86.8\% & --- \\
+Positive (\(\F\downarrow\)) & 85.6\% & \(+0.19\) \\
+Negative (\(\F\uparrow\)) & 81.0\% & \(-0.09\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\textbf{Positive $-$ Negative \(=\) 4.6\% の精度差}\\
+$\to$ \(\F\) が\textbf{因果的}な学習シグナルであることを実証.
+
+\textit{\small 注: 単一 seed (entropy\_sign=-1) の結果. 3-seed 再現と
+他モデル (BERT-base) への拡張を計画中.}
+\end{minipage}
+}
+
+%%============================================================
+%% 5. Discussion
+%%============================================================
+\block{5. Discussion \textemdash{} SP の意義と $\beta_1$ への一般化}{
+\begin{minipage}[t]{0.48\linewidth}
+\textbf{SP はクエリ依存の位相項}
+
+\medskip
+採択論文の SP は Query $Q$ (CLS) への経路集中度として定義される.
+これは「\textbf{今解こうとしている問題に効く構造か}」を測る.
+
+\medskip
+Figure 1 の Multi-hop Reach (赤い外側円) は $Q$ からの到達可能性
+で定義される領域であり, SP はこの領域での短絡強度を表す.
+
+\medskip
+\textbf{SP $\to$ $\beta_1$ への一般化}:
+$Q$ 依存性を外した一般化として,
+\textbf{第一 Betti 数} $\beta_1$ (独立サイクル数) が考えられる.
+これは閉路の数そのものをグラフ全体の位相量として扱う.
+$\beta_1$ は以下の性質を持つ (\textit{採択論文後の拡張}):
+\begin{itemize}\setlength\itemsep{1mm}
+  \item 位相不変量 (計量・重みに依存しない)
+  \item 離散量 (\(\btnorm \in \mathbb{Z}\))
+  \item 次元フリー (\(O(V+E)\) で計算可能)
+\end{itemize}
+並行記録実験で Spearman $r > 0.7$ (SP, $\beta_1$ 間).
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.48\linewidth}
+\textbf{外部実証: 視覚処理ドメイン (OCR)}
+
+\medskip
+\textit{採択論文外の独立検証として}
+外部プロジェクト
+(\href{https://github.com/miyauchikazuyoshi/vector-based-cnn-ocr}
+      {\texttt{vector-based-cnn-ocr}})
+で geDIG 原理を Font $\to$ 手書き cross-domain transfer に適用:
+
+\medskip
+\begin{center}
+\begin{tabular}{lc}
+\toprule
+指標 & 値 \\
+\midrule
+パラメータ数 & \textbf{18K} (標準 CNN の 1/100+) \\
+精度 & \textbf{73.53\%} \\
+DG チャネル 情報効率 & AG の \textbf{5 倍} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\textbf{含意}:
+\begin{itemize}\setlength\itemsep{1mm}
+  \item 構造を先に与えれば params 桁違いに減少
+  \item DG (確定情報) $>$ AG (探索情報) の効率性
+  \item 空間 KG / 意味 KG 以外にも geDIG が機能
+\end{itemize}
+
+\textit{\small 詳細は \href{https://github.com/miyauchikazuyoshi/vector-based-cnn-ocr}{外部リポジトリ} と
+\texttt{docs/research/gedig\_core\_theory\_unified.md \S 8.2} 参照.}
+\end{minipage}
+}
+
+%%============================================================
+%% 6. Limitations
+%%============================================================
+\block{6. Limitations}{
+\textbf{誠実な限界の明示}:
+\begin{itemize}\setlength\itemsep{1mm}
+  \item \textbf{統計的検定}: 迷路 単一設定, Transformer 単一 seed.
+    3-seed 以上の再現と paired comparison を計画.
+  \item \textbf{モデル規模}: DistilBERT のみ検証.
+    BERT-base / GPT-2 / Pythia への拡張は Future Work.
+  \item \textbf{学習初期化}: 事前学習済みモデルでの介入のみ.
+    ランダム初期化からの学習過程の検証は未実施 (Pythia 計画中).
+  \item \textbf{$\beta_1$ への完全移行}: SP と $\beta_1$ の相関は確認済み
+    (Spearman $r > 0.7$) だが, Transformer での $\beta_1$ 直接検証は継続中.
+  \item \textbf{$\lambda, \gamma$ の感度分析}: 分位点校正による経験的選択のみ.
+    理論的導出は未着手.
+\end{itemize}
+}
+
+%%============================================================
+%% 7. Conclusion & Links
+%%============================================================
+\block{7. Conclusion \& Resources}{
+\begin{minipage}[t]{0.62\linewidth}
+\textbf{まとめ}
+\begin{itemize}\setlength\itemsep{1mm}
+  \item geDIG は動的知識グラフの When 問題に対する統一ゲージを提供
+  \item SP 定義の改善と entropy\_sign 導入により
+    \textbf{迷路 (空間 KG)} と \textbf{Transformer (意味 KG)} を同一ゲージで評価
+  \item 介入実験による因果検証で 4.6\% の精度差を確認
+\end{itemize}
+
+\medskip
+\textbf{Future Work}
+\begin{itemize}\setlength\itemsep{1mm}
+  \item Pythia チェックポイントによる学習過程全体の観察
+  \item SP $\to \beta_1$ への完全移行 (Transformer 含む)
+  \item Grokking 相転移における $\F$ と attention 渦度の相関
+    (既存 $\beta_1$ proxy 研究 (TAG-DS 2025) の拡張)
+\end{itemize}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.35\linewidth}
+\textbf{Resources}
+
+\medskip
+\begin{itemize}\setlength\itemsep{1mm}
+  \item GitHub:\\
+    \href{https://github.com/miyauchikazuyoshi/InsightSpike-AI}
+         {\texttt{InsightSpike-AI}}
+  \item Zenodo DOI: \\
+    \href{https://doi.org/10.5281/zenodo.19454110}
+         {\texttt{10.5281/zenodo.19454110}}
+  \item 1-page Overview:\\
+    \texttt{docs/research/overview.md}
+  \item Paper v3 (採択版):\\
+    \texttt{docs/paper/jsai2026/v3/}
+\end{itemize}
+
+\medskip
+\textit{\scriptsize 連絡: miyauchikazuyoshi@gmail.com}
+\end{minipage}
+}
+
+\end{document}
