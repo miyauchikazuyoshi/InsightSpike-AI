@@ -21,11 +21,15 @@
 
   %% ============ 領域ラベル ============
 
-  \node[red!70, font=\small\bfseries] at (0, 6.9) {Multi-hop Reach (DG)};
-  \node[red!70, font=\footnotesize] at (0, 6.3) {評価: $\Delta \mathrm{SP}$};
+  % Multi-hop Reach: 外側円の上部、円の外
+  \node[red!70, font=\small\bfseries] at (0, 7.0) {Multi-hop Reach (DG)};
+  \node[red!70, font=\footnotesize] at (0, 6.55) {評価: $\Delta \mathrm{SP}$};
 
-  \node[blue!70, font=\small\bfseries] at (0, 2.4) {0-hop Orbit (AG)};
-  \node[blue!70, font=\footnotesize] at (0, 1.9) {評価: $\Delta \mathrm{EPC}, \Delta H$};
+  % 0-hop Orbit: 内側円の左外側（Case A との重なりを避ける）
+  \node[blue!70, font=\small\bfseries, anchor=east] at (-3.2, 1.6)
+    {0-hop Orbit (AG)};
+  \node[blue!70, font=\footnotesize, anchor=east] at (-3.2, 1.0)
+    {評価: $\Delta \mathrm{EPC}, \Delta H$};
 
   %% ============ Query (中心) ============
 
@@ -44,9 +48,9 @@
   % 赤太線で Multi-hop 短絡
   \draw[red, line width=2.5pt, -{Latex[length=4mm]}] (A1) -- (Q);
 
-  % ラベル
+  % ラベル (ノードの上方、0-hop ラベルと重ならない位置)
   \node[align=center, font=\small, fill=white, draw=red!40, rounded corners,
-        inner sep=3pt] at (-5.0, 2.3)
+        inner sep=3pt] at (-5.2, 5.5)
        {\textbf{Case A: Insight}\\
         $\Delta \mathrm{SP}{=}+1,\ F{<}0$\\
         \textcolor{red!80}{\textbf{DG 発火 → 受け入れ}}};
@@ -60,9 +64,9 @@
   % 普通の黒エッジ (Q に届かない編集)
   \draw[black, line width=1.2pt] (B1) -- (B2);
 
-  % ラベル
+  % ラベル (0-hop 円の右外側、Multi-hop 圏内の下部)
   \node[align=center, font=\small, fill=white, draw=black!30, rounded corners,
-        inner sep=3pt] at (4.2, 0.5)
+        inner sep=3pt] at (4.8, -1.7)
        {\textbf{Case B: 力仕事}\\
         $\Delta \mathrm{SP}{=}0,\ F{\approx}0$\\
         \textcolor{black!60}{\textbf{発火なし → 保留}}};
@@ -80,9 +84,9 @@
   % 削除マーク (×)
   \node[red, font=\LARGE\bfseries] at (2.3, -2.3) {\texttimes};
 
-  % ラベル
+  % ラベル (外側円の内側、下部)
   \node[align=center, font=\small, fill=white, draw=red!40, rounded corners,
-        inner sep=3pt] at (5.5, -6.0)
+        inner sep=3pt] at (5.0, -5.3)
        {\textbf{Case C: 崩壊}\\
         $\Delta \mathrm{SP}{=}-1,\ F{>}0$\\
         \textcolor{red!80}{\textbf{逆発火 → 拒否}}};

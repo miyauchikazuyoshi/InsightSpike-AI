@@ -2,8 +2,11 @@
 %% JSAI 2026 Poster
 %% geDIG: Gauge what Knowledge Graph needs.
 %%
-%% Build: uplatex poster.tex && dvipdfmx poster.dvi
-%% (or lualatex poster.tex with luatexja setup)
+%% Build: lualatex poster.tex (run twice for cross-references)
+%%
+%% Note: tikzposter + uplatex + dvipdfmx has a known compatibility
+%% issue (PS special commands not interpretable by dvipdfmx, causing
+%% blocks to disappear). We use lualatex which directly outputs PDF.
 %%
 %% Paper v3 (accepted): ../v3/main.tex
 %% Figure 1 hybrid: figs/figure1_hybrid.tex
@@ -11,11 +14,11 @@
 
 \documentclass[a0paper, portrait, 25pt, margin=1.5cm]{tikzposter}
 
-%% ---- 日本語 (uplatex + dvipdfmx) ----
-\usepackage[deluxe, uplatex]{otf}
-\usepackage[dvipdfmx]{graphicx}
-\usepackage[dvipdfmx]{hyperref}
-\usepackage[dvipdfmx]{xcolor}
+%% ---- 日本語 (lualatex + luatexja) ----
+\usepackage{luatexja}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
 
 %% ---- 数式・表 ----
 \usepackage{amsmath, amssymb}
@@ -39,6 +42,9 @@
                colorThree=blue!70!black]{Default}
 \useblockstyle{Default}
 \usetitlestyle{Default}
+
+%% ---- tikzposter のロゴ非表示 ----
+\tikzposterlatexaffectionproofoff
 
 %% ---- タイトル設定 ----
 \title{\parbox{0.92\linewidth}{\centering
@@ -198,7 +204,7 @@
 
 \medskip
 \begin{itemize}\setlength\itemsep{1mm}
-  \item 設定: 15×15 grid, 部分観測, 250 steps
+  \item 設定: $15 \times 15$ grid, 部分観測, 250 steps
   \item \(s=+1\) (構築フェーズ)
   \item ベースライン: ランダム探索等
 \end{itemize}
@@ -212,7 +218,7 @@
     デッドエンド/ループ閉鎖と一致
 \end{itemize}
 
-\textit{\small 注: 単一設定 (15×15) における結果. 統計的な seed 間分散の
+\textit{\small 注: 単一設定 ($15 \times 15$) における結果. 統計的な seed 間分散の
 追加検証を計画中 (Future Work).}
 \end{minipage}%
 \hfill

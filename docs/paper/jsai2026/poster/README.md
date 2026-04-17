@@ -15,39 +15,40 @@ poster/
 
 ## ビルド方法
 
-### 推奨: uplatex + dvipdfmx
+### 推奨: lualatex (現行設定)
 
 ```bash
 cd docs/paper/jsai2026/poster
-uplatex poster.tex
-uplatex poster.tex              # 2 回走らせて目次等を安定化
-dvipdfmx poster.dvi             # → poster.pdf を生成
-```
-
-### 代替: lualatex (日本語フォント問題時)
-
-`poster.tex` の日本語設定を以下に差し替え:
-
-```latex
-% 以下を差し替え
-\usepackage[deluxe, uplatex]{otf}
-% ↓↓↓
-\usepackage{luatexja}
-\usepackage{luatexja-fontspec}
-```
-
-その後:
-```bash
 lualatex poster.tex
+lualatex poster.tex             # 2 回目は cross-reference 安定化のため (任意)
 ```
+
+→ `poster.pdf` が直接生成されます。
+
+### なぜ lualatex か — uplatex + dvipdfmx では不具合
+
+**tikzposter + uplatex + dvipdfmx の既知の相性問題**:
+- tikzposter はブロック描画に PostScript 特殊命令 (`ps::`) を使用
+- dvipdfmx はこれを解釈できず「`Unknown token "restore"`」警告を出す
+- 結果: **タイトル以外のブロックが全て消失**してしまう
+
+→ **lualatex** は PDF を直接出力するためこの問題を回避できる。
+   日本語は `luatexja` パッケージで対応済み (HaranoAji フォント使用)。
+
+### uplatex 環境で試したい場合 (非推奨)
+
+`poster.tex` の日本語設定を差し替え、さらに tikzposter のブロック描画を
+avoid する調整が必要。現実的には lualatex を推奨。
 
 ### 依存パッケージ
 
 - `tikzposter` (ポスタークラス)
-- `otf` (日本語フォント、deluxe オプション)
+- `luatexja` (lualatex 用 日本語組版)
 - `amsmath`, `amssymb`, `booktabs`, `array`
 - `tikz` + libraries: `arrows.meta`, `positioning`, `shapes.geometric`, `fit`, `calc`
-- `hyperref`, `xcolor`, `graphicx` (dvipdfmx オプション)
+- `hyperref`, `xcolor`, `graphicx`
+
+MacTeX / TeX Live 2025 以上であれば標準で揃っています。
 
 ## 構成 (7 セクション, A0 縦)
 
@@ -105,10 +106,16 @@ lualatex poster.tex
 
 ## トラブルシューティング
 
+### 「タイトル以外のブロックが消えている」
+
+- **原因**: uplatex + dvipdfmx を使っている場合、tikzposter の PostScript 特殊命令が dvipdfmx で解釈できない既知の問題
+- **対処**: `lualatex poster.tex` を使う (現行設定)
+
 ### 日本語が出ない
 
-- `otf` パッケージがインストール済みか確認: `kpsewhich otf.sty`
-- TeX Live / MacTeX で通常は含まれるが, MiKTeX では追加インストールが必要な場合あり
+- `luatexja` パッケージがインストール済みか確認:
+  `kpsewhich luatexja.sty`
+- TeX Live 2020 以上であれば標準装備
 
 ### Figure 1 が表示されない
 
@@ -124,6 +131,15 @@ lualatex poster.tex
 \usecolorstyle{Default}        % Default, Australia, Britain, Sweden, ...
 \useblockstyle{Default}        % Default, Basic, Minimal, Envelope, Corner, Slide, TornOut
 ```
+
+### Figure 1 のラベル重なり調整
+
+`figs/figure1_hybrid.tex` 内の `\node` 座標を調整:
+- Case A/B/C ボックスの座標 `at (x, y)`
+- 領域ラベル (`Multi-hop Reach`, `0-hop Orbit`) の座標
+- 凡例ボックスの座標
+
+調整後は `lualatex poster.tex` で再ビルド。
 
 ## 関連ドキュメント
 
