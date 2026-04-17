@@ -129,10 +129,15 @@ RAG (HotpotQA) / Transformer 層別解析。
 | ☀ [thinking/insight_bourbaki_three_structures.md](thinking/insight_bourbaki_three_structures.md) | 三項（EPC/ΔH/Δβ₁）と**現代数学の3つの基本空間**（計量/測度/位相）の対応 | **気づきメモ（2026-04-17）** |
 | ☀ [thinking/insight_beta1_dimension_free.md](thinking/insight_beta1_dimension_free.md) | β₁ の**次元フリー性**と curse of dimensionality の回避 — Part 4 Transformer 統合の理論的正当化 | **気づきメモ（2026-04-17）** |
 | ☀ [thinking/insight_three_terms_orthogonality.md](thinking/insight_three_terms_orthogonality.md) | 三項独立性の厳密化は**open problem**（例示的独立 → 統計的独立 → 情報幾何的直交の3段階） | **気づきメモ（2026-04-17）** |
+| ☀ [thinking/insight_transformer_phase_transition_landscape.md](thinking/insight_transformer_phase_transition_landscape.md) | **Transformer × 相転移 × 位相**の先行研究ランドスケープ（Özönder 2025, Sun-Haghighat 2025, T3former）+ 既存 BKT 言及 3 箇所の統合。検証計画 H_ising-bkt 付き。**Part 4 §8.6 negative result の具体的修正方針** | **気づきメモ（2026-04-17）** |
+| 🧪 [thinking/experiment_grokking_curl.md](thinking/experiment_grokking_curl.md) | **最優先実験プロトコル**: Grokking 相転移で β₁ + curl(attention) + F を測定。Nanda 2023 で 10 週間。既存 TAG-DS 2025 の β₁ proxy を **curl 追加で拡張**、既存 curl TODO ([cognitive_foundation §8](thinking/gedig_cognitive_foundation.md)) を一気に検証 | **実験プロトコル（2026-04-17）** |
 | 💭 [thinking/insight_morphogenetic_generality.md](thinking/insight_morphogenetic_generality.md) | **妄想メモ（作者自身が疑いながら書いている）**: 樹木・脳細胞・粘菌の形態形成と geDIG の同型可能性。射程が広すぎてスケールの幅が見えない、工学的実証範囲外 | **妄想メモ（2026-04-17）** |
 
 > **注記**: Helmholtz 対応（気づき 3 相当）は独立メモ化せず、[thinking/gedig_formula_three_readings_20260306.md](thinking/gedig_formula_three_readings_20260306.md) §4.3-4.4 に統合（`(EPC - B) - H` の形が Helmholtz 対応として正しい）。  
-> **注記2**: ☀ = 工学的実証に接続する気づき。💭 = 射程が広すぎて作者も疑っている妄想メモ（長期構想の種、論文では主張しない）。
+> **注記2**: マーク凡例:  
+> - ☀ = 工学的実証に接続する気づき  
+> - 🧪 = 実行可能な実験プロトコル（action 候補、GPU 利用時に着手）  
+> - 💭 = 射程が広すぎて作者も疑っている妄想メモ（長期構想の種、論文では主張しない）
 
 ### Part 2: 認知・推論アーキテクチャ
 
@@ -167,6 +172,8 @@ NREM/REM 二サイクル、Hebbian 学習、シグナル伝播、神経調節物
 | ファイル | 内容 | ステータス |
 |---|---|---|
 | **[gedig_transformer_architecture.md](gedig_transformer_architecture.md)** | **統合版（骨格作成済、§1-8 + 付録 A-C、本文化予定）** | **新規・統合先** |
+| ☀ [thinking/insight_transformer_phase_transition_landscape.md](thinking/insight_transformer_phase_transition_landscape.md) | **Transformer × 相転移 × 位相** 先行研究（Özönder/Sun-Haghighat/T3former）+ 既存 BKT 3 箇所統合 + 検証計画 H_ising-bkt / H_grokking-curl | **気づきメモ（2026-04-17）** |
+| 🧪 [thinking/experiment_grokking_curl.md](thinking/experiment_grokking_curl.md) | **最優先実験**: Grokking で β₁ + curl(attention) + F を測定。Nanda 2023 再現 + curl 初観測 | **実験プロトコル（2026-04-17）** |
 | [geDIG_transformer_discussion_20260416.md](geDIG_transformer_discussion_20260416.md) | 層フロー同型、§9 自己批判、nominalization 問題 | **核心ノート（維持、§9 が long-term 参照）** |
 | [dynamic_transformer_spec.md](dynamic_transformer_spec.md) | 層の動的再構成、Phase 1/2 サイクル | 統合対象 |
 | [splatting_attention_duality_for_gedig.md](splatting_attention_duality_for_gedig.md) | Splatting(where) / Attention(what) 双対 | 統合対象 |
