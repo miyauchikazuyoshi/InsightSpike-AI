@@ -26,16 +26,14 @@ docs/paper/
 │   ├── tier1_action_plan.md    今日までの研究整理を v7 に反映する Tier 1 計画
 │   └── restructured_draft.tex  再構成草稿（2025-09、v7 の種として参考）
 │
-├── jsai2026/                    人工知能学会 2026 向け投稿原稿
-│   ├── README.md               投稿戦略（Option A/B/AB）
-│   ├── draft_a/                Option A: 迷路版
-│   ├── draft_b/                Option B: Transformer 版
+├── jsai2026/                    人工知能学会 2026 向け投稿原稿（採択: v3）
+│   ├── README.md
+│   ├── v3/                     **採択版** (SP + entropy_sign + 介入実験)
+│   ├── draft_a/, draft_b/      Option A/B（草稿、v3 以前）
 │   ├── draft_hotpotqa/         HotpotQA 向け
 │   ├── option_ab_merged/       A+B 統合版
 │   ├── option_ab_merged_v2/    A+B 統合版 v2
-│   ├── option_a_maze.md        構成メモ
-│   ├── option_b_transformer.md 構成メモ
-│   └── speech_script_sec4.md   発表原稿
+│   └── (poster/)               ポスター（今後作成）
 │
 ├── logs/                        プロセスメモ（作業履歴、完成版には反映済）
 │   ├── STRUCTURE_IMPROVEMENT_LOG.md
@@ -43,24 +41,35 @@ docs/paper/
 │   ├── MAZE_EXPERIMENT_DESIGN_ADDED.md
 │   └── FINAL_STRUCTURE.md
 │
-└── （共有リソース、バージョン横断で使用）
-    ├── figures/                    論文図
-    ├── fig_scripts/                図作成スクリプト
-    ├── maze_25x25_panels/          迷路実験の図版
-    ├── maze_25x25_snapshots/       迷路実験のスクリーンショット
-    ├── fig10_ablation_study.{pdf,png}
-    ├── fig11_component_analysis.{pdf,png}
-    ├── figures.png
-    ├── appendix_fep_mdl_bridge_ja.tex   FEP-MDL 付録（日本語）
-    ├── appendix_smallworld.tex          スモールワールド付録
-    ├── sections/                    セクション断片（日英）
-    ├── templates/                   表・図のテンプレート
-    ├── data/                        実験結果 JSON/CSV (60+)
-    ├── references.bib               BibTeX 共通
-    ├── figures_and_tables.md        図表一覧
-    ├── story_ged_as_insight.md      theoretical narrative
-    └── README_figs.md               figures/ の案内
+├── shared/                      共有リソース（バージョン横断で使用）
+│   ├── figures/                    論文図（40+）
+│   ├── fig_scripts/                図作成スクリプト
+│   ├── maze_25x25_panels/          迷路実験の図版
+│   ├── maze_25x25_snapshots/       迷路実験のスクリーンショット
+│   ├── fig10_ablation_study.{pdf,png}
+│   ├── fig11_component_analysis.{pdf,png}
+│   ├── figures.png
+│   ├── appendix_fep_mdl_bridge_ja.tex   FEP-MDL 付録（日本語）
+│   ├── appendix_smallworld.tex          スモールワールド付録
+│   ├── sections/                   セクション断片（日英）
+│   ├── templates/                  表・図のテンプレート
+│   ├── references.bib              BibTeX 共通
+│   ├── figures_and_tables.md       図表一覧
+│   ├── story_ged_as_insight.md     theoretical narrative
+│   └── README_figs.md              figures/ の案内
+│
+└── data/                        実験結果 JSON/CSV (60+)
+                                 ※ experiments/ 配下のコード 31+ 箇所から参照されているため
+                                   shared/ には移動せず、root に残す
 ```
+
+### 構造の原則
+
+- **v5 / v6**: 履歴参照用。再ビルドしない前提（PDF 保存済）
+- **v7 / jsai2026**: アクティブな作業場所
+- **shared/**: バージョン横断で参照する共有リソース
+- **data/**: 論文 + 実験コード両方から参照、root 維持
+- **logs/**: 過去の作業履歴、通常参照不要
 
 ---
 
