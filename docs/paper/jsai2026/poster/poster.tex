@@ -75,8 +75,8 @@
 %% Row 1: When 問題 (全幅)
 %%============================================================
 \block{1. 本研究の問い: When 問題}{
-\begin{columns}
-\column{0.62}
+\begin{minipage}[t]{0.62\linewidth}
+\vspace{0mm}
 \textbf{動的知識グラフにおける根本問題}:
 エージェントが新しい情報に出会ったとき,
 「\textbf{いつ受け入れ, いつ探索を続けるべきか?}」
@@ -88,21 +88,22 @@
 \medskip
 \textbf{本研究}: 構造コストと情報利得を\textbf{独立項としてスカラー化}し,
 単一ゲージ \(\F\) で定量化.
-
-\column{0.36}
-\vspace{-3mm}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.35\linewidth}
+\vspace{0mm}
 \begin{center}
   \Large \(\F = \gednorm - \lambda \bigl( s \cdot \ignorm + \gamma \cdot \spnorm \bigr)\)
 \end{center}
 \medskip
-\textbf{2 段ゲート AG/DG} により \(\F\) の符号で\\
+\textbf{2 段ゲート AG/DG} により \(\F\) の符号で
 \textbf{\textcolor{heroblue}{受け入れ}} / 保留 /
 \textbf{\textcolor{herored}{拒否}} の 3 判定.
 
 \medskip
 \textbf{貢献 3 点}: (1) SP 定義改善 (CLS 集中度), (2) entropy\_sign \(s\) 導入,
 (3) 介入実験による因果検証.
-\end{columns}
+\end{minipage}
 }
 
 %%============================================================
@@ -141,36 +142,61 @@
 %% Row 2: Figure 1 hybrid (full width) + caption
 %%============================================================
 \block{2. Why three terms? \textemdash{} AG/DG 二段ゲートと 3 判定}{
-\vspace{-3mm}
+\begin{minipage}[t]{0.38\linewidth}
+\vspace{0mm}
 \begin{center}
-  \resizebox{0.70\linewidth}{!}{\input{figs/figure1_hybrid}}
+  \resizebox{0.96\linewidth}{!}{\input{figs/figure1_hybrid}}
 \end{center}
-\vspace{-2mm}
+\small\centering
+\textbf{Figure 1}: AG/DG 二段ゲートと 3 判定の空間的構造
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.60\linewidth}
+\vspace{0mm}
+\textbf{2 段ゲートの必然性}\\
+Query $Q$ (Transformer の CLS, 迷路のゴール) を中心に,
+geDIG は 2 段階で新情報を評価する.
 
-\begin{center}
-\begin{minipage}{0.92\linewidth}
-\small
-Query $Q$ を中心に geDIG は 2 段階で判定する.
-\textcolor{heroblue}{\textbf{AG (内側円, 0-hop)}} は \(\gednorm, \ignorm\) で
-近傍の曖昧性を検知,
-\textcolor{herored}{\textbf{DG (外側円, multi-hop)}} は遠方への短絡
-\(\spnorm \gg 0\) を確認する.
+\smallskip
+\begin{itemize}\setlength\itemsep{1mm}
+  \item \textcolor{heroblue}{\textbf{AG (内側円, 0-hop)}}: 近傍の曖昧性を検知.
+    $g_0 = \gednorm - \lambda \cdot \ignorm$ の大小で発火.
+  \item \textcolor{herored}{\textbf{DG (外側円, multi-hop)}}: 遠方への短絡が有効か確認.
+    \(\spnorm \gg 0\) なら発火.
+\end{itemize}
+\small AG だけでは全探索になりコスト爆発, DG だけでは新発見不能.
+2 段組み合わせで\textbf{曖昧性検知 $\to$ 有効性検証}の流れを作る.
 
 \medskip
-\textbf{3 判定}:
-\quad \textbf{A} (Multi-hop 新短絡, $\spnorm{=}+1$) $\to$
-\textcolor{heroblue}{\textbf{受け入れ}}
-\quad $\big|$ \quad \textbf{B} (0-hop 編集, $\spnorm{=}0$) $\to$ 保留
-\quad $\big|$ \quad \textbf{C} (短絡消失, $\spnorm{=}-1$) $\to$
-\textcolor{herored}{\textbf{拒否}}
+\textbf{3 ケースの判定 (Figure 1 参照)}
+
+\smallskip
+\begin{itemize}\setlength\itemsep{1mm}
+  \item \textbf{Case A: Insight} \; $\spnorm{=}+1$, $F{<}0$\\
+    Multi-hop 圏に新短絡が張られる. CLS への新経路発見.\\
+    $\to$ DG 発火 $\to$ \textbf{\textcolor{heroblue}{受け入れ}}
+    (\S 5B の Positive 介入と対応)
+  \item \textbf{Case B: 力仕事} \; $\spnorm{=}0$, $F{\approx}0$\\
+    0-hop 圏内の編集. CLS 集中度に寄与しない.\\
+    $\to$ 発火なし $\to$ \textbf{保留}
+  \item \textbf{Case C: 崩壊} \; $\spnorm{=}-1$, $F{>}0$\\
+    既存の Multi-hop 短絡が消失. CLS への有効経路断絶.\\
+    $\to$ 逆発火 $\to$ \textbf{\textcolor{herored}{拒否}}
+    (\S 5B の Negative 介入と対応)
+\end{itemize}
 
 \medskip
-\centering
-同じ編集コスト (\(\gednorm{=}1\)) でも \textbf{位相項 \(\spnorm\) と 2 段ゲート}で
-質的に異なる 3 判定が可能. \quad
+\textbf{なぜ位相項 $\spnorm$ が必要か}\\
+Case A/B/C は同じ編集コスト (\(\gednorm{=}1\))
+かつ類似の情報量変化 (\(\ignorm\)) でも, \textbf{CLS への経路集中度
+\(\spnorm\)} が $+1/0/-1$ に分岐する. 確率的評価 (KL 等) は
+$\spnorm$ の情報を見逃す.
+
+\medskip
+$\to$ 位相項を独立に F に組み込むことで,
+\textbf{質的に異なる 3 判定}が初めて工学的に実現される.
 \textbf{これが geDIG の When 問題への解法.}
 \end{minipage}
-\end{center}
 }
 
 %%============================================================
