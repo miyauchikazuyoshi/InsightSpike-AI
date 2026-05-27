@@ -1,0 +1,1238 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JSAI2026 Poster v2 - geDIG</title>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;600;700;800;900&display=swap");
+
+:root {
+  --paper: #fbfaf7;
+  --panel: #ffffff;
+  --ink: #20201d;
+  --muted: #66665f;
+  --line: #d8d4ca;
+  --soft: #f1eee7;
+  --green: #0f6e56;
+  --green-soft: #e6f1ec;
+  --rust: #bf542d;
+  --rust-soft: #f7e7dd;
+  --indigo: #453f91;
+  --indigo-soft: #e9e8f7;
+  --gold: #a66b00;
+  --gold-soft: #f5ecd8;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: #e5e1d8;
+  color: var(--ink);
+  font-family: "Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", "Meiryo", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-feature-settings: "palt" 1;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  padding: 28px 0;
+}
+
+body.embed-preview {
+  padding: 0;
+  overflow: auto;
+  background: #0f172a;
+}
+
+body.embed-preview .poster {
+  margin: 0;
+  transform-origin: top left;
+}
+
+.poster {
+  width: 1200px;
+  min-height: 1697px;
+  margin: 0 auto;
+  padding: 28px 38px 28px;
+  background: var(--paper);
+  border: 1px solid #cfc9bd;
+  box-shadow: 0 18px 50px rgba(40, 35, 25, 0.18);
+}
+
+@page {
+  size: 1200px 2800px;
+  margin: 0;
+}
+
+@media print {
+  html, body { background: #fff; padding: 0; width: 1200px; }
+  .poster {
+    width: 1200px;
+    margin: 0;
+    border: none;
+    box-shadow: none;
+  }
+}
+
+.poster-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 28px;
+  align-items: end;
+  padding-bottom: 18px;
+  border-bottom: 3px solid var(--ink);
+}
+
+.title-block {
+  min-width: 0;
+}
+
+h1 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.13;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.subtitle {
+  margin-top: 10px;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.authors {
+  text-align: right;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.authors strong {
+  display: block;
+  color: var(--ink);
+  font-size: 18px;
+}
+
+.layout {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.top-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.top-left {
+  display: grid;
+  grid-template-columns: 1.18fr 0.82fr;
+  gap: 16px;
+  align-content: start;
+}
+
+.top-grid section.major {
+  padding: 13px 15px;
+}
+
+.top-grid .section-title {
+  font-size: 15.6px;
+  margin-bottom: 7px;
+}
+
+.top-grid .num {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.right-area {
+  grid-column: span 2;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.right-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.stack {
+  display: grid;
+  gap: 16px;
+}
+
+section {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px 15px;
+  overflow: hidden;
+}
+
+section.major {
+  padding: 17px 19px;
+}
+
+.band {
+  background: linear-gradient(180deg, #fff 0%, #fbfaf7 100%);
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 9px;
+  font-size: 17.2px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+.num {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 760;
+  flex: 0 0 auto;
+}
+
+p {
+  margin: 0;
+  font-size: 12.7px;
+  line-height: 1.52;
+}
+
+p + p { margin-top: 8px; }
+
+.lead {
+  font-size: 13.3px;
+  line-height: 1.48;
+}
+
+.small {
+  font-size: 11.2px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.tiny {
+  font-size: 10.5px;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.accent-green { color: var(--green); }
+.accent-rust { color: var(--rust); }
+.accent-indigo { color: var(--indigo); }
+.accent-gold { color: var(--gold); }
+
+.claim {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 9px;
+}
+
+.motivation-diagram {
+  display: block;
+  width: 100%;
+  height: 232px;
+  margin-top: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.claim-item {
+  min-height: 58px;
+  padding: 8px 10px;
+  border-left: 5px solid var(--green);
+  background: var(--green-soft);
+}
+
+.claim-item.rust {
+  border-left-color: var(--rust);
+  background: var(--rust-soft);
+}
+
+.claim-label {
+  font-size: 10.5px;
+  line-height: 1;
+  color: var(--muted);
+  font-weight: 720;
+  text-transform: uppercase;
+}
+
+.claim-text {
+  margin-top: 5px;
+  font-size: 12.4px;
+  line-height: 1.42;
+  font-weight: 680;
+}
+
+.finding-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.top-grid .finding-grid {
+  grid-template-columns: 1fr;
+}
+
+.finding {
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fff;
+}
+
+.finding .label {
+  font-size: 10.3px;
+  line-height: 1.2;
+  color: var(--muted);
+  font-weight: 680;
+}
+
+.finding .value {
+  margin-top: 3px;
+  font-size: 16px;
+  line-height: 1.08;
+  font-weight: 760;
+  color: var(--green);
+}
+
+.finding .note {
+  margin-top: 4px;
+  font-size: 10.8px;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.formula-box {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  padding: 15px 18px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.stage-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 760;
+}
+
+.stage-label::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--rust);
+}
+
+.stage-label.green::before { background: var(--green); }
+.stage-label.indigo::before { background: var(--indigo); }
+
+.stage {
+  display: grid;
+  gap: 7px;
+}
+
+.formula {
+  text-align: center;
+  font-size: 34px;
+  line-height: 1.18;
+  font-weight: 700;
+  font-family: "Inter", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
+  white-space: nowrap;
+}
+
+.concept-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+
+.concept {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfaf7;
+  padding: 8px 9px 7px;
+}
+
+.concept svg {
+  display: block;
+  width: 100%;
+  height: 82px;
+}
+
+.concept-title {
+  margin-top: 4px;
+  font-size: 11.5px;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.concept-copy {
+  margin-top: 3px;
+  font-size: 10.3px;
+  line-height: 1.32;
+  color: var(--muted);
+}
+
+.concept-def {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #e3ded4;
+  font-size: 10.5px;
+  line-height: 1.34;
+  color: var(--ink);
+}
+
+.term {
+  padding: 9px 10px;
+  background: var(--soft);
+  border-radius: 7px;
+  min-height: 0;
+}
+
+.term-name {
+  font-size: 13.5px;
+  font-weight: 760;
+}
+
+.term-desc {
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 1.36;
+  color: var(--muted);
+}
+
+.branch-panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfaf7;
+  padding: 9px 10px 10px;
+}
+
+.branch-panel svg {
+  display: block;
+  width: 100%;
+  height: 244px;
+}
+
+.branch-caption {
+  margin-bottom: 6px;
+  font-size: 11.6px;
+  line-height: 1.35;
+  font-weight: 760;
+}
+
+.flow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.flow-step {
+  min-height: 70px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 11px 11px;
+}
+
+.flow-step.green { border-top: 5px solid var(--green); }
+.flow-step.rust { border-top: 5px solid var(--rust); }
+.flow-step.indigo { border-top: 5px solid var(--indigo); }
+.flow-step.gold { border-top: 5px solid var(--gold); }
+
+.flow-title {
+  font-size: 13px;
+  line-height: 1.25;
+  font-weight: 760;
+}
+
+.flow-copy {
+  margin-top: 5px;
+  font-size: 11.6px;
+  line-height: 1.36;
+  color: var(--muted);
+}
+
+.arrow {
+  display: none;
+}
+
+.maze-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.episode-box {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 12px;
+}
+
+.episode-title {
+  font-size: 14px;
+  font-weight: 760;
+  margin-bottom: 9px;
+}
+
+.feature-list {
+  display: grid;
+  gap: 5px;
+}
+
+.feature-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.feature-chips span {
+  padding: 5px 7px;
+  border-radius: 6px;
+  background: var(--soft);
+  border: 1px solid #e0dbd1;
+  font-size: 10.8px;
+  line-height: 1.25;
+}
+
+.feature {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 7px;
+  align-items: start;
+  font-size: 11.6px;
+  line-height: 1.36;
+}
+
+.feature b {
+  color: var(--ink);
+}
+
+.weight-note {
+  margin-top: 8px;
+  padding: 8px 9px;
+  background: var(--gold-soft);
+  color: #5b3b00;
+  border-left: 4px solid var(--gold);
+  font-size: 11.2px;
+  line-height: 1.42;
+}
+
+.mini-diagram {
+  width: 100%;
+  display: block;
+}
+
+.figure-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fff;
+}
+
+.maze-figure {
+  margin-top: 10px;
+}
+
+.bert-figure {
+  margin-bottom: 9px;
+}
+
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 11.2px;
+  line-height: 1.25;
+}
+
+.result-table th,
+.result-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 5px 5px;
+  text-align: right;
+  vertical-align: middle;
+}
+
+.result-table th:first-child,
+.result-table td:first-child {
+  text-align: left;
+}
+
+.result-table th {
+  color: var(--muted);
+  font-weight: 720;
+  background: #f6f3ed;
+}
+
+.result-table tr.highlight td {
+  color: var(--green);
+  font-weight: 760;
+  background: var(--green-soft);
+}
+
+.callout {
+  margin-top: 9px;
+  padding: 8px 9px;
+  border-left: 5px solid var(--rust);
+  background: var(--rust-soft);
+  font-size: 11.5px;
+  line-height: 1.36;
+}
+
+.map-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11.4px;
+  line-height: 1.32;
+}
+
+.map-table th,
+.map-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 6px 5px;
+  vertical-align: top;
+}
+
+.map-table th {
+  text-align: left;
+  color: var(--muted);
+  background: #f6f3ed;
+  font-weight: 720;
+}
+
+.map-table td:first-child {
+  font-weight: 760;
+}
+
+.bert-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.alpha-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11.2px;
+}
+
+.alpha-table th,
+.alpha-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 5px 5px;
+  text-align: right;
+}
+
+.alpha-table th:first-child,
+.alpha-table td:first-child {
+  text-align: left;
+}
+
+.alpha-table .best td {
+  color: var(--green);
+  font-weight: 760;
+  background: var(--green-soft);
+}
+
+.alpha-table .bad td {
+  color: var(--rust);
+  font-weight: 720;
+}
+
+.sleep-band {
+  border: 2px solid #cfc8b8;
+}
+
+.future-inline {
+  grid-column: 1 / -1;
+}
+
+.future-inline .future-card {
+  padding: 10px 11px;
+}
+
+.future-inline .future-card h4 {
+  font-size: 13.5px;
+}
+
+.future-inline .future-card li {
+  font-size: 11px;
+}
+
+.future-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.future-card {
+  padding: 12px 13px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.future-card.wake { border-top: 6px solid var(--green); }
+.future-card.sleep { border-top: 6px solid var(--rust); }
+.future-card.extend { border-top: 6px solid var(--indigo); }
+
+.future-card h4 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.future-card ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.future-card p + ul {
+  margin-top: 7px;
+}
+
+.future-card li {
+  margin: 4px 0;
+  font-size: 12px;
+  line-height: 1.38;
+}
+
+.poster-foot {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.qr-set {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.qr-card {
+  width: 310px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fffdf9;
+  text-align: left;
+  text-decoration: none;
+}
+
+.qr-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.qr-card img {
+  width: 74px;
+  height: 74px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  background: #fff;
+  image-rendering: pixelated;
+}
+
+.qr-label {
+  font-size: 11.2px;
+  line-height: 1.1;
+  font-weight: 760;
+  color: var(--ink);
+}
+
+.qr-value {
+  font-size: 8.6px;
+  line-height: 1.22;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+strong {
+  font-weight: 700;
+}
+</style>
+</head>
+<body>
+<main class="poster">
+  <header class="poster-head">
+    <div class="title-block">
+      <h1>動的知識グラフの探索・統合を制御する統一ゲージの提案</h1>
+      <div class="subtitle">geDIG: 新規入力を「いつ探索し、いつ記憶構造に統合するか」を、単一スカラー F で判定する</div>
+    </div>
+    <div class="authors">
+      <strong>宮内 和義</strong>
+      独立研究者<br>
+      JSAI2026 / 2Yin-B-50<br>
+      2026.06.09
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="top-grid">
+      <div class="top-left">
+      <section class="major band">
+        <h2 class="section-title"><span class="num">1</span>When 問題: 動的 KG は「いつ覚えるか」を持っていない</h2>
+        <p class="lead">GraphRAG や Self-RAG は <strong>何を検索するか</strong> を最適化する。一方で、動的に成長する知識グラフでは、新規エピソードを <strong>構造として統合するか、探索を続けるか、棄却するか</strong> を判断する原理が必要になる。</p>
+        <div class="claim">
+          <div class="claim-item">
+            <div class="claim-label">This paper</div>
+            <div class="claim-text">入力が来たときの評価、つまり <strong>Wake 相</strong> の探索/統合制御を F で実証する。</div>
+          </div>
+          <div class="claim-item rust">
+            <div class="claim-label">Next target</div>
+            <div class="claim-text">入力がないとき、記憶グラフ自身を整理する <strong>Sleep 相</strong> へ拡張する。</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="major">
+        <h2 class="section-title"><span class="num">2</span>提出論文の主要結果</h2>
+        <div class="finding-grid">
+          <div class="finding">
+            <div class="label">Spatial KG / Maze</div>
+            <div class="value">98% success</div>
+            <div class="note">15×15 で候補エッジの 98% を棄却しつつ到達</div>
+          </div>
+          <div class="finding">
+            <div class="label">Semantic KG / Transformer</div>
+            <div class="value">p &lt; 10<sup>-80</sup></div>
+            <div class="note">BERT 層方向に探索相から構造相への遷移</div>
+          </div>
+          <div class="finding">
+            <div class="label">Causal intervention</div>
+            <div class="value">+0.33 pp</div>
+            <div class="note">弱い F 正則化で DistilBERT/SST-2 が改善 (p = 0.038)</div>
+          </div>
+        </div>
+      </section>
+      </div>
+
+    </div>
+
+    <section class="major">
+      <h2 class="section-title"><span class="num">3</span>統一評価関数 F</h2>
+      <div class="formula-box">
+        <div class="stage">
+        <div class="stage-label">更新評価: 何を覚えるかではなく、いつ構造に入れるか</div>
+        <svg class="motivation-diagram" viewBox="0 0 700 310" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="グラフ更新を評価する関数が不足している問題">
+          <defs>
+            <marker id="motarr-v2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+          <text x="125" y="40" text-anchor="middle" font-size="16" fill="#66665f" font-weight="800">更新前</text>
+          <text x="575" y="40" text-anchor="middle" font-size="16" fill="#66665f" font-weight="800">更新後</text>
+
+          <g stroke="#7a9ab8" stroke-width="2.8" fill="none" opacity="0.72">
+            <path d="M70 94L120 68L172 94L184 151L128 184L72 151Z"/>
+            <path d="M120 68L128 184"/>
+            <path d="M70 94L184 151"/>
+            <path d="M172 94L72 151"/>
+          </g>
+          <g fill="#d7e5ef" stroke="#4a7aa8" stroke-width="2.4">
+            <circle cx="70" cy="94" r="10"/><circle cx="120" cy="68" r="10"/><circle cx="172" cy="94" r="10"/>
+            <circle cx="184" cy="151" r="10"/><circle cx="128" cy="184" r="10"/><circle cx="72" cy="151" r="10"/>
+          </g>
+
+          <path d="M218 126H300" stroke="#66665f" stroke-width="2.8" marker-end="url(#motarr-v2)"/>
+          <circle cx="350" cy="126" r="35" fill="#bf542d"/>
+          <text x="350" y="120" text-anchor="middle" font-size="15" fill="#fff" font-weight="800">new</text>
+          <text x="350" y="139" text-anchor="middle" font-size="11" fill="#fff">episode</text>
+          <path d="M400 126H482" stroke="#bf542d" stroke-width="2.8" marker-end="url(#motarr-v2)"/>
+
+          <g stroke="#7a9ab8" stroke-width="2.8" fill="none" opacity="0.72">
+            <path d="M518 94L568 68L620 94L632 151L576 184L520 151Z"/>
+            <path d="M568 68L576 184"/>
+            <path d="M518 94L632 151"/>
+            <path d="M620 94L520 151"/>
+          </g>
+          <g stroke="#bf542d" stroke-width="4" fill="none">
+            <path d="M620 94L655 139L638 212"/>
+            <path d="M632 151L638 212"/>
+            <path d="M576 184L638 212"/>
+          </g>
+          <g fill="#d7e5ef" stroke="#4a7aa8" stroke-width="2.4">
+            <circle cx="518" cy="94" r="10"/><circle cx="568" cy="68" r="10"/><circle cx="620" cy="94" r="10"/>
+            <circle cx="632" cy="151" r="10"/><circle cx="576" cy="184" r="10"/><circle cx="520" cy="151" r="10"/>
+          </g>
+          <circle cx="638" cy="212" r="12" fill="#bf542d" stroke="#8a3115" stroke-width="2.4"/>
+          <text x="638" y="216" text-anchor="middle" font-size="8" fill="#fff" font-weight="800">new</text>
+
+          <rect x="206" y="218" width="288" height="58" rx="10" fill="#f7e7dd" stroke="#bf542d" stroke-width="1.6"/>
+          <text x="350" y="242" text-anchor="middle" font-size="20" fill="#bf542d" font-weight="850">どちらが良い?</text>
+          <text x="350" y="263" text-anchor="middle" font-size="14" fill="#8a3115" font-weight="720">F(更新前) と F(更新後) を比べる関数が必要</text>
+        </svg>
+        </div>
+        <div class="stage">
+        <div class="stage-label green">Fの3項: 更新コストと利得を同じスカラーで比較</div>
+        <div>
+          <div class="formula">
+            F = <span class="accent-rust">ΔEPC<sub>norm</sub></span> − λ(<span class="accent-green">ΔH<sub>norm</sub></span> + γ·<span class="accent-indigo">ΔSP<sub>rel</sub></span>)
+          </div>
+          <p class="small" style="margin-top:7px; text-align:center;">F はタスク内の相対比較として用いる。ΔSP は構造利得であり、迷路では「近道」がその利得として現れる。</p>
+        </div>
+        <div class="concept-grid">
+          <div class="concept">
+            <svg viewBox="0 0 210 96" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="graph edit concept">
+              <defs>
+                <marker id="carr1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </marker>
+              </defs>
+              <g fill="#fff" stroke="#8e887f" stroke-width="2">
+                <circle cx="31" cy="35" r="8"/><circle cx="65" cy="24" r="8"/><circle cx="66" cy="60" r="8"/>
+                <circle cx="145" cy="35" r="8"/><circle cx="179" cy="24" r="8"/><circle cx="180" cy="60" r="8"/>
+              </g>
+              <g stroke="#8e887f" stroke-width="2">
+                <path d="M39 33L57 27"/><path d="M38 38L58 56"/>
+                <path d="M153 33L171 27"/><path d="M152 38L172 56"/>
+              </g>
+              <circle cx="151" cy="72" r="8" fill="#bf542d"/>
+              <path d="M178 60L157 68" stroke="#bf542d" stroke-width="3" stroke-linecap="round"/>
+              <path d="M88 47H120" stroke="#66665f" stroke-width="2" marker-end="url(#carr1)"/>
+              <text x="46" y="87" text-anchor="middle" font-size="10" fill="#66665f">更新前</text>
+              <text x="165" y="87" text-anchor="middle" font-size="10" fill="#66665f">更新後</text>
+            </svg>
+            <div class="concept-title accent-rust">ΔEPC: 更新コスト</div>
+            <div class="concept-copy">新しいノード/エッジを足すほど構造変更は重くなる。</div>
+            <div class="concept-def"><strong>定義:</strong> グラフ編集距離の正規化値。迷路では新規通路/想起接続、Transformer では Attention 変化を測る。</div>
+          </div>
+          <div class="concept">
+            <svg viewBox="0 0 210 96" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="entropy concept">
+              <rect x="19" y="56" width="24" height="22" rx="4" fill="#cfe7dc"/>
+              <rect x="52" y="42" width="24" height="36" rx="4" fill="#9ed1bd"/>
+              <rect x="85" y="24" width="24" height="54" rx="4" fill="#0f6e56"/>
+              <rect x="128" y="37" width="24" height="41" rx="4" fill="#9ed1bd"/>
+              <rect x="161" y="38" width="24" height="40" rx="4" fill="#9ed1bd"/>
+              <path d="M116 48H124" stroke="#66665f" stroke-width="2"/>
+              <text x="64" y="17" text-anchor="middle" font-size="11" fill="#66665f">偏った候補</text>
+              <text x="156" y="17" text-anchor="middle" font-size="11" fill="#66665f">広がる候補</text>
+              <path d="M23 82H187" stroke="#8e887f" stroke-width="1.5"/>
+            </svg>
+            <div class="concept-title accent-green">ΔH: 探索余地</div>
+            <div class="concept-copy">候補分布が広がるほど、探索すべき不確実性が増える。</div>
+            <div class="concept-def"><strong>定義:</strong> 候補分布のエントロピー増分。迷路では行動候補の多様性、Transformer では Attention 拡散に対応する。</div>
+          </div>
+          <div class="concept">
+            <svg viewBox="0 0 210 96" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="shortest path concept">
+              <g stroke="#b9b2a8" stroke-width="2.5" fill="none" stroke-linecap="round">
+                <path d="M28 66C54 28,78 74,105 42S155 30,183 63"/>
+              </g>
+              <path d="M32 64L183 63" stroke="#453f91" stroke-width="5" stroke-linecap="round"/>
+              <path d="M32 64L183 63" stroke="#fff" stroke-width="2" stroke-dasharray="7 8" stroke-linecap="round"/>
+              <g fill="#fff" stroke="#8e887f" stroke-width="2">
+                <circle cx="31" cy="65" r="8"/><circle cx="78" cy="61" r="7"/><circle cx="105" cy="42" r="7"/><circle cx="145" cy="37" r="7"/><circle cx="183" cy="63" r="8"/>
+              </g>
+              <text x="105" y="18" text-anchor="middle" font-size="11" fill="#66665f">近道</text>
+              <path d="M70 21H140" stroke="#453f91" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <div class="concept-title accent-indigo">ΔSP: 構造利得</div>
+            <div class="concept-copy">候補エッジが構造全体を圧縮するほど利得が大きい。迷路では近道になる。</div>
+            <div class="concept-def"><strong>定義:</strong> 平均最短路長の相対短縮。局所的な接続が大域構造をどれだけ効率化するかを測る。</div>
+          </div>
+        </div>
+        </div>
+        <div class="stage">
+        <div class="stage-label indigo">AG/DG判定: 局所候補を大域構造でコミットするか決める</div>
+        <div class="branch-panel">
+          <div class="branch-caption">AG 内で見つかった候補エッジを、DG の multi-hop 範囲で「構造利得があるか」として判定する。</div>
+          <svg viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AGとDGによるループ短絡と希薄領域の比較">
+            <text x="170" y="22" text-anchor="middle" font-size="15" font-weight="700">(a) ループ短絡</text>
+            <text x="170" y="42" text-anchor="middle" font-size="12" fill="#66665f">multi-hop 先で閉ループを形成</text>
+            <text x="510" y="22" text-anchor="middle" font-size="15" font-weight="700">(b) 希薄領域</text>
+            <text x="510" y="42" text-anchor="middle" font-size="12" fill="#66665f">hop を広げてもループが閉じない</text>
+            <line x1="340" y1="56" x2="340" y2="276" stroke="#d8d4ca" stroke-width="1"/>
+            <g>
+              <ellipse cx="170" cy="142" rx="130" ry="72" fill="none" stroke="#bf542d" stroke-width="1.2" opacity="0.34"/>
+              <ellipse cx="170" cy="142" rx="60" ry="35" fill="none" stroke="#0f6e56" stroke-width="1.3" opacity="0.5"/>
+              <g stroke="#9f9a91" stroke-width="1.7" fill="none" stroke-dasharray="4 4">
+                <path d="M215 122L255 96L240 70L170 64L95 82L125 135L170 142"/>
+              </g>
+              <path d="M170 142L215 122" stroke="#bf542d" stroke-width="4" fill="none" stroke-linecap="round"/>
+              <g fill="#fff" stroke="#8e887f" stroke-width="1.7">
+                <circle cx="170" cy="142" r="7"/><circle cx="215" cy="122" r="7"/><circle cx="255" cy="96" r="6"/><circle cx="240" cy="70" r="6"/><circle cx="170" cy="64" r="6"/><circle cx="95" cy="82" r="6"/><circle cx="125" cy="135" r="7"/>
+              </g>
+              <circle cx="170" cy="142" r="8" fill="#bf542d"/>
+              <text x="170" y="145" text-anchor="middle" font-size="8" fill="#fff" font-weight="800">Q</text>
+              <text x="47" y="72" font-size="11" fill="#bf542d" font-weight="760">DG</text>
+              <text x="52" y="203" font-size="11" fill="#0f6e56" font-weight="760">AG</text>
+            </g>
+            <g>
+              <ellipse cx="510" cy="142" rx="130" ry="72" fill="none" stroke="#bf542d" stroke-width="1.2" opacity="0.26"/>
+              <ellipse cx="510" cy="142" rx="60" ry="35" fill="none" stroke="#0f6e56" stroke-width="1.3" opacity="0.45"/>
+              <g stroke="#9f9a91" stroke-width="1.7" fill="none" stroke-dasharray="4 4">
+                <path d="M510 142L555 122L595 96L625 72"/>
+                <path d="M510 142L465 122L425 96L400 72"/>
+                <path d="M510 142L485 170L450 196"/>
+              </g>
+              <path d="M510 142L555 122" stroke="#bf542d" stroke-width="4" fill="none" stroke-linecap="round"/>
+              <g fill="#fff" stroke="#8e887f" stroke-width="1.7">
+                <circle cx="510" cy="142" r="7"/><circle cx="555" cy="122" r="7"/><circle cx="595" cy="96" r="6"/><circle cx="625" cy="72" r="6"/><circle cx="465" cy="122" r="6"/><circle cx="425" cy="96" r="6"/><circle cx="400" cy="72" r="6"/><circle cx="485" cy="170" r="6"/><circle cx="450" cy="196" r="6"/>
+              </g>
+              <circle cx="510" cy="142" r="8" fill="#bf542d"/>
+              <text x="510" y="145" text-anchor="middle" font-size="8" fill="#fff" font-weight="800">Q</text>
+              <text x="386" y="72" font-size="11" fill="#bf542d" font-weight="760">DG</text>
+              <text x="393" y="210" font-size="11" fill="#0f6e56" font-weight="760">AG</text>
+            </g>
+            <rect x="44" y="232" width="272" height="44" rx="8" fill="#fff" stroke="#d8d4ca"/>
+            <text x="180" y="250" text-anchor="middle" font-size="12" fill="#66665f">ΔEPC = +1/C,  構造利得 大</text>
+            <text x="180" y="267" text-anchor="middle" font-size="12.5" fill="#bf542d" font-weight="800">F が低下 → 記憶へコミット</text>
+            <rect x="364" y="232" width="272" height="44" rx="8" fill="#fff" stroke="#d8d4ca"/>
+            <text x="500" y="250" text-anchor="middle" font-size="12" fill="#66665f">ΔEPC = +1/C,  構造利得 小</text>
+            <text x="500" y="267" text-anchor="middle" font-size="12.5" fill="#66665f" font-weight="800">F ほぼ不変 → 棄却</text>
+          </svg>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="content-grid">
+      <div class="stack">
+        <section>
+          <h2 class="section-title"><span class="num">4</span>Wake 相: AG/DG による段階的判定</h2>
+          <p>多数の候補をすべて大域評価すると高コストになる。geDIG は 0-hop の局所評価で違和感を検出し、必要な場合だけ multi-hop で近道を確認する。</p>
+          <div class="flow">
+            <div class="flow-step green">
+              <div class="flow-title">observe</div>
+              <div class="flow-copy">現在状態と近傍をエピソード化</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="flow-step gold">
+              <div class="flow-title">candidate</div>
+              <div class="flow-copy">候補移動・候補エッジを生成</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="flow-step rust">
+              <div class="flow-title">AG: 0-hop</div>
+              <div class="flow-copy">局所の未知・曖昧さを検出</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="flow-step indigo">
+              <div class="flow-title">DG: multi-hop</div>
+              <div class="flow-copy">近道なら記憶へコミット</div>
+            </div>
+          </div>
+          <p class="small" style="margin-top:10px;"><strong>物理的な移動</strong> と <strong>記憶グラフへの恒久保存</strong> は別である。DG を通った接続だけが認知地図の骨格として残る。</p>
+        </section>
+
+        <section class="major">
+          <h2 class="section-title"><span class="num">5</span>Maze: なぜ部分観測で解けるのか</h2>
+          <div class="maze-grid">
+            <div class="episode-box">
+              <div class="episode-title">移動エピソードベクトル</div>
+              <p><strong>8D:</strong> 位置、相対移動、通行可否、訪問回数、success/goal。クエリベクトルとの重み付き距離から候補分布を作る。</p>
+              <div class="weight-note">weights = pos 1,1 / dir 0,0 / wall 6 / visit 4 / success,goal 0,0。ゴール座標・正解経路は事前に教えない。</div>
+            </div>
+            <img class="figure-img maze-figure" src="figures/fig3_maze.png" alt="迷路探索軌跡とgeDIGが構築するエピソード記憶グラフ">
+          </div>
+          <div class="callout"><strong>因果:</strong> ゴールを教えるのではなく、移動履歴から候補分布を作る → F で記憶接続を選択 → 疎な認知地図で戻る/進む判断が可能。</div>
+        </section>
+      </div>
+
+      <div class="right-area">
+        <div class="right-grid">
+      <div class="stack">
+        <section>
+          <h2 class="section-title"><span class="num">6</span>Maze 結果: 成功率より「記憶圧縮」を見る</h2>
+          <table class="result-table">
+            <thead>
+              <tr><th>手法</th><th>成功率</th><th>平均 step</th><th>圧縮率</th></tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="4"><strong>15×15</strong> (n=100, max=250)</td></tr>
+              <tr><td>Random Walk</td><td>0.75 ± 0.08</td><td>105.8</td><td>–</td></tr>
+              <tr><td>Greedy DFS</td><td>0.99 ± 0.03</td><td>82.1</td><td>–</td></tr>
+              <tr class="highlight"><td>geDIG</td><td>0.98 ± 0.03</td><td>89.6</td><td>98%</td></tr>
+              <tr><td colspan="4"><strong>25×25</strong> (n=60, max=500)</td></tr>
+              <tr><td>Random Walk</td><td>0.40 ± 0.12</td><td>242.2</td><td>–</td></tr>
+              <tr><td>Greedy DFS</td><td>0.95 ± 0.06</td><td>242.2</td><td>–</td></tr>
+              <tr class="highlight"><td>geDIG</td><td>0.75 ± 0.11</td><td>254.1</td><td>99%</td></tr>
+            </tbody>
+          </table>
+          <p class="small" style="margin-top:9px;">25×25 では Greedy DFS の成功率が高い。geDIG の主張は、候補エッジの大半を棄却しても到達可能性を保つことに置く。</p>
+        </section>
+
+        <section>
+          <h2 class="section-title"><span class="num">7</span>共通グラフ化: 何をノード/エッジにするか</h2>
+          <table class="map-table">
+            <thead>
+              <tr><th>対象</th><th>ノード</th><th>エッジ</th><th>F が判定するもの</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Maze</td><td>移動エピソード</td><td>通行/想起接続</td><td>この接続を記憶へ残すか</td></tr>
+              <tr><td>Transformer</td><td>トークン</td><td>Attention</td><td>層が探索相か構造相か</td></tr>
+              <tr><td>Sleep</td><td>既存記憶ノード</td><td>再配線候補</td><td>入力なしで整理すべきか</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+
+      <div class="stack">
+        <section>
+          <h2 class="section-title"><span class="num">8</span>Transformer: 同じ F が意味的 KG にも現れる</h2>
+          <div class="bert-grid">
+            <img class="figure-img bert-figure" src="figures/fig4_bert.png" alt="BERT層別F値分布">
+            <div>
+              <p>Attention 行列を token-relation graph として扱うと、浅層は高エントロピーな探索相、深層は低エントロピーな構造相として読める。</p>
+              <p class="small"><strong>観測:</strong> 層別 F の遷移は p &lt; 10<sup>-80</sup>。F 正則化は弱いと改善し、強すぎると性能を落とす。</p>
+            </div>
+          </div>
+          <table class="alpha-table" style="margin-top:10px;">
+            <thead><tr><th>α</th><th>Accuracy</th><th>Δ</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>86.00 ± 0.53</td><td>–</td></tr>
+              <tr class="best"><td>0.001</td><td>86.33 ± 0.46</td><td>+0.33</td></tr>
+              <tr><td>0.01</td><td>86.27 ± 0.70</td><td>+0.27</td></tr>
+              <tr><td>0.1</td><td>85.93 ± 1.10</td><td>-0.07</td></tr>
+              <tr class="bad"><td>1.0</td><td>78.93 ± 1.55</td><td>-7.07</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h2 class="section-title"><span class="num">9</span>考察: 操作的対応としての FEP/MDL</h2>
+          <p>ΔEPC は複雑さ、ΔH は探索余地、ΔSP は構造利得に対応する。これは KL と GED の厳密同値を主張するものではなく、<strong>グラフ上で計算可能な操作的対応</strong>である。</p>
+          <p class="small">また、F の構成項はグラフ内部状態から計算可能である。ただし Transformer の性能評価や CE 学習にはタスクラベルを用いる。</p>
+        </section>
+      </div>
+        </div>
+
+      <section class="major sleep-band future-inline">
+        <h2 class="section-title"><span class="num">10</span>今後の展望: Wake から Sleep へ</h2>
+        <div class="future-grid">
+          <div class="future-card wake">
+            <h4>Wake: 入力評価</h4>
+            <p>本論文の範囲。新規入力が来たとき、AG/DG で探索・統合・棄却を判定する。</p>
+            <ul>
+              <li>Maze: 移動エピソードを評価</li>
+              <li>Transformer: Attention構造を評価</li>
+            </ul>
+          </div>
+          <div class="future-card sleep">
+            <h4>Sleep: 入力なしの整理</h4>
+            <p>現在の記憶グラフ自身から再編候補を生成し、ΔF &lt; 0 の整理だけを採択する。</p>
+            <ul>
+              <li>冗長エッジ削除</li>
+              <li>クラスタ統合・近道保持</li>
+            </ul>
+          </div>
+          <div class="future-card extend">
+            <h4>B1 / 位相拡張</h4>
+            <p>提出版の ΔSP を、発展版では β<sub>1</sub> (B1) に拡張し、ループ/短絡を位相量として扱う。</p>
+            <ul>
+              <li>GraphRAG / Self-RAG への適用</li>
+              <li>Wake/Sleep 両方で自律整理を制御</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+      </div>
+    </div>
+  </div>
+
+  <footer class="poster-foot">
+    <div class="qr-set" aria-label="contact, landing page, and GitHub QR codes">
+      <a class="qr-card" href="mailto:miyauchikazuyoshi@gmail.com">
+        <span class="qr-copy">
+          <span class="qr-label">Email</span>
+          <span class="qr-value">miyauchikazuyoshi@gmail.com</span>
+        </span>
+        <img src="figures/email_qr.png" alt="Email QR code">
+      </a>
+      <a class="qr-card" href="https://miyauchikazuyoshi.github.io/InsightSpike-AI/">
+        <span class="qr-copy">
+          <span class="qr-label">Landing page</span>
+          <span class="qr-value">miyauchikazuyoshi.github.io/InsightSpike-AI/</span>
+        </span>
+        <img src="figures/landing_qr.png" alt="Landing page QR code">
+      </a>
+      <a class="qr-card" href="https://github.com/miyauchikazuyoshi/InsightSpike-AI">
+        <span class="qr-copy">
+          <span class="qr-label">GitHub</span>
+          <span class="qr-value">github.com/miyauchikazuyoshi/InsightSpike-AI</span>
+        </span>
+        <img src="figures/github_qr.png" alt="GitHub repository QR code">
+      </a>
+    </div>
+  </footer>
+</main>
+<script>
+(() => {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has("embed")) return;
+
+  const fitPoster = () => {
+    const poster = document.querySelector(".poster");
+    if (!poster) return;
+    document.body.classList.add("embed-preview");
+    poster.style.transform = "";
+    const scale = Math.min(window.innerWidth / poster.offsetWidth, 1);
+    poster.style.transform = `scale(${scale})`;
+    document.body.style.width = `${poster.offsetWidth * scale}px`;
+    document.body.style.height = `${poster.offsetHeight * scale}px`;
+    document.documentElement.style.height = document.body.style.height;
+  };
+
+  window.addEventListener("load", fitPoster);
+  window.addEventListener("resize", fitPoster);
+  fitPoster();
+})();
+</script>
+</body>
+</html>
