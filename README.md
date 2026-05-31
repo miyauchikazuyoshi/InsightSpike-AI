@@ -5,7 +5,7 @@
 $$\mathcal{F} = \underbrace{\Delta \text{EPC}}_{\text{Metric}} \;-\; \lambda \left( \underbrace{\Delta H}_{\text{Measure}} \;+\; \gamma\, \underbrace{\Delta \beta_1}_{\text{Topology}} \right)$$
 
 [![CI (Lite)](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci-lite.yml/badge.svg)](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci-lite.yml)
-[![Paper](https://img.shields.io/badge/paper-PDF-blue)](docs/paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf)
+[![Paper](https://img.shields.io/badge/paper-PDF-blue)](docs/paper/v6/arxiv_en/geDIG_onegauge_improved_v6_en.pdf)
 [![Pages](https://img.shields.io/badge/docs-GitHub%20Pages-green)](https://miyauchikazuyoshi.github.io/InsightSpike-AI)
 
 ---
@@ -47,13 +47,13 @@ It is not a production library.
 
 | Component | Status | Location |
 |-----------|--------|----------|
-| **Unified geDIG Core** | **71 tests pass, 3-domain verified** | [`src/gedig/`](src/gedig/) |
-| geDIG theory (v6 paper) | Pre-print available | [`docs/paper/`](docs/paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf) |
-| BRIGHT reasoning-intensive retrieval | **nDCG@10 = 0.439 (Spec X)** | [`experiments/hotpotqa_v2/`](experiments/hotpotqa_v2/) |
-| AGHT (Graph Transformer) | **HotpotQA R@2 = 0.405 (+170%)** | [`experiments/hotpotqa_v2/src/unified_graph.py`](experiments/hotpotqa_v2/src/unified_graph.py) |
-| Transformer F-regularization (Exp4) | **negative_better confirmed (β₁)** | [`experiments/transformer/`](experiments/transformer/) |
-| Maze Wake-Sleep-Wake | 98% goal-reach (15x15) | [`experiments/maze/`](experiments/maze/) |
-| HotpotQA dual-process (v3) | **GPT-4o EM 51.2% @ 3.6x fewer calls** | [`experiments/hotpotqa_v2/REPORT_v3_dual_process.md`](experiments/hotpotqa_v2/REPORT_v3_dual_process.md) |
+| **Unified geDIG Core** | 71 unit tests pass; F-eval gives equivalent results across 3 backends (maze / RAG / transformer) | [`src/gedig/`](src/gedig/) |
+| geDIG theory (v6 paper) | Pre-print — position paper + proof-of-concept | [`docs/paper/`](docs/paper/v6/arxiv_en/geDIG_onegauge_improved_v6_en.pdf) |
+| BRIGHT reasoning-intensive retrieval | nDCG@10 = 0.439 on **biology, 50 queries, single seed** (preliminary; full 3-domain ≈ 0.19; SOTA ≈ 0.63) | [`experiments/hotpotqa_v2/`](experiments/hotpotqa_v2/) |
+| AGHT (Graph Transformer) | HotpotQA R@2 = 0.405, **+170% over an internal PageRank baseline** (zero-shot, 100q, single seed) | [`experiments/hotpotqa_v2/src/unified_graph.py`](experiments/hotpotqa_v2/src/unified_graph.py) |
+| Transformer F-regularization (Exp4) | **Preliminary, single seed**: F-maximize > baseline under SP-based F only — *not* confirmed under β₁ or against a random-regularization control | [`experiments/transformer/`](experiments/transformer/) |
+| Maze Wake-Sleep-Wake | 98% goal-reach (15x15, n=100) — on par with greedy-DFS / oracle (99%); distinctive result is ~98% map compression | [`experiments/maze/`](experiments/maze/) |
+| HotpotQA dual-process (v3) | GPT-4o EM 51.2% vs IRCoT 47.6% (500q) — **p=0.086, not significant**; reverses on GPT-4o-mini | [`experiments/hotpotqa_v2/REPORT_v3_dual_process.md`](experiments/hotpotqa_v2/REPORT_v3_dual_process.md) |
 | Visual proof (matchstick figure) | Interactive HTML | [EN](https://miyauchikazuyoshi.github.io/InsightSpike-AI/research/thinking/matchstick_figure_v2_en.html) / [JA](https://miyauchikazuyoshi.github.io/InsightSpike-AI/research/thinking/matchstick_figure_v2.html) |
 
 ---
@@ -78,11 +78,12 @@ See [`docs/architecture/unified_core_architecture.md`](docs/architecture/unified
 
 ### Maze Navigation
 
-A partial-observation maze agent that builds a persistent knowledge graph and uses geDIG to decide when to explore vs. exploit.
+A partial-observation maze agent that builds a persistent knowledge graph and uses geDIG to decide when to explore vs. exploit. This is a **proof-of-concept that a single gauge F + AG/DG gates can drive exploration and integration** — not a claim that geDIG is the best maze solver.
 
 - **Architecture**: Wake-Sleep-Wake cycle with three-layer search (L0: O(1) hash, L1: O(degree) attention walk, L2: O(N log N) full sort)
-- **15x15 maze**: 98% goal-reach rate (baseline ~60%)
-- **25x25 maze**: Active experimentation with graph-persistent DG and 10D vector extension
+- **15x15 maze (n=100)**: geDIG reaches **98%** goal-reach (Wilson 95% CI [0.93, 0.99]). For reference, a plain greedy-DFS baseline reaches **99%** and an oracle BFS **99%** — so geDIG does *not* beat the simplest complete baseline on success rate.
+- **What is distinctive**: geDIG attains this via *emergent* AG/DG control (no hard-coded "if dead-end" rule) while compressing the explored map by **~98%** (retaining only the topological skeleton). The PoC's contribution is the control mechanism and compression, not raw success superiority.
+- **25x25 maze**: preliminary — success rate varies by configuration (≈ 0.42–0.75 across runs) and statistics are not yet finalized.
 
 ```bash
 # Reproduce (requires .venv with networkx, numpy, etc.)
@@ -104,15 +105,17 @@ Layer-by-layer measurement of $\Delta\text{EPC}$, $\Delta H$, and $\Delta\beta_1
   - [Gao et al. (2025)](https://arxiv.org/abs/2511.13653) sparse-circuit interpretability corresponds to $\beta_1$ reduction in $\mathcal{F}$
   - [Hewitt & Manning (2019)](https://aclanthology.org/N19-1419/) structural probes provide the measurement basis for EPC
 
-**Experiment 4 — F-Regularization (Training Intervention)**:
+**Experiment 4 — F-Regularization (Training Intervention)** — *preliminary, single run (SST-2 / DistilBERT, 2k train, β=0.1); not yet replicated across seeds*:
 
-| Condition | Final Accuracy | Interpretation |
-|-----------|---------------|----------------|
-| Baseline (CE only) | 88.1% | Standard training |
-| Positive (CE + F minimize) | 87.2% | Flattens attention structure — hurts |
-| **Negative (CE + F maximize)** | **89.4%** | **Preserves DG topology — helps** |
+| Condition | Accuracy (SP-based F) | Accuracy (β₁-based F) |
+|-----------|:---:|:---:|
+| Baseline (CE only) | 88.1%¹ | 88.5% |
+| Positive (CE + F minimize) | 87.2% | 83.5% |
+| **Negative (CE + F maximize)** | **89.4%** | 85.5% |
 
-**Conclusion: `negative_better`** — Transformer learns better when DG (derivation/uncertainty) structure is explicitly preserved. This finding holds under both SP-based and β₁-based F definitions.
+¹ The baseline reached 89.4% at epochs 1–2 and dropped to 88.1% by epoch 3 (overfitting); the negative condition's 89.4% equals the baseline's own earlier peak.
+
+**Conclusion (preliminary, not established):** Under SP-based F, the negative (F-maximize) condition edges out the epoch-3 baseline — consistent with "preserving DG topology helps." But this is a **single run**, and the effect does **not** hold up under scrutiny: (i) under β₁-based F the negative condition (85.5%) is *below* baseline (88.5%); (ii) a separate negative-control experiment found geDIG-F regularization (66.5%) did **not** beat random-value regularization (69.5%), suggesting any gain may come from regularization in general rather than geDIG-F specifically. Multi-seed replication is required before claiming `negative_better`.
 
 See [`experiments/transformer/`](experiments/transformer/) for experiment design and results.
 
@@ -121,14 +124,17 @@ See [`experiments/transformer/`](experiments/transformer/) for experiment design
 AGHT (Analytical Heterogeneous Graph Transformer) applied to BRIGHT benchmark (ICLR 2025) — document retrieval requiring multi-hop reasoning.
 
 - **Architecture**: Unified Sentence-Token heterogeneous graph with QKV attention (10 analytical parameters, zero-shot)
-- **BRIGHT biology 50q**: nDCG@10 = 0.439 (Spec X: Enhanced Graph + Early Token Graph)
-- **HotpotQA paragraph selection**: R@2 = 0.405 (+170% vs Legacy), SF F1 = 0.334
+- **BRIGHT biology, 50 queries, single seed**: nDCG@10 = 0.439 (Spec X: Enhanced Graph + Early Token Graph). This is a single-config screening result on **one domain**; the 50-query CI is ≈ ±13pt. On the full 3-domain set (323 queries) the best configuration reaches overall nDCG@10 ≈ **0.19**.
+- **Context — not competitive with SOTA**: on BRIGHT, BM25 ≈ 0.145, BM25 + GPT-4 reasoning + rerank ≈ 0.30, and current SOTA (INF-X-Retriever) ≈ 0.63. This zero-shot result is an early proof-of-concept, well below these references.
+- **HotpotQA paragraph selection (100q, zero-shot, single seed)**: R@2 = 0.405, **+170% over an internal PageRank baseline** (not a supervised SOTA). SF F1 = 0.334 ≈ 41% of supervised DFGN (81.1).
 
-| Benchmark | Metric | AGHT (ours) | Legacy | Delta |
+| Benchmark | Metric | AGHT (ours, zero-shot) | Internal baseline (PageRank) | Delta |
 |-----------|--------|-------------|--------|-------|
-| HotpotQA (comparison/AG) | R@2 | **0.429** | 0.143 | **+200%** |
-| HotpotQA (bridge/DG) | R@2 | **0.256** | 0.151 | **+70%** |
-| HotpotQA (all) | SF F1 | **0.334** | — | zero-shot |
+| HotpotQA (comparison/AG) | R@2 | **0.429** | 0.143 | +200% |
+| HotpotQA (bridge/DG) | R@2 | **0.256** | 0.151 | +70% |
+| HotpotQA (all) | SF F1 | 0.334 | — | zero-shot |
+
+*Deltas are vs an internal PageRank baseline, single seed; statistical tests are pending (planned for v7).*
 
 See [`experiments/hotpotqa_v2/`](experiments/hotpotqa_v2/) and [`docs/architecture/unified_core_architecture.md`](docs/architecture/unified_core_architecture.md).
 
@@ -166,15 +172,17 @@ See [`experiments/hotpotqa_v2/docs/experiment_design_v11.md`](experiments/hotpot
 
 geDIG applied to multi-hop question answering on HotpotQA (distractor setting). The v3 **dual-process architecture** uses Betti numbers as a cognitive routing signal — the gauge value F decides when to answer instantly (System 1) vs. reason step-by-step (System 2), inspired by Kahneman's dual-process theory.
 
-- **Model-dependent interaction**: On GPT-4o, Hybrid-E1 **leads IRCoT (EM 51.2% vs 47.6%) at 3.6x fewer LLM calls**
-- **Scaling property**: Topology-guided routing improves with model capability (+6pt from mini→4o vs -3pt for IRCoT)
+- **Model-dependent interaction**: On GPT-4o, Hybrid-E1 reaches EM 51.2% vs IRCoT 47.6% (+3.6pt) at far fewer LLM calls — but the gap is **not statistically significant (McNemar p=0.086)**. On GPT-4o-mini the ordering reverses and IRCoT wins significantly (p=0.008).
+- **Tentative observation (two model sizes only)**: topology-guided routing *appears* to improve with model capability. This is an observation from two data points, not an established scaling law.
 
 **500-question evaluation (primary reference):**
 
-| Model | Hybrid-E1 EM | IRCoT EM | LLM Calls | p-value |
+| Model | Hybrid-E1 EM | IRCoT EM | LLM Calls² | McNemar p |
 |:-----:|:---:|:---:|:---------:|:-------:|
-| **GPT-4o** | **51.2%** | 47.6% | **2.2 vs 8** | 0.086 |
-| GPT-4o-mini | 45.2% | **50.4%** | 2.2 vs 8 | **0.008** |
+| **GPT-4o** | **51.2%** | 47.6% | ~2.2 vs ≤8 | 0.086 (n.s.) |
+| GPT-4o-mini | 45.2% | **50.4%** | ~2.1 vs ≤8 | **0.008 (sig.)** |
+
+² Call counts are not directly logged. Hybrid's "~2.2" is derived as 1 + mean(CoT steps) (4o: 1.24, mini: 1.14). IRCoT's "≤8" is its `max_steps` budget (a ceiling, not a measured value; early-exit makes the actual count lower but it is unrecorded). So the "fewer calls" advantage is real in direction but the exact ratio is approximate.
 
 See [`experiments/hotpotqa_v2/`](experiments/hotpotqa_v2/) for full experiment code and [`REPORT_v3_dual_process.md`](experiments/hotpotqa_v2/REPORT_v3_dual_process.md) for the detailed report.
 
@@ -222,7 +230,7 @@ $$\mathcal{F} = E - TS \quad\longleftrightarrow\quad \mathcal{F} = \Delta\text{E
 
 > *The neurotransmitter correspondence is a computational analogy, not a physiological claim.*
 
-For formal definitions, see [`docs/gedig_spec.md`](docs/gedig_spec.md). For the full paper, see the [v6 pre-print (PDF)](docs/paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf).
+For formal definitions, see [`docs/gedig_spec.md`](docs/gedig_spec.md). For the full paper, see the [v6 pre-print (PDF)](docs/paper/v6/arxiv_en/geDIG_onegauge_improved_v6_en.pdf).
 
 ---
 
@@ -255,7 +263,7 @@ Specific, actionable research questions where external collaboration would be va
 ## References
 
 **Core theory**:
-- geDIG v6 paper: [`docs/paper/arxiv_v6_en/`](docs/paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf)
+- geDIG v6 paper: [`docs/paper/arxiv_v6_en/`](docs/paper/v6/arxiv_en/geDIG_onegauge_improved_v6_en.pdf)
 - Canonical spec: [`docs/gedig_spec.md`](docs/gedig_spec.md)
 
 **Each term of $\mathcal{F}$ is grounded in independent prior work**:
@@ -273,7 +281,7 @@ Specific, actionable research questions where external collaboration would be va
 
 ## Citation, License, and Patent
 
-**Paper**: [geDIG v6 (pre-print)](docs/paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf)
+**Paper**: [geDIG v6 (pre-print)](docs/paper/v6/arxiv_en/geDIG_onegauge_improved_v6_en.pdf)
 
 **Patent**: JP 2025-082988, JP 2025-082989
 

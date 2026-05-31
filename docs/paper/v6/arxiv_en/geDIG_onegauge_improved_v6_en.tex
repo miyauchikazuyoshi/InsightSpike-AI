@@ -471,23 +471,23 @@ $N{\times}N$ grid maze ($15{\times}15 \sim 50{\times}50$) with partial observati
 \end{itemize}
 
 \subsection{Results Summary}
-Table~\ref{tab:maze_main_result} shows the results for $15{\times}15, 25{\times}25$ mazes (100 episodes each).
-\textbf{geDIG achieves success rates near Oracle (0.98--1.00) while keeping step counts within $1.5\sim2.0\times$ of Oracle.}
-Notably, \textbf{compression rate is very high ($>90\%$)}, indicating that $\F$-driven pruning successfully leaves only the topological skeleton (intersections/dead ends) and removes straight-line redundancy.
+Table~\ref{tab:maze_main_result} shows the measured $15{\times}15$ results ($n{=}100$).
+geDIG reaches a \textbf{98\% success rate --- on par with a plain greedy-DFS baseline (99\%) and oracle BFS (99\%), not exceeding them}.
+The distinctive result is the \textbf{very high map compression ($\sim$98\%)}: $\F$-driven pruning leaves only the topological skeleton (intersections/dead ends) and removes straight-line redundancy. The PoC's contribution is the emergent AG/DG control (no hard-coded rules) and this compression, not raw success superiority.
 
 \begin{table}[H]
     \centering
-    \caption{Maze PoC Results ($15{\times}15$, 100 runs). geDIG achieves near-optimal success with high compression.}
+    \caption{Maze PoC Results ($15{\times}15$, $n{=}100$, measured from \texttt{docs/paper/data/maze\_15x15\_*.json}). geDIG matches the simplest complete baselines on success/steps; its distinctive property is high compression. Oracle (BFS) assumes a known map and is an upper-bound reference.}
     \label{tab:maze_main_result}
     \small
-    \begin{tabular}{lccccc}
+    \begin{tabular}{lcccc}
     \toprule
-    Method & Success & Steps & Oracle Ratio & Compression & AG/DG Freq \\
+    Method & Success & Steps & Oracle Ratio & Compression \\
     \midrule
-    Random Walk & 0.45 & 210.5 & 5.2x & 0.00 & - \\
-    Greedy DFS & 0.92 & 85.3 & 2.1x & 0.00 & - \\
-    \textbf{geDIG (Proposed)} & \textbf{0.98} & \textbf{69.0} & \textbf{1.7x} & \textbf{0.95} & 11.2 / 4.5 \\
-    Oracle (Ref) & 1.00 & 40.2 & 1.0x & - & - \\
+    Random Walk & 0.75 & 141.9 & 3.0x & - \\
+    Greedy DFS & 0.99 & 83.7 & 1.7x & - \\
+    Oracle (BFS, Ref) & 0.99 & 48.0 & 1.0x & - \\
+    \textbf{geDIG (Proposed)} & 0.98 & 92.8 & 1.9x & \textbf{0.98} \\
     \bottomrule
     \end{tabular}
 \end{table}
@@ -544,8 +544,8 @@ This suggests the ``margin check'' $m(t)$ is effective for ensuring robust struc
 The maze experiment confirmed that:
 \begin{enumerate}
     \item \textbf{One-Gauge works}: Single $\F$ successfully differentiates Navigation (flat), Dead-end (AG), and Shortcut (DG).
-    \item \textbf{Compression is evident}: 95\% compression indicates it accurately captures the topological skeleton.
-    \item \textbf{Scalable}: Performance holds from $15{\times}15$ to $25{\times}25$ (and preliminarily $50{\times}50$).
+    \item \textbf{Compression is evident}: $\sim$98\% edge compression indicates it accurately captures the topological skeleton.
+    \item \textbf{Scale behavior}: at $15{\times}15$ geDIG reaches 98\% ($n{=}100$); at $25{\times}25$ success drops to $\sim$56--75\% depending on configuration (preliminary, $n{=}60$), indicating headroom rather than scale-invariance.
 \end{enumerate}
 This justifies proceeding to the RAG experiment. Although spatial and semantic graphs differ in structure, they share the common framework of structural cost versus information gain. We map ``Dead-end'' to ``Unknown/Hallucination'' and ``Shortcut'' to ``Insight/Logical Connection''.
 

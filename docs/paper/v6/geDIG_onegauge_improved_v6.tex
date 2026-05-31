@@ -1196,7 +1196,7 @@ MDL/FEP と本指標 $\F$ の対応を表\,\ref{tab:theory_mapping_summary} に�
 
 \subsection*{結果サマリ（Maze；結果先行）}
 \label{sec:maze_result_summary}
-本節の主目的は、\textbf{未知迷路における探索効率の改善}を定量化することである。代表的な設定（15/25/50\,\mbox{$\times$}\,15 迷路）では、geDIG は成功率 95--100\% を維持しつつ、ステップ数をベースライン比で約 20--30\% 削減し、候補エッジの約95\% を剪定できたことを確認した（詳細は表~\ref{tab:maze_v4_main}）。参照（Dijkstra／A*）は\,\emph{理想上限}として整合度（Regret／SPL や順位相関）で扱う\footnote{Regret はオラクル（最短路）との差の累積。SPL（Success weighted by Path Length）は成功時の効率（実行経路長と最短経路長の比）を表す。}。代表結果（25\,\mbox{$\times$}\,25, \,$N{=}32$；L3\,only, max\,steps=250）の要点を先にまとめる：
+本節の主目的は、\textbf{未知迷路における探索効率の改善}を定量化することである。代表的な設定では、geDIG は 15\,\mbox{$\times$}\,15 で成功率 98.0\%（$N{=}100$）、25\,\mbox{$\times$}\,25 で 56--75\%（設定依存）を示した。成功率自体は単純な Greedy DFS（15\,\mbox{$\times$}\,15: 99\%, 25\,\mbox{$\times$}\,25: 95\%）と同等以下であり、geDIG の特徴は\emph{生の成功率}の優位ではなく、候補エッジの約 98\% を剪定できる点と、ドメイン固有ルールに依らない創発的な AG/DG 制御にある（詳細は表~\ref{tab:maze_v4_main}）。参照（Dijkstra／A*）は\,\emph{理想上限}として整合度（Regret／SPL や順位相関）で扱う\footnote{Regret はオラクル（最短路）との差の累積。SPL（Success weighted by Path Length）は成功時の効率（実行経路長と最短経路長の比）を表す。}。代表結果（25\,\mbox{$\times$}\,25, \,$N{=}32$；L3\,only, max\,steps=250）の要点を先にまとめる：
 \begin{itemize}[leftmargin=1.4em]
   \item \textbf{探索率}（unique/total）: 25.6\%（全シード平均；25\,\mbox{$\times$}\,25; eval 系列）
   \item \textbf{訪問重複率}: 平均 1.33 回/訪問セル（全シード平均；25\,\mbox{$\times$}\,25; eval 系列）
@@ -1569,15 +1569,15 @@ if no_unvisited_neighbors(pos):      # 迷路特有の判定
 \begin{table}[H]
 \centering
 \small
-\caption{探索効率の比較（25×25迷路、N=100）}
+\caption{探索効率（25×25迷路、$N{=}60$、実測ログ \texttt{maze\_25x25\_*\_s500.json}）。成功率は同一条件・部分観測での実測値。探索率/訪問重複/BT長/検出遅延は geDIG の実測（baseline 側は同指標を未測定のため N/A）。}
 \label{tab:exploration_efficiency}
 \begin{tabular}{@{}l p{1.6cm} p{1.6cm} p{1.6cm} p{1.2cm} p{1.8cm}@{}}
 \toprule
 手法 & 探索率 & 訪問重複 & BT長 & 検出遅延 & 成功率 \\
 \midrule
-Random Walk & 0.89 & 4.2 & 85 & N/A & 0.28 \\
-DFS-inspired & 0.65 & 2.3 & 18 & 1.5 & 0.78 \\
-\textbf{geDIG} & \textbf{0.38} & \textbf{1.28} & \textbf{4.3} & \textbf{0.8} & \textbf{1.00} \\
+Random Walk & N/A & N/A & N/A & N/A & 0.40 \\
+Greedy DFS & N/A & N/A & N/A & N/A & 0.95 \\
+\textbf{geDIG} & 0.256 & 1.33 & $\approx$1.0 & $\approx$0 & 0.75 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1603,7 +1603,7 @@ DFS-inspired & 0.65 & 2.3 & 18 & 1.5 & 0.78 \\
 
 \subsection{原理検証の結論}
 
-部分観測迷路という最小構成でも、geDIG は統一指標と二段ゲートが想定どおり連携することを確認できた。Table~\ref{tab:maze_results} に示すように、15×15～50×50の全スケールで geDIG は成功率95～100\%を維持しつつ、ステップ数を各種ベースラインより19～30\%削減し、候補エッジの 95\% 以上を削減した。特に AG 発火率が 5～8\% 程度、DG 発火率が 2～3\% 程度に収まっていることは、曖昧さ検出と洞察統合がイベント駆動で機能し、無駄な探索を抑制することを示している。スケール別の詳細な発火頻度は Table~\ref{tab:maze_gate_stats} に整理しており、DG/AG 比が約 35〜41\% に収束することで「AG→DG」の連鎖が適度な頻度で発生していることがわかる。また、$\Delta$EPC-only や $\Delta$IG-only のアブレーションと比較しても統一ゲージが優位であり、構造・情報の両面を同時に評価する必要性が裏付けられた。
+部分観測迷路という最小構成でも、geDIG の統一指標と二段ゲートが想定どおり連携することを確認できた。表~\ref{tab:maze_results} に示すように、geDIG は 15×15 で成功率 98\%（単純な Greedy DFS の 99\% と同等）、25×25 で 75\% を達成し、候補エッジの 98\% 以上を削減した。\emph{生の成功率では単純な Greedy DFS に及ばない}ものの、本 PoC の主眼は探索ソルバとしての優劣ではなく、ドメイン固有ルールに依らない\emph{創発的な制御}と高い圧縮率の実証にある。AG 発火率・DG 発火率が低位（数\%）に収まることは、曖昧さ検出と洞察統合がイベント駆動で機能し、無駄な探索を抑制することと整合する（発火頻度は表~\ref{tab:maze_gate_stats}）。一方で、15×15 のアブレーション（$\Delta$EPC-only／$\Delta$IG-only）では成功率・平均ステップに有意差が出ておらず、本スケールでは各項の寄与を分離できていない（構造・情報の同時評価の必要性は、より難度の高い環境での今後の検証課題として残る）。
 
 これらの結果から、One\,\mbox{-}Gauge 統合制御・二段ゲート・クエリ中心multi\,\mbox{-}hopという三要素が、ドメイン固有のルールに頼らずに連携し得ることが示された。次章では、この設計原理を大規模かつ高次元な知識検索（RAG）環境に拡張し、同じ制御理念が実運用レベルでも通用するかを検証する。
 
@@ -1611,40 +1611,27 @@ DFS-inspired & 0.65 & 2.3 & 18 & 1.5 & 0.78 \\
 
 \begin{table}[H]
 \centering
-\caption{迷路ナビゲーション実験結果（複数スケール総合）。注: エッジ削減(\%)は候補列挙で得た未フィルタの辺集合 $E_{\mathrm{link}}$ に対する最終採用エッジ $E_{\mathrm{final}}$ の相対削減率 $1-\lvert E_{\mathrm{final}}\rvert/\lvert E_{\mathrm{link}}\rvert$ を指す（迷路の局所4近傍に基づく候補列挙）。}
+\caption{迷路ナビゲーション\textbf{実測}結果。値は実測ログ（\texttt{docs/paper/data/maze\_*\_s*.json}）に基づく。成功率は同一条件・部分観測での比較。Oracle(BFS) は既知地図を前提とする\emph{上限参照}。エッジ削減(\%)は候補辺集合 $E_{\mathrm{link}}$ に対する最終採用辺 $E_{\mathrm{final}}$ の相対削減率 $1-\lvert E_{\mathrm{final}}\rvert/\lvert E_{\mathrm{link}}\rvert$。}
 \label{tab:maze_results}
-\begin{tabular}{lccccc}
+\begin{tabular}{lcccc}
 \toprule
-手法 & 成功率(\%) & 平均ステップ & エッジ削減(\%) & AG発火率(\%) & DG発火率(\%) \\
+手法 & 成功率(\%) & 平均ステップ & エッジ削減(\%) & $N$ \\
 \midrule
-\multicolumn{6}{l}{\textit{15×15迷路（N=100エピソード）}} \\
-Random Walk & 45.2 & 156.3 & - & - & - \\
-DFS-inspired & 78.5 & 93.1 & - & - & - \\
-Curiosity & 82.3 & 85.4 & - & - & - \\
-Q-learning & 71.8 & 98.7 & - & - & - \\
-$\Delta$EPC only & 88.5 & 78.2 & 73.2 & - & - \\
-$\Delta$IG only & 85.2 & 82.6 & 68.5 & - & - \\
-\textbf{geDIG (提案)} & \textbf{100.0} & \textbf{69.0} & \textbf{94.8} & 7.8 & 3.2 \\
+\multicolumn{5}{l}{\textit{15×15迷路}} \\
+Random Walk & 75.0 & 141.9 & - & 100 \\
+Greedy DFS & 99.0 & 83.7 & - & 100 \\
+Oracle (BFS, 上限参照) & 99.0 & 48.0 & - & 100 \\
+\textbf{geDIG (提案)} & \textbf{98.0} & 92.8 & \textbf{98.3} & 100 \\
 \midrule
-\multicolumn{6}{l}{\textit{25×25迷路（N=60エピソード）}} \\
-Random Walk & 28.3 & 421.5 & - & - & - \\
-DFS-inspired & 65.0 & 398.7 & - & - & - \\
-Curiosity & 71.7 & 375.2 & - & - & - \\
-Q-learning & 58.3 & 415.3 & - & - & - \\
-$\Delta$EPC only & 83.3 & 368.5 & 81.5 & - & - \\
-$\Delta$IG only & 80.0 & 385.1 & 76.3 & - & - \\
-\textbf{geDIG (提案)} & \textbf{100.0} & \textbf{352.3} & \textbf{99.4} & 6.1 & 2.5 \\
-\midrule
-\multicolumn{6}{l}{\textit{50×50迷路（N=40エピソード）}} \\
-Random Walk & 15.0 & 1850+ & - & - & - \\
-DFS-inspired & 47.5 & 1521.3 & - & - & - \\
-Curiosity & 55.0 & 1398.7 & - & - & - \\
-Q-learning & 42.5 & 1632.1 & - & - & - \\
-$\Delta$EPC only & 72.5 & 1285.4 & 85.2 & - & - \\
-$\Delta$IG only & 70.0 & 1342.8 & 82.1 & - & - \\
-\textbf{geDIG (提案)} & \textbf{95.0} & \textbf{1043.1} & \textbf{97.8} & 5.3 & 1.9 \\
+\multicolumn{5}{l}{\textit{25×25迷路}} \\
+Random Walk & 40.0 & 396.9 & - & 60 \\
+Greedy DFS & 95.0 & 255.1 & - & 60 \\
+Oracle (BFS, 上限参照) & 95.0 & 118.4 & - & 60 \\
+\textbf{geDIG (提案)} & 75.0 & 315.6 & \textbf{99.3} & 60 \\
 \bottomrule
 \end{tabular}
+\\[0.4em]
+\footnotesize\textit{注}: geDIG の\emph{生の成功率}は単純な Greedy DFS と同等以下（15×15: 98 vs 99\%, 25×25: 75 vs 95\%）であり、本 PoC の主眼は探索ソルバとしての優劣ではなく、統一ゲージ $\F$ と AG/DG による\emph{制御原理}の実証と高いマップ圧縮（約98--99\%）にある。15×15 のアブレーション（$\Delta$EPC-only / $\Delta$IG-only / AG・DG無効）は成功率・平均ステップに差が出ず（\texttt{maze\_15x15\_ablation\_fullscale.json}）、本スケールではコンポーネント寄与を分離できていない（より大規模・高難度環境での検証は今後の課題）。架空の中間ベースライン（Curiosity / Q-learning 等）および 50×50 の数値は実測データが揃っていないため本表から除外した（スケーリングの定性傾向は図~\ref{fig:maze_scaling} を参照）。
 \end{table}
 
 \experimNote{50×50の大規模実験は現在20エピソードのみ。追加40エピソードを実施予定}
