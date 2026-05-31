@@ -67,3 +67,10 @@ docs/patent/**
 *.sqlite
 *.db
 AGENTS.md
+
+# Root output artifacts (repo cleanup 2026-05)
+test_output*.txt
+/vis_*.png
+
+# All local virtualenvs (catch-all; supersedes individual entries above)
+.venv*/
