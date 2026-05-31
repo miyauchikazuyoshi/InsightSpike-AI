@@ -2,7 +2,8 @@
   "title": "InsightSpike-AI: Brain-Inspired Multi-Agent Architecture for Insight Detection and Knowledge Restructuring",
   "upload_type": "publication",
   "publication_type": "article",
-  "description": "Release package for geDIG v4 paper (JA/EN PDFs) and lightweight reproduction scripts.",
+  "version": "0.6.1",
+  "description": "Release package (v0.6.1) for the geDIG v6 paper (JA/EN PDFs) and lightweight reproduction scripts. In this release, the reported experimental numbers in the README and paper were aligned with the underlying measured data (single-seed/PoC caveats made explicit; maze baselines corrected; BRIGHT scope and SOTA context added).",
   "creators": [
     { "name": "Miyauchi, Kazuyoshi", "affiliation": "InsightSpike-AI", "orcid": "0000-0000-0000-0000" }
   ],
