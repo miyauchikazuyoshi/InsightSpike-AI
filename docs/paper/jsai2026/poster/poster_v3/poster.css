@@ -140,7 +140,9 @@ sup{font-size:.62em;}
 .hyp b{color:var(--explore-deep);}
 
 .eqbox{
-  background:linear-gradient(160deg,#172033 0%,#111726 100%);color:#fff;
+  /* Solid background instead of gradient — gradients produce visible band
+     artifacts when Chrome rasterises to PDF (especially under transform:scale). */
+  background:#141c2c;color:#fff;
   border-radius:var(--radius);padding:24px 40px 26px;
   display:flex;flex-direction:column;justify-content:center;gap:18px;
 }
@@ -294,7 +296,10 @@ figcaption{font-size:18px;color:var(--muted);line-height:1.45;}
 }
 /* thermodynamic block (sits inside column 1) */
 .thermo{
-  background:linear-gradient(150deg,#1a1410 0%,#15161f 52%,#0f1a2e 100%);
+  /* Solid background. The original 3-stop gradient rendered to PDF with
+     visible cross-shaped band artifacts (one band per stop boundary,
+     diagonal due to the 150deg angle). Solid dark uses warm-cool midpoint. */
+  background:#161422;
   color:#fff;border-radius:var(--radius);padding:17px 28px;
   display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;
 }
