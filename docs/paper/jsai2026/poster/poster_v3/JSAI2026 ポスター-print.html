@@ -9,9 +9,12 @@
 <style>
 @media print {
   @page { size: 841mm 1189mm; margin: 0; }
-  html, body { margin:0 !important; padding:0 !important; background:#fff !important; width:auto !important; height:auto !important; overflow:visible !important; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
-  .stage { position:static !important; display:block !important; width:auto !important; height:auto !important; align-items:flex-start !important; justify-content:flex-start !important; overflow:visible !important; }
-  .poster { transform: scale(1.589) !important; transform-origin: top left !important; }
+  html, body { margin:0 !important; padding:0 !important; background:#fff !important; width:841mm !important; height:1189mm !important; overflow:hidden !important; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+  .stage { position:static !important; display:block !important; width:841mm !important; height:1189mm !important; align-items:flex-start !important; justify-content:flex-start !important; overflow:hidden !important; padding:0 !important; }
+  /* Use transform: scale and reserve layout space via the .stage wrapper sized in mm.
+     transform scales the visual rendering; layout box stays at 2000×2828, but stage is mm-sized so the page fits. */
+  .poster { transform: scale(1.589) !important; transform-origin: top left !important; width:2000px !important; height:2828px !important; position:absolute !important; top:0 !important; left:0 !important; }
+  .stage { position:relative !important; }
   *, *::before, *::after { animation-delay:-99s !important; animation-duration:.001s !important; animation-iteration-count:1 !important; animation-fill-mode:both !important; transition-duration:0s !important; }
 }
 </style>
