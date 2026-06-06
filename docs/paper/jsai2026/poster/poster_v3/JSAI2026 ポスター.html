@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSAI 2026 ポスター — geDIG</title>
+<link rel="stylesheet" href="poster.css">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+</head>
+<body>
+<div class="stage">
+<div class="poster" id="poster">
+
+  <!-- ============ HEADER ============ -->
+  <header class="hd">
+    <div class="hd-top">
+      <span class="badge">JSAI 2026 ・ 2026年度 人工知能学会全国大会</span>
+      <span class="hd-field">知識グラフ ／ 機械学習 ／ 計算論的認知</span>
+    </div>
+    <div class="hd-main">
+      <div class="hd-text">
+        <h1 class="title">動的知識グラフの探索・統合を<br>制御する統一ゲージの提案</h1>
+        <p class="subtitle">— Gauge what Knowledge Graph needs. —</p>
+        <p class="title-en">A Unified Gauge for Controlling Exploration and Integration in Dynamic Knowledge Graphs</p>
+        <div class="authors">
+          <span class="author">宮内 和義<span class="aff-mark">Kazuyoshi Miyauchi</span></span>
+          <span class="affil">独立研究者 ／ Independent Researcher</span>
+          <span class="contact">miyauchikazuyoshi@gmail.com</span>
+        </div>
+      </div>
+      <div class="hd-qr">
+        <div class="qr-item"><div class="qr" id="qr-paper"></div><span class="qr-cap">論文 PDF</span></div>
+        <div class="qr-item"><div class="qr" id="qr-landing"></div><span class="qr-cap">Landing</span></div>
+        <div class="qr-item"><div class="qr" id="qr-github"></div><span class="qr-cap">GitHub</span></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ HERO : When問題 + 統一評価関数 ============ -->
+  <section class="hero">
+    <div class="hero-row">
+      <div class="problem">
+        <span class="eyebrow explore-text">The “When” Problem</span>
+        <p class="lead">動的知識グラフが検索すべき<b>「何を（What）」</b>は GraphRAG・Self-RAG が最適化してきた。だが新情報を<span class="struc">「いつ（When）」</span>構造として統合し、いつ探索を続けるか——その原理的な基準は無かった。</p>
+        <p class="sub">geDIG は<b>自由エネルギー原理（FEP）</b>と<b>最小記述長（MDL）</b>を操作的に橋渡しし、このトレードオフを単一スカラー <em class="v">F</em> で評価する。</p>
+
+        <figure class="diagram ba-fig">
+          <svg viewBox="0 0 760 164" class="fig" role="img" aria-label="F before-after comparison">
+            <defs>
+              <marker id="ba" markerWidth="11" markerHeight="11" refX="8" refY="4" orient="auto"><path d="M0,0 L9,4 L0,8 z" fill="#374055"/></marker>
+            </defs>
+            <g font-family="Noto Sans JP, sans-serif">
+              <text x="4" y="17" font-size="18" font-weight="700" fill="#141b29"><tspan font-family="Source Serif 4, serif" font-style="italic">どちらが良い？</tspan> <tspan fill="#6b7686" font-size="16">— 候補を仮に足し F(更新前) と F(更新後) を比較</tspan></text>
+              <rect x="6" y="42" width="300" height="116" rx="13" fill="#f3efe6" stroke="#cdc6b6" stroke-width="1.5"/>
+              <text x="20" y="38" font-size="17" font-weight="700" fill="#6b7686">更新前 (current)</text>
+              <g stroke="#2f63cf" stroke-width="4" opacity="0.5">
+                <line x1="72" y1="78" x2="150" y2="66"/>
+                <line x1="150" y1="66" x2="240" y2="88"/>
+                <line x1="240" y1="88" x2="172" y2="142"/>
+              </g>
+              <line x1="172" y1="142" x2="72" y2="78" stroke="#dd7a35" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="84" y="130" font-size="16" fill="#b85d1d" font-weight="700">候補エッジ</text>
+              <g fill="#2f63cf"><circle cx="72" cy="78" r="12"/><circle cx="150" cy="66" r="12"/><circle cx="240" cy="88" r="12"/></g>
+              <circle cx="172" cy="142" r="14" fill="#fff" stroke="#1f7a5c" stroke-width="4"/>
+              <text x="172" y="147" text-anchor="middle" font-size="15" font-weight="700" fill="#1f7a5c">Q</text>
+              <line x1="312" y1="100" x2="372" y2="100" stroke="#374055" stroke-width="3" marker-end="url(#ba)"/>
+              <text x="342" y="88" text-anchor="middle" font-size="15" fill="#6b7686" font-weight="700">F 比較</text>
+              <rect x="384" y="42" width="300" height="116" rx="13" fill="#e6edfb" stroke="#9bb6ef" stroke-width="1.5"/>
+              <text x="398" y="38" font-size="17" font-weight="700" fill="#1f47a0">更新後 (committed)</text>
+              <g stroke="#2f63cf" stroke-width="4" opacity="0.6">
+                <line x1="450" y1="78" x2="528" y2="66"/>
+                <line x1="528" y1="66" x2="618" y2="88"/>
+                <line x1="618" y1="88" x2="550" y2="142"/>
+              </g>
+              <line x1="550" y1="142" x2="450" y2="78" stroke="#1f7a5c" stroke-width="5"/>
+              <text x="452" y="130" font-size="16" fill="#1f7a5c" font-weight="700">近道 = loop</text>
+              <g fill="#2f63cf"><circle cx="450" cy="78" r="12"/><circle cx="528" cy="66" r="12"/><circle cx="618" cy="88" r="12"/></g>
+              <circle cx="550" cy="142" r="14" fill="#fff" stroke="#1f7a5c" stroke-width="4"/>
+              <text x="550" y="147" text-anchor="middle" font-size="15" font-weight="700" fill="#1f7a5c">Q</text>
+            </g>
+          </svg>
+          <figcaption><b>「いつ統合するか」</b>＝候補エッジを仮に足し <em class="v">F</em>(更新前) と <em class="v">F</em>(更新後) を比較。<b style="color:#1f7a5c">ループ短絡で近道</b>を生む（ΔF&lt;0）場合のみコミット、希薄なら棄却。</figcaption>
+        </figure>
+      </div>
+      <div class="eqbox">
+        <span class="eqlabel">geDIG ｜ graph edit Distance and Information Gain</span>
+        <div class="equation">
+          <span class="F">F</span> <span class="op">=</span> <span class="epc">ΔEPC<sub>norm</sub></span> <span class="op">−</span> <span class="op">λ&thinsp;(</span><span class="h">ΔH<sub>norm</sub></span> <span class="op">+</span> <span class="op">γ&middot;</span><span class="sp">ΔSP<sub>rel</sub></span><span class="op">)</span>
+        </div>
+        <div class="eqfoot">
+          <span><b>λ</b>, <b>γ</b> ＝ 情報温度（構造の複雑さと圧縮率のバランス）</span>
+        </div>
+        <div class="eqterms">
+          <div class="et t-epc">
+            <span class="ets">ΔEPC<sub>norm</sub></span>
+            <span class="etn">構造変更コスト</span>
+            <span class="etd">GED の局所近似。構造を変えるほど大きい。</span>
+            <span class="etc">FEP 複雑さ ・ MDL L(M)増 ・ <b>抑制</b></span>
+          </div>
+          <div class="et t-h">
+            <span class="ets">ΔH<sub>norm</sub></span>
+            <span class="etn">伸展利得 (optionality)</span>
+            <span class="etd">候補分布のエントロピー差。探索圧＝温度項。</span>
+            <span class="etc">FEP 探索圧 ・ 温度項 ・ <b>拡散</b></span>
+          </div>
+          <div class="et t-sp">
+            <span class="ets">ΔSP<sub>rel</sub></span>
+            <span class="etn">経路短縮 (近道)</span>
+            <span class="etd">平均最短路長の相対短縮。効率化を測る。</span>
+            <span class="etc">MDL L(D|M)圧縮 ・ <b>効率</b></span>
+          </div>
+        </div>
+        <div class="hyp-eq"><b>核心仮説 —</b> 構造コストと伸展利得のトレードオフを単一スカラーで評価すれば、知識グラフの種類によらず探索と統合を統一的に制御できる。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BODY : 3 columns ============ -->
+  <div class="grid">
+
+    <!-- ===== Col 1 : AG/DG gate control ===== -->
+    <div class="col">
+      <div class="panel">
+        <div class="sec-head">
+          <span class="sec-num s-gate">01</span>
+          <div class="ht"><span class="he">Control</span><h2>AG／DG 二段ゲート制御</h2></div>
+        </div>
+        <p>エージェントは <em class="v">F</em> を用いて 2 つのゲートを<b>事象駆動的</b>に開閉し、探索モードと統合モードを自律的に切り替える。</p>
+
+        <div class="gate ag">
+          <div class="gh"><span class="gname">AG</span><span class="gtag">Attention Gate ｜ 0-hop</span></div>
+          <div class="gcond">g<sub>0</sub> = F|<sub>local</sub> &gt; θ<sub>AG</sub></div>
+          <div class="gtxt">局所的な<b>「違和感・未知」</b>を検知 → <b>探索モード</b>を起動。</div>
+        </div>
+        <div class="gate dg">
+          <div class="gh"><span class="gname">DG</span><span class="gtag">Decision Gate ｜ multi-hop</span></div>
+          <div class="gcond">g<sub>min</sub> = min<sub>h</sub> F<sup>(h)</sup> &lt; θ<sub>DG</sub></div>
+          <div class="gtxt">大域的な<b>「近道・洞察」</b>を発見 → <b>統合モード</b>でエッジを確定。</div>
+        </div>
+
+        <figure class="diagram node-fig">
+          <svg viewBox="0 0 760 268" class="fig" role="img" aria-label="AG 0-hop and DG multi-hop node diagram">
+            <defs>
+              <marker id="cm" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#9aa0ab"/></marker>
+            </defs>
+            <g font-family="Noto Sans JP, sans-serif">
+              <line x1="380" y1="18" x2="380" y2="234" stroke="#e3ddd0" stroke-width="2"/>
+              <!-- Panel A: loop short-circuit -> commit -->
+              <circle cx="178" cy="138" r="114" fill="#2f63cf" fill-opacity="0.05" stroke="#2f63cf" stroke-width="2" stroke-dasharray="7 6"/>
+              <text x="214" y="36" text-anchor="middle" font-size="18" font-weight="700" fill="#1f47a0">DG ｜ multi-hop</text>
+              <circle cx="118" cy="138" r="62" fill="#dd7a35" fill-opacity="0.09" stroke="#dd7a35" stroke-width="2" stroke-dasharray="6 5"/>
+              <text x="104" y="84" text-anchor="middle" font-size="16" font-weight="700" fill="#b85d1d">AG ｜ 0-hop</text>
+              <g stroke="#2f63cf" stroke-width="3.5" opacity="0.5" fill="none">
+                <line x1="118" y1="138" x2="80" y2="110"/>
+                <line x1="118" y1="138" x2="158" y2="106"/>
+                <line x1="118" y1="138" x2="150" y2="184"/>
+                <line x1="158" y1="106" x2="238" y2="120"/>
+                <line x1="238" y1="120" x2="252" y2="196"/>
+              </g>
+              <line x1="150" y1="184" x2="252" y2="196" stroke="#1f7a5c" stroke-width="5"/>
+              <text x="196" y="226" text-anchor="middle" font-size="15" font-weight="700" fill="#1f7a5c">ループ短絡</text>
+              <g fill="#2f63cf"><circle cx="80" cy="110" r="11"/><circle cx="158" cy="106" r="12"/><circle cx="150" cy="184" r="12"/><circle cx="238" cy="120" r="12"/><circle cx="252" cy="196" r="12"/></g>
+              <circle cx="118" cy="138" r="15" fill="#fff" stroke="#1f7a5c" stroke-width="4"/>
+              <text x="118" y="144" text-anchor="middle" font-size="15" font-weight="700" fill="#1f7a5c">Q</text>
+              <text x="190" y="256" text-anchor="middle" font-size="18" font-weight="700" fill="#141b29">(a) 閉ループ → <tspan fill="#1f7a5c">F↓ コミット</tspan></text>
+              <!-- Panel B: sparse -> reject -->
+              <circle cx="574" cy="138" r="114" fill="#6b7686" fill-opacity="0.04" stroke="#9aa0ab" stroke-width="2" stroke-dasharray="7 6"/>
+              <text x="606" y="36" text-anchor="middle" font-size="18" font-weight="700" fill="#6b7686">DG ｜ multi-hop ↗ 拡大</text>
+              <circle cx="516" cy="138" r="62" fill="#dd7a35" fill-opacity="0.09" stroke="#dd7a35" stroke-width="2" stroke-dasharray="6 5"/>
+              <text x="502" y="84" text-anchor="middle" font-size="16" font-weight="700" fill="#b85d1d">AG ｜ 0-hop</text>
+              <g stroke="#2f63cf" stroke-width="3.5" opacity="0.5" fill="none">
+                <line x1="516" y1="138" x2="478" y2="110"/>
+                <line x1="516" y1="138" x2="556" y2="106"/>
+                <line x1="516" y1="138" x2="548" y2="184"/>
+                <line x1="556" y1="106" x2="640" y2="122"/>
+              </g>
+              <line x1="640" y1="122" x2="696" y2="200" stroke="#9aa0ab" stroke-width="4" stroke-dasharray="8 6" marker-end="url(#cm)"/>
+              <text x="614" y="194" font-size="15" font-weight="700" fill="#9aa0ab">閉じず</text>
+              <g fill="#2f63cf"><circle cx="478" cy="110" r="11"/><circle cx="556" cy="106" r="12"/><circle cx="548" cy="184" r="12"/><circle cx="640" cy="122" r="12"/></g>
+              <circle cx="516" cy="138" r="15" fill="#fff" stroke="#1f7a5c" stroke-width="4"/>
+              <text x="516" y="144" text-anchor="middle" font-size="15" font-weight="700" fill="#1f7a5c">Q</text>
+              <text x="574" y="256" text-anchor="middle" font-size="18" font-weight="700" fill="#141b29">(b) ループ閉じず → <tspan fill="#b0556a">F≈ 棄却</tspan></text>
+            </g>
+          </svg>
+          <figcaption><b>図1.</b> <b style="color:#b85d1d">AG</b> は Q と<b>直接つながる 0-hop 近傍</b>（1次接続）で違和感を検知、<b style="color:#1f47a0">DG</b> は <b>multi-hop</b> 範囲で候補が<b style="color:#1f7a5c">ループを短絡＝近道</b>になるかを判定。なる場合のみコミットする。</figcaption>
+        </figure>
+
+        <div class="motto">「<span class="ag-c">わからないときだけ調べ（AG）</span>、<br><span class="dg-c">わかったときだけ覚える（DG）</span>」</div>
+      </div>
+
+      <div class="thermo">
+        <span class="eyebrow">Thermodynamic Interpretation</span>
+        <h2>熱力学的自由エネルギーとの同型性</h2>
+        <div class="map2">
+          <div class="mrow"><span class="ml">geDIG</span><span class="me"><em>F</em> = ΔEPC − λ(ΔH + γΔSP)</span></div>
+          <div class="mrow"><span class="ml">展開</span><span class="me">= (<span class="cool">ΔEPC − λγΔSP</span>) − <span class="warm">λΔH</span></span></div>
+          <div class="mrow"><span class="ml">同型</span><span class="me">≅ <span class="cool">E</span> − <span class="warm">T·S</span></span></div>
+        </div>
+        <p><span class="cool">構造項 (ΔEPC − λγΔSP) ↔ エネルギー E</span>、<span class="warm">λΔH ↔ 温度×エントロピー T·S</span>（T = λ：情報温度）。層別 <em class="v" style="font-style:italic">F</em> 推移は<b style="color:#fff">「高温→低温への冷却＝アニーリング過程」</b>と読める。</p>
+        <div class="coolbar"></div>
+        <div class="coolbar-lbl"><span>高温・高エントロピー ｜ 探索</span><span>低温・低エントロピー ｜ 構造</span></div>
+      </div>
+    </div>
+
+    <!-- ===== Col 2 : Maze (Spatial KG) ===== -->
+    <div class="col">
+      <div class="panel">
+        <div class="sec-head">
+          <span class="sec-num s-maze">02</span>
+          <div class="ht"><span class="he">Validation I ｜ Spatial KG</span><h2>検証 I：迷路探索</h2></div>
+        </div>
+        <p>部分観測迷路でエージェントが築く<b>認知地図</b>は動的知識グラフの一形態。周囲1マスしか見えず、「全通路を記憶」か「分岐点のみ記憶」かの選択を迫られる。</p>
+
+        <figure class="diagram realfig">
+          <div class="figrow">
+            <div class="fcell">
+              <img src="figs/maze.png" alt="15x15 maze with geDIG exploration path">
+              <span class="fcap">(a) 実空間 ｜ 15×15 迷路の探索軌跡</span>
+            </div>
+            <div class="farrow"><span>圧縮</span><svg viewBox="0 0 40 20" width="40" height="20"><path d="M2,10 H32 M26,4 L34,10 L26,16" fill="none" stroke="#374055" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="fcell">
+              <img src="figs/img_p2_2.png" alt="cognitive map graph">
+              <span class="fcap">(b) 内部表現 ｜ 認知地図グラフ</span>
+            </div>
+          </div>
+          <figcaption><b>図2.</b> 直線通路は圧縮され、<b style="color:#2f63cf">分岐点（意思決定点）</b>と経路のみが保持される。AG が「驚き＝未知」をノードに、DG が「理解＝因果」をエッジに記録する。</figcaption>
+        </figure>
+
+        <div class="epibox">
+          <span class="epihead">移動エピソードベクトル <b>8D</b></span>
+          <p class="epitxt">位置・相対移動・通行可否・訪問回数・success/goal を符号化（weights: <b>wall 6 / visit 4</b>）。クエリとの重み付き距離で候補分布を生成する。<b>ゴール座標・正解経路は与えない</b>——移動履歴のみから記憶接続を選ぶ。</p>
+        </div>
+
+        <div class="stats">
+          <div class="stat s1"><span class="num">98%</span><span class="lab">15×15 迷路の成功率<br>（Greedy DFS と同等）</span></div>
+          <div class="stat s2"><span class="num">98%</span><span class="lab">候補エッジの棄却率<br>＝記憶圧縮率</span></div>
+        </div>
+
+        <table>
+          <caption>表2 ｜ 迷路ナビゲーション結果（部分観測）</caption>
+          <thead><tr><th>手法</th><th>成功率</th><th>平均ステップ</th><th>圧縮率</th></tr></thead>
+          <tbody>
+            <tr class="grp"><td colspan="4">15×15 （n=100, max=250）</td></tr>
+            <tr><td>Random Walk</td><td>0.75 <span class="pm">±.08</span></td><td>105.8</td><td>—</td></tr>
+            <tr><td>Greedy DFS</td><td>0.99 <span class="pm">±.03</span></td><td>82.1</td><td>—</td></tr>
+            <tr class="hi"><td>geDIG</td><td>0.98 <span class="pm">±.03</span></td><td>89.6</td><td>98%</td></tr>
+            <tr class="grp"><td colspan="4">25×25 （n=60, max=500）</td></tr>
+            <tr><td>Random Walk</td><td>0.40 <span class="pm">±.12</span></td><td>242.2</td><td>—</td></tr>
+            <tr><td>Greedy DFS</td><td>0.95 <span class="pm">±.06</span></td><td>242.2</td><td>—</td></tr>
+            <tr class="hi"><td>geDIG</td><td>0.75 <span class="pm">±.11</span></td><td>254.1</td><td>99%</td></tr>
+          </tbody>
+        </table>
+        <p class="tnote">geDIG は<b>「必要なトポロジー骨格」のみ</b>を選択的に記憶する。vs Random Walk は McNemar 検定で有意（15×15: <em class="v">p</em>&lt;10⁻⁵）。</p>
+      </div>
+    </div>
+
+    <!-- ===== Col 3 : Transformer (Semantic KG) ===== -->
+    <div class="col">
+      <div class="panel">
+        <div class="sec-head">
+          <span class="sec-num s-tf">03</span>
+          <div class="ht"><span class="he">Validation II ｜ Semantic KG</span><h2>検証 II：Transformer</h2></div>
+        </div>
+        <p>Attention 行列 <em class="v">A<sub style="font-style:normal">ij</sub></em> を関係グラフと見なすと<b>意味的 KG</b> が得られる（BERT 12層・SST-2・n=200）。同じ <em class="v">F</em> の3項を Attention 上で定義：</p>
+
+        <div class="tfmap">
+          <div class="tfhead">グラフ化 ｜ ノード = <b>トークン</b>、エッジ = <b>Attention A<sub>ij</sub></b>（上位10%を保持）</div>
+          <div class="tfrow"><span class="tfk epc">ΔEPC</span><span class="tfv">Attention 構成の変化＝編集コスト</span></div>
+          <div class="tfrow"><span class="tfk hh">ΔH</span><span class="tfv">Attention 分布の拡散＝エントロピー</span></div>
+          <div class="tfrow"><span class="tfk sp">ΔSP</span><span class="tfv">Attention 上の最短路の短縮</span></div>
+        </div>
+
+        <div class="chartwrap">
+          <span class="chart-title">図4 ｜ BERT 12層における geDIG F 値の分布（BERT-base, SST-2, n=200）</span>
+          <div class="realfig boxplot"><img src="figs/img_p2_3.png" alt="BERT layer-wise geDIG F-score boxplot"></div>
+        </div>
+
+        <div class="phase">
+          <div class="pr"><span class="pdot" style="background:#dd7a35"></span><span><b>浅層 0–1</b>｜探索相（<em class="v">F</em>≈−0.50）</span></div>
+          <div class="pr"><span class="pdot" style="background:#9a86b0"></span><span><b>中層 4–5</b>｜構造化が進行（<em class="v">F</em>≈−0.45）</span></div>
+          <div class="pr"><span class="pdot" style="background:#2f63cf"></span><span><b>深層 10–11</b>｜構造相へ相転移（<em class="v">F</em>≈−0.44）</span></div>
+        </div>
+        <p class="tnote">Layer 0–1 vs 10–11 は有意（paired <em class="v">t</em>(199)=32.6, <b><em class="v">p</em>&lt;10⁻⁸⁰</b>, Cohen's <em class="v">d</em>=2.31）。ヘッドは「探索担当／統合担当」に機能分化。</p>
+
+        <table>
+          <caption>表3 ｜ F 正則化の因果的介入（L = L<sub>CE</sub> + α·F）</caption>
+          <thead><tr><th>α</th><th>Accuracy (%)</th><th>Δ (pp)</th></tr></thead>
+          <tbody>
+            <tr><td>0（基準）</td><td>86.00 <span class="pm">±.53</span></td><td>—</td></tr>
+            <tr class="hi-b"><td>0.001</td><td>86.33 <span class="pm">±.46</span></td><td>+0.33<sup>*</sup></td></tr>
+            <tr><td>0.01</td><td>86.27 <span class="pm">±.70</span></td><td>+0.27</td></tr>
+            <tr><td>0.1</td><td>85.93 <span class="pm">±1.1</span></td><td>−0.07</td></tr>
+            <tr><td>1.0</td><td>78.93 <span class="pm">±1.6</span></td><td>−7.07</td></tr>
+          </tbody>
+        </table>
+        <p class="tnote"><sup>*</sup>paired <em class="v">t</em>-test <b><em class="v">p</em>=0.038</b>。<b>逆U字</b>＝微弱な正則化は改善、過剰は悪化。適切な「構造化圧」が汎化を引き出す因果的証拠。学習済み Transformer は既に <em class="v">F</em> 最小化に近い。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ BOTTOM : 熱力学的解釈 + 結論 ============ -->
+  <!-- ============ BOTTOM : 結論と展望 ============ -->
+  <div class="bottom">
+    <div class="concl">
+      <div class="concl-main">
+        <h2>結論と展望</h2>
+        <ul>
+          <li><b>2種の動的 KG（迷路・Transformer）</b>で、<em class="v">F</em> が共通の構造化原理として機能することを実証。</li>
+          <li>いずれも<b>探索相 → 構造相への相転移</b>を示し、F 正則化により <em class="v">F</em> と性能の因果関係を確認。</li>
+        </ul>
+      </div>
+      <div class="future">
+        <span class="eyebrow">Future Work</span>
+        <p class="fut-pt"><b>① ΔSP → β₁ への位相拡張。</b>近道（ΔSP）を<b>第一ベッチ数 β₁</b>に一般化し、ループ・短絡を位相不変量として扱う。</p>
+        <p class="fut-pt"><b>② GraphRAG / Self-RAG への応用。</b>AG/DG ゲートで現行 RAG の<b>「いつ検索し、いつ構造化するか」</b>を原理的に自律制御する。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="ft">
+    <div class="refs"><b>主要参考：</b>Friston 2010 (FEP) ・ Grünwald 2007 (MDL) ・ O'Keefe &amp; Nadel 1978 (Cognitive Map) ・ Devlin 2019 (BERT) ・ Edge 2024 (GraphRAG) ・ Asai 2023 (Self-RAG)</div>
+    <div class="brand">geDIG</div>
+  </footer>
+
+</div>
+</div>
+<script src="poster.js"></script>
+</body>
+</html>
