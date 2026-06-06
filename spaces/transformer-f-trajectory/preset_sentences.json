@@ -1,0 +1,77 @@
+{
+  "description": "Curated sentences to demonstrate F-trajectory patterns across BERT layers.",
+  "categories": {
+    "simple": [
+      {
+        "id": "simple_1",
+        "text": "The cat sat on the mat.",
+        "note": "短い平叙文。曖昧性なし。F軌跡は緩やかに上昇する見込み。"
+      },
+      {
+        "id": "simple_2",
+        "text": "Water boils at one hundred degrees.",
+        "note": "事実文。固有名詞なし、明確な意味。"
+      }
+    ],
+    "complex": [
+      {
+        "id": "complex_1",
+        "text": "Although it was raining heavily, John decided to walk to the library to return the books he had borrowed last week.",
+        "note": "長文・節構造。深層で構造化負荷が高まる。"
+      },
+      {
+        "id": "complex_2",
+        "text": "The committee, which had been deliberating for several hours, finally reached a unanimous decision on the matter.",
+        "note": "関係節挿入。中間層で entropy 変化が現れやすい。"
+      }
+    ],
+    "ambiguous": [
+      {
+        "id": "amb_1",
+        "text": "Time flies like an arrow; fruit flies like a banana.",
+        "note": "古典的曖昧構文。'like' の品詞解釈で軌跡が変わる。"
+      },
+      {
+        "id": "amb_2",
+        "text": "The chicken is ready to eat.",
+        "note": "agent/patient 曖昧。"
+      }
+    ],
+    "garden_path": [
+      {
+        "id": "gp_1",
+        "text": "The horse raced past the barn fell.",
+        "note": "古典 garden-path 文。途中で構文解析が破綻し再パースが必要。"
+      },
+      {
+        "id": "gp_2",
+        "text": "The old man the boats.",
+        "note": "'old' が名詞・'man' が動詞の garden-path。"
+      }
+    ],
+    "named_entity": [
+      {
+        "id": "ne_1",
+        "text": "Apple announced new products at the conference.",
+        "note": "'Apple' の意味曖昧性 (果物/会社)。1976以降は会社優位。"
+      },
+      {
+        "id": "ne_2",
+        "text": "Einstein developed the theory of relativity in nineteen fifteen.",
+        "note": "歴史的事実。固有名詞が強く構造化される。"
+      }
+    ],
+    "question": [
+      {
+        "id": "q_1",
+        "text": "What is the capital of France?",
+        "note": "質問文。F軌跡が宣言文と異なる傾向。"
+      },
+      {
+        "id": "q_2",
+        "text": "How does photosynthesis work?",
+        "note": "Why/How 質問は構造化負荷が高い。"
+      }
+    ]
+  }
+}
