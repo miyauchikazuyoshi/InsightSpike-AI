@@ -8,6 +8,8 @@ import logging
 import os
 import atexit
 import time as _time_for_trace  # local alias to avoid shadowing later 'time'
+
+_logger = logging.getLogger(__name__)
 _DIAG_IMPORT = os.getenv('INSIGHTSPIKE_DIAG_IMPORT') == '1'
 if _DIAG_IMPORT:
     print('[main_agent] module import start', flush=True)

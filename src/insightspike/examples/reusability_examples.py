@@ -133,6 +133,7 @@ def example_5_insight_pattern_analysis():
     """Example 5: Analyzing insight patterns across episodes"""
     print("=== Example 5: Insight Pattern Analysis ===")
 
+    from insightspike.implementations.agents.agent_factory import create_maze_agent
     agent = create_maze_agent(maze_size=12)
     all_insights = []
 

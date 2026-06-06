@@ -485,6 +485,5 @@ def get_global_ged_calculator() -> GraphEditDistance:
 
 def reset_ged_state():
     """Reset the global GED calculator state."""
-    global _global_ged_calculator
     if _global_ged_calculator is not None:
         _global_ged_calculator.reset_state()

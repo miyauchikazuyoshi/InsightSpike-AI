@@ -8,7 +8,7 @@ to prevent memory explosion while maintaining backward compatibility.
 
 import logging
 import time
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 

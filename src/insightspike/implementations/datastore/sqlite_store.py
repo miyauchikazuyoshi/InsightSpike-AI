@@ -20,6 +20,11 @@ from uuid import uuid4
 import aiosqlite
 import numpy as np
 
+try:
+    import faiss  # optional dependency for vector index
+except ImportError:  # pragma: no cover
+    faiss = None
+
 from ...core.base.async_datastore import AsyncDataStore
 from ...core.base.datastore import VectorIndex
 from ...vector_index import VectorIndexFactory

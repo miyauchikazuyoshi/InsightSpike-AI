@@ -103,8 +103,6 @@ class EmbeddingManager:
         if self._model is not None:
             return self._model
 
-        global _model_cache
-
         if self.model_name in _model_cache:
             self._model = _model_cache[self.model_name]
             return self._model
@@ -213,7 +211,6 @@ class EmbeddingManager:
         """Fallback to simple hash-based model."""
         logger.warning("Using fallback hash-based embedding model")
 
-        global _model_cache
         fallback_key = f"fallback_{self.dimension}"
 
         if fallback_key not in _model_cache:
