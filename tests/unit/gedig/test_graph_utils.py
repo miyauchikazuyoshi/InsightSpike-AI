@@ -335,17 +335,27 @@ class TestTrimTerminalEdgesExtended:
     """Extended tests for trim_terminal_edges."""
 
     def test_with_terminal_layer(self):
-        """Test that terminal layer edges are removed."""
+        """Test that boundary edges between two terminal nodes are removed.
+
+        Per the trim_terminal_edges implementation, an edge is removed only
+        when BOTH endpoints are at the terminal hop distance. This preserves
+        edges from anchor toward terminal nodes while pruning the boundary
+        ring between two terminal nodes.
+        """
         g = nx.Graph()
+        # a -- b -- c1, b -- c2, and c1 -- c2 (boundary at hop=2)
         g.add_edges_from([
-            ('a', 'b'), ('b', 'c'), ('c', 'd')
+            ('a', 'b'), ('b', 'c1'), ('b', 'c2'), ('c1', 'c2')
         ])
         anchors = {'a'}
         trimmed = trim_terminal_edges(g, anchors, hop=2)
-        # Edge (b, c) should be removed as c is at hop=2 (terminal)
-        # Edge (c, d) is NOT removed because d is not visited (dist=None)
-        assert ('b', 'c') not in trimmed.edges()
+        # Both c1 and c2 are at hop=2 (terminal), so the boundary edge between
+        # them is removed.
+        assert ('c1', 'c2') not in trimmed.edges()
+        # Edges from interior to terminal are kept.
         assert ('a', 'b') in trimmed.edges()
+        assert ('b', 'c1') in trimmed.edges()
+        assert ('b', 'c2') in trimmed.edges()
 
     def test_exception_handling(self):
         """Test that exceptions are handled gracefully."""
