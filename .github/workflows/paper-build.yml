@@ -1,15 +1,16 @@
 name: Paper Build
 
+# Manual-only. PDFs are built locally and committed alongside the .tex source,
+# so we don't need CI re-builds on every paper-related push. Trigger manually
+# from the Actions tab when you want to verify the LaTeX still compiles.
+#
+# History: prior auto-trigger pointed at v5 .tex files which were renamed to
+# v6, causing every docs/paper/** push to fail noisily. Rather than maintain
+# a fragile (xelatex + Japanese) CI build for an artifact we already commit,
+# we ship the PDF from the developer's machine and run this workflow only
+# when explicitly requested.
 on:
-  push:
-    branches: [ main, master ]
-    paths:
-      - 'docs/paper/**'
-      - '.github/workflows/paper-build.yml'
-  pull_request:
-    paths:
-      - 'docs/paper/**'
-      - '.github/workflows/paper-build.yml'
+  workflow_dispatch:
 
 jobs:
   build:
