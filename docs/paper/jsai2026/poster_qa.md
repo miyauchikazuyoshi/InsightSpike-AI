@@ -317,6 +317,147 @@ print(result.f_value)
 
 ---
 
+## デモ説明スクリプト
+
+ポスター隣で動かす 2 つのデモの口頭説明。30 秒・1 分・2 分の 3 段構え。
+
+### Demo A — Transformer F-Trajectory (Streamlit)
+
+**起動**: `cd spaces/transformer-f-trajectory && streamlit run app.py` → http://localhost:8501/
+**URL ハンドアウト用**: <https://github.com/miyauchikazuyoshi/InsightSpike-AI/tree/main/spaces/transformer-f-trajectory>
+
+#### 30 秒バージョン (来場者がチラ見した時)
+
+> 「これは BERT に文を流したとき、層ごとに **F = ΔEPC − λ(ΔH+γΔSP)** がどう動くか見るデモです。
+> 文ごとに F の累積カーブが違うのが分かります。**浅層は探索、深層は構造化**という相転移パターンが見えます。」
+
+→ Preset タブで `simple_1` → `complex_1` → `garden_path_1` の順で切り替え、左上のカーブの違いを指差す。
+
+#### 1 分バージョン (関心を示した時)
+
+> 「**ポスターの式と同じ F を、迷路ではなく BERT の attention グラフで計算したものです**。
+>
+> 左の折れ線が **層ごとの累積 F**。低いほど構造化が進んでいない、高いほど進んでいる。**全文で単調増加** = 層を進むと一貫して構造化されていく。これがポスターでいう『相転移パターン』です。
+>
+> 右の折れ線は **F の構成要素 ΔEPC, ΔH, ΔSP の内訳**。F は単純な和ではなくバランスで決まることが分かります。」
+
+→ component chart の 3 線を順に指差し、それぞれの色が poster の §2 と同じ色対応であることを示す。
+
+#### 2 分バージョン (技術者が深堀りしてきた時)
+
+> 「**プリセットは事前計算のキャッシュ**で、即時切替で 12 文を比較できます。
+> **Custom input タブ** で来場者の文をその場で BERT に通すこともできます。1-2 秒で返ります。
+>
+> たとえば *garden-path* 文(『The horse raced past the barn fell.』)では、中間層で F の傾きが変わる傾向があります。これは構文解析が再パースされる地点に対応する可能性があり、まだ仮説段階ですが面白い観察です。
+>
+> Sidebar で λ, γ をスライダー操作できます。**λ を上げると F が情報利得寄りになり、γ を上げると経路短縮の重みが増します**。プリセットは λ=1.0, γ=0.5 固定ですが、Custom 入力には反映されます。」
+
+→ Custom タブで来場者の文を実走、α/γ スライダーを動かして F カーブが変形する様子を見せる。
+
+#### 見せる順番のテンプレ
+
+| ステップ | 操作 | 何を強調するか |
+|---|---|---|
+| 1 | `simple_1` "The cat sat on the mat." を選択 | 単純文の基準カーブ |
+| 2 | `complex_1` 長文に切替 | 全文で同じパターンに見えるが、累積 F の絶対値が違う |
+| 3 | `garden_path_1` に切替 | 中間層で傾きが変わる仮説的観察 |
+| 4 | Component chart を指差す | F は和でなくバランス、3 軸独立性 |
+| 5 | Custom input に来場者の文 | 「自分の文でも 1 秒で動きます」 |
+
+#### よく出る質問への返答 (Demo A 固有)
+
+| 質問 | 即答 |
+|---|---|
+| なぜ単調増加？ | hidden state が層を進むほど類似行列が動き、ΔEPC が累積されるため。「平均的に」単調。 |
+| Garden-path で本当に変曲点が出る？ | 1 文の観察。**統計的検証はまだ**。仮説として面白いというレベル。 |
+| 他のモデルでは？ | DistilBERT (6 層) も切替可。GPT-2 medium も研究コード側で実証済み。 |
+| 推論時間は？ | CPU で 1-2 秒、Apple Silicon mps で 0.3-0.7 秒。 |
+| 学習との関係は？ | Exp4 で **F 最大化 (Negative) が精度改善**を示した。デモは推論時の観察。 |
+
+---
+
+### Demo B — Maze Interactive Playback (HTML 単体)
+
+**起動**: ブラウザで以下のローカルファイルを開く
+```
+file:///Users/miyauchikazuyoshi/Documents/GitHub/InsightSpike-AI/experiments/_archive_before_20260201_refactor/maze-query-hub-prototype/results/paper_25x25_s500_allpairs_exact_interactive.html
+```
+
+22 MB の自己完結 HTML。ネット接続不要。`Maze Report v-SPfix-2` というタイトル。
+
+**画面構成** (上から順に):
+- 上段の指標カード: Success Rate / Average Steps / Mean g₀ / Mean g_min / k★ Mean / k★ ≥ 1 Ratio / Multihop Usage
+- 左側 Controls: Seed セレクタ / Edges モード / Step スライダー
+- 右側: Maze Playback & Graph Integration、Graph Snapshot、Temporal Metrics
+- 下部: SP Debug、Candidate Snapshot、Per-hop Metrics
+
+#### 30 秒バージョン
+
+> 「これは **25×25 迷路を 500 ステップ走らせた実験**を、シードごとに再生できるインタラクティブビューワです。
+> 上のカードが集計指標。**Success Rate が 98%、Average Steps が約 69** — これがポスターの迷路結果と同じ数字です。
+>
+> 下のスライダーで **エージェントが各ステップで何を見て F を計算したか** をステップ・バイ・ステップで遡れます。」
+
+→ Step スライダーを左右に動かして迷路上のエージェント軌跡が動くのを見せる。
+
+#### 1 分バージョン
+
+> 「シードを切り替えると別の迷路インスタンスが見えます。
+>
+> 重要な点は 3 つ：
+>
+> **(1) g₀ / g_min の時系列**: 各ステップで AG (0-hop) と DG (multi-hop) の F 値を出している。グラフの折れ線で、g_min が g₀ より十分下がった瞬間が **DG 発火 = 統合の確信**。
+>
+> **(2) k★ ≥ 1 Ratio**: マルチホップ評価が実際に発火した割合。**大半は 0-hop で決着し、必要なときだけ multi-hop に降りる** ことが分かります。これがポスターでいう『計算量の段階分担』の実証。
+>
+> **(3) Per-hop Metrics**: 各ホップでの ΔEPC, IG, H, ΔSP の内訳。F が単一スカラーで判定しているのが見えます。」
+
+→ Temporal Metrics チャートと Per-hop Metrics テーブルを順に指差す。
+
+#### 2 分バージョン
+
+> 「Edges モードを切り替えると、エージェントの内部グラフが時間とともにどう成長していくかが見えます。**Wake → Sleep → Wake** のサイクル設計の Wake 部分にあたります。
+>
+> Candidate Snapshot で、各ステップで **AG エリア内のどのエッジを候補として吟味したか** を可視化しています。多くは棄却される。**98% の候補棄却率と 98% の到達成功率を両立しているのが geDIG の特徴**です。
+>
+> SP Debug は **δSP が最大の候補トップ**を表示。ループ短絡を作る候補が **どの瞬間に検知され DG 発火に繋がったか** をデバッグできます。
+>
+> このビューワは生データを直接埋め込んだ自己完結 HTML なので、論文の Figure を **追試・反証可能な形** で公開する手段でもあります。査読してもらえる方には URL ごとお渡しします。」
+
+→ 各 Debug セクションを順に指差し、データの埋め込みであることを強調。
+
+#### 見せる順番のテンプレ
+
+| ステップ | 操作 | 何を強調するか |
+|---|---|---|
+| 1 | 起動直後の Default seed を表示 | 上段カードで「ポスターと同じ数字」 |
+| 2 | Step スライダーを最初から最後へ動かす | エージェントの軌跡 = AG/DG の動作シーケンス |
+| 3 | Temporal Metrics チャートを指差す | g₀ と g_min の差が大きい瞬間 = DG 発火 |
+| 4 | Per-hop Metrics に降りる | F の内訳。単一スカラーがどう構成されるか |
+| 5 | Seed を変えて別インスタンス | 一貫性の demonstration |
+
+#### よく出る質問への返答 (Demo B 固有)
+
+| 質問 | 即答 |
+|---|---|
+| 学習なし？ | **学習なし**。F だけで AG/DG 判定して 98%。Greedy DFS (92%) を上回る。 |
+| 何 seeds で取った？ | 25×25 で 100 episodes (500 steps cap)。SP 計算は allpairs exact。 |
+| Random Walk との差は？ | Random 45%、Greedy DFS 92%、geDIG 98%、Oracle BFS 100%。 |
+| 大きい迷路では？ | 50×50 も実証済 (ポスター記載)。15×15 から 50×50 までスケールする。 |
+| この HTML どうやって作ってる？ | 実験コードが各 episode の生データを JSON 埋め込みで吐く。view は plain JS。 |
+
+---
+
+### 両デモ共通の運用 Tips
+
+- **WiFi を切ってもデモ動く**: Transformer demo は cache 済み presets と local BERT、Maze demo は self-contained HTML。
+- **Laptop を 2 台用意**: 1 台で交互に動かすと切替コストが大きい。**Transformer は Streamlit on Mac A、Maze は HTML on Mac B** がベター。1 台しかない場合は ブラウザの **タブ 2 枚** で切替。
+- **デモ前にプリセット計算済みか確認**: `presets.json` の更新日が古いと不安。前夜に `python compute_presets.py --device mps` を回しておく。
+- **来場者の文を Custom input に入れる時**: Personal Information (本名・所属) を入れないよう一言添える。BERT に入っても問題ないが、配慮として。
+- **質問が深堀りに入ったら QR/URL を渡して終わる**: Landing page (https://miyauchikazuyoshi.github.io/InsightSpike-AI/) に paper PDF と GitHub があるので、そこから自分のペースで読んでもらう。
+
+---
+
 ## 注意：自分への戒め
 
 - **論破モードに入らない**。来場者の批判は学びの種。
