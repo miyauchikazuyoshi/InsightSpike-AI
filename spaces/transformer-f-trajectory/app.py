@@ -31,32 +31,71 @@ st.markdown(
     """
     <style>
       .stApp { background: #0f1320; color: #eef1f7; }
-      .block-container { padding-top: 2rem; padding-bottom: 2rem; }
+      .block-container { padding-top: 1.4rem; padding-bottom: 2rem; max-width: 1500px; }
       h1, h2, h3 { color: #eef1f7; }
       .stSelectbox label, .stTextInput label { color: #aeb6c8; }
       .preset-note {
-          color: #aeb6c8; font-size: 13px; font-style: italic;
-          padding: 8px 12px; border-left: 3px solid #2f63cf; background: rgba(47,99,207,0.08);
+          color: #aeb6c8; font-size: 14px;
+          padding: 10px 14px; border-left: 3px solid #2f63cf;
+          background: rgba(47,99,207,0.10);
+          border-radius: 0 6px 6px 0;
       }
+      .focus-hint {
+          color: #ffd28a; font-size: 15px; font-weight: 600;
+          padding: 12px 16px; border-left: 4px solid #e7b98c;
+          background: rgba(231,185,140,0.12);
+          border-radius: 0 6px 6px 0;
+          margin-bottom: 8px;
+      }
+      .focus-hint .label {
+          color: #e7b98c; text-transform: uppercase; letter-spacing: 0.08em;
+          font-size: 11px; display: block; margin-bottom: 4px;
+      }
+      .chart-guide {
+          color: #aeb6c8; font-size: 13px; font-style: italic;
+          padding: 6px 0 0; line-height: 1.5;
+      }
+      .chart-guide b { color: #eef1f7; font-style: normal; }
       .stat-card {
-          background: #181d2e; border-radius: 10px; padding: 14px 18px; margin: 6px 0;
+          background: #181d2e; border-radius: 10px; padding: 12px 16px; margin: 4px 0;
           border: 1px solid rgba(255,255,255,0.08);
       }
-      .stat-name { color: #aeb6c8; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
-      .stat-value { color: #ffffff; font-size: 24px; font-weight: 700; }
+      .stat-name { color: #aeb6c8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+      .stat-value { color: #ffffff; font-size: 22px; font-weight: 700; }
+      .legend-row { display: flex; gap: 18px; flex-wrap: wrap; margin: 8px 0 16px; font-size: 13px; }
+      .legend-item { display: flex; align-items: center; gap: 6px; color: #aeb6c8; }
+      .legend-swatch { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
 # Colour palette aligned with the poster.
-COLOR_F = "#e7b98c"        # geDIG amber
-COLOR_EPC = "#993C1D"      # structural cost
-COLOR_H = "#0F6E56"        # entropy term
-COLOR_SP = "#3B6D11"       # path shortening
-COLOR_CUMF = "#7aa8ff"     # cumulative F (highlight)
+COLOR_F = "#e7b98c"        # geDIG amber (poster F highlight)
+COLOR_EPC = "#f0a566"      # structural cost (poster .et.t-epc)
+COLOR_H = "#7fa6ee"        # entropy term (poster .et.t-h)
+COLOR_SP = "#7fd4b4"       # path shortening (poster .et.t-sp)
+COLOR_CUMF = "#e7b98c"     # cumulative F (highlight)
+COLOR_EXPLORE = "rgba(127,166,238,0.10)"   # background tint: explore zone
+COLOR_STRUCTURE = "rgba(231,185,140,0.10)" # background tint: structure zone
 
 PRESETS_PATH = Path(__file__).parent / "presets.json"
+
+# Per-preset focus hints — what the visitor should look at to "get it" fast.
+FOCUS_HINTS = {
+    "simple_1": "短く単純な平叙文の基準カーブ。**緩やかに上がる** = 構造化負荷が低い。これを比較の出発点にする。",
+    "simple_2": "事実陳述。Simple1 と並べると、語数が違っても **形は似ている** ことが見える。",
+    "complex_1": "長文・節構造。Simple と並べると **絶対値が大きい / 深層の傾き** が違うことに注目。",
+    "complex_2": "関係節挿入。**中盤(L4-L6)** で ΔH の変動が大きい傾向。",
+    "amb_1": "古典的曖昧構文。'like' の品詞解釈の不確かさが **多峰的な ΔH** に現れる仮説。",
+    "amb_2": "Agent/patient 曖昧。短文でも **F の累積値が単純文より高い**。",
+    "gp_1": "**最重要プリセット**。Garden-path。 **中間層 (L5-L7) で F の傾きが変化** する仮説的観察。再パースの瞬間に対応？",
+    "gp_2": "Garden-path その2。短文だが累積 F は急上昇。**構文の曖昧性が F に直接効く**ことを示唆。",
+    "ne_1": "**'Apple' の意味曖昧性**(果物/会社)。固有名詞単独だが文脈で構造化される。",
+    "ne_2": "歴史的事実 + 年号。固有名詞 + 数値で **強く構造化される** (F 高め)。",
+    "q_1": "質問文。**宣言文と F 軌跡の形が異なる**傾向。シンプルな質問でも累積 F は大きめ。",
+    "q_2": "Why/How 質問は **構造化負荷が高い**。Q1 と並べると形の違いが見える。",
+}
 
 
 # ---------- data loaders ----------
@@ -73,81 +112,150 @@ def _load_presets() -> dict | None:
         return json.load(f)
 
 
+def _all_preset_items(presets: dict) -> list[dict]:
+    out: list[dict] = []
+    for cat_name, items in presets["categories"].items():
+        for item in items:
+            out.append({**item, "category": cat_name})
+    return out
+
+
 # ---------- charts ----------
-def plot_cumulative_f(traj: dict, *, height: int = 360) -> go.Figure:
-    """Cumulative F across layers — the headline phase-transition curve."""
+def plot_cumulative_f(
+    traj: dict,
+    *,
+    height: int = 380,
+    compare: dict | None = None,
+    show_zones: bool = True,
+) -> go.Figure:
+    """Cumulative F across layers — the headline phase-transition curve.
+
+    Optionally overlays a comparison trajectory in lighter colour so the
+    visitor sees that *the same F* produces different curves for
+    different sentences.
+    """
     cum = traj["cumulative_f"]
-    layers = list(range(1, len(cum) + 1))
+    n = len(cum)
+    layers = list(range(1, n + 1))
+
     fig = go.Figure()
+
+    # Background shading: explore (early layers) vs structure (late layers).
+    if show_zones and n >= 6:
+        midpoint = n // 2 + 0.5
+        fig.add_vrect(
+            x0=0.5, x1=midpoint,
+            fillcolor=COLOR_EXPLORE, line_width=0,
+            annotation_text="explore phase", annotation_position="top left",
+            annotation=dict(font=dict(color="#7fa6ee", size=11), bgcolor="rgba(0,0,0,0)"),
+        )
+        fig.add_vrect(
+            x0=midpoint, x1=n + 0.5,
+            fillcolor=COLOR_STRUCTURE, line_width=0,
+            annotation_text="structure phase", annotation_position="top right",
+            annotation=dict(font=dict(color="#e7b98c", size=11), bgcolor="rgba(0,0,0,0)"),
+        )
+
+    # Comparison trajectory (lighter), drawn first so it sits behind the main.
+    if compare is not None:
+        ccum = compare["cumulative_f"]
+        clayers = list(range(1, len(ccum) + 1))
+        fig.add_trace(
+            go.Scatter(
+                x=clayers, y=ccum, mode="lines+markers",
+                line=dict(color="#5b6680", width=3, dash="dash"),
+                marker=dict(size=7, color="#5b6680"),
+                name=f"compare: {compare.get('text', 'other')[:40]}",
+                hovertemplate="layer %{x}<br>Σ F = %{y:.3f}<extra></extra>",
+            )
+        )
+
+    # Main trajectory.
     fig.add_trace(
         go.Scatter(
-            x=layers,
-            y=cum,
-            mode="lines+markers",
-            line=dict(color=COLOR_CUMF, width=4),
-            marker=dict(size=9, color=COLOR_CUMF),
-            name="cumulative F",
+            x=layers, y=cum, mode="lines+markers",
+            line=dict(color=COLOR_CUMF, width=5),
+            marker=dict(size=10, color=COLOR_CUMF),
+            name=f"this: {traj.get('text', '')[:40]}",
             hovertemplate="layer %{x}<br>Σ F = %{y:.3f}<extra></extra>",
         )
     )
+
     fig.update_layout(
-        title="<b>Cumulative F across layers</b> — phase-transition pattern",
-        xaxis_title="Layer (transition n→n+1)",
-        yaxis_title="Σ F  (smaller = more structured)",
+        title=dict(
+            text="<b>Cumulative F across layers</b><br>"
+                 "<span style='font-size:13px;color:#aeb6c8;font-weight:normal'>"
+                 "値が単調に上がる = 文を読み進めるごとに構造化が進んでいる"
+                 "</span>",
+            x=0.02, xanchor="left",
+        ),
+        xaxis_title="Layer (transition n → n+1)",
+        yaxis_title="Σ F  (cumulative)",
         template="plotly_dark",
         paper_bgcolor="#0f1320",
         plot_bgcolor="#181d2e",
         height=height,
-        margin=dict(l=60, r=20, t=60, b=50),
+        margin=dict(l=60, r=20, t=80, b=50),
+        legend=dict(orientation="h", y=-0.18, font=dict(size=11)),
+        showlegend=(compare is not None),
     )
     return fig
 
 
-def plot_components(traj: dict, *, height: int = 360) -> go.Figure:
+def plot_components(traj: dict, *, height: int = 380) -> go.Figure:
     """Per-layer ΔEPC, ΔH, ΔSP — what drives F at each layer."""
     n = len(traj["f_per_layer"])
     layers = list(range(1, n + 1))
     fig = go.Figure()
-    fig.add_trace(
-        go.Scatter(
-            x=layers, y=traj["epc_per_layer"], mode="lines+markers",
-            line=dict(color=COLOR_EPC, width=2.5), name="ΔEPC (cost)",
-        )
-    )
-    fig.add_trace(
-        go.Scatter(
-            x=layers, y=traj["delta_h_per_layer"], mode="lines+markers",
-            line=dict(color=COLOR_H, width=2.5), name="ΔH (entropy)",
-        )
-    )
-    fig.add_trace(
-        go.Scatter(
-            x=layers, y=traj["delta_sp_per_layer"], mode="lines+markers",
-            line=dict(color=COLOR_SP, width=2.5), name="ΔSP (shortcut)",
-        )
-    )
-    fig.add_trace(
-        go.Scatter(
-            x=layers, y=traj["f_per_layer"], mode="lines+markers",
-            line=dict(color=COLOR_F, width=3, dash="dot"),
-            name="F = ΔEPC − λ(ΔH+γΔSP)",
-        )
-    )
+
+    fig.add_trace(go.Bar(
+        x=layers, y=traj["epc_per_layer"],
+        marker_color=COLOR_EPC, opacity=0.85,
+        name="ΔEPC (structural cost)",
+        hovertemplate="L%{x}: ΔEPC=%{y:.3f}<extra></extra>",
+    ))
+    fig.add_trace(go.Bar(
+        x=layers, y=traj["delta_h_per_layer"],
+        marker_color=COLOR_H, opacity=0.85,
+        name="ΔH (entropy)",
+        hovertemplate="L%{x}: ΔH=%{y:.3f}<extra></extra>",
+    ))
+    fig.add_trace(go.Bar(
+        x=layers, y=traj["delta_sp_per_layer"],
+        marker_color=COLOR_SP, opacity=0.85,
+        name="ΔSP (shortcut)",
+        hovertemplate="L%{x}: ΔSP=%{y:.3f}<extra></extra>",
+    ))
+    fig.add_trace(go.Scatter(
+        x=layers, y=traj["f_per_layer"], mode="lines+markers",
+        line=dict(color=COLOR_F, width=4),
+        marker=dict(size=10, color=COLOR_F, line=dict(color="#1a1a1a", width=1)),
+        name="F (resulting gauge)",
+        hovertemplate="L%{x}: F=%{y:.3f}<extra></extra>",
+    ))
+
     fig.update_layout(
-        title="<b>Per-layer components</b> — F is a balance, not a sum",
+        title=dict(
+            text="<b>Per-layer components</b><br>"
+                 "<span style='font-size:13px;color:#aeb6c8;font-weight:normal'>"
+                 "F は3項の単純和ではなくバランス。1層ごとに別々に動く"
+                 "</span>",
+            x=0.02, xanchor="left",
+        ),
         xaxis_title="Layer",
         yaxis_title="value",
         template="plotly_dark",
         paper_bgcolor="#0f1320",
         plot_bgcolor="#181d2e",
         height=height,
-        legend=dict(orientation="h", y=-0.18),
-        margin=dict(l=60, r=20, t=60, b=70),
+        barmode="group",
+        legend=dict(orientation="h", y=-0.18, font=dict(size=11)),
+        margin=dict(l=60, r=20, t=80, b=70),
     )
     return fig
 
 
-# ---------- UI ----------
+# ---------- UI helpers ----------
 def _stat_card(name: str, value: str, *, sub: str = "") -> str:
     return (
         f"<div class='stat-card'>"
@@ -158,12 +266,42 @@ def _stat_card(name: str, value: str, *, sub: str = "") -> str:
     )
 
 
+def _legend_chip(color: str, label: str) -> str:
+    return (
+        f"<div class='legend-item'>"
+        f"<span class='legend-swatch' style='background:{color}'></span>{label}"
+        f"</div>"
+    )
+
+
+CATEGORY_LABELS = {
+    "simple": "Simple statements",
+    "complex": "Complex / multi-clause",
+    "ambiguous": "Ambiguous parsing",
+    "garden_path": "Garden-path sentences",
+    "named_entity": "Named entity",
+    "question": "Questions",
+}
+
+
+# ---------- main ----------
 def main() -> None:
-    st.title("geDIG · F-Trajectory across Transformer layers")
+    st.title("geDIG · F-Trajectory across BERT layers")
     st.markdown(
-        "Visualise how the unified gauge "
-        "**F = ΔEPC − λ(ΔH + γ·ΔSP)** evolves as a sentence flows through BERT. "
-        "Tied to the JSAI 2026 poster — same F, different domain."
+        "**JSAI 2026 ポスター連動デモ**。"
+        "迷路と同じ式 **F = ΔEPC − λ(ΔH + γ·ΔSP)** を、今度は BERT の hidden state に適用。"
+        "_同じゲージが異なるドメインで動くか_ を、文ごとに見比べて確認します。"
+    )
+
+    # Inline legend so the bar/line colours match the poster.
+    st.markdown(
+        "<div class='legend-row'>"
+        + _legend_chip(COLOR_EPC, "ΔEPC — 構造変更コスト")
+        + _legend_chip(COLOR_H, "ΔH — エントロピー差")
+        + _legend_chip(COLOR_SP, "ΔSP — 経路短縮")
+        + _legend_chip(COLOR_F, "F = 統一ゲージ")
+        + "</div>",
+        unsafe_allow_html=True,
     )
 
     presets = _load_presets()
@@ -177,63 +315,126 @@ def main() -> None:
             help="BERT-base default (12 layers). DistilBERT is faster (6 layers).",
         )
         device = st.selectbox(
-            "Device",
-            ["cpu", "mps", "cuda"],
-            index=0,
+            "Device", ["cpu", "mps", "cuda"], index=0,
             help="On Apple Silicon, pick 'mps' for ~3× speedup.",
         )
         lambda_ = st.slider("λ (information weight)", 0.1, 3.0, 1.0, 0.1)
         gamma = st.slider("γ (SP weight inside IG)", 0.0, 1.5, 0.5, 0.1)
-        anchor_idx = 0  # [CLS] for encoder models
         st.caption(
             "Presets are pre-computed at λ=1.0, γ=0.5. "
-            "Changing sliders affects custom input only."
+            "Sliders affect Custom input only."
+        )
+        st.divider()
+        show_zones = st.checkbox(
+            "Show explore / structure phase tint", value=True,
+            help="累積 F カーブの背景を半分で塗り分け、相転移を視覚化",
         )
 
-    tab_preset, tab_custom = st.tabs([
-        "Presets (instant)",
-        "Custom input (live BERT)",
+    tab_view, tab_compare, tab_custom = st.tabs([
+        "🔍 Inspect one preset",
+        "⚖️ Compare two presets",
+        "✍️ Custom input (live BERT)",
     ])
 
-    # --------------- Preset tab ---------------
-    with tab_preset:
+    # =================== Tab 1: single inspect ===================
+    with tab_view:
         if presets is None:
             st.warning(
-                "Pre-computed `presets.json` not found. Run "
-                "`python compute_presets.py --device mps` first."
+                "`presets.json` が見つかりません。`python compute_presets.py --device mps` を先に実行してください。"
             )
         else:
             categories = presets["categories"]
-            cat_name = st.selectbox(
-                "Category",
-                list(categories.keys()),
-                format_func=lambda s: {
-                    "simple": "Simple statements",
-                    "complex": "Complex / multi-clause",
-                    "ambiguous": "Ambiguous parsing",
-                    "garden_path": "Garden-path sentences",
-                    "named_entity": "Named entity",
-                    "question": "Questions",
-                }.get(s, s),
-            )
+            col_cat, col_sent = st.columns([1, 2])
+            with col_cat:
+                cat_name = st.selectbox(
+                    "カテゴリ",
+                    list(categories.keys()),
+                    format_func=lambda s: CATEGORY_LABELS.get(s, s),
+                    key="single_cat",
+                )
             items = categories[cat_name]
             options = {item["text"]: item for item in items}
-            picked = st.selectbox("Sentence", list(options.keys()))
+            with col_sent:
+                picked = st.selectbox("文を選択", list(options.keys()), key="single_text")
             item = options[picked]
             traj = item["trajectory"]
 
+            hint = FOCUS_HINTS.get(item["id"], "")
+            if hint:
+                st.markdown(
+                    f"<div class='focus-hint'>"
+                    f"<span class='label'>何を見るか</span>{hint}"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
             if item.get("note"):
                 st.markdown(
                     f"<div class='preset-note'>{item['note']}</div>",
                     unsafe_allow_html=True,
                 )
 
-            _render_result(traj)
+            _render_result(traj, show_zones=show_zones)
 
-    # --------------- Custom tab ---------------
+    # =================== Tab 2: compare two ===================
+    with tab_compare:
+        if presets is None:
+            st.warning("`presets.json` がありません。")
+        else:
+            st.markdown(
+                "**同じ式 F が文によって違うカーブを描く**ことを直接比較できます。"
+                "迷路の F グラフが maze-instance ごとに違うのと同じ。"
+            )
+            all_items = _all_preset_items(presets)
+            options = {f"[{it['category']}] {it['text']}": it for it in all_items}
+            c1, c2 = st.columns(2)
+            with c1:
+                a_label = st.selectbox(
+                    "A (主) — 太い橙線", list(options.keys()), index=0, key="cmp_a",
+                )
+            with c2:
+                b_label = st.selectbox(
+                    "B (比較) — グレー破線",
+                    list(options.keys()),
+                    index=min(6, len(options) - 1),  # default to a different category
+                    key="cmp_b",
+                )
+            traj_a = options[a_label]["trajectory"]
+            traj_b = options[b_label]["trajectory"]
+            traj_a = {**traj_a, "text": options[a_label]["text"]}
+            traj_b = {**traj_b, "text": options[b_label]["text"]}
+
+            st.plotly_chart(
+                plot_cumulative_f(traj_a, compare=traj_b, show_zones=show_zones, height=440),
+                use_container_width=True,
+            )
+
+            # Compact side-by-side stats
+            sa, sb = st.columns(2)
+            for col, traj, label in [(sa, traj_a, "A"), (sb, traj_b, "B")]:
+                with col:
+                    st.markdown(f"#### {label}: _{traj['text']}_")
+                    cc1, cc2, cc3 = st.columns(3)
+                    cc1.markdown(
+                        _stat_card("Total F", f"{traj['total_f']:.3f}"),
+                        unsafe_allow_html=True,
+                    )
+                    cc2.markdown(
+                        _stat_card("Mean F / layer", f"{traj['mean_f']:.3f}"),
+                        unsafe_allow_html=True,
+                    )
+                    cc3.markdown(
+                        _stat_card(
+                            "Monotonic",
+                            "✓" if traj.get("monotonic") else "no",
+                            sub="累積Fが減らない",
+                        ),
+                        unsafe_allow_html=True,
+                    )
+
+    # =================== Tab 3: custom input ===================
     with tab_custom:
         text = st.text_area(
-            "Enter a sentence",
+            "文を入力 (英語推奨)",
             value="Although it was raining heavily, John decided to walk home.",
             height=80,
         )
@@ -245,34 +446,37 @@ def main() -> None:
             except Exception as e:
                 st.error(f"Could not load model: {e}")
                 return
-            with st.spinner(f"Running {model_name} forward pass…"):
+            with st.spinner(f"{model_name} forward pass…"):
                 traj_obj = f_trajectory.compute(
-                    model,
-                    tokenizer,
-                    text,
-                    model_name=model_name,
-                    anchor_idx=anchor_idx,
-                    lambda_=lambda_,
-                    gamma=gamma,
-                    device=device,
+                    model, tokenizer, text,
+                    model_name=model_name, anchor_idx=0,
+                    lambda_=lambda_, gamma=gamma, device=device,
                 )
             elapsed = time.time() - t0
             st.success(f"Computed in {elapsed:.1f}s")
-            _render_result(traj_obj.to_dict())
+            st.markdown(
+                "<div class='focus-hint'>"
+                "<span class='label'>何を見るか</span>"
+                "Preset と並べて比較するなら、累積 F の <b>絶対値</b> ではなく <b>形(傾き)</b> に注目。"
+                "短文同士・長文同士で比べるのが公平。"
+                "</div>",
+                unsafe_allow_html=True,
+            )
+            _render_result(traj_obj.to_dict(), show_zones=show_zones)
 
 
-def _render_result(traj: dict) -> None:
+def _render_result(traj: dict, *, show_zones: bool = True) -> None:
+    """4 stat cards + 2 explanatory charts side by side, with reading guide."""
     c1, c2, c3, c4 = st.columns(4)
     c1.markdown(
         _stat_card(
-            "Layers",
-            str(traj["num_layers"]),
+            "Layers", str(traj["num_layers"]),
             sub=f"{traj['num_tokens']} tokens",
         ),
         unsafe_allow_html=True,
     )
     c2.markdown(
-        _stat_card("Total F", f"{traj['total_f']:.3f}"),
+        _stat_card("Total F", f"{traj['total_f']:.3f}", sub="= ΣF over all transitions"),
         unsafe_allow_html=True,
     )
     c3.markdown(
@@ -281,29 +485,44 @@ def _render_result(traj: dict) -> None:
     )
     c4.markdown(
         _stat_card(
-            "Monotonic?",
+            "Monotonic",
             "✓ yes" if traj.get("monotonic") else "no",
-            sub="cumulative F never decreases",
+            sub="累積Fが層を進むごとに減らない",
         ),
         unsafe_allow_html=True,
     )
 
     left, right = st.columns(2)
     with left:
-        st.plotly_chart(plot_cumulative_f(traj), use_container_width=True)
+        st.plotly_chart(
+            plot_cumulative_f(traj, show_zones=show_zones),
+            use_container_width=True,
+        )
+        st.markdown(
+            "<div class='chart-guide'>"
+            "👁 <b>見方</b>: 折れ線が <b>右肩上がり</b>＝層を進むごとに構造化が進む。"
+            "<b>傾きの変わる箇所</b>があれば、その文の難所(再パース、曖昧解消)に対応する仮説。"
+            "</div>",
+            unsafe_allow_html=True,
+        )
     with right:
         st.plotly_chart(plot_components(traj), use_container_width=True)
-
-    with st.expander("Raw values"):
-        st.json(
-            {
-                "f_per_layer": [round(v, 4) for v in traj["f_per_layer"]],
-                "cumulative_f": [round(v, 4) for v in traj["cumulative_f"]],
-                "epc_per_layer": [round(v, 4) for v in traj["epc_per_layer"]],
-                "delta_h_per_layer": [round(v, 4) for v in traj["delta_h_per_layer"]],
-                "delta_sp_per_layer": [round(v, 4) for v in traj["delta_sp_per_layer"]],
-            }
+        st.markdown(
+            "<div class='chart-guide'>"
+            "👁 <b>見方</b>: 棒3本(ΔEPC/ΔH/ΔSP)は <b>独立に動く</b>。"
+            "上の折れ線(F)はそれらのバランス。<b>1項だけでは F を予測できない</b>のがポイント。"
+            "</div>",
+            unsafe_allow_html=True,
         )
+
+    with st.expander("Raw values (詳細データ)"):
+        st.json({
+            "f_per_layer": [round(v, 4) for v in traj["f_per_layer"]],
+            "cumulative_f": [round(v, 4) for v in traj["cumulative_f"]],
+            "epc_per_layer": [round(v, 4) for v in traj["epc_per_layer"]],
+            "delta_h_per_layer": [round(v, 4) for v in traj["delta_h_per_layer"]],
+            "delta_sp_per_layer": [round(v, 4) for v in traj["delta_sp_per_layer"]],
+        })
 
 
 if __name__ == "__main__":
