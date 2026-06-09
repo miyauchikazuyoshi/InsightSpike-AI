@@ -32,39 +32,47 @@ st.markdown(
     <style>
       .stApp { background: #0f1320; color: #eef1f7; }
       .block-container { padding-top: 1.4rem; padding-bottom: 2rem; max-width: 1500px; }
-      h1, h2, h3 { color: #eef1f7; }
-      .stSelectbox label, .stTextInput label { color: #aeb6c8; }
+      h1, h2, h3 { color: #ffffff; }
+      .stSelectbox label, .stTextInput label { color: #d3d8e4; }
+      /* Streamlit markdown body — make sure default text is bright enough */
+      .stMarkdown p, .stMarkdown li { color: #e9ecf3; }
+      /* Higher contrast info box */
       .preset-note {
-          color: #aeb6c8; font-size: 14px;
-          padding: 10px 14px; border-left: 3px solid #2f63cf;
-          background: rgba(47,99,207,0.10);
+          color: #ffffff; font-size: 14px;
+          padding: 10px 14px; border-left: 3px solid #6a9aff;
+          background: #1b2840;
           border-radius: 0 6px 6px 0;
       }
+      /* Higher contrast "what to look at" hint — solid amber border, bright text */
       .focus-hint {
-          color: #ffd28a; font-size: 15px; font-weight: 600;
+          color: #ffffff; font-size: 15px; font-weight: 600;
           padding: 12px 16px; border-left: 4px solid #e7b98c;
-          background: rgba(231,185,140,0.12);
+          background: #2a2218;
           border-radius: 0 6px 6px 0;
           margin-bottom: 8px;
+          line-height: 1.55;
       }
+      .focus-hint b { color: #ffd28a; }
       .focus-hint .label {
           color: #e7b98c; text-transform: uppercase; letter-spacing: 0.08em;
-          font-size: 11px; display: block; margin-bottom: 4px;
+          font-size: 11px; display: block; margin-bottom: 6px; font-weight: 700;
       }
       .chart-guide {
-          color: #aeb6c8; font-size: 13px; font-style: italic;
-          padding: 6px 0 0; line-height: 1.5;
+          color: #d3d8e4; font-size: 13px;
+          padding: 8px 12px; line-height: 1.55;
+          background: #1a1f30; border-radius: 6px;
+          margin-top: 6px;
       }
-      .chart-guide b { color: #eef1f7; font-style: normal; }
+      .chart-guide b { color: #ffffff; }
       .stat-card {
-          background: #181d2e; border-radius: 10px; padding: 12px 16px; margin: 4px 0;
-          border: 1px solid rgba(255,255,255,0.08);
+          background: #1b2236; border-radius: 10px; padding: 12px 16px; margin: 4px 0;
+          border: 1px solid rgba(255,255,255,0.12);
       }
-      .stat-name { color: #aeb6c8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+      .stat-name { color: #b8c2d6; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
       .stat-value { color: #ffffff; font-size: 22px; font-weight: 700; }
       .legend-row { display: flex; gap: 18px; flex-wrap: wrap; margin: 8px 0 16px; font-size: 13px; }
-      .legend-item { display: flex; align-items: center; gap: 6px; color: #aeb6c8; }
-      .legend-swatch { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+      .legend-item { display: flex; align-items: center; gap: 7px; color: #d3d8e4; font-weight: 500; }
+      .legend-swatch { width: 14px; height: 14px; border-radius: 3px; display: inline-block; border: 1px solid rgba(0,0,0,0.3); }
     </style>
     """,
     unsafe_allow_html=True,
@@ -82,19 +90,24 @@ COLOR_STRUCTURE = "rgba(231,185,140,0.10)" # background tint: structure zone
 PRESETS_PATH = Path(__file__).parent / "presets.json"
 
 # Per-preset focus hints — what the visitor should look at to "get it" fast.
+# IMPORTANT: F semantics in this demo are "cost − gain per layer transition".
+# Smaller F (incl. negative) = each layer's information gain exceeded its
+# structural cost. Larger F = the layer "paid" more than it "gained".
+# We deliberately DO NOT claim "up = good" or "down = good"; the interesting
+# signal is the *shape* and the *between-sentence comparison*, not the sign.
 FOCUS_HINTS = {
-    "simple_1": "短く単純な平叙文の基準カーブ。**緩やかに上がる** = 構造化負荷が低い。これを比較の出発点にする。",
-    "simple_2": "事実陳述。Simple1 と並べると、語数が違っても **形は似ている** ことが見える。",
-    "complex_1": "長文・節構造。Simple と並べると **絶対値が大きい / 深層の傾き** が違うことに注目。",
-    "complex_2": "関係節挿入。**中盤(L4-L6)** で ΔH の変動が大きい傾向。",
-    "amb_1": "古典的曖昧構文。'like' の品詞解釈の不確かさが **多峰的な ΔH** に現れる仮説。",
-    "amb_2": "Agent/patient 曖昧。短文でも **F の累積値が単純文より高い**。",
-    "gp_1": "**最重要プリセット**。Garden-path。 **中間層 (L5-L7) で F の傾きが変化** する仮説的観察。再パースの瞬間に対応？",
-    "gp_2": "Garden-path その2。短文だが累積 F は急上昇。**構文の曖昧性が F に直接効く**ことを示唆。",
-    "ne_1": "**'Apple' の意味曖昧性**(果物/会社)。固有名詞単独だが文脈で構造化される。",
-    "ne_2": "歴史的事実 + 年号。固有名詞 + 数値で **強く構造化される** (F 高め)。",
-    "q_1": "質問文。**宣言文と F 軌跡の形が異なる**傾向。シンプルな質問でも累積 F は大きめ。",
-    "q_2": "Why/How 質問は **構造化負荷が高い**。Q1 と並べると形の違いが見える。",
+    "simple_1": "短い平叙文の基準カーブ。**比較の出発点**として使う。他の文と並べると形の違いが見える。",
+    "simple_2": "事実陳述。Simple1 と並べると、語数違いでも **層ごとの増分パターンは似る** 傾向。",
+    "complex_1": "長文・節構造。**累積 F の到達値**が単純文より大きい(=各層の処理量が多い)。",
+    "complex_2": "関係節挿入。**中盤(L4–L6)** で ΔH(エントロピー変化)の振れが大きい傾向。",
+    "amb_1": "古典的曖昧構文。'like' の品詞解釈の不確かさが **ΔH の凸凹** に現れる仮説。",
+    "amb_2": "Agent/patient 曖昧。**短文だが累積 F は単純文より大きい** = 短くても処理は重い。",
+    "gp_1": "**最重要プリセット**。Garden-path。 **中盤 (L5–L7) で F の傾きが変化** する仮説的観察。再パースの瞬間？",
+    "gp_2": "Garden-path その2。**短文なのに累積 F が急上昇** = 構文曖昧性が F に直接効く示唆。",
+    "ne_1": "**'Apple' の意味曖昧性**(果物/会社)。固有名詞単独でも文脈による構造化が見える。",
+    "ne_2": "歴史的事実 + 年号。**固有名詞 + 数値** で深層の F が大きく動く傾向。",
+    "q_1": "質問文。**宣言文と F 軌跡の形が違う** 傾向。短い質問でも累積 F は大きめ。",
+    "q_2": "Why/How 質問。Q1 と並べると **形の違い** が見える。",
 }
 
 
@@ -140,19 +153,22 @@ def plot_cumulative_f(
 
     fig = go.Figure()
 
-    # Background shading: explore (early layers) vs structure (late layers).
+    # Background shading: shallow vs deep layers. We avoid "good/bad"
+    # labels — there's no inherent up/down preference here. We just mark
+    # "shallow half" and "deep half" so the visitor can compare slope
+    # between regions.
     if show_zones and n >= 6:
         midpoint = n // 2 + 0.5
         fig.add_vrect(
             x0=0.5, x1=midpoint,
             fillcolor=COLOR_EXPLORE, line_width=0,
-            annotation_text="explore phase", annotation_position="top left",
-            annotation=dict(font=dict(color="#7fa6ee", size=11), bgcolor="rgba(0,0,0,0)"),
+            annotation_text="shallow layers", annotation_position="top left",
+            annotation=dict(font=dict(color="#9fb6e6", size=11), bgcolor="rgba(0,0,0,0)"),
         )
         fig.add_vrect(
             x0=midpoint, x1=n + 0.5,
             fillcolor=COLOR_STRUCTURE, line_width=0,
-            annotation_text="structure phase", annotation_position="top right",
+            annotation_text="deep layers", annotation_position="top right",
             annotation=dict(font=dict(color="#e7b98c", size=11), bgcolor="rgba(0,0,0,0)"),
         )
 
@@ -183,14 +199,15 @@ def plot_cumulative_f(
 
     fig.update_layout(
         title=dict(
-            text="<b>Cumulative F across layers</b><br>"
-                 "<span style='font-size:13px;color:#aeb6c8;font-weight:normal'>"
-                 "値が単調に上がる = 文を読み進めるごとに構造化が進んでいる"
+            text="<b>累積 F (層を進むほど積み上がる)</b><br>"
+                 "<span style='font-size:13px;color:#d3d8e4;font-weight:normal'>"
+                 "F = 各層の (構造変更コスト − 情報利得)。"
+                 "形 / 傾きの変わり目を見る。"
                  "</span>",
             x=0.02, xanchor="left",
         ),
-        xaxis_title="Layer (transition n → n+1)",
-        yaxis_title="Σ F  (cumulative)",
+        xaxis_title="Layer (層遷移 n → n+1)",
+        yaxis_title="Σ F  (累積)",
         template="plotly_dark",
         paper_bgcolor="#0f1320",
         plot_bgcolor="#181d2e",
@@ -236,9 +253,9 @@ def plot_components(traj: dict, *, height: int = 380) -> go.Figure:
 
     fig.update_layout(
         title=dict(
-            text="<b>Per-layer components</b><br>"
-                 "<span style='font-size:13px;color:#aeb6c8;font-weight:normal'>"
-                 "F は3項の単純和ではなくバランス。1層ごとに別々に動く"
+            text="<b>各層の構成要素</b><br>"
+                 "<span style='font-size:13px;color:#d3d8e4;font-weight:normal'>"
+                 "F は ΔEPC, ΔH, ΔSP の <b>バランス</b>。1項だけでは F を予測できない"
                  "</span>",
             x=0.02, xanchor="left",
         ),
@@ -289,8 +306,13 @@ def main() -> None:
     st.title("geDIG · F-Trajectory across BERT layers")
     st.markdown(
         "**JSAI 2026 ポスター連動デモ**。"
-        "迷路と同じ式 **F = ΔEPC − λ(ΔH + γ·ΔSP)** を、今度は BERT の hidden state に適用。"
-        "_同じゲージが異なるドメインで動くか_ を、文ごとに見比べて確認します。"
+        "迷路と同じ式 **F = ΔEPC − λ(ΔH + γ·ΔSP)** を、BERT の hidden state に層ごとに適用。"
+        "_同じゲージが異なるドメインで動くか_ を文ごとに比較します。"
+    )
+    st.caption(
+        "📝 解釈の注意: 迷路 / RAG では「**小さい F = 良い統合**」が判断基準でしたが、"
+        "このデモは推論軌跡の **観察**(何かを採択する判断ではない)。"
+        "F の累積方向に良し悪しはなく、見るべきは **文ごとの形の違い** と **構成要素 ΔEPC/ΔH/ΔSP のバランス**。"
     )
 
     # Inline legend so the bar/line colours match the poster.
@@ -485,9 +507,9 @@ def _render_result(traj: dict, *, show_zones: bool = True) -> None:
     )
     c4.markdown(
         _stat_card(
-            "Monotonic",
+            "層別 F が常に≥0",
             "✓ yes" if traj.get("monotonic") else "no",
-            sub="累積Fが層を進むごとに減らない",
+            sub="各層の F が非負(コスト≥利得)か",
         ),
         unsafe_allow_html=True,
     )
@@ -500,8 +522,10 @@ def _render_result(traj: dict, *, show_zones: bool = True) -> None:
         )
         st.markdown(
             "<div class='chart-guide'>"
-            "👁 <b>見方</b>: 折れ線が <b>右肩上がり</b>＝層を進むごとに構造化が進む。"
-            "<b>傾きの変わる箇所</b>があれば、その文の難所(再パース、曖昧解消)に対応する仮説。"
+            "👁 <b>見方</b>: F は各層の (構造変更コスト − 情報利得)。"
+            "<b>累積値の上下方向に良し悪しはない</b>(F は判断基準ではなく観察量)。"
+            "見るべきは<b>形 / 傾きの変わり目</b>。中盤で勾配が変わるなら、"
+            "その文の難所(再パース・曖昧解消)に対応する可能性。"
             "</div>",
             unsafe_allow_html=True,
         )
@@ -510,7 +534,8 @@ def _render_result(traj: dict, *, show_zones: bool = True) -> None:
         st.markdown(
             "<div class='chart-guide'>"
             "👁 <b>見方</b>: 棒3本(ΔEPC/ΔH/ΔSP)は <b>独立に動く</b>。"
-            "上の折れ線(F)はそれらのバランス。<b>1項だけでは F を予測できない</b>のがポイント。"
+            "上の折れ線(F)はそれらの<b>バランス</b>。"
+            "<b>1項だけでは F を予測できない</b> ことが、F を統一スカラーとして導入する根拠。"
             "</div>",
             unsafe_allow_html=True,
         )
