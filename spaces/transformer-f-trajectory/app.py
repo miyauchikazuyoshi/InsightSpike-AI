@@ -308,13 +308,19 @@ CATEGORY_LABELS = {
 def main() -> None:
     st.title("geDIG · Attention F across BERT layers")
     st.markdown(
-        "**JSAI 2026 ポスター §3 連動デモ**。"
+        "**JSAI 2026 ポスター §3 連動デモ** (検証 II: 意味的 KG としての Transformer)。"
         "BERT の Attention 行列をグラフ化して "
-        "**F = ΔEPC − λ·γ·ΔSP − λ·ΔH** を計算。"
+        "**F = ΔEPC − λ·γ·ΔSP − λ·ΔH** を (層 × ヘッド) ごとに計算。"
         "Real attention vs Random baseline で **実 attention の構造的優位** を見る。"
     )
     presets = _load_presets()
 
+    st.caption(
+        "📝 本デモは観察 **Pattern C** (学習済モデルの attention graph) の再現。"
+        "Transformer 系では他に Pattern A (hidden state F-軌跡) と "
+        "Pattern B (Pythia 学習動態) も実施したが判定基準未達で論文未採用。"
+        "Pattern C は 2,304 サンプルで p<10⁻⁸⁰, Cohen's d=2.31 (論文 §3)。"
+    )
     st.caption(
         "📝 解釈の約束: 論文 §3 では F は **負値**で測定され、"
         "**F が 0 に近づく = 構造化が進む**(エントロピー集中、効率パス形成)。"
@@ -356,6 +362,25 @@ def main() -> None:
         st.markdown(
             "<span class='paper-match'>📄 数値: Phase 1 (-0.43) と一致確認済み</span>",
             unsafe_allow_html=True,
+        )
+
+        st.markdown("---")
+        st.markdown("### Transformer 実験全体図")
+        st.markdown(
+            """
+            **観察 (3 パターン)**
+            - A: hidden state F-軌跡 → 不採用 (initial signal only)
+            - B: Pythia 学習動態 → 不採用 (Causal LM の SP 制約)
+            - **C: Attention graph F ← ★ 本デモ ★ (論文 §3 採用)**
+
+            **介入 (3 段階)**
+            - Phase 3: 推論時介入 → F 特有性示せず
+            - **Phase 5: F 最小化正則化 → +0.33pp (論文 §4 採用)**
+            - exp4: F 最大化正則化 → +1.4pp, 3 度再現 (v7 へ)
+
+            **後続応用**
+            - AGHT → HotpotQA EM 40 → 48.9% (+8.9pt)
+            """
         )
 
     tab_view, tab_compare, tab_custom = st.tabs([
