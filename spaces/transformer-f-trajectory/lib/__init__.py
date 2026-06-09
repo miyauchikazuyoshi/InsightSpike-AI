@@ -1,1 +1,1 @@
-"""Thin wrapper around experiments/transformer/inference_f_trajectory/gedig_hidden.py."""
+"""Thin wrapper over src/insightspike/algorithms/gedig/attention.py — the canonical attention-based F formula used in JSAI 2026 paper §3."""
