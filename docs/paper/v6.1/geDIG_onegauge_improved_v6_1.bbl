@@ -1,0 +1,190 @@
+\begin{thebibliography}{10}
+
+\bibitem{tobugraph2024}
+A graph-based approach for conversational ai-driven personal memory capture and
+  retrieval in a real-world application.
+\newblock {\em arXiv preprint arXiv:2412.05447}, 2024.
+\newblock TOBUGraph.
+
+\bibitem{tgrag2025temporal}
+Rag meets temporal graphs: Time-sensitive modeling with temporal graphrag.
+\newblock {\em arXiv preprint arXiv:2510.13590}, 2025.
+\newblock Placeholder entry.
+
+\bibitem{Ammanabrolu2020WorldModels}
+Prithviraj Ammanabrolu, Matthew Hausknecht, Kyra Brantley, Karthik Narasimhan,
+  and Mark Riedl.
+\newblock Learning knowledge graph-based world models in text-based games.
+\newblock In {\em Proceedings of the AAAI Conference on Artificial
+  Intelligence}, volume~34, pages 4902--4909, 2020.
+
+\bibitem{GraphSAIL2020}
+{Authors}.
+\newblock Graphsail: Graph structure aware incremental learning for recommender
+  systems.
+\newblock arXiv preprint, 2020.
+\newblock Placeholder bibliographic entry; update authors/venue/DOI.
+
+\bibitem{AL4GNN2022Survey}
+{Authors}.
+\newblock Active learning for graph neural networks: A survey.
+\newblock arXiv preprint, 2022.
+\newblock Placeholder bibliographic entry; update authors/DOI.
+
+\bibitem{dygrag2024}
+{Authors}.
+\newblock Dynamic graph-based retrieval-augmented generation.
+\newblock arXiv preprint, 2024.
+\newblock Preprint; DOI/URL to be updated.
+
+\bibitem{kedkg2024}
+{Authors}.
+\newblock Knowledge editing with dynamic knowledge graphs.
+\newblock arXiv preprint, 2024.
+\newblock Preprint; DOI/URL to be updated.
+
+\bibitem{Buzsaki2015}
+Gy{"o}rgy Buzs{\'a}ki.
+\newblock {\em Rhythms of the Brain}.
+\newblock Oxford University Press, 2011.
+
+\bibitem{Carr2011}
+Matthew~F Carr, Shantanu~P Jadhav, and Loren~M Frank.
+\newblock Hippocampal replay in the awake state: a neural substrate of spatial
+  memory.
+\newblock {\em Nature Neuroscience}, 14(2):147--153, 2011.
+
+\bibitem{chen2025pathrag}
+B.~Chen et~al.
+\newblock Pathrag: Pruning graph-based retrieval augmented generation via key
+  relational paths.
+\newblock {\em arXiv preprint arXiv:2502.14902}, 2025.
+\newblock Placeholder entry; author list to be updated.
+
+\bibitem{Child2019SparseTransformer}
+Rewon Child, Scott Gray, Alec Radford, and Ilya Sutskever.
+\newblock Generating long sequences with sparse transformers.
+\newblock In {\em Advances in Neural Information Processing Systems}, 2019.
+\newblock Sparse attention and block-sparse structure for efficient long-range
+  modeling.
+
+\bibitem{Dehghani2019UniversalTransformer}
+Mostafa Dehghani, Stephan Gouws, Oriol Vinyals, Jakob Uszkoreit, and {\L}ukasz
+  Kaiser.
+\newblock Universal transformers.
+\newblock In {\em International Conference on Learning Representations}, 2019.
+
+\bibitem{DittrichKinne2025ITI}
+Christian Dittrich and Jennifer Flygare~Kinne.
+\newblock The information-theoretic imperative: Compression and the epistemic
+  foundations of intelligence, 2025.
+\newblock preprint.
+
+\bibitem{Fedus2021SwitchTransformer}
+William Fedus, Barret Zoph, and Noam Shazeer.
+\newblock Switch transformers: Scaling to trillion parameter models with simple
+  and efficient sparsity.
+\newblock In {\em Journal of Machine Learning Research Workshop and Conference
+  Proceedings}, 2021.
+\newblock Mixture-of-Experts style routing with dynamic sparsity.
+
+\bibitem{gao2010survey}
+Xinbo Gao, Bing Xiao, Dacheng Tao, and Xuelong Li.
+\newblock A survey of graph edit distance.
+\newblock {\em Pattern Analysis and applications}, 13(1):113--129, 2010.
+
+\bibitem{guo2025decoupling}
+Zhenyu Guo and Wenguang Chen.
+\newblock Decoupling knowledge and reasoning in transformers: A modular
+  architecture with generalized cross-attention.
+\newblock {\em arXiv preprint arXiv:2501.00823}, 2025.
+\newblock Placeholder entry; update if venue appears.
+
+\bibitem{Lampinen2025LatentLearning}
+Andrew~Kyle Lampinen, Martin Engelcke, Yuxuan Li, Arslan Chaudhry, and James~L
+  McClelland.
+\newblock Latent learning: episodic memory complements parametric learning by
+  enabling flexible reuse of experiences.
+\newblock {\em arXiv preprint arXiv:2509.16189}, 2025.
+
+\bibitem{lewis2020}
+Patrick Lewis, Ethan Perez, Aleksandra Piktus, Fabio Petroni, Vladimir
+  Karpukhin, Naman Goyal, Heinrich K{\"u}ttler, Mike Lewis, Wen-tau Yih, Tim
+  Rockt{\"a}schel, et~al.
+\newblock Retrieval-augmented generation for knowledge-intensive nlp tasks.
+\newblock In {\em Advances in Neural Information Processing Systems},
+  volume~33, pages 9459--9474, 2020.
+
+\bibitem{li2025tgrag}
+Dong Li, Yichen Niu, Ying Ai, Xiang Zou, Biqing Qi, and Jianxing Liu.
+\newblock T-grag: A dynamic graphrag framework for resolving temporal conflicts
+  and redundancy in knowledge retrieval.
+\newblock In {\em Proceedings of ACM Multimedia}, 2025.
+\newblock Also on arXiv:2508.01680.
+
+\bibitem{McGregor2014GraphStreams}
+Andrew McGregor.
+\newblock Graph stream algorithms: a survey.
+\newblock {\em SIGMOD Record}, 43(1):9--20, 2014.
+
+\bibitem{graphrag2024}
+{Microsoft Research Team}.
+\newblock Graphrag: Retrieval-augmented generation via knowledge graphs.
+\newblock arXiv preprint, 2024.
+\newblock Whitepaper/technical report; DOI/URL to be updated.
+
+\bibitem{Mitchell2018NELL}
+Tom~M. Mitchell, William~W. Cohen, Estevam Hruschka, Partha Talukdar, Bishan
+  Yang, Justin Betteridge, Andrew Carlson, Bhavana Dalvi, Matt Gardner, Bryan
+  Kisiel, Jayant Krishnamurthy, Ni~Lao, Kathryn Mazaitis, Ahmed Mohamed,
+  Ndapandula Nakashole, Emmanouil~A. Platanios, Alan Ritter, Mehdi Samadi, Burr
+  Settles, Richard~C. Wang, Derry~Tanti Wijaya, Abhinav Gupta, Congle Chen,
+  Abulhair Saparov, Mark Greaves, and Max Welling.
+\newblock Never-ending learning.
+\newblock {\em Communications of the ACM}, 61(5):103--115, 2018.
+
+\bibitem{Pfeiffer2013}
+Brad~E Pfeiffer and David~J Foster.
+\newblock Hippocampal place-cell sequences depict future paths to remembered
+  goals.
+\newblock {\em Nature}, 497:74--79, 2013.
+
+\bibitem{Reimers2019}
+Nils Reimers and Iryna Gurevych.
+\newblock Sentence-bert: Sentence embeddings using siamese bert-networks.
+\newblock In {\em Proceedings of EMNLP-IJCNLP}, 2019.
+
+\bibitem{rissanen1978}
+Jorma Rissanen.
+\newblock Modeling by shortest data description.
+\newblock {\em Automatica}, 14(5):465--471, 1978.
+
+\bibitem{Tishby1999}
+Naftali Tishby, Fernando~C Pereira, and William Bialek.
+\newblock The information bottleneck method.
+\newblock In {\em 37th Annual Allerton Conference on Communication, Control,
+  and Computing}, 1999.
+
+\bibitem{wang2022selfinstruct}
+Yizhong Wang, Yeganeh Kordi, Swaroop Mishra, Alisa Liu, Noah~A Smith, Daniel
+  Khashabi, and Hannaneh Hajishirzi.
+\newblock Self-instruct: Aligning language models with self-generated
+  instructions.
+\newblock {\em arXiv preprint arXiv:2212.10560}, 2022.
+
+\bibitem{Yasunaga2021QAGNN}
+Michihiro Yasunaga, Hongyu Ren, Antoine Bosselut, Percy Liang, and Jure
+  Leskovec.
+\newblock {QA}-{GNN}: Reasoning with language models and knowledge graphs for
+  question answering.
+\newblock In {\em Proceedings of the 2021 Conference of the North American
+  Chapter of the Association for Computational Linguistics}, pages 535--546,
+  2021.
+
+\bibitem{zweiger2025seal}
+Adam Zweiger, Jyothish Pari, Han Guo, Ekin Aky{\"u}rek, Yoon Kim, and Pulkit
+  Agrawal.
+\newblock Self-adapting language models.
+\newblock {\em arXiv preprint arXiv:2506.10943}, 2025.
+
+\end{thebibliography}

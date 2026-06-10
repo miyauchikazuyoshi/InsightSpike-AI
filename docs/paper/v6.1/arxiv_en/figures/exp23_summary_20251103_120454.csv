@@ -1,0 +1,5 @@
+baseline,per_mean,acceptance_rate,fmr,latency_p50,latency_p95,psz_inside,ag_rate,dg_rate,avg_steps
+static_rag,0.231,0.0,1.0,160.0,160.0,False,0.0,0.0,1.0
+frequency,0.231,0.0,1.0,160.0,160.0,False,0.0,0.0,1.0
+cosine_topk,0.2483,0.0,1.0,160.0,160.0,False,0.0,0.0,1.0
+gedig_ag_dg,0.1319,0.0,1.0,240.0,240.0,False,0.0,1.0,2.667
