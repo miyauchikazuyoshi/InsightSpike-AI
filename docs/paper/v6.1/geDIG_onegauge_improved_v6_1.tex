@@ -1679,7 +1679,7 @@ Query-Hub v4 の実測（表~\ref{tab:maze_v4_main}）では、成功率は 15×
 \begin{table}[H]
 \centering
 \small
-\caption{静的RAGにおけるプロンプト強化と関連指標（旧プロトタイプ実装による予備測定; $n{=}168$ クエリ; \emph{参考値}）。}
+\caption{静的RAGにおけるプロンプト強化と関連指標（旧プロトタイプ実装による予備測定; KB 168項目・クエリ数は少数; \emph{参考値}）。}
 \label{tab:rag_static_enrichment}
 \begin{tabular}{lcccc}
 \toprule
@@ -1692,7 +1692,7 @@ Cosine-only & 123.7\% & 0.71 & 3.2 & 18\% \\
 \bottomrule
 \end{tabular}
 \end{table}
-\noindent 表\ref{tab:rag_static_enrichment}は\emph{旧プロトタイプ実装による予備測定}（$n{=}168$；再現スクリプト未整備のため参考値）であり、本稿の主結果は lite スイートの表~\ref{tab:rag_summary} とする。予備測定の傾向としては、geDIG によるプロンプト強化率・関連度・多様性・クロスドメイン橋渡しの改善が観察された。
+\noindent 表\ref{tab:rag_static_enrichment}は\emph{旧プロトタイプ実装による予備測定}（KB 168項目・少数クエリ；再現スクリプト未整備のため参考値。v6 以前の「$n{=}168$ クエリ」表記は KB アイテム数の取り違え）であり、本稿の主結果は lite スイートの表~\ref{tab:rag_summary} とする。予備測定の傾向としては、geDIG によるプロンプト強化率・関連度・多様性・クロスドメイン橋渡しの改善が観察された。
 
 \subsection{比較対象（固定；静的）}
 \label{sec:rag_baselines}
@@ -1909,7 +1909,7 @@ RAG への移植で geDIG が機能する鍵は、\S\ref{sec:phi_requirements} �
 \subsection{実験設定の拡充}
 
 \paragraph{データセットと評価クエリ}
-RAG 評価は三段階で計画している：小規模 25 クエリ（旧プロトタイプ）、中間 168 クエリ / 20 ドメイン（旧プロトタイプ; 表~\ref{tab:rag_static_enrichment} の予備測定）、主要 500 クエリ（本稿の lite スイート; 合成コーパス）。拡張 1000+/100+ ドメインおよび実コーパス（HotpotQA 等）での評価は引き続き計画中である。詳細なサンプリング条件とクエリ例は補足資料にまとめる予定で、本文では設計意図のみ記載する。
+RAG 評価は三段階で計画している：小規模 25 クエリ（旧プロトタイプ）、中間（KB 168項目 / 20 ドメイン; 旧プロトタイプ; 表~\ref{tab:rag_static_enrichment} の予備測定）、主要 500 クエリ（本稿の lite スイート; 合成コーパス）。拡張 1000+/100+ ドメインおよび実コーパス（HotpotQA 等）での評価は引き続き計画中である。詳細なサンプリング条件とクエリ例は補足資料にまとめる予定で、本文では設計意図のみ記載する。
 
 \paragraph{比較ベースライン}
 Equal\,\mbox{-}resources（同一埋め込み器・ANN 設定・トークン予算・計算資源）を前提に、本稿では Static RAG／Frequency／Cosine-threshold と提案手法（geDIG）を実測比較した。GraphRAG\cite{graphrag2024}／DyG-RAG\cite{dygrag2024}／KEDKG\cite{kedkg2024} との比較、および各手法固有の最適設定による比較は\emph{今後の課題}である。
@@ -2083,7 +2083,7 @@ PSZ（Perfect Scaling Zone）は、受容$\ge$95\%、FMR$\le$2\%、追加遅延P
 
 \subsection{Multi-hop効果の詳細分析}
 
-表\ref{tab:multihop_analysis}は\emph{旧プロトタイプ実装による予備測定}（参考値; 再現スクリプト未整備。PER の絶対値は lite スイートと正規化が異なる）である。ホップ数の増加により以下の傾向が観察された：
+表\ref{tab:multihop_analysis}は\emph{旧プロトタイプ実装による予備測定}（参考値; 再現スクリプト未整備）である。\textbf{注意}: 本表の数値は\emph{プロンプト強化率}（multi-hop 文脈追加によるプロンプト長の相対増加; 旧実装の enrichment ratio）であり、PER（完全エピソード率）ではない。v6 以前の版では誤って「PER」と表記されていた（経緯は \texttt{docs/audits/per\_metric\_audit.md}）。ホップ数の増加により以下の傾向が観察された：
 
 \begin{table}[H]
 \centering
@@ -2091,7 +2091,7 @@ PSZ（Perfect Scaling Zone）は、受容$\ge$95\%、FMR$\le$2\%、追加遅延P
 \label{tab:multihop_analysis}
 \begin{tabular}{lcccc}
 \toprule
-ホップ数 & 単一ドメイン & クロスドメイン & 深い推論 & 平均PER(\%) \\
+ホップ数 & 単一ドメイン & クロスドメイン & 深い推論 & 平均強化率(\%) \\
 \midrule
 1-hop & 118.5\% & 125.8\% & 131.2\% & 125.3\% \\
 2-hop & 138.7\% & 147.2\% & 151.5\% & 145.8\% \\
@@ -2347,7 +2347,7 @@ w/o $\Delta$SP & 96.7 & 71.5 \\
 迷路PoCにおける粗い掃引では、$\lambda \in [0.3, 0.7]$ の範囲で安定した性能が得られた。$\lambda < 0.3$ では情報利得の寄与が弱まり誤統合が増加し、$\lambda > 0.7$ では構造コスト側が過度に強調され冗長性が増加する傾向が見られた。これらはあくまで PoC 規模での定性的な観察であり、RAG を含む広い条件での体系的な感度分析は今後の課題とする。
 
 \paragraph{ホップ数 $H$ の影響}
-表\ref{tab:hop_sensitivity}（旧プロトタイプによる予備測定; \emph{参考値}）では、$H=3$が最もバランスが良く、$H>3$では計算コスト増大に対する性能向上が飽和する傾向が観察された。lite スイートでの再計測は今後の課題である。
+表\ref{tab:hop_sensitivity}（旧プロトタイプによる予備測定; \emph{参考値}。第2列はプロンプト強化率であり PER ではない）では、$H=3$が最もバランスが良く、$H>3$では計算コスト増大に対する性能向上が飽和する傾向が観察された。lite スイートでの再計測は今後の課題である。
 
 \begin{table}[H]
 \centering
@@ -2355,7 +2355,7 @@ w/o $\Delta$SP & 96.7 & 71.5 \\
 \label{tab:hop_sensitivity}
 \begin{tabular}{lccccc}
 \toprule
-$H$ & RAG PER(\%) & 受容率(\%) & FMR(\%) & P50遅延(ms) & 計算コスト \\
+$H$ & 強化率(\%) & 受容率(\%) & FMR(\%) & P50遅延(ms) & 計算コスト \\
 \midrule
 1 & 125.3 & 88.5 & 2.8 & 98 & 1.0× \\
 2 & 145.8 & 94.2 & 1.9 & 156 & 2.3× \\
