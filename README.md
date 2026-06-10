@@ -272,10 +272,11 @@ Specific, actionable research questions where external collaboration would be va
 |---------------------|-----------|
 | $\Delta\text{EPC}$ (metric) | Hewitt & Manning (2019), [A Structural Probe for Finding Syntax in Word Representations](https://aclanthology.org/N19-1419/) |
 | $\Delta H$ (measure) | Ali et al. (2025), [Entropy-Lens: The Information Signature of Transformer Computations](https://arxiv.org/abs/2502.16570) |
-| $\Delta\beta_1$ (topology) | Oyama et al. (2025), [Mapping 1,000+ Language Models via the Log-Likelihood Vector](https://aclanthology.org/2025.acl-long.1584/) — ACL Outstanding Paper |
+| $\Delta\beta_1$ (topology) | Kushnareva et al. (2021), [Artificial Text Detection via Examining the Topology of Attention Maps](https://aclanthology.org/2021.emnlp-main.50/) — TDA/Betti features on BERT attention graphs (EMNLP 2021) |
 
 **Related work on structure and interpretability**:
 - Gao et al. (2025), [Weight-sparse transformers have interpretable circuits](https://arxiv.org/abs/2511.13653) — sparsification as $\beta_1$ reduction
+- Oyama et al. (2025), [Mapping 1,000+ Language Models via the Log-Likelihood Vector](https://aclanthology.org/2025.acl-long.1584/) — ACL Outstanding Paper; model-map methodology related to our $H$-based comparisons (not a topology grounding)
 
 ---
 

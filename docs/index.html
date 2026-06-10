@@ -338,7 +338,7 @@
                 </span>
                 <span
                     class="block mt-4 text-xs text-slate-500 font-mono bg-white/5 inline-block px-3 py-1 rounded border border-white/5">
-                    <strong>Maze:</strong> 60% → <strong>98%</strong> goal-reach (15×15).
+                    <strong>Maze:</strong> <strong>98%</strong> goal-reach (15×15, on par with greedy DFS) while pruning <strong>98%</strong> of candidate edges.
                     <strong>Transformer:</strong> F tracks model quality across 8 models. </span>
             </p>
             <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
@@ -790,14 +790,18 @@
                         Wake-Sleep-Wake cycle with three-layer search.
                     </p>
                     <div class="bg-bg border border-white/10 rounded-lg p-3 mb-4">
-                        <div class="text-[11px] text-slate-500 uppercase tracking-wider mb-2">Result (15&times;15 maze, 12 seeds)</div>
+                        <div class="text-[11px] text-slate-500 uppercase tracking-wider mb-2">Result (15&times;15 maze, n=100)</div>
                         <div class="flex justify-between text-sm font-mono">
                             <span class="text-slate-400">Goal-reach</span>
                             <span class="text-emerald-400 font-bold">98%</span>
                         </div>
                         <div class="flex justify-between text-sm font-mono">
-                            <span class="text-slate-400">Baseline</span>
-                            <span class="text-slate-500">~60%</span>
+                            <span class="text-slate-400">Greedy DFS</span>
+                            <span class="text-slate-500">99%</span>
+                        </div>
+                        <div class="flex justify-between text-sm font-mono">
+                            <span class="text-slate-400">Edge pruning</span>
+                            <span class="text-emerald-400 font-bold">98%</span>
                         </div>
                     </div>
                     <a href="https://github.com/miyauchikazuyoshi/InsightSpike-AI/tree/main/experiments/maze" target="_blank"
@@ -949,8 +953,8 @@
                     <tbody class="divide-y divide-white/5 text-slate-400">
                         <tr>
                             <td class="py-4 pr-4 text-white font-medium">Maze 15&times;15</td>
-                            <td class="py-4 pr-4 font-mono text-xs">12 seeds, 250 steps</td>
-                            <td class="py-4 pr-4"><span class="text-emerald-400 font-bold">98%</span> goal-reach (baseline ~60%)</td>
+                            <td class="py-4 pr-4 font-mono text-xs">n=100, 250 steps</td>
+                            <td class="py-4 pr-4"><span class="text-emerald-400 font-bold">98%</span> goal-reach (on par with greedy DFS 99%) + <span class="text-emerald-400 font-bold">98%</span> edge pruning</td>
                             <td class="py-4"><span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Reproducible</span></td>
                         </tr>
                         <tr>
