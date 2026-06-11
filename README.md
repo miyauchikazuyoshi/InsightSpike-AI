@@ -52,7 +52,8 @@ It is not a production library.
 | BRIGHT reasoning-intensive retrieval | nDCG@10 = 0.439 on **biology, 50 queries, single seed** (preliminary; full 3-domain ≈ 0.19; SOTA ≈ 0.63) | [`experiments/hotpotqa_v2/`](experiments/hotpotqa_v2/) |
 | AGHT (Graph Transformer) | HotpotQA R@2 = 0.405, **+170% over an internal PageRank baseline** (zero-shot, 100q, single seed) | [`experiments/hotpotqa_v2/src/unified_graph.py`](experiments/hotpotqa_v2/src/unified_graph.py) |
 | Transformer F-regularization (Exp4) | **Preliminary, single seed**: F-maximize > baseline under SP-based F only — *not* confirmed under β₁ or against a random-regularization control | [`experiments/transformer/`](experiments/transformer/) |
-| Maze Wake-Sleep-Wake | 98% goal-reach (15x15, n=100) — on par with greedy-DFS / oracle (99%); distinctive result is ~98% map compression | [`experiments/maze/`](experiments/maze/) |
+| Maze PoC (single episode) | 98% goal-reach (15x15, n=100) — on par with greedy-DFS / oracle (99%); distinctive result is ~98% map compression via emergent AG/DG control | [`experiments/maze/`](experiments/maze/) |
+| Maze stage-2 (Wake-Sleep-Wake) | 25x25: success 71.9%→95.3%, steps −41%, edges −34% — **package effect** (10D vectors + sleep + curriculum changed together); sleep-only ablation is the next pre-registered experiment | [`experiments/maze/graph_persistent_dg/`](experiments/maze/graph_persistent_dg/) |
 | HotpotQA dual-process (v3) | GPT-4o EM 51.2% vs IRCoT 47.6% (500q) — **p=0.086, not significant**; reverses on GPT-4o-mini | [`experiments/hotpotqa_v2/REPORT_v3_dual_process.md`](experiments/hotpotqa_v2/REPORT_v3_dual_process.md) |
 | Visual proof (matchstick figure) | Interactive HTML | [EN](https://miyauchikazuyoshi.github.io/InsightSpike-AI/research/thinking/matchstick_figure_v2_en.html) / [JA](https://miyauchikazuyoshi.github.io/InsightSpike-AI/research/thinking/matchstick_figure_v2.html) |
 
@@ -78,12 +79,16 @@ See [`docs/architecture/unified_core_architecture.md`](docs/architecture/unified
 
 ### Maze Navigation
 
-A partial-observation maze agent that builds a persistent knowledge graph and uses geDIG to decide when to explore vs. exploit. This is a **proof-of-concept that a single gauge F + AG/DG gates can drive exploration and integration** — not a claim that geDIG is the best maze solver.
+A partial-observation maze agent that builds a persistent knowledge graph and uses geDIG to decide when to explore vs. exploit. This is a **proof-of-concept that every decision — what to accept into memory, what to discard, and when to backtrack — can emerge from operating a single gauge F + quantile gates (AG/DG), with no domain rules**. It is *not* a claim that geDIG is the best maze solver.
 
 - **Architecture**: Wake-Sleep-Wake cycle with three-layer search (L0: O(1) hash, L1: O(degree) attention walk, L2: O(N log N) full sort)
-- **15x15 maze (n=100)**: geDIG reaches **98%** goal-reach (Wilson 95% CI [0.93, 0.99]). For reference, a plain greedy-DFS baseline reaches **99%** and an oracle BFS **99%** — so geDIG does *not* beat the simplest complete baseline on success rate.
-- **What is distinctive**: geDIG attains this via *emergent* AG/DG control (no hard-coded "if dead-end" rule) while compressing the explored map by **~98%** (retaining only the topological skeleton). The PoC's contribution is the control mechanism and compression, not raw success superiority.
+- **15x15 maze (n=100)**: geDIG reaches **98%** goal-reach (Wilson 95% CI [0.93, 0.99]). For reference, a plain greedy-DFS baseline reaches **99%** and an oracle BFS **99%** — so geDIG does *not* beat the simplest complete baseline on success rate. (DFS is a maze-specific algorithm; geDIG knows nothing about mazes — success rate is a sanity check, not the claim.)
+- **What is distinctive**: geDIG attains this via *emergent* AG/DG control (no hard-coded "if dead-end" rule) while compressing the explored map by **~98%** (retaining only the topological skeleton). The PoC's contribution is the control mechanism and the **memory write-gate behavior** (selecting what is worth remembering), not raw success superiority.
 - **25x25 maze**: preliminary — success rate varies by configuration (≈ 0.42–0.75 across runs) and statistics are not yet finalized.
+
+**Stage-2 (Wake-Sleep-Wake / graph persistence)** asks a different question: does the memory graph built in one episode, consolidated during a sleep phase (Q-style reward propagation + pruning), make the *next* episode better?
+- Current evidence (25x25, v6_perseed): success 71.9% → 95.3%, mean steps −41%, edges −34%. **Caveat: this is a package effect** — 10D vectors, sleep propagation, and curriculum warmup were changed together, so sleep's isolated contribution is not yet established. A pre-registered sleep-on/off ablation (10D + curriculum held fixed) is the next planned experiment.
+- Stage-2 metrics are **steps / edge count / second-episode improvement**, not success rate (which is near ceiling at 15x15 and insensitive).
 
 ```bash
 # Reproduce (requires .venv with networkx, numpy, etc.)
