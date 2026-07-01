@@ -49,8 +49,13 @@ Visual representations of system architecture
 ### 📄 Paper & Theory
 Formal specification and theory background
 - [geDIG Spec](./gedig_spec.md) - High‑level spec of the gauge
-- Paper v5 (JA): `docs/paper/geDIG_onegauge_improved_v5.pdf`
-- Paper v5 (EN, full): `docs/paper/arxiv_v5_en/geDIG_onegauge_improved_v5_full_en.pdf`
+- **Paper v6.1 (current; claim–evidence consistency revision, 2026-06)**:
+  JA `docs/paper/v6.1/geDIG_onegauge_improved_v6_1.pdf` / EN `docs/paper/v6.1/arxiv_en/geDIG_onegauge_improved_v6_1_en.pdf`
+- Paper v6 (arXiv/Zenodo DOI-pinned): `docs/paper/v6/arxiv_en/geDIG_onegauge_improved_v6_en.pdf`
+- Paper v5 (historical): `docs/paper/geDIG_onegauge_improved_v5.pdf`
+- v7 plan (β₁ generalization, in progress): [paper/v7/plan.md](./paper/v7/plan.md) + [Tier 1 drafts](./paper/v7/draft_sections/)
+- **Audits (2026-06, external review)**: [audits/](./audits/) — F-sign, PER metric, oracle routing ceiling
+- **Pre-registrations**: [prereg/](./prereg/) — router duel (Stage A defeat recorded), maze sleep ablation
 
 ### 🗂️ Research Notes (Long‑Term / AGI)
 Exploratory notes on AGI foundations, governance, and Phase‑2 ideas
@@ -67,9 +72,9 @@ Documentation images and animations
 - **Users**: Check [User Guide](./user-guide/) for daily usage
 - **Developers**: See [API Reference](./api-reference/) and [Architecture](./architecture/)
 - **Researchers**: Read the paper and theory docs:
-  - Paper v5 (JA): `docs/paper/geDIG_onegauge_improved_v5.pdf`
-  - Paper v5 (EN, full): `docs/paper/arxiv_v5_en/geDIG_onegauge_improved_v5_full_en.pdf`
+  - Paper v6.1 (current): `docs/paper/v6.1/` (JA/EN)
   - Gauge spec: [geDIG Spec](./gedig_spec.md)
+  - Audits and pre-registrations: [audits/](./audits/), [prereg/](./prereg/)
 - **Contributors**: Review [CONTRIBUTING](./CONTRIBUTING.md) for ongoing work
 
 ## 📝 Documentation Standards
@@ -90,4 +95,4 @@ When contributing documentation:
 
 ---
 
-*Last updated: July 2025*
+*Last updated: July 2026*
