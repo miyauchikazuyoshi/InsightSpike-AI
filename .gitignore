@@ -46,6 +46,10 @@ pruned_model/
 # Archived content (code/docs/experiments)
 /archive/
 !docs/archive/
+experiments/_archive_before_20260201_refactor/
+
+# Poster distribution zips (generated from tracked poster dirs)
+docs/paper/jsai2026/poster/*.zip
 
 # Caches
 .mypy_cache/
