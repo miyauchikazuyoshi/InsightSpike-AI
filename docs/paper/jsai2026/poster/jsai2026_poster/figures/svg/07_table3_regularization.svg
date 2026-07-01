@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100%" viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg">
+<text x="340" y="24" text-anchor="middle" font-size="14" font-weight="500">表3. F 正則化の効果 (SST-2, DistilBERT, n = 3 seeds)</text>
+<rect x="30" y="40" width="390" height="28" fill="#f5f5f5" stroke="#aaa" stroke-width="0.5"/>
+<text x="95" y="54" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="500">α</text>
+<text x="265" y="54" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="500">Accuracy (%, mean ± std)</text>
+<text x="385" y="54" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="500">Δ (pp)</text>
+<rect x="30" y="68" width="390" height="26" fill="none" stroke="#ddd" stroke-width="0.3"/>
+<text x="95" y="81" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#777">0 (Baseline)</text>
+<text x="265" y="81" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#777">86.00 ± 0.53</text>
+<text x="385" y="81" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#777">—</text>
+<rect x="30" y="94" width="390" height="26" fill="#E1F5EE" stroke="#1D9E75" stroke-width="0.5"/>
+<text x="95" y="107" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56" font-weight="500">0.001</text>
+<text x="265" y="107" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56" font-weight="500">86.33* ± 0.46</text>
+<text x="385" y="107" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56" font-weight="500">+0.33</text>
+<rect x="30" y="120" width="390" height="26" fill="none" stroke="#ddd" stroke-width="0.3"/>
+<text x="95" y="133" text-anchor="middle" dominant-baseline="central" font-size="11">0.01</text>
+<text x="265" y="133" text-anchor="middle" dominant-baseline="central" font-size="11">86.27 ± 0.70</text>
+<text x="385" y="133" text-anchor="middle" dominant-baseline="central" font-size="11">+0.27</text>
+<rect x="30" y="146" width="390" height="26" fill="none" stroke="#ddd" stroke-width="0.3"/>
+<text x="95" y="159" text-anchor="middle" dominant-baseline="central" font-size="11">0.1</text>
+<text x="265" y="159" text-anchor="middle" dominant-baseline="central" font-size="11">85.93 ± 1.10</text>
+<text x="385" y="159" text-anchor="middle" dominant-baseline="central" font-size="11">−0.07</text>
+<rect x="30" y="172" width="390" height="26" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.5"/>
+<text x="95" y="185" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#A32D2D" font-weight="500">1.0</text>
+<text x="265" y="185" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#A32D2D" font-weight="500">78.93 ± 1.55</text>
+<text x="385" y="185" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#A32D2D" font-weight="500">−7.07</text>
+<text x="40" y="215" text-anchor="start" font-size="10" fill="#666">* paired t-test: p = 0.038 vs Baseline (seed 対応, n = 3)</text>
+<text x="40" y="230" text-anchor="start" font-size="10" fill="#666">+0.33pp は誤り率を約 2.4% 相対減 (14.0% → 13.7%)</text>
+<text x="555" y="54" text-anchor="middle" font-size="12" font-weight="500">逆 U 字特性</text>
+<g transform="translate(450,68)">
+<line x1="10" y1="145" x2="210" y2="145" stroke="#888" stroke-width="0.6"/>
+<line x1="10" y1="10" x2="10" y2="145" stroke="#888" stroke-width="0.6"/>
+<text x="5" y="10" text-anchor="end" dominant-baseline="central" font-size="9">88</text>
+<text x="5" y="37" text-anchor="end" dominant-baseline="central" font-size="9">86</text>
+<text x="5" y="64" text-anchor="end" dominant-baseline="central" font-size="9">84</text>
+<text x="5" y="91" text-anchor="end" dominant-baseline="central" font-size="9">82</text>
+<text x="5" y="118" text-anchor="end" dominant-baseline="central" font-size="9">80</text>
+<text x="5" y="145" text-anchor="end" dominant-baseline="central" font-size="9">78</text>
+<text x="-8" y="165" text-anchor="start" font-size="9" fill="#666">Acc(%)</text>
+<line x1="10" y1="37" x2="210" y2="37" stroke="#bbb" stroke-width="0.3" stroke-dasharray="2 2"/>
+<text x="214" y="37" text-anchor="start" dominant-baseline="central" font-size="9" fill="#666">86.00</text>
+<circle cx="30" cy="37" r="3.5" fill="#777"/>
+<text x="30" y="160" text-anchor="middle" font-size="9">0</text>
+<circle cx="75" cy="32.6" r="4" fill="#0F6E56"/>
+<text x="75" y="160" text-anchor="middle" font-size="9">0.001</text>
+<text x="75" y="23" text-anchor="middle" font-size="9" fill="#0F6E56" font-weight="500">86.33</text>
+<circle cx="120" cy="33.4" r="3.5" fill="#777"/>
+<text x="120" y="160" text-anchor="middle" font-size="9">0.01</text>
+<circle cx="165" cy="37.9" r="3.5" fill="#777"/>
+<text x="165" y="160" text-anchor="middle" font-size="9">0.1</text>
+<circle cx="205" cy="132.4" r="4" fill="#A32D2D"/>
+<text x="205" y="160" text-anchor="middle" font-size="9">1.0</text>
+<text x="205" y="124" text-anchor="middle" font-size="9" fill="#A32D2D" font-weight="500">78.93</text>
+<path d="M 30 37 Q 50 33 75 32.6 L 120 33.4 L 165 37.9 L 205 132.4" stroke="#333" stroke-width="1" fill="none" opacity="0.5"/>
+<text x="110" y="182" text-anchor="middle" font-size="10" fill="#666">α (log scale)</text>
+</g>
+</svg>

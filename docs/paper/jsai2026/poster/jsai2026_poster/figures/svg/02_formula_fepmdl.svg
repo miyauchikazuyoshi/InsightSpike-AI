@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100%" viewBox="0 0 680 385" xmlns="http://www.w3.org/2000/svg">
+<text x="340" y="32" text-anchor="middle" font-size="16" font-weight="500" fill="#1a1a1a">統一評価関数 F</text>
+
+<!-- 式を1つのtext+tspanに統一してずれを防止 -->
+<text x="340" y="95" text-anchor="middle" font-size="24" font-weight="500" fill="#1a1a1a">
+<tspan>F = </tspan><tspan fill="#993C1D">ΔEPC</tspan><tspan font-size="13" dy="5" fill="#993C1D">norm</tspan><tspan font-size="24" dy="-5" fill="#1a1a1a"> − λ (</tspan><tspan fill="#0F6E56">ΔH</tspan><tspan font-size="13" dy="5" fill="#0F6E56">norm</tspan><tspan font-size="24" dy="-5" fill="#1a1a1a"> + γ · </tspan><tspan fill="#3B6D11">ΔSP</tspan><tspan font-size="13" dy="5" fill="#3B6D11">rel</tspan><tspan font-size="24" dy="-5" fill="#1a1a1a"> )</tspan>
+</text>
+
+<text x="340" y="128" text-anchor="middle" font-size="12" fill="#666">F の減少が改善を表す (FEP 自由エネルギー・MDL 記述長と符号規約一致)</text>
+
+<rect x="40" y="155" width="600" height="28" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+<text x="100" y="174" text-anchor="middle" font-size="13" font-weight="500">項</text>
+<text x="235" y="174" text-anchor="middle" font-size="13" font-weight="500">意味</text>
+<text x="385" y="174" text-anchor="middle" font-size="13" font-weight="500">FEP</text>
+<text x="495" y="174" text-anchor="middle" font-size="13" font-weight="500">MDL</text>
+<text x="595" y="174" text-anchor="middle" font-size="13" font-weight="500">役割</text>
+
+<rect x="40" y="183" width="600" height="36" fill="none" stroke="#ddd" stroke-width="0.5"/>
+<text x="100" y="206" text-anchor="middle" font-size="13" fill="#993C1D" font-weight="500">ΔEPC<tspan font-size="10" dy="3">norm</tspan></text>
+<text x="235" y="206" text-anchor="middle" font-size="13">構造変更コスト</text>
+<text x="385" y="206" text-anchor="middle" font-size="13">複雑さ</text>
+<text x="495" y="206" text-anchor="middle" font-size="13">L(M) 増</text>
+<text x="595" y="206" text-anchor="middle" font-size="13">抑制</text>
+
+<rect x="40" y="219" width="600" height="36" fill="#f5f5f5" stroke="#ddd" stroke-width="0.5" opacity="0.5"/>
+<text x="100" y="242" text-anchor="middle" font-size="13" fill="#0F6E56" font-weight="500">ΔH<tspan font-size="10" dy="3">norm</tspan></text>
+<text x="235" y="242" text-anchor="middle" font-size="13">伸展利得 (optionality)</text>
+<text x="385" y="242" text-anchor="middle" font-size="13">探索圧</text>
+<text x="495" y="242" text-anchor="middle" font-size="13">―</text>
+<text x="595" y="242" text-anchor="middle" font-size="13">拡散</text>
+
+<rect x="40" y="255" width="600" height="36" fill="none" stroke="#ddd" stroke-width="0.5"/>
+<text x="100" y="278" text-anchor="middle" font-size="13" fill="#3B6D11" font-weight="500">ΔSP<tspan font-size="10" dy="3">rel</tspan></text>
+<text x="235" y="278" text-anchor="middle" font-size="13">経路短縮</text>
+<text x="385" y="278" text-anchor="middle" font-size="13">―</text>
+<text x="495" y="278" text-anchor="middle" font-size="13">L(D|M) 圧縮</text>
+<text x="595" y="278" text-anchor="middle" font-size="13">効率</text>
+
+<text x="340" y="318" text-anchor="middle" font-size="12" fill="#666">λ, γ は「情報温度」として機能、構造の複雑さと圧縮率のバランスを決定</text>
+<text x="340" y="345" text-anchor="middle" font-size="12" fill="#A32D2D" font-weight="500">全ての項はグラフ内部状態から計算可能 ― 外部ラベル・報酬は不要</text>
+<text x="340" y="372" text-anchor="middle" font-size="10" fill="#888" font-style="italic">* FEP/MDL 対応は operational な橋渡しであり、項の厳密な数学的同型を主張するものではない</text>
+</svg>

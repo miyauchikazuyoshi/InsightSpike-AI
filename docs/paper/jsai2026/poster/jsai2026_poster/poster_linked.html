@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>JSAI2026 - 動的知識グラフの探索・統合を制御する統一ゲージの提案</title>
+<style>
+@page { size: A0 portrait; margin: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+  color: #1a1a1a;
+  background: #f5f5f5;
+  line-height: 1.55;
+}
+body { padding: 20px; }
+.poster {
+  width: 1200px;
+  height: 1697px;
+  background: #ffffff;
+  margin: 0 auto;
+  padding: 30px 55px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 10px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+  position: relative;
+}
+@media print {
+  body { background: white; padding: 0; }
+  .poster { width: 841mm; height: 1189mm; box-shadow: none; padding: 22mm 35mm; }
+}
+header.poster-head {
+  border-bottom: 3px solid #1a1a1a;
+  padding-bottom: 10px;
+}
+h1.title {
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.25;
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+h2.subtitle {
+  font-size: 16px;
+  font-weight: 400;
+  color: #555;
+  font-style: italic;
+  margin-bottom: 7px;
+}
+.authors {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 14px;
+}
+.authors .name { font-weight: 500; font-size: 16px; }
+.authors .affiliation { color: #666; }
+.authors .session {
+  font-size: 13px;
+  color: #888;
+  letter-spacing: 0.02em;
+}
+.body-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.column { display: flex; flex-direction: column; gap: 8px; }
+section {
+  border-left: 3px solid #888;
+  padding-left: 14px;
+}
+section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #1a1a1a;
+}
+section h3 .num {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  background: #1a1a1a;
+  color: white;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+  margin-right: 7px;
+  vertical-align: middle;
+}
+section p {
+  font-size: 12.5px;
+  line-height: 1.5;
+  margin-bottom: 3px;
+}
+section p + p { margin-top: 1px; }
+.caption {
+  font-size: 11px;
+  color: #666;
+  text-align: center;
+  margin-top: 3px;
+  line-height: 1.4;
+}
+.highlight-num {
+  font-weight: 600;
+  color: #0F6E56;
+}
+.highlight-num-red {
+  font-weight: 600;
+  color: #A32D2D;
+}
+.figure-wrap {
+  margin: 4px 0 2px;
+}
+.figure-wrap svg { display: block; width: 70%; height: auto; margin: 0 auto; }
+
+.side-by-side {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  align-items: center;
+  margin: 4px 0;
+}
+.side-by-side .figure-wrap,
+.side-by-side .paper-figure {
+  margin: 0;
+  max-width: 100%;
+}
+.side-by-side .figure-wrap svg {
+  width: 100%;
+}
+.side-by-side .paper-figure img {
+  max-width: 100%;
+}
+.image-placeholder {
+  margin: 6px 0 2px;
+  border: 1px dashed #bbb;
+  border-radius: 4px;
+  padding: 24px;
+  text-align: center;
+  font-size: 12px;
+  color: #888;
+  min-height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+}
+.paper-figure {
+  margin: 6px auto 4px;
+  text-align: center;
+  max-width: 55%;
+}
+.paper-figure img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto 4px;
+}
+.paper-figure figcaption {
+  font-size: 10.5px;
+  color: #666;
+  line-height: 1.4;
+  padding: 0 10px;
+}
+.image-placeholder .main { font-size: 13px; color: #555; font-weight: 500; }
+footer.poster-foot {
+  border-top: 2px solid #1a1a1a;
+  padding-top: 4px;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 20px;
+  font-size: 10.5px;
+  color: #444;
+  align-items: center;
+}
+footer .refs { line-height: 1.45; }
+footer .refs strong { font-size: 11.5px; color: #1a1a1a; display: block; margin-bottom: 2px; }
+footer .qr {
+  text-align: center;
+  font-size: 9.5px;
+  color: #666;
+}
+footer .qr .qr-box {
+  width: 58px;
+  height: 58px;
+  background: #eee;
+  border: 1px solid #ccc;
+  margin: 0 auto 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8.5px;
+  color: #888;
+}
+footer .contact { font-size: 10.5px; line-height: 1.4; }
+footer .contact strong { font-size: 11.5px; color: #1a1a1a; display: block; margin-bottom: 2px; }
+.key-findings {
+  display: flex;
+  gap: 8px;
+  margin: 6px 0;
+}
+.finding {
+  flex: 1;
+  padding: 6px 8px;
+  background: #f7f5ef;
+  border-left: 3px solid #0F6E56;
+  border-radius: 0 4px 4px 0;
+}
+.finding .label { font-size: 9.5px; color: #666; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+.finding .value { font-size: 13px; font-weight: 600; color: #0F6E56; margin-top: 2px; }
+.finding .desc { font-size: 10.5px; color: #444; margin-top: 2px; line-height: 1.4; }
+.finding.coral { border-left-color: #993C1D; }
+.finding.coral .value { color: #993C1D; }
+.finding.purple { border-left-color: #534AB7; }
+.finding.purple .value { color: #534AB7; }
+
+.term-examples {
+  margin-top: 6px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 5px;
+}
+.term-example {
+  padding: 5px 8px;
+  background: #fafaf7;
+  border-left: 3px solid #888;
+  border-radius: 0 4px 4px 0;
+  font-size: 10.5px;
+  line-height: 1.4;
+}
+.term-example.coral { border-left-color: #993C1D; }
+.term-example.teal { border-left-color: #0F6E56; }
+.term-example.green { border-left-color: #3B6D11; }
+.term-example .term-name {
+  font-weight: 600;
+  font-size: 12.5px;
+  margin-bottom: 1px;
+  color: #1a1a1a;
+}
+.term-example.coral .term-name { color: #993C1D; }
+.term-example.teal .term-name { color: #0F6E56; }
+.term-example.green .term-name { color: #3B6D11; }
+.term-example .term-desc { color: #444; font-size: 11.5px; }
+.term-example .domain {
+  font-weight: 500;
+  color: #555;
+  font-size: 10.5px;
+}
+
+.figure-guide {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #333;
+  border-left: 3px solid #1a1a1a;
+  padding: 3px 10px;
+  margin: 3px 0 4px;
+}
+.figure-guide strong { color: #1a1a1a; }
+
+.granularity-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11.5px;
+  margin: 4px 0;
+}
+.granularity-table th, .granularity-table td {
+  padding: 4px 7px;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+}
+.granularity-table thead th {
+  background: #f5f5f5;
+  font-weight: 500;
+  font-size: 11.5px;
+}
+.granularity-table tr.highlight {
+  background: #E1F5EE;
+}
+.granularity-table tr.highlight td {
+  color: #0F6E56;
+}
+
+.experiment-setup {
+  margin-top: 6px;
+  padding: 6px 10px;
+  border-left: 3px solid #888;
+  background: #fafaf7;
+  font-size: 10.5px;
+  line-height: 1.5;
+  border-radius: 0 4px 4px 0;
+}
+.experiment-setup .es-title {
+  font-weight: 600;
+  font-size: 11px;
+  color: #444;
+  margin-bottom: 2px;
+  letter-spacing: 0.02em;
+}
+.experiment-setup dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 1px 8px;
+  margin: 0;
+}
+.experiment-setup dt {
+  font-weight: 500;
+  color: #555;
+}
+.experiment-setup dd {
+  margin: 0;
+  color: #333;
+}
+
+.future-subsection {
+  margin-top: 6px;
+  padding-left: 10px;
+  border-left: 3px solid #888;
+}
+.future-subsection:first-of-type {
+  margin-top: 4px;
+}
+.future-subsection .fs-title {
+  font-weight: 600;
+  font-size: 12.5px;
+  color: #1a1a1a;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.future-subsection .fs-title .paper-note {
+  font-size: 9.5px;
+  font-weight: 400;
+  color: #A32D2D;
+  font-style: italic;
+  letter-spacing: 0;
+}
+.future-subsection p {
+  font-size: 11.5px;
+  line-height: 1.5;
+  margin-bottom: 0;
+}
+.future-subsection.applied { border-left-color: #1D9E75; }
+.future-subsection.applied .fs-title { color: #0F6E56; }
+.future-subsection.topology { border-left-color: #534AB7; }
+.future-subsection.topology .fs-title { color: #26215C; }
+.future-subsection.sleep { border-left-color: #D85A30; }
+.future-subsection.sleep .fs-title { color: #8A3115; }
+</style>
+</head>
+<body>
+<div class="poster">
+
+<header class="poster-head">
+  <h1 class="title">動的知識グラフの探索・統合を制御する統一ゲージの提案</h1>
+  <h2 class="subtitle">— Gauge what Knowledge Graph needs. —</h2>
+  <div class="authors">
+    <div>
+      <span class="name">宮内 和義</span>
+      <span class="affiliation">(独立研究者)</span>
+    </div>
+    <div class="session">JSAI2026 &nbsp;&nbsp; Session 2Yin-B-50 &nbsp;&nbsp; 2026.06.09</div>
+  </div>
+</header>
+
+<div class="body-grid">
+
+<div class="column">
+
+<section>
+  <h3><span class="num">1</span>動機: 動的 KG の評価関数を定義する</h3>
+  <p><strong>動機 ―</strong> 動的に成長する知識グラフを前提とした時、<strong>新規エピソード注入によってグラフが改善したか悪化したかを判定する関数が存在しない</strong>。GraphRAG・Self-RAG は「何を (What)」検索するかに焦点を当てるが、「いつ (When)」統合するかの判定はヒューリスティックに依存している。</p>
+
+  <div class="figure-wrap">
+    <!-- SVG: motivation brain graph -->
+    <object type="image/svg+xml" data="figures/svg/01_motivation_brain.svg" class="linked-svg"></object>
+  </div>
+
+  <p><strong>アプローチ ―</strong> 本研究では、新規エピソード注入時の変化を <strong>構造変更コスト (ΔEPC) − 情報利得 (ΔH + γ·ΔSP)</strong> として統一評価関数 <strong>F</strong> に定式化する。F が減少するなら統合は有益、増加なら棄却するという原理的判定が可能になる。</p>
+  <p><strong>実証 ―</strong> この F を用いて空間的 KG (部分観測迷路探索) と意味的 KG (Transformer) の両方で検証し、単一スカラーによる動的 KG 制御が成立することを示した。ノード単位を従来のトークン/チャンクではなく <strong>エピソード</strong> とすることで、認知地図・エピソード記憶との計算論的対応も実現する。</p>
+</section>
+
+<section>
+  <h3><span class="num">2</span>統一評価関数 F と FEP/MDL 対応</h3>
+  <div class="figure-wrap">
+    <!-- SVG: 式+対応表 (文字ずれ修正版) -->
+    <object type="image/svg+xml" data="figures/svg/02_formula_fepmdl.svg" class="linked-svg"></object>
+  </div>
+
+  <div class="term-examples">
+    <div class="term-example coral">
+      <div class="term-name">ΔEPC<sub>norm</sub></div>
+      <div class="term-desc">グラフ編集距離の正規化値。<br>迷路:新通路 / TF:閾値超Attn変化</div>
+    </div>
+    <div class="term-example teal">
+      <div class="term-name">ΔH<sub>norm</sub></div>
+      <div class="term-desc">候補分布のエントロピー変化。<br>迷路:行動多様性 / TF:Attn拡散</div>
+    </div>
+    <div class="term-example green">
+      <div class="term-name">ΔSP<sub>rel</sub></div>
+      <div class="term-desc">平均最短路長の相対短縮。<br>迷路:物理近道 / TF:CLS集約</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h3><span class="num">3</span>Figure 1: ΔSP分岐の2ケース</h3>
+  <p class="figure-guide">候補エッジを AG エリア内に張った時、<strong>multi-hop 先で閉ループが形成されるか否か</strong>で F 収支が分岐する。</p>
+  <div class="figure-wrap">
+    <!-- SVG: Figure 1 (v10) -->
+    <object type="image/svg+xml" data="figures/svg/03_figure1_dsp_branching.svg" class="linked-svg"></object>
+  </div>
+  <p class="caption">同じ ΔEPC でも ΔSP_rel が異なれば統合判定は分岐する。AG内に張る候補エッジが multi-hop 領域でループを閉じるか否かが鍵。</p>
+</section>
+
+<section>
+  <h3><span class="num">4</span>AG/DG: 局所から大域への段階的判定</h3>
+  <p><strong>制約 ―</strong> F を毎ステップ全グラフ上で評価すると、グラフ成長に伴い計算量が飽和する。実用的な動的 KG 制御には、評価範囲を限定する戦略が不可欠である。</p>
+  <p><strong>戦略 ―</strong> 本研究では、<strong>新規エピソードを中心とした局所構造で先に評価し、局所で判定不能の場合に限り接続エッジで系を拡張して再評価</strong> する段階的アプローチを採る。大多数の更新は局所で決着するため、計算量を劇的に削減できる。</p>
+  <div class="figure-wrap">
+    <!-- SVG: AG/DG flow (v6) -->
+    <object type="image/svg+xml" data="figures/svg/04_agdg_flow.svg" class="linked-svg"></object>
+  </div>
+  <p><strong>実装 ―</strong> F を用いてエージェントは2つのゲートを段階的に起動する。<strong>AG (0-hop 評価) で局所的違和感がなければ、そのまま統合を確定</strong>(大多数の更新がここで決着)。局所で違和感を検知した場合のみ <strong>DG (multi-hop 評価) で大域的近道 (shortcut) を探索</strong>し、近道を発見した候補のみ統合を確定する。結果として「わからないときだけ調べ、必要なときだけ拡張する」自律的振る舞いが得られる。</p>
+</section>
+
+</div><!-- /left column -->
+
+<div class="column">
+
+<section>
+  <h3><span class="num">5</span>ノード粒度: エピソード単位の意義</h3>
+  <p>GraphRAG (チャンク) / Self-RAG (文・段落) が<strong>静的なノード</strong>を前提とするのに対し、geDIG は <strong>経験の単位 = エピソード</strong> を動的に成長させる。この粒度により、迷路の訪問位置と Transformer の Attention 集約を <strong>同じ構造</strong> として扱え、認知地図・エピソード記憶の計算論的定義に対応する。</p>
+</section>
+
+
+<section>
+  <h3><span class="num">6</span>検証I: 空間的KG ― 部分観測迷路探索</h3>
+  <div class="experiment-setup">
+    <div class="es-title">実験設定</div>
+    <dl>
+      <dt>迷路:</dt><dd>DFS 生成 15×15 / 25×25, 部分観測 (周囲1マス)</dd>
+      <dt>パラメータ:</dt><dd>λ=γ=1.0, θ_AG=0.4, θ_DG=0.0, 特徴量 8次元</dd>
+      <dt>比較対象:</dt><dd>Random Walk, Greedy DFS (max_steps 250 / 500)</dd>
+    </dl>
+  </div>
+  <div class="side-by-side">
+  <div class="figure-wrap">
+    <!-- SVG: 表2 -->
+    <object type="image/svg+xml" data="figures/svg/06_table2_maze.svg" class="linked-svg"></object>
+  </div>
+  <figure class="paper-figure">
+    <img src="figures/fig3_maze.png" alt="Figure 3: Maze exploration trajectory vs abstracted internal representation" />
+    <figcaption>図3. (a) 実空間の探索軌跡 / (b) 抽象化された内部表現。直線通路は圧縮され、分岐点のみが保持される。</figcaption>
+  </figure>
+  </div>
+  <p>候補エッジの <span class="highlight-num">98%を棄却しながら成功率98%</span> を達成し、「必要なトポロジー骨格」のみを選択的に記憶することを実証 (McNemar検定, p&lt;10⁻⁵)。AGが「驚き」を検知した地点をノード、DGが「因果」を確定した経路をエッジとする構造は、認知地図・エピソード記憶の計算論的定義に対応する。</p>
+</section>
+
+<section>
+  <h3><span class="num">7</span>検証II: 意味的KG ― Transformer</h3>
+
+  <div class="experiment-setup">
+    <div class="es-title">実験設定</div>
+    <dl>
+      <dt>モデル:</dt><dd>BERT-base (層別 n=200) / DistilBERT (F正則化 n=3 seeds)</dd>
+      <dt>タスク:</dt><dd>SST-2 (train 1000/val 500), 系列長≤128, 閾値上位10%</dd>
+      <dt>学習:</dt><dd>L_CE + α·F, AdamW lr=2e-5, soft-threshold 近似</dd>
+    </dl>
+  </div>
+
+  <div class="side-by-side">
+  <figure class="paper-figure">
+    <img src="figures/fig4_bert.png" alt="Figure 4: BERT layer-wise F-score distribution" />
+    <figcaption>図4. BERT 層別 F 値分布 (SST-2, n=200)。浅層で探索相 (低 F)、深層で構造相 (高 F) への遷移。</figcaption>
+  </figure>
+
+  <div class="figure-wrap">
+    <!-- SVG: 表3 (v2) -->
+    <object type="image/svg+xml" data="figures/svg/07_table3_regularization.svg" class="linked-svg"></object>
+  </div>
+  </div>
+
+  <div class="key-findings">
+    <div class="finding coral">
+      <div class="label">相転移</div>
+      <div class="value">p &lt; 10⁻⁸⁰</div>
+      <div class="desc">Layer 0-1 vs 10-11 <br>paired t(199)=32.6, d=2.31</div>
+    </div>
+    <div class="finding">
+      <div class="label">F 正則化</div>
+      <div class="value">+0.33 pp</div>
+      <div class="desc">α=0.001で有意改善 <br>(p=0.038, n=3 seeds)</div>
+    </div>
+    <div class="finding purple">
+      <div class="label">逆U字</div>
+      <div class="value">−7.07 pp</div>
+      <div class="desc">α=1.0で急落 <br>適切な構造化圧の存在</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h3><span class="num">8</span>考察: 熱力学自由エネルギーとの同型対応</h3>
+  <p><strong>FEP/MDL と熱力学の同型対応 ―</strong> ΔEPC は FEP における複雑さ項 / MDL における L(M) と類縁であり、ΔSP は MDL における L(D|M) 圧縮と対応する。これは<strong>計算可能な形で実装した類似構造</strong>であり、KL ダイバージェンスとグラフ編集距離の厳密な同値性を主張するものではない。さらに項を物理的役割で再編成すると、熱力学の自由エネルギー <strong>F = E − TS</strong> と同型構造が明示され、Transformer の層別F推移は「<strong>高温(探索)から低温(構造化)への冷却過程</strong>」として解釈できる。従来理論的のみ論じられてきた FEP/MDL 接続を<strong>グラフ上で直接計算できる形に落とし込んだ</strong>点に、本研究の operational 貢献がある。</p>
+
+  <p><strong>内閉した自己評価系 ―</strong> F の全ての項はグラフ自身の内部状態から計算可能であり、<strong>外部ラベル・外部報酬への参照を一切必要としない</strong>。迷路では外部報酬なしにナビゲーションが成立したことから、F は <strong>内発報酬 (intrinsic reward)</strong> として機能しうる。従来の強化学習における curiosity / empowerment / surprise minimization はヒューリスティックに設計されるが、本研究の F はグラフ構造そのものから導出される原理的定義となる。</p>
+</section>
+
+<section>
+  <h3><span class="num">9</span>今後の展望</h3>
+
+  <div class="future-subsection applied">
+    <div class="fs-title">9.1 RAG への自律制御 <span class="paper-note">(論文記載)</span></div>
+    <p>GraphRAG・Self-RAG 等の既存 RAG は検索タイミングをヒューリスティックに決定するが、AG/DG ゲート導入により <strong>「いつ検索し、いつ構造化するか」を F の原理的判定で自律制御</strong> できる。</p>
+  </div>
+
+  <div class="future-subsection topology">
+    <div class="fs-title">9.2 SP 項の β₁ への一般化 <span class="paper-note">(本ポスター初出)</span></div>
+    <p>現行の ΔSP_rel は計算可能な近似指標。これを <strong>1次ベッチ数 β₁ (独立ループ数)</strong> に置換することで位相不変量ベースの厳密化が可能となり、持続ホモロジーとの接続も開ける。</p>
+  </div>
+
+  <div class="future-subsection sleep">
+    <div class="fs-title">9.3 Sleep: オフライン構造再編 <span class="paper-note">(本ポスター初出)</span></div>
+    <p>現行は wake 相のみ。<strong>入力を遮断して F でグラフ自身の構造改善を行う sleep 相</strong> の導入を検討中。神経科学の睡眠時シナプス再編 (Tononi SHY 仮説) と対応する。</p>
+  </div>
+</section>
+
+</div><!-- /right column -->
+
+</div><!-- /body-grid -->
+
+<footer class="poster-foot">
+  <div class="refs">
+    <strong>参考文献 (主要)</strong>
+    [1] Friston 2010 <em>Nat. Rev. Neurosci.</em> &nbsp; [2] Grünwald 2007 <em>MDL Principle</em> &nbsp; [5] O'Keefe &amp; Nadel 1978 &nbsp; [7] Devlin et al. 2019 <em>NAACL</em> &nbsp; [10] Edge et al. 2024 <em>arXiv:2404.16130</em> &nbsp; [11] Asai et al. 2023 <em>arXiv:2310.11511</em>
+  </div>
+  <div class="qr">
+    <div class="qr-box">論文 PDF</div>
+    <div>JSAI2026 論文</div>
+  </div>
+  <div class="contact">
+    <strong>連絡先</strong>
+    宮内 和義 (独立研究者) <br>
+    miyauchikazuyoshi@gmail.com <br>
+    GitHub: miyauchikazuyoshi/InsightSpike-AI
+  </div>
+</footer>
+
+</div><!-- /poster -->
+</body>
+</html>
