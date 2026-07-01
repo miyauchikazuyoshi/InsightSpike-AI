@@ -201,6 +201,9 @@ def parse_args() -> argparse.Namespace:
                         help="Discount factor for graph reward propagation in Sleep phase.")
     parser.add_argument("--sleep-propagate-iters", type=int, default=50,
                         help="Max iterations for graph reward propagation in Sleep phase.")
+    parser.add_argument("--sleep-propagate", type=str, choices=["on", "off"], default="on",
+                        help="Sleep graph optimization (reward propagation + isolate removal + dim9 sync). "
+                             "off = inherit the raw Wake1 graph unchanged (ablation control).")
     # Curriculum (Wake→Sleep→Wake): warmup run to ensure goal experience, then eval guided by Sleep path plan
     parser.add_argument(
         "--curriculum-warmup-steps",
@@ -374,6 +377,7 @@ def build_config(
         advantage_commit=float(getattr(args, "advantage_commit", 0.0)),
         sleep_propagate_gamma=float(getattr(args, "sleep_propagate_gamma", 0.95)),
         sleep_propagate_iters=int(getattr(args, "sleep_propagate_iters", 50)),
+        sleep_propagate=str(getattr(args, "sleep_propagate", "on")),
         event_weights=dict(event_weights or {}),
         event_beta=float(getattr(args, "event_beta", 1.0)),
         affordance_bias=bool(getattr(args, "affordance_bias", False)),

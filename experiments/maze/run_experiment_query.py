@@ -3931,6 +3931,7 @@ def main() -> None:
             propagated_alpha=float(getattr(args, "propagated_alpha", 1.0)),
             sleep_propagate_gamma=float(getattr(args, "sleep_propagate_gamma", 0.95)),
             sleep_propagate_iters=int(getattr(args, "sleep_propagate_iters", 50)),
+            sleep_propagate=str(getattr(args, "sleep_propagate", "on")),
             sp_mode=str(getattr(args, "sp_mode", "asp")),
             search_mode=str(getattr(args, "search_mode", "legacy")),
             theta_attention=float(getattr(args, "theta_attention", 0.3)),
@@ -4369,15 +4370,20 @@ def main() -> None:
                     accumulated_graph = warm_artifacts.graph
                     accumulated_steps = list(warm_artifacts.steps)
                     if accumulated_graph is not None and accumulated_graph.number_of_nodes() > 0:
-                        try:
-                            optimized_graph = _sleep_graph_optimize(
-                                accumulated_graph,
-                                gamma=float(getattr(warm_cfg, "sleep_propagate_gamma", 0.95)),
-                                n_iters=int(getattr(warm_cfg, "sleep_propagate_iters", 50)),
-                            )
-                        except Exception as e:
-                            print(f"  Warning: sleep_graph_optimize failed: {e}")
-                            optimized_graph = None
+                        if str(getattr(warm_cfg, "sleep_propagate", "on")) == "off":
+                            # Ablation control: inherit the raw Wake1 graph unchanged
+                            # (no reward propagation, no isolate removal, dim9 stays at init)
+                            optimized_graph = accumulated_graph.copy()
+                        else:
+                            try:
+                                optimized_graph = _sleep_graph_optimize(
+                                    accumulated_graph,
+                                    gamma=float(getattr(warm_cfg, "sleep_propagate_gamma", 0.95)),
+                                    n_iters=int(getattr(warm_cfg, "sleep_propagate_iters", 50)),
+                                )
+                            except Exception as e:
+                                print(f"  Warning: sleep_graph_optimize failed: {e}")
+                                optimized_graph = None
 
                     # Extra Wake-Sleep cycles (W-S-W-S-W when wsw_cycles=2)
                     _wsw_cycles = int(getattr(args, "wsw_cycles", 1) or 1)
@@ -4419,14 +4425,17 @@ def main() -> None:
                         )
                         # Re-optimize graph
                         if accumulated_graph is not None and accumulated_graph.number_of_nodes() > 0:
-                            try:
-                                optimized_graph = _sleep_graph_optimize(
-                                    accumulated_graph,
-                                    gamma=float(getattr(warm_cfg, "sleep_propagate_gamma", 0.95)),
-                                    n_iters=int(getattr(warm_cfg, "sleep_propagate_iters", 50)),
-                                )
-                            except Exception:
-                                pass
+                            if str(getattr(warm_cfg, "sleep_propagate", "on")) == "off":
+                                optimized_graph = accumulated_graph.copy()
+                            else:
+                                try:
+                                    optimized_graph = _sleep_graph_optimize(
+                                        accumulated_graph,
+                                        gamma=float(getattr(warm_cfg, "sleep_propagate_gamma", 0.95)),
+                                        n_iters=int(getattr(warm_cfg, "sleep_propagate_iters", 50)),
+                                    )
+                                except Exception:
+                                    pass
 
                     eval_artifacts = run_episode_query(
                         seed=seed,
@@ -4443,6 +4452,13 @@ def main() -> None:
                         "sleep_plan": sleep_meta,
                         "sleep_q": sleep_q_meta,
                         "sleep_edge": sleep_edge_meta,
+                        "sleep_propagate": str(getattr(warm_cfg, "sleep_propagate", "on")),
+                        "inherited_graph_nodes": int(optimized_graph.number_of_nodes()) if optimized_graph is not None else 0,
+                        "inherited_graph_edges": int(optimized_graph.number_of_edges()) if optimized_graph is not None else 0,
+                        "inherited_propagated_nodes": (
+                            sum(1 for _n, _d in optimized_graph.nodes(data=True) if "propagated" in _d)
+                            if optimized_graph is not None else 0
+                        ),
                         "warmup": {
                             "success": bool(warm_artifacts.summary.get("success")),
                             "steps": int(warm_artifacts.summary.get("steps", 0)),

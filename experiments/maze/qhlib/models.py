@@ -348,6 +348,7 @@ class QueryHubConfig:
     advantage_commit: float = 0.0  # if > 1.0, argmax when best/second >= threshold
     sleep_propagate_gamma: float = 0.95
     sleep_propagate_iters: int = 50
+    sleep_propagate: str = "on"  # 'on' or 'off' (ablation control: inherit raw Wake1 graph)
     # SP definition mode: asp (default), betti1, both (parallel recording)
     sp_mode: str = "asp"
     # Two-graph mode: skip hop loop, compare prev vs full graph (β₁ only)
