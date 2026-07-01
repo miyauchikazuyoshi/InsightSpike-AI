@@ -304,7 +304,7 @@ Day 2:
 - [x] C. §2.4 Helmholtz 改称 — **ドラフト完了**: [draft_sections/section2_4_helmholtz_draft.md](draft_sections/section2_4_helmholtz_draft.md)（β₁ 版の U 対応、3 読み方、canonical 固定。v6.1 Lemma 1/2 の扱いは著者判断待ち）
 - [x] D. §10 Related Work 拡充 — **ドラフト完了**: [draft_sections/section10_11_additions_draft.md](draft_sections/section10_11_additions_draft.md)（⚠ arXiv 番号は投稿前に全件原典照合）
 - [x] E. §11 Limitations 拡充 — **ドラフト完了**: 同上ファイル（§11.6 に maze sleep ablation prereg を追加 — tier1 計画にない 2026-07-02 の判断）
-- [ ] B. §2.1 Figure 1 挿入 — 未着手（matchstick HTML → TikZ/PNG の図版化。ドラフトレビュー後に実施）
+- [x] B. §2.1 Figure 1 挿入 — **図版化完了**: [draft_sections/figure1_matchstick.tex](draft_sections/figure1_matchstick.tex)（TikZ standalone、pdflatex ビルド確認済み、EN ラベル、色規則は poster/HTML と統一）。本文への挿入は v7 tex 起稿時
 - [x] A. §1 Introduction 全面書き直し — **ドラフト完了**: [draft_sections/section1_introduction_draft.md](draft_sections/section1_introduction_draft.md)（監査後の誠実版貢献リスト。未決事項 3 点は編集メモ参照）
 
 **注**: [x] は「著者レビュー待ちのドラフト完了」であり、論文反映済みという意味ではない。ドラフトはすべて英語本文 + 日本語編集メモの形式。貢献リストは 2026-06-10 監査と整合させ、negative_better は Phase 1 T1（3-seed 再現）が通るまで断定しない方針で書かれている。
