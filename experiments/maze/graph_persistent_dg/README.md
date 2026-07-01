@@ -18,9 +18,10 @@ Wake1 → Sleep → Wake2 パイプラインにおいて、**グラフを捨て�
   sleep 単独の寄与は未分離（baseline n=32 / extended n=64 とサンプル数も非対称）
 - **次の実験（最優先）**: sleep on/off 単独アブレーション
   （`--vector-mode extended`・カリキュラムは両群で固定、sleep 伝播のみ切替、n≥30 seeds）。
-  実行前に `docs/prereg/` へ予測と反証条件をコミットすること。
-  反証条件の例: 「sleep on/off が主要指標で区別不能なら、v6_perseed の改善は
-  カリキュラム/10D 由来であり、sleep 機構は荷重を持たないと記録する」
+  **事前登録済み（2026-07-02）**: [`docs/prereg/maze_sleep_ablation.md`](../../../docs/prereg/maze_sleep_ablation.md)
+  — 予測 P1–P3・反証条件・打ち切り処理を登録。FROZEN 化（パイロット 1 シードで実行時間確認）後に実行する。
+  切替フラグ `--sleep-propagate {on,off}` 実装済み（off = 生 Wake1 グラフを無変更で継承）。
+  実行: `bash run_sleep_ablation.sh 0 29`（on/off を同一シードで paired 実行）
 
 ## 概要
 
