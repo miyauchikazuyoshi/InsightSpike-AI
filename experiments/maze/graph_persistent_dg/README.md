@@ -22,8 +22,15 @@ Wake1 → Sleep → Wake2 パイプラインにおいて、**グラフを捨て�
   グラフ持ち越し）・10D ベクトル・辞書ベース誘導の組み合わせ由来である。
 - 原因候補（事前登録済み・未検証）: 伝播値の飽和（無向 max 伝播で全ノード tanh>0.999、
   `test/test_sleep_propagate_semantics.py` 参照）＋床効果（`--sleep-guide override` の辞書誘導が支配）
-- **再設計（各回事前登録必須、試行予算 N=2）**: (1) SPEC 意味論準拠の伝播（飽和修正）、
-  (2) sleep の F 駆動化（各編集を F(edit)<0 でゲート — 論文 Phase 2 中核）
+- **再設計バリアント#1（v2、2026-07-02 実施）— 主張成立**:
+  [`docs/prereg/maze_sleep_ablation_v2.md`](../../../docs/prereg/maze_sleep_ablation_v2.md) §8。
+  伝播を**軌跡ベース Q backup の転写**（`--sleep-propagate replay`、有向・有界・負例保存）に置換し、
+  eval を自力ナビ（`--sleep-guide off`）にした条件で、warmup 成功 23 シード paired:
+  **eval 歩数 124.2 vs 202.3（−39%、p=4.0e-05）、袋小路遭遇 0.17 vs 4.74 回/ラン**。
+  replay の値勾配ナビは BFS 計画誘導と同等の最短性能（平均 ≈ 理論最短 124.0）を計画なしで達成 —
+  **sleep（F 非依存の値固定化）の単独寄与の初実証**。
+- 未検証のまま残るもの（各回事前登録必須）: readout 経路の分解（dim9 vs α バイアス）、
+  warmup 失敗シードの引き上げ、51×51 スケール、**sleep の F 駆動化**（論文 Phase 2 中核）
 
 ## 概要
 
