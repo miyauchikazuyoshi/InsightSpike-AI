@@ -12,16 +12,18 @@ Wake1 → Sleep → Wake2 パイプラインにおいて、**グラフを捨て�
 **従属変数**: 成功率は使わない（15×15 では 98% で天井に近く感度がない）。
 主要指標は **平均ステップ数・最終エッジ数（圧縮）・再訪時の改善幅**。
 
-**現状の証拠と限界**:
+**現状の証拠と限界（2026-07-02 更新 — アブレーション実施済み）**:
 - v6_perseed（25×25）: 成功率 71.9%→95.3%、平均ステップ −41%、エッジ −34%
-- **ただしこれは 10D ベクトル＋sleep 伝播＋カリキュラムを同時に変えたパッケージ効果**で、
-  sleep 単独の寄与は未分離（baseline n=32 / extended n=64 とサンプル数も非対称）
-- **次の実験（最優先）**: sleep on/off 単独アブレーション
-  （`--vector-mode extended`・カリキュラムは両群で固定、sleep 伝播のみ切替、n≥30 seeds）。
-  **事前登録済み（2026-07-02）**: [`docs/prereg/maze_sleep_ablation.md`](../../../docs/prereg/maze_sleep_ablation.md)
-  — 予測 P1–P3・反証条件・打ち切り処理を登録。FROZEN 化（パイロット 1 シードで実行時間確認）後に実行する。
-  切替フラグ `--sleep-propagate {on,off}` 実装済み（off = 生 Wake1 グラフを無変更で継承）。
-  実行: `bash run_sleep_ablation.sh 0 29`（on/off を同一シードで paired 実行）
+- **sleep 単独アブレーション完了（2026-07-02、n=30 paired、事前登録・FROZEN 下で実施）**:
+  [`docs/prereg/maze_sleep_ablation.md`](../../../docs/prereg/maze_sleep_ablation.md) §8 — **P1 不成立（敗北記録）**。
+  30 ペア中 29 ペアで eval 軌跡が**完全同一**（両成功 23 ペアは paired 差が厳密に 0）＝
+  値伝播は Wake2 の行動に一切関与しなかった。唯一の差（seed=23）は逆方向（on 失敗 / off 成功）。
+- **したがって v6_perseed の改善の sleep への帰属は撤回**。改善はカリキュラム（warmup 経験の
+  グラフ持ち越し）・10D ベクトル・辞書ベース誘導の組み合わせ由来である。
+- 原因候補（事前登録済み・未検証）: 伝播値の飽和（無向 max 伝播で全ノード tanh>0.999、
+  `test/test_sleep_propagate_semantics.py` 参照）＋床効果（`--sleep-guide override` の辞書誘導が支配）
+- **再設計（各回事前登録必須、試行予算 N=2）**: (1) SPEC 意味論準拠の伝播（飽和修正）、
+  (2) sleep の F 駆動化（各編集を F(edit)<0 でゲート — 論文 Phase 2 中核）
 
 ## 概要
 
