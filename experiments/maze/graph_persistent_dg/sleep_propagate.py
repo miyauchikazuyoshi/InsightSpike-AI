@@ -108,6 +108,61 @@ def sleep_optimize(
     return optimized
 
 
+def sleep_replay_optimize(
+    graph: nx.Graph,
+    sleep_q: dict | None,
+) -> nx.Graph:
+    """Sleep variant 'replay': write trajectory-based Q values onto the graph.
+
+    Undirected max-propagation (sleep_optimize) self-reinforces to
+    ~reward/(1-gamma), inflating every node positive and saturating
+    tanh-dim9 (see test/test_sleep_propagate_semantics.py). This variant
+    instead takes the Q(s, a) table built by qhlib.sleep.build_sleep_q_table
+    — a DIRECTED episodic backup over experienced transitions, with absorbing
+    goal and negative-example penalties — and stores it as node 'propagated':
+
+        direction node (r, c, a)  -> Q((r, c), a)
+        query node     (r, c, -1) -> max_a Q((r, c), a)   (state value)
+
+    Q values are bounded (goal_reward=1.0 scale), so tanh does not saturate,
+    and negative examples survive because backups follow the trajectory
+    instead of an undirected max over neighbors.
+
+    Cleanup and dim8/dim9 sync are identical to sleep_optimize.
+    """
+    optimized = graph.copy()
+    table = sleep_q or {}
+
+    for node, data in optimized.nodes(data=True):
+        try:
+            r, c, d = int(node[0]), int(node[1]), int(node[2])
+        except Exception:
+            data["propagated"] = 0.0
+            continue
+        qs = table.get((r, c), {}) or {}
+        if d >= 0:  # direction node: Q(s, a)
+            data["propagated"] = float(qs.get(d, qs.get(str(d), 0.0)))
+        else:  # query node: V(s) = max_a Q(s, a)
+            data["propagated"] = float(max(qs.values())) if qs else 0.0
+
+    # Same cleanup as sleep_optimize step 2
+    optimized.remove_nodes_from(list(nx.isolates(optimized)))
+
+    # Same vector sync as sleep_optimize step 4
+    sync_vectors(optimized)
+
+    # Same edge annotation as sleep_optimize step 5
+    for u, v in optimized.edges():
+        try:
+            pu = float(optimized.nodes[u].get("propagated", 0.0))
+            pv = float(optimized.nodes[v].get("propagated", 0.0))
+            optimized[u][v]["propagation_weight"] = max(pu, pv)
+        except Exception:
+            pass
+
+    return optimized
+
+
 def sync_vectors(graph: nx.Graph) -> None:
     """Sync reward/propagated into abs_vector dims 8-9 (in-place).
 

@@ -201,8 +201,10 @@ def parse_args() -> argparse.Namespace:
                         help="Discount factor for graph reward propagation in Sleep phase.")
     parser.add_argument("--sleep-propagate-iters", type=int, default=50,
                         help="Max iterations for graph reward propagation in Sleep phase.")
-    parser.add_argument("--sleep-propagate", type=str, choices=["on", "off"], default="on",
-                        help="Sleep graph optimization (reward propagation + isolate removal + dim9 sync). "
+    parser.add_argument("--sleep-propagate", type=str, choices=["on", "off", "replay"], default="on",
+                        help="Sleep graph optimization. on = undirected max-propagation (saturates; "
+                             "kept for v6_perseed comparability). replay = trajectory-based Q backup "
+                             "(sleep_q table written onto nodes; directed, bounded, negatives survive). "
                              "off = inherit the raw Wake1 graph unchanged (ablation control).")
     # Curriculum (Wake→Sleep→Wake): warmup run to ensure goal experience, then eval guided by Sleep path plan
     parser.add_argument(

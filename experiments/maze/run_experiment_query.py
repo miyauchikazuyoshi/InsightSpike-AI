@@ -81,7 +81,10 @@ from qhlib.sleep import (
     build_sleep_edge_weights as _build_sleep_edge_weights,
 )
 from qhlib.aggregate import aggregate
-from graph_persistent_dg.sleep_propagate import sleep_optimize as _sleep_graph_optimize
+from graph_persistent_dg.sleep_propagate import (
+    sleep_optimize as _sleep_graph_optimize,
+    sleep_replay_optimize as _sleep_replay_optimize,
+)
 from qhlib.cli import parse_args, build_config, build_selector_params
 
 StepLog = Dict[str, Any]
@@ -4370,10 +4373,17 @@ def main() -> None:
                     accumulated_graph = warm_artifacts.graph
                     accumulated_steps = list(warm_artifacts.steps)
                     if accumulated_graph is not None and accumulated_graph.number_of_nodes() > 0:
-                        if str(getattr(warm_cfg, "sleep_propagate", "on")) == "off":
+                        _sp_mode = str(getattr(warm_cfg, "sleep_propagate", "on"))
+                        if _sp_mode == "off":
                             # Ablation control: inherit the raw Wake1 graph unchanged
                             # (no reward propagation, no isolate removal, dim9 stays at init)
                             optimized_graph = accumulated_graph.copy()
+                        elif _sp_mode == "replay":
+                            try:
+                                optimized_graph = _sleep_replay_optimize(accumulated_graph, sleep_q)
+                            except Exception as e:
+                                print(f"  Warning: sleep_replay_optimize failed: {e}")
+                                optimized_graph = None
                         else:
                             try:
                                 optimized_graph = _sleep_graph_optimize(
@@ -4425,8 +4435,14 @@ def main() -> None:
                         )
                         # Re-optimize graph
                         if accumulated_graph is not None and accumulated_graph.number_of_nodes() > 0:
-                            if str(getattr(warm_cfg, "sleep_propagate", "on")) == "off":
+                            _sp_mode2 = str(getattr(warm_cfg, "sleep_propagate", "on"))
+                            if _sp_mode2 == "off":
                                 optimized_graph = accumulated_graph.copy()
+                            elif _sp_mode2 == "replay":
+                                try:
+                                    optimized_graph = _sleep_replay_optimize(accumulated_graph, sleep_q)
+                                except Exception:
+                                    pass
                             else:
                                 try:
                                     optimized_graph = _sleep_graph_optimize(

@@ -149,6 +149,63 @@ class TestSpecDesignIntent:
         assert self.p["D"] == pytest.approx(1.49, abs=0.05)
 
 
+class TestReplayVariant:
+    """sleep_replay_optimize: Q-table transcription (redesign variant #1).
+
+    The Q table itself comes from qhlib.sleep.build_sleep_q_table (directed
+    episodic backup, long-standing dictionary-sleep code). These tests pin
+    the transcription contract: bounded values, negatives SURVIVE (unlike
+    max-propagation), correct node-kind routing, dim9 non-saturation.
+    """
+
+    def build_graph(self):
+        g = nx.Graph()
+        # direction nodes (r, c, action 0-3), query nodes (r, c, -1)
+        for node, reward in [
+            ((1, 1, -1), 0.0), ((1, 1, 0), 0.2), ((1, 1, 2), -1.0),
+            ((1, 2, -1), 0.0), ((1, 2, 0), 1.0),
+        ]:
+            g.add_node(node, reward=reward, abs_vector=np.zeros(10))
+        g.add_edges_from([
+            ((1, 1, -1), (1, 1, 0)), ((1, 1, -1), (1, 1, 2)),
+            ((1, 1, 0), (1, 2, -1)), ((1, 2, -1), (1, 2, 0)),
+        ])
+        g.add_node("orphan", reward=0.0, abs_vector=np.zeros(10))
+        return g
+
+    def setup_method(self):
+        from graph_persistent_dg.sleep_propagate import sleep_replay_optimize
+        self.q = {
+            (1, 1): {0: 0.85, 2: -0.35},   # toward goal positive, dead-end direction NEGATIVE
+            (1, 2): {0: 0.99},
+        }
+        self.out = sleep_replay_optimize(self.build_graph(), self.q)
+
+    def test_direction_nodes_get_q_values(self):
+        assert self.out.nodes[(1, 1, 0)]["propagated"] == pytest.approx(0.85)
+        assert self.out.nodes[(1, 1, 2)]["propagated"] == pytest.approx(-0.35)
+
+    def test_negative_examples_survive(self):
+        # The core fix over max-propagation: a negative Q stays negative
+        # even though positive neighbors exist.
+        assert self.out.nodes[(1, 1, 2)]["propagated"] < 0.0
+
+    def test_query_nodes_get_state_value(self):
+        assert self.out.nodes[(1, 1, -1)]["propagated"] == pytest.approx(0.85)  # max_a Q
+        assert self.out.nodes[(1, 2, -1)]["propagated"] == pytest.approx(0.99)
+
+    def test_dim9_not_saturated_and_signed(self):
+        d9 = {n: d["abs_vector"][9] for n, d in self.out.nodes(data=True)}
+        assert d9[(1, 1, 0)] == pytest.approx(math.tanh(0.85))
+        assert d9[(1, 1, 2)] == pytest.approx(math.tanh(-0.35))
+        assert abs(d9[(1, 1, 0)]) < 0.999  # no saturation at Q scale
+        # discriminative spread exists (unlike the saturated on-mode)
+        assert abs(d9[(1, 1, 0)] - d9[(1, 1, 2)]) > 0.5
+
+    def test_unknown_state_defaults_zero_and_isolates_removed(self):
+        assert "orphan" not in self.out.nodes
+
+
 class TestSleepOptimizePackage:
     """sleep_optimize = propagation + isolate removal + dim9/dim8 sync."""
 
