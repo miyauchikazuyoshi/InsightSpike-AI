@@ -18,16 +18,18 @@
 - **[MainAgent Behavior](mainagent_behavior.md)** (deprecated) - legacy MainAgent
 
 ### Experiment-Side Architecture(実験ディレクトリ側に実体)
+- **[Three-Layer Search Architecture](threelayer_search_architecture.md)** ⭐ **NEW (2026-07)** -
+  L0 ハッシュ / L1 注意歩行 / L2 フォールバックのカスケード設計(実装: `experiments/maze/qhlib/`)
 - **[Graph-Persistent DG / Sleep](../../experiments/maze/graph_persistent_dg/SPEC.md)** - Wake-Sleep-Wake の設計仕様
   (報酬値は実装が正: novel +0.2 / revisit −0.4。`--sleep-propagate replay` の意味論は
   `experiments/maze/test/test_sleep_propagate_semantics.py` が正典)
-- **Three-Layer Search (L0/L1/L2)** ❌ 専用設計文書なし - 実装は `experiments/maze/qhlib/`(hash_index /
-  graph_walker / attention / search_engine)、概要は [maze README](../../experiments/maze/README.md)
 - **QHub Query-Node 体系** ❌ 専用設計文書なし - [maze README](../../experiments/maze/README.md) のノード体系節が現状の一次情報源
 
 ### Advanced Features
-- **[Spectral GED Enhancement](spectral_ged_feature.md)** ❓ - Laplacian eigenvalue analysis(実装現存の確認要)
-- **[Flash-geDIG Spec](flash_gedig_spec.md)** ❓ - GPU-native differentiable F(実装現存の確認要)
+- **[Spectral GED Enhancement](spectral_ged_feature.md)** - Laplacian eigenvalue analysis
+  (実装現存を確認済み 2026-07: `algorithms/gedig/graph_utils.py::spectral_score`)
+- **[Flash-geDIG Spec](flash_gedig_spec.md)** - GPU-native differentiable F
+  (実装現存を確認済み 2026-07: `src/insightspike/gedig/{functional,module}.py` — README の `compute_f_score` の実体)
 - **[Advanced Metrics](advanced_metrics_2025_01.md)** ⚠ - GeDIG, multi-hop reasoning
 - **[Why InsightSpike is Advanced](why_insightspike_is_advanced.md)** - Key innovations and differentiators
 

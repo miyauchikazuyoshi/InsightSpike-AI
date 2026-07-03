@@ -2,21 +2,25 @@
 
 This directory contains Mermaid diagrams illustrating the InsightSpike-AI architecture and processes.
 
+> **鮮度注記(2026-07-03 監査)**: 図は src 本体(2026-04 以降凍結)を描いたもの。
+> 実験側の新機構(three-layer search、replay sleep、Wake-Sleep-Wake)の図は**まだ存在しない** —
+> 文書は [architecture/threelayer_search_architecture.md](../architecture/threelayer_search_architecture.md) と
+> [graph_persistent_dg/SPEC.md](../../experiments/maze/graph_persistent_dg/SPEC.md) を参照。
+> 古くなった 4 図(MULTIHOP_CONCEPT / WORKFLOW_TREE / SYSTEM_DASHBOARD / WRITER_INJECTION)は
+> `docs/archive/diagrams/` へ移動済み。
+
 ## 🧠 Architecture Diagrams
 
 ### Core System Architecture
 - **CURRENT_ARCHITECTURE.mermaid** - ⚡ **LATEST** Current simplified architecture with query storage and Streamlit app wrapper (2025-09)
 - **CURRENT_ARCHITECTURE.svg** - Rendered export of the latest architecture diagram
-- **QUERY_STORAGE_ARCHITECTURE.mermaid** - ⚡ **NEW** Query storage and analysis system
-- **CONFIG_SYSTEM.mermaid** - ⚡ **NEW** Pydantic-based configuration system
-- **CLI_ARCHITECTURE.mermaid** - ⚡ **NEW** CLI dependency injection with Typer Context
-- **TECHNICAL_ARCHITECTURE.mermaid** - System architecture with scalable graph implementation
-- **DATA_FLOW_ARCHITECTURE.mermaid** - Data flow with query storage (updated)
-- **WORKFLOW_TREE.mermaid** - Processing workflow with query persistence
+- **QUERY_STORAGE_ARCHITECTURE.mermaid** - Query storage and analysis system
+- **CONFIG_SYSTEM.mermaid** - Pydantic-based configuration system
+- **CLI_ARCHITECTURE.mermaid** - CLI dependency injection with Typer Context
+- **TECHNICAL_ARCHITECTURE.mermaid** - System architecture with scalable graph implementation (L2_Integration node fixed 2026-07)
+- **DATA_FLOW_ARCHITECTURE.mermaid** - Data flow with query storage
 - **GEDIG_SELECTOR_PIPELINE.mermaid** - Canonical selector→core pipeline (2026-02 updated)
 - **GEDIG_REFACTOR_2025_08.mermaid** - Modular geDIG architecture post-refactoring (2026-02)
-- **WRITER_INJECTION.mermaid** - A/B logger writer injection flow (2025‑09)
-- **SYSTEM_DASHBOARD.mermaid** - Real-time system metrics with hierarchical graph performance
 
 ### Memory Management
 - **INTRINSIC_MOTIVATION_FLOW.mermaid** - Intrinsic reward → episode management flow

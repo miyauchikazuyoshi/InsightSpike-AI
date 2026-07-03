@@ -14,6 +14,9 @@
   - Enables fast-path to Layer4 for known concepts
   - Configurable uncertainty thresholds
   - 10x performance improvement for production systems
+- **Variants** (in `implementations/layers/`):
+  - `layer1_conductor.py`: Orchestration variant
+  - `layer1_stream_processor.py`: Streaming-input variant
 
 ### Layer 2: Memory Manager (`implementations/layers/layer2_memory_manager.py`)
 - **Brain Analog**: Hippocampus + Locus Coeruleus
@@ -48,6 +51,9 @@
   - Automatic extraction from spike responses
   - Quality evaluation and filtering
   - Persistent storage in InsightFactRegistry
+- **Submodules** (`implementations/layers/layer3/`): analysis, analyzer_runner, conflict, gnn,
+  graph_builder, message_passing(+controller), metrics_controller, lite_stub
+  — the reasoner delegates graph construction / message passing / metrics to these
 
 ### Layer 4: Language Interface (`implementations/layers/layer4_llm_interface.py`)
 - **Brain Analog**: Broca's + Wernicke's areas
@@ -100,11 +106,12 @@ Natural Language Output
 ### After: Clean separation
 - `core/` - Only interfaces and base classes
 - `implementations/layers/` - All layer implementations
-  - `layer1_error_monitor.py`
+  - `layer1_error_monitor.py` (+ `layer1_conductor.py`, `layer1_stream_processor.py` variants)
   - `layer2_memory_manager.py` (unified)
   - `layer2_compatibility.py` (backward compatibility)
   - `layer2_working_memory.py` (DataStore-centric)
-  - `layer3_graph_reasoner.py`
+  - `cached_memory_manager.py` (caching wrapper)
+  - `layer3_graph_reasoner.py` (+ `layer3/` submodules: analysis, gnn, message_passing, metrics, …)
   - `layer4_llm_interface.py` (unified)
   - `layer4_prompt_builder.py`
   - `scalable_graph_builder.py`
