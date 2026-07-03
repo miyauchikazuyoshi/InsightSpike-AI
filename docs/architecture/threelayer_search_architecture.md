@@ -3,7 +3,9 @@
 **Status**: implemented & tested (2026-02) — used by the maze line via `--search-mode threelayer`
 **Implementation**: `experiments/maze/qhlib/` — `hash_index.py` / `graph_walker.py` / `attention.py` / `search_engine.py` (432 lines total)
 **Tests**: `experiments/maze/test/test_threelayer.py` (23 unit tests: H1-H6, W1-W5, A1-A7, E1-E5) + `test/validate_compatibility.py` (24 backward-compat checks)
-**This document**: written 2026-07-03 from the implementation (the design previously lived only in code and session notes)
+**This document**: written 2026-07-03 from the implementation.
+**先行設計メモ**: [docs/research/thinking/memory_search_implementation_20260208.md](../research/thinking/memory_search_implementation_20260208.md)
+(2026-02-08 — Layer0/1/2 を β₁ の大小に対応づけた原典。本書は実装後の正確な仕様、原典は設計動機を保存)
 
 ---
 
