@@ -3,13 +3,17 @@
 This directory contains Mermaid diagrams illustrating the InsightSpike-AI architecture and processes.
 
 > **鮮度注記(2026-07-03 監査)**: 図は src 本体(2026-04 以降凍結)を描いたもの。
-> 実験側の新機構(three-layer search、replay sleep、Wake-Sleep-Wake)の図は**まだ存在しない** —
-> 文書は [architecture/threelayer_search_architecture.md](../architecture/threelayer_search_architecture.md) と
-> [graph_persistent_dg/SPEC.md](../../experiments/maze/graph_persistent_dg/SPEC.md) を参照。
 > 古くなった 4 図(MULTIHOP_CONCEPT / WORKFLOW_TREE / SYSTEM_DASHBOARD / WRITER_INJECTION)は
 > `docs/archive/diagrams/` へ移動済み。
 
 ## 🧠 Architecture Diagrams
+
+### Experiment-Side Mechanisms(2026-07 新規)
+- **THREELAYER_SEARCH.mermaid / .svg** - ⚡ **NEW** L0 ハッシュ / L1 注意歩行 / L2 フォールバックのカスケード
+  (設計文書: [threelayer_search_architecture.md](../architecture/threelayer_search_architecture.md))
+- **WAKE_SLEEP_WAKE.mermaid / .svg** - ⚡ **NEW** Wake-Sleep-Wake と `--sleep-propagate` 3 variant
+  (replay/on/off)、readout 経路、v1/v2 のエビデンス注記付き
+  (設計: [graph_persistent_dg/SPEC.md](../../experiments/maze/graph_persistent_dg/SPEC.md)、勝敗: [prereg 台帳](../prereg/README.md))
 
 ### Core System Architecture
 - **CURRENT_ARCHITECTURE.mermaid** - ⚡ **LATEST** Current simplified architecture with query storage and Streamlit app wrapper (2025-09)

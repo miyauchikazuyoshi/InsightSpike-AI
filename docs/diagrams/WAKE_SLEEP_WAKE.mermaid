@@ -1,0 +1,45 @@
+%% Wake-Sleep-Wake cycle with the --sleep-propagate variants (as shipped, 2026-07)
+%% Sources of truth: experiments/maze/graph_persistent_dg/SPEC.md (+ header note),
+%%   test_sleep_propagate_semantics.py (semantics), docs/prereg/maze_sleep_ablation*.md (evidence)
+%% Created 2026-07-03. SVG not yet rendered — the .mermaid source is canonical.
+
+flowchart TB
+    subgraph W1["Wake1 (warmup) — deterministic per seed"]
+        E1[explore maze<br/>build query-hub graph]
+        R1["record reward on direction nodes (overwrite)<br/>goal +1.0 · novel +0.2 · revisit −0.4 · deadend/blocked −1.0<br/>extended mode: dim8 ← reward DURING wake"]
+        E1 --> R1
+    end
+
+    subgraph SL["Sleep — value reprocessing (F is NOT used)"]
+        direction TB
+        SW{"--sleep-propagate"}
+        REP["replay (current)<br/>transcribe Q(s,a) from trajectory backup<br/>direction node ← Q(s,a) · query node ← max_a Q<br/>bounded, directed, negatives survive"]
+        ON["on (legacy, kept for v6_perseed comparability)<br/>undirected max-propagation<br/>KNOWN BUG: inflates to ~r/(1−γ), tanh saturates,<br/>negatives killed — zero behavioral contribution (v1)"]
+        OFF["off (ablation control)<br/>inherit raw Wake1 graph unchanged"]
+        CL["isolate removal + dim9 ← tanh(propagated)"]
+        SW --> REP --> CL
+        SW --> ON --> CL
+        SW --> OFF
+    end
+
+    subgraph W2["Wake2 (eval)"]
+        RD["readout of propagated values:<br/>(i) dim9 in similarity · (ii) propagated_alpha action bias"]
+        NAV{"--sleep-guide"}
+        DICT["override/prefer:<br/>dictionary plan dominates<br/>(v1 floor effect)"]
+        SELF["off: self-navigation<br/>similarity + value gradient"]
+        RD --> NAV
+        NAV --> DICT
+        NAV --> SELF
+    end
+
+    W1 --> SL --> W2
+
+    EV1["evidence v2 (warmup-success seeds):<br/>replay 124.2 vs off 202.3 steps (−39%, p=4.0e−05)<br/>dead-ends 0.17 vs 4.74 per run"]
+    EV2["evidence v3 (failed-warmup lift):<br/>pre-registered, running 2026-07-03"]
+    SELF -.-> EV1
+    SELF -.-> EV2
+
+    style SL fill:#ece8f4
+    style W1 fill:#e8f4e8
+    style W2 fill:#f4f0e8
+    style ON fill:#f4d8d8

@@ -1,0 +1,39 @@
+%% Three-Layer Search cascade (L0/L1/L2)
+%% Source of truth: docs/architecture/threelayer_search_architecture.md
+%% Implementation: experiments/maze/qhlib/{hash_index,graph_walker,attention,search_engine}.py
+%% Created 2026-07-03. SVG not yet rendered — the .mermaid source is canonical.
+
+flowchart TB
+    Q[query_vector<br/>current observation]
+
+    subgraph L0["Layer 0 — VectorHashIndex · O(1)"]
+        H[hash_index.lookup<br/>quantized bucket, θ_revisit=0.95]
+    end
+
+    subgraph L1["Layer 1 — AttentionGraphWalker · O(degree)"]
+        W[get_candidates from revisit node<br/>follow edges with attention ≥ θ=0.3<br/>score = weighted similarity ⊕ attention]
+        C{candidates ≥<br/>min_layer1 = 2?}
+    end
+
+    subgraph L2["Layer 2 — legacy full sort · O(N log N)"]
+        F[SearchResult candidates = empty<br/>caller runs full memory sort]
+    end
+
+    Q --> H
+    H -->|revisit found| W
+    H -->|no revisit| F
+    W --> C
+    C -->|yes| R1[layer_used = 1<br/>local candidates returned]
+    C -->|no| F
+    F --> R2[layer_used = 2]
+
+    subgraph AM["AttentionManager — edge attention lifecycle"]
+        direction LR
+        A1[on_new_edge<br/>attention = 1.0<br/>BEFORE decay] --> A2[on_step<br/>×0.95 decay] --> A3[on_traverse<br/>boost traversed edge]
+    end
+
+    AM -.->|maintains edge weights used by| W
+
+    style L0 fill:#e8f4e8
+    style L1 fill:#e8ecf4
+    style L2 fill:#f4ece8

@@ -23,7 +23,9 @@
 - **[Graph-Persistent DG / Sleep](../../experiments/maze/graph_persistent_dg/SPEC.md)** - Wake-Sleep-Wake の設計仕様
   (報酬値は実装が正: novel +0.2 / revisit −0.4。`--sleep-propagate replay` の意味論は
   `experiments/maze/test/test_sleep_propagate_semantics.py` が正典)
-- **QHub Query-Node 体系** ❌ 専用設計文書なし - [maze README](../../experiments/maze/README.md) のノード体系節が現状の一次情報源
+- **[QHub Query-Node Architecture](qhub_query_node_architecture.md)** ⭐ **NEW (2026-07)** -
+  クエリハブ型グラフ体系の骨格(ノード 3 種の ID 実装形式、エッジ 3 種、8 段階実行シーケンス。
+  運用詳細の一次情報源は [maze README](../../experiments/maze/README.md) のまま)
 
 ### Advanced Features
 - **[Spectral GED Enhancement](spectral_ged_feature.md)** - Laplacian eigenvalue analysis
