@@ -81,3 +81,7 @@ geDIG は「知識グラフをいつ再構築すべきか」を単一ゲージ *
 - SPEC.md の報酬値(+0.3/−0.3)は初期案。**実装値は novel +0.2 / revisit −0.4**(SPEC 冒頭の注記参照)
 - Lite Mode 環境変数が 3 種ある(`INSIGHTSPIKE_LITE_MODE` / `INSIGHTSPIKE_MIN_IMPORT` / 旧 `INSIGHT_SPIKE_LIGHT_MODE`)
 - `.venv` 必須(システム python に networkx なし)。実験は `.venv/bin/python3` で
+- **docs/architecture/ は 2026-07-03 に鮮度監査済み**(コア 8 文書は実装と同期、⚠/❓ マーカーは
+  architecture/README.md 参照)。**threelayer search と QHub ノード体系は docs/ 側に設計文書がない**
+  (一次情報源は experiments/maze/README.md と qhlib/ 実装)。diagrams/ は 2026-02 以前の図が混在
+  (新しい機構 — replay sleep、threelayer — の図は存在しない)

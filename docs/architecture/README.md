@@ -1,26 +1,42 @@
 # InsightSpike Architecture Documentation
 
+> **鮮度注記(2026-07-03 監査)**: src 本体は 2026-04 以降凍結中のため、コア文書群は実装と同期している。
+> 分類の詳細と全体案内は [docs/MAP.md](../MAP.md) を参照。
+> ⚠ = 軽微な乖離あり、❓ = 実装の現存が未確認(要検証)。
+
 ## 📚 Documentation Index
 
-### Core Architecture
+### Core Architecture(実装と同期)
+- **[Unified Core Architecture](unified_core_architecture.md)** ⭐ - `src/gedig/` 統一 F-eval コア(3 実験ライン共有、2026-03)
 - **[Directory Structure](directory_structure.md)** - Clean architecture and package organization
-- **[Layer Architecture](layer_architecture.md)** - 4-layer neurobiologically-inspired processing system
-- **[Agent Types](agent_types.md)** - Available agent implementations and their use cases
-- **[MainAgent Behavior](mainagent_behavior.md)** (deprecated) - Detailed behavior and processing flow of legacy MainAgent
-- **[geDIG Selector & Core](gedig_selector_and_core.md)** - Canonical selector entry and refactored core (2025‑09)
+- **[Layer Architecture](layer_architecture.md)** ⚠ - 4-layer processing system(バリアント: layer2_compatibility/_working_memory、layer3/ サブディレクトリは未記載)
+- **[geDIG Selector & Core](gedig_selector_and_core.md)** - Canonical selector entry and refactored core
+- **[geDIG Refactor Overview](gedig_refactor_overview.md)** - 10 モジュール分割(2026-02)
 - **[Configuration System](configuration.md)** - YAML-based configuration and settings management
 - **[Data Management](data_management_strategy.md)** - DataStore abstraction and data handling
-- **[Query Storage System](query_storage.md)** ⚡ **NEW** - Query persistence and analysis architecture
+- **[Query Storage System](query_storage.md)** - Query persistence and analysis architecture
+- **[MainAgent Behavior](mainagent_behavior.md)** (deprecated) - legacy MainAgent
+
+### Experiment-Side Architecture(実験ディレクトリ側に実体)
+- **[Graph-Persistent DG / Sleep](../../experiments/maze/graph_persistent_dg/SPEC.md)** - Wake-Sleep-Wake の設計仕様
+  (報酬値は実装が正: novel +0.2 / revisit −0.4。`--sleep-propagate replay` の意味論は
+  `experiments/maze/test/test_sleep_propagate_semantics.py` が正典)
+- **Three-Layer Search (L0/L1/L2)** ❌ 専用設計文書なし - 実装は `experiments/maze/qhlib/`(hash_index /
+  graph_walker / attention / search_engine)、概要は [maze README](../../experiments/maze/README.md)
+- **QHub Query-Node 体系** ❌ 専用設計文書なし - [maze README](../../experiments/maze/README.md) のノード体系節が現状の一次情報源
 
 ### Advanced Features
-- **[Message Passing & Edge Re-evaluation](recent_features_2024_07.md)** - Question-aware graph enhancement
-- **[Spectral GED Enhancement](spectral_ged_feature.md)** - Laplacian eigenvalue analysis for structural quality
-- **[Advanced Metrics](advanced_metrics_2025_01.md)** - GeDIG, multi-hop reasoning, and quantum metrics
+- **[Spectral GED Enhancement](spectral_ged_feature.md)** ❓ - Laplacian eigenvalue analysis(実装現存の確認要)
+- **[Flash-geDIG Spec](flash_gedig_spec.md)** ❓ - GPU-native differentiable F(実装現存の確認要)
+- **[Advanced Metrics](advanced_metrics_2025_01.md)** ⚠ - GeDIG, multi-hop reasoning
 - **[Why InsightSpike is Advanced](why_insightspike_is_advanced.md)** - Key innovations and differentiators
 
 ### System Design
-- **[Multi-User Design](multi_user_design.md)** - Architecture for multi-user scenarios
+- **[Multi-User Design](multi_user_design.md)** ❓ - Architecture for multi-user scenarios(実装対応未確認)
 - **[Vector Search Backend](vector_search.md)** - High-performance NumPy-based vector similarity search
+
+> アーカイブ済み(2026-03-19): agent_types.md、recent_features_2024_07.md、
+> navigator_na_bt_refactor_plan.md → `docs/archive/architecture/`
 
 ## 🧠 Quick Overview
 
@@ -194,4 +210,4 @@ poetry run python -m insightspike.config validate
 
 ---
 
-*Last updated: August 2025*
+*Last updated: July 2026 (index + freshness audit; body sections below the index are of August-2025 vintage — treat performance/maintenance notes as historical)*
