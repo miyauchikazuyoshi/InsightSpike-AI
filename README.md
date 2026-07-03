@@ -40,6 +40,9 @@ From this question came geDIG: the hypothesis that **insight is the topological 
 
 ---
 
+> **Navigating this repo** (agents & collaborators): start with [docs/MAP.md](docs/MAP.md) —
+> directory map, terminology traps (the four meanings of "Phase"), the claims ledger, and known debt.
+
 ## Project Status
 
 This is an **active research project** by an individual researcher with AI-assisted implementation.

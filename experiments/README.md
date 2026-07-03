@@ -1,36 +1,30 @@
 # InsightSpike-AI Experiments
 
-This directory contains experiments validating the geDIG framework and InsightSpike-AI implementation.
+geDIG フレームワークを検証する実験群。**リポジトリ全体の歩き方は [docs/MAP.md](../docs/MAP.md)**、
+確証実験の事前登録 SOP は [docs/prereg/README.md](../docs/prereg/README.md) を参照。
 
-## 📊 Published Experiments (geDIG Paper v3)
+## アクティブな実験ライン
 
-### 1. Comprehensive geDIG Evaluation (`comprehensive_gedig_evaluation/`)
-Main experiment reported in the paper with:
-- 100-item hierarchical knowledge base
-- 20 test questions (Easy: 5, Medium: 10, Hard: 5)
-- **Results**: 85% overall accuracy, 100% on hard questions
-- ΔGED and ΔIG analysis demonstrating difficulty reversal phenomenon
+| ライン | 場所 | 内容と状態(2026-07 時点) |
+|---|---|---|
+| **迷路(主力)** | [`maze/`](maze/) | stage-1 PoC(創発制御+~98% 圧縮、実証済み)。stage-2 sleep は事前登録 3 連: v1 敗北 → v2 成立(replay 伝播 −39% 歩数)→ v3 実行中。実行定型・CLI は [maze/README.md](maze/README.md) |
+| **RAG / ルーティング** | [`hotpotqa_v2/`](hotpotqa_v2/) | BRIGHT(nDCG 0.439 biology 単一ドメイン)、HotpotQA dual-process(非有意)、MuSiQue v10/v11。F-routing は Stage A 敗北記録済み、Stage B は DECISION 待ちで凍結 |
+| **Transformer** | [`transformer/`](transformer/) | F-trajectory 観測(8 モデル)。F-regularization は予備的・符号未確定([f_sign 監査](../docs/audits/f_sign_audit.md)) |
+| **maze β₁** | [`maze_b1/`](maze_b1/) | β₁ ベース評価の実験(v7 Phase 0 関連) |
 
-### 2. English Insight Reproduction (`english_insight_reproduction/`)
-Validation experiment showing:
-- Real-time insight detection (45ms average)
-- Knowledge graph evolution visualization
-- Spike detection mechanism demonstration
+## 保存物(通常は読まない)
 
-### 3. Mathematical Concept Evolution (`mathematical_concept_evolution/`)
-Explores episodic memory splitting during concept learning:
-- Elementary → Middle school mathematical concepts
-- Demonstrates knowledge structure reorganization
-- Validates hippocampal replay analogy
+- `refactor_maze/`, `refactor_hotpotqa_v2/`, `refactor_transformer/` — 2026-02 リファクタ時の旧実装
+- `_archive_before_20260201_refactor/` — 35GB のローカルアーカイブ(**git 外**)
 
-## 📋 Experiment Guidelines
+## 規約
 
-See `EXPERIMENT_GUIDELINES.md` for:
-- Reproducible experiment setup
-- Data management protocols
-- Result documentation standards
-- Academic integrity requirements
+- [EXPERIMENT_GUIDELINES.md](EXPERIMENT_GUIDELINES.md) — 再現性・データ管理・記録標準
+- [OUTPUT_CONVENTION.md](OUTPUT_CONVENTION.md) — 出力の置き場所規約
+- 確証実験は **必ず事前登録してから**([docs/prereg/](../docs/prereg/))。探索的ランは
+  `results/**/_exploratory_*/` に隔離し、NOTES.md を残す
+- 結果は `results/`(gitignore 済み・ローカルのみ)
 
 ---
 
-*Last Updated: July 2025*
+*旧版のこのファイル(2025-07、v3 論文時代の 3 実験の記載)は現状と乖離していたため全面更新した(2026-07-03)。*

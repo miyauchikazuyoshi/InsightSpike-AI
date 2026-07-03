@@ -2,6 +2,9 @@
 
 Welcome to the InsightSpike-AI documentation! This directory contains all technical documentation, guides, and references for the project.
 
+> **First time here (agent or collaborator)?** Read [MAP.md](./MAP.md) — the repository
+> orientation guide (directory map, terminology traps, claims ledger, known debt).
+
 ## 📚 Documentation Structure
 
 ### 🚀 [Getting Started](./getting-started/)

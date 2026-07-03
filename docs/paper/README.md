@@ -1,6 +1,6 @@
 # geDIG Paper Directory
 
-**最終更新**: 2026-04-17  
+**最終更新**: 2026-07-03  
 **用途**: geDIG 論文の各バージョン・会議投稿・共有リソース集約
 
 ---
@@ -17,23 +17,27 @@ docs/paper/
 │   ├── geDIG_onegauge_improved_v5.{tex,pdf,bbl,blg}
 │   └── review_v5.md            v5 に対する外部レビュー記録
 │
-├── v6/                          geDIG v6 (現行 arxiv 版)
+├── v6/                          geDIG v6 (arxiv/Zenodo DOI 固定版 — 触らない)
 │   ├── arxiv_en/               英語版 arxiv 原稿
 │   └── geDIG_onegauge_improved_v6.{tex,pdf,bbl,blg}
 │
+├── v6.1/                        geDIG v6.1 (**現行** — claim–evidence 整合性改訂 2026-06-10)
+│   ├── arxiv_en/               英語版（PER 誤記修正・F 符号の未確定化。根拠: docs/audits/）
+│   └── geDIG_onegauge_improved_v6_1.{tex,pdf}
+│
 ├── v7/                          geDIG v7 (策定中、β₁ ベースへの大幅改訂)
 │   ├── plan.md                 v7 論文構成計画（12 章 + Phase 0-3 実行順）
-│   ├── tier1_action_plan.md    今日までの研究整理を v7 に反映する Tier 1 計画
-│   └── restructured_draft.tex  再構成草稿（2025-09、v7 の種として参考）
+│   ├── tier1_action_plan.md    Tier 1 計画（全 6 作業ドラフト完了 2026-07-02）
+│   ├── draft_sections/         §1 全面書き直し・§2.4 Helmholtz・§10.3/§11.5-6・Figure 1 TikZ（著者レビュー待ち）
+│   └── restructured_draft.tex  再構成草稿（2025-09、歴史的参考 — 数値は監査前で古い）
 │
-├── jsai2026/                    人工知能学会 2026 向け投稿原稿（採択: v3）
+├── jsai2026/                    人工知能学会 2026（**発表済み** 2026-06-09、Session 2Yin-B-50）
 │   ├── README.md
-│   ├── v3/                     **採択版** (SP + entropy_sign + 介入実験)
+│   ├── v3/                     採択・発表版 (SP + entropy_sign + 介入実験)
+│   ├── poster/                 ポスター（jsai2026_poster/ = 発表実物の HTML 一式）
+│   ├── poster_qa.md 等         Q&A・スピーチ原稿（監査済み誠実版）
 │   ├── draft_a/, draft_b/      Option A/B（草稿、v3 以前）
-│   ├── draft_hotpotqa/         HotpotQA 向け
-│   ├── option_ab_merged/       A+B 統合版
-│   ├── option_ab_merged_v2/    A+B 統合版 v2
-│   └── (poster/)               ポスター（今後作成）
+│   └── option_ab_merged*/      A+B 統合版（旧草稿）
 │
 ├── logs/                        プロセスメモ（作業履歴、完成版には反映済）
 │   ├── STRUCTURE_IMPROVEMENT_LOG.md
@@ -115,7 +119,8 @@ v5/v6/v7 の tex ファイルから相対パスで参照している。
 
 | やりたいこと | 見るファイル |
 |---|---|
-| 現行論文を見る | [v6/geDIG_onegauge_improved_v6.pdf](v6/geDIG_onegauge_improved_v6.pdf) |
+| 現行論文を見る | [v6.1/geDIG_onegauge_improved_v6_1.pdf](v6.1/geDIG_onegauge_improved_v6_1.pdf)（EN は v6.1/arxiv_en/） |
+| DOI 固定版（引用の安定性） | [v6/geDIG_onegauge_improved_v6.pdf](v6/geDIG_onegauge_improved_v6.pdf) |
 | 次期改訂の全体計画 | [v7/plan.md](v7/plan.md) |
 | 今日の整理を v7 にどう反映するか | [v7/tier1_action_plan.md](v7/tier1_action_plan.md) |
 | JSAI 投稿の戦略 | [jsai2026/README.md](jsai2026/README.md) |
@@ -128,5 +133,8 @@ v5/v6/v7 の tex ファイルから相対パスで参照している。
 ## バージョン履歴
 
 - **v5** (〜2025 前半): 初期 arxiv 版、SP ベース
-- **v6** (2025-後半〜2026-04): 現行 arxiv 版、SP ベース、v5 の改訂
-- **v7** (策定中): β₁ ベース、AGHT 追加、Transformer F-regularization 追加、**思想的根拠層を追加**（連続・確率パラダイム批判）
+- **v6** (2025-後半〜2026-04): arxiv 版、SP ベース、Zenodo DOI 固定（引用の安定性のため以後不変）
+- **v6.1** (2026-06-10): **現行**。外部レビュー 3 監査（F 符号・PER 誤記・oracle ceiling）を受けた
+  claim–evidence 整合性改訂。JA/EN 並行
+- **v7** (策定中): β₁ ベース、AGHT 追加、思想的根拠層を追加。Tier 1 ドラフト済み。
+  stage-2 節は sleep アブレーション 3 連（v1 敗北 → v2 成立 → v3、docs/prereg/）を反映予定
