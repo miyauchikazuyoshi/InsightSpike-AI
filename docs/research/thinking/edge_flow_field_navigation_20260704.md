@@ -79,6 +79,23 @@ v2/v3 は `abs`(既定、direction node の生 Q)で走っていた。**議論�
 3. `sleep_replay_optimize` が書く `edges[u][v]["propagation_weight"]` は現状**読み手ゼロ(死にコード)**
    — flow を陽に持たせるならここを活かせる(あるいは on-the-fly 計算のまま)
 
+### 実装レビューの発見(2026-07-04、探索ラン起動後の照合)
+
+- ✅ **gradient = flow の同一性を確認**: `_propagated_at_pos` = その位置の direction node の
+  propagated の max = V(s)。gradient 分岐は正確に V(next) − V(here)
+- ✅ **未探索セルの扱いは失敗層で正しく機能する構造**(設計時の見落とし、コードが賢かった):
+  グラフ外セルは V=0 扱い → 失敗層(V(here)≤0)では未探索方向の flow ≥ 0 で相対浮上(Push 維持)、
+  全行動が負に沈んだ場所では flow > 0 = 脱出方向として浮く。消去法と流れ場は干渉しない
+- ⚠ **gradient 切替は α バイアス経路のみ**: dim9 類似度経路は abs 値(tanh Q)のまま残る。
+  つまり「gradient モード」は flow + abs 類似度のハイブリッドであり、純粋 flow readout ではない。
+  prereg の機構分解の論点(dim9 ゼロ化条件を作るか、weight_vector で切るか)
+- ⚠ **blocked_penalty はほぼ飾り**: blocked 遷移は s2==s の自己ループで
+  Q(s,壁) ← r−1.01 + 0.99·V(s) とペナルティが自己 V で薄まり、さらに観測ガードで壁方向は
+  候補から除外されるため readout に乗らない。彫り込みの本命は deadend のみ
+- ⚠ **操作チェック(枝内 flow 向き)の道具が未実装**: Q テーブルは JSON に保存されない。
+  prereg 前に per-seed メタへの flow 要約追加 or warmup 軌跡からの Q 再計算スクリプトが必要
+- 探索ラダーは 2×2 に修正(abs/grad × nopen/deadend の 4 条件、seed=52)
+
 ## 6. (a)再設計 prereg の骨子(消去法ナビ)
 
 - **操作**: 2 ノブの独立切替 —
