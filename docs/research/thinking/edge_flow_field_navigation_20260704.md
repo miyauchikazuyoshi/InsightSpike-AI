@@ -110,9 +110,36 @@ v2/v3 は `abs`(既定、direction node の生 Q)で走っていた。**議論�
 
 ## 7. 次アクション
 
-1. 本メモをコミット(議論の保存)← 完了時点
+1. 本メモをコミット(議論の保存)← 完了
 2. **予備実験(探索、非登録)**: 難度シード数個で `--propagated-mode gradient` × deadend ペナルティ ON を
-   `results/**/_exploratory_*/` で試し、flow が枝内で逆流するかを可視化。ノブの効き方の感触を得る
-3. 感触が得られたら (a)prereg を §6 の骨子で FROZEN 化 → 未使用シードで確証
+   `results/**/_exploratory_*/` で試し、flow が枝内で逆流するかを可視化 ← 完了(§8)
+3. 感触が得られたら (a)prereg を §6 の骨子で FROZEN 化 → 未使用シードで確証 ← **§8 により 1 ノブに簡約して v4 へ**
+
+## 8. 探索結果(2026-07-04、seed=52 の 2×2)と readout 等価性の発見
+
+探索記録: `experiments/maze/results/graph_persistent_dg/_exploratory_flow/`(probe.log + NOTES.md)。
+seed=52 は v3 で replay(abs) 256 歩が off 108 歩に負けた「伝播が害」の診断ケース。
+
+| | ペナルティなし | deadend/blocked −1.0 |
+|---|---|---|
+| abs | 256 歩・袋小路 6 | **104 歩・袋小路 2** |
+| gradient(flow) | 256 歩・袋小路 6 | **104 歩・袋小路 2** |
+
+**発見 1 — ヒーローは彫り込み**: deadend −1.0 だけで 256→104(−59%)、**off(108)を初めて下回った**。
+「負例の伝播で行き止まりを避ける」の原直感が、軌跡 backup + ペナルティで本来の力を出した。
+
+**発見 2 — abs と flow は候補比較において情報等価(数学)**: 同一交差点での候補比較では
+`Q(here,a) = r + γ·V(next_a)` と `flow_a = V(next_a) − V(here)` は、r と V(here) が候補間で
+共通の定数なので**どちらも V(next_a) の単調関数 → argmax が一致**する。4 条件で歩数まで完全同一
+だったのは偶然ではなく必然。**flow readout は行動バイアスとしては不要**。
+flow の独自価値は反対称性を使う用途 — 往路/復路の区別、curl 診断(値地形の矛盾検出)— に限られる。
+
+**§3(QKV 対応)の更新**: 「エッジ嗜好」の実用は **V 地形を正しく彫ること(value shaping)が本体**で、
+readout 形式(abs/flow)は等価類。Transformer への翻訳も「value 学習が本体、attention の読み出し形式は
+等価な族」という一段精密な読みになる。
+
+**帰結**: (a)prereg は **deadend/blocked ペナルティの dim8 価値統一という 1 ノブ**に簡約
+→ [docs/prereg/maze_sleep_v4_deadend_carving.md](../../prereg/maze_sleep_v4_deadend_carving.md)(操作 1 変数の理想形)。
+seed=52 は探索で消費したため確証(シード 60–89)から除外。
 
 Related: [[sleep-line-2026-07]], [[prereg-protocol]], [[sleep-rag-design-2026-06]]

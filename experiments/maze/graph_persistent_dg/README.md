@@ -35,8 +35,13 @@ Wake1 → Sleep → Wake2 パイプラインにおいて、**グラフを捨て�
   （−51%、p=2.9e-04）— **値固定化の効果は 2 つの独立な事前登録実験で確立**。
   「未達トライの引き上げ」（P1）は方向一致だが**証拠不十分**（off でも自力ナビで 5/12 成功し、
   成否の discordance が検出力に届かず。撤回ではなく保留 — 事前登録の underpowered/refuted 区別を適用）
-- 未検証のまま残るもの（各回事前登録必須）: 引き上げの再設計（難度層 or 質的主検定）、
-  readout 経路の分解（dim9 vs α バイアス）、51×51 スケール、**sleep の F 駆動化**（論文 Phase 2 中核）
+- **消去法ナビゲーション設計（2026-07-04 議論）**:
+  [`docs/research/thinking/edge_flow_field_navigation_20260704.md`](../../../docs/research/thinking/edge_flow_field_navigation_20260704.md)
+  — node 記憶 → sleep 伝播 → エッジ嗜好 → QKV の設計討議。探索 2×2（`results/graph_persistent_dg/_exploratory_flow/`）で
+  **deadend 彫り込みが単独で 256→104 歩（off 越え）**、abs/flow readout は候補比較で情報等価と判明。
+  確証: [`docs/prereg/maze_sleep_v4_deadend_carving.md`](../../../docs/prereg/maze_sleep_v4_deadend_carving.md)
+- 未検証のまま残るもの（各回事前登録必須）: readout 経路の分解（dim9 vs α バイアス）、
+  51×51 スケール、**sleep の F 駆動化**（論文 Phase 2 中核）、curl 診断（flow 反対称成分の活用）
 
 ## 概要
 
