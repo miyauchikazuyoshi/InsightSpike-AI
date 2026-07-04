@@ -1,7 +1,7 @@
 # 事前登録: 迷路 sleep v4 — deadend 彫り込み(dim8/dim9 価値統一)による消去法ナビゲーション
 
 > **日付**: 2026-07-04(実験実施前にコミット)
-> **状態**: DRAFT — 著者承認で FROZEN に変更し、以後は追記のみ
+> **状態**: **FROZEN**(2026-07-04、著者承認「走らせよう」) — 以後は追記のみ(本文の書き換え禁止)
 > **位置づけ**: [v3](maze_sleep_ablation_v3.md) §8 が指示した「引き上げ/失敗層の再設計 —
 > (ii) 質を主検定に」の実行。設計討議は
 > [edge_flow_field_navigation_20260704.md](../research/thinking/edge_flow_field_navigation_20260704.md)
@@ -100,8 +100,8 @@
 
 ## 7. 凍結手続き
 
-1. 状態を FROZEN に変更してコミット(**著者の承認事項**)
-2. 実験実行: `bash run_sleep_v4_carving.sh` → 解析: `analyze_sleep_v4_carving.py` → 結果が何であれ §8 に追記
+1. ~~状態を FROZEN に変更してコミット~~ ✅ 完了(2026-07-04、著者承認)
+2. 実験実行: `bash run_sleep_v4_carving.sh`(約 10–14 時間) → 解析: `analyze_sleep_v4_carving.py` → 結果が何であれ §8 に追記
 
 ---
 
