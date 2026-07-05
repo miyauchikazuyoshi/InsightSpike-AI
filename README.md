@@ -42,6 +42,7 @@ From this question came geDIG: the hypothesis that **insight is the topological 
 
 > **Navigating this repo** (agents & collaborators): start with [docs/MAP.md](docs/MAP.md) —
 > directory map, terminology traps (the four meanings of "Phase"), the claims ledger, and known debt.
+> **Which F / implementation / tests / claims are authoritative:** [docs/CANONICAL.md](docs/CANONICAL.md).
 
 ## Project Status
 
@@ -50,7 +51,7 @@ It is not a production library.
 
 | Component | Status | Location |
 |-----------|--------|----------|
-| **Unified geDIG Core** | 71 unit tests pass; F-eval gives equivalent results across 3 backends (maze / RAG / transformer) | [`src/gedig/`](src/gedig/) |
+| **Unified geDIG Core** | 71 unit tests, run in CI on every push (60 in the torch-less light CI, all 71 locally); F-eval gives equivalent results across 3 backends (maze / RAG / transformer) | [`src/gedig/`](src/gedig/) |
 | geDIG theory (v6 paper) | Pre-print — position paper + proof-of-concept | [`docs/paper/`](docs/paper/v6/arxiv_en/geDIG_onegauge_improved_v6_en.pdf) |
 | BRIGHT reasoning-intensive retrieval | nDCG@10 = 0.439 on **biology, 50 queries, single seed** (preliminary; full 3-domain ≈ 0.19; SOTA ≈ 0.63) | [`experiments/hotpotqa_v2/`](experiments/hotpotqa_v2/) |
 | AGHT (Graph Transformer) | HotpotQA R@2 = 0.405, **+170% over an internal PageRank baseline** (zero-shot, 100q, single seed) | [`experiments/hotpotqa_v2/src/unified_graph.py`](experiments/hotpotqa_v2/src/unified_graph.py) |
@@ -203,6 +204,11 @@ Cross-domain analogy experiments were conducted in earlier phases and informed t
 ---
 
 ## Quick Start
+
+This example uses **Flash-geDIG** (`insightspike.gedig`), the torch-native fast
+path for attention matrices. The reference implementation is the unified core
+[`src/gedig/`](src/gedig/); the two are tied by equivalence tests — see
+[docs/CANONICAL.md](docs/CANONICAL.md).
 
 ```python
 import torch

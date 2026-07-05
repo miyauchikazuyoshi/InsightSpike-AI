@@ -26,7 +26,8 @@ geDIG は「知識グラフをいつ再構築すべきか」を単一ゲージ *
 | `experiments/transformer/` | Transformer F-trajectory / F-regularization | F 符号問題は未確定(監査参照) |
 | `experiments/refactor_*/` | 2026-02 リファクタ時の旧実装保存 | 読む必要は通常ない |
 | `experiments/_archive_before_20260201_refactor/` | 35GB ローカルアーカイブ | **git 外・触らない** |
-| `docs/gedig_spec.md` | ゲージの正準仕様 | 式の正典はここ |
+| `docs/gedig_spec.md` | ΔSP 形ゲージの数式仕様(v4 One-Gauge Spec) | 式の詳細はここ |
+| `docs/CANONICAL.md` | **正準の一意宣言**(どの F・どの実装・どのテスト・どの主張が正か) | 文書間で食い違ったらここが優先 |
 | `docs/paper/` | 論文 v5(歴史)/ v6(arXiv)/ **v6.1(現行)**/ v7(策定中、Tier 1 ドラフトあり)/ jsai2026(発表済み) | |
 | `docs/prereg/` | **事前登録と結果**(SOP は同ディレクトリ README) | 実験前に必読 |
 | `docs/audits/` | 監査(F 符号、PER、oracle ceiling、sleep 設計監査) | 失敗の一次資料 |
@@ -48,7 +49,9 @@ geDIG は「知識グラフをいつ再構築すべきか」を単一ゲージ *
 
 ### 頻出用語
 
-- **F(ゲージ)**: ΔEPC − λ(ΔH + γΔβ₁)。F < 0 = 利得がコスト超過 → commit。正準は `docs/gedig_spec.md`
+- **F(ゲージ)**: ΔEPC − λ(ΔH + γ**ΔB**)。B は構造ポテンシャルのスロットで、
+  **実証済みは B=ΔSP**(全確立結果はこの形。仕様 `docs/gedig_spec.md`)、B=Δβ₁ は v7 の進行中一般化(未確認)。
+  F < 0 = 利得がコスト超過 → commit。正準宣言は `docs/CANONICAL.md`
 - **AG / DG**: 二段ゲート(AG=0-hop の曖昧さ検出、DG=multi-hop のショートカット確認)
 - **sleep**: 現行実装は「**F 非依存の値再処理**」(軌跡 Q backup の転写+孤立除去+dim9 同期)。
   論文 Phase 2 が構想する F 駆動オフライン再配線の**前駆体**であり、同一視しないこと
@@ -74,8 +77,10 @@ geDIG は「知識グラフをいつ再構築すべきか」を単一ゲージ *
 
 ## 5. 既知の負債(混乱ポイント先回り)
 
-- **geDIG 実装が 2 系統**: `src/insightspike/gedig/`(Flash 版、Transformer attention 向け)と
-  `src/insightspike/algorithms/gedig/`(フル版、maze/RAG 向け)。統一は将来課題
+- **geDIG 実装が 3 系統**: `src/gedig/`(統一コア=**正準 reference**)、`src/insightspike/gedig/`
+  (Flash 版、Transformer attention 向け)、`src/insightspike/algorithms/gedig/`(フル版、maze/RAG 向け)。
+  insightspike 側 2 系統は正準の派生で、等価性テスト(src/gedig/tests の M/R/T 系)が core と結ぶ。
+  役割宣言は `docs/CANONICAL.md` §2
 - 古い文書には `experiments/maze-query-hub-prototype/` という旧パスが残る(現在は `experiments/maze/`)
 - `experiments/maze/ABLATION_PLAN.md` は 2026-02 の GED 定義切り分け計画(sleep アブレーションとは別物)
 - SPEC.md の報酬値(+0.3/−0.3)は初期案。**実装値は novel +0.2 / revisit −0.4**(SPEC 冒頭の注記参照)
