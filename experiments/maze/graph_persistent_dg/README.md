@@ -39,7 +39,12 @@ Wake1 → Sleep → Wake2 パイプラインにおいて、**グラフを捨て�
   [`docs/research/thinking/edge_flow_field_navigation_20260704.md`](../../../docs/research/thinking/edge_flow_field_navigation_20260704.md)
   — node 記憶 → sleep 伝播 → エッジ嗜好 → QKV の設計討議。探索 2×2（`results/graph_persistent_dg/_exploratory_flow/`）で
   **deadend 彫り込みが単独で 256→104 歩（off 越え）**、abs/flow readout は候補比較で情報等価と判明。
-  確証: [`docs/prereg/maze_sleep_v4_deadend_carving.md`](../../../docs/prereg/maze_sleep_v4_deadend_carving.md)
+- **v4（2026-07-05）— 彫り込みの確証は敗北記録**:
+  [`docs/prereg/maze_sleep_v4_deadend_carving.md`](../../../docs/prereg/maze_sleep_v4_deadend_carving.md) §8。
+  新シード 60–89 で **seed=52 の効果は一般化せず**（失敗層 n=7 で +5.1 歩・方向逆、袋小路差 0.0）。
+  副産物として**成功層への完全無害性**（23/23 ペアで歩数が厳密同一）を確認。
+  消去法ナビ路線は「彫り込みでは不足 — 探索構造の変更（warmup 予算分割・複数エピソード・
+  フロンティア非等方化）が必要」に更新（各々新規事前登録で）。
 - 未検証のまま残るもの（各回事前登録必須）: readout 経路の分解（dim9 vs α バイアス）、
   51×51 スケール、**sleep の F 駆動化**（論文 Phase 2 中核）、curl 診断（flow 反対称成分の活用）
 
