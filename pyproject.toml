@@ -3,12 +3,17 @@ name = "insightspike-ai"
 version = "0.1.0"
 description = "Brain-Inspired Multi-Agent Architecture for Insight Detection and Knowledge Restructuring"
 authors = ["Kazuyoshi Miyauchi <contact@insightspike-ai.org>"]
-packages = [{ include = "insightspike", from = "src" }]
+packages = [
+    { include = "insightspike", from = "src" },
+    { include = "gedig", from = "src" },
+]
 exclude = [
     "src/insightspike/deprecated/**",
     "src/insightspike/experimental/**/heavy/**",
     "src/insightspike/experimental/**",
     "src/insightspike/legacy/**",
+    "src/gedig/tests/**",
+    "src/gedig/docs/**",
 ]
 readme = "README.md"
 license = "Apache-2.0"
@@ -23,6 +28,8 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
@@ -35,7 +42,7 @@ classifiers = [
 
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.13"
+python = ">=3.10,<3.14"
 
 # Core ML dependencies - optimized for Colab and local compatibility
 # CUDA auto-detection: PyTorch will automatically use GPU when available

@@ -3329,7 +3329,7 @@ description = "Easily download, build, install, upgrade, and uninstall Python pa
 optional = true
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "(extra == \"gnn\" or extra == \"gnn-core\" or extra == \"full\" or extra == \"vision\" or extra == \"audio\" or extra == \"rag\" or extra == \"llm\") and (platform_system == \"Linux\" or python_version == \"3.12\") and (platform_machine == \"x86_64\" or python_version == \"3.12\")"
+markers = "(extra == \"gnn\" or extra == \"gnn-core\" or extra == \"full\" or extra == \"vision\" or extra == \"audio\" or extra == \"rag\" or extra == \"llm\") and (platform_system == \"Linux\" or python_version >= \"3.12\") and (platform_machine == \"x86_64\" or python_version >= \"3.12\")"
 files = [
     {file = "setuptools-80.10.2-py3-none-any.whl", hash = "sha256:95b30ddfb717250edb492926c92b5221f7ef3fbcc2b07579bcd4a27da21d0173"},
     {file = "setuptools-80.10.2.tar.gz", hash = "sha256:8b0e9d10c784bf7d262c4e5ec5d4ec94127ce206e8738f29a437945fbc219b70"},
@@ -4082,5 +4082,5 @@ vision = ["torchvision"]
 
 [metadata]
 lock-version = "2.1"
-python-versions = ">=3.10,<3.13"
-content-hash = "2c21d8cfe131547f386d86eb9fd91f0eccd81ffe076451d3c7e33b81a92d3f63"
+python-versions = ">=3.10,<3.14"
+content-hash = "cff7abe8364409cfce12d193902a2cc2e09121e8a168c742ea67b14dcb02fc87"

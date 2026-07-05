@@ -42,3 +42,10 @@ jobs:
       - name: Run unit subset
         run: |
           pytest -q tests/unit tests/test_minimal_healthcheck.py tests/test__minimal_probe.py -m "not slow and not integration and not performance and not benchmark and not calibration"
+
+      # Unified geDIG Core (the README "71 unit tests" claim lives here).
+      # torch is absent in this job, so the 11 transformer-equiv tests
+      # skip; 60 run. Separate step so a core regression fails visibly.
+      - name: Run unified geDIG core tests
+        run: |
+          pytest -q src/gedig/tests
