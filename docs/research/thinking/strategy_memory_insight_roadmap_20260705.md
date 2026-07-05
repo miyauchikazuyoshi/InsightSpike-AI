@@ -3,7 +3,7 @@
 **日付**: 2026-07-05
 **ステータス**: ★ 羅針盤(v5 実験走行中の戦略討議の記録。実験結果ではなく方向の合意)
 **関連**: [[sleep-line-2026-07]]、[edge_flow_field_navigation_20260704.md](edge_flow_field_navigation_20260704.md)、
-[gedig_origin_story](../gedig_origin_story.md)、[sleep-rag-design-2026-06]]、
+[gedig_origin_story](../gedig_origin_story.md)、[[sleep-rag-design-2026-06]]、
 リファレンス: [references/agent_memory_landscape_2026.md](../references/agent_memory_landscape_2026.md)(deep-research 成果、読み方註釈付き)
 
 ---
