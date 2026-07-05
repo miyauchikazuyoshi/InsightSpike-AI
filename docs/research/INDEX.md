@@ -120,6 +120,8 @@ RAG (HotpotQA) / Transformer 層別解析。
 | ファイル | 内容 | ステータス |
 |---|---|---|
 | **[gedig_core_theory_unified.md](gedig_core_theory_unified.md)** | **統合版（§1-9 本文化完了、付録 A-D 完備）** | **統合完了** |
+| ★ [references/agent_memory_landscape_2026.md](references/agent_memory_landscape_2026.md) | **応用軸(agent memory)の外部地形図** — 2026 のベンチ・手法・オープン課題と geDIG の空き地(忘却/insight 評価)。精読者の読み方註釈付き | **リファレンス・現役**（応用軸はこれを参照） |
+| ★ [thinking/strategy_memory_insight_roadmap_20260705.md](thinking/strategy_memory_insight_roadmap_20260705.md) | **戦略羅針盤** — RAG→agent memory 転回、閃きの工学 4 段階、二軸戦略 | **羅針盤・現役**（2026-07-05） |
 | **★ [thinking/matchstick_figure_v2.html](thinking/matchstick_figure_v2.html)** | **核心視覚化: Figure 1（KLの盲点）/ Figure 2（剪定パラドックス）** | **核心図・現役** |
 | [thinking/betti1_engineering_spec.md](thinking/betti1_engineering_spec.md) | β₁ 実装仕様（詳細なコード変更仕様、現役参照） | **実装仕様・現役** |
 | [thinking/gedig_formula_three_readings_20260306.md](thinking/gedig_formula_three_readings_20260306.md) | F 式の3つの読み方（§4.3-4.4 で Helmholtz 詳細 + λ 温度制御） | **現役**（core §6 から参照中） |
