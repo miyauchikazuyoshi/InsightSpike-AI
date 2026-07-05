@@ -1,194 +1,162 @@
-# Graph-Persistent DG
+# Graph-Persistent DG (Wake-Sleep-Wake / stage-2)
 
-Wake1 → Sleep → Wake2 パイプラインにおいて、**グラフを捨てずに引き継ぐ**ことで
-2回目の試行を改善する実験モジュール。
+**グラフを捨てずに sleep で再処理して引き継ぐ**ことで、次の試行を改善する実験モジュール。
+論文 Phase 2(オフライン再編)の最小実装であり、agent memory 応用
+([地形図](../../../docs/research/references/agent_memory_landscape_2026.md))への校正場。
 
-## 実験目標と証拠状態（2026-06 時点）
+> 迷い込んだら: 全体案内 [docs/MAP.md](../../../docs/MAP.md) /
+> 実験の勝敗台帳 [docs/prereg/README.md](../../../docs/prereg/README.md) /
+> 図版 [WAKE_SLEEP_WAKE.svg](../../../docs/diagrams/WAKE_SLEEP_WAKE.svg)
 
-**目標**: wake で構築した記憶グラフを sleep（報酬伝播＋剪定）で再編して引き継ぐと、
-次の試行が改善することを示す。これは論文の Phase 2（オフライン再配線）の最小実装であり、
-将来の Sleep-RAG（チャンク粒度・エッジ重みの自律調整）の機構検証を兼ねる。
+## パイプライン(現行構成)
 
-**従属変数**: 成功率は使わない（15×15 では 98% で天井に近く感度がない）。
-主要指標は **平均ステップ数・最終エッジ数（圧縮）・再訪時の改善幅**。
+```mermaid
+flowchart LR
+    W1["Wake1 (warmup)<br/>探索 + 報酬をノードに記録<br/>dim8 ← 生reward (wake中)"]
+    S["Sleep = F非依存の値再処理<br/>replay: 軌跡Q backupを転写<br/>dim9 ← tanh(Q) + 孤立除去"]
+    W2["Wake2 (eval) 自力ナビ<br/>readout: dim9類似度 + αバイアス<br/>(--sleep-guide off)"]
+    W1 --> S --> W2
 
-**現状の証拠と限界（2026-07-02 更新 — アブレーション実施済み）**:
-- v6_perseed（25×25）: 成功率 71.9%→95.3%、平均ステップ −41%、エッジ −34%
-- **sleep 単独アブレーション完了（2026-07-02、n=30 paired、事前登録・FROZEN 下で実施）**:
-  [`docs/prereg/maze_sleep_ablation.md`](../../../docs/prereg/maze_sleep_ablation.md) §8 — **P1 不成立（敗北記録）**。
-  30 ペア中 29 ペアで eval 軌跡が**完全同一**（両成功 23 ペアは paired 差が厳密に 0）＝
-  値伝播は Wake2 の行動に一切関与しなかった。唯一の差（seed=23）は逆方向（on 失敗 / off 成功）。
-- **したがって v6_perseed の改善の sleep への帰属は撤回**。改善はカリキュラム（warmup 経験の
-  グラフ持ち越し）・10D ベクトル・辞書ベース誘導の組み合わせ由来である。
-- 原因候補（事前登録済み・未検証）: 伝播値の飽和（無向 max 伝播で全ノード tanh>0.999、
-  `test/test_sleep_propagate_semantics.py` 参照）＋床効果（`--sleep-guide override` の辞書誘導が支配）
-- **再設計バリアント#1（v2、2026-07-02 実施）— 主張成立**:
-  [`docs/prereg/maze_sleep_ablation_v2.md`](../../../docs/prereg/maze_sleep_ablation_v2.md) §8。
-  伝播を**軌跡ベース Q backup の転写**（`--sleep-propagate replay`、有向・有界・負例保存）に置換し、
-  eval を自力ナビ（`--sleep-guide off`）にした条件で、warmup 成功 23 シード paired:
-  **eval 歩数 124.2 vs 202.3（−39%、p=4.0e-05）、袋小路遭遇 0.17 vs 4.74 回/ラン**。
-  replay の値勾配ナビは BFS 計画誘導と同等の最短性能（平均 ≈ 理論最短 124.0）を計画なしで達成 —
-  **sleep（F 非依存の値固定化）の単独寄与の初実証**。
-- **v3（2026-07-04）— v2 の新シード再現が成立**:
-  [`docs/prereg/maze_sleep_ablation_v3.md`](../../../docs/prereg/maze_sleep_ablation_v3.md) §8。
-  未使用シード 30–59 の warmup 成功層 n=18 で replay 115.3 vs off 234.0 歩
-  （−51%、p=2.9e-04）— **値固定化の効果は 2 つの独立な事前登録実験で確立**。
-  「未達トライの引き上げ」（P1）は方向一致だが**証拠不十分**（off でも自力ナビで 5/12 成功し、
-  成否の discordance が検出力に届かず。撤回ではなく保留 — 事前登録の underpowered/refuted 区別を適用）
-- **消去法ナビゲーション設計（2026-07-04 議論）**:
-  [`docs/research/thinking/edge_flow_field_navigation_20260704.md`](../../../docs/research/thinking/edge_flow_field_navigation_20260704.md)
-  — node 記憶 → sleep 伝播 → エッジ嗜好 → QKV の設計討議。探索 2×2（`results/graph_persistent_dg/_exploratory_flow/`）で
-  **deadend 彫り込みが単独で 256→104 歩（off 越え）**、abs/flow readout は候補比較で情報等価と判明。
-- **v4（2026-07-05）— 彫り込みの確証は敗北記録**:
-  [`docs/prereg/maze_sleep_v4_deadend_carving.md`](../../../docs/prereg/maze_sleep_v4_deadend_carving.md) §8。
-  新シード 60–89 で **seed=52 の効果は一般化せず**（失敗層 n=7 で +5.1 歩・方向逆、袋小路差 0.0）。
-  副産物として**成功層への完全無害性**（23/23 ペアで歩数が厳密同一）を確認。
-  消去法ナビ路線は「彫り込みでは不足 — 探索構造の変更（warmup 予算分割・複数エピソード・
-  フロンティア非等方化）が必要」に更新（各々新規事前登録で）。
-- 未検証のまま残るもの（各回事前登録必須）: readout 経路の分解（dim9 vs α バイアス）、
-  51×51 スケール、**sleep の F 駆動化**（論文 Phase 2 中核）、curl 診断（flow 反対称成分の活用）
-
-## 概要
-
-### 問題 (従来)
-```
-Wake1: graph = nx.Graph()  →  探索  →  graphは捨てられる
-Sleep: stepsログから辞書(sleep_plan, sleep_q, sleep_edge)を抽出
-Wake2: graph = nx.Graph()  →  辞書をβで加算  →  グラフを辿っていない
+    style S fill:#ece8f4
+    style W1 fill:#e8f4e8
+    style W2 fill:#f4f0e8
 ```
 
-### 解決 (本モジュール)
-```
-Wake1: graph構築 + 各ノードにreward記録
-Sleep: graphを最適化 (報酬伝播 + ベクトル同期)
-Wake2: 最適化graphを引き継ぎ、類似度計算自体が報酬情報を含む
-```
+**v5(走行中)の予算分割**: 総 warmup 予算 500 を固定したまま中間 sleep を挟む —
+「sleep の価値は反復にある」の直接検証。
 
-## ベクトル拡張
-
-`--vector-mode extended` で 8D → 10D に拡張。
-
-| dim | 内容 | weight | 備考 |
-|-----|------|--------|------|
-| 0-1 | 位置 (row/col) | 1.0 | 既存 |
-| 2-3 | 方向 (dx/dy) | 0.0 | 既存 |
-| 4 | 通過可否 | 3.0 | 既存 |
-| 5 | 訪問回数 | 2.0 | 既存 |
-| 6-7 | success/goal | 0.0 | 既存 |
-| **8** | **reward** | **2.0** | 新規: ヒューリスティック報酬 |
-| **9** | **tanh(propagated)** | **3.0** | 新規: Sleep伝播後の累積値 |
-
-query vector は dim8=1.0, dim9=1.0 を持つため、
-正報酬/正伝播のノードが L2距離で「近い」= 高類似度になる。
-
-## 報酬テーブル
-
-実装値（`run_experiment_query.py` の報酬記録部を正とする。SPEC.md §2.1 の +0.3/−0.3 は
-設計時の初期案で、§7 の調整指針に従い下記に調整済み）:
-
-| イベント | reward | 根拠 |
-|----------|--------|------|
-| goal到達 | +1.0 | 目的達成 |
-| 新セル通過 | +0.2 | 探索の進展 |
-| 既訪問セル再訪 | -0.4 | 進展なし |
-| 行き止まり | -1.0 | 構造的な罠（revisit等より優先） |
-| 壁衝突 | -1.0 | 無効な行動 |
-
-## Sleep伝播アルゴリズム
-
-```
-propagated(n) = reward(n) + γ · max(propagated(neighbor))
+```mermaid
+flowchart LR
+    A["Wake1a<br/>250歩"] --> SA["Sleep"] --> B["Wake1b 250歩<br/>負例地形が未踏領域へ導く"] --> SB["Sleep"] --> E["Wake2 (eval)"]
+    style SA fill:#ece8f4
+    style SB fill:#ece8f4
 ```
 
-Q-learning的な反復伝播。goalの正報酬が上流に、dead-endの負報酬が上流に
-それぞれγ減衰で伝播する。
+## 実験系譜(事前登録 5 連)
+
+```mermaid
+flowchart TB
+    V6P["v6_perseed (2026-02)<br/>71.9%→95.3% パッケージ効果"] --> V1
+    V1["v1: 無向max伝播 on/off<br/>寄与ゼロ (29/30 軌跡完全同一)"] --> AUD["設計監査: 4ギャップ R1-R4<br/>+23.4pt は Wake1 効果と判明<br/>→ sleep への帰属を撤回"]
+    AUD --> V2["v2: replay × 自力ナビ<br/>−39% (p=4.0e-05, n=23)<br/>値固定化の初実証"]
+    V2 --> V3["v3: 新シード再現 −51%<br/>(p=2.9e-04, n=18)<br/>引き上げは underpowered 保留"]
+    V3 --> V4["v4: deadend 彫り込み<br/>敗北 (seed=52 は特異)<br/>成功層には完全無害・完全不活性"]
+    V4 --> V5["v5: 予算分割 warmup<br/>探索 5/5 優位 (−49%)<br/>確証 走行中 (シード90-119)"]
+
+    style V1 fill:#fdd,stroke:#c62828
+    style V4 fill:#fdd,stroke:#c62828
+    style AUD fill:#ffe9c8,stroke:#b26a00
+    style V2 fill:#dfd,stroke:#2e7d32
+    style V3 fill:#dfd,stroke:#2e7d32
+    style V5 fill:#dde8fd,stroke:#1565c0
+```
+
+## 主張の現状台帳
+
+| 主張 | 状態 | 根拠 |
+|---|---|---|
+| replay 値固定化は warmup 成功層で eval −39〜−51% | ✅ **確立(独立 2 実験で再現)** | [v2](../../../docs/prereg/maze_sleep_ablation_v2.md)・[v3](../../../docs/prereg/maze_sleep_ablation_v3.md) |
+| v6_perseed の +23.4pt は sleep の効果 | ❌ **撤回**(Wake1 効果 + パッケージ交絡) | [v1](../../../docs/prereg/maze_sleep_ablation.md)・[監査](../../../docs/audits/sleep_ablation_design_audit.md) |
+| 旧 `--sleep-propagate on`(無向 max 伝播) | ❌ 寄与ゼロ・飽和バグ(比較用に残置) | v1・[semantics テスト](../test/test_sleep_propagate_semantics.py) |
+| 未達トライの引き上げ | ⏸ 保留(方向 OK・検出力不足) | v3 §8 |
+| deadend 彫り込み(dim8/dim9 価値統一) | ❌ 敗北(無害だが無力、seed=52 特異) | [v4](../../../docs/prereg/maze_sleep_v4_deadend_carving.md) |
+| 予算分割 warmup(sleep 反復価値) | 🔵 **確証走行中**(探索 5/5 優位) | [v5](../../../docs/prereg/maze_sleep_v5_budget_split.md) |
+| F 駆動 sleep・51×51・readout 分解・curl 診断 | ⬜ 未着手(各々新規事前登録で) | — |
+
+詳細な経緯・実務知識(実行時間・難シード等)は各 prereg の §8 と
+[edge_flow_field_navigation ノート](../../../docs/research/thinking/edge_flow_field_navigation_20260704.md)を参照。
+
+## 機構の要点
+
+### 何が Wake2 の行動を決めるか(v2 で実証された経路)
+
+- 記憶は**ノード**に宿る: 方位ノード (r,c,a) に `reward`(wake 中・上書き)と `propagated`(sleep が付与)
+- replay sleep = `build_sleep_q_table` の **Q(s,a) を方位ノードへ転写**(有向・有界・負例保存)、
+  query ノードには V(s)=max Q。その後 dim9 ← tanh(propagated)、孤立ノード除去
+- readout は 2 経路: dim9 が類似度計算に参加(weight 3.0)+ `propagated_alpha` の行動バイアス。
+  **候補比較では abs と flow(V 差)は数学的に等価**(v4 期の探索で証明 — 詳細は flow ノート)
+
+### ⚠ 旧アルゴリズム(参考・使用しない)
+
+```
+propagated(n) = reward(n) + γ · max(propagated(neighbor))   # --sleep-propagate on
+```
+
+無向 max の相互強化で全ノードが ~reward/(1−γ) に膨張し tanh 飽和 → **行動への寄与ゼロが v1 で確定**。
+SPEC §3.3 の設計意図(負の dead-end 回避)は満たさない(strict xfail としてテストに固定済み)。
+v6_perseed との比較のためだけに残置。**新実験は `--sleep-propagate replay` を使うこと**。
+
+## ベクトル拡張(10D)
+
+`--vector-mode extended` で 8D → 10D:
+
+| dim | 内容 | weight | 書き込み者 |
+|-----|------|--------|-----------|
+| 0-1 | 位置 (row/col) | 1.0 | wake |
+| 2-3 | 方向 (dx/dy) | 0.0 | wake |
+| 4 | 通過可否 | 3.0 | wake |
+| 5 | 訪問回数 | 2.0 | wake |
+| 6-7 | success/goal | 0.0 | wake |
+| **8** | **reward** | **2.0** | **wake**(記録と同時に同期) |
+| **9** | **tanh(propagated)** | **3.0** | **sleep**(replay 転写後に同期) |
+
+query vector は dim8=1.0, dim9=1.0 → 正報酬/正伝播ノードが L2 距離で「近い」= 高類似度。
+
+## 報酬テーブル(実装値)
+
+`run_experiment_query.py` の報酬記録部が正(SPEC §2.1 の +0.3/−0.3 は設計時初期案):
+
+| イベント | reward(dim8) | replay Q 側 |
+|----------|--------|--------|
+| goal 到達 | +1.0 | goal_reward +1.0(吸収) |
+| 新セル通過 | +0.2 | (novel 概念なし — step −0.01 のみ) |
+| 既訪問再訪 | −0.4 | revisit_penalty −0.2 |
+| 行き止まり | −1.0 | deadend_penalty 0.0(既定。−1.0 統一は v4 で無効果と判明) |
+| 壁衝突 | −1.0 | blocked_penalty 0.0(自己ループ+観測ガードでほぼ不活性) |
 
 ## 使い方
 
-### 基本 (extended vector + curriculum)
+### 現行実験標準(v2 以降の構成: replay + 自力ナビ)
 
 ```bash
 cd experiments/maze
-export PYTHONPATH="../../src"
-export INSIGHTSPIKE_MIN_IMPORT=1
-export INSIGHTSPIKE_LITE_MODE=1
-
-python3 run_experiment_query.py \
-  --maze-size 25 \
-  --max-steps 500 \
-  --seed-start 32 --seeds 1 \
-  --max-hops 15 \
-  --lambda-weight 1.0 \
-  --decay-factor 0.7 \
-  --theta-ag -1.0 --theta-dg 0.15 \
-  --sp-scope union --sp-hop-expand 3 --sp-boundary trim \
-  --action-policy softmax \
-  --curriculum-warmup-steps 500 \
-  --sleep-guide prefer \
+PYTHONPATH=../../src INSIGHTSPIKE_MIN_IMPORT=1 INSIGHTSPIKE_LITE_MODE=1 \
+../../.venv/bin/python3 run_experiment_query.py \
+  --maze-size 25 --max-steps 500 --seeds 1 --seed-start 0 \
+  --max-hops 15 --sp-cand-topk 5 \
+  --curriculum-warmup-steps 500 --lambda-weight 0.01 \
   --vector-mode extended \
-  --sleep-propagate-gamma 0.95 \
-  --sleep-propagate-iters 50 \
-  --output results/graph_persistent_dg/seed32_extended.json
+  --sleep-propagate replay \
+  --sleep-guide off \
+  --steps-ultra-light \
+  --output results/graph_persistent_dg/example.json
 ```
 
-### ベースライン比較 (standard vector, カリキュラムなし)
+- 予算分割(v5 構成)は `--wsw-cycles 2` を追加(総 warmup 予算は自動で均等分割)
+- 一括実行は `run_sleep_ablation*.sh` / `run_sleep_v4_carving.sh` / `run_sleep_v5_split.sh` を参照
+  (per-seed・skip-if-exists・paired 実行の型)
 
-```bash
-python3 run_experiment_query.py \
-  --maze-size 25 \
-  --max-steps 500 \
-  --seed-start 32 --seeds 1 \
-  --max-hops 15 \
-  --lambda-weight 1.0 \
-  --decay-factor 0.7 \
-  --theta-ag -1.0 --theta-dg 0.15 \
-  --sp-scope union --sp-hop-expand 3 --sp-boundary trim \
-  --action-policy softmax \
-  --output results/graph_persistent_dg/seed32_baseline.json
-```
+### 主要オプション
 
-### カリキュラム + standard vector (辞書方式との比較)
-
-```bash
-python3 run_experiment_query.py \
-  --maze-size 25 \
-  --max-steps 500 \
-  --seed-start 32 --seeds 1 \
-  --max-hops 15 \
-  --lambda-weight 1.0 \
-  --decay-factor 0.7 \
-  --theta-ag -1.0 --theta-dg 0.15 \
-  --sp-scope union --sp-hop-expand 3 --sp-boundary trim \
-  --action-policy softmax \
-  --curriculum-warmup-steps 500 \
-  --sleep-guide prefer \
-  --vector-mode standard \
-  --output results/graph_persistent_dg/seed32_curriculum_std.json
-```
-
-### オプション一覧
-
-| オプション | デフォルト | 説明 |
+| オプション | 既定 | 説明 |
 |------------|-----------|------|
-| `--vector-mode` | standard | `standard` (8D) or `extended` (10D) |
-| `--propagated-alpha` | 1.0 | standardモード用のスカラーボーナス重み |
-| `--sleep-propagate-gamma` | 0.95 | 伝播の割引率 (大→遠距離影響、小→近距離のみ) |
-| `--sleep-propagate-iters` | 50 | 伝播の最大反復数 |
-| `--curriculum-warmup-steps` | 0 | Wake1のステップ数 (0=カリキュラム無効) |
+| `--sleep-propagate` | on | **replay 推奨**(軌跡 Q 転写)。on=旧 max 伝播(比較用)、off=生グラフ継承(対照) |
+| `--sleep-guide` | override | **off 推奨**(自力ナビ)。override は辞書計画が行動を支配(v1 の床効果) |
+| `--wsw-cycles` | 1 | 2 で予算分割 W-S-W-S-E(総 warmup 予算固定・均等分割) |
+| `--vector-mode` | standard | extended(10D)が実験標準 |
+| `--propagated-mode` | abs | gradient(V 差)は候補比較で abs と等価(v4 期に証明) |
+| `--sleep-q-*` | 各種 | replay の Q 学習パラメータ(γ=0.99, α=0.4, iters=50 等) |
 
 ## ファイル構成
 
 ```
 graph_persistent_dg/
 ├── README.md              ← この文書
-├── SPEC.md                ← 設計仕様書
+├── SPEC.md                ← 設計仕様書(冒頭の実装乖離注記を必ず読む)
 ├── __init__.py
-└── sleep_propagate.py     ← Sleep伝播エンジン
+└── sleep_propagate.py     ← sleep_optimize(旧on) / sleep_replay_optimize(現行replay)
+関連:
+├── ../test/test_sleep_propagate_semantics.py  ← 意味論の正典(実装挙動+SPEC意図のxfail)
+├── ../qhlib/sleep.py                          ← build_sleep_q_table(replayのQ源)
+└── ../run_sleep_ablation*.sh ほか             ← 事前登録実験のランナー群
 ```
-
-変更された既存ファイル:
-- `qhlib/utils.py` — 10Dベクトル、weight_vector拡張
-- `qhlib/cli.py` — CLIオプション追加
-- `qhlib/models.py` — EpisodeArtifacts.graph フィールド
-- `qhlib/l3_adapter.py` — 次元数対応
-- `run_experiment_query.py` — 報酬記録、Sleep配線、scoring拡張
