@@ -4319,7 +4319,11 @@ def main() -> None:
             for offset in range(args.seeds):
                 seed = args.seed_start + offset
                 if use_curriculum:
-                    warm_cfg = replace(config, max_steps=int(warmup_steps))
+                    # Fair-budget cycling: with --wsw-cycles N, the TOTAL warmup
+                    # budget stays warmup_steps, split evenly across cycles
+                    # (cycle 1 here, cycles 2..N in the loop below).
+                    _n_cycles = max(1, int(getattr(args, "wsw_cycles", 1) or 1))
+                    warm_cfg = replace(config, max_steps=max(int(warmup_steps) // _n_cycles, 50))
                     warm_artifacts = run_episode_query(seed=seed, config=warm_cfg)
                     warmup_runs.append(dict(warm_artifacts.summary, episode_phase="warmup"))
                     maze_data[str(seed)] = warm_artifacts.maze_snapshot
@@ -4397,6 +4401,10 @@ def main() -> None:
 
                     # Extra Wake-Sleep cycles (W-S-W-S-W when wsw_cycles=2)
                     _wsw_cycles = int(getattr(args, "wsw_cycles", 1) or 1)
+                    _cycle_summaries = [{
+                        "success": bool(warm_artifacts.summary.get("success")),
+                        "steps": int(warm_artifacts.summary.get("steps", 0)),
+                    }]
                     for _cyc in range(1, _wsw_cycles):
                         _cyc_steps = max(warmup_steps // _wsw_cycles, 50)
                         _cyc_cfg = replace(config, max_steps=int(_cyc_steps))
@@ -4409,6 +4417,11 @@ def main() -> None:
                             sleep_guide=str(getattr(args, "sleep_guide", "override")),
                             inherited_graph=optimized_graph,
                         )
+                        warmup_runs.append(dict(_cyc_artifacts.summary, episode_phase=f"warmup_cycle{_cyc + 1}"))
+                        _cycle_summaries.append({
+                            "success": bool(_cyc_artifacts.summary.get("success")),
+                            "steps": int(_cyc_artifacts.summary.get("steps", 0)),
+                        })
                         # Merge graphs: combine new exploration with accumulated
                         if _cyc_artifacts.graph is not None and _cyc_artifacts.graph.number_of_nodes() > 0:
                             if accumulated_graph is not None:
@@ -4469,6 +4482,9 @@ def main() -> None:
                         "sleep_q": sleep_q_meta,
                         "sleep_edge": sleep_edge_meta,
                         "sleep_propagate": str(getattr(warm_cfg, "sleep_propagate", "on")),
+                        "wsw_cycles": int(_wsw_cycles),
+                        "warmup_cycles": _cycle_summaries,
+                        "warmup_any_goal": bool(any(c["success"] for c in _cycle_summaries)),
                         "inherited_graph_nodes": int(optimized_graph.number_of_nodes()) if optimized_graph is not None else 0,
                         "inherited_graph_edges": int(optimized_graph.number_of_edges()) if optimized_graph is not None else 0,
                         "inherited_propagated_nodes": (
