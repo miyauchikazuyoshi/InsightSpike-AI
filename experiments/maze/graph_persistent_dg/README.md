@@ -22,8 +22,9 @@ flowchart LR
     style W2 fill:#f4f0e8
 ```
 
-**v5(走行中)の予算分割**: 総 warmup 予算 500 を固定したまま中間 sleep を挟む —
-「sleep の価値は反復にある」の直接検証。
+**v5(決着 2026-07-06)の予算分割**: 総 warmup 予算 500 を固定したまま中間 sleep を挟む —
+「sleep の価値は反復にある」の直接検証。**結果: 無条件の分割は不採用**(成功層 +122.5 歩の
+退行が確定。失敗層は方向 OK だが n=6 で検出力不足)。一括 warmup(cycles=1)が既定のまま。
 
 ```mermaid
 flowchart LR
@@ -31,6 +32,9 @@ flowchart LR
     style SA fill:#ece8f4
     style SB fill:#ece8f4
 ```
+
+この構成が成立するのは**一括 warmup が失敗する迷路だけ**(救済 4/6、うち 3 件は両 warmup
+未達のまま eval 成功 = 被覆機構の直接証拠)。成功する迷路では有害(v5 §8 の退行の型分析)。
 
 ## 実験系譜(事前登録 5 連)
 
@@ -41,14 +45,16 @@ flowchart TB
     AUD --> V2["v2: replay × 自力ナビ<br/>−39% (p=4.0e-05, n=23)<br/>値固定化の初実証"]
     V2 --> V3["v3: 新シード再現 −51%<br/>(p=2.9e-04, n=18)<br/>引き上げは underpowered 保留"]
     V3 --> V4["v4: deadend 彫り込み<br/>敗北 (seed=52 は特異)<br/>成功層には完全無害・完全不活性"]
-    V4 --> V5["v5: 予算分割 warmup<br/>探索 5/5 優位 (−49%)<br/>確証 走行中 (シード90-119)"]
+    V4 --> V5["v5: 予算分割 warmup<br/>成功層退行 +122.5 (p=1.8e-05)<br/>→ 全面採用見送り<br/>失敗層 −212 は方向OK・検出力不足"]
+    V5 --> V6C["v6 候補: 適応的分割<br/>(成功で分割停止・失敗のみ継続)<br/>未着手 — 新規登録で"]
 
     style V1 fill:#fdd,stroke:#c62828
     style V4 fill:#fdd,stroke:#c62828
     style AUD fill:#ffe9c8,stroke:#b26a00
     style V2 fill:#dfd,stroke:#2e7d32
     style V3 fill:#dfd,stroke:#2e7d32
-    style V5 fill:#dde8fd,stroke:#1565c0
+    style V5 fill:#fdd,stroke:#c62828
+    style V6C fill:#f5f5f5,stroke:#9e9e9e,stroke-dasharray: 5 5
 ```
 
 ## 主張の現状台帳
@@ -60,7 +66,9 @@ flowchart TB
 | 旧 `--sleep-propagate on`(無向 max 伝播) | ❌ 寄与ゼロ・飽和バグ(比較用に残置) | v1・[semantics テスト](../test/test_sleep_propagate_semantics.py) |
 | 未達トライの引き上げ | ⏸ 保留(方向 OK・検出力不足) | v3 §8 |
 | deadend 彫り込み(dim8/dim9 価値統一) | ❌ 敗北(無害だが無力、seed=52 特異) | [v4](../../../docs/prereg/maze_sleep_v4_deadend_carving.md) |
-| 予算分割 warmup(sleep 反復価値) | 🔵 **確証走行中**(探索 5/5 優位) | [v5](../../../docs/prereg/maze_sleep_v5_budget_split.md) |
+| 無条件の予算分割 warmup(sleep 反復価値) | ❌ **全面採用見送り**(成功層 +122.5 歩退行、p=1.8e-05。事前懸念の「予算切り」は退行の一部しか説明せず — 250 以内成功シードでも +104) | [v5 §8](../../../docs/prereg/maze_sleep_v5_budget_split.md) |
+| 分割は失敗層(一括 warmup 全滅の迷路)を救済する | ⏸ 保留(方向 OK: −212 歩・救済 4/6・CI 0 除外、だが n=6 で p=0.125) | v5 §8 |
+| 適応的分割(成功で停止・失敗のみ継続) | ⬜ **v6 候補**(退行 2 機構を構造的に回避する設計 — v5 §8 で登録) | v5 §8 |
 | F 駆動 sleep・51×51・readout 分解・curl 診断 | ⬜ 未着手(各々新規事前登録で) | — |
 
 詳細な経緯・実務知識(実行時間・難シード等)は各 prereg の §8 と

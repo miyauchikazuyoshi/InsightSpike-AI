@@ -36,6 +36,7 @@
 | [maze_sleep_ablation_v2.md](maze_sleep_ablation_v2.md) | replay 伝播 × 自力ナビの単独寄与 | **P1/P2/P3 成立**（2026-07-02）— −39% 歩数、袋小路 0.17 vs 4.74 |
 | [maze_sleep_ablation_v3.md](maze_sleep_ablation_v3.md) | 未達トライの引き上げ（負例地形） | **P4 成立**（v2 を新シードで再現 −51%、p=2.9e-04）／P1 は**証拠不十分**（2026-07-04） |
 | [maze_sleep_v4_deadend_carving.md](maze_sleep_v4_deadend_carving.md) | deadend 彫り込み（dim8/dim9 価値統一）で失敗層の質改善 | **P1 敗北記録**（seed-52 効果は特異、失敗層で差なし）／P4 完全無害（23/23 同一）／P3 式欠陥を自己記録（2026-07-05） |
+| [maze_sleep_v5_budget_split.md](maze_sleep_v5_budget_split.md) | 予算分割 warmup（sleep 反復の価値） | **P4 退行確定 → 全面採用見送り**（成功層 +122.5 歩、p=1.8e-05）／P1 は方向 OK・**証拠不十分**（−212 歩、CI 0 除外、p=0.125、n=6）／適応的分割を v6 候補に登録（2026-07-06） |
 
 関連: 設計監査は [docs/audits/](../audits/)（特に [sleep_ablation_design_audit.md](../audits/sleep_ablation_design_audit.md) —
 「その実験は仮説をテストできる構造か」を実験前に問う）。
