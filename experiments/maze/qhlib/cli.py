@@ -195,6 +195,9 @@ def parse_args() -> argparse.Namespace:
                         help="How to use propagated values: abs (raw value) or gradient (prop(next) - prop(here)).")
     parser.add_argument("--wsw-cycles", type=int, default=1,
                         help="Number of Wake-Sleep cycles before final eval (1=W-S-W, 2=W-S-W-S-W). Warmup budget split evenly.")
+    parser.add_argument("--sleep-q-episode-reset", action="store_true", default=False,
+                        help="Reset revisit visit-counts at episode boundaries when rebuilding Sleep Q from multi-cycle "
+                             "concatenated steps (fixes cross-episode revisit mislabeling). Default off = historical behavior.")
     parser.add_argument("--advantage-commit", type=float, default=0.0,
                         help="Advantage-gated selection: if best_weight/second_weight > threshold, use argmax. 0=disabled.")
     parser.add_argument("--sleep-propagate-gamma", type=float, default=0.95,

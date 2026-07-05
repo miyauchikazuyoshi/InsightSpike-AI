@@ -4401,6 +4401,7 @@ def main() -> None:
 
                     # Extra Wake-Sleep cycles (W-S-W-S-W when wsw_cycles=2)
                     _wsw_cycles = int(getattr(args, "wsw_cycles", 1) or 1)
+                    _ep_boundaries: List[int] = []
                     _cycle_summaries = [{
                         "success": bool(warm_artifacts.summary.get("success")),
                         "steps": int(warm_artifacts.summary.get("steps", 0)),
@@ -4428,7 +4429,10 @@ def main() -> None:
                                 accumulated_graph = nx.compose(accumulated_graph, _cyc_artifacts.graph)
                             else:
                                 accumulated_graph = _cyc_artifacts.graph
-                        # Accumulate steps for plan/Q rebuild
+                        # Accumulate steps for plan/Q rebuild. Each cycle is a
+                        # separate episode; record the boundary so the Q rebuild
+                        # can reset revisit counts (--sleep-q-episode-reset).
+                        _ep_boundaries.append(len(accumulated_steps))
                         accumulated_steps.extend(_cyc_artifacts.steps)
                         # Re-build Sleep plan and Q from expanded experience
                         sleep_plan, sleep_meta = _build_sleep_action_plan(accumulated_steps, start_pos=sp, goal_pos=gp)
@@ -4445,6 +4449,7 @@ def main() -> None:
                             deadend_penalty=float(getattr(warm_cfg, "sleep_q_deadend_penalty", 0.0)),
                             blocked_penalty=float(getattr(warm_cfg, "sleep_q_blocked_penalty", 0.0)),
                             revisit_threshold=int(getattr(warm_cfg, "cortisol_repeat_visits", 2)),
+                            episode_boundaries=(_ep_boundaries if bool(getattr(args, "sleep_q_episode_reset", False)) else None),
                         )
                         # Re-optimize graph
                         if accumulated_graph is not None and accumulated_graph.number_of_nodes() > 0:

@@ -124,12 +124,20 @@ def build_sleep_q_table(
     deadend_penalty: float = 0.0,
     blocked_penalty: float = 0.0,
     revisit_threshold: int = 2,
+    episode_boundaries: Optional[Sequence[int]] = None,
 ) -> Tuple[Dict[Tuple[int, int], Dict[int, float]], Dict[str, Any]]:
     """Derive a Q(s,a) table from warmup transitions (Sleep value propagation).
 
     This is a lightweight, tabular replay update (Q-learning style) over the
     experienced transitions only. It is intended to act as a *prior* for the
     next Wake episode (soft bias), not as a hard plan.
+
+    episode_boundaries: indices into `steps` where a new episode begins
+    (multi-cycle warmup concatenates episodes). At each boundary the
+    revisit visit_counts reset, so a later episode's traversal of cells
+    seen in an earlier episode is not mislabeled as a revisit. None (the
+    default) keeps the historical behavior: one continuous count across
+    the whole sequence.
     """
     # Collect transitions and per-state available actions.
     actions_by_state: Dict[Tuple[int, int], Set[int]] = defaultdict(set)
@@ -139,8 +147,11 @@ def build_sleep_q_table(
     visit_counts: Dict[Tuple[int, int], int] = {tuple(start_pos): 1}
     threshold = max(2, int(revisit_threshold or 2))
     action_name_to_id = {str(v): int(k) for k, v in SimpleMaze.ACTION_NAMES.items()}
+    _boundary_set = set(int(b) for b in (episode_boundaries or []))
 
-    for rec in steps:
+    for _rec_idx, rec in enumerate(steps):
+        if _rec_idx in _boundary_set:
+            visit_counts = {tuple(start_pos): 1}
         try:
             pre_node = (getattr(rec, "query_node_pre", None) or [])[:2]
             post_node = (getattr(rec, "query_node_post", None) or [])[:2]
@@ -229,6 +240,7 @@ def build_sleep_q_table(
             "transitions": 0,
             "q_min": 0.0,
             "q_max": 0.0,
+            "episode_boundaries_applied": sorted(_boundary_set),
             "params": {
                 "gamma": float(gamma),
                 "alpha": float(alpha),
@@ -281,6 +293,7 @@ def build_sleep_q_table(
         "transitions": int(len(transitions)),
         "q_min": float(min(q_vals)) if q_vals else 0.0,
         "q_max": float(max(q_vals)) if q_vals else 0.0,
+        "episode_boundaries_applied": sorted(_boundary_set),
         "params": {
             "gamma": float(gamma),
             "alpha": float(alpha),
