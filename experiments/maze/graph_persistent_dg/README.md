@@ -74,7 +74,8 @@ flowchart TB
 | 分割は失敗層(一括 warmup 全滅の迷路)を救済する | ❌ **再現せず**(v5 −212 → v6 新シードで中立 +10.9、救済 2/損失 5/引分 4。v5 はシード群特異) | v5 §8・[v6 §8](../../../docs/prereg/maze_sleep_v6_split_reset.md) |
 | 分割の発見喪失コスト(warmup >250 の迷路) | ✅ 実在(>250 成功層 6 中 5 が発見喪失、reset では不可避 — §6 登録済み) | [v6 §8](../../../docs/prereg/maze_sleep_v6_split_reset.md) |
 | `--sleep-q-episode-reset`(多サイクル時の汚染除去) | ✅ 有効・**残置**(単一サイクルでは no-op、既定オフ) | v6 §8 |
-| readout 分解(dim9 類似度は行動バイアスに対し冗長か) | ⬜ **次の候補**(価値は 2 経路で読み出し、行動バイアスは 8D でも動く — dim9 の必要性は未検証) | — |
+| **v7: 11D 三信号 + β₁-DG(抜本改訂)** | 🔵 **設計起動**(正例=Hebb・負例=罠深さ・DG=β₁サイズ。第一手=DG正規化アブレーション) | [v7 設計ノート](../../../docs/research/thinking/v7_three_signal_edge_propagation_20260706.md) |
+| readout 分解(dim9 は行動バイアスに対し冗長か) | ⬜ v7 に統合(11D materialize と同時に決着) | v7 設計ノート §4 |
 | F 駆動 sleep・51×51・curl 診断 | ⬜ 未着手(各々新規事前登録で) | — |
 
 詳細な経緯・実務知識(実行時間・難シード等)は各 prereg の §8 と

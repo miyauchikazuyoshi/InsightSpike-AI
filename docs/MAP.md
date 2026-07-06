@@ -33,6 +33,7 @@ geDIG は「知識グラフをいつ再構築すべきか」を単一ゲージ *
 | `docs/audits/` | 監査(F 符号、PER、oracle ceiling、sleep 設計監査) | 失敗の一次資料 |
 | `docs/research/` | 理論ノート(~46 ファイル、`gedig_core_theory_unified.md` が統合版) | `thinking/` は思想メモ |
 | `docs/research/gedig_origin_story.md` | 研究の動機と骨子(閃き=トポロジカル再構成、睡眠相の定義) | 骨子確認はここへ |
+| `docs/research/thinking/v7_three_signal_edge_propagation_20260706.md` | **v7 抜本改訂の背骨**(11D 三信号=Hebb正例/罠深さ負例/β₁-DG、エッジ伝播) | sleep v6 決着後の次線・設計起動 |
 | `experiments/EXPERIMENT_GUIDELINES.md`, `OUTPUT_CONVENTION.md` | 実験の規約 | |
 | `results/`, `experiments/**/results/` | 実験出力(gitignore) | ローカルのみ。`_exploratory_*/` は探索ラン隔離用 |
 
