@@ -46,7 +46,7 @@ flowchart TB
     V2 --> V3["v3: 新シード再現 −51%<br/>(p=2.9e-04, n=18)<br/>引き上げは underpowered 保留"]
     V3 --> V4["v4: deadend 彫り込み<br/>敗北 (seed=52 は特異)<br/>成功層には完全無害・完全不活性"]
     V4 --> V5["v5: 予算分割 warmup<br/>成功層退行 +122.5 (p=1.8e-05)<br/>→ 全面採用見送り<br/>失敗層 −212 は方向OK・検出力不足"]
-    V5 --> V6C["v6 候補: 適応的分割<br/>(成功で分割停止・失敗のみ継続)<br/>未着手 — 新規登録で"]
+    V5 --> V6["v6: 分割 × 境界リセット<br/>汚染修正は確証 (≤250 で13/13一致)<br/>但し発見喪失(>250)で P1 FAIL<br/>失敗層救済は再現せず → 分割棄却"]
 
     style V1 fill:#fdd,stroke:#c62828
     style V4 fill:#fdd,stroke:#c62828
@@ -54,8 +54,11 @@ flowchart TB
     style V2 fill:#dfd,stroke:#2e7d32
     style V3 fill:#dfd,stroke:#2e7d32
     style V5 fill:#fdd,stroke:#c62828
-    style V6C fill:#f5f5f5,stroke:#9e9e9e,stroke-dasharray: 5 5
+    style V6 fill:#fde9d8,stroke:#c62828
 ```
+
+> v6 は**部分的成果**(オレンジ寄り赤): 装置仮説「≤250 退行は汚染」は確証されたが、
+> 「分割に反復価値がある」という上位主張は棄却。reset は残す・分割は捨てる、の分離判定。
 
 ## 主張の現状台帳
 
@@ -66,10 +69,13 @@ flowchart TB
 | 旧 `--sleep-propagate on`(無向 max 伝播) | ❌ 寄与ゼロ・飽和バグ(比較用に残置) | v1・[semantics テスト](../test/test_sleep_propagate_semantics.py) |
 | 未達トライの引き上げ | ⏸ 保留(方向 OK・検出力不足) | v3 §8 |
 | deadend 彫り込み(dim8/dim9 価値統一) | ❌ 敗北(無害だが無力、seed=52 特異) | [v4](../../../docs/prereg/maze_sleep_v4_deadend_carving.md) |
-| 無条件の予算分割 warmup(sleep 反復価値) | ❌ **全面採用見送り**(成功層 +122.5 歩退行、p=1.8e-05。事前懸念の「予算切り」は退行の一部しか説明せず — 250 以内成功シードでも +104) | [v5 §8](../../../docs/prereg/maze_sleep_v5_budget_split.md) |
-| 分割は失敗層(一括 warmup 全滅の迷路)を救済する | ⏸ 保留(方向 OK: −212 歩・救済 4/6・CI 0 除外、だが n=6 で p=0.125) | v5 §8 |
-| 適応的分割(成功で停止・失敗のみ継続) | ⬜ **v6 候補**(退行 2 機構を構造的に回避する設計 — v5 §8 で登録) | v5 §8 |
-| F 駆動 sleep・51×51・readout 分解・curl 診断 | ⬜ 未着手(各々新規事前登録で) | — |
+| 無条件の予算分割 warmup(sleep 反復価値) | ❌ **棄却**(v5 退行 +122.5・v6 でも分割自体に利得なし。反復価値は迷路では不支持) | [v5 §8](../../../docs/prereg/maze_sleep_v5_budget_split.md)・[v6 §8](../../../docs/prereg/maze_sleep_v6_split_reset.md) |
+| v5 の ≤250 退行の正体は境界跨ぎ汚染 | ✅ **確立**(reset で ≤250 成功層 13/13 完全一致。探索 5/5 → 確証 13/13) | [v6 §8](../../../docs/prereg/maze_sleep_v6_split_reset.md) |
+| 分割は失敗層(一括 warmup 全滅の迷路)を救済する | ❌ **再現せず**(v5 −212 → v6 新シードで中立 +10.9、救済 2/損失 5/引分 4。v5 はシード群特異) | v5 §8・[v6 §8](../../../docs/prereg/maze_sleep_v6_split_reset.md) |
+| 分割の発見喪失コスト(warmup >250 の迷路) | ✅ 実在(>250 成功層 6 中 5 が発見喪失、reset では不可避 — §6 登録済み) | [v6 §8](../../../docs/prereg/maze_sleep_v6_split_reset.md) |
+| `--sleep-q-episode-reset`(多サイクル時の汚染除去) | ✅ 有効・**残置**(単一サイクルでは no-op、既定オフ) | v6 §8 |
+| readout 分解(dim9 類似度は行動バイアスに対し冗長か) | ⬜ **次の候補**(価値は 2 経路で読み出し、行動バイアスは 8D でも動く — dim9 の必要性は未検証) | — |
+| F 駆動 sleep・51×51・curl 診断 | ⬜ 未着手(各々新規事前登録で) | — |
 
 詳細な経緯・実務知識(実行時間・難シード等)は各 prereg の §8 と
 [edge_flow_field_navigation ノート](../../../docs/research/thinking/edge_flow_field_navigation_20260704.md)を参照。

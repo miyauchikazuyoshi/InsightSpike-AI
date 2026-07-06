@@ -37,6 +37,7 @@
 | [maze_sleep_ablation_v3.md](maze_sleep_ablation_v3.md) | 未達トライの引き上げ（負例地形） | **P4 成立**（v2 を新シードで再現 −51%、p=2.9e-04）／P1 は**証拠不十分**（2026-07-04） |
 | [maze_sleep_v4_deadend_carving.md](maze_sleep_v4_deadend_carving.md) | deadend 彫り込み（dim8/dim9 価値統一）で失敗層の質改善 | **P1 敗北記録**（seed-52 効果は特異、失敗層で差なし）／P4 完全無害（23/23 同一）／P3 式欠陥を自己記録（2026-07-05） |
 | [maze_sleep_v5_budget_split.md](maze_sleep_v5_budget_split.md) | 予算分割 warmup（sleep 反復の価値） | **P4 退行確定 → 全面採用見送り**（成功層 +122.5 歩、p=1.8e-05）／P1 は方向 OK・**証拠不十分**（−212 歩、CI 0 除外、p=0.125、n=6）／適応的分割を v6 候補に登録（2026-07-06） |
+| [maze_sleep_v6_split_reset.md](maze_sleep_v6_split_reset.md) | 予算分割 × エピソード境界リセット（v5 退行の汚染仮説の検証） | **汚染帰属は成立**（≤250 成功層 13/13 完全一致）／だが **P1 登録どおり FAIL**（成功層全体 +70.7、原因は §6 登録済みの発見喪失 >250）／失敗層救済は**新シードで再現せず**（中立 +10.9）→ **分割路線は棄却・cycles=1 既定維持、reset は多サイクル時の必須修正として残置**（2026-07-06） |
 
 関連: 設計監査は [docs/audits/](../audits/)（特に [sleep_ablation_design_audit.md](../audits/sleep_ablation_design_audit.md) —
 「その実験は仮説をテストできる構造か」を実験前に問う）。
