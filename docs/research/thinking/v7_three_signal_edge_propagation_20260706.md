@@ -161,6 +161,24 @@ flowchart TB
 - **3att / three-layer 基盤は現状 legacy に敗北している**(§10)。既存基盤での隔離ランは
   「3att 内で効くか」は言えるが「legacy 超え」はまだ問わない —— そこは分けて記録する。
 
+## 9.5 前提確認の探索(2026-07-07、5 シード)— DG=β₁ の signal は実在
+
+pipeline を組む前に「エージェントのグラフにサイズ spread のあるサイクルがあるか」を
+既存機構で確認(`results/graph_persistent_dg/_exploratory_v7_beta1/` NOTES.md、
+env-gated graph dump + `analyze_v7_beta1_cycles.py`)。
+
+- **回廊は例外なく木**(perfect maze)。ループは想起/DG エッジからのみ生まれる。
+- **著者の洞察が実証された**: 「木迷路でも記憶走査(未探索分岐の想起)で抽象グラフにループが生まれ、
+  その大きさが DG 重み」。hard seed(500 歩探索)で **サイクルサイズ [95, 47, 3×8]** —
+  距離2の想起エッジが、壁のせいで**回廊 95 歩のループ**を閉じる = 大ショートカット。
+- **サイズ spread は劇的**(easy max 3–7 → medium 15 → hard **95**)。→ **①サイズ重み vs ②固定スケールは
+  well-motivated**。「braided 迷路が必要」は誤診だった(木迷路で成立)。
+- **新ノブ = link-radius**: 想起エッジは全シードで Manhattan 距離 2 固定 = `ring=ceil(0.05×25)=2`。
+  想起の到達距離を直接制御する。設計の「どこまで記憶を想起するか」= link-radius。
+  → 第一アブレーションの前段に **link-radius sweep**(ring 2→5→…)を置く価値。
+- **未解決(crude proxy)**: 大ループ端点はゴール近傍でない(near-goal=0)。
+  「大ショートカットがゴール到達に効くか」は別問題 → §8 の箱に追加。
+
 ## 10. 先行研究との整合(2026-02 3att、なぜ今度は違うか)
 
 本設計は [l1_three_attention_design.md](../../design/l1_three_attention_design.md)(2026-02-10)の**改訂・復活**。

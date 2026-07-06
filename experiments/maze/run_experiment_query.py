@@ -4471,6 +4471,27 @@ def main() -> None:
                                 except Exception:
                                     pass
 
+                    # v7 exploration: dump the sleep-time graph (with DG edges)
+                    # for offline β₁ cycle-structure analysis. Behind an env var
+                    # so it is a strict no-op for all committed experiments.
+                    import os as _os  # module-level os is shadowed as a local inside main()
+                    if _os.environ.get("INSIGHTSPIKE_DUMP_GRAPH") and optimized_graph is not None:
+                        try:
+                            from networkx.readwrite import json_graph
+                            _dump_dir = _os.environ["INSIGHTSPIKE_DUMP_GRAPH"]
+                            _os.makedirs(_dump_dir, exist_ok=True)
+                            _gd = json_graph.node_link_data(optimized_graph)
+                            _gd = {"nodes": [[list(n["id"]) if isinstance(n["id"], tuple) else n["id"],
+                                              float(n.get("propagated", 0.0))] for n in _gd["nodes"]],
+                                   "edges": [[list(e["source"]) if isinstance(e["source"], tuple) else e["source"],
+                                              list(e["target"]) if isinstance(e["target"], tuple) else e["target"]]
+                                             for e in _gd["links"]],
+                                   "goal_pos": list(gp), "start_pos": list(sp)}
+                            with open(_os.path.join(_dump_dir, f"graph_seed{seed}.json"), "w") as _gf:
+                                json.dump(_gd, _gf)
+                        except Exception as _e:
+                            print(f"  Warning: graph dump failed: {_e}")
+
                     eval_artifacts = run_episode_query(
                         seed=seed,
                         config=config,
