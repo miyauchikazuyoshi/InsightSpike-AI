@@ -60,6 +60,7 @@ def analyze(path):
     corridor, shortcuts, goal, start = load_cell_graph(path)
     ncells = corridor.number_of_nodes()
     ncorr = corridor.number_of_edges()
+    recall_manh = sorted(m for _, _, m in shortcuts)  # Manhattan reach of recall edges
     # cycle size for each shortcut = corridor-only shortest path between endpoints + 1
     sizes = []
     goal_reaching = 0  # shortcut whose endpoint is within a few cells of goal
@@ -85,6 +86,8 @@ def analyze(path):
         "size_median": sorted(real)[len(real) // 2] if real else None,
         "disconnected_shortcuts": sum(1 for s in sizes if s is None),
         "shortcuts_near_goal": goal_reaching,
+        "recall_manhattan": recall_manh,
+        "recall_manh_max": max(recall_manh) if recall_manh else 0,
     }
 
 
@@ -104,6 +107,7 @@ def main():
               f"shortcuts={r['shortcuts']} (disconnected={r['disconnected_shortcuts']})")
         print(f"  cycle size: min={r['size_min']} median={r['size_median']} max={r['size_max']} "
               f"| big(≥6)={len(big)} small(<6)={len(small)} | near-goal shortcuts={r['shortcuts_near_goal']}")
+        print(f"  recall Manhattan reach: max={r['recall_manh_max']} dist={r['recall_manhattan']}")
         print(f"  top sizes: {r['cycle_sizes'][:12]}")
         print()
     return 0

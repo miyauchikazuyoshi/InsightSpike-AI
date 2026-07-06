@@ -179,6 +179,16 @@ env-gated graph dump + `analyze_v7_beta1_cycles.py`)。
 - **未解決(crude proxy)**: 大ループ端点はゴール近傍でない(near-goal=0)。
   「大ショートカットがゴール到達に効くか」は別問題 → §8 の箱に追加。
 
+### 追探索: link-radius sweep(2026-07-07、`_exploratory_v7_linkradius/`)
+
+link-radius を上げると想起がどこまで伸びるかを sweep(lr 0.05/0.10/0.20 = ring 2/3/5、3 シード):
+- **構造は劇的に濃くなる**: ショートカット 5→36→**65 本**、想起 Manhattan 到達 2→4→**7**、
+  サイクルサイズ最大 **105**(seed 118 ring5 は size~100 が6本)。**link-radius = 想起の到達距離ノブ、実証**。
+- **だが eval 歩数は全 ring で完全一致**(192/192/192 等)。**リッチな β₁ 構造は現行の勝ち構成
+  (guide off + propagated-Q バイアス)から完全に切り離されている(silent structure)**。
+- **→ v7 の次の load-bearing = σ(dg) 読み出しの配線**(§4 の3ゲートで β₁ を行動に結合)。それが無い限り
+  link-radius も ①/② も behaviorally testable にならない。**構造探索は完了、次は読み出し実装。**
+
 ## 10. 先行研究との整合(2026-02 3att、なぜ今度は違うか)
 
 本設計は [l1_three_attention_design.md](../../design/l1_three_attention_design.md)(2026-02-10)の**改訂・復活**。
