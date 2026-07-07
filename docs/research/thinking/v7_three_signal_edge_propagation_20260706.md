@@ -89,6 +89,12 @@
   dg を β₁ 化するのが今回の差分。
 - 11D: 3信号をベクトル次元に materialize → L2 類似度距離にも入る。**「dim9 は行動バイアスに対し冗長か」
   (readout 分解)の宿題は、この 11D 化と同時に決着させられる**。
+- **⚠ 実装の場所が確定(2026-07-07、結合テスト)**: 3ゲートは **L1 検索スコア(3att)でなく
+  行動選択の exp-bias 積に配線する**。結合テスト([_exploratory_v7_coupling](../../../experiments/maze/results/graph_persistent_dg/_exploratory_v7_coupling/NOTES.md))で、
+  3att は engaged(グラフを 542→535 ノードに変えた)のに **eval は完全一致(180歩)** =
+  **search/L1 層の変化は eval 行動に届かない**(guide-off の行動は propagated_bias=sleep-Q argmax 支配)。
+  ∴ σ(pos)×σ(-neg)×σ(dg) は既存 propagated_bias(`w *= exp(α·propagated)`、run_experiment_query.py:~1036)
+  の場所に、その一般化として実装する。
 
 ## 5. 段階的自律化: DG が最初の F-native チャンネル
 
