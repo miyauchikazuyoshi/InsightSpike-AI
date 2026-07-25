@@ -9,6 +9,43 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  config-compat:
+    name: Config compatibility (${{ matrix.pydantic-label }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - pydantic-label: pydantic-v1
+            pydantic-spec: "pydantic>=1.10,<2"
+          - pydantic-label: pydantic-v2
+            pydantic-spec: "pydantic>=2,<3"
+    env:
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
+      INSIGHTSPIKE_LITE_MODE: "1"
+      INSIGHTSPIKE_MIN_IMPORT: "1"
+      MPLCONFIGDIR: "results/mpl"
+      PYTHONPATH: src
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install config test deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U pytest "numpy>=1.26.0,<3.0" \
+            "${{ matrix.pydantic-spec }}" "pyyaml>=6.0" "networkx>=3.1"
+
+      - name: Run config compatibility tests
+        run: |
+          pytest -q tests/unit/config
+
   unit:
     name: Unit tests (light mode) (py${{ matrix.python-version }})
     runs-on: ubuntu-latest
@@ -43,9 +80,9 @@ jobs:
         run: |
           pytest -q tests/unit tests/test_minimal_healthcheck.py tests/test__minimal_probe.py -m "not slow and not integration and not performance and not benchmark and not calibration"
 
-      # Unified geDIG Core (the README "71 unit tests" claim lives here).
-      # torch is absent in this job, so the 11 transformer-equiv tests
-      # skip; 60 run. Separate step so a core regression fails visibly.
+      # Unified geDIG Core. Torch is absent in this job, so 56 pass and
+      # 20 skip; all 76 pass in the local torch-enabled environment.
+      # Separate step so a core regression fails visibly.
       - name: Run unified geDIG core tests
         run: |
           pytest -q src/gedig/tests

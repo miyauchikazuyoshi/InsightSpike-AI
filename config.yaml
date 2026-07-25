@@ -17,7 +17,7 @@ llm:
 
 # DataStore Settings
 datastore:
-  # Type of data store. Options: filesystem, in_memory
+  # Type of data store. Options: filesystem, memory, sqlite
   type: filesystem
   # Root path for the filesystem data store
   root_path: ./data/insight_store
@@ -112,12 +112,10 @@ embedding:
 
 # Output Settings
 output:
-  # Response style: concise, detailed, academic, conversational
-  response_style: concise
   # Include reasoning trace
-  show_reasoning: false
+  include_reasoning: false
   # Include metadata
-  show_metadata: false
+  include_metadata: false
 
 # Performance Settings
 performance:
@@ -127,20 +125,14 @@ performance:
 # Monitoring Settings
 monitoring:
   # Enable performance monitoring
-  enable_monitoring: true
+  enabled: true
   # Memory usage tracking
-  track_memory_usage: true
-  # Metrics collection interval
-  metrics_interval: 60
+  performance_tracking: true
 
 # Logging Settings
 logging:
   # Log level: DEBUG, INFO, WARNING, ERROR
   level: INFO
-  # Log format
-  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-  # Enable file logging
-  file_enabled: false
   file_path: logs/insightspike.log
 
 # Vector Search Settings

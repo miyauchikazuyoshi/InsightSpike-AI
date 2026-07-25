@@ -8,7 +8,15 @@ import math
 import pytest
 import networkx as nx
 
-from gedig.core import FEval, FEvalResult, PercentileClassifier, ThresholdClassifier
+from gedig.core import (
+    EdgePartitionResult,
+    FEval,
+    FEvalResult,
+    PercentileClassifier,
+    PercentileEdgePartitioner,
+    ThresholdClassifier,
+    ThresholdEdgePartitioner,
+)
 from gedig.backends.networkx_backend import (
     NxGraphSnapshot,
     NxEPC,
@@ -230,6 +238,31 @@ class TestPercentileClassifier:
         assert result.n_ag == 0
         assert result.n_dg == 0
 
+    def test_new_partition_type_does_not_claim_gate_events(self):
+        scores = {"e1": 0.1, "e2": 0.3, "e3": 0.5}
+        partition = PercentileEdgePartitioner(
+            percentile=0.4
+        ).partition(scores)
+
+        assert isinstance(partition, EdgePartitionResult)
+        assert partition.low_score_edges == ["e1"]
+        assert partition.high_score_edges == ["e2", "e3"]
+
+    def test_mutated_percentile_is_used_by_compatibility_wrapper(self):
+        scores = {
+            "e1": 0.1,
+            "e2": 0.3,
+            "e3": 0.5,
+            "e4": 0.7,
+            "e5": 0.9,
+        }
+        classifier = PercentileClassifier(percentile=0.2)
+        assert classifier.classify(scores).n_ag == 1
+
+        classifier.percentile = 0.8
+
+        assert classifier.classify(scores).n_ag == 4
+
 
 class TestThresholdClassifier:
     def test_ag_fire(self):
@@ -238,6 +271,35 @@ class TestThresholdClassifier:
         result = clf.classify(scores)
         assert "e1" in result.ag_edges
         assert "e3" in result.dg_edges
+
+    def test_threshold_partition_records_the_deadband(self):
+        scores = {"low": 0.1, "middle": 0.4, "high": 0.8}
+
+        result = ThresholdEdgePartitioner(
+            upper_threshold=0.5,
+            lower_threshold=0.2,
+        ).partition(scores)
+
+        assert result.low_score_edges == ["low"]
+        assert result.middle_score_edges == ["middle"]
+        assert result.high_score_edges == ["high"]
+        assert (
+            result.n_low_score
+            + result.n_middle_score
+            + result.n_high_score
+            == len(scores)
+        )
+
+    def test_mutated_thresholds_are_used_by_compatibility_wrapper(self):
+        scores = {"e1": 0.8, "e2": 0.3, "e3": 0.1}
+        classifier = ThresholdClassifier(theta_ag=0.5, theta_dg=0.2)
+
+        classifier.theta_ag = 0.9
+        classifier.theta_dg = 0.4
+        result = classifier.classify(scores)
+
+        assert result.ag_edges == []
+        assert result.dg_edges == ["e2", "e3"]
 
 
 # ─── PyTorch Backend Tests (optional) ────────────────────────────

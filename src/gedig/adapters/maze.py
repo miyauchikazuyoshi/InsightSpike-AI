@@ -15,13 +15,13 @@ Usage:
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import networkx as nx
 
-from gedig.core.f_eval import FEval
 from gedig.core.ag_dg import ThresholdClassifier
-from gedig.core.protocols import FEvalResult, AGDGResult
+from gedig.core.f_eval import FEval
+from gedig.core.protocols import FEvalResult, TwoStageGateDecision
 from gedig.core.message_passing import QLearningPropagator
 from gedig.backends.networkx_backend import (
     NxGraphSnapshot,
@@ -47,9 +47,9 @@ class MazeFEval:
     use_betti : bool
         If True, use β₁ instead of SP.
     theta_ag : float
-        AG fire threshold (g > theta → commit).
+        Attention Gate threshold (high hop-0 ambiguity opens exploration).
     theta_dg : float
-        DG fire threshold (g < theta → explore further).
+        Decision Gate threshold (low multi-hop F confirms a commit).
     """
 
     def __init__(
@@ -68,11 +68,33 @@ class MazeFEval:
             lambda_param=lambda_param,
             gamma=gamma,
         )
+        # Historical public attribute retained for callers that tune the
+        # thresholds adaptively. Gate decisions do not use its edge labels.
         self.classifier = ThresholdClassifier(
             theta_ag=theta_ag,
             theta_dg=theta_dg,
         )
         self.propagator = QLearningPropagator()
+
+    @property
+    def theta_ag(self) -> float:
+        """Current Attention Gate threshold."""
+
+        return self.classifier.theta_ag
+
+    @theta_ag.setter
+    def theta_ag(self, value: float) -> None:
+        self.classifier.theta_ag = value
+
+    @property
+    def theta_dg(self) -> float:
+        """Current Decision Gate threshold."""
+
+        return self.classifier.theta_dg
+
+    @theta_dg.setter
+    def theta_dg(self, value: float) -> None:
+        self.classifier.theta_dg = value
 
     def evaluate_hop(
         self,
@@ -127,7 +149,7 @@ class MazeFEval:
         gmin_mh: float,
         best_hop: int,
     ) -> Dict[str, Any]:
-        """Classify a maze step as AG fire, DG fire, or neither.
+        """Return the historical mapping for a two-stage gate decision.
 
         Parameters
         ----------
@@ -142,16 +164,25 @@ class MazeFEval:
         -------
         dict with ag_fire, dg_fire, best_hop.
         """
-        ag_fire = g0 > self.classifier.theta_ag
-        dg_fire = best_hop >= 1 and gmin_mh < self.classifier.theta_dg
+        return self.decide_step(g0, gmin_mh, best_hop).as_legacy_dict()
 
-        return {
-            "ag_fire": ag_fire,
-            "dg_fire": dg_fire,
-            "best_hop": best_hop,
-            "g0": g0,
-            "gmin_mh": gmin_mh,
-        }
+    def decide_step(
+        self,
+        g0: float,
+        gmin_mh: float,
+        best_hop: int,
+    ) -> TwoStageGateDecision:
+        """Evaluate Attention Gate then multi-hop Decision Gate events."""
+
+        return TwoStageGateDecision(
+            attention_gate_fired=g0 > self.theta_ag,
+            decision_gate_fired=(
+                best_hop >= 1 and gmin_mh < self.theta_dg
+            ),
+            hop0_score=float(g0),
+            best_multihop_score=float(gmin_mh),
+            best_hop=int(best_hop),
+        )
 
     def sleep_propagate(
         self,

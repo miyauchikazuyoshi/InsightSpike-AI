@@ -1,7 +1,7 @@
 """Transformer adapter equivalence tests (T1-T5).
 
 Verifies that the unified adapter produces numerically equivalent
-results to the legacy DifferentiableGeDIG implementation.
+results to the frozen pre-refactor DifferentiableGeDIG implementation.
 """
 
 import sys
@@ -15,8 +15,15 @@ try:
 except ImportError:
     HAS_TORCH = False
 
-# Add transformer experiment to path for legacy import
-sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "experiments" / "transformer"))
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(
+    0,
+    str(_REPO_ROOT / "experiments" / "transformer"),
+)
+sys.path.insert(
+    0,
+    str(_REPO_ROOT / "experiments" / "refactor_transformer"),
+)
 
 pytestmark = pytest.mark.skipif(not HAS_TORCH, reason="PyTorch not installed")
 
@@ -32,8 +39,8 @@ def random_attention():
 
 @pytest.fixture
 def legacy_gedig():
-    """Legacy DifferentiableGeDIG (SP mode)."""
-    from thermodynamic_gedig import DifferentiableGeDIG
+    """Frozen pre-refactor DifferentiableGeDIG (SP mode)."""
+    from thermodynamic_gedig_legacy import DifferentiableGeDIG
     return DifferentiableGeDIG(
         lambda_param=1.0, gamma=0.5,
         percentile=0.9, temperature=10.0,
@@ -43,7 +50,7 @@ def legacy_gedig():
 
 @pytest.fixture
 def unified_gedig():
-    """Unified DifferentiableGeDIG (adapter mode)."""
+    """Current experiment wrapper in unified-adapter mode."""
     from thermodynamic_gedig import DifferentiableGeDIG
     return DifferentiableGeDIG(
         lambda_param=1.0, gamma=0.5,
@@ -56,6 +63,24 @@ def unified_gedig():
 
 class TestT1_NumericalEquivalence_SP:
     """T1: |F_old - F_new| < 1e-4 on identical inputs (SP mode)."""
+
+    def test_oracle_is_independent_from_unified_adapter(
+        self,
+        random_attention,
+        legacy_gedig,
+        unified_gedig,
+    ):
+        before, after = random_attention
+        legacy_gedig(before, after)
+        unified_gedig(before, after)
+
+        assert legacy_gedig.__class__.__module__ == (
+            "thermodynamic_gedig_legacy"
+        )
+        assert legacy_gedig.use_unified is False
+        assert legacy_gedig._unified_adapter is None
+        assert unified_gedig.use_unified is True
+        assert unified_gedig._unified_adapter is not None
 
     def test_f_mean_equivalence(self, random_attention, legacy_gedig, unified_gedig):
         before, after = random_attention
@@ -93,10 +118,15 @@ class TestT1_NumericalEquivalence_SP:
 
     def test_100_random_samples(self):
         """Run 100 random samples and check all are within tolerance."""
-        from thermodynamic_gedig import DifferentiableGeDIG
+        from thermodynamic_gedig import (
+            DifferentiableGeDIG as UnifiedGeDIG,
+        )
+        from thermodynamic_gedig_legacy import (
+            DifferentiableGeDIG as LegacyGeDIG,
+        )
 
-        legacy = DifferentiableGeDIG(use_unified=False)
-        unified = DifferentiableGeDIG(use_unified=True)
+        legacy = LegacyGeDIG(use_unified=False)
+        unified = UnifiedGeDIG(use_unified=True)
 
         max_diff = 0.0
         for seed in range(100):
@@ -111,6 +141,68 @@ class TestT1_NumericalEquivalence_SP:
 
         assert max_diff < 1e-4, f"Max diff across 100 samples: {max_diff:.8f}"
 
+    @pytest.mark.parametrize("use_betti", [False, True])
+    def test_masked_nondefault_parameters_match_all_outputs(
+        self,
+        use_betti,
+    ):
+        from thermodynamic_gedig import (
+            DifferentiableGeDIG as UnifiedGeDIG,
+        )
+        from thermodynamic_gedig_legacy import (
+            DifferentiableGeDIG as LegacyGeDIG,
+        )
+
+        torch.manual_seed(17)
+        before = torch.softmax(
+            torch.randn(2, 3, 8, 8),
+            dim=-1,
+        )
+        after = torch.softmax(
+            torch.randn(2, 3, 8, 8),
+            dim=-1,
+        )
+        mask = torch.tensor(
+            [
+                [1, 1, 1, 1, 1, 0, 0, 0],
+                [1, 1, 1, 1, 1, 1, 1, 0],
+            ],
+            dtype=torch.float,
+        )
+        options = {
+            "lambda_param": 0.7,
+            "gamma": 0.25,
+            "percentile": 0.75,
+            "temperature": 6.0,
+            "use_betti": use_betti,
+        }
+        legacy = LegacyGeDIG(
+            **options,
+            use_unified=False,
+        )
+        unified = UnifiedGeDIG(
+            **options,
+            use_unified=True,
+        )
+
+        old = legacy(before, after, mask)
+        new = unified(before, after, mask)
+
+        for field in (
+            "F",
+            "F_mean",
+            "delta_epc",
+            "delta_h",
+            "delta_sp",
+            "delta_b1",
+        ):
+            torch.testing.assert_close(
+                old[field],
+                new[field],
+                rtol=1e-6,
+                atol=1e-7,
+            )
+
 
 # ─── T2: Numerical Equivalence (β₁ mode) ────────────────────────
 
@@ -118,10 +210,21 @@ class TestT2_NumericalEquivalence_Betti:
     """T2: |F_old - F_new| < 1e-4 on identical inputs (β₁ mode)."""
 
     def test_betti_f_mean_equivalence(self, random_attention):
-        from thermodynamic_gedig import DifferentiableGeDIG
+        from thermodynamic_gedig import (
+            DifferentiableGeDIG as UnifiedGeDIG,
+        )
+        from thermodynamic_gedig_legacy import (
+            DifferentiableGeDIG as LegacyGeDIG,
+        )
 
-        legacy = DifferentiableGeDIG(use_betti=True, use_unified=False)
-        unified = DifferentiableGeDIG(use_betti=True, use_unified=True)
+        legacy = LegacyGeDIG(
+            use_betti=True,
+            use_unified=False,
+        )
+        unified = UnifiedGeDIG(
+            use_betti=True,
+            use_unified=True,
+        )
 
         before, after = random_attention
         r_old = legacy(before, after)
@@ -130,10 +233,21 @@ class TestT2_NumericalEquivalence_Betti:
         assert abs(r_old["F_mean"].item() - r_new["F_mean"].item()) < 1e-4
 
     def test_betti_delta_b1_equivalence(self, random_attention):
-        from thermodynamic_gedig import DifferentiableGeDIG
+        from thermodynamic_gedig import (
+            DifferentiableGeDIG as UnifiedGeDIG,
+        )
+        from thermodynamic_gedig_legacy import (
+            DifferentiableGeDIG as LegacyGeDIG,
+        )
 
-        legacy = DifferentiableGeDIG(use_betti=True, use_unified=False)
-        unified = DifferentiableGeDIG(use_betti=True, use_unified=True)
+        legacy = LegacyGeDIG(
+            use_betti=True,
+            use_unified=False,
+        )
+        unified = UnifiedGeDIG(
+            use_betti=True,
+            use_unified=True,
+        )
 
         before, after = random_attention
         r_old = legacy(before, after)
@@ -148,7 +262,12 @@ class TestT3_GradientEquivalence:
     """T3: |grad_old - grad_new| < 1e-3."""
 
     def test_gradient_direction_matches(self):
-        from thermodynamic_gedig import DifferentiableGeDIG
+        from thermodynamic_gedig import (
+            DifferentiableGeDIG as UnifiedGeDIG,
+        )
+        from thermodynamic_gedig_legacy import (
+            DifferentiableGeDIG as LegacyGeDIG,
+        )
 
         torch.manual_seed(42)
         before = torch.softmax(torch.randn(1, 2, 8, 8), dim=-1)
@@ -156,7 +275,7 @@ class TestT3_GradientEquivalence:
         # Legacy
         raw_old = torch.randn(1, 2, 8, 8, requires_grad=True)
         after_old = torch.softmax(raw_old, dim=-1)
-        legacy = DifferentiableGeDIG(use_unified=False)
+        legacy = LegacyGeDIG(use_unified=False)
         r_old = legacy(before, after_old)
         r_old["F_mean"].backward()
         grad_old = raw_old.grad.clone()
@@ -164,12 +283,19 @@ class TestT3_GradientEquivalence:
         # Unified
         raw_new = raw_old.data.clone().requires_grad_(True)
         after_new = torch.softmax(raw_new, dim=-1)
-        unified = DifferentiableGeDIG(use_unified=True)
+        unified = UnifiedGeDIG(use_unified=True)
         r_new = unified(before, after_new)
         r_new["F_mean"].backward()
         grad_new = raw_new.grad.clone()
 
-        # Gradient cosine similarity should be > 0.99
+        torch.testing.assert_close(
+            grad_old,
+            grad_new,
+            rtol=1e-5,
+            atol=1e-6,
+        )
+
+        # Retain a directional diagnostic for clearer failures.
         cos_sim = torch.nn.functional.cosine_similarity(
             grad_old.flatten().unsqueeze(0),
             grad_new.flatten().unsqueeze(0),
@@ -177,7 +303,9 @@ class TestT3_GradientEquivalence:
         assert cos_sim > 0.99, f"Gradient cosine similarity: {cos_sim:.6f}"
 
     def test_gradient_magnitude(self):
-        from thermodynamic_gedig import DifferentiableGeDIG
+        from thermodynamic_gedig import (
+            DifferentiableGeDIG,
+        )
 
         torch.manual_seed(42)
         before = torch.softmax(torch.randn(1, 2, 8, 8), dim=-1)
@@ -200,14 +328,19 @@ class TestT5_SpeedRegression:
 
     def test_forward_speed(self):
         import time
-        from thermodynamic_gedig import DifferentiableGeDIG
+        from thermodynamic_gedig import (
+            DifferentiableGeDIG as UnifiedGeDIG,
+        )
+        from thermodynamic_gedig_legacy import (
+            DifferentiableGeDIG as LegacyGeDIG,
+        )
 
         torch.manual_seed(0)
         before = torch.softmax(torch.randn(4, 6, 32, 32), dim=-1)
         after = torch.softmax(torch.randn(4, 6, 32, 32), dim=-1)
 
-        legacy = DifferentiableGeDIG(use_unified=False)
-        unified = DifferentiableGeDIG(use_unified=True)
+        legacy = LegacyGeDIG(use_unified=False)
+        unified = UnifiedGeDIG(use_unified=True)
 
         # Warmup
         legacy(before, after)

@@ -163,3 +163,28 @@ class TestMessagePassing:
         assert np.allclose(weights.sum(), 1.0)  # Weights sum to 1
         assert weights[0] > weights[1]  # First key most similar to query
         assert weights[0] > weights[2]
+
+    def test_attention_name_is_a_warned_mean_alias(self):
+        with pytest.warns(FutureWarning):
+            mp = MessagePassing(aggregation="attention")
+
+        assert mp.aggregation == "mean"
+
+    def test_unknown_aggregation_is_rejected(self):
+        with pytest.raises(ValueError, match="Unknown.*aggregation"):
+            MessagePassing(aggregation="typo")
+
+    def test_attention_weight_softmax_is_stable(self):
+        mp = MessagePassing()
+        weights = mp.compute_attention_weights(
+            np.array([1000.0, 0.0]),
+            np.array(
+                [
+                    [1000.0, 0.0],
+                    [999.0, 0.0],
+                ]
+            ),
+        )
+
+        assert np.isfinite(weights).all()
+        assert weights.sum() == pytest.approx(1.0)

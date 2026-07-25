@@ -7,14 +7,21 @@ Core tensor-native implementations of geDIG metrics.
 All functions are stateless, differentiable, and GPU-ready.
 """
 
-from typing import Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
 import torch
 import torch.nn.functional as F
 import math
 
+if TYPE_CHECKING:
+    from gedig.adapters.transformer import TransformerFEvalResult
+else:
+    # Keep importing the adapter lazy while allowing typing.get_type_hints()
+    # to resolve the public function at runtime.
+    TransformerFEvalResult = Any
 
-def compute_f_score(
+
+def compute_structural_profile(
     attention: torch.Tensor,
     attention_mask: Optional[torch.Tensor] = None,
     lambda_param: float = 1.0,
@@ -23,8 +30,11 @@ def compute_f_score(
     percentile: float = 0.9,
     max_path_length: int = 4,
 ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor]]:
-    """
-    Compute geDIG F-score and component metrics for a batch of attention matrices.
+    """Compute the legacy single-state Flash structural profile.
+
+    This is an absolute diagnostic over one attention state. It is not the
+    canonical geDIG before/after delta, so its components intentionally do not
+    use ``delta_*`` names and it has no universal optimization direction.
 
     Args:
         attention: Attention weights (Batch, Heads, Seq, Seq)
@@ -36,8 +46,8 @@ def compute_f_score(
         max_path_length: Maximum path length for SP approximation (Matrix Power).
 
     Returns:
-        f_values: Tensor of F-scores (Batch, Heads)
-        metrics: Dictionary containing 'delta_epc', 'delta_h', 'delta_sp' tensors.
+        profile_values: Tensor of profile values (Batch, Heads)
+        metrics: Absolute ``epc``, ``h``, ``sp``, and ``clustering`` tensors.
     """
     # 1. Preprocess: Apply mask if provided
     if attention_mask is not None:
@@ -47,21 +57,95 @@ def compute_f_score(
         attention = attention * mask_2d
 
     # 2. Compute Components
-    delta_epc = _compute_soft_density(attention, temperature, percentile)
-    delta_h = _compute_entropy(attention, attention_mask)
-    delta_sp = _compute_soft_path_efficiency(attention, temperature, percentile, max_path_length)
-    delta_clustering = _compute_soft_clustering(attention, temperature, percentile)
+    epc = _compute_soft_density(attention, temperature, percentile)
+    entropy = _compute_entropy(attention, attention_mask)
+    structure_potential = _compute_soft_path_efficiency(
+        attention,
+        temperature,
+        percentile,
+        max_path_length,
+    )
+    clustering = _compute_soft_clustering(
+        attention,
+        temperature,
+        percentile,
+    )
 
     # 3. Compute F
     # ... (omitted comments)
-    f_values = delta_epc - lambda_param * (delta_h + gamma * delta_sp)
+    f_values = epc - lambda_param * (
+        entropy + gamma * structure_potential
+    )
 
     return f_values, {
-        "delta_epc": delta_epc,
-        "delta_h": delta_h,
-        "delta_sp": delta_sp,
-        "delta_clustering": delta_clustering
+        "epc": epc,
+        "h": entropy,
+        "sp": structure_potential,
+        "clustering": clustering,
     }
+
+
+def compute_f_score(
+    attention: torch.Tensor,
+    attention_mask: Optional[torch.Tensor] = None,
+    lambda_param: float = 1.0,
+    gamma: float = 0.5,
+    temperature: float = 0.1,
+    percentile: float = 0.9,
+    max_path_length: int = 4,
+) -> Tuple[torch.Tensor, Dict[str, torch.Tensor]]:
+    """Compatibility wrapper for the historical single-state Flash API.
+
+    The returned numbers and legacy ``delta_*`` metric keys are preserved.
+    New diagnostic code should call :func:`compute_structural_profile`; code
+    that needs canonical geDIG semantics should call
+    :func:`compute_delta_f_score`.
+    """
+
+    profile, metrics = compute_structural_profile(
+        attention,
+        attention_mask=attention_mask,
+        lambda_param=lambda_param,
+        gamma=gamma,
+        temperature=temperature,
+        percentile=percentile,
+        max_path_length=max_path_length,
+    )
+    return profile, {
+        "delta_epc": metrics["epc"],
+        "delta_h": metrics["h"],
+        "delta_sp": metrics["sp"],
+        "delta_clustering": metrics["clustering"],
+    }
+
+
+def compute_delta_f_score(
+    before_attention: torch.Tensor,
+    after_attention: torch.Tensor,
+    mask: Optional[torch.Tensor] = None,
+    *,
+    lambda_param: float = 1.0,
+    gamma: float = 0.5,
+    temperature: float = 10.0,
+    percentile: float = 0.9,
+    use_betti: bool = False,
+) -> "TransformerFEvalResult":
+    """Compute canonical before/after geDIG F via ``TransformerFEval``.
+
+    Lower F is better under the repository-wide judgment convention. The
+    returned adapter result exposes ``F`` with shape ``(batch, heads)``,
+    scalar ``F_mean``, and the component means without repackaging them.
+    """
+
+    from gedig.adapters.transformer import TransformerFEval
+
+    return TransformerFEval(
+        lambda_param=lambda_param,
+        gamma=gamma,
+        percentile=percentile,
+        temperature=temperature,
+        use_betti=use_betti,
+    ).compute(before_attention, after_attention, mask)
 
 # Helpers
 

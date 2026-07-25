@@ -69,7 +69,7 @@ class UnknownLearner:
             from ..config import get_config
 
             config = get_config()
-            db_path = config.paths.root_dir / "data" / "unknown_learning.db"
+            db_path = config.paths.data_dir / "unknown_learning.db"
 
         self.db_path = db_path
         self.db_path.parent.mkdir(parents=True, exist_ok=True)

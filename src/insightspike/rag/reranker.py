@@ -3,8 +3,8 @@
 Structure-Guided RAG Reranker
 =============================
 
-Reranks retrieved documents based on their "Structural Fitness" (geDIG F-score).
-Prioritizes information that the model can structurally integrate (logical/coherent) over pure similarity.
+Reranks retrieved documents using a single-state Flash structural profile.
+This diagnostic is distinct from canonical before/after geDIG delta F.
 """
 
 from typing import List, Dict, Optional, Tuple, Union
@@ -14,7 +14,7 @@ import torch.nn as nn
 from transformers import AutoModel, AutoTokenizer, PreTrainedModel
 import logging
 
-from insightspike.gedig import compute_f_score
+from insightspike.gedig import compute_structural_profile
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ def _select_bottom_indices(scores: List[float], fraction: float) -> List[int]:
 
 class StructureReranker:
     """
-    Reranks document chunks based on how much 'structural order' they induce in the Transformer.
+    Reranks chunks with an experiment-specific structural-profile heuristic.
     """
     def __init__(
         self, 
@@ -76,7 +76,7 @@ class StructureReranker:
         gate_penalty: Optional[float] = None
     ) -> List[Dict[str, Union[str, float]]]:
         """
-        Rerank documents by F-score.
+        Rerank documents by a single-state structural profile.
         
         Args:
             query: The user query.
@@ -109,39 +109,44 @@ class StructureReranker:
             with torch.no_grad():
                 outputs = self.model(**inputs, output_attentions=True)
                 
-            # Compute F-score for this query-doc pair
-            # We average F across all heads and all layers to get a single "Coherence Score".
+            # Compute the single-state profile for this query-doc pair.
+            # Average heads/layers to retain the historical score contract.
             # Note: We could weigh deeper layers more, but uniform average is a good start.
             
             # attentions: tuple of (batch=1, heads, seq, seq)
-            total_f = 0.0
+            total_profile = 0.0
             metrics_sum = {"epc": 0.0, "entropy": 0.0, "sp": 0.0, "clustering": 0.0}
             num_layers = len(outputs.attentions)
             
             for layer_attn in outputs.attentions:
-                f_val, metrics = compute_f_score(
+                profile_value, metrics = compute_structural_profile(
                     layer_attn,
                     attention_mask=inputs.get("attention_mask")
                 )
-                # f_val: (1, heads)
-                total_f += f_val.mean().item()
-                metrics_sum["epc"] += metrics["delta_epc"].mean().item()
-                metrics_sum["entropy"] += metrics["delta_h"].mean().item()
-                metrics_sum["sp"] += metrics["delta_sp"].mean().item()
-                metrics_sum["clustering"] += metrics.get("delta_clustering", torch.tensor(0.0)).mean().item()
+                # profile_value: (1, heads)
+                total_profile += profile_value.mean().item()
+                metrics_sum["epc"] += metrics["epc"].mean().item()
+                metrics_sum["entropy"] += metrics["h"].mean().item()
+                metrics_sum["sp"] += metrics["sp"].mean().item()
+                metrics_sum["clustering"] += metrics.get(
+                    "clustering",
+                    torch.tensor(0.0),
+                ).mean().item()
 
-            avg_f = total_f / num_layers
+            avg_profile = total_profile / num_layers
             avg_metrics = {k: v / num_layers for k, v in metrics_sum.items()}
             
             results.append({
                 "doc": doc,
-                "score": avg_f,
+                # ``score`` is retained for compatibility; its value is the
+                # historical single-state profile, not canonical delta F.
+                "score": avg_profile,
                 "metrics": avg_metrics
             })
 
         for res in results:
             m = res["metrics"]
-            # Custom Ranking Score aligned with "Structural Fitness" intended for RAG
+            # Experiment-specific ranking heuristic derived from profile terms.
             # New Formula: Clustering is KING. Random graphs have ~0 clustering. Semantic graphs have >0.
             # SP is also good. Entropy is bad. EPC is ambiguous but we prefer sparse.
             # Weighting: Clustering (x5.0) > SP (x2.0) > Entropy (x-1.0) > EPC (x-0.5)

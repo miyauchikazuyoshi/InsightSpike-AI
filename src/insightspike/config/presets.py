@@ -16,6 +16,7 @@ from .models import (
     MemoryConfig,
     MonitoringConfig,
 )
+from .pydantic_compat import model_dump_compat
 
 
 class ConfigPresets:
@@ -80,6 +81,7 @@ class ConfigPresets:
                 episodic_memory_capacity=100,
                 max_retrieved_docs=15,
                 similarity_threshold=0.35,
+                max_episodes=2000,
             ),
             embedding=EmbeddingConfig(
                 model_name="sentence-transformers/all-MiniLM-L6-v2",
@@ -121,6 +123,7 @@ class ConfigPresets:
                 episodic_memory_capacity=200,
                 max_retrieved_docs=20,
                 similarity_threshold=0.4,
+                max_episodes=5000,
             ),
             embedding=EmbeddingConfig(
                 model_name="sentence-transformers/all-mpnet-base-v2",
@@ -336,7 +339,7 @@ class ConfigPresets:
             )
 
         # Return as dictionary for backward compatibility
-        return presets[name].dict()
+        return model_dump_compat(presets[name])
 
     # Legacy dictionary format for backward compatibility
     DEVELOPMENT = {

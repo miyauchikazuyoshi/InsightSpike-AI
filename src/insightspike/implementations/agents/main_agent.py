@@ -8,6 +8,7 @@ import logging
 import os
 import atexit
 import time as _time_for_trace  # local alias to avoid shadowing later 'time'
+from collections.abc import Mapping
 
 _logger = logging.getLogger(__name__)
 _DIAG_IMPORT = os.getenv('INSIGHTSPIKE_DIAG_IMPORT') == '1'
@@ -29,21 +30,11 @@ import time
 # insightspike.implementations.agents.main_agent.get_llm_provider
 # without importing heavy dependencies at module import time.
 def get_llm_provider(config=None, safe_mode: bool = False):  # type: ignore
-    try:
-        from ..layers.layer4_llm_interface import get_llm_provider as _impl  # local import
-        return _impl(config, safe_mode=safe_mode)
-    except Exception as e:  # pragma: no cover
-        # Minimal fallback provider with the expected interface
-        class _FallbackLLM:
-            def __init__(self):
-                self.initialized = True
-            def initialize(self):
-                return True
-            def generate_response_detailed(self, ctx, question):  # type: ignore
-                return {"response": "", "success": True, "confidence": 0.0}
-            def generate_response(self, *a, **k):
-                return {"response": "", "success": True}
-        return _FallbackLLM()
+    from ..layers.layer4_llm_interface import get_llm_provider as _impl  # local import
+
+    # Provider construction errors are handled by AgentLifecycle so there is
+    # one fallback implementation and one observable fallback payload.
+    return _impl(config, safe_mode=safe_mode)
 
 # Optional: detailed import tracer (Task1). Enables slow-import logging to pinpoint hang.
 # Usage: INSIGHTSPIKE_IMPORT_TRACE=1 INSIGHTSPIKE_IMPORT_TRACE_MIN_MS=25 (ms threshold)
@@ -88,6 +79,14 @@ from ...core.base.datastore import DataStore
 if _DIAG_IMPORT:
     print('[main_agent] post datastore import', flush=True)
 from ...core.episode import Episode
+from ..datastore.episode_codec import episode_to_record, record_to_episode
+from .agent_config_access import AgentConfigAccess
+from .agent_lifecycle import AgentLifecycle
+from .agent_persistence import AgentPersistence
+from .cycle_result_aggregator import (
+    CycleAggregationStats,
+    CycleResultAggregator,
+)
 if _DIAG_IMPORT:
     print('[main_agent] episode imported', flush=True)
 from ...detection.insight_registry import get_insight_registry
@@ -280,23 +279,30 @@ class MainAgent:
         )  # CONFIG_BRANCH_IGNORE
         self._original_config = config
         cfg_type = detect_config_type(config)
-        try:
-            if cfg_type != 'pydantic':
-                normalized_candidate = normalize(config)
-                if is_pydantic_config(normalized_candidate):
-                    self.config = normalized_candidate
-                    self.is_pydantic_config = True
-                else:
-                    self.config = config
-                    self.is_pydantic_config = is_pydantic_config(config)
-            else:
-                self.config = config
-                self.is_pydantic_config = True
-        except Exception:
+        if cfg_type != 'pydantic':
+            self.config = normalize(config)
+            self.is_pydantic_config = is_pydantic_config(self.config)
+        else:
             self.config = config
-            self.is_pydantic_config = is_pydantic_config(config)
+            self.is_pydantic_config = True
         if not self.is_pydantic_config:
-            logger.debug("MainAgent using non-pydantic config (normalization fallback).")
+            raise TypeError("MainAgent configuration did not normalize to InsightSpikeConfig")
+        try:
+            self._normalized_config = (
+                self._get_config_access().normalized(self.config)
+            )
+            self._generated_normalized_config = (
+                self._normalized_config
+            )
+            self._normalized_config_overrides = {}
+        except Exception as e:  # pragma: no cover
+            logger.debug(
+                "NormalizedConfig creation failed (non-fatal): %s",
+                e,
+            )
+            self._normalized_config = None
+            self._generated_normalized_config = None
+            self._normalized_config_overrides = {}
         self._diag('phase1 config normalized')
         if _maybe_stop(1):
             return
@@ -361,10 +367,20 @@ class MainAgent:
         # Learning flag
         self.enable_learning = False
         try:
-            if getattr(self, '_normalized_config', None) is not None:
-                self.enable_learning = bool(getattr(self._normalized_config, 'enable_learning', False))
+            normalized_config = self._nc()
+            if normalized_config is not None:
+                self.enable_learning = bool(
+                    normalized_config.enable_learning
+                )
             else:
-                self.enable_learning = bool(safe_attr(self.config, 'processing.enable_learning', False))
+                processing_config = self._processing_cfg()
+                self.enable_learning = bool(
+                    getattr(
+                        processing_config,
+                        "enable_learning",
+                        False,
+                    )
+                )
         except Exception:
             pass
         self._diag(f'phase7 enable_learning={self.enable_learning}')
@@ -372,17 +388,11 @@ class MainAgent:
             return
 
         self._initialized = False
-        try:
-            from insightspike.config.normalized import NormalizedConfig
-            self._normalized_config = NormalizedConfig.from_any(self.config)
-            logger.debug(
-                "NormalizedConfig initialized: %s (defaults=%s)",
-                getattr(self._normalized_config, 'source_type', '?'),
-                getattr(self._normalized_config, 'applied_defaults', None),
-            )
-        except Exception as e:  # pragma: no cover
-            logger.debug(f"NormalizedConfig creation failed (non-fatal): {e}")
-            self._normalized_config = None
+        logger.debug(
+            "NormalizedConfig initialized: %s (defaults=%s)",
+            getattr(self._normalized_config, 'source_type', '?'),
+            getattr(self._normalized_config, 'applied_defaults', None),
+        )
         self._diag('phase8 normalized_config processed')
         if _maybe_stop(8):
             return
@@ -405,15 +415,12 @@ class MainAgent:
                 # NOTE: FS 直結は行わない。外部から set_writer()/set_auto_csv_path() を注入する運用に切替。
                 # 互換のため、mode=ab が有効な場合はヒントのみログ出力する。
                 try:
-                    gedig_mode = None
-                    if getattr(self, '_normalized_config', None) is not None:
-                        gedig_mode = getattr(self._normalized_config, 'gedig_mode', None)
-                    else:
-                        if isinstance(self.config, dict):
-                            gedig_mode = self.config.get('gedig', {}).get('mode')
-                        else:  # pragma: no cover - defensive
-                            gedig_obj = getattr(self.config, 'gedig', None)
-                            gedig_mode = getattr(gedig_obj, 'mode', None)
+                    normalized_config = self._nc()
+                    gedig_mode = (
+                        normalized_config.gedig_mode
+                        if normalized_config is not None
+                        else None
+                    )
                     if gedig_mode == 'ab':
                         hint_dir = os.getenv('INSIGHTSPIKE_AB_LOG_DIR')
                         if hint_dir:
@@ -440,6 +447,56 @@ class MainAgent:
         if _DIAG_IMPORT:
             print('[main_agent] __init__ complete', flush=True)
         self._diag('init end')
+
+    @property
+    def initialized(self) -> bool:
+        """Whether all runtime components have completed initialization.
+
+        ``_initialized`` remains the internal storage for backward
+        compatibility. Public callers should use this property so quick-start
+        helpers and wrappers do not have to infer lifecycle state.
+        """
+        return bool(getattr(self, "_initialized", False))
+
+    def _get_persistence(self) -> AgentPersistence:
+        """Return the lazily-created persistence service.
+
+        Lazy creation preserves constructor-free compatibility paths that use
+        ``MainAgent.__new__`` and then inject the public component attributes.
+        """
+
+        service = getattr(self, "_agent_persistence", None)
+        if service is None:
+            service = AgentPersistence(logger=logger)
+            self._agent_persistence = service
+        return service
+
+    def _get_lifecycle(self) -> AgentLifecycle:
+        """Return the lifecycle service without moving component ownership."""
+
+        service = getattr(self, "_agent_lifecycle", None)
+        if service is None:
+            service = AgentLifecycle(logger=logger)
+            self._agent_lifecycle = service
+        return service
+
+    def _get_config_access(self) -> AgentConfigAccess:
+        """Return the stateless configuration-access service."""
+
+        service = getattr(self, "_agent_config_access", None)
+        if service is None:
+            service = AgentConfigAccess(logger=logger)
+            self._agent_config_access = service
+        return service
+
+    def _get_result_aggregator(self) -> CycleResultAggregator:
+        """Return the lazily-created pure cycle-result aggregator."""
+
+        service = getattr(self, "_cycle_result_aggregator", None)
+        if service is None:
+            service = CycleResultAggregator(CycleResult)
+            self._cycle_result_aggregator = service
+        return service
 
     # --- Lazy learning component loader ---------------------------------------
     def _maybe_init_learning(self):
@@ -476,120 +533,89 @@ class MainAgent:
 
     # --- Config Access Helpers (Phase1a reduction) ---
     def _nc(self):
-        """Return normalized config (recreate if missing)."""
-        if getattr(self, '_normalized_config', None) is None:
-            try:
-                from insightspike.config.normalized import NormalizedConfig
-                self._normalized_config = NormalizedConfig.from_any(self.config)
-            except Exception:  # pragma: no cover
-                return None
-        return self._normalized_config
+        """Return live normalized config plus explicit field overrides."""
+
+        access = self._get_config_access()
+        current = getattr(self, "_normalized_config", None)
+        generated = getattr(
+            self,
+            "_generated_normalized_config",
+            None,
+        )
+        overrides = dict(
+            getattr(self, "_normalized_config_overrides", {})
+        )
+        # Tests and advanced callers historically replace this attribute
+        # directly (for example via dataclasses.replace). Preserve changed
+        # fields while allowing all other values to follow the source config.
+        if current is not None and generated is not None and current is not generated:
+            overrides.update(
+                access.normalized_override_fields(
+                    generated,
+                    current,
+                )
+            )
+        if current is not None and generated is None:
+            return current
+
+        try:
+            refreshed = access.normalized_with_overrides(
+                self.config,
+                overrides,
+            )
+        except Exception:  # pragma: no cover
+            return current
+        self._normalized_config_overrides = overrides
+        self._normalized_config = refreshed
+        self._generated_normalized_config = refreshed
+        return refreshed
 
     # --- Thin wrappers to eliminate scattered getattr (Phase1a residual cleanup) ---
     def _graph_cfg(self):
-        if self.is_pydantic_config:
-            return self.config.graph
-        return getattr(self.config, 'graph', None)
+        return self._get_config_access().section(
+            self.config,
+            "graph",
+        )
 
     def _memory_cfg(self):
-        if self.is_pydantic_config:
-            return self.config.memory
-        return getattr(self.config, 'memory', None)
+        return self._get_config_access().section(
+            self.config,
+            "memory",
+        )
 
     def _processing_cfg(self):
-        if self.is_pydantic_config:
-            return self.config.processing
-        return getattr(self.config, 'processing', None)
+        return self._get_config_access().section(
+            self.config,
+            "processing",
+        )
 
     def _two_threshold_params(self) -> Dict[str, Any]:
-        params: Dict[str, Any] = {
-            "theta_cand": 0.45,
-            "theta_link": 0.35,
-            "k_cap": 32,
-            "top_m": None,
-            "ig_denominator": "legacy",
-            "use_local_normalization": False,
-        }
-        cfg = getattr(self, 'config', None)
-        if cfg is None:
-            return params
-
-        try:
-            theta_cand = safe_attr(cfg, 'metrics.theta_cand', params['theta_cand'])
-            theta_link = safe_attr(cfg, 'metrics.theta_link', params['theta_link'])
-            k_cap = safe_attr(cfg, 'metrics.candidate_cap', params['k_cap'])
-            top_m = safe_attr(cfg, 'metrics.top_m', params['top_m'])
-            ig_mode = safe_attr(cfg, 'metrics.ig_denominator', params['ig_denominator'])
-            local_norm = safe_attr(cfg, 'metrics.use_local_normalization', params['use_local_normalization'])
-
-            if theta_cand is not None:
-                params['theta_cand'] = float(theta_cand)
-            if theta_link is not None:
-                params['theta_link'] = float(theta_link)
-            if k_cap is not None:
-                params['k_cap'] = max(1, int(k_cap))
-            if top_m is not None:
-                try:
-                    params['top_m'] = max(1, int(top_m))
-                except Exception:
-                    params['top_m'] = None
-            if ig_mode is not None:
-                params['ig_denominator'] = str(ig_mode).lower()
-            params['use_local_normalization'] = bool(local_norm)
-        except Exception as cfg_err:
-            logger.debug(f"Two-threshold config fallback: {cfg_err}")
-
-        if params['theta_cand'] < params['theta_link']:
-            params['theta_cand'], params['theta_link'] = params['theta_link'], params['theta_cand']
-        return params
+        return self._get_config_access().two_threshold_params(
+            getattr(self, "config", None)
+        )
 
     def initialize(self) -> bool:
         """Initialize all components"""
         try:
             logger.info("Initializing MainAgent components...")
-
-            # Lazy create provider (avoid importing layer4_llm_interface during test collection)
-            if self.l4_llm is None:
-                try:
-                    from ..layers.layer4_llm_interface import get_llm_provider  # local import (heavy)
-                    # In lite/min mode force safe_mode True to ensure minimal path
-                    self.l4_llm = get_llm_provider(self.config, safe_mode=self._lite_mode)
-                except Exception as e:  # pragma: no cover
-                    logger.warning(f"Failed to create LLM provider (fallback mock). Error: {e}")
-                    class _FallbackLLM:
-                        initialized = True
-                        def initialize(self_inner):
-                            return True
-                        def generate(self_inner, *a, **k):
-                            return {"text": "[fallback-llm-response]", "raw": "[fallback-llm-response]"}
-                        def generate_response(self_inner, *a, **k):
-                            return {"response": "[fallback-llm-response]", "success": True}
-                        def generate_response_detailed(self_inner, *a, **k):
-                            return {"response": "[fallback-llm-response]", "success": True}
-                    self.l4_llm = _FallbackLLM()
-
-            # Initialize provider if it exposes initialize
-            if hasattr(self.l4_llm, "initialize"):
-                try:
-                    if not getattr(self.l4_llm, 'initialized', False):
-                        if not self.l4_llm.initialize():  # type: ignore
-                            logger.error("Failed to initialize LLM provider")
-                            return False
-                except Exception as e:
-                    logger.error(f"LLM initialization failed: {e}")
-                    raise
-
-            # Try to load existing memory (legacy path)
-            # In lite/min modes or when a DataStore is configured, skip legacy L2 JSON load
-            # to avoid pulling in repo-level sample data during isolated runs.
-            if self.datastore is None and not self._lite_mode:
-                if not self.l2_memory.load():
-                    logger.info("No existing memory found, starting fresh")
-            else:
-                logger.debug("Skipping legacy L2 load (datastore present or lite/min mode)")
-
-            # Initialize error monitor
-            self.l1_error_monitor.reset()
+            lifecycle = self._get_lifecycle()
+            self.l4_llm = lifecycle.resolve_llm(
+                llm=self.l4_llm,
+                llm_factory=lambda: get_llm_provider(
+                    self.config,
+                    safe_mode=self._lite_mode,
+                ),
+            )
+            initialization = lifecycle.initialize(
+                llm=self.l4_llm,
+                memory=self.l2_memory,
+                datastore=self.datastore,
+                lite_mode=self._lite_mode,
+                error_monitor=self.l1_error_monitor,
+            )
+            self.l4_llm = initialization.llm
+            if not initialization.initialized:
+                return False
 
             self._initialized = True
             logger.info("MainAgent initialization complete")
@@ -754,18 +780,12 @@ class MainAgent:
         previous_graph/current_graph: 任意のグラフ表現 (現行実装互換)
         戻り値: dict { 'gedig': float, 'ged': float|None, 'ig': float|None, 'mode': str }
         """
-        mode = 'full'
-        if getattr(self, '_normalized_config', None) is not None:
-            mode = self._normalized_config.gedig_mode
-        else:
-            # raw config 読み取り (後方互換)
-            try:
-                if isinstance(self.config, dict):
-                    mode = self.config.get('gedig', {}).get('mode', 'full')
-                else:
-                    mode = getattr(getattr(self.config, 'gedig', {}), 'mode', 'full')
-            except Exception:
-                mode = 'full'
+        normalized_config = self._nc()
+        mode = (
+            normalized_config.gedig_mode
+            if normalized_config is not None
+            else "full"
+        )
 
         # Normalize graph inputs (allow None by mapping to empty graphs)
         try:
@@ -915,10 +935,12 @@ class MainAgent:
             # L3: Graph reasoning and analysis
             # NormSpec from NormalizedConfig for consistent thresholds across layers
             try:
-                from ...config import get_config as _get_cfg
-                from ...config.normalized import NormalizedConfig as _NC
-                _nc = _NC.from_any(_get_cfg())
-                _norm_spec = _nc.norm_spec
+                normalized_config = self._nc()
+                _norm_spec = (
+                    normalized_config.norm_spec
+                    if normalized_config is not None
+                    else None
+                )
             except Exception:
                 _norm_spec = None
             graph_context = {
@@ -943,9 +965,17 @@ class MainAgent:
                 try:
                     from ..layers.layer1_conductor import L1Conductor
                     l1c = L1Conductor(self.config)
+                    graph_config = self._graph_cfg()
                     # centers: Top N retrieved docs (configurable via graph.centers_count)
                     try:
-                        centers_count = int(getattr(getattr(self.config, 'graph', None), 'centers_count', 3) or 3)
+                        centers_count = int(
+                            getattr(
+                                graph_config,
+                                "centers_count",
+                                3,
+                            )
+                            or 3
+                        )
                     except Exception:
                         centers_count = 3
                     centers = []
@@ -954,7 +984,14 @@ class MainAgent:
                             centers.append(int(doc["index"]))
                     # defaults（設定で上書き可）
                     try:
-                        top_k = int(getattr(getattr(self.config, 'graph', None), 'candidate_topk', 16) or 16)
+                        top_k = int(
+                            getattr(
+                                graph_config,
+                                "candidate_topk",
+                                16,
+                            )
+                            or 16
+                        )
                     except Exception:
                         top_k = 16
                     theta_link = 0.3
@@ -967,7 +1004,14 @@ class MainAgent:
                         pass
                     max_hops = 3
                     try:
-                        max_hops = int(getattr(getattr(self.config, 'graph', None), 'sp_hop_expand', 3) or 3)
+                        max_hops = int(
+                            getattr(
+                                graph_config,
+                                "sp_hop_expand",
+                                3,
+                            )
+                            or 3
+                        )
                     except Exception:
                         pass
                     l1_out = l1c.propose_candidates(retrieved_docs, centers, top_k=top_k, theta_link=theta_link, max_hops=max_hops)
@@ -982,9 +1026,13 @@ class MainAgent:
                 graph_analysis = self.l3_graph.analyze_documents(retrieved_docs, graph_context)
                 # Optional: decision controller
                 try:
-                    use_dc = False
-                    if self.is_pydantic_config:
-                        use_dc = bool(getattr(getattr(self.config, 'agent', None), 'use_decision_controller', False))
+                    use_dc = bool(
+                        self._get_config_access().value(
+                            self.config,
+                            "agent.use_decision_controller",
+                            False,
+                        )
+                    )
                     if use_dc:
                         if self._decision_controller is None:
                             from .decision_controller import DecisionController
@@ -1023,10 +1071,16 @@ class MainAgent:
             else:
                 graph_search_enabled = False
                 if self.is_pydantic_config:
-                    graph_search_enabled = getattr(self.config.graph, "enable_graph_search", False)
+                    graph_search_enabled = getattr(
+                        self._graph_cfg(),
+                        "enable_graph_search",
+                        False,
+                    )
                 else:
                     graph_search_enabled = getattr(
-                        getattr(self.config, "graph", {}), "enable_graph_search", False
+                        self._graph_cfg(),
+                        "enable_graph_search",
+                        False,
                     )
             
             if graph_search_enabled and self.current_graph is not None and retrieved_docs:
@@ -1180,7 +1234,7 @@ class MainAgent:
                 # Apply adaptive thresholds
                 if self.is_pydantic_config:
                     # mutate underlying pydantic config cautiously
-                    g = self.config.graph
+                    g = self._graph_cfg()
                     g.similarity_threshold = adaptive_config.get(
                         "similarity_threshold", g.similarity_threshold
                     )
@@ -1524,25 +1578,23 @@ class MainAgent:
         if not results:
             return self._error_cycle_result("", 0, "No results generated")
 
-        # Use the best result (highest quality)
-        best_result = max(results, key=lambda r: r.reasoning_quality)
-
-        # Create a new CycleResult with additional metadata
-        # Store extra data in graph_analysis for backward compatibility
-        enhanced_graph_analysis = best_result.graph_analysis.copy()
-        enhanced_graph_analysis.update(
-            {
-                "total_cycles": len(results),
-                "converged": converged,
-                "cycle_history": [r.to_dict() for r in results] if verbose else [],
-                "agent_stats": {
-                    "memory_episodes": self.l2_memory.get_memory_stats().get(
-                        "total_episodes", 0
-                    ),
-                    "total_processed": len(self.reasoning_history),
-                },
-            }
+        aggregator = self._get_result_aggregator()
+        aggregation = aggregator.prepare(
+            results,
+            converged=converged,
+            include_history=verbose,
+            stats=CycleAggregationStats(
+                memory_episodes=(
+                    self.l2_memory.get_memory_stats().get(
+                        "total_episodes",
+                        0,
+                    )
+                ),
+                total_processed=len(self.reasoning_history),
+            ),
         )
+        best_result = aggregation.selected
+        enhanced_graph_analysis = aggregation.graph_analysis
         
         # Log pattern and optimize strategy if learning is enabled
         if self.enable_learning:
@@ -1575,17 +1627,7 @@ class MainAgent:
             except Exception as e:
                 logger.error(f"Learning update failed: {e}")
 
-        return CycleResult(
-            question=best_result.question,
-            retrieved_documents=best_result.retrieved_documents,
-            graph_analysis=enhanced_graph_analysis,
-            response=best_result.response,
-            reasoning_quality=best_result.reasoning_quality,
-            spike_detected=best_result.spike_detected,
-            error_state=best_result.error_state,
-            cycle_number=best_result.cycle_number,
-            success=best_result.success,
-        )
+        return aggregator.build_result(aggregation)
 
     def _error_result(self, question: str, error: str) -> Dict[str, Any]:
         """Generate error result"""
@@ -1601,25 +1643,9 @@ class MainAgent:
 
     def _get_config_snapshot(self) -> Dict[str, Any]:
         """Get current configuration parameters for learning"""
-        nc = self._nc()
-        if nc:
-            return {
-                "similarity_threshold": nc.similarity_threshold,
-                "hop_limit": nc.hop_limit,
-                "path_decay": nc.path_decay,
-                "max_retrieved_docs": nc.max_retrieved_docs,
-                "spike_ged_threshold": nc.spike_ged_threshold,
-                "spike_ig_threshold": nc.spike_ig_threshold,
-            }
-        # fallback minimal snapshot
-        return {
-            "similarity_threshold": 0.3,
-            "hop_limit": 2,
-            "path_decay": 0.7,
-            "max_retrieved_docs": 10,
-            "spike_ged_threshold": -0.5,
-            "spike_ig_threshold": 0.2,
-        }
+        return self._get_config_access().learning_snapshot(
+            self._nc()
+        )
     
     def _error_cycle_result(self, question: str, cycle: int, error: str) -> CycleResult:
         """Generate error cycle result"""
@@ -1636,11 +1662,44 @@ class MainAgent:
         )
 
     def add_document(
-        self, text: str, c_value: float = 0.5, metadata: Optional[Dict] = None
+        self,
+        text: Any,
+        c_value: float = 0.5,
+        metadata: Optional[Dict] = None,
     ) -> bool:
-        """Add a document to memory"""
-        episode_idx = self.l2_memory.store_episode(text, c_value, metadata)
-        return episode_idx >= 0
+        """Add a text document or legacy document mapping to memory."""
+        document_text = text
+        document_metadata: Dict[str, Any] = {}
+
+        if isinstance(text, Mapping):
+            document_text = text.get("text")
+            mapping_metadata = text.get("metadata")
+            if isinstance(mapping_metadata, Mapping):
+                document_metadata.update(mapping_metadata)
+            c_value = text.get(
+                "c_value",
+                text.get("c", text.get("confidence", c_value)),
+            )
+
+        if isinstance(metadata, Mapping):
+            document_metadata.update(metadata)
+
+        if not isinstance(document_text, str) or not document_text.strip():
+            logger.warning("Document must contain non-empty text")
+            return False
+
+        try:
+            normalized_c_value = float(c_value)
+        except (TypeError, ValueError):
+            logger.warning("Document c_value must be numeric")
+            return False
+
+        episode_idx = self.l2_memory.store_episode(
+            document_text,
+            normalized_c_value,
+            document_metadata or None,
+        )
+        return episode_idx is not None and int(episode_idx) >= 0
 
     # Phase3 helper
     def export_gedig_ab_csv(self, path: str) -> int:
@@ -1702,33 +1761,25 @@ class MainAgent:
             # Persist all episodes to datastore if available (lightweight JSON snapshot)
             if self.datastore is not None and hasattr(self.l2_memory, 'episodes'):
                 try:
-                    serializable = []
-                    for ep in self.l2_memory.episodes:
-                        serializable.append({
-                            "text": getattr(ep, 'text', ''),
-                            "c_value": getattr(ep, 'c', 0.5),
-                            "timestamp": getattr(ep, 'timestamp', 0.0),
-                            "metadata": getattr(ep, 'metadata', {}),
-                            # DataStore.save_episodes expects 'vec' key
-                            "vec": getattr(ep, 'vec', None)
-                        })
-                    if hasattr(self.datastore, 'save_episodes'):
-                        # Save to both default (legacy) and agent_state (preferred)
-                        try:
-                            self.datastore.save_episodes(serializable, namespace='default')
-                        except Exception:
-                            pass
-                        try:
-                            self.datastore.save_episodes(serializable, namespace='agent_state')
-                        except Exception:
-                            pass
+                    self._get_persistence().persist_live_episode_snapshots(
+                        episodes=self.l2_memory.episodes,
+                        episode_encoder=episode_to_record,
+                        replace_episode_snapshot=(
+                            self._replace_episode_snapshot
+                        ),
+                    )
                 except Exception as persist_e:  # pragma: no cover (best-effort persistence)
                     logger.debug(f"Episode persistence skipped: {persist_e}")
             
             # Update graph if available
+            graph_updated = False
             if hasattr(self, 'l3_graph') and self.l3_graph:
                 try:
-                    self.l3_graph.update_graph([episode])
+                    update_result = self.l3_graph.update_graph([episode])
+                    # The current L3 compatibility method is an acknowledged
+                    # no-op and returns None. Report an update only when a
+                    # replacement implementation explicitly confirms it.
+                    graph_updated = update_result is True
                 except Exception as e:
                     logger.warning(f"Graph update failed: {e}")
             
@@ -1736,7 +1787,8 @@ class MainAgent:
                 "success": True,
                 "episode_idx": episode_idx,
                 "text": text,
-                "c_value": c_value
+                "c_value": c_value,
+                "graph_updated": graph_updated,
             }
             
         except AttributeError:
@@ -1835,6 +1887,7 @@ class MainAgent:
                 "graph_analysis": graph_analysis,
                 "total_episodes": len(self.l2_memory.episodes),
                 "graph_nodes": graph_nodes,
+                "graph_updated": False,
                 "success": True,
             }
 
@@ -1842,7 +1895,12 @@ class MainAgent:
 
         except Exception as e:
             logger.error(f"Failed to add knowledge: {e}")
-            return {"episode_idx": -1, "success": False, "error": str(e)}
+            return {
+                "episode_idx": -1,
+                "graph_updated": False,
+                "success": False,
+                "error": str(e),
+            }
 
     # --- Backward compatibility alias expected by tests ---
     def learn(self, text: str, c_value: float = 0.5) -> Dict[str, Any]:
@@ -1852,6 +1910,15 @@ class MainAgent:
         expecting insight accumulation.
         """
         result = self.add_knowledge(text, c_value)
+        try:
+            episode_added = (
+                result.get("success") is True
+                and int(result.get("episode_idx", -1)) >= 0
+            )
+        except (TypeError, ValueError):
+            episode_added = False
+        result.setdefault("episodes_added", 1 if episode_added else 0)
+        result.setdefault("graph_updated", False)
         # Ensure key exists for tests checking insights
         if result.get("success") and "insights" not in result:
             result["insights"] = []
@@ -1958,27 +2025,33 @@ class MainAgent:
     def get_insights(self, limit: int = 5) -> Dict[str, Any]:
         """Get recent insights discovered by the agent."""
         try:
-            from ...detection.insight_registry import InsightFactRegistry
-
-            registry = InsightFactRegistry()
+            registry = self.insight_registry
 
             # Get insights from registry
             insights = registry.get_recent_insights(limit=limit)
+            all_insights = getattr(registry, "insights", {})
+            categories = sorted(
+                {
+                    str(insight.relationship_type)
+                    for insight in all_insights.values()
+                    if getattr(insight, "relationship_type", None)
+                }
+            )
 
             # Add metadata
             return {
-                "total_insights": registry.total_insights,
+                "total_insights": len(all_insights),
                 "recent_insights": [
                     {
-                        "question": i.question,
-                        "answer": i.answer,
-                        "timestamp": i.timestamp,
-                        "context": i.context,
-                        "importance": i.importance,
+                        "question": i.discovery_context,
+                        "answer": i.text,
+                        "timestamp": i.generated_at,
+                        "context": i.discovery_context,
+                        "importance": i.quality_score,
                     }
                     for i in insights
                 ],
-                "categories": registry.get_categories(),
+                "categories": categories,
             }
         except Exception as e:
             logger.error(f"Failed to get insights: {e}")
@@ -1987,22 +2060,21 @@ class MainAgent:
     def search_insights(self, concept: str, limit: int = 10) -> List[Dict[str, Any]]:
         """Search for insights related to a concept."""
         try:
-            from ...detection.insight_registry import InsightFactRegistry
-
-            registry = InsightFactRegistry()
-
             # Search insights
-            results = registry.search_insights(concept, limit=limit)
+            results = self.insight_registry.search_insights_by_concept(
+                concept,
+                limit=limit,
+            )
 
             return [
                 {
-                    "question": i.question,
-                    "answer": i.answer,
+                    "question": i.discovery_context,
+                    "answer": i.text,
                     "relevance": i.relevance_score
                     if hasattr(i, "relevance_score")
                     else 1.0,
-                    "timestamp": i.timestamp,
-                    "importance": i.importance,
+                    "timestamp": i.generated_at,
+                    "importance": i.quality_score,
                 }
                 for i in results
             ]
@@ -2016,73 +2088,33 @@ class MainAgent:
             logger.warning("No DataStore configured, falling back to legacy save")
             return self._legacy_save_state()
 
-        try:
-            # Collect episodes from L2 memory
-            if self.l2_memory and hasattr(self.l2_memory, "episodes"):
-                episodes_to_save = []
-                for episode in self.l2_memory.episodes:
-                    # Convert episode to dict format for DataStore
-                    episode_dict = {
-                        "text": episode.text,
-                        "vec": episode.vec,
-                        "c_value": getattr(
-                            episode, "c", 0.5
-                        ),  # Episode uses 'c' attribute
-                        "timestamp": getattr(episode, "timestamp", time.time()),
-                    }
-                    episodes_to_save.append(episode_dict)
+        return self._get_persistence().save_datastore_state(
+            datastore=self.datastore,
+            memory=self.l2_memory,
+            graph_layer=self.l3_graph,
+            episode_encoder=episode_to_record,
+            replace_episode_snapshot=self._replace_episode_snapshot,
+        )
 
-                # Save episodes via DataStore
-                self.datastore.save_episodes(episodes_to_save, namespace="agent_state")
-                logger.info(f"Saved {len(episodes_to_save)} episodes via DataStore")
-
-            # Save graph from L3
-            if (
-                self.l3_graph
-                and hasattr(self.l3_graph, "previous_graph")
-                and self.l3_graph.previous_graph is not None
-            ):
-                self.datastore.save_graph(
-                    self.l3_graph.previous_graph,
-                    graph_id="main_graph",
-                    namespace="agent_state",
-                )
-                logger.info("Saved graph via DataStore")
-
-            return True
-
-        except Exception as e:
-            logger.error(f"Failed to save agent state via DataStore: {e}")
-            return False
+    def _replace_episode_snapshot(
+        self,
+        episodes: List[Dict[str, Any]],
+        *,
+        namespace: str,
+    ) -> bool:
+        """Persist an exact snapshot with a legacy-store fallback."""
+        return self._get_persistence().replace_episode_snapshot(
+            self.datastore,
+            episodes,
+            namespace=namespace,
+        )
 
     def _legacy_save_state(self) -> bool:
         """Legacy save method - to be deprecated."""
-        try:
-            success = True
-
-            # Save L2 memory
-            if self.l2_memory:
-                memory_saved = self.l2_memory.save()
-                if not memory_saved:
-                    logger.warning("Failed to save L2 memory")
-                    success = False
-                else:
-                    logger.info("L2 memory saved successfully")
-
-            # Save L3 graph
-            if self.l3_graph and self.l3_graph.previous_graph is not None:
-                try:
-                    self.l3_graph.save_graph(self.l3_graph.previous_graph)
-                    logger.info("L3 graph saved successfully")
-                except Exception as e:
-                    logger.warning(f"Failed to save L3 graph: {e}")
-                    success = False
-
-            return success
-
-        except Exception as e:
-            logger.error(f"Failed to save agent state: {e}")
-            return False
+        return self._get_persistence().save_legacy_state(
+            memory=self.l2_memory,
+            graph_layer=self.l3_graph,
+        )
 
     def load_state(self) -> bool:
         """Load agent state (memory and graph) using DataStore."""
@@ -2090,79 +2122,19 @@ class MainAgent:
             logger.warning("No DataStore configured, falling back to legacy load")
             return self._legacy_load_state()
 
-        try:
-            # Load episodes into L2 memory
-            if self.l2_memory:
-                loaded_episodes = self.datastore.load_episodes(namespace="agent_state")
-                if loaded_episodes:
-                    # Clear existing episodes and load new ones
-                    self.l2_memory.episodes = []
-                    for ep_dict in loaded_episodes:
-                        # Create episode object from dict
-                        episode = Episode(
-                            text=ep_dict["text"],
-                            vec=ep_dict["vec"],
-                            c=ep_dict.get(
-                                "c_value", 0.5
-                            ),  # Note: Episode uses 'c' not 'c_value'
-                            timestamp=ep_dict.get("timestamp", time.time()),
-                        )
-                        self.l2_memory.episodes.append(episode)
-
-                    logger.info(f"Loaded {len(loaded_episodes)} episodes via DataStore")
-                else:
-                    logger.warning("No episodes found in DataStore")
-
-            # Load graph into L3
-            if self.l3_graph:
-                loaded_graph = self.datastore.load_graph(
-                    graph_id="main_graph", namespace="agent_state"
-                )
-                if loaded_graph is not None:
-                    self.l3_graph.previous_graph = loaded_graph
-                    logger.info(
-                        f"Loaded graph via DataStore: {loaded_graph.num_nodes} nodes"
-                    )
-                else:
-                    logger.warning("No graph found in DataStore")
-
-            return True
-
-        except Exception as e:
-            logger.error(f"Failed to load agent state via DataStore: {e}")
-            return False
+        return self._get_persistence().load_datastore_state(
+            datastore=self.datastore,
+            memory=self.l2_memory,
+            graph_layer=self.l3_graph,
+            episode_decoder=record_to_episode,
+        )
 
     def _legacy_load_state(self) -> bool:
         """Legacy load method - to be deprecated."""
-        try:
-            success = True
-
-            # Load L2 memory
-            if self.l2_memory:
-                memory_loaded = self.l2_memory.load()
-                if memory_loaded:
-                    logger.info(
-                        f"L2 memory loaded: {len(self.l2_memory.episodes)} episodes"
-                    )
-                else:
-                    logger.warning("No existing L2 memory found")
-                    success = False
-
-            # Load L3 graph
-            if self.l3_graph:
-                loaded_graph = self.l3_graph.load_graph()
-                if loaded_graph is not None:
-                    self.l3_graph.previous_graph = loaded_graph
-                    logger.info(f"L3 graph loaded: {loaded_graph.num_nodes} nodes")
-                else:
-                    logger.warning("No existing L3 graph found")
-                    success = False
-
-            return success
-
-        except Exception as e:
-            logger.error(f"Failed to load agent state: {e}")
-            return False
+        return self._get_persistence().load_legacy_state(
+            memory=self.l2_memory,
+            graph_layer=self.l3_graph,
+        )
 
 # Backward compatibility function
 def cycle(memory, question: str, previous_graph=None, **kwargs) -> Dict[str, Any]:
@@ -2174,23 +2146,63 @@ def cycle(memory, question: str, previous_graph=None, **kwargs) -> Dict[str, Any
     """
     try:
         # Create temporary agent
-        agent = MainAgent()
+        from ...config import load_config
+
+        config = kwargs.pop("config", None) or load_config()
+        datastore = kwargs.pop("datastore", None)
+        max_cycles = int(kwargs.pop("max_cycles", 3))
+        verbose = bool(kwargs.pop("verbose", False))
+        agent = MainAgent(config, datastore=datastore)
+
+        # Initialize before copying caller-owned memory. The legacy initialize
+        # path may load persisted L2 state and would otherwise overwrite the
+        # supplied episodes.
+        initialize = getattr(agent, "initialize", None)
+        if callable(initialize) and not initialize():
+            return {
+                "answer": "Error: Failed to initialize agent",
+                "documents": [],
+                "graph": None,
+                "metrics": {},
+                "success": False,
+            }
 
         # If memory is provided, try to extract documents
         if hasattr(memory, "episodes") and memory.episodes:
             for episode in memory.episodes:
-                agent.add_document(episode.text, episode.c)
+                agent.add_document(
+                    episode.text,
+                    getattr(episode, "c", getattr(episode, "c_value", 0.5)),
+                )
+
+        if previous_graph is not None:
+            graph_layer = getattr(agent, "l3_graph", None)
+            if graph_layer is not None:
+                graph_layer.previous_graph = previous_graph
 
         # Process question
-        result = agent.process_question(question, max_cycles=3, verbose=False)
+        result = agent.process_question(
+            question,
+            max_cycles=max_cycles,
+            verbose=verbose,
+        )
+        payload = result.to_dict() if hasattr(result, "to_dict") else result
+
+        def _value(name: str, default: Any = None) -> Any:
+            if isinstance(payload, dict):
+                return payload.get(name, default)
+            return getattr(payload, name, default)
 
         # Return in old format
         return {
-            "answer": result.get("response", ""),
-            "documents": result.get("documents", []),
-            "graph": result.get("graph"),
-            "metrics": result.get("metrics", {}),
-            "success": result.get("success", True),
+            "answer": _value("response", ""),
+            "documents": _value(
+                "documents",
+                _value("retrieved_documents", []),
+            ),
+            "graph": _value("graph", _value("graph_analysis")),
+            "metrics": _value("metrics", {}),
+            "success": _value("success", True),
         }
 
     except Exception as e:

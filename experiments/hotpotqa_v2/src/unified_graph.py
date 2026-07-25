@@ -82,8 +82,9 @@ class AGHTConfig:
     sim_threshold: float = 0.30
     max_para_freq: int = 5
 
-    # Unified core
-    use_unified_feval: bool = False  # True: use gedig.adapters.rag
+    # Deprecated compatibility field. AGHT has delegated to RAGFEval
+    # unconditionally since the 2026-02 refactor.
+    use_unified_feval: bool = False
 
 
 @dataclass
@@ -598,11 +599,12 @@ def graph_attention_propagation(
     graph: nx.DiGraph,
     n_iterations: int = 2,
     mp_alpha: float = 0.3,
-    use_unified: bool = True,  # Kept for backward compat
+    use_unified: bool = True,  # Deprecated no-op; kept for call compatibility
 ) -> None:
     """Attention-weighted message passing on unified graph.
 
     Delegates to gedig.core.message_passing.AttentionPropagator.
+    ``use_unified`` is ignored because the active AGHT path is fully migrated.
     Updates node['relevance'] in-place.
     """
     # Initialize relevance from Q-score

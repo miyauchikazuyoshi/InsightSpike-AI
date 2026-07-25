@@ -51,7 +51,7 @@ answer = app.ask("What is geDIG?")
 - Create a simple DataStore instance
 - Allowed kinds: `filesystem`, `memory` (safe defaults only)
 - Examples:
-  - `create_datastore("filesystem", root="data")`
+  - `create_datastore("filesystem", root_path="data")`
   - `create_datastore("memory")`
 
 ## Notes & Guardrails

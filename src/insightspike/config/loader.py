@@ -1,301 +1,440 @@
-"""
-Configuration Loading and Management
-===================================
+"""Configuration loading, migration, validation, and persistence."""
 
-Handles loading configuration from various sources:
-- YAML/JSON files
-- Environment variables
-- Command-line arguments
-- Presets
-"""
+from __future__ import annotations
 
+import copy
 import json
 import logging
 import os
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 import yaml
 
+from .migration import ConfigMigrationDiagnostic, migrate_config
 from .models import InsightSpikeConfig
 from .presets import ConfigPresets
+from .pydantic_compat import model_dump_compat, model_validate_compat
 
 logger = logging.getLogger(__name__)
 
 
 class ConfigLoader:
-    """Unified configuration loader that handles all configuration sources"""
+    """Load all supported sources into one strict canonical configuration."""
 
     ENV_PREFIX = "INSIGHTSPIKE_"
     CONFIG_PATH_ENV = "INSIGHTSPIKE_CONFIG_PATH"
+    DEFAULT_DATASTORE_ROOT = "./data/insight_store"
 
     def __init__(self):
         self._config: Optional[InsightSpikeConfig] = None
         self._config_path: Optional[Path] = None
+        self._diagnostics: list[ConfigMigrationDiagnostic] = []
+
+    @property
+    def diagnostics(self) -> tuple[ConfigMigrationDiagnostic, ...]:
+        """Structured migrations produced by the latest load operation."""
+
+        return tuple(self._diagnostics)
 
     def load(
         self,
         config_path: Optional[Union[str, Path]] = None,
         preset: Optional[str] = None,
-        overrides: Optional[Dict[str, Any]] = None,
+        overrides: Optional[dict[str, Any]] = None,
     ) -> InsightSpikeConfig:
-        """
-        Load configuration from various sources with priority:
-        1. Command-line overrides (highest)
-        2. Environment variables
-        3. Config file (YAML/JSON)
-        4. Preset
-        5. Defaults (lowest)
+        """Load sources with priority ``preset < file < env < overrides``."""
 
-        Args:
-            config_path: Path to config file (YAML/JSON)
-            preset: Preset name to use as base
-            overrides: Dictionary of overrides
-
-        Returns:
-            Loaded configuration
-        """
-        # Start with defaults or preset
-        if preset:
-            config_dict = ConfigPresets.get_preset(preset)
-        else:
-            config_dict = {}
-
-        # Load from file if specified
-        file_config = self._load_from_file(config_path)
-        if file_config:
-            config_dict = self._deep_merge(config_dict, file_config)
-
-        # Apply environment variables
-        env_config = self._load_from_env()
-        if env_config:
-            config_dict = self._deep_merge(config_dict, env_config)
-
-        # Apply explicit overrides
-        if overrides:
-            config_dict = self._deep_merge(config_dict, overrides)
-
-        # Track if datastore.root_path was explicitly set by user (file/env/override)
-        def _has_explicit_root(d: Dict[str, Any]) -> bool:
-            try:
-                ds = d.get("datastore", {})
-                return "root_path" in ds and ds["root_path"] is not None
-            except Exception:
-                return False
-
-        explicit_root = any(
-            _has_explicit_root(src)
-            for src in (
-                file_config or {},
-                env_config or {},
-                overrides or {},
-            )
+        self._diagnostics = []
+        # A loader may be reused.  Do not let a file selected by an earlier
+        # load become the implicit save target for a later preset/default load.
+        self._config_path = None
+        preset_config = self._migrate_source(
+            ConfigPresets.get_preset(preset) if preset else {},
+            source="preset",
         )
-        if explicit_root:
-            # Ensure nested structure exists then set the marker
-            config_dict.setdefault("datastore", {})["explicit_root_path"] = True
+        # An explicitly selected preset is self-contained unless a file path
+        # (argument or environment variable) is also explicitly selected.
+        should_discover_file = (
+            preset is None
+            or config_path is not None
+            or bool(os.getenv(self.CONFIG_PATH_ENV))
+        )
+        file_config = self._migrate_source(
+            self._load_from_file(config_path) if should_discover_file else {},
+            source="file",
+        )
+        env_config = self._migrate_source(
+            self._load_from_env(),
+            source="environment",
+        )
+        override_config = self._migrate_source(
+            overrides or {},
+            source="override",
+        )
 
-        # Create and validate configuration
-        self._config = InsightSpikeConfig(**config_dict)
+        config_dict: dict[str, Any] = {}
+        for source_config in (
+            preset_config,
+            file_config,
+            env_config,
+            override_config,
+        ):
+            config_dict = self._deep_merge(config_dict, source_config)
+
+        explicit_root = self._resolve_explicit_root(
+            file_config,
+            env_config,
+            override_config,
+        )
+        if explicit_root is not None:
+            config_dict.setdefault("datastore", {})[
+                "explicit_root_path"
+            ] = explicit_root
+
+        self._config = self._validate(config_dict)
         return self._config
 
-    def _load_from_file(
-        self, config_path: Optional[Union[str, Path]] = None
-    ) -> Dict[str, Any]:
-        """Load configuration from YAML or JSON file"""
-        # Check explicit path first
-        if config_path:
-            path = Path(config_path)
-        else:
-            # Check environment variable
-            env_path = os.getenv(self.CONFIG_PATH_ENV)
-            if env_path:
-                path = Path(env_path)
-            else:
-                # Check default locations
-                # Prioritize YAML over JSON for better experiment control
-                for default_path in [
-                    "config.yaml",
-                    ".insightspike.yaml",
-                    "config.json",  # JSON last to avoid accidental overrides
-                ]:
-                    if Path(default_path).exists():
-                        path = Path(default_path)
-                        break
-                else:
-                    return {}
+    def _migrate_source(
+        self,
+        data: Mapping[str, Any],
+        *,
+        source: str,
+    ) -> dict[str, Any]:
+        result = migrate_config(
+            data,
+            emit_warnings=True,
+            source=source,
+        )
+        self._diagnostics.extend(result.diagnostics)
+        return result.config
 
+    @staticmethod
+    def _validate(data: Mapping[str, Any]) -> InsightSpikeConfig:
+        return model_validate_compat(InsightSpikeConfig, data)
+
+    @staticmethod
+    def _explicit_root_intent(
+        data: Mapping[str, Any],
+    ) -> Optional[bool]:
+        """Return a source's explicit datastore-root intent, if expressed.
+
+        ``explicit_root_path`` is an internal round-trip marker accepted for
+        compatibility.  Otherwise, the presence of ``root_path`` means that
+        the source intentionally selected that path.
+        """
+
+        datastore = data.get("datastore", {})
+        if not isinstance(datastore, Mapping):
+            return None
+        if "explicit_root_path" in datastore:
+            return bool(datastore["explicit_root_path"])
+        if datastore.get("root_path") is not None:
+            return True
+        return None
+
+    @classmethod
+    def _resolve_explicit_root(
+        cls,
+        *sources: Mapping[str, Any],
+    ) -> Optional[bool]:
+        """Resolve root intent in source-priority order."""
+
+        resolved: Optional[bool] = None
+        for source in sources:
+            intent = cls._explicit_root_intent(source)
+            if intent is not None:
+                resolved = intent
+        return resolved
+
+    @classmethod
+    def _has_explicit_root(cls, data: Mapping[str, Any]) -> bool:
+        """Compatibility helper retained for callers of the old predicate."""
+
+        return cls._explicit_root_intent(data) is True
+
+    def _load_from_file(
+        self,
+        config_path: Optional[Union[str, Path]] = None,
+    ) -> dict[str, Any]:
+        """Decode a YAML/JSON document without applying compatibility rules."""
+
+        path = self._resolve_config_path(config_path)
+        if path is None:
+            return {}
         if not path.exists():
-            logger.debug(f"Config file not found: {path}")
+            logger.debug("Config file not found: %s", path)
             return {}
 
         self._config_path = path
-        logger.info(f"Loading config from: {path}")
+        logger.info("Loading config from: %s", path)
+        with path.open("r", encoding="utf-8") as stream:
+            if path.suffix.lower() in {".yaml", ".yml"}:
+                decoded = yaml.safe_load(stream)
+            elif path.suffix.lower() == ".json":
+                decoded = json.load(stream)
+            else:
+                content = stream.read()
+                try:
+                    decoded = json.loads(content)
+                except json.JSONDecodeError:
+                    decoded = yaml.safe_load(content)
 
-        try:
-            with open(path, "r") as f:
-                if path.suffix in [".yaml", ".yml"]:
-                    try:
-                        import yaml
-
-                        return yaml.safe_load(f) or {}
-                    except ImportError:
-                        logger.warning(
-                            "PyYAML not installed. Cannot load YAML config files. Use JSON instead or install PyYAML."
-                        )
-                        return {}
-                elif path.suffix == ".json":
-                    return json.load(f)
-                else:
-                    # Try to detect format - try JSON first
-                    content = f.read()
-                    try:
-                        return json.loads(content)
-                    except json.JSONDecodeError:
-                        # Try YAML if available
-                        try:
-                            import yaml
-
-                            f.seek(0)
-                            return yaml.safe_load(f) or {}
-                        except ImportError:
-                            logger.warning(
-                                "Could not parse config file as JSON and PyYAML not available"
-                            )
-                            return {}
-        except Exception as e:
-            logger.error(f"Failed to load config file {path}: {e}")
+        if decoded is None:
             return {}
+        if not isinstance(decoded, Mapping):
+            raise TypeError(
+                f"Configuration document must contain a mapping: {path}"
+            )
+        return copy.deepcopy(dict(decoded))
 
-    def _load_from_env(self) -> Dict[str, Any]:
-        """Load configuration from environment variables"""
-        config = {}
+    def _resolve_config_path(
+        self,
+        config_path: Optional[Union[str, Path]],
+    ) -> Optional[Path]:
+        if config_path is not None:
+            return Path(config_path)
 
-        # Map of environment variables to config paths
+        env_path = os.getenv(self.CONFIG_PATH_ENV)
+        if env_path:
+            return Path(env_path)
+
+        for default_path in (
+            Path("config.yaml"),
+            Path(".insightspike.yaml"),
+            Path("config.json"),
+        ):
+            if default_path.exists():
+                return default_path
+        return None
+
+    def _load_from_env(self) -> dict[str, Any]:
+        """Decode explicitly supported environment variables."""
+
+        config: dict[str, Any] = {}
+        # The second tuple item is the field's parser. Content-based coercion
+        # of paths
+        # and model names (for example "123") behaves differently between
+        # Pydantic v1 and v2, so string fields must remain strings.
         env_mappings = {
-            # New format with double underscore for nested fields
-            f"{self.ENV_PREFIX}LLM__PROVIDER": "llm.provider",
-            f"{self.ENV_PREFIX}LLM__MODEL": "llm.model",
-            f"{self.ENV_PREFIX}LLM__TEMPERATURE": "llm.temperature",
-            f"{self.ENV_PREFIX}LLM__MAX_TOKENS": "llm.max_tokens",
-            f"{self.ENV_PREFIX}MEMORY__EPISODIC_MEMORY_CAPACITY": "memory.episodic_memory_capacity",
-            f"{self.ENV_PREFIX}MEMORY__MAX_RETRIEVED_DOCS": "memory.max_retrieved_docs",
-            f"{self.ENV_PREFIX}ENVIRONMENT": "environment",
-            f"{self.ENV_PREFIX}LOGGING__LEVEL": "logging.level",
-            f"{self.ENV_PREFIX}LOGGING__FILE_PATH": "logging.file_path",
-            # Legacy mappings for backward compatibility
-            f"{self.ENV_PREFIX}MODEL_NAME": "embedding.model_name",
-            f"{self.ENV_PREFIX}DATA_DIR": "paths.data_dir",
-            f"{self.ENV_PREFIX}LOG_DIR": "paths.log_dir",
+            f"{self.ENV_PREFIX}LLM__PROVIDER": ("llm.provider", str),
+            f"{self.ENV_PREFIX}LLM__MODEL": ("llm.model", str),
+            f"{self.ENV_PREFIX}LLM__TEMPERATURE": (
+                "llm.temperature",
+                float,
+            ),
+            f"{self.ENV_PREFIX}LLM__MAX_TOKENS": ("llm.max_tokens", int),
+            f"{self.ENV_PREFIX}MEMORY__EPISODIC_MEMORY_CAPACITY": (
+                "memory.episodic_memory_capacity",
+                int,
+            ),
+            f"{self.ENV_PREFIX}MEMORY__MAX_RETRIEVED_DOCS": (
+                "memory.max_retrieved_docs",
+                int,
+            ),
+            f"{self.ENV_PREFIX}DATASTORE__TYPE": ("datastore.type", str),
+            f"{self.ENV_PREFIX}DATASTORE__ROOT_PATH": (
+                "datastore.root_path",
+                str,
+            ),
+            f"{self.ENV_PREFIX}DATASTORE__DB_PATH": (
+                "datastore.db_path",
+                str,
+            ),
+            f"{self.ENV_PREFIX}ENVIRONMENT": ("environment", str),
+            f"{self.ENV_PREFIX}LOGGING__LEVEL": ("logging.level", str),
+            f"{self.ENV_PREFIX}LOGGING__FILE_PATH": (
+                "logging.file_path",
+                str,
+            ),
+            # Legacy one-level names.
+            f"{self.ENV_PREFIX}MODEL_NAME": (
+                "embedding.model_name",
+                str,
+            ),
+            f"{self.ENV_PREFIX}DATA_DIR": ("paths.data_dir", str),
+            f"{self.ENV_PREFIX}LOG_DIR": ("paths.logs_dir", str),
         }
 
-        for env_var, config_path in env_mappings.items():
+        for env_var, (config_path, parser) in env_mappings.items():
             value = os.getenv(env_var)
             if value is not None:
-                # Convert boolean strings
-                if value.lower() in ["true", "false"]:
-                    value = value.lower() == "true"
-                # Convert numeric strings
-                elif value.isdigit():
-                    value = int(value)
-                elif self._is_float(value):
-                    value = float(value)
-
-                # Set nested value
-                self._set_nested(config, config_path, value)
-
+                self._set_nested(
+                    config,
+                    config_path,
+                    parser(value),
+                )
         return config
 
-    def _deep_merge(
-        self, base: Dict[str, Any], update: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """Deep merge two dictionaries"""
-        result = base.copy()
+    @staticmethod
+    def _coerce_env_value(value: str) -> Any:
+        lowered = value.lower()
+        if lowered in {"true", "false"}:
+            return lowered == "true"
+        try:
+            return int(value)
+        except ValueError:
+            pass
+        try:
+            return float(value)
+        except ValueError:
+            return value
 
+    @staticmethod
+    def _deep_merge(
+        base: Mapping[str, Any],
+        update: Mapping[str, Any],
+    ) -> dict[str, Any]:
+        """Deep merge two mappings without mutating either input."""
+
+        result = copy.deepcopy(dict(base))
         for key, value in update.items():
             if (
                 key in result
-                and isinstance(result[key], dict)
-                and isinstance(value, dict)
+                and isinstance(result[key], Mapping)
+                and isinstance(value, Mapping)
             ):
-                result[key] = self._deep_merge(result[key], value)
+                result[key] = ConfigLoader._deep_merge(
+                    result[key],
+                    value,
+                )
             else:
-                result[key] = value
-
+                result[key] = copy.deepcopy(value)
         return result
 
-    def _set_nested(self, d: Dict[str, Any], path: str, value: Any) -> None:
-        """Set a nested dictionary value using dot notation"""
+    @staticmethod
+    def _set_nested(
+        data: dict[str, Any],
+        path: str,
+        value: Any,
+    ) -> None:
         keys = path.split(".")
-        current = d
-
+        current = data
         for key in keys[:-1]:
-            if key not in current:
-                current[key] = {}
-            current = current[key]
-
+            child = current.get(key)
+            if not isinstance(child, dict):
+                child = {}
+                current[key] = child
+            current = child
         current[keys[-1]] = value
 
-    def _is_float(self, value: str) -> bool:
-        """Check if string is a float"""
+    @staticmethod
+    def _is_float(value: str) -> bool:
+        """Retained for compatibility with callers of the old helper."""
+
         try:
             float(value)
             return "." in value
         except ValueError:
             return False
 
-    def load_from_file(self, path: Union[str, Path]) -> InsightSpikeConfig:
-        """Public method to load configuration from file"""
-        config_dict = self._load_from_file(path)
-        if not config_dict:
-            # Return default config if file is empty
-            config_dict = {}
-        return InsightSpikeConfig(**config_dict)
+    def load_from_file(
+        self,
+        path: Union[str, Path],
+    ) -> InsightSpikeConfig:
+        """Load, migrate, and strictly validate one configuration file."""
 
-    def _apply_env_overrides(self, config: InsightSpikeConfig) -> InsightSpikeConfig:
-        """Apply environment variable overrides to existing config"""
-        env_config = self._load_from_env()
-        if env_config:
-            config_dict = config.dict()
-            config_dict = self._deep_merge(config_dict, env_config)
-            return InsightSpikeConfig(**config_dict)
-        return config
+        self._diagnostics = []
+        self._config_path = None
+        config_dict = self._migrate_source(
+            self._load_from_file(path),
+            source="file",
+        )
+        explicit_root = self._explicit_root_intent(config_dict)
+        if explicit_root is not None:
+            config_dict.setdefault("datastore", {})[
+                "explicit_root_path"
+            ] = explicit_root
+        self._config = self._validate(config_dict)
+        return self._config
+
+    def _apply_env_overrides(
+        self,
+        config: InsightSpikeConfig,
+    ) -> InsightSpikeConfig:
+        """Apply validated environment overrides to an existing config."""
+
+        env_config = self._migrate_source(
+            self._load_from_env(),
+            source="environment",
+        )
+        if not env_config:
+            return config
+        config_dict = self._deep_merge(
+            model_dump_compat(config),
+            env_config,
+        )
+        explicit_root = self._explicit_root_intent(env_config)
+        if explicit_root is None:
+            explicit_root = config.datastore.explicit_root_path
+        config_dict.setdefault("datastore", {})[
+            "explicit_root_path"
+        ] = explicit_root
+        return self._validate(config_dict)
 
     def save(self, path: Optional[Union[str, Path]] = None) -> None:
-        """Save current configuration to file"""
-        if not self._config:
+        """Persist the current configuration as portable YAML or JSON."""
+
+        if self._config is None:
             raise ValueError("No configuration loaded")
 
-        save_path = Path(path) if path else self._config_path
-        if not save_path:
+        save_path = Path(path) if path is not None else self._config_path
+        if save_path is None:
             save_path = Path("config.yaml")
 
-        config_dict = self._config.dict()
-
-        with open(save_path, "w") as f:
-            if save_path.suffix in [".yaml", ".yml"]:
-                yaml.dump(config_dict, f, default_flow_style=False)
+        config_dict = model_dump_compat(self._config, mode="json")
+        datastore = config_dict.get("datastore")
+        if (
+            isinstance(datastore, dict)
+            and not self._config.datastore.explicit_root_path
+            and datastore.get("root_path") == self.DEFAULT_DATASTORE_ROOT
+        ):
+            # Omitting the implicit default is what preserves the distinction
+            # between "use paths.data_dir" and "the user selected root_path".
+            # Validation restores the same default value on reload.
+            datastore.pop("root_path", None)
+        with save_path.open("w", encoding="utf-8") as stream:
+            if save_path.suffix.lower() in {".yaml", ".yml"}:
+                yaml.safe_dump(
+                    config_dict,
+                    stream,
+                    default_flow_style=False,
+                    sort_keys=False,
+                    allow_unicode=True,
+                )
             else:
-                json.dump(config_dict, f, indent=2)
+                json.dump(
+                    config_dict,
+                    stream,
+                    indent=2,
+                    ensure_ascii=False,
+                )
+                stream.write("\n")
 
-        logger.info(f"Configuration saved to: {save_path}")
+        logger.info("Configuration saved to: %s", save_path)
 
 
-# Global instance
 _loader = ConfigLoader()
 
 
 def load_config(
     config_path: Optional[Union[str, Path]] = None,
     preset: Optional[str] = None,
-    overrides: Optional[Dict[str, Any]] = None,
+    overrides: Optional[dict[str, Any]] = None,
 ) -> InsightSpikeConfig:
-    """Load configuration using global loader"""
+    """Load configuration using the process-wide loader."""
+
     return _loader.load(config_path, preset, overrides)
 
 
 def get_config() -> InsightSpikeConfig:
-    """Get current configuration or load defaults"""
+    """Return the current configuration, loading defaults when needed."""
+
     if _loader._config is None:
         _loader.load()
+    assert _loader._config is not None
     return _loader._config
+
+
+__all__ = ["ConfigLoader", "get_config", "load_config"]

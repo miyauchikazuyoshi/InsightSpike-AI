@@ -78,54 +78,87 @@ class FileSystemDataStore(DataStore):
     def save_episodes(
         self, episodes: List[Dict[str, Any]], namespace: str = "default"
     ) -> bool:
-        """Save episodes to JSON file"""
+        """Append episodes to a JSON namespace."""
+        return self._write_episodes(episodes, namespace=namespace, append=True)
+
+    def replace_episodes(
+        self, episodes: List[Dict[str, Any]], namespace: str = "default"
+    ) -> bool:
+        """Replace a JSON namespace with an exact episode snapshot."""
+        return self._write_episodes(episodes, namespace=namespace, append=False)
+
+    @staticmethod
+    def _json_compatible(value: Any) -> Any:
+        """Convert common scientific-Python values to JSON-safe values."""
+        if isinstance(value, np.ndarray):
+            return value.tolist()
+        if isinstance(value, np.generic):
+            return value.item()
+        if isinstance(value, Path):
+            return str(value)
+        if isinstance(value, dict):
+            return {
+                str(key): FileSystemDataStore._json_compatible(item)
+                for key, item in value.items()
+            }
+        if isinstance(value, (list, tuple)):
+            return [FileSystemDataStore._json_compatible(item) for item in value]
+        return value
+
+    @classmethod
+    def _serialize_episode(cls, episode: Dict[str, Any]) -> Dict[str, Any]:
+        """Normalize one episode while retaining backward-compatible fields."""
+        c_value = episode.get(
+            "c",
+            episode.get("c_value", episode.get("confidence", 0.5)),
+        )
+        serialized = {
+            "text": episode["text"],
+            "c": c_value,
+            "c_value": c_value,
+            "timestamp": episode.get("timestamp"),
+            "metadata": episode.get("metadata", {}),
+        }
+
+        vector = episode.get("vec", episode.get("embedding"))
+        if vector is not None:
+            serialized["vec"] = vector
+
+        for key, value in episode.items():
+            if key not in serialized and key not in {"vec", "embedding"}:
+                serialized[key] = value
+
+        return cls._json_compatible(serialized)
+
+    def _write_episodes(
+        self,
+        episodes: List[Dict[str, Any]],
+        namespace: str,
+        *,
+        append: bool,
+    ) -> bool:
+        """Write episodes with explicit append or snapshot semantics."""
+        namespace_path = self._get_namespace_path("episodes")
+        file_path = namespace_path / f"{namespace}.json"
         try:
-            namespace_path = self._get_namespace_path("episodes")
-            file_path = namespace_path / f"{namespace}.json"
-
-            # Convert numpy arrays to lists for JSON serialization without copying
-            def serialize_episode(ep):
-                # Create new dict with only necessary fields to avoid deep copy
-                serialized = {
-                    "text": ep["text"],
-                    "c_value": ep.get("c_value", 0.5),
-                    "timestamp": ep.get("timestamp"),
-                    "metadata": ep.get("metadata", {}),
-                }
-
-                # Handle vector conversion efficiently
-                if "vec" in ep:
-                    vec = ep["vec"]
-                    serialized["vec"] = (
-                        vec.tolist() if isinstance(vec, np.ndarray) else vec
-                    )
-
-                # Include any other fields that aren't in the standard set
-                for key, value in ep.items():
-                    if key not in serialized and key != "vec":
-                        serialized[key] = value
-
-                return serialized
-
-            # Load existing episodes (append behavior) if file exists
             existing: List[Dict[str, Any]] = []
-            if file_path.exists():
+            if append and file_path.exists():
                 try:
-                    with open(file_path, "r") as rf:
+                    with open(file_path, "r", encoding="utf-8") as rf:
                         existing = json.load(rf)
                 except Exception:
                     existing = []
 
-            # Use list comprehension for efficiency and normalize new entries
-            serializable_episodes = [serialize_episode(ep) for ep in episodes]
-
-            # Append to existing list
+            serializable_episodes = [
+                self._serialize_episode(episode) for episode in episodes
+            ]
             combined = existing + serializable_episodes
 
-            with open(file_path, "w") as f:
-                json.dump(combined, f, indent=2)
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(combined, f, indent=2, ensure_ascii=False)
 
-            logger.info(f"Saved {len(episodes)} episodes to {file_path}")
+            operation = "Appended" if append else "Replaced"
+            logger.info(f"{operation} {len(episodes)} episodes at {file_path}")
             return True
 
         except IOError as e:

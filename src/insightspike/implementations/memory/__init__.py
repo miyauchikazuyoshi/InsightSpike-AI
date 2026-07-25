@@ -35,7 +35,10 @@ class Memory:
 
     def _save_all(self, episodes: List[Dict[str, Any]]) -> bool:
         try:
-            return self.datastore.save_episodes(episodes, namespace=self.namespace)
+            return self.datastore.replace_episodes(
+                episodes,
+                namespace=self.namespace,
+            )
         except Exception:
             return False
 

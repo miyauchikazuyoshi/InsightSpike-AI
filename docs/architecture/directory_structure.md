@@ -1,6 +1,6 @@
 # InsightSpike Directory Structure
 
-> **Last Updated**: 2026-02-01
+> **Last Updated**: 2026-07-24
 
 ## 📁 Overview
 
@@ -24,7 +24,11 @@ src/insightspike/
 │
 ├── implementations/            # All concrete implementations
 │   ├── agents/                # Agent implementations
-│   │   ├── main_agent.py      # MainAgent for Q&A (primary)
+│   │   ├── main_agent.py      # Public MainAgent facade and L1-L4 orchestration
+│   │   ├── agent_lifecycle.py # Runtime initialization coordination
+│   │   ├── agent_persistence.py # Exact/legacy state persistence
+│   │   ├── agent_config_access.py # Live normalized config access
+│   │   ├── cycle_result_aggregator.py # Cycle selection and result metadata
 │   │   └── configurable_agent.py  # Configurable agent
 │   ├── layers/                # Layer implementations (unified)
 │   │   ├── layer1_error_monitor.py     # L1: Error detection

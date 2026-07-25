@@ -2,11 +2,29 @@
 統合インデックスの設定
 """
 
-from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from .pydantic_compat import PYDANTIC_V2, StrictConfigModel
+
+if PYDANTIC_V2:
+    from pydantic import ConfigDict
 
 
-class IntegratedIndexConfig(BaseModel):
+_INTEGRATED_INDEX_SCHEMA_EXAMPLE = {
+    "example": {
+        "enabled": True,
+        "dimension": 768,
+        "similarity_threshold": 0.3,
+        "use_faiss": True,
+        "faiss_threshold": 100000,
+        "migration_mode": "shadow",
+        "auto_save": True,
+        "save_interval": 1000,
+    }
+}
+
+
+class IntegratedIndexConfig(StrictConfigModel):
     """統合インデックスの設定"""
     
     # 基本設定
@@ -53,22 +71,17 @@ class IntegratedIndexConfig(BaseModel):
         description="自動保存の間隔（エピソード数）"
     )
     
-    class Config:
-        schema_extra = {
-            "example": {
-                "enabled": True,
-                "dimension": 768,
-                "similarity_threshold": 0.3,
-                "use_faiss": True,
-                "faiss_threshold": 100000,
-                "migration_mode": "shadow",
-                "auto_save": True,
-                "save_interval": 1000
-            }
-        }
+    if PYDANTIC_V2:
+        model_config = ConfigDict(
+            extra="forbid",
+            json_schema_extra=_INTEGRATED_INDEX_SCHEMA_EXAMPLE,
+        )
+    else:
+        class Config(StrictConfigModel.Config):
+            schema_extra = _INTEGRATED_INDEX_SCHEMA_EXAMPLE
 
 
-class IndexFeatureFlags(BaseModel):
+class IndexFeatureFlags(StrictConfigModel):
     """機能フラグ設定"""
     
     use_integrated_index: bool = Field(

@@ -1,74 +1,106 @@
-# Migration Progress — 逐次更新
+# Adapter Migration Progress
 
-## Phase 4a: Transformer ✅ (2026-03-19)
+> **Status date:** 2026-07-24
+> This is the factual migration ledger. `MIGRATION_PLAN.md` is the historical
+> pre-migration plan and is not evidence that an E2E run occurred.
 
-| テスト | 結果 | 詳細 |
-|--------|------|------|
-| T1: 数値等価性 (SP) | ✅ pass | 100 samples, \|diff\| < 1e-4 |
-| T2: 数値等価性 (β₁) | ✅ pass | F_mean, delta_b1 both < 1e-4 |
-| T3: 勾配等価性 | ✅ pass | cosine sim > 0.99, grad norm reasonable |
-| T4: Exp4 再現 | ✅ pass | conclusion=negative_better 一致 |
-| T5: 速度回帰 | ✅ pass | 1.70x (< 2.0x 閾値) |
+## Current boundary
 
-**切り替え状態**: `use_unified=False` (デフォルト)
-**コミット**: `ecc9da99`
+| Domain | Active experiment path | State | What is verified | What is not claimed |
+|---|---|---|---|---|
+| Transformer delta F | `experiments/transformer/thermodynamic_gedig.py` | **Delegated** to `TransformerFEval`; `use_unified` is an inert compatibility input | Unified values and gradients match the frozen pre-refactor oracle | T4/Exp4 E2E was not rerun in this debt-repayment phase |
+| RAG / AGHT | `experiments/hotpotqa_v2/src/unified_graph.py` | **Delegated** to `RAGFEval`; `use_unified_feval` and `use_unified` are inert compatibility inputs | R1–R3 independently check edge F, partition, and propagation formulas | R4–R6 are historical experiment records, not runnable P6 regression tests |
+| Maze | `experiments/maze/qhlib/evaluator.py` | **Legacy fixed** on `insightspike.algorithms.gedig_core.GeDIGCore` | `MazeFEval` contracts plus a golden trace of the active SP evaluator | No drop-in equivalence, active cutover, gate equivalence, sleep equivalence, M4, or M5 |
 
----
+`src/gedig/` is the canonical implementation for new code. Archived
+pre-refactor implementations under `experiments/refactor_*` are read-only
+oracles and provenance records, not alternate production paths.
 
-## Phase 4b: RAG 🔧 (2026-03-19)
+## Transformer
 
-### 対象
-- `unified_graph.py` の F-eval ループ (compute_qkv_attention)
-- `unified_graph.py` の message passing (graph_attention_propagation)
+The active `DifferentiableGeDIG` wrapper delegates every before/after delta
+evaluation to `gedig.adapters.transformer.TransformerFEval`. Since commit
+`eed1ae4`, passing `use_unified=False` to that active wrapper does not select
+the old algorithm.
 
-### テスト計画
+The independent comparison now imports:
 
-| テスト | 合格基準 | 状態 |
-|--------|---------|------|
-| R1: per-edge F値等価性 | \|f_old - f_new\| < 1e-6 | ✅ pass |
-| R2: AG/DG 分類一致 | 100% 一致 | ✅ pass |
-| R3: propagation 等価性 | \|rel_old - rel_new\| < 1e-6 | ✅ pass |
-| R4: HotpotQA R@2 一致 | \|Δ\| < 0.01 | ✅ pass (差分 0.0000) |
-| R5: HotpotQA SF_F1 一致 | \|Δ\| < 0.01 | ✅ pass (差分 0.0000) |
-| R6: BRIGHT nDCG 一致 | \|Δ\| < 0.005 | ⚠️ diff=0.050 (RIA非決定性、F-eval自体は等価) |
+```text
+old: experiments/refactor_transformer/thermodynamic_gedig_legacy.py
+new: experiments/transformer/thermodynamic_gedig.py
+     → src/gedig/adapters/transformer.py
+```
 
-### 進捗
-- [x] unified_graph.py に use_unified_feval フラグ追加 (AGHTConfig)
-- [x] F-eval ループを RAGFEval adapter に委譲 (compute_qkv_attention)
-- [x] propagation を adapter に委譲 (graph_attention_propagation)
-- [x] R1-R3 等価性テスト作成・実行 ✅
-- [x] R4-R5 HotpotQA E2E テスト ✅ (差分 0.0000)
-- [x] R6 BRIGHT E2E テスト ⚠️ (diff=0.050, RIA非決定性が原因。HotpotQA完全一致でF-eval等価性は確認済)
+The regression suite prevents another self-comparison by asserting that the
+old class comes from `thermodynamic_gedig_legacy`, keeps
+`use_unified=False`, and never constructs `_unified_adapter`.
 
----
+Verified locally:
 
-## Phase 4c: Maze 🔧 (2026-03-19)
+- SP and β₁ component values and full F tensors;
+- 100 deterministic random samples;
+- masked tensors and non-default λ, γ, percentile, and temperature;
+- direct gradient tensor equality (within explicit numerical tolerance);
+- a true old/new forward-speed guard.
 
-### テスト計画
+T4 is not present as an automated E2E test and was not rerun. Historical
+artifacts produced after `eed1ae4` may record `"use_unified": false` even
+though the active wrapper actually used the unified adapter; that field
+records the requested CLI value, not reliable backend provenance.
 
-| テスト | 合格基準 | 状態 |
-|--------|---------|------|
-| M1: g-value = F formula | f = ΔEPC - λ(ΔH + γΔB) 一致 | ✅ pass |
-| M2: AG/DG classification | threshold logic 100% 一致 | ✅ pass |
-| M3: sleep propagation | Q-learning 手計算と一致 | ✅ pass |
-| M4: 15x15 success rate | \|Δ\| < 5% | ⏳ E2E 要実行 |
-| M5: 25x25 avg steps | \|Δ\| < 10% | ⏳ E2E 要実行 |
+The separate `experiments/transformer/train_f_regularized.py` calculator is a
+single-state experimental profile. It is not the canonical before/after delta
+API and is not part of this adapter migration claim.
 
-### 進捗
-- [x] MazeFEval adapter テスト (M1-M3) ✅
-- [ ] evaluator.py に use_unified フラグ追加 (次セッション)
-- [ ] M4-M5 E2E テスト
+## RAG / AGHT
 
----
+The active AGHT edge evaluation, percentile partition, and relevance
+propagation all call `RAGFEval`. The retained config/function/CLI flags do not
+switch implementations; their help and comments mark them as deprecated
+no-ops.
 
-## 全体テスト数
+R1–R3 remain independent formula-level comparisons:
 
-| Phase | テスト数 | Pass | Fail |
-|-------|---------|------|------|
-| Core + Backends | 25 | 25 | 0 |
-| Adapters | 19 | 19 | 0 |
-| Transformer equiv | 11 | 11 | 0 |
-| RAG equiv | - | - | - |
-| RAG equiv | 4 | 4 | 0 |
-| Maze equiv | 12 | 12 | 0 |
-| **Total** | **71** | **71** | **0** |
+- R1 compares per-edge F with a manual QK dot-product formula;
+- R2 compares the complete edge partition with a manual percentile split;
+- R3 compares every propagated node value with a local legacy loop.
+
+The prior HotpotQA and BRIGHT E2E numbers remain experiment records. P6 did
+not rerun datasets or external-model evaluation, so it does not upgrade their
+evidential status or claim R4–R6 as current executable tests.
+
+## Maze
+
+The active maze evaluator is intentionally not switched in this phase. It
+combines experiment-specific Cmax normalization, linkset IG, scoped/sampled
+shortest-path evaluation, hop selection, and runner-side gates. `MazeFEval`
+uses the generic NetworkX snapshot backends and is therefore not a drop-in
+replacement.
+
+The M1–M3 tests are adapter contracts only:
+
+- F composition on small NetworkX graphs;
+- two-stage gate threshold semantics;
+- canonical synchronous Q-style propagation.
+
+They do not import the active evaluator. The active evaluator is instead
+protected by
+`src/gedig/tests/fixtures/maze_active_sp_trace.json` and
+`test_maze_active_trace.py`, which freeze g0, gmin, best hop, selected edge,
+and the hop-series components for one deterministic SP-mode graph. The
+fixture explicitly makes no adapter-equivalence claim.
+
+Active maze sleep propagation also has different update semantics from the
+canonical propagator. Cutover requires a separate post-v7 design and E2E
+phase. The ongoing v7 files are protected from this refactor.
+
+## Test entry points
+
+```bash
+# Canonical core, adapters, frozen Transformer oracle, active maze trace
+PYTHONPATH=src .venv/bin/python -m pytest -q src/gedig/tests
+
+# Public Flash profile/delta boundary
+PYTHONPATH=src .venv/bin/python -m pytest -q \
+  tests/unit/test_flash_gedig_api.py
+```

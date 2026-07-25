@@ -14,6 +14,8 @@ import torch_geometric
 from sklearn.metrics.pairwise import cosine_similarity
 import logging
 
+from .message_passing_common import normalize_message_aggregation
+
 logger = logging.getLogger(__name__)
 
 
@@ -38,13 +40,14 @@ class MessagePassing:
         Args:
             alpha: Weight for question influence (0-1)
             iterations: Number of message passing iterations
-            aggregation: Aggregation method ('weighted_mean', 'max', 'attention')
+            aggregation: Aggregation method ('weighted_mean', 'mean', 'max').
+                The legacy 'attention' value is a deprecated alias for 'mean'.
             self_loop_weight: Weight for self-loop in propagation
             decay_factor: Decay factor for question relevance over distance
         """
         self.alpha = alpha
         self.iterations = iterations
-        self.aggregation = aggregation
+        self.aggregation = normalize_message_aggregation(aggregation)
         self.self_loop_weight = self_loop_weight
         self.decay_factor = decay_factor
         
@@ -142,7 +145,7 @@ class MessagePassing:
                     elif self.aggregation == "max":
                         # Max pooling
                         aggregated = np.max(neighbor_messages, axis=0)
-                    else:  # Default to mean
+                    elif self.aggregation == "mean":
                         aggregated = np.mean(neighbor_messages, axis=0)
                     
                     # Update with self-loop
@@ -165,7 +168,11 @@ class MessagePassing:
                                   query_vector: np.ndarray,
                                   key_vectors: np.ndarray) -> np.ndarray:
         """
-        Compute attention weights for aggregation.
+        Compute legacy standalone dot-product weights.
+
+        This utility is not wired to an aggregation mode. In particular,
+        deprecated ``aggregation="attention"`` preserves its historical
+        simple-mean behavior.
         
         Args:
             query_vector: Query representation
@@ -176,5 +183,6 @@ class MessagePassing:
         """
         # Simple dot-product attention
         scores = np.dot(key_vectors, query_vector)
-        weights = np.exp(scores) / np.sum(np.exp(scores))
+        exp_scores = np.exp(scores - np.max(scores))
+        weights = exp_scores / exp_scores.sum()
         return weights

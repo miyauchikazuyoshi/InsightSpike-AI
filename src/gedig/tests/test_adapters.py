@@ -8,7 +8,12 @@ import math
 import pytest
 import networkx as nx
 
-from gedig.core import FEvalResult, AGDGResult
+from gedig.core import (
+    AGDGResult,
+    EdgePartitionResult,
+    FEvalResult,
+    TwoStageGateDecision,
+)
 from gedig.adapters.maze import MazeFEval
 from gedig.adapters.rag import RAGFEval
 
@@ -63,6 +68,15 @@ class TestMazeAdapter:
         assert result["ag_fire"] is True
         assert result["dg_fire"] is False
 
+        decision = f_eval.decide_step(
+            g0=0.8,
+            gmin_mh=0.3,
+            best_hop=0,
+        )
+        assert isinstance(decision, TwoStageGateDecision)
+        assert decision.attention_gate_fired is True
+        assert decision.decision_gate_fired is False
+
     def test_dg_fire(self):
         """DG fires when multi-hop found and gmin below threshold."""
         f_eval = MazeFEval(theta_ag=0.5, theta_dg=0.5)
@@ -70,6 +84,18 @@ class TestMazeAdapter:
         result = f_eval.classify_step(g0=0.3, gmin_mh=0.1, best_hop=2)
         assert result["ag_fire"] is False
         assert result["dg_fire"] is True
+
+    def test_legacy_classifier_threshold_mutation_updates_gate(self):
+        f_eval = MazeFEval(theta_ag=0.5, theta_dg=0.2)
+
+        f_eval.classifier.theta_ag = 0.9
+
+        result = f_eval.classify_step(
+            g0=0.8,
+            gmin_mh=0.3,
+            best_hop=0,
+        )
+        assert result["ag_fire"] is False
 
     def test_sleep_propagation(self):
         """Sleep propagation increases values near high-reward nodes."""
@@ -130,7 +156,7 @@ class TestRAGAdapter:
         assert f_ag < f_dg  # AG has lower f-value
 
     def test_classify_edges(self):
-        """Percentile classification splits edges into AG/DG."""
+        """New edge partition and legacy labels preserve the same split."""
         f_eval = RAGFEval(percentile=0.4)
         edge_scores = {
             "e1": -0.5,  # very AG
@@ -144,6 +170,15 @@ class TestRAGAdapter:
         assert result.n_ag + result.n_dg == 5
         assert result.n_ag > 0
         assert result.n_dg > 0
+
+        partition = f_eval.partition_edges(edge_scores)
+        assert isinstance(partition, EdgePartitionResult)
+        assert (
+            partition.n_low_score + partition.n_high_score
+            == len(edge_scores)
+        )
+        assert partition.low_score_edges == result.ag_edges
+        assert partition.high_score_edges == result.dg_edges
 
     def test_graph_betti(self):
         """β₁ computation on document graph."""

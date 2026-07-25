@@ -7,8 +7,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 try:
-    from ...graph.message_passing import MessagePassing as _RealMP  # type: ignore
-    from ...graph.edge_reevaluator import EdgeReevaluator as _RealER  # type: ignore
+    from insightspike.graph.message_passing import MessagePassing as _RealMP  # type: ignore
+    from insightspike.graph.edge_reevaluator import EdgeReevaluator as _RealER  # type: ignore
     MessagePassing = _RealMP  # type: ignore
     EdgeReevaluator = _RealER  # type: ignore
 except Exception as exc:  # pragma: no cover - fallback path

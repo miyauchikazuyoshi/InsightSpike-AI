@@ -2,6 +2,7 @@
 
 import tempfile
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import numpy as np
@@ -26,6 +27,7 @@ def mock_datastore():
     datastore = Mock(spec=DataStore)
     datastore.load_episodes.return_value = []
     datastore.save_episodes.return_value = True
+    datastore.replace_episodes.return_value = True
     datastore.load_graph.return_value = None
     datastore.save_graph.return_value = True
     return datastore
@@ -113,7 +115,7 @@ class TestMainAgentProcessing:
         assert len(result.retrieved_documents) >= 0  # May retrieve the stored episodes
         assert result.reasoning_quality >= 0.0
 
-    def test_spike_detection(self, agent):
+    def test_spike_detection(self, agent, monkeypatch):
         """Test insight spike detection."""
         agent.initialize()
 
@@ -122,25 +124,27 @@ class TestMainAgentProcessing:
         agent.l2_memory.store_episode("System B operates independently.", c_value=0.7)
         agent.l2_memory.store_episode("A and B together create emergence.", c_value=0.9)
 
-        # Mock graph reasoner to detect spike
-        if agent.l3_graph:
-            with patch.object(agent.l3_graph, "analyze_documents") as mock_analyze:
-                mock_analyze.return_value = {
-                    "graph": Mock(),
-                    "metrics": {"delta_ged": -0.8, "delta_ig": 0.5},
-                    "conflicts": {"total": 0.1},
-                    "reward": {"total": 0.9},
-                    "spike_detected": True,
-                    "graph_features": None,
-                    "reasoning_quality": 0.95,
-                }
+        # The global test harness defaults to Lite mode. Replace only the
+        # optional L3 boundary so this contract is independent of PyG.
+        monkeypatch.setenv("INSIGHTSPIKE_LITE_MODE", "0")
+        monkeypatch.setenv("INSIGHTSPIKE_MIN_IMPORT", "0")
+        agent.l3_graph = Mock()
+        agent.l3_graph.analyze_documents.return_value = {
+            "graph": Mock(),
+            "metrics": {"delta_ged": -0.8, "delta_ig": 0.5},
+            "conflicts": {"total": 0.1},
+            "reward": {"total": 0.9},
+            "spike_detected": True,
+            "graph_features": None,
+            "reasoning_quality": 0.95,
+        }
 
-                result = agent.process_question(
-                    "What happens when A and B integrate?", max_cycles=2
-                )
+        result = agent.process_question(
+            "What happens when A and B integrate?", max_cycles=2
+        )
 
-                assert result.spike_detected is True
-                assert result.graph_analysis["spike_detected"] is True
+        assert result.spike_detected is True
+        assert result.graph_analysis["spike_detected"] is True
 
     def test_error_handling(self, agent):
         """Test error handling during processing."""
@@ -173,6 +177,9 @@ class TestMainAgentLearning:
 
         assert result is True
         assert agent.l2_memory.get_memory_stats()["total_episodes"] > 0
+        episode = agent.l2_memory.episodes[-1]
+        assert episode.text == "InsightSpike uses graph-based reasoning."
+        assert episode.metadata == {"source": "test"}
 
     def test_learn_from_text(self, agent):
         """Test learning from text content."""
@@ -187,8 +194,10 @@ class TestMainAgentLearning:
         result = agent.learn(text_content)
 
         assert result["success"] is True
-        assert result["episodes_added"] > 0
-        assert "graph_updated" in result
+        assert result["episodes_added"] == 1
+        # Current L3.update_graph is an acknowledged no-op; a successful call
+        # must not be reported as a completed structural update.
+        assert result["graph_updated"] is False
 
     def test_batch_learning(self, agent):
         """Test learning from multiple documents."""
@@ -216,20 +225,38 @@ class TestMainAgentStatePersistence:
 
         # Add some data
         agent.l2_memory.store_episode("Test episode", c_value=0.8)
+        agent.l3_graph.previous_graph = {"nodes": [], "edges": []}
 
         # Save state
         result = agent.save_state()
 
         assert result is True
-        mock_datastore.save_episodes.assert_called()
+        mock_datastore.replace_episodes.assert_called()
         mock_datastore.save_graph.assert_called()
+
+        records = mock_datastore.replace_episodes.call_args.args[0]
+        assert records[0]["text"] == "Test episode"
+        assert "metadata" in records[0]
+        assert "episode_type" in records[0]
+        assert "selection_count" in records[0]
+        assert "creation_time" in records[0]
 
     def test_load_state(self, agent, mock_datastore):
         """Test loading agent state."""
         # Mock loaded data
         mock_episodes = [
-            Episode(text="Loaded episode 1", vec=np.random.randn(384), c=0.7),
-            Episode(text="Loaded episode 2", vec=np.random.randn(384), c=0.8),
+            Episode(
+                text="Loaded episode 1",
+                vec=np.random.randn(384),
+                c=0.7,
+                metadata={"source": "object"},
+            ),
+            {
+                "text": "Loaded episode 2",
+                "vec": np.random.randn(384),
+                "c": 0.8,
+                "metadata": {"source": "mapping"},
+            },
         ]
         mock_datastore.load_episodes.return_value = mock_episodes
 
@@ -242,6 +269,11 @@ class TestMainAgentStatePersistence:
         # Check episodes were loaded
         stats = agent.get_stats()
         assert stats["memory_stats"]["total_episodes"] == 2
+        assert [episode.c for episode in agent.l2_memory.episodes] == pytest.approx(
+            [0.7, 0.8]
+        )
+        assert agent.l2_memory.episodes[0].metadata == {"source": "object"}
+        assert agent.l2_memory.episodes[1].metadata == {"source": "mapping"}
 
 
 class TestMainAgentWithDifferentConfigs:
@@ -266,14 +298,19 @@ class TestMainAgentWithDifferentConfigs:
         config = ConfigPresets.production()
         agent = MainAgent(config=config, datastore=mock_datastore)
 
-        # Production uses OpenAI, which may not be available
-        # So we'll mock the LLM initialization
-        with patch.object(agent.l4_llm, "initialize", return_value=True):
-            agent.initialize()
+        # L4 is intentionally resolved lazily during initialize().
+        provider = Mock(initialized=False)
+        provider.initialize.return_value = True
+        with patch(
+            "insightspike.implementations.agents.main_agent.get_llm_provider",
+            return_value=provider,
+        ):
+            assert agent.initialize() is True
 
             assert agent.config.environment == "production"
             assert agent.config.llm.provider == "openai"
             assert agent.config.memory.max_episodes == 5000
+            assert agent.l4_llm is provider
 
     def test_with_custom_config(self, mock_datastore):
         """Test agent with custom configuration."""
@@ -299,33 +336,59 @@ class TestMainAgentInsights:
         """Test retrieving discovered insights."""
         agent.initialize()
 
-        # Add some episodes with high importance
-        agent.l2_memory.store_episode("Important insight about emergence", c_value=0.95)
-        agent.l2_memory.store_episode("Another key insight", c_value=0.9)
-        agent.l2_memory.store_episode("Regular information", c_value=0.5)
+        insights = [
+            SimpleNamespace(
+                id="insight-1",
+                text="Important insight about emergence",
+                discovery_context="What emerges?",
+                generated_at=2.0,
+                quality_score=0.95,
+                relationship_type="synthetic",
+            ),
+            SimpleNamespace(
+                id="insight-2",
+                text="Another key insight",
+                discovery_context="What integrates?",
+                generated_at=1.0,
+                quality_score=0.9,
+                relationship_type="structural",
+            ),
+        ]
+        agent.insight_registry = Mock()
+        agent.insight_registry.insights = {
+            insight.id: insight for insight in insights
+        }
+        agent.insight_registry.get_recent_insights.return_value = insights
 
-        insights = agent.get_insights(limit=2)
+        result = agent.get_insights(limit=2)
 
-        assert "total_insights" in insights
-        assert insights["total_insights"] >= 2
-        assert "recent_insights" in insights
+        assert result["total_insights"] == 2
+        assert len(result["recent_insights"]) == 2
+        assert result["recent_insights"][0]["answer"] == insights[0].text
+        assert result["categories"] == ["structural", "synthetic"]
 
     def test_search_insights(self, agent):
         """Test searching for specific insights."""
         agent.initialize()
 
-        # Add related episodes
-        agent.l2_memory.store_episode(
-            "Emergence occurs in complex systems", c_value=0.9
+        insight = SimpleNamespace(
+            text="Emergence occurs in complex systems",
+            discovery_context="What is emergence?",
+            generated_at=1.0,
+            quality_score=0.9,
+            relationship_type="synthetic",
         )
-        agent.l2_memory.store_episode("Integration leads to emergence", c_value=0.85)
-        agent.l2_memory.store_episode("Unrelated topic about weather", c_value=0.7)
+        agent.insight_registry = Mock()
+        agent.insight_registry.search_insights_by_concept.return_value = [insight]
 
         results = agent.search_insights("emergence", limit=5)
 
         assert isinstance(results, list)
-        # Should find the emergence-related episodes
         assert any("emergence" in r.get("answer", "").lower() for r in results)
+        agent.insight_registry.search_insights_by_concept.assert_called_once_with(
+            "emergence",
+            limit=5,
+        )
 
 
 class TestMemoryIntegration:
@@ -379,26 +442,26 @@ class TestConvergenceDetection:
             assert result.reasoning_quality > 0.8
             assert result.success is True
 
-    def test_spike_based_convergence(self, agent):
+    def test_spike_based_convergence(self, agent, monkeypatch):
         """Test convergence when spike is detected."""
         agent.initialize()
 
-        if agent.l3_graph:
-            # Mock spike detection
-            with patch.object(agent.l3_graph, "analyze_documents") as mock_analyze:
-                mock_analyze.return_value = {
-                    "graph": Mock(),
-                    "metrics": {"delta_ged": -0.9, "delta_ig": 0.6},
-                    "conflicts": {"total": 0.05},
-                    "reward": {"total": 0.95},
-                    "spike_detected": True,
-                    "graph_features": None,
-                    "reasoning_quality": 0.9,
-                }
+        monkeypatch.setenv("INSIGHTSPIKE_LITE_MODE", "0")
+        monkeypatch.setenv("INSIGHTSPIKE_MIN_IMPORT", "0")
+        agent.l3_graph = Mock()
+        agent.l3_graph.analyze_documents.return_value = {
+            "graph": Mock(),
+            "metrics": {"delta_ged": -0.9, "delta_ig": 0.6},
+            "conflicts": {"total": 0.05},
+            "reward": {"total": 0.95},
+            "spike_detected": True,
+            "graph_features": None,
+            "reasoning_quality": 0.9,
+        }
 
-                result = agent.process_question("Test question", max_cycles=10)
+        result = agent.process_question("Test question", max_cycles=10)
 
-                # Should converge due to spike detection
-                assert result.spike_detected is True
-                # Should have stopped before max_cycles
-                assert mock_analyze.call_count < 10
+        # Should converge due to spike detection
+        assert result.spike_detected is True
+        # Should have stopped before max_cycles
+        assert agent.l3_graph.analyze_documents.call_count < 10

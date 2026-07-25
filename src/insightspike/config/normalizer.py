@@ -1,239 +1,173 @@
-"""
-Config Normalizer - Unified configuration handling
+"""Canonical configuration normalization.
+
+Strict application entry points validate unknown fields.  This module is the
+explicit compatibility boundary for older dict/object configurations: legacy
+keys are migrated, unknown fields are reported with structured warnings, and
+the complete surviving document is validated without rebuilding a subset of
+sections.
 """
 
+from __future__ import annotations
+
+import copy
 import logging
-from typing import Union, Dict, Any, Optional
+import warnings
+from collections.abc import Mapping
+from typing import Any
+
 from pydantic import BaseModel
 
-from .models import (
-    InsightSpikeConfig, LLMConfig, MemoryConfig, EmbeddingConfig,
-    GraphConfig, ProcessingConfig
+from .migration import migrate_config
+from .models import InsightSpikeConfig, LLMConfig
+from .pydantic_compat import (
+    UnknownConfigWarning,
+    model_dump_compat,
+    model_validate_compat,
+    prune_unknown_fields,
 )
 
 logger = logging.getLogger(__name__)
 
 
+def _plain_value(value: Any) -> Any:
+    """Convert a legacy namespace-like object into builtin containers."""
+
+    if isinstance(value, BaseModel):
+        return model_dump_compat(value)
+    if isinstance(value, Mapping):
+        return {str(key): _plain_value(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_plain_value(item) for item in value]
+    if isinstance(value, tuple):
+        return [_plain_value(item) for item in value]
+    if hasattr(value, "__dict__") and not isinstance(
+        value,
+        (str, bytes, bytearray),
+    ):
+        attributes: dict[str, Any] = {}
+        for owner in reversed(type(value).__mro__):
+            for name, item in vars(owner).items():
+                if (
+                    name.startswith("_")
+                    or isinstance(item, (classmethod, staticmethod, property))
+                    or callable(item)
+                ):
+                    continue
+                attributes[name] = getattr(value, name)
+        for name, item in vars(value).items():
+            if not name.startswith("_") and not callable(item):
+                attributes[name] = item
+        return {
+            name: _plain_value(item)
+            for name, item in attributes.items()
+        }
+    return copy.deepcopy(value)
+
+
 class ConfigNormalizer:
-    """
-    Normalizes various configuration formats to standard Pydantic models.
-    
-    This ensures consistent configuration handling throughout the system.
-    """
-    
+    """Normalize supported inputs into the canonical configuration model."""
+
     @staticmethod
-    def normalize(config: Union[Dict[str, Any], InsightSpikeConfig, BaseModel]) -> InsightSpikeConfig:
+    def normalize(
+        config: Any,
+        *,
+        tolerate_unknown: bool = True,
+        source: str = "legacy",
+    ) -> InsightSpikeConfig:
+        """Normalize a model, mapping, or legacy namespace.
+
+        ``tolerate_unknown`` exists only for compatibility call sites.  Every
+        ignored key emits :class:`UnknownConfigWarning`; strict loaders bypass
+        this path and fail validation instead.
         """
-        Normalize any configuration format to InsightSpikeConfig.
-        
-        Args:
-            config: Configuration in dict or Pydantic format
-            
-        Returns:
-            InsightSpikeConfig: Normalized configuration
-        """
+
         if isinstance(config, InsightSpikeConfig):
             return config
-        
-        if isinstance(config, dict):
-            return ConfigNormalizer._dict_to_config(config)
-        
-        if isinstance(config, BaseModel):
-            # Other Pydantic model, convert to dict first
-            return ConfigNormalizer._dict_to_config(config.dict())
-        
-        raise TypeError(f"Unsupported config type: {type(config)}")
-    
+
+        plain = _plain_value(config)
+        if not isinstance(plain, Mapping):
+            raise TypeError(f"Unsupported config type: {type(config)}")
+
+        migrated = migrate_config(
+            plain,
+            emit_warnings=True,
+            source=source,
+        ).config
+
+        if tolerate_unknown:
+            pruned = prune_unknown_fields(
+                InsightSpikeConfig,
+                migrated,
+                source=source,
+            )
+            for diagnostic in pruned.diagnostics:
+                warnings.warn(
+                    UnknownConfigWarning(diagnostic),
+                    stacklevel=2,
+                )
+            migrated = pruned.config
+
+        return model_validate_compat(InsightSpikeConfig, migrated)
+
     @staticmethod
-    def _dict_to_config(config_dict: Dict[str, Any]) -> InsightSpikeConfig:
-        """
-        Convert dictionary to InsightSpikeConfig.
-        
-        Handles legacy formats and missing sections gracefully.
-        """
-        # Extract sections with defaults
-        llm_dict = config_dict.get('llm', {})
-        memory_dict = config_dict.get('memory', {})
-        embedding_dict = config_dict.get('embedding', {})
-        graph_dict = config_dict.get('graph', {})
-        processing_dict = config_dict.get('processing', {})
-        
-        # Create sub-configs
-        llm_config = ConfigNormalizer._create_llm_config(llm_dict)
-        memory_config = ConfigNormalizer._create_memory_config(memory_dict)
-        embedding_config = ConfigNormalizer._create_embedding_config(embedding_dict)
-        graph_config = ConfigNormalizer._create_graph_config(graph_dict)
-        processing_config = ConfigNormalizer._create_processing_config(processing_dict)
-        
-        # Create main config
-        return InsightSpikeConfig(
-            llm=llm_config,
-            memory=memory_config,
-            embedding=embedding_config,
-            graph=graph_config,
-            processing=processing_config
-        )
-    
+    def _dict_to_config(config_dict: Mapping[str, Any]) -> InsightSpikeConfig:
+        """Backward-compatible alias for callers of the old private helper."""
+
+        return ConfigNormalizer.normalize(config_dict)
+
     @staticmethod
-    def _create_llm_config(llm_dict: Dict[str, Any]) -> LLMConfig:
-        """
-        Create LLMConfig with support for extra fields.
-        """
-        # Standard fields
-        config = LLMConfig(
-            provider=llm_dict.get('provider', 'mock'),
-            api_key=llm_dict.get('api_key', ''),
-            model=llm_dict.get('model', ''),
-            temperature=llm_dict.get('temperature', 0.7),
-            max_tokens=llm_dict.get('max_tokens', 1000),
-            timeout=llm_dict.get('timeout', 30)
-        )
-        
-        # Store extra fields as attributes
-        extra_fields = ['prompt_style', 'use_simple_prompt', 'system_prompt']
-        for field in extra_fields:
-            if field in llm_dict:
-                setattr(config, field, llm_dict[field])
-        
-        return config
-    
-    @staticmethod
-    def _create_memory_config(memory_dict: Dict[str, Any]) -> MemoryConfig:
-        """Create MemoryConfig with defaults."""
-        # Track which defaults we auto-applied for diagnostics
-        defaults_applied = []
-        faiss_index_type = memory_dict.get('faiss_index_type')
-        if not faiss_index_type:
-            faiss_index_type = 'FlatL2'
-            defaults_applied.append('faiss_index_type')
-        metric = memory_dict.get('metric')
-        if not metric:
-            metric = 'l2'
-            defaults_applied.append('metric')
-        mc = MemoryConfig(
-            episodic_memory_capacity=memory_dict.get('episodic_memory_capacity', 100),
-            max_retrieved_docs=memory_dict.get('max_retrieved_docs', 10),
-            similarity_threshold=memory_dict.get('similarity_threshold', 0.3),
-            enable_graph_search=memory_dict.get('enable_graph_search', False),
-            cache_size=memory_dict.get('cache_size', 100)
-        )
-        # Attach dynamic attributes (non-schema) so downstream still tolerant (layer2 uses dataclass MemoryConfig)
+    def get_llm_config(config: Any) -> LLMConfig:
+        """Extract the validated LLM section from any supported input."""
+
         try:
-            setattr(mc, 'faiss_index_type', faiss_index_type)
-            setattr(mc, 'metric', metric)
-            setattr(mc, 'defaults_applied', defaults_applied)
-        except Exception:
-            # Best-effort; ignore if underlying model forbids extras
-            pass
-        return mc
-    
+            return ConfigNormalizer.normalize(config).llm
+        except (TypeError, ValueError):
+            logger.warning("No valid LLM config found, using defaults")
+            return LLMConfig()
+
     @staticmethod
-    def _create_embedding_config(embedding_dict: Dict[str, Any]) -> EmbeddingConfig:
-        """Create EmbeddingConfig with defaults."""
-        # Treat None/empty as missing to avoid pydantic validation error when tests
-        # explicitly set model_name=None for lightweight runs.
-        model_name = embedding_dict.get('model_name')
-        if not model_name:  # None or ""
-            model_name = 'sentence-transformers/all-MiniLM-L6-v2'
-        return EmbeddingConfig(
-            model_name=model_name,
-            dimension=embedding_dict.get('dimension', 384),
-            batch_size=embedding_dict.get('batch_size', 32),
-            normalize=embedding_dict.get('normalize', True)
+    def merge_configs(
+        base: InsightSpikeConfig,
+        override: Mapping[str, Any],
+    ) -> InsightSpikeConfig:
+        """Merge a higher-priority override into an existing configuration."""
+
+        migrated_override = migrate_config(
+            override,
+            emit_warnings=True,
+            source="override",
+        ).config
+        merged = ConfigNormalizer._deep_merge(
+            model_dump_compat(base),
+            migrated_override,
         )
-    
-    @staticmethod
-    def _create_graph_config(graph_dict: Dict[str, Any]) -> GraphConfig:
-        """Create GraphConfig with defaults."""
-        # Handle multihop config
-        multihop_dict = graph_dict.get('multihop_config', {})
-        
-        config_params = {
-            'similarity_threshold': graph_dict.get('similarity_threshold', 0.3),
-            'spike_ged_threshold': graph_dict.get('spike_ged_threshold', -0.5),
-            'spike_ig_threshold': graph_dict.get('spike_ig_threshold', 0.2),
-            'conflict_threshold': graph_dict.get('conflict_threshold', 0.5),
-            'use_gnn': graph_dict.get('use_gnn', False),
-            'gnn_hidden_dim': graph_dict.get('gnn_hidden_dim', 64),
-            'hop_limit': graph_dict.get('hop_limit', 2),
-            'neighbor_threshold': graph_dict.get('neighbor_threshold', 0.4),
-            'path_decay': graph_dict.get('path_decay', 0.7),
-            'enable_graph_search': graph_dict.get('enable_graph_search', False),
-        }
-        
-        # Handle legacy fields
-        if 'use_multihop_gedig' in graph_dict:
-            config_params['enable_graph_search'] = graph_dict['use_multihop_gedig']
-        
-        return GraphConfig(**config_params)
-    
-    @staticmethod
-    def _create_processing_config(processing_dict: Dict[str, Any]) -> ProcessingConfig:
-        """Create ProcessingConfig with defaults."""
-        # Handle adaptive loop config
-        adaptive_dict = processing_dict.get('adaptive_loop', {})
-        
-        return ProcessingConfig(
-            enable_layer1_bypass=processing_dict.get('enable_layer1_bypass', True),
-            dynamic_doc_adjustment=processing_dict.get('dynamic_doc_adjustment', False),
-            enable_insight_registration=processing_dict.get('enable_insight_registration', False),
-            min_confidence_threshold=processing_dict.get('min_confidence_threshold', 0.1),
-            # AdaptiveLoopConfig if needed
-            adaptive_loop=adaptive_dict if adaptive_dict else None
+        return ConfigNormalizer.normalize(
+            merged,
+            tolerate_unknown=True,
+            source="merged",
         )
-    
+
     @staticmethod
-    def get_llm_config(config: Union[Dict[str, Any], InsightSpikeConfig, BaseModel]) -> LLMConfig:
-        """
-        Extract LLM configuration from any config format.
-        
-        Args:
-            config: Configuration in any format
-            
-        Returns:
-            LLMConfig: LLM configuration
-        """
-        if isinstance(config, dict):
-            llm_dict = config.get('llm', {})
-            return ConfigNormalizer._create_llm_config(llm_dict)
-        
-        if hasattr(config, 'llm'):
-            return config.llm
-        
-        # Fallback to empty LLM config
-        logger.warning("No LLM config found, using defaults")
-        return LLMConfig()
-    
-    @staticmethod
-    def merge_configs(base: InsightSpikeConfig, override: Dict[str, Any]) -> InsightSpikeConfig:
-        """
-        Merge override dictionary into base config.
-        
-        Args:
-            base: Base configuration
-            override: Dictionary of overrides
-            
-        Returns:
-            InsightSpikeConfig: Merged configuration
-        """
-        # Convert base to dict
-        base_dict = base.dict()
-        
-        # Deep merge
-        merged = ConfigNormalizer._deep_merge(base_dict, override)
-        
-        # Convert back to config
-        return ConfigNormalizer._dict_to_config(merged)
-    
-    @staticmethod
-    def _deep_merge(base: Dict, override: Dict) -> Dict:
-        """Deep merge two dictionaries."""
-        result = base.copy()
-        
+    def _deep_merge(
+        base: Mapping[str, Any],
+        override: Mapping[str, Any],
+    ) -> dict[str, Any]:
+        """Recursively merge mappings, with ``override`` values winning."""
+
+        result = copy.deepcopy(dict(base))
         for key, value in override.items():
-            if key in result and isinstance(result[key], dict) and isinstance(value, dict):
-                result[key] = ConfigNormalizer._deep_merge(result[key], value)
+            if (
+                key in result
+                and isinstance(result[key], Mapping)
+                and isinstance(value, Mapping)
+            ):
+                result[key] = ConfigNormalizer._deep_merge(
+                    result[key],
+                    value,
+                )
             else:
-                result[key] = value
-        
+                result[key] = copy.deepcopy(value)
         return result
+
+
+__all__ = ["ConfigNormalizer"]

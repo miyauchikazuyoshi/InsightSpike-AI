@@ -122,6 +122,7 @@ class TestConfigPresets:
         assert config.llm.provider == "local"
         assert config.llm.model == "distilgpt2"
         assert config.memory.episodic_memory_capacity == 100
+        assert config.memory.max_episodes == 2000
         assert config.monitoring.enabled is True
         assert config.logging.level == "INFO"
 
@@ -133,6 +134,7 @@ class TestConfigPresets:
         assert config.llm.provider == "openai"
         assert config.llm.model == "gpt-3.5-turbo"
         assert config.memory.episodic_memory_capacity == 200
+        assert config.memory.max_episodes == 5000
         assert config.monitoring.enabled is True
         assert config.monitoring.performance_tracking is True
         assert config.logging.level == "WARNING"

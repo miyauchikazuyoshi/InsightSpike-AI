@@ -1,9 +1,38 @@
-"""
-Wake-Sleep cycle configuration models.
-"""
+"""Wake-Sleep cycle configuration models."""
 
-from pydantic import BaseModel, Field, ConfigDict
 from typing import Literal, Optional
+
+from pydantic import Field
+
+from .pydantic_compat import PYDANTIC_V2, StrictConfigModel
+
+if PYDANTIC_V2:
+    from pydantic import ConfigDict
+
+BaseModel = StrictConfigModel
+
+SPHERE_SEARCH_SCHEMA_EXTRA = {
+    "example": {
+        "method": "donut",
+        "intuitive_radius": 0.5,
+        "intuitive_inner_radius": 0.2,
+        "intuitive_outer_radius": 0.6,
+        "max_neighbors": 20,
+        "use_faiss": True,
+        "use_dimension_aware_scaling": True,
+    },
+    "example_strict": {
+        "method": "sphere",
+        "intuitive_radius": 0.3,
+        "max_neighbors": 10,
+    },
+    "example_creative": {
+        "method": "donut",
+        "intuitive_inner_radius": 0.1,
+        "intuitive_outer_radius": 0.7,
+        "max_neighbors": 50,
+    },
+}
 
 
 class SphereSearchConfig(BaseModel):
@@ -102,28 +131,15 @@ class SphereSearchConfig(BaseModel):
         description="Automatically scale intuitive radius based on vector dimension"
     )
 
-    model_config = ConfigDict(json_schema_extra={
-        "example": {
-            "method": "donut",
-            "intuitive_radius": 0.5,
-            "intuitive_inner_radius": 0.2,
-            "intuitive_outer_radius": 0.6,
-            "max_neighbors": 20,
-            "use_faiss": True,
-            "use_dimension_aware_scaling": True
-        },
-        "example_strict": {
-            "method": "sphere",
-            "intuitive_radius": 0.3,
-            "max_neighbors": 10
-        },
-        "example_creative": {
-            "method": "donut",
-            "intuitive_inner_radius": 0.1,
-            "intuitive_outer_radius": 0.7,
-            "max_neighbors": 50
-        }
-    })
+    if PYDANTIC_V2:
+        model_config = ConfigDict(
+            extra="forbid",
+            json_schema_extra=SPHERE_SEARCH_SCHEMA_EXTRA,
+        )
+    else:
+
+        class Config(StrictConfigModel.Config):
+            schema_extra = SPHERE_SEARCH_SCHEMA_EXTRA
 
 
 class WakeModeConfig(BaseModel):

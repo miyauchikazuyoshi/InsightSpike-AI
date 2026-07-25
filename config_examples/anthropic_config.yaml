@@ -1,39 +1,38 @@
-# Anthropic Claude Provider Configuration Example
-# ===============================================
+# Anthropic provider with a local embedding model.
+# Set ANTHROPIC_API_KEY in the process environment before making API calls.
 
-# LLM Configuration
+environment: production
+pre_warm_models: false
+
 llm:
   provider: anthropic
-  model_name: claude-3-sonnet-20240229  # or claude-3-opus-20240229
-  api_key: ${ANTHROPIC_API_KEY}  # Set via environment variable
+  model: claude-3-sonnet-20240229
   temperature: 0.7
   max_tokens: 1000
   timeout: 30
+  prompt_style: detailed
 
-# Embedding Configuration  
 embedding:
-  provider: sentence-transformers  # Anthropic doesn't provide embeddings
-  model_name: all-MiniLM-L6-v2
+  model_name: sentence-transformers/all-MiniLM-L6-v2
   dimension: 384
+  device: cpu
 
-# Spike Detection
-spike:
-  spike_ged: 0.5
-  spike_ig: 0.2
-  eta_spike: 0.2
-
-# Memory Configuration
 memory:
   max_episodes: 10000
-  retrieval_k: 20
-  
-# Graph Configuration
-graph:
-  max_nodes: 5000
-  max_edges: 10000
-  pruning_threshold: 0.1
+  max_retrieved_docs: 20
+  search_k: 20
 
-# System
-system:
-  safe_mode: false
-  log_level: INFO
+graph:
+  similarity_threshold: 0.3
+  spike_ged_threshold: -0.5
+  spike_ig_threshold: 0.2
+  ged_algorithm: advanced
+  ig_algorithm: advanced
+
+datastore:
+  type: filesystem
+  root_path: ./data/anthropic_store
+
+logging:
+  level: INFO
+  log_to_console: true

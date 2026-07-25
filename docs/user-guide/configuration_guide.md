@@ -2,208 +2,189 @@
 
 ## Overview
 
-InsightSpike now provides a simplified configuration system that makes it easy to:
-- Switch between different execution modes (CPU/GPU, safe mode/real LLM)
-- Use pre-configured settings for common scenarios
-- Override settings via environment variables
-- Save and load configurations
+InsightSpike uses one canonical, nested Pydantic model:
+`insightspike.config.InsightSpikeConfig`. Configuration can come from a
+preset, YAML/JSON file, supported environment variables, and explicit
+overrides.
 
-## Quick Start
+When multiple sources are selected, priority is:
 
-### Using Presets
+1. explicit overrides
+2. environment variables
+3. configuration file
+4. preset
+5. model defaults
+
+Each source is migrated independently before merging. This matters when a
+higher-priority source still uses an older key name.
+
+## Quick start
 
 ```python
-from insightspike.config import get_config, ConfigPresets
+from insightspike.config import load_config
 
-# Get a preset configuration
-config = get_config("experiment")  # Real LLM, moderate performance
-
-# Or use preset class directly
-dev_config = ConfigPresets.development()  # Fast, safe, debug-friendly
-prod_config = ConfigPresets.production()  # Optimized for performance
+config = load_config(
+    preset="development",
+    overrides={
+        "llm": {"temperature": 0.2},
+        "datastore": {"type": "memory"},
+    },
+)
 ```
 
-### Available Presets
+An explicit preset is self-contained. A local `config.yaml` is merged only
+when no preset is selected, or when a file is explicitly selected through
+`config_path` or `INSIGHTSPIKE_CONFIG_PATH`.
 
-1. **development** - Fast iteration, mock LLM, debug enabled
-2. **testing** - Isolated paths, reproducible, small limits
-3. **production** - GPU enabled, real LLM, optimized
-4. **experiment** - Real LLM, CPU mode, moderate settings
-5. **cloud** - For API-based LLMs (OpenAI, Anthropic)
+```python
+config = load_config(config_path="config.yaml")
+```
 
-## Configuration Options
+Available presets are `development`, `experiment`, `production`, `research`,
+`cloud`/`testing`, `paper`, `production_optimized`, `minimal`,
+`graph_enhanced`, and `adaptive_learning`.
 
-### Core Settings
+## Canonical YAML example
+
+```yaml
+environment: development
+pre_warm_models: false
+
+llm:
+  provider: mock
+  model: mock
+  temperature: 0.3
+  max_tokens: 256
+
+embedding:
+  model_name: sentence-transformers/all-MiniLM-L6-v2
+  dimension: 384
+
+memory:
+  max_retrieved_docs: 10
+  episodic_memory_capacity: 60
+
+graph:
+  similarity_threshold: 0.3
+  spike_ged_threshold: -0.5
+  spike_ig_threshold: 0.2
+  enable_message_passing: false
+
+datastore:
+  type: filesystem
+  root_path: ./data/insight_store
+
+output:
+  include_reasoning: false
+  include_metadata: false
+
+monitoring:
+  enabled: true
+  performance_tracking: true
+```
+
+Unknown root and nested keys are rejected by strict file loading. For example,
+`graph.similiarity_threshold` fails validation instead of silently using the
+default.
+
+## Datastore settings
 
 | Setting | Default | Description |
-|---------|---------|-------------|
-| `mode` | `"cpu"` | Execution mode: "cpu", "gpu", "mps" |
-| `safe_mode` | `True` | Use mock LLM (no model loading) |
-| `debug` | `False` | Enable debug logging |
+|---|---:|---|
+| `datastore.type` | `filesystem` | `filesystem`, `memory`, or `sqlite`; `in_memory` remains a legacy alias |
+| `datastore.root_path` | `./data/insight_store` | Filesystem base directory and SQLite fallback location |
+| `datastore.db_path` | `null` | Explicit SQLite database path |
+| `datastore.vector_dim` | `null` | SQLite vector dimension; embedding dimension is used when omitted |
 
-### Model Settings
-
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `embedding_model` | `"paraphrase-MiniLM-L6-v2"` | Sentence embedding model |
-| `llm_model` | `"TinyLlama/TinyLlama-1.1B-Chat-v1.0"` | Language model |
-| `llm_provider` | `"local"` | Provider: "local", "openai", "anthropic" |
-
-### Performance Settings
-
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `max_tokens` | `256` | Maximum tokens for LLM response |
-| `temperature` | `0.3` | LLM temperature (0.0-1.0) |
-| `batch_size` | `32` | Batch size for processing |
-
-### Spike Detection
-
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `spike_ged_threshold` | `0.5` | Graph Edit Distance threshold |
-| `spike_ig_threshold` | `0.2` | Information Gain threshold |
-| `spike_sensitivity` | `1.0` | Multiplier for thresholds |
-
-### Datastore Settings
-
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `datastore.type` | `"filesystem"` | Persistence backend: `filesystem`, `in_memory` |
-| `datastore.root_path` | `"./data/insight_store"` | Base directory for filesystem backend (alias: `base_path`) |
-
-Example YAML:
+Examples:
 
 ```yaml
 datastore:
-  type: filesystem
-  root_path: ./data/insight_store  # or absolute path
+  type: memory
 ```
 
-Tip: CLI bootstrap honors `INSIGHTSPIKE_DATA_DIR` to override the base path quickly.
-
-## Usage Examples
-
-### Custom Configuration
-
-```python
-from insightspike.config import SimpleConfig
-
-config = SimpleConfig(
-    mode="cpu",
-    safe_mode=False,  # Use real LLM
-    max_tokens=512,
-    spike_sensitivity=1.5,  # More sensitive spike detection
-    debug=True
-)
+```yaml
+datastore:
+  type: sqlite
+  db_path: ./data/insight_store/state.sqlite3
+  vector_dim: 384
 ```
 
-### Using ConfigManager
+## Supported environment variables
 
-```python
-from insightspike.config import ConfigManager, ConfigPresets
-
-# Create manager with preset
-manager = ConfigManager(ConfigPresets.experiment())
-
-# Get values
-mode = manager.get("mode")
-tokens = manager.get("max_tokens", default=256)
-
-# Update values
-manager.set("debug", True)
-manager.update(
-    max_tokens=1024,
-    temperature=0.7
-)
-```
-
-### Environment Variables
-
-Override any setting using environment variables:
+Nested names use a double underscore:
 
 ```bash
-export INSIGHTSPIKE_MODE=gpu
-export INSIGHTSPIKE_SAFE_MODE=false
-export INSIGHTSPIKE_MAX_TOKENS=1024
-export INSIGHTSPIKE_DEBUG=true
+export INSIGHTSPIKE_LLM__PROVIDER=openai
+export INSIGHTSPIKE_LLM__MODEL=gpt-4.1-mini
+export INSIGHTSPIKE_LLM__TEMPERATURE=0.2
+export INSIGHTSPIKE_MEMORY__MAX_RETRIEVED_DOCS=20
+export INSIGHTSPIKE_DATASTORE__TYPE=sqlite
+export INSIGHTSPIKE_DATASTORE__DB_PATH=./state.sqlite3
+export INSIGHTSPIKE_ENVIRONMENT=production
 ```
 
-### Save and Load
+`INSIGHTSPIKE_CONFIG_PATH` selects a configuration file.
+`INSIGHTSPIKE_MODEL_NAME`, `INSIGHTSPIKE_DATA_DIR`, and
+`INSIGHTSPIKE_LOG_DIR` remain supported compatibility names.
+
+## Save and reload
+
+Use `ConfigLoader` when a configuration must be persisted:
 
 ```python
-# Save configuration
-config = ConfigPresets.experiment()
-config.save("my_experiment.json")
+from insightspike.config.loader import ConfigLoader
 
-# Load configuration
-loaded = SimpleConfig.load("my_experiment.json")
+loader = ConfigLoader()
+config = loader.load(preset="development")
+loader.save("resolved-config.yaml")
+
+reloaded = ConfigLoader().load_from_file("resolved-config.yaml")
 ```
 
-## Integration with MainAgent
+Saved YAML is portable and safe-loadable: `Path` values are strings and
+Pydantic implementation metadata is not serialized.
+
+## Legacy migration
+
+Older dictionaries remain accepted at compatibility boundaries such as
+`MainAgent(config=legacy_dict)`. Migrations and ignored unknown keys emit
+structured `UserWarning` instances with their dotted paths.
+
+| Legacy form | Canonical form |
+|---|---|
+| `l4_config` | `llm` |
+| `llm.model_name` | `llm.model` |
+| `embedding.model` | `embedding.model_name` |
+| `output.show_reasoning` | `output.include_reasoning` |
+| `output.show_metadata` | `output.include_metadata` |
+| `monitoring.enable_monitoring` | `monitoring.enabled` |
+| `monitoring.track_memory_usage` | `monitoring.performance_tracking` |
+| `datastore.path` | `datastore.root_path` |
+| `datastore.type: in_memory` | `datastore.type: memory` |
+| `paths.log_dir` | `paths.logs_dir` |
+
+Deprecated fields without a safe semantic equivalent are removed with a
+warning: `output.response_style`, `monitoring.metrics_interval`,
+`logging.format`, and `logging.file_enabled`.
+
+When legacy and canonical fields coexist in the same source, the canonical
+value wins and a conflict diagnostic is emitted.
+
+## Direct model construction
+
+Use direct construction when strict validation is desired without source
+loading:
 
 ```python
-from insightspike.config import ConfigManager, ConfigPresets
-from insightspike.core.agents.main_agent import MainAgent
+from insightspike.config import InsightSpikeConfig
 
-# Setup configuration
-manager = ConfigManager(ConfigPresets.experiment())
-
-# Convert to legacy format (temporary compatibility)
-legacy_config = manager.to_legacy_config()
-
-# Create agent
-agent = MainAgent(config=legacy_config)
-agent.initialize()
+config = InsightSpikeConfig(
+    llm={"provider": "mock"},
+    graph={"similarity_threshold": 0.4},
+)
 ```
 
-## Best Practices
-
-1. **Start with presets** - Use presets as a starting point and customize as needed
-2. **Use environment variables** - For deployment, use env vars instead of hardcoding
-3. **Save configurations** - Save successful configurations for reproducibility
-4. **Spike sensitivity** - Adjust `spike_sensitivity` instead of individual thresholds
-
-## Migration from Legacy Config
-
-The new system is designed to work alongside the existing configuration. The `to_legacy_config()` method provides compatibility:
-
-```python
-# Old way
-from insightspike.core.config import Config
-config = Config()
-config.llm.safe_mode = False
-config.spike.spike_ged = 0.3
-
-# New way
-from insightspike.config import SimpleConfig
-config = SimpleConfig(safe_mode=False, spike_ged_threshold=0.3)
-```
-
-## Troubleshooting
-
-### GPU Not Available
-
-If you request GPU mode but it's not available, the system automatically falls back to CPU:
-
-```
-WARNING: GPU requested but not available, falling back to CPU
-```
-
-### Model Not Found
-
-If using `safe_mode=False` but the model isn't downloaded:
-
-```python
-# Check if model is available
-manager = ConfigManager()
-if not manager.validate():
-    print("Configuration issues detected")
-```
-
-### Environment Variable Not Working
-
-Ensure the variable follows the naming pattern:
-- Prefix: `INSIGHTSPIKE_`
-- Setting name in UPPERCASE
-- Example: `INSIGHTSPIKE_MAX_TOKENS`
+Application code should pass the validated object and a configured datastore
+to `MainAgent`; public helpers such as `create_agent()` perform this composition
+automatically.

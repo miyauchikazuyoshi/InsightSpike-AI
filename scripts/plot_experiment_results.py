@@ -15,7 +15,7 @@ import torch
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(os.path.join(REPO_ROOT, "src"))
 
-from insightspike.gedig import compute_f_score
+from insightspike.gedig import compute_structural_profile
 from insightspike.rag.reranker import StructureReranker
 
 
@@ -36,8 +36,12 @@ def _flash_metrics(device: str, batch: int, heads: int, seq: int, temperature: f
     attention = torch.softmax(attention_raw, dim=-1)
     attention.retain_grad()
 
-    f_val, _ = compute_f_score(attention, temperature=temperature, percentile=percentile)
-    loss = -f_val.mean()
+    profile_value, _ = compute_structural_profile(
+        attention,
+        temperature=temperature,
+        percentile=percentile,
+    )
+    loss = -profile_value.mean()
     loss.backward()
     grad_norm = attention_raw.grad.norm().item() if attention_raw.grad is not None else 0.0
 
@@ -46,7 +50,11 @@ def _flash_metrics(device: str, batch: int, heads: int, seq: int, temperature: f
     attention_profile = torch.softmax(torch.rand(batch, heads, seq, seq, device=device), dim=-1)
 
     def step():
-        compute_f_score(attention_profile, temperature=temperature, percentile=percentile)
+        compute_structural_profile(
+            attention_profile,
+            temperature=temperature,
+            percentile=percentile,
+        )
 
     warmup = 3
     iters = 10
@@ -58,12 +66,12 @@ def _flash_metrics(device: str, batch: int, heads: int, seq: int, temperature: f
     end = time.perf_counter()
     profile_ms = (end - start) * 1000.0 / iters
 
-    return f_val.mean().item(), grad_norm, profile_ms
+    return profile_value.mean().item(), grad_norm, profile_ms
 
 
 def plot_flash_gedig(device: str, seed: int, batch: int, heads: int, seq: int, temperature: float, percentile: float):
     device = _device_from_arg(device)
-    f_mean, grad_norm, profile_ms = _flash_metrics(
+    profile_mean, grad_norm, profile_ms = _flash_metrics(
         device=device,
         batch=batch,
         heads=heads,
@@ -74,8 +82,8 @@ def plot_flash_gedig(device: str, seed: int, batch: int, heads: int, seq: int, t
     )
 
     fig, axes = plt.subplots(1, 3, figsize=(9, 3))
-    axes[0].bar(["f_mean"], [f_mean], color="#4c78a8")
-    axes[0].set_title("F mean")
+    axes[0].bar(["profile_mean"], [profile_mean], color="#4c78a8")
+    axes[0].set_title("Structural profile mean")
     axes[0].axhline(0.0, color="#999999", linewidth=0.8)
 
     axes[1].bar(["grad_norm"], [grad_norm], color="#f58518")
@@ -92,7 +100,10 @@ def plot_flash_gedig(device: str, seed: int, batch: int, heads: int, seq: int, t
     fig.savefig(path, dpi=140)
     plt.close(fig)
 
-    print(f"[flash] device={device} f_mean={f_mean:.6f} grad_norm={grad_norm:.6f} profile_ms={profile_ms:.3f}")
+    print(
+        f"[flash] device={device} profile_mean={profile_mean:.6f} "
+        f"grad_norm={grad_norm:.6f} profile_ms={profile_ms:.3f}"
+    )
     print(f"[flash] wrote {path}")
 
 

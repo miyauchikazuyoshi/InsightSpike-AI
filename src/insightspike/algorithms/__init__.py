@@ -22,6 +22,15 @@ LIGHT_MODE = (
     or os.environ.get("INSIGHTSPIKE_MIN_IMPORT") == "1"
 )
 
+# Optional PyG-backed exports are defined in every mode so helper functions fail
+# with a clear dependency error instead of NameError.
+GEDResult = None
+GraphEditDistance = None
+OptimizationLevel = None
+compute_delta_ged = None
+compute_graph_edit_distance = None
+_GRAPH_EDIT_DISTANCE_IMPORT_ERROR = None
+
 if LIGHT_MODE:
     # Provide minimal surface; heavy algorithm imports skipped to avoid torch dependency.
     __all__ = [
@@ -33,13 +42,25 @@ else:
         EntropyCalculator,
         EntropyResult,
     )
-    from .graph_edit_distance import (
-        GEDResult,
-        GraphEditDistance,
-        OptimizationLevel,
-        compute_delta_ged,
-        compute_graph_edit_distance,
-    )
+    try:
+        from .graph_edit_distance import (
+            GEDResult,
+            GraphEditDistance,
+            OptimizationLevel,
+            compute_delta_ged,
+            compute_graph_edit_distance,
+        )
+        _GRAPH_EDIT_DISTANCE_IMPORT_ERROR = None
+    except ImportError as exc:
+        # PyTorch Geometric is optional. Importing an unrelated lightweight
+        # submodule (for example ``algorithms.gedig.selector``) must not fail
+        # merely because the PyG-backed convenience exports are unavailable.
+        GEDResult = None  # type: ignore[assignment]
+        GraphEditDistance = None  # type: ignore[assignment]
+        OptimizationLevel = None  # type: ignore[assignment]
+        compute_delta_ged = None  # type: ignore[assignment]
+        compute_graph_edit_distance = None  # type: ignore[assignment]
+        _GRAPH_EDIT_DISTANCE_IMPORT_ERROR = exc
     from .information_gain import (
         EntropyMethod,
         IGResult,
@@ -141,6 +162,12 @@ def create_default_ged_calculator(**kwargs) -> GraphEditDistance:
     Returns:
         GraphEditDistance: Configured calculator
     """
+    if GraphEditDistance is None or OptimizationLevel is None:
+        raise RuntimeError(
+            "GraphEditDistance requires the optional torch-geometric "
+            "dependencies"
+        ) from _GRAPH_EDIT_DISTANCE_IMPORT_ERROR
+
     defaults = {
         "optimization_level": OptimizationLevel.STANDARD,
         "node_cost": 1.0,

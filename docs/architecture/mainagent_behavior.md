@@ -1,11 +1,64 @@
 # MainAgent Behavior Documentation
 
 > **式の位置づけ（簡約式） / Formula Status (Simplified)**: この文書の数式は説明用の簡約式です。正準定義（Canonical）は `docs/gedig_spec.md` です。
+>
+> **Status**: Current public runtime behavior as of 2026-07-24.
 
 
 ## 🧠 Overview
 
 MainAgent is the core orchestrator in InsightSpike that coordinates all 4 neurobiologically-inspired layers to process questions, manage memory, detect insights, and generate responses.
+
+## Facade and service boundaries
+
+`MainAgent` remains the public facade and owns the replaceable component
+attributes `l1_error_monitor`, `l1_embedder`, `l2_memory`, `l3_graph`,
+`l4_llm`, and `datastore`. The L1–L4 algorithms still run through the facade;
+the following coordination-only responsibilities are delegated:
+
+| Service | Responsibility |
+|---|---|
+| `AgentLifecycle` | Resolve and initialize the current L4 provider, load legacy memory when applicable, and reset L1 |
+| `AgentPersistence` | Exact episode snapshots, graph state, legacy persistence, and index rebuilds |
+| `CycleResultAggregator` | Select the highest-quality cycle and materialize result metadata after learning hooks |
+| `AgentConfigAccess` | Read live config values and build the normalized scalar facade |
+
+These services do not own copies of the public components. A test or
+integration may replace a component attribute on `MainAgent`, and the next
+operation receives that current instance.
+
+### Lifecycle contract
+
+- A newly resolved provider is assigned to `MainAgent.l4_llm` before later
+  initialization steps run. If memory loading or monitor reset fails, a retry
+  reuses the same provider rather than constructing another one.
+- Repeated `initialize()` calls preserve the established observable behavior:
+  an already initialized provider is not initialized twice, while applicable
+  memory loading and monitor reset run again.
+- A failed repeated initialization returns `False`; if the agent was already
+  initialized, its prior `initialized` state remains unchanged.
+- Provider-construction errors use one lightweight fallback implementation
+  with the marker response `[fallback-llm-response]`.
+
+### Live configuration and explicit overrides
+
+`AgentConfigAccess` rebuilds `NormalizedConfig` from the current source config
+when `_nc()` is read. Runtime changes such as adaptive graph thresholds are
+therefore visible to later cycles and learning snapshots.
+
+`_normalized_config` remains an internal compatibility patch point used by
+existing integrations. When it is replaced (for example with
+`dataclasses.replace(..., gedig_mode="ab")`), only fields that differ from the
+last generated facade become explicit overrides. Other fields continue to
+follow the live source config.
+
+### Result aggregation contract
+
+The result with the highest `reasoning_quality` is selected; equal scores keep
+the first result. Learning hooks run against that selected result before a new
+public `CycleResult` is materialized. Aggregated graph metadata includes cycle
+count, convergence, optional history, and agent statistics. `query_id` starts
+as `None` on the aggregate and is assigned by `QueryRecorder`.
 
 ## 🔄 Processing Cycle
 
@@ -94,19 +147,41 @@ These thresholds are configurable in `config.yaml`.
 
 ## 💾 Memory Management
 
-### Episode Storage
+### State persistence
+
 ```python
-def add_episode_with_graph_update(self, text: str, source: str = "user") -> Dict
+saved: bool = agent.save_state()
+loaded: bool = agent.load_state()
 ```
 
-1. Creates episode with embedding
-2. Performs graph analysis
-3. Detects potential spikes
-4. Updates memory rewards
-5. Triggers automatic management:
-   - **Merge**: Similar episodes (> 0.8 similarity)
-   - **Split**: Conflicting episodes (> 0.3 conflict)
-   - **Prune**: Low-value episodes (< 0.1 C-value)
+With a configured `DataStore`, persistence replaces the complete episode
+snapshot, saves graph id `main_graph` in namespace `agent_state`, and rebuilds
+the memory index after load. Loading an empty snapshot clears existing
+episodes. Without a `DataStore`, the legacy L2/L3 save and load paths remain
+available. Both public methods return `bool`; callers should handle `False`.
+
+### Episode Storage
+```python
+def add_document(
+    self,
+    text: str | Mapping[str, Any],
+    c_value: float = 0.5,
+    metadata: dict | None = None,
+) -> bool
+
+def add_knowledge(self, text: str, c_value: float = 0.5) -> Dict[str, Any]
+def learn(self, text: str, c_value: float = 0.5) -> Dict[str, Any]
+```
+
+`add_document()` is the compact boolean API. It accepts either text or the
+legacy `{"text", "metadata", "c_value"}` mapping and rejects empty text or a
+non-numeric confidence without inserting an episode.
+
+`add_knowledge()` returns the episode id and graph-update status. `learn()` is
+its compatibility alias and additionally reports `episodes_added` plus an
+`insights` list. `graph_updated` means that L3 explicitly confirmed a completed
+update; the current compatibility `L3GraphReasoner.update_graph()` is a no-op,
+so merely accepting that call does not produce a false positive.
 
 ### Reward System
 Episodes involved in successful reasoning receive C-value boosts:
@@ -131,8 +206,12 @@ def get_insights(limit: int = 5) -> Dict[str, Any]
 def search_insights(concept: str, limit: int = 10) -> List[Dict]
 ```
 - Accesses InsightFactRegistry
-- Returns categorized insights
-- Supports concept-based search
+- Reuses the registry owned by the agent; it does not open an unrelated
+  registry per call
+- Maps `InsightFact.text`, `generated_at`, `quality_score`, and
+  `relationship_type` to the public answer/timestamp/importance/category view
+- Supports concept-based search through
+  `InsightFactRegistry.search_insights_by_concept()`
 
 ## 🧪 Experiments & Demos
 
@@ -167,21 +246,20 @@ from insightspike.config.presets import ConfigPresets
 # Option 1: Load from config.yaml
 config = load_config()
 
-# Option 2: Use a preset
-preset_dict = ConfigPresets.get_preset("development")
+# Option 2: Use a preset model
+config = ConfigPresets.development()
 
 # Option 3: Create custom config
-from insightspike.config.models import CoreConfig, MemoryConfig
 custom_config = InsightSpikeConfig(
-    core=CoreConfig(llm_provider="clean"),
-    memory=MemoryConfig(episodic_memory_capacity=100)
+    llm={"provider": "mock"},
+    memory={"episodic_memory_capacity": 100},
 )
 ```
 
 Key configuration parameters:
-- `core.llm_provider`: LLM provider ("mock", "clean", "openai", etc.)
+- `llm.provider`: LLM provider (`mock`, `openai`, `anthropic`, etc.)
 - `memory.episodic_memory_capacity`: Number of episodes to retain
-- `reasoning.episode_merge_threshold`: When to merge similar episodes
+- `graph.episode_merge_threshold`: When to merge similar episodes
 - `graph.spike_ged_threshold`: Threshold for spike detection
 - `graph.ged_algorithm` / `graph.ig_algorithm`: メトリクス実装の選択（既定: `advanced`）
 - `metrics.query_centric`, `metrics.query_topk_centers`, `metrics.query_radius`: クエリ中心の局所評価を制御（既定: `true`, `3`, `1`）
@@ -206,14 +284,12 @@ MainAgent handles errors gracefully:
 
 ```python
 from insightspike.implementations.agents import MainAgent
-from insightspike.core.base.datastore import DataStore
-from insightspike.config.converter import ConfigConverter
+from insightspike.implementations.datastore.factory import DataStoreFactory
 from insightspike.config.presets import ConfigPresets
 
 # Create dependencies
-datastore = DataStore()  # Or use a specific implementation
-preset_dict = ConfigPresets.get_preset("development")
-config = ConfigConverter.preset_dict_to_legacy_config(preset_dict)
+datastore = DataStoreFactory.create("in_memory")
+config = ConfigPresets.development()
 
 # Initialize
 agent = MainAgent(config=config, datastore=datastore)
@@ -241,7 +317,8 @@ if answer.spike_detected:
 print(f"Query saved with ID: {answer.query_id}")
     
 # Save state
-agent.save_state()
+if not agent.save_state():
+    raise RuntimeError("State persistence failed")
 ```
 
 ## 🐛 Debugging
@@ -257,8 +334,3 @@ Use `get_stats()` to monitor:
 - Agent health
 - Performance metrics
 - Memory usage
----
-status: deprecated
-note: This document describes the legacy MainAgent behavior. The recommended path is to use `ConfigurableAgent` (implementations/agents/configurable_agent.py) via the public API `insightspike.public.create_agent`. geDIG computations must go through the selector entrypoint.
-updated: 2025-09-08
----

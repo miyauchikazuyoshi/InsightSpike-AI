@@ -1,5 +1,11 @@
 # Adapter Migration Plan — 既存実験コードの統合
 
+> **Historical plan (superseded):** This file preserves the proposed
+> migration sequence. It is not a completion report and several flag-based
+> steps no longer describe the active code. Use
+> [`MIGRATION_PROGRESS.md`](MIGRATION_PROGRESS.md) for the verified
+> 2026-07-24 boundary.
+
 ## 概要
 
 `src/gedig/` の core + adapter が完成 (44/44 tests pass)。

@@ -33,6 +33,7 @@ jobs:
             tests/unit/test_layer3_graph_reasoner.py \
             tests/unit/test_scalable_graph_builder.py \
             tests/unit/test_message_passing.py \
+            tests/unit/test_message_passing_optimized.py \
+            tests/unit/test_message_passing_aggregation_contract.py \
             tests/unit/test_edge_reevaluator.py \
             tests/unit/test_ged_calibration.py
-

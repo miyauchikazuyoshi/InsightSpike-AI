@@ -1,15 +1,36 @@
-"""
-Message Passing Configuration Models
-===================================
+"""Validated configuration for message passing and edge reevaluation."""
 
-Pydantic models for message passing configuration with validation.
-"""
-
-from pydantic import BaseModel, Field
 from typing import Literal
 
+from pydantic import Field
 
-class MessagePassingConfig(BaseModel):
+from .pydantic_compat import (
+    PYDANTIC_V2,
+    StrictConfigModel,
+    model_dump_compat,
+)
+
+if PYDANTIC_V2:
+    from pydantic import ConfigDict
+
+MESSAGE_PASSING_SCHEMA_EXTRA = {
+    "example": {
+        "alpha": 0.3,
+        "iterations": 2,
+        "max_hops": 1,
+        "aggregation": "weighted_mean",
+        "self_loop_weight": 0.5,
+        "decay_factor": 0.8,
+        "similarity_threshold": 0.3,
+        "convergence_threshold": 0.0001,
+        "enable_batch_computation": True,
+        "cache_similarities": True,
+        "top_k_relevance_percentile": 75,
+    }
+}
+
+
+class MessagePassingConfig(StrictConfigModel):
     """Configuration for question-aware message passing"""
     
     # Core parameters
@@ -35,9 +56,17 @@ class MessagePassingConfig(BaseModel):
     )
     
     # Aggregation settings
-    aggregation: Literal["weighted_mean", "max", "attention"] = Field(
+    aggregation: Literal[
+        "weighted_mean",
+        "mean",
+        "max",
+        "attention",
+    ] = Field(
         default="weighted_mean",
-        description="Message aggregation method"
+        description=(
+            "Message aggregation method. 'attention' is a deprecated "
+            "compatibility alias for the historical simple-mean behavior."
+        ),
     )
     
     self_loop_weight: float = Field(
@@ -88,46 +117,51 @@ class MessagePassingConfig(BaseModel):
         description="Percentile threshold for selecting starting nodes (e.g., 75 = top 25%)"
     )
     
-    class Config:
-        """Pydantic config"""
-        schema_extra = {
-            "example": {
-                "alpha": 0.3,
-                "iterations": 2,
-                "max_hops": 1,
-                "aggregation": "weighted_mean",
-                "self_loop_weight": 0.5,
-                "decay_factor": 0.8,
-                "similarity_threshold": 0.3,
-                "convergence_threshold": 0.0001,
-                "enable_batch_computation": True,
-                "cache_similarities": True,
-                "top_k_relevance_percentile": 75
-            }
-        }
+    if PYDANTIC_V2:
+        model_config = ConfigDict(
+            extra="forbid",
+            json_schema_extra=MESSAGE_PASSING_SCHEMA_EXTRA,
+        )
+    else:
+
+        class Config(StrictConfigModel.Config):
+            schema_extra = MESSAGE_PASSING_SCHEMA_EXTRA
+
+
+class EdgeReevaluationConfig(StrictConfigModel):
+    """Thresholds for rebuilding edges after message propagation."""
+
+    similarity_threshold: float = Field(default=0.7, ge=0.0, le=1.0)
+    new_edge_threshold: float = Field(default=0.8, ge=0.0, le=1.0)
+    max_new_edges_per_node: int = Field(default=5, ge=0)
+    edge_decay_factor: float = Field(default=0.9, ge=0.0, le=1.0)
 
 
 def get_default_message_passing_config() -> dict:
     """Get default message passing configuration as dict"""
-    return MessagePassingConfig().dict()
+    return model_dump_compat(MessagePassingConfig())
 
 
 def get_performance_optimized_config() -> dict:
     """Get performance-optimized configuration"""
-    return MessagePassingConfig(
-        iterations=1,
-        max_hops=1,
-        similarity_threshold=0.5,
-        top_k_relevance_percentile=85
-    ).dict()
+    return model_dump_compat(
+        MessagePassingConfig(
+            iterations=1,
+            max_hops=1,
+            similarity_threshold=0.5,
+            top_k_relevance_percentile=85,
+        )
+    )
 
 
 def get_quality_optimized_config() -> dict:
     """Get quality-optimized configuration (slower but more thorough)"""
-    return MessagePassingConfig(
-        alpha=0.5,
-        iterations=3,
-        max_hops=3,
-        similarity_threshold=0.2,
-        top_k_relevance_percentile=60
-    ).dict()
+    return model_dump_compat(
+        MessagePassingConfig(
+            alpha=0.5,
+            iterations=3,
+            max_hops=3,
+            similarity_threshold=0.2,
+            top_k_relevance_percentile=60,
+        )
+    )

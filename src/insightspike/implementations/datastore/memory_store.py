@@ -27,7 +27,7 @@ class InMemoryDataStore(DataStore):
     def save_episodes(
         self, episodes: List[Dict[str, Any]], namespace: str = "default"
     ) -> bool:
-        """Save episodes to memory"""
+        """Save episodes to memory using the historical replace behavior."""
         try:
             self.data["episodes"][namespace] = episodes.copy()
             logger.info(f"Saved {len(episodes)} episodes to memory")
@@ -35,6 +35,12 @@ class InMemoryDataStore(DataStore):
         except Exception as e:
             logger.error(f"Failed to save episodes: {e}")
             return False
+
+    def replace_episodes(
+        self, episodes: List[Dict[str, Any]], namespace: str = "default"
+    ) -> bool:
+        """Replace a namespace with an exact in-memory snapshot."""
+        return self.save_episodes(episodes, namespace=namespace)
 
     def load_episodes(self, namespace: str = "default") -> List[Dict[str, Any]]:
         """Load episodes from memory"""

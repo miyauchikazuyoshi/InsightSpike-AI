@@ -142,22 +142,32 @@ def pytest_collection_modifyitems(config, items):  # type: ignore
     """
     if _TORCH_AVAILABLE and _PYG_AVAILABLE:
         return
-    skip_reason = []
-    if not _TORCH_AVAILABLE:
-        skip_reason.append("torch")
-    if not _PYG_AVAILABLE:
-        skip_reason.append("torch_geometric")
-    reason = f"missing: {','.join(skip_reason)}"
-    substrings = ["import torch", "from torch ", "torch_geometric"]
     for item in items:
         try:
             # 小さいテストファイル前提: サイズ > 32KB の場合はスキャンスキップ
             p = item.fspath  # type: ignore[attr-defined]
+            # Unified-core tests own their optional dependency markers. A
+            # file-level substring heuristic would otherwise skip unrelated
+            # NetworkX tests merely because the same module has torch tests.
+            if "src/gedig/tests" in str(p):
+                continue
             if p.size() > 32768:  # pragma: no cover
                 continue
             content = p.read()
-            if any(s in content for s in substrings):
-                item.add_marker(pytest.mark.skip(reason=reason))
+            missing = []
+            needs_torch = (
+                "import torch" in content
+                or "from torch " in content
+            )
+            needs_pyg = "torch_geometric" in content
+            if needs_torch and not _TORCH_AVAILABLE:
+                missing.append("torch")
+            if needs_pyg and not _PYG_AVAILABLE:
+                missing.append("torch_geometric")
+            if missing:
+                item.add_marker(
+                    pytest.mark.skip(reason=f"missing: {','.join(missing)}")
+                )
         except Exception:  # noqa: BLE001
             continue
 

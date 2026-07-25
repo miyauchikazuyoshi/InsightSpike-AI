@@ -1,0 +1,62 @@
+{
+  "provenance": {
+    "implementation": "experiments/maze/qhlib/evaluator.py:evaluate_multihop",
+    "purpose": "Freeze the active SP-mode maze evaluator before any future MazeFEval cutover",
+    "adapter_equivalence_claimed": false
+  },
+  "input": {
+    "path_nodes": [
+      [0, 0, 0],
+      [0, 0, 1],
+      [0, 0, 2],
+      [0, 0, 3]
+    ],
+    "candidate_edge": [
+      [0, 0, 0],
+      [0, 0, 3]
+    ],
+    "base_ig": 0.2,
+    "denom_cmax_base": 10.0,
+    "max_hops": 2
+  },
+  "expected": {
+    "g0": -0.2,
+    "gmin": -0.20000000000000004,
+    "best_hop": 1,
+    "delta_ged": 0.0,
+    "delta_ig": 0.2,
+    "delta_sp": 0.0,
+    "chosen_edges_by_hop": [
+      [
+        [0, 0, 0],
+        [0, 0, 3]
+      ]
+    ],
+    "hop_series": [
+      {
+        "hop": 0,
+        "g": -0.2,
+        "ged": 0.0,
+        "ig": 0.2,
+        "sp": 0.0,
+        "sp_pairs": 6
+      },
+      {
+        "hop": 1,
+        "g": -0.20000000000000004,
+        "ged": 0.1,
+        "ig": 0.30000000000000004,
+        "sp": 0.20000000000000007,
+        "sp_pairs": 6
+      },
+      {
+        "hop": 2,
+        "g": -0.20000000000000004,
+        "ged": 0.1,
+        "ig": 0.30000000000000004,
+        "sp": 0.20000000000000007,
+        "sp_pairs": 6
+      }
+    ]
+  }
+}

@@ -337,14 +337,14 @@ print(f"Spike detected: {answer.spike_detected}")
 
 # Check statistics
 stats = agent.get_stats()
-print(f"\nTotal episodes: {stats['episodes']}")
+print(f"\nTotal episodes: {stats['memory_stats']['total_episodes']}")
 print(f"Graph nodes: {stats.get('graph_nodes', 0)}")
 
 # Get insights
 insights = agent.get_insights(limit=3)
-for insight in insights.get('insights', []):
-    print(f"\nInsight: {insight['fact']}")
-    print(f"Category: {insight['category']}")
+for insight in insights.get('recent_insights', []):
+    print(f"\nInsight: {insight['answer']}")
+    print(f"Importance: {insight['importance']:.3f}")
 
 # MUST save to persist
 agent.save_state()
@@ -355,12 +355,15 @@ agent.save_state()
 | Method | Purpose | Returns |
 |--------|---------|----------|
 | `initialize()` | Initialize agent components | `bool` (success) |
-| `add_knowledge(text, source)` | Add document with graph update | `Dict` with success, spike_detected |
+| `add_document(text_or_mapping, c_value, metadata)` | Add one episode through the compact compatibility API | `bool` |
+| `add_knowledge(text, c_value)` | Add document with graph update | `Dict` with success, episode id, graph status |
+| `learn(text, c_value)` | Compatibility learning alias | `Dict` with success, episodes added, graph status, insights |
 | `process_question(question, max_cycles, verbose)` | Process query through all layers | `CycleResult` object |
 | `get_stats()` | Get agent statistics | `Dict` with metrics |
 | `get_insights(limit)` | Retrieve discovered insights | `Dict` with insights list |
 | `search_insights(concept, limit)` | Search insights by concept | `List[Dict]` |
-| `save_state()` | Persist agent state to disk | `None` |
+| `save_state()` | Persist the complete agent snapshot | `bool` (success) |
+| `load_state()` | Replace memory/graph state from storage | `bool` (success) |
 | `age_episodes()` | Apply time-based memory decay | `int` (pruned count) |
 | `run_experiment(type, episodes)` | Run built-in experiments | `Dict` with results |
 

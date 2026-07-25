@@ -8,8 +8,8 @@ Usage:
 
     f_eval = TransformerFEval(lambda_param=1.0, gamma=0.5, use_betti=False)
     result = f_eval.compute(before_attention, after_attention, mask=mask)
-    # result.f_mean  → scalar F value
-    # result.delta_epc, result.delta_h, result.delta_b  → components
+    # result.F_mean  → scalar F value
+    # result.delta_epc, result.delta_h, result.delta_sp  → components
 
 This adapter produces numerically equivalent results to the original
 DifferentiableGeDIG.forward() in thermodynamic_gedig.py.
@@ -56,7 +56,8 @@ class TransformerFEval:
     """Unified F-eval for transformer attention graphs.
 
     Drop-in replacement for DifferentiableGeDIG.forward() using
-    the unified core backends.
+    the unified core backends. This is a before/after delta evaluator;
+    lower F is better under the canonical judgment convention.
 
     Parameters
     ----------

@@ -1,31 +1,37 @@
-"""AG/DG edge classification.
+"""Compatibility shims for historical AG/DG edge-classifier names.
 
-AG (Assertion Graph): confirmed edges, low uncertainty
-DG (Differential Graph): uncertain edges, information gaps
-
-Two classifiers:
-  - PercentileClassifier: dynamic threshold from data (RAG, transformer)
-  - ThresholdClassifier: fixed threshold (maze)
+The old API used AG/DG names for score-based edge partitions. AG and DG now
+refer only to the Attention Gate and Decision Gate event pair; new edge code
+uses :mod:`gedig.core.edge_partition`.
 """
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Sequence
+from typing import Any, Dict
 
-from .protocols import AGDGResult
+from .edge_partition import (
+    PercentileEdgePartitioner,
+    ThresholdEdgePartitioner,
+)
+from .protocols import AGDGResult, EdgePartitionResult
+
+
+def _legacy_result(partition: EdgePartitionResult) -> AGDGResult:
+    return AGDGResult(
+        n_ag=partition.n_low_score,
+        n_dg=partition.n_high_score,
+        threshold=partition.threshold,
+        ag_edges=partition.low_score_edges,
+        dg_edges=partition.high_score_edges,
+        metadata={
+            **partition.metadata,
+            "legacy_edge_labels": True,
+        },
+    )
 
 
 class PercentileClassifier:
-    """Classify edges as AG/DG using a percentile-based threshold.
-
-    Used by RAG (30th percentile on f-values) and transformer.
-    Edges below the threshold are AG (confirmed), above are DG (uncertain).
-
-    Parameters
-    ----------
-    percentile : float
-        Fraction of edges classified as AG. Default 0.3 (30th percentile).
-    """
+    """Deprecated wrapper around :class:`PercentileEdgePartitioner`."""
 
     def __init__(self, percentile: float = 0.3):
         self.percentile = percentile
@@ -34,53 +40,14 @@ class PercentileClassifier:
         self,
         edge_scores: Dict[Any, float],
     ) -> AGDGResult:
-        """Classify edges based on percentile threshold.
+        """Return the historical field layout for a score partition."""
 
-        Parameters
-        ----------
-        edge_scores : dict
-            Mapping of edge_id → f_value (lower = more AG-like).
-
-        Returns
-        -------
-        AGDGResult with ag_edges, dg_edges, and threshold.
-        """
-        if not edge_scores:
-            return AGDGResult()
-
-        sorted_vals = sorted(edge_scores.values())
-        idx = int(len(sorted_vals) * self.percentile)
-        threshold = sorted_vals[min(idx, len(sorted_vals) - 1)]
-
-        ag_edges = []
-        dg_edges = []
-        for edge_id, fv in edge_scores.items():
-            if fv < threshold:
-                ag_edges.append(edge_id)
-            else:
-                dg_edges.append(edge_id)
-
-        return AGDGResult(
-            n_ag=len(ag_edges),
-            n_dg=len(dg_edges),
-            threshold=threshold,
-            ag_edges=ag_edges,
-            dg_edges=dg_edges,
-        )
+        partitioner = PercentileEdgePartitioner(self.percentile)
+        return _legacy_result(partitioner.partition(edge_scores))
 
 
 class ThresholdClassifier:
-    """Classify edges as AG/DG using fixed thresholds.
-
-    Used by maze: ag_fire = g0 > theta_AG, dg_fire = gmin < theta_DG.
-
-    Parameters
-    ----------
-    theta_ag : float
-        AG fire threshold. Scores above this are AG.
-    theta_dg : float
-        DG fire threshold. Scores below this are DG.
-    """
+    """Deprecated edge-partition wrapper with historical parameter names."""
 
     def __init__(
         self,
@@ -94,25 +61,22 @@ class ThresholdClassifier:
         self,
         edge_scores: Dict[Any, float],
     ) -> AGDGResult:
-        """Classify edges based on fixed thresholds.
+        """Return the historical field layout for a score partition."""
 
-        For maze: scores are g-values (higher = better structural gain).
-        AG: g > theta_ag (high quality → commit)
-        DG: g < theta_dg (low quality → explore further)
-        """
-        ag_edges = []
-        dg_edges = []
-        for edge_id, g in edge_scores.items():
-            if g > self.theta_ag:
-                ag_edges.append(edge_id)
-            elif g < self.theta_dg:
-                dg_edges.append(edge_id)
-
+        partition = ThresholdEdgePartitioner(
+            upper_threshold=self.theta_ag,
+            lower_threshold=self.theta_dg,
+        ).partition(edge_scores)
         return AGDGResult(
-            n_ag=len(ag_edges),
-            n_dg=len(dg_edges),
-            threshold=self.theta_ag,
-            ag_edges=ag_edges,
-            dg_edges=dg_edges,
-            metadata={"theta_ag": self.theta_ag, "theta_dg": self.theta_dg},
+            n_ag=partition.n_high_score,
+            n_dg=partition.n_low_score,
+            threshold=partition.threshold,
+            ag_edges=partition.high_score_edges,
+            dg_edges=partition.low_score_edges,
+            metadata={
+                **partition.metadata,
+                "legacy_edge_labels": True,
+                "theta_ag": self.theta_ag,
+                "theta_dg": self.theta_dg,
+            },
         )

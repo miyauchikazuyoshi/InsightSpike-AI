@@ -8,10 +8,10 @@ geDIG (generalized Differential Information Gain) は**1つの原理**を
 ```
                         src/gedig/core/
                     ┌─────────────────────┐
-                    │  f_eval.py          │  F = ΔEPC - λ(ΔH + γΔB)
-                    │  protocols.py       │  GedigGraph / FResult
+                    │  f_eval.py          │  F composition
+                    │  protocols.py       │  snapshots / result types
+                    │  edge_partition.py  │  score-band partition
                     │  message_passing.py │  Attention-weighted MP
-                    │  betti.py           │  β₁ = E - V + C
                     └────────┬────────────┘
                              │
               ┌──────────────┼──────────────┐
@@ -28,11 +28,16 @@ geDIG (generalized Differential Information Gain) は**1つの原理**を
 ```
 F = ΔEPC - λ(ΔH + γΔB)
 
-  EPC  = Euler Poincaré Characteristic = V - E (グラフの複雑さ)
+  EPC  = Edit Path Cost (before/afterの構造変更コスト)
   H    = Shannon Entropy of edge weights (情報の均一さ)
-  B    = β₁ Betti number = E - V + C (位相的穴の数)
+  B    = pluggableなstructure benefit
+         既定・確立済み: ΔSP (relative shortest-path gain)
+         明示的な研究モード: Δβ₁ (Betti number)
   λ, γ = 重みパラメータ
 ```
+
+無修飾のFはSP形式を指す。β₁形式は`use_betti=True`のように明示し、
+進行中のtopological generalizationとして区別する。
 
 ### ドメイン間の対応表
 
@@ -45,12 +50,12 @@ Edge           通路              entity/similarity    attention weight
 Q              ゴール方向        query 情報ニーズ      W_Q · x
 K              探索状態          ノード情報量          W_K · x
 V              通路コスト        エッジ特徴量          W_V · x
-AG             探索済みパス      表層一致エッジ        high attention
-DG             未探索パス        推論ギャップ          low attention
+Event gate     AG→探索 / DG→確定  domain policy          experiment-specific
+Edge partition n/a               low/high edge F        low/high profile score
 F-eval         ΔGED-λ(ΔH+γΔB)   cost-λ·dot(Q,K)      ΔEPC-λ(ΔH+γΔB)
 Wake           探索              検索/RIA              forward pass
 Sleep          報酬伝搬          グラフ分析/F-eval     attention 構造評価
-Wake₂          活用              DG-guided 再検索      次の forward
+Wake₂          活用              partition-guided検索  次の forward
 ```
 
 ## Wake-Sleep-Wake Cycle
@@ -66,32 +71,41 @@ Wake₂          活用              DG-guided 再検索      次の forward
     ┌──── Sleep ────┐
     │  構造分析      │
     │  F-eval        │
-    │  AG/DG 分類    │
+    │ gate/partition │
+    │ policy         │
     └───────┬───────┘
             ▼
     ┌──── Wake₂ ────┐
-    │  DG-guided     │
+    │ policy-guided │
     │  次のアクション │
     └───────┬───────┘
             │
             └──→ (繰り返し)
 ```
 
-## AG/DG Edge Classification
+## AG/DG Event Gate とEdge Score Partition
 
-F-eval による自動分類:
+AG/DGは二段のイベントゲートである。
 
 ```python
-α = dot(Q, K) / √d_k          # attention score
-f = cost(e) - λ · α            # F-eval value
+ag_fire = g0 > theta_ag
+# AG (Attention Gate): hop-0の曖昧性を検出し、追加探索を開く
 
-f < θ  →  AG (Assertion Graph)   # 確認済み情報
-f ≥ θ  →  DG (Derivation Graph)  # 推論ギャップ
+dg_fire = best_hop >= 1 and gmin_multihop < theta_dg
+# DG (Decision Gate): multi-hopで改善した低F候補を確認し、commitする
 ```
 
-**核心的発見**: AG = high attention edge, DG = low attention edge
-→ Transformer の attention が「どの token に注目するか」を学ぶように、
-   geDIG は「どのエッジが情報ギャップか」を検出する。
+一方、RAG/Transformerにはscalar edge scoreをpercentileで分ける処理もある。
+
+```python
+f = cost(edge) - lambda_param * dot(Q, K) / sqrt(d_k)
+partition = partition_edges(edge_scores)
+# partition.low_score_edges / partition.high_score_edges
+```
+
+これはedge集合の分割であってAG/DGゲート発火ではない。旧APIの
+`AGDGResult.ag_edges/dg_edges`は再現性のため残す互換ラベルであり、新規コードは
+`EdgePartitionResult`を使用する。
 
 ## AGHT (Analytical Heterogeneous Graph Transformer)
 
@@ -115,29 +129,42 @@ QKV Features (10 parameters, zero-shot):
   V = [w_v1·cost, w_v2·bridge, w_v3·cross_level]
 ```
 
-## Experiment 4 Key Finding
+## Experiment 4 Preliminary Observation
 
 ```
-F maximization (DG preservation) > Baseline > F minimization
+single-state Flash profile maximization > Baseline > profile minimization
+（単一seed・SP条件の予備結果）
 
-→ Transformer は「知らないこと」(DG) を明示的に保持した方が学習が良い
-→ CE Loss だけでは「知ること」に最適化するが、
-   「何を知らないか」の構造は保存しない
-→ F 最大化 = 「無知の構造」を保存する正則化
+この実験固有のprofile最大化目的は、canonical delta Fの
+「lower is better」という判断方向を変更しない。β₁条件やrandom regularization
+controlでは優位性が確認されておらず、DG保存の確立済み証拠とは扱わない。
 ```
 
 ## Test Structure
 
 ```
-tests/
-├── test_gedig_core.py          # 25 tests: F-eval, protocols, betti
-├── test_adapters.py            # 21 tests: transformer, RAG, maze equiv
-├── test_migration.py           # 25 tests: legacy ↔ unified equivalence
-└── E2E reproduction:
-    ├── R4-R5: HotpotQA 100q    # diff = 0.0000 (exact match)
-    ├── T4: Exp4 conclusion     # negative_better (matches legacy)
-    └── R6: BRIGHT 50q          # diff = 0.0500 (RIA non-determinism)
+src/gedig/tests/
+├── test_f_eval.py              # F composition, backends, partitions
+├── test_adapters.py            # Maze/RAG/Transformer adapter contracts
+├── test_maze_equiv.py          # MazeFEval contracts (not active equivalence)
+├── test_maze_active_trace.py   # Active legacy evaluator golden trace
+├── test_rag_equiv.py           # Independent RAG formula comparison
+└── test_transformer_equiv.py   # Frozen-oracle value/gradient comparison
+
+tests/unit/test_flash_gedig_api.py
+└── public Flash profile/delta, value/gradient, loss-direction contracts
 ```
+
+`test_transformer_equiv.py`のold armは
+`experiments/refactor_transformer/thermodynamic_gedig_legacy.py`を直接使い、
+unified adapterを生成していないこともassertする。SP/β₁、mask、非既定parameter、
+全component、gradientを比較する。T4/Exp4 E2Eはこの検証では再実行していない。
+
+RAG/AGHTのactive pathは常に`RAGFEval`へ委譲済みで、残る
+`use_unified*`引数はdeprecated no-opである。Maze active evaluatorは
+experiment固有のCmax/linkset/scoped-SP意味論を持つため未移行であり、
+`MazeFEval`とのdrop-in等価性は主張しない。詳細は
+`src/gedig/docs/MIGRATION_PROGRESS.md`を参照。
 
 ## File Map
 
@@ -145,14 +172,16 @@ tests/
 src/gedig/
 ├── __init__.py
 ├── core/
-│   ├── f_eval.py              # F = ΔEPC - λ(ΔH + γΔB)
-│   ├── protocols.py           # GedigGraph, GedigNode, GedigEdge, FResult
+│   ├── f_eval.py              # F composition; SP default, β₁ explicit
+│   ├── protocols.py           # snapshots, F/gate/partition results
+│   ├── edge_partition.py      # low/high scalar edge-score partition
+│   ├── ag_dg.py               # historical edge-label compatibility shims
 │   ├── message_passing.py     # Attention-weighted propagation
-│   └── betti.py               # β₁ computation (exact + differentiable)
 ├── adapters/
-│   ├── transformer_adapter.py # Attention matrix → GedigGraph
-│   ├── rag_adapter.py         # Document graph → GedigGraph
-│   └── maze_adapter.py        # Spatial graph → GedigGraph
+│   ├── transformer.py         # Attention matrix → TorchGraphSnapshot
+│   ├── rag.py                 # Document graph adapter
+│   └── maze.py                # Spatial graph adapter
 └── backends/
-    └── networkx_backend.py    # NetworkX implementation
+    ├── networkx_backend.py
+    └── torch_backend.py
 ```

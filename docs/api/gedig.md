@@ -9,6 +9,41 @@
 
 geDIG (Graph Edit Distance and Information Gain) is the core metric system for InsightSpike. This document describes the modular API structure after the refactoring.
 
+## Canonical API
+
+New evaluation code uses the standalone unified core:
+
+```python
+from gedig.core import FEval
+from gedig.adapters.transformer import TransformerFEval
+```
+
+For torch-native public use through InsightSpike:
+
+```python
+from insightspike.gedig import (
+    compute_delta_f_score,
+    compute_structural_profile,
+)
+
+# Canonical before/after delta. Lower F is better.
+result = compute_delta_f_score(before_attention, after_attention, mask=mask)
+print(result.F_mean, result.delta_epc, result.delta_h, result.delta_sp)
+
+# Single-state diagnostic. This is not delta F and has no universal direction.
+profile, metrics = compute_structural_profile(after_attention)
+```
+
+`compute_f_score(attention, ...)` remains as a compatibility wrapper for the
+historical single-state Flash profile and returns historical `delta_*` key
+names. `FlashGeDIGLoss(alpha=..., objective="minimize"|"maximize")` makes
+the experiment-specific profile direction explicit; the default
+`"maximize"` preserves its old `-profile` behavior.
+
+The `insightspike.algorithms.gedig` API documented below is the existing
+InsightSpike runtime/experiment compatibility layer. It is not the preferred
+foundation for new domain adapters.
+
 ## Module Structure
 
 ```
@@ -374,10 +409,11 @@ See [gedig_refactor_migration.md](../migration/gedig_refactor_migration.md) for 
 # Old import
 from insightspike.algorithms.gedig_core import GeDIGCore, GeDIGResult
 
-# New import (recommended)
+# Existing InsightSpike runtime compatibility import
 from insightspike.algorithms.gedig import GeDIGResult, GeDIGConfig
 from insightspike.algorithms.gedig_core import GeDIGCore
 
-# Even newer: use standalone functions
-from insightspike.algorithms.gedig import detect_spike, compute_sp_gain_norm
+# New adapters: use the standalone unified core
+from gedig.core import FEval
+from gedig.adapters.rag import RAGFEval
 ```

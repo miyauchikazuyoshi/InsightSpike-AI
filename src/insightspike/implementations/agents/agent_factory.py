@@ -196,9 +196,10 @@ def create_qa_agent(mode: str = "basic", **kwargs):
 
     except ImportError:
         # Fallback to basic MainAgent
+        from ...config import load_config
         from .main_agent import MainAgent
 
-        return MainAgent()
+        return MainAgent(load_config())
 
 
 # Export factory and convenience functions

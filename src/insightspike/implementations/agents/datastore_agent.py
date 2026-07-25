@@ -14,6 +14,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 
 from ...config.models import InsightSpikeConfig
+from ...config.normalizer import ConfigNormalizer
+from ...config.pydantic_compat import model_dump_compat
 from ...core.base.datastore import DataStore
 from ...core.episode import Episode
 from ...detection.eureka_spike import EurekaDetector
@@ -63,10 +65,16 @@ class DataStoreMainAgent:
         elif isinstance(config, dict):
             # Merge with kwargs
             config_dict = {**config, **kwargs}
-            return InsightSpikeConfig(**config_dict)
+            return ConfigNormalizer.normalize(
+                config_dict,
+                source="datastore-agent",
+            )
         else:
             # Use default config with kwargs
-            return InsightSpikeConfig(**kwargs)
+            return ConfigNormalizer.normalize(
+                kwargs,
+                source="datastore-agent",
+            )
 
     def _initialize_components(self):
         """Initialize agent components"""
@@ -340,7 +348,10 @@ Answer:"""
     def save_checkpoint(self, checkpoint_path: str) -> bool:
         """Save agent state (working memory only)"""
         try:
-            checkpoint = {"config": self.config.dict(), "timestamp": time.time()}
+            checkpoint = {
+                "config": model_dump_compat(self.config, mode="json"),
+                "timestamp": time.time(),
+            }
 
             # Save working memory state
             if self.memory_manager:

@@ -353,5 +353,6 @@ def create_default_monitor() -> GraphOperationMonitor:
     config = get_config()
 
     return GraphOperationMonitor(
-        log_dir=config.paths.log_dir / "graph_operations", enable_file_logging=True
+        log_dir=config.paths.logs_dir / "graph_operations",
+        enable_file_logging=True,
     )

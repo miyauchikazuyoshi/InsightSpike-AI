@@ -25,7 +25,11 @@ So: when a document says "the gauge" without qualification, it means the
 
 **Sign convention** (canonical, as implemented in `src/gedig/core/f_eval.py`):
 **F < 0 = structural gain exceeds cost = commit / accept. Lower is better.**
-AG/DG gates are quantile thresholds on the F stream, not hard rules.
+AG/DG means the two-stage **Attention Gate / Decision Gate** event flow:
+AG reacts to the hop-0 signal and opens exploration; DG evaluates the
+multi-hop signal and confirms a commit. Historical RAG/Transformer code also
+called a low/high edge-score partition “AG/DG”; that partition is now a
+separate type and is not a gate event.
 Derived uses may point the other way locally — e.g. Exp4 rewards *raising* F
 as a training regularizer — but those are per-experiment loss constructions,
 defined in the experiment's own README; they do not change the judgment
@@ -36,21 +40,28 @@ convention here.
 | Implementation | Path | Role |
 |---|---|---|
 | **Unified Core — the reference** | [`src/gedig/`](../src/gedig/) | numpy/networkx. EPC / Entropy / StructurePotential injected as Protocols; one `FEval` for all three domains. **New code imports this.** |
-| Flash-geDIG | [`src/insightspike/gedig/`](../src/insightspike/gedig/) | torch-native fast path for transformer attention (the README Quick Start). Tied to the core by the transformer-equivalence tests (T1–T5) |
-| Full/legacy geDIG | [`src/insightspike/algorithms/gedig/`](../src/insightspike/algorithms/gedig/) | Historical maze/RAG implementation. Tied to the core by the maze/RAG-equivalence tests (M1–M3, R1–R3) |
+| Flash-geDIG | [`src/insightspike/gedig/`](../src/insightspike/gedig/) | torch-native transformer API. `compute_delta_f_score` delegates to `TransformerFEval`; `compute_structural_profile` is a distinct single-state diagnostic. Public forwarding and gradients are checked by `test_flash_gedig_api.py` |
+| Full/legacy geDIG | [`src/insightspike/algorithms/gedig/`](../src/insightspike/algorithms/gedig/) | Historical application implementation. The active maze evaluator still uses `GeDIGCore`; its behavior is frozen by an active-path golden trace, not claimed equivalent to `MazeFEval` |
 | Experiment-local code | `experiments/**` | Frozen for reproducibility of published runs. Never canonical |
 
 Both `insightspike` variants predate the unified core; they remain because
-published experiments ran on them. The equivalence tests are the contract
-that lets results transfer to the core.
+published experiments ran on them. Transformer T1–T3/T5 now compare the
+adapter with the frozen pre-refactor implementation under
+`experiments/refactor_transformer/`; an independence guard prevents the old
+and new arms from resolving to the same adapter. T4/Exp4 E2E was not rerun.
+RAG R1–R3 are independent formula-level comparisons. Maze M1–M3 are adapter
+contracts only; the active maze evaluator remains on the historical
+application core and has no full-equivalence claim.
 
 ## 3. The canonical tests
 
-- **Core correctness**: [`src/gedig/tests/`](../src/gedig/tests/) — 71 tests
-  (F composition, Betti, SP, AG/DG, and the equivalence suites above).
+- **Core correctness**: [`src/gedig/tests/`](../src/gedig/tests/) — the unified
+  core suite
+  (F composition, Betti, SP, AG/DG, independent Transformer/RAG comparisons,
+  adapter contracts, and the active-maze golden trace).
   Run on every push by `ci-unit.yml`; the light CI has no torch, so the
-  11 transformer-equivalence tests skip there (60 run) and all 71 run in a
-  full local env (`make test`).
+  torch-only tests skip in the light job and run in a full local environment.
+  `make test` executes both the application suite and this core suite.
 - **Experimental claims**: verified only by pre-registered experiments in
   [`docs/prereg/`](prereg/) (analysis scripts committed before execution).
   CI passing says the code computes what it says; it says nothing about

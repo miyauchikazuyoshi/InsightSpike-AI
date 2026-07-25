@@ -2,7 +2,7 @@
 
 **A structural fitness score for knowledge graphs — can one equation decide when to restructure?**
 
-$$\mathcal{F} = \underbrace{\Delta \text{EPC}}_{\text{Metric}} \;-\; \lambda \left( \underbrace{\Delta H}_{\text{Measure}} \;+\; \gamma\, \underbrace{\Delta \beta_1}_{\text{Topology}} \right)$$
+$$\mathcal{F} = \Delta \text{EPC}_{norm} - \lambda \left(\Delta H_{norm} + \gamma\,\Delta \text{SP}_{rel}\right)$$
 
 [![CI (Lite)](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci-lite.yml/badge.svg)](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci-lite.yml)
 [![Paper](https://img.shields.io/badge/paper-PDF-blue)](docs/paper/v6/arxiv_en/geDIG_onegauge_improved_v6_en.pdf)
@@ -12,19 +12,19 @@ $$\mathcal{F} = \underbrace{\Delta \text{EPC}}_{\text{Metric}} \;-\; \lambda \le
 
 ## The Equation
 
-$$\mathcal{F} = \underbrace{\Delta \text{EPC}}_{\text{Metric}} \;-\; \lambda \left( \underbrace{\Delta H}_{\text{Measure}} \;+\; \gamma\, \underbrace{\Delta \beta_1}_{\text{Topology}} \right)$$
+$$\mathcal{F} = \underbrace{\Delta \text{EPC}_{norm}}_{\text{Metric}} \;-\; \lambda \left( \underbrace{\Delta H_{norm}}_{\text{Measure}} \;+\; \gamma\, \underbrace{\Delta \text{SP}_{rel}}_{\text{Structure potential}} \right)$$
 
 | Term | Mathematical Structure | What It Captures | Grounding |
 |------|----------------------|------------------|-----------|
 | $\Delta\text{EPC}$ | **Metric** (distance) | Cost of restructuring the knowledge graph | Graph Edit Distance |
 | $\Delta H$ | **Measure** (probability) | Change in entropy / uncertainty | Shannon (1948); Entropy-Lens (Ali et al., 2025) |
-| $\Delta\beta_1$ | **Topology** (loops) | Change in the number of independent cycles | Algebraic Topology; Betti numbers |
+| $\Delta\text{SP}_{rel}$ | **Structure potential** (paths) | Relative shortest-path gain | Graph theory |
 
 Three independent mathematical structures. One dimensionless, scale-invariant scalar.
 
 **$\mathcal{F} < 0$** means information gain exceeds structural cost — the system should commit the change.
 
-> *Note: The v6 paper uses $\Delta\text{SP}$ (shortest-path shortening) as the structural term. The ongoing research generalizes this to $\Delta\beta_1$ (first Betti number), which is a topological invariant independent of graph shape or scale.*
+> *The established gauge and v6 paper use $\Delta\text{SP}$. The ongoing v7 research tests $\Delta\beta_1$ as a possible generalized structure-potential term; it is not yet the default.*
 
 ---
 
@@ -51,11 +51,11 @@ It is not a production library.
 
 | Component | Status | Location |
 |-----------|--------|----------|
-| **Unified geDIG Core** | 71 unit tests, run in CI on every push (60 in the torch-less light CI, all 71 locally); F-eval gives equivalent results across 3 backends (maze / RAG / transformer) | [`src/gedig/`](src/gedig/) |
+| **Unified geDIG Core** | 80 core regression tests (all 80 pass locally; a CI-compatible torch import-block simulation produces 57 passes and 23 expected skips). Transformer values/gradients are compared with the frozen independent oracle; RAG has independent formula checks; Maze has adapter contracts plus an active-legacy golden trace, not a full equivalence claim | [`src/gedig/`](src/gedig/) |
 | geDIG theory (v6 paper) | Pre-print — position paper + proof-of-concept | [`docs/paper/`](docs/paper/v6/arxiv_en/geDIG_onegauge_improved_v6_en.pdf) |
 | BRIGHT reasoning-intensive retrieval | nDCG@10 = 0.439 on **biology, 50 queries, single seed** (preliminary; full 3-domain ≈ 0.19; SOTA ≈ 0.63) | [`experiments/hotpotqa_v2/`](experiments/hotpotqa_v2/) |
 | AGHT (Graph Transformer) | HotpotQA R@2 = 0.405, **+170% over an internal PageRank baseline** (zero-shot, 100q, single seed) | [`experiments/hotpotqa_v2/src/unified_graph.py`](experiments/hotpotqa_v2/src/unified_graph.py) |
-| Transformer F-regularization (Exp4) | **Preliminary, single seed**: F-maximize > baseline under SP-based F only — *not* confirmed under β₁ or against a random-regularization control | [`experiments/transformer/`](experiments/transformer/) |
+| Transformer Flash-profile regularization (Exp4) | **Preliminary, single seed**: single-state profile maximize > baseline under the SP profile only — *not* confirmed under β₁ or against a random-regularization control | [`experiments/transformer/`](experiments/transformer/) |
 | Maze PoC (single episode) | 98% goal-reach (15x15, n=100) — on par with greedy-DFS / oracle (99%); distinctive result is ~98% map compression via emergent AG/DG control | [`experiments/maze/`](experiments/maze/) |
 | Maze stage-2 (Wake-Sleep-Wake) | Six pre-registered ablations (2026-07): v1 — original undirected propagation contributed **zero** (headline 71.9%→95.3% re-attributed to curriculum+10D). v2 — **trajectory-Q replay propagation, self-navigation: eval steps −39%** (p=4.0e-05, n=23 paired). v3 — **replicated on 18 fresh seeds, −51%** (115 vs 234, p=2.9e-04); lift-of-failed-warmups inconclusive. v4 — dead-end carving: **defeat recorded**. v5 — unconditional budget-split warmup: **regression confirmed** in the succeeded stratum (+122.5 steps, p=1.8e-05) → withheld. v6 — split × episode-boundary reset: **the v5 sub-250 regression is confirmed to be a visit-count contamination artifact** (reset makes it 13/13 identical), but budget-split itself is **rejected** — the whole-stratum non-inferiority fails on the registered discovery-loss cost (warmup >250 mazes) and v5's failed-stratum rescue does not replicate on fresh seeds. Net: single-cycle stays default; the reset fix is retained for any multi-cycle use | [`experiments/maze/graph_persistent_dg/`](experiments/maze/graph_persistent_dg/) |
 | HotpotQA dual-process (v3) | GPT-4o EM 51.2% vs IRCoT 47.6% (500q) — **p=0.086, not significant**; reverses on GPT-4o-mini | [`experiments/hotpotqa_v2/REPORT_v3_dual_process.md`](experiments/hotpotqa_v2/REPORT_v3_dual_process.md) |
@@ -63,19 +63,66 @@ It is not a production library.
 
 ---
 
+## Repository Maintenance Status (2026-07-25)
+
+The P0–P6 technical-debt programme is complete. The public surface remains
+backward compatible, while composition, persistence, configuration, and
+experiment-adapter boundaries now have explicit contracts.
+
+| Area | Current contract |
+|------|------------------|
+| Public runtime | `create_agent()` returns an initialized, ready-to-use agent and injects the configured `DataStore`. Direct `MainAgent(...)` construction keeps its lazy lifecycle. |
+| Configuration | Strict nested validation, source-aware legacy-key migration, Pydantic v1/v2 compatibility, canonical examples, and safe YAML round trips. Unknown keys no longer disappear silently. |
+| Persistence | Memory, filesystem, and SQLite stores share one factory and episode codec. Agent saves are exact snapshots, and vector indexes are rebuilt after load. |
+| `MainAgent` | The public facade and replaceable L1–L4 attributes remain. Lifecycle, persistence, cycle aggregation, and live config access are delegated to four focused services. |
+| geDIG APIs | Canonical before/after delta F is separate from the backward-compatible single-state Flash profile. “Lower F is better” remains the canonical decision direction. |
+| Experiment adapters | Transformer validation compares against a frozen independent oracle; the active AGHT RAG path delegates to `RAGFEval`; the active Maze evaluator remains legacy-fixed and is protected by a golden trace. |
+| Message passing | `weighted_mean`, `mean`, and `max` are explicit. Legacy `attention` warns and aliases `mean`; unknown spellings raise instead of silently changing behavior. |
+
+Verification for this maintenance change:
+
+- 143 targeted public/config/persistence/Flash/message-passing/MainAgent tests passed.
+- 80/80 unified-core tests passed locally; torch-less simulation produced
+  57 passed and 23 expected skips.
+- The `MainAgent` integration file improved from the unchanged-HEAD baseline
+  of 11 failures / 11 passes to 22 passes in both PyG and torch-less environments.
+- The cloud-safe smoke suite passed 16/16; the normal test entry collected
+  1,078 tests with 33 collection-time skips. The complete 1,078-test suite was
+  collected, not claimed as fully executed.
+
+Authoritative maintenance references:
+
+- [Completed debt-repayment plan and validation ledger](docs/development/debt_repayment_refactoring_plan_20260724.md)
+- [Canonical definitions and implementation map](docs/CANONICAL.md)
+- [Transformer / RAG / Maze migration ledger](src/gedig/docs/MIGRATION_PROGRESS.md)
+- [`MainAgent` facade and service contracts](docs/architecture/mainagent_behavior.md)
+
+Deliberate boundaries: the active Maze evaluator will not cut over until the
+ongoing v7 work is complete; Transformer T4/Exp4 and historical RAG R4–R6 E2E
+runs were not rerun in this maintenance phase; a true attention aggregator
+requires a separate scientific specification.
+
+---
+
 ## Unified Core
 
-Three independent experiment streams share a single F-eval implementation:
+The canonical package exposes one F-eval contract to three adapters. Active
+experiment wiring differs by stream and is recorded explicitly:
 
 ```
-src/gedig/core/f_eval.py  →  F = ΔEPC - λ(ΔH + γΔB)
+src/gedig/core/f_eval.py  →  F = ΔEPC_norm - λ(ΔH_norm + γΔSP_rel)
          │
     ┌────┼────┐
     ▼    ▼    ▼
-  Maze  RAG  Transformer
+  MazeFEval   RAGFEval   TransformerFEval
+  contract    delegated delegated
+  (active Maze remains legacy-fixed)
 ```
 
-See [`docs/architecture/unified_core_architecture.md`](docs/architecture/unified_core_architecture.md) for full architecture.
+See [`docs/architecture/unified_core_architecture.md`](docs/architecture/unified_core_architecture.md)
+for the architecture and
+[`src/gedig/docs/MIGRATION_PROGRESS.md`](src/gedig/docs/MIGRATION_PROGRESS.md)
+for the evidence boundary of each adapter.
 
 ---
 
@@ -116,17 +163,17 @@ Layer-by-layer measurement of $\Delta\text{EPC}$, $\Delta H$, and $\Delta\beta_1
   - [Gao et al. (2025)](https://arxiv.org/abs/2511.13653) sparse-circuit interpretability corresponds to $\beta_1$ reduction in $\mathcal{F}$
   - [Hewitt & Manning (2019)](https://aclanthology.org/N19-1419/) structural probes provide the measurement basis for EPC
 
-**Experiment 4 — F-Regularization (Training Intervention)** — *preliminary, single run (SST-2 / DistilBERT, 2k train, β=0.1); not yet replicated across seeds*:
+**Experiment 4 — Single-State Flash-Profile Regularization (Training Intervention)** — *preliminary, single run (SST-2 / DistilBERT, 2k train, β=0.1); not yet replicated across seeds*:
 
-| Condition | Accuracy (SP-based F) | Accuracy (β₁-based F) |
+| Condition | Accuracy (SP profile) | Accuracy (β₁ profile) |
 |-----------|:---:|:---:|
 | Baseline (CE only) | 88.1%¹ | 88.5% |
-| Positive (CE + F minimize) | 87.2% | 83.5% |
-| **Negative (CE + F maximize)** | **89.4%** | 85.5% |
+| Positive (CE + profile minimize) | 87.2% | 83.5% |
+| **Negative (CE + profile maximize)** | **89.4%** | 85.5% |
 
 ¹ The baseline reached 89.4% at epochs 1–2 and dropped to 88.1% by epoch 3 (overfitting); the negative condition's 89.4% equals the baseline's own earlier peak.
 
-**Conclusion (preliminary, not established):** Under SP-based F, the negative (F-maximize) condition edges out the epoch-3 baseline — consistent with "preserving DG topology helps." But this is a **single run**, and the effect does **not** hold up under scrutiny: (i) under β₁-based F the negative condition (85.5%) is *below* baseline (88.5%); (ii) a separate negative-control experiment found geDIG-F regularization (66.5%) did **not** beat random-value regularization (69.5%), suggesting any gain may come from regularization in general rather than geDIG-F specifically. Multi-seed replication is required before claiming `negative_better`.
+**Conclusion (preliminary, not established):** Under the SP-based single-state profile, the profile-maximize condition edges out the epoch-3 baseline. This is an experiment-specific observation, not evidence about the canonical before/after delta-F direction. It is a **single run**, and the effect does **not** hold up under scrutiny: (i) under the β₁ profile the same condition (85.5%) is *below* baseline (88.5%); (ii) a separate negative-control experiment found profile regularization (66.5%) did **not** beat random-value regularization (69.5%), suggesting any gain may come from regularization in general. Multi-seed replication is required before claiming `negative_better`.
 
 See [`experiments/transformer/`](experiments/transformer/) for experiment design and results.
 
@@ -205,29 +252,66 @@ Cross-domain analogy experiments were conducted in earlier phases and informed t
 
 ## Quick Start
 
+Install the base runtime:
+
+```bash
+pip install -e .
+```
+
+To reproduce the standard test entry from a clean environment, install the
+development dependencies first:
+
+```bash
+make install-dev
+make test
+```
+
+### Ready-to-use Agent API
+
+`create_agent()` applies validated nested overrides, creates the configured
+store, and completes initialization before returning:
+
+```python
+from insightspike import create_agent
+
+agent = create_agent(
+    provider="mock",
+    datastore__type="memory",
+)
+assert agent.initialized
+
+agent.add_knowledge("geDIG balances graph-edit cost and information gain.")
+result = agent.process_question("What does geDIG balance?", max_cycles=1)
+print(result.response)
+```
+
+### Canonical delta F and Flash profile
+
 This example uses **Flash-geDIG** (`insightspike.gedig`), the torch-native fast
 path for attention matrices. The reference implementation is the unified core
-[`src/gedig/`](src/gedig/); the two are tied by equivalence tests — see
-[docs/CANONICAL.md](docs/CANONICAL.md).
+[`src/gedig/`](src/gedig/); the two are tied by independent-oracle and adapter
+tests described in [docs/CANONICAL.md](docs/CANONICAL.md). Install the optional
+PyTorch dependency for your platform before running this example.
 
 ```python
 import torch
-from insightspike.gedig import compute_f_score
+from insightspike.gedig import (
+    compute_delta_f_score,
+    compute_structural_profile,
+)
 
-# Attention matrix: (Batch, Heads, Seq, Seq)
-attn = torch.rand(1, 12, 64, 64)
-f_values, metrics = compute_f_score(attn, lambda_param=1.0, gamma=0.5)
+# Attention matrices: (Batch, Heads, Seq, Seq)
+before = torch.softmax(torch.rand(1, 12, 64, 64), dim=-1)
+after = torch.softmax(torch.rand(1, 12, 64, 64), dim=-1)
+result = compute_delta_f_score(before, after)
 
-# f_values: (Batch, Heads) — lower is better
-print(f"Mean F: {f_values.mean():.4f}")
-print(f"EPC={metrics['delta_epc'].mean():.4f}, "
-      f"H={metrics['delta_h'].mean():.4f}, "
-      f"SP={metrics['delta_sp'].mean():.4f}")
-```
+# Canonical before/after delta F: lower is better
+print(f"Mean delta F: {result.F_mean:.4f}")
+print(f"EPC={result.delta_epc:.4f}, H={result.delta_h:.4f}, "
+      f"SP={result.delta_sp:.4f}")
 
-```bash
-pip install -e .          # Install from source
-make test                 # Run unit tests
+# A single-state Flash diagnostic is explicitly a profile, not delta F.
+profile, profile_metrics = compute_structural_profile(after)
 ```
 
 ---
@@ -272,7 +356,10 @@ Specific, actionable research questions where external collaboration would be va
 
 3. **Scaling to 70B+ models** — The hypothesis predicts that $(\lambda, \gamma)$ converge across model families at sufficient scale. Verification requires GPU resources beyond the current individual setup.
 
-4. **F-regularization robustness** — The v6 paper shows weak F-regularization improves downstream performance (+0.33pt on SST-2). Is this robust across tasks and model families?
+4. **Profile/delta-F intervention robustness** — Can the preliminary
+   single-state Flash-profile result be reproduced across seeds and against a
+   matched random-regularization control? Canonical before/after delta F must
+   be evaluated as a separate intervention.
 
 ---
 
@@ -306,4 +393,4 @@ Specific, actionable research questions where external collaboration would be va
 
 **Contact**: miyauchikazuyoshi@gmail.com
 
-> *All theoretical contributions and experimental design are by the author. Implementation is AI-assisted (Claude, GitHub Copilot).*
+> *All theoretical contributions and experimental design are by the author. Implementation is AI-assisted (Codex, Claude, GitHub Copilot).*

@@ -3,6 +3,8 @@
 from .protocols import (
     FEvalResult,
     AGDGResult,
+    EdgePartitionResult,
+    TwoStageGateDecision,
     GraphSnapshot,
     EPCComputer,
     EntropyComputer,
@@ -10,10 +12,16 @@ from .protocols import (
 )
 from .f_eval import FEval
 from .ag_dg import PercentileClassifier, ThresholdClassifier
+from .edge_partition import (
+    PercentileEdgePartitioner,
+    ThresholdEdgePartitioner,
+)
 
 __all__ = [
     "FEvalResult",
     "AGDGResult",
+    "EdgePartitionResult",
+    "TwoStageGateDecision",
     "GraphSnapshot",
     "EPCComputer",
     "EntropyComputer",
@@ -21,4 +29,6 @@ __all__ = [
     "FEval",
     "PercentileClassifier",
     "ThresholdClassifier",
+    "PercentileEdgePartitioner",
+    "ThresholdEdgePartitioner",
 ]

@@ -9,7 +9,9 @@ from typing import Any, Dict, Optional, Tuple
 from pydantic import ValidationError
 
 from .config import load_config
+from .config.pydantic_compat import model_dump_compat
 from .implementations.agents.main_agent import MainAgent
+from .implementations.datastore.factory import DataStoreFactory
 
 logger = logging.getLogger(__name__)
 
@@ -70,19 +72,33 @@ def create_agent(provider: str = "mock", **kwargs) -> MainAgent:
                 "Torch/CUDA not available; using CPU-friendly model: flan-t5-small"
             )
 
-    # Create and initialize agent
-    agent = MainAgent(config)
+    # Build the effective store after applying overrides, then inject that exact
+    # instance into the agent.
+    datastore = _create_datastore_for_config(config)
+    agent = MainAgent(config, datastore=datastore)
     
-    # Check if agent needs initialization (handle both old and new style)
-    if hasattr(agent, 'initialized') and not agent.initialized:
-        success = agent.initialize()
-        if not success:
-            logger.warning("Agent initialization had issues, but may still work")
-    elif hasattr(agent, '_initialized') and not agent._initialized:
-        # Some agents use _initialized instead
-        logger.info("Agent auto-initialized")
+    # Public contract: create_agent returns a ready-to-use agent.  Support both
+    # the public property and the historical private flag while migrations are
+    # in flight, but never infer that a false private flag means initialized.
+    initialized = bool(
+        getattr(agent, "initialized", getattr(agent, "_initialized", False))
+    )
+    if not initialized:
+        initialize = getattr(agent, "initialize", None)
+        if not callable(initialize):
+            raise RuntimeError(
+                f"{type(agent).__name__} does not provide initialize(); "
+                "cannot satisfy create_agent's ready-to-use contract"
+            )
+        if not initialize():
+            raise RuntimeError(f"Failed to initialize {type(agent).__name__}")
     
     return agent
+
+
+def _create_datastore_for_config(config):
+    """Create the configured DataStore through the shared composition path."""
+    return DataStoreFactory.create_for_app_config(config)
 
 
 def quick_demo():
@@ -180,9 +196,7 @@ def _apply_config_overrides(config, overrides: Dict[str, Any]):
 
 
 def _config_to_dict(config) -> Dict[str, Any]:
-    if hasattr(config, "model_dump"):
-        return config.model_dump()
-    return config.dict()
+    return model_dump_compat(config)
 
 
 def _deep_merge_dicts(base: Dict[str, Any], overrides: Dict[str, Any]) -> Dict[str, Any]:

@@ -1,70 +1,57 @@
-# Configuration for question-aware message passing and query integration
-# This enables the new edge evaluation timing and insight vector generation features
+# Question-aware graph message passing and post-propagation edge evaluation.
 
-# Model configuration
-model:
-  name: "InsightSpike-MessagePassing"
-  version: "1.0.0"
+environment: experiment
+pre_warm_models: false
 
-# Embedding configuration
+llm:
+  provider: mock
+  model: mock
+  max_context_docs: 5
+  use_simple_prompt: false
+
 embedding:
-  model: "sentence-transformers/all-MiniLM-L6-v2"
+  model_name: sentence-transformers/all-MiniLM-L6-v2
   dimension: 384
-  cache_enabled: true
+  device: cpu
 
-# Processing configuration  
+memory:
+  max_episodes: 5000
+  max_retrieved_docs: 15
+
 processing:
   enable_insight_search: true
   max_insights_per_query: 5
 
-# Graph configuration with message passing
 graph:
-  # Enable message passing for question-aware graph enhancement
   enable_message_passing: true
-  
-  # Message passing configuration
   message_passing:
-    alpha: 0.3  # Weight for question influence (0-1)
-    iterations: 3  # Number of message passing iterations
-    aggregation: "weighted_mean"  # Aggregation method: weighted_mean, max, attention
-    self_loop_weight: 0.5  # Weight for self-loop in propagation
-    decay_factor: 0.8  # Decay factor for question relevance over distance
-  
-  # Edge re-evaluation configuration (after message passing)
+    alpha: 0.3
+    iterations: 3
+    max_hops: 2
+    # weighted_mean | mean | max
+    # "attention" is a deprecated compatibility alias for mean.
+    aggregation: weighted_mean
+    self_loop_weight: 0.5
+    decay_factor: 0.8
+    similarity_threshold: 0.3
+    convergence_threshold: 0.0001
+    enable_batch_computation: true
+    cache_similarities: true
+    top_k_relevance_percentile: 75
   edge_reevaluation:
-    similarity_threshold: 0.7  # Minimum similarity for edge retention
-    new_edge_threshold: 0.8  # Minimum similarity for new edge creation
-    max_new_edges_per_node: 5  # Maximum new edges to add per node
-    edge_decay_factor: 0.9  # Factor to decay original edge weights
-  
-  # Standard graph settings
+    similarity_threshold: 0.7
+    new_edge_threshold: 0.8
+    max_new_edges_per_node: 5
+    edge_decay_factor: 0.9
   similarity_threshold: 0.6
-  spike_ged_threshold: 0.3
+  spike_ged_threshold: -0.3
   spike_ig_threshold: 0.7
   conflict_threshold: 0.5
   enable_graph_search: true
-  use_gnn: false  # Can be combined with GNN if needed
+  use_gnn: false
+  ged_algorithm: advanced
+  ig_algorithm: advanced
 
-# Algorithm configuration
-algorithms:
-  # Use advanced algorithms that work well with message passing
-  use_advanced_ged: true
-  use_advanced_ig: true
-  advanced_ged_algorithm: "hungarian"  # Better for dynamic graphs
-  advanced_ig_algorithm: "normalized"
-
-# LLM configuration
-llm:
-  provider: "mock"  # Change to "openai", "anthropic" etc as needed
-  max_context_docs: 5
-  use_simple_prompt: false
-
-# Memory configuration
-memory:
-  max_episodes: 5000
-  consolidation_threshold: 100
-  
-# Logging
 logging:
-  level: "INFO"
-  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  level: INFO
+  log_to_console: true

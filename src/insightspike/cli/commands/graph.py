@@ -22,8 +22,6 @@ from rich.tree import Tree
 from ...implementations.agents.main_agent import MainAgent as SimpleRAGGraph
 from ...config.loader import load_config
 from ...implementations.datastore.factory import DataStoreFactory
-from ...config.models import DataStoreConfig
-from ...utils.path_utils import resolve_project_relative
 
 logger = logging.getLogger(__name__)
 console = Console()
@@ -766,33 +764,9 @@ def sleep_gc_command(
 ):
     """Run sleep/forget maintenance: edge pooling, weight decay, orphan pruning."""
     try:
-        # Build datastore using the same logic as the composition root
+        # Build datastore using the same backend-aware composition path.
         config = load_config()
-        if hasattr(config, "datastore") and config.datastore:
-            ds_type = getattr(config.datastore, "type", "filesystem")
-            root_path = getattr(config.datastore, "root_path", None)
-            base_path = getattr(config.datastore, "base_path", None)
-            fallback_path = str(getattr(getattr(config, "paths", None), "data_dir", "./data"))
-            default_root = DataStoreConfig().root_path
-            root_explicit = bool(getattr(config.datastore, "explicit_root_path", False)) or (
-                root_path is not None and str(root_path) != str(default_root)
-            )
-            if base_path:
-                effective_path = base_path
-            elif root_explicit:
-                effective_path = root_path
-            else:
-                effective_path = fallback_path
-            # Normalize relative path against project root
-            effective_path = resolve_project_relative(effective_path)
-            logger.info(f"Using DataStore base_path: {effective_path}")
-            datastore_config = {"type": ds_type, "params": {"base_path": effective_path}}
-        else:
-            normalized = resolve_project_relative("./data")
-            datastore_config = {"type": "filesystem", "params": {"base_path": normalized}}
-            logger.info("Using DataStore base_path: ./data")
-
-        datastore = DataStoreFactory.create_from_config(datastore_config)
+        datastore = DataStoreFactory.create_for_app_config(config)
 
         if not hasattr(datastore, "run_sleep_gc"):
             console.print("[yellow]Current datastore does not support graph GC (requires SQLite).[/yellow]")

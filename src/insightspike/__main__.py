@@ -6,7 +6,6 @@ This is the composition root where all dependencies are wired together.
 
 import logging
 import sys
-from pathlib import Path
 
 # Setup basic logging before imports
 logging.basicConfig(
@@ -23,10 +22,7 @@ def run_app():
         # Import here to avoid circular imports
         from .cli import spike
         from .config.loader import load_config
-        from .implementations.agents.main_agent import MainAgent
         from .implementations.datastore.factory import DataStoreFactory
-        from .config.models import DataStoreConfig
-        from .utils.path_utils import resolve_project_relative
 
         logger.info("Starting InsightSpike composition root...")
 
@@ -39,43 +35,8 @@ def run_app():
 
             config = ConfigPresets.development()
 
-        # 2. Create DataStore based on configuration
-        if hasattr(config, "datastore") and config.datastore:
-            # Backward-compatible resolution: prefer legacy paths.data_dir
-            # unless root_path was explicitly set by the user.
-            ds_type = getattr(config.datastore, "type", "filesystem")
-            root_path = getattr(config.datastore, "root_path", None)
-            base_path = getattr(config.datastore, "base_path", None)
-            # As a final fallback, try paths.data_dir or ./data
-            fallback_path = (
-                str(getattr(getattr(config, "paths", None), "data_dir", "./data"))
-            )
-            default_root = DataStoreConfig().root_path
-            root_explicit = bool(getattr(config.datastore, "explicit_root_path", False)) or (
-                root_path is not None and str(root_path) != str(default_root)
-            )
-            if base_path:
-                effective_path = base_path
-            elif root_explicit:
-                effective_path = root_path
-            else:
-                effective_path = fallback_path
-            # Normalize to project root to avoid nested CWD artifacts
-            effective_path = resolve_project_relative(effective_path)
-            logger.info(f"Using DataStore base_path: {effective_path}")
-            datastore_config = {
-                "type": ds_type,
-                # FileSystemDataStore accepts base_path and root_path; pass base_path for clarity
-                "params": {"base_path": effective_path},
-            }
-        else:
-            normalized = resolve_project_relative("./data")
-            datastore_config = {
-                "type": "filesystem",
-                "params": {"base_path": normalized},
-            }
-            logger.info("Using DataStore base_path: ./data")
-        datastore = DataStoreFactory.create_from_config(datastore_config)
+        # 2. Create DataStore through the shared backend-aware composition path.
+        datastore = DataStoreFactory.create_for_app_config(config)
         logger.info(f"Created DataStore: {datastore.__class__.__name__}")
 
         # 3. Pre-warm LLM models based on configuration

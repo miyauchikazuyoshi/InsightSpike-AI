@@ -15,7 +15,8 @@
 - **[Configuration System](configuration.md)** - YAML-based configuration and settings management
 - **[Data Management](data_management_strategy.md)** - DataStore abstraction and data handling
 - **[Query Storage System](query_storage.md)** - Query persistence and analysis architecture
-- **[MainAgent Behavior](mainagent_behavior.md)** (deprecated) - legacy MainAgent
+- **[MainAgent Behavior](mainagent_behavior.md)** - Current public facade,
+  lifecycle, persistence, aggregation, and live-config contracts
 
 ### Experiment-Side Architecture(実験ディレクトリ側に実体)
 - **[Three-Layer Search Architecture](threelayer_search_architecture.md)** ⭐ **NEW (2026-07)** -
@@ -83,7 +84,9 @@ The Streamlit UI in `apps/knowledge_app.py` uses `insightspike.public.InsightApp
 
 Notes:
 - Top‑level imports should use `insightspike.public` (CI enforced)
-- geDIG calculations must go through `algorithms.gedig.selector.compute_gedig` (STRICT guard available)
+- New geDIG evaluation code uses the standalone `gedig` unified core.
+  `algorithms.gedig.selector.compute_gedig` remains the guarded composition
+  path for the existing InsightSpike runtime.
 
 ## 📊 Architecture Highlights
 
@@ -104,8 +107,8 @@ Notes:
     *   **Approximation**: Matrix powers $A^k$ for SP, Soft Thresholding for EPC.
     *   **End-to-End**: Fully differentiable, usable as a loss function.
 *   **[Neuro-Pruning Tool](../design/neuro_pruning_spec.md)** - Structural lobotomy for Transformers.
-    *   **Diagnosis**: Measures "Structural Fitness" (F-score) of every attention head.
-    *   **Action**: Prunes bottom $N$% low-structure heads ("Chaos removal").
+    *   **Diagnosis**: Measures the single-state Flash structural profile of every attention head.
+    *   **Action**: Applies an experiment-specific ranking rule; profile direction is not the canonical delta-F judgment direction.
     *   **Result**: 10% pruning achieved with <1% accuracy drop on BERT-base.
 
 ## 🔄 Previous Updates (August 2025)

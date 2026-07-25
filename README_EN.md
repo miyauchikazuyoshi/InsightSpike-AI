@@ -20,19 +20,17 @@
 F = ΔEPC_norm − λ ( ΔH_norm + γ · ΔSP_rel )
 ```
 
-In the ongoing research the structural-information term ΔSP is generalized to Δβ₁ (the first Betti number — a scale-free topological invariant):
-
-```
-F = ΔEPC − λ ( ΔH + γ · Δβ₁ )
-```
-
 | Term | Mathematical structure | What it captures |
 |------|------------------------|------------------|
 | ΔEPC | Metric (distance) | Cost of restructuring the knowledge graph (graph-edit-path cost) |
 | ΔH | Measure (probability) | Change in entropy / uncertainty (Shannon) |
-| Δβ₁ / ΔSP | Topology / path | Change in independent cycles, or shortest-path shortening |
+| ΔSP_rel | Structure potential (paths) | Relative shortest-path gain |
 
 **F < 0** means information gain exceeds structural cost — the system should commit the change.
+
+The established gauge and v6 paper use ΔSP. Ongoing v7 research evaluates
+Δβ₁ (the first Betti number) as an explicit alternative research mode; it is
+not the default structural term.
 
 Two-stage gating: **AG** (0-hop ambiguity detection → explore) and **DG** (multi-hop confirmation → integrate). The neurotransmitter analogy (AG↔noradrenaline, DG↔dopamine) and the thermodynamic reading (F = E − TS, FEP/MDL) are **operational metaphors**, not literal claims.
 
@@ -42,12 +40,52 @@ Two-stage gating: **AG** (0-hop ambiguity detection → explore) and **DG** (mul
 
 | Component | Status |
 |-----------|--------|
-| **Unified geDIG Core** | 71 unit tests pass; F-eval gives equivalent results across 3 backends (maze / RAG / transformer). See [`src/gedig/`](src/gedig/). |
+| **Unified geDIG Core** | 80 core regression tests (all 80 pass locally; a CI-compatible torch import-block simulation produces 57 passes and 23 expected skips). Transformer values/gradients are compared with the frozen independent oracle; RAG has independent formula checks; Maze has adapter contracts plus an active-legacy golden trace, not a full equivalence claim. See [`src/gedig/`](src/gedig/). |
 | geDIG theory (v6 paper) | Pre-print — position paper + PoC. [PDF](docs/paper/v6/arxiv_en/geDIG_onegauge_improved_v6_en.pdf) |
-| Maze Wake-Sleep-Wake | 98% goal-reach (15×15, n=100) — **on par with greedy-DFS / oracle (99%)**; the distinctive result is ~98% map compression. PoC only. |
+| Maze PoC (single episode) | 98% goal-reach (15×15, n=100) — **on par with greedy-DFS / oracle (99%)**; the distinctive result is ~98% map compression. PoC only. |
+| Maze stage-2 (Wake-Sleep-Wake) | Pre-registered v2/v3 established and replicated a trajectory-Q replay benefit for self-navigation; v5/v6 rejected unconditional budget splitting. Single-cycle remains the default. See [`experiments/maze/graph_persistent_dg/`](experiments/maze/graph_persistent_dg/). |
 | HotpotQA dual-process (v3) | GPT-4o EM 51.2% vs IRCoT 47.6% (500q) — **p=0.086, not significant**; the ordering reverses on GPT-4o-mini (p=0.008). The most carefully evaluated experiment. |
 | BRIGHT retrieval (AGHT) | nDCG@10 = 0.439 on **biology, 50 queries, single seed** (full 3-domain ≈ 0.19). **Not competitive with SOTA (≈ 0.63).** |
-| Transformer F-regularization (Exp4) | **Single-seed, preliminary**: F-maximize > baseline under SP-based F only — *not* confirmed under β₁ or vs a random-regularization control. |
+| Transformer Flash-profile regularization (Exp4) | **Single-seed, preliminary**: single-state profile maximize > baseline under the SP profile only — *not* confirmed under β₁ or vs a random-regularization control. |
+
+---
+
+## Repository Maintenance Status (2026-07-25)
+
+The P0–P6 technical-debt programme is complete. The public API remains
+compatible, while formerly implicit behavior is now covered by explicit
+contracts.
+
+| Area | Current contract |
+|------|------------------|
+| Public runtime | `create_agent()` returns an initialized agent and injects the configured `DataStore`; direct `MainAgent(...)` construction remains lazy. |
+| Configuration | Strict nested validation, source-aware legacy migration, Pydantic v1/v2 compatibility, canonical examples, and safe YAML round trips. |
+| Persistence | Memory, filesystem, and SQLite share one factory and episode codec; state saves are exact snapshots and indexes rebuild after load. |
+| `MainAgent` | The facade and replaceable L1–L4 components remain; lifecycle, persistence, result aggregation, and config access are focused services. |
+| geDIG and adapters | Canonical delta F is separate from the legacy Flash profile. Transformer validation compares against an independent frozen oracle, the active AGHT RAG path delegates to `RAGFEval`, and active Maze remains legacy-fixed with a golden trace. |
+| Message passing | `weighted_mean`, `mean`, and `max` are explicit; legacy `attention` warns and aliases `mean`; unknown values raise. |
+
+Validation evidence:
+
+- 143 targeted tests passed across public API, config, persistence, Flash,
+  message passing, and `MainAgent`.
+- All 80 unified-core tests passed locally; the torch-less simulation produced
+  57 passes and 23 expected skips.
+- The `MainAgent` integration file moved from the unchanged-HEAD baseline of
+  11 failures / 11 passes to 22 passes in both PyG and torch-less environments.
+- The cloud-safe smoke suite passed 16/16. The standard entry collected 1,078
+  tests with 33 collection-time skips; this is not a claim that all 1,078 were run.
+
+References:
+
+- [Completed debt-repayment plan](docs/development/debt_repayment_refactoring_plan_20260724.md)
+- [Canonical implementation map](docs/CANONICAL.md)
+- [Adapter migration ledger](src/gedig/docs/MIGRATION_PROGRESS.md)
+- [`MainAgent` behavior contract](docs/architecture/mainagent_behavior.md)
+
+Deliberate boundaries: active Maze cutover waits for the ongoing v7 work;
+Transformer T4/Exp4 and historical RAG R4–R6 E2E runs were not rerun; a true
+attention aggregator requires a separate scientific specification.
 
 ---
 
@@ -72,11 +110,11 @@ Zero-shot heterogeneous graph transformer (10 analytical parameters).
 - For context on BRIGHT: BM25 ≈ 0.145, BM25 + GPT-4 + rerank ≈ 0.30, SOTA INF-X-Retriever ≈ 0.63. This is an early PoC, well below these.
 - HotpotQA paragraph selection (100q, zero-shot): R@2 = 0.405, **+170% over an internal PageRank baseline** (not a supervised SOTA).
 
-### Transformer F-regularization (Exp4) — preliminary
+### Transformer single-state Flash-profile regularization (Exp4) — preliminary
 SST-2 / DistilBERT, single run, β = 0.1.
-- SP-based F: negative (F-maximize) 89.4% vs baseline 88.1% (baseline peaked at 89.4% at epochs 1–2, then overfit to 88.1%).
-- **β₁-based F: negative 85.5% < baseline 88.5%** — the effect does not hold.
-- A negative control found geDIG-F regularization (66.5%) did **not** beat random-value regularization (69.5%). Multi-seed replication is required before any `negative_better` claim.
+- SP profile: profile-maximize 89.4% vs baseline 88.1% (baseline peaked at 89.4% at epochs 1–2, then overfit to 88.1%).
+- **β₁ profile: the same condition reached 85.5% < baseline 88.5%** — the effect does not hold.
+- A negative control found profile regularization (66.5%) did **not** beat random-value regularization (69.5%). This does not establish the direction of canonical before/after delta F; multi-seed replication is required before any `negative_better` claim.
 
 ---
 
@@ -100,17 +138,37 @@ To set expectations honestly:
 ```bash
 git clone https://github.com/miyauchikazuyoshi/InsightSpike-AI.git
 cd InsightSpike-AI
-pip install -e .
+make install-dev
 make test
 ```
 
+For a runtime-only installation, use `pip install -e .`.
+
+### Ready-to-use Agent API
+
+```python
+from insightspike import create_agent
+
+agent = create_agent(provider="mock", datastore__type="memory")
+assert agent.initialized
+
+agent.add_knowledge("geDIG balances graph-edit cost and information gain.")
+result = agent.process_question("What does geDIG balance?", max_cycles=1)
+print(result.response)
+```
+
+### Canonical delta F
+
+The example below requires the optional PyTorch dependency for your platform.
+
 ```python
 import torch
-from insightspike.gedig import compute_f_score
+from insightspike.gedig import compute_delta_f_score
 
-attn = torch.rand(1, 12, 64, 64)            # (Batch, Heads, Seq, Seq)
-f_values, metrics = compute_f_score(attn, lambda_param=1.0, gamma=0.5)
-print(f"Mean F: {f_values.mean():.4f}")     # lower is better
+before = torch.softmax(torch.rand(1, 12, 64, 64), dim=-1)
+after = torch.softmax(torch.rand(1, 12, 64, 64), dim=-1)
+result = compute_delta_f_score(before, after)
+print(f"Mean delta F: {result.F_mean:.4f}")  # lower is better
 ```
 
 ---
@@ -123,4 +181,4 @@ print(f"Mean F: {f_values.mean():.4f}")     # lower is better
 - **Patents:** JP 2025-082988, JP 2025-082989 (pending)
 - **Contact:** miyauchikazuyoshi@gmail.com
 
-> *All theoretical contributions and experimental design are by the author. Implementation is AI-assisted (Claude, GitHub Copilot).*
+> *All theoretical contributions and experimental design are by the author. Implementation is AI-assisted (Codex, Claude, GitHub Copilot).*

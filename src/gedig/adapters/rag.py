@@ -1,6 +1,6 @@
 """RAG adapter: maps document graphs to unified geDIG F-eval.
 
-Wraps AGHT's per-edge QKV attention and AG/DG classification
+Wraps AGHT's per-edge QKV attention and score partitioning
 using the unified core.
 
 Usage:
@@ -9,18 +9,19 @@ Usage:
     f_eval = RAGFEval()
     # Per-edge F-eval (QKV style)
     edge_f = f_eval.compute_edge_f(cost=0.3, q_score=0.8, k_score=0.6, f_lambda=1.0)
-    # AG/DG classification
-    result = f_eval.classify_edges(edge_f_values, percentile=0.3)
+    # Low/high F edge partition
+    result = f_eval.partition_edges(edge_f_values)
 """
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional, Set, Tuple
+from typing import Any, Dict
 
 import networkx as nx
 
 from gedig.core.ag_dg import PercentileClassifier
-from gedig.core.protocols import AGDGResult, FEvalResult
+from gedig.core.edge_partition import PercentileEdgePartitioner
+from gedig.core.protocols import AGDGResult, EdgePartitionResult
 from gedig.core.message_passing import AttentionPropagator
 from gedig.backends.networkx_backend import NxGraphSnapshot, NxBetti
 
@@ -33,14 +34,15 @@ class RAGFEval:
 
     This is different from maze/transformer which compare before/after
     graph states. Instead, each edge gets an individual f-value, and
-    the AG/DG classification uses a percentile threshold.
+    a percentile threshold partitions lower and higher scores. This edge
+    partition is not the Attention Gate / Decision Gate event pair.
 
     Parameters
     ----------
     f_lambda : float
         Weight for query relevance in f-value computation.
     percentile : float
-        AG/DG classification percentile (default 0.3 = bottom 30% are AG).
+        Edge partition percentile (default 0.3).
     d_k : float
         QKV scaling dimension.
     """
@@ -52,6 +54,10 @@ class RAGFEval:
         d_k: float = 3.0,
     ):
         self.f_lambda = f_lambda
+        self.partitioner = PercentileEdgePartitioner(
+            percentile=percentile
+        )
+        # Historical API retained for classify_edges().
         self.classifier = PercentileClassifier(percentile=percentile)
         self.d_k = d_k
         self.propagator = AttentionPropagator()
@@ -77,7 +83,7 @@ class RAGFEval:
 
         Returns
         -------
-        float : f-value (lower = more AG-like)
+        float : f-value (lower means a better cost/relevance trade-off)
         """
         import math
         dot = sum(q * k for q, k in zip(q_vec, k_vec))
@@ -88,7 +94,7 @@ class RAGFEval:
         self,
         edge_f_values: Dict[Any, float],
     ) -> AGDGResult:
-        """Classify edges as AG/DG using percentile threshold.
+        """Return historical AG/DG-labelled edge partition fields.
 
         Parameters
         ----------
@@ -97,9 +103,18 @@ class RAGFEval:
 
         Returns
         -------
-        AGDGResult with ag/dg edge lists and threshold.
+        AGDGResult
+            Historical field layout. It does not represent gate events.
         """
         return self.classifier.classify(edge_f_values)
+
+    def partition_edges(
+        self,
+        edge_f_values: Dict[Any, float],
+    ) -> EdgePartitionResult:
+        """Partition edges into lower- and higher-F score sets."""
+
+        return self.partitioner.partition(edge_f_values)
 
     def compute_graph_betti(self, graph: nx.Graph) -> float:
         """Compute β₁ of a document graph.

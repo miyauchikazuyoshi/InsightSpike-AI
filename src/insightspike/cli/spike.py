@@ -35,6 +35,10 @@ from insightspike.config import (
     load_config,
 )
 from insightspike.config.loader import ConfigLoader
+from insightspike.config.pydantic_compat import (
+    model_dump_compat,
+    model_validate_compat,
+)
 from insightspike.core.error_handler import InsightSpikeError, get_logger
 from insightspike.implementations.agents.main_agent import MainAgent
 
@@ -122,8 +126,8 @@ class DependencyFactory:
         if self.base_config:
             # Update the Pydantic config with values from base_config
             # This ensures config.yaml values take precedence
-            config_dict = pydantic_config.dict()
-            base_dict = self.base_config.dict()
+            config_dict = model_dump_compat(pydantic_config)
+            base_dict = model_dump_compat(self.base_config)
 
             # Deep merge base config into preset config
             for key, value in base_dict.items():
@@ -137,10 +141,22 @@ class DependencyFactory:
                     config_dict[key] = value
 
             # Create new config from merged dict
-            pydantic_config = InsightSpikeConfig(**config_dict)
+            pydantic_config = model_validate_compat(
+                InsightSpikeConfig,
+                config_dict,
+            )
 
-        # Create and initialize agent with Pydantic config directly
-        agent = MainAgent(config=pydantic_config)
+        # Reuse the composition-root store when supplied; otherwise build one
+        # from the effective preset/config merge.
+        datastore = self.datastore
+        if datastore is None:
+            from insightspike.implementations.datastore.factory import (
+                DataStoreFactory,
+            )
+
+            datastore = DataStoreFactory.create_for_app_config(pydantic_config)
+
+        agent = MainAgent(config=pydantic_config, datastore=datastore)
 
         if not agent.initialize():
             raise InsightSpikeError(f"Failed to initialize agent with preset: {preset}")
@@ -329,7 +345,7 @@ def config(
 
         if action == "show":
             # Convert config to dict and display as JSON
-            config_dict = config.dict()
+            config_dict = model_dump_compat(config, mode="json")
 
             # Convert Path objects to strings for JSON serialization
             def convert_paths(obj):
@@ -361,7 +377,7 @@ def config(
             keys = key.split(".")
 
             # Update config with the new value
-            config_dict = config.dict()
+            config_dict = model_dump_compat(config)
             current = config_dict
             for k in keys[:-1]:
                 if k not in current:
@@ -376,7 +392,10 @@ def config(
             current[keys[-1]] = value
 
             # Update factory's base config
-            factory.base_config = InsightSpikeConfig(**config_dict)
+            factory.base_config = model_validate_compat(
+                InsightSpikeConfig,
+                config_dict,
+            )
             console.print(f"[green]✅ Set {key} = {value}[/green]")
 
         elif action == "save":
@@ -422,7 +441,7 @@ def config(
         elif action == "export":
             path = Path(key) if key else Path("config.json")
             # Export config to JSON file
-            config_dict = config.dict()
+            config_dict = model_dump_compat(config, mode="json")
 
             # Convert Path objects to strings
             def convert_paths(obj):

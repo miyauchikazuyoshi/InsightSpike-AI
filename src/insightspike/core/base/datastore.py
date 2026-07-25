@@ -19,7 +19,7 @@ class DataStore(ABC):
     def save_episodes(
         self, episodes: List[Dict[str, Any]], namespace: str = "default"
     ) -> bool:
-        """Save episodes to storage
+        """Persist episodes using the backend's historical write semantics.
 
         Args:
             episodes: List of episode dictionaries with 'text', 'vec', 'c', 'metadata'
@@ -29,6 +29,24 @@ class DataStore(ABC):
             Success status
         """
         pass
+
+    def replace_episodes(
+        self, episodes: List[Dict[str, Any]], namespace: str = "default"
+    ) -> bool:
+        """Replace an episode namespace with an exact snapshot.
+
+        Concrete stores should override this method when ``save_episodes`` has
+        append semantics.  The default preserves compatibility with third-party
+        stores whose historical save operation already replaced the namespace.
+
+        Args:
+            episodes: Complete episode snapshot for the namespace
+            namespace: Namespace/collection to replace
+
+        Returns:
+            Success status
+        """
+        return self.save_episodes(episodes, namespace=namespace)
 
     @abstractmethod
     def load_episodes(self, namespace: str = "default") -> List[Dict[str, Any]]:

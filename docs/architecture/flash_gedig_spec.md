@@ -1,70 +1,106 @@
 # Flash-geDIG Specification
-**"Structure as a First-Class Citizen in Deep Learning"**
 
-## 1. コンセプト (Philosophy)
-*   **Zero-Copy**: CPU/NetworkXへのデータ転送を一切行わず、全ての計算をGPU上のTensor演算で完結させる。
-*   **Differentiable**: 全工程が微分可能（Differentiable）であり、学習時の損失関数（Loss）として直接利用可能。
-*   **Plug-and-Play**: 既存のTransformerモデル（HuggingFace等）に、わずか数行で組み込める手軽さ。
+Flash-geDIGは、Transformer attentionをCPU/NetworkXへ移さずに評価する
+torch-native APIである。すべての演算は微分可能だが、次の2種類の量を混同しては
+ならない。
 
-## 2. API Design
+- **canonical delta F**: before/afterの変化量。リポジトリ共通規約はlower is better。
+- **single-state structural profile**: 1つのattentionを測るFlash固有の絶対profile。
+  普遍的な良否方向はなく、実験ごとに目的方向を明示する。
 
-### 2.1. Functional API (推奨)
-最も手軽に使うためのステートレスな関数群。
+## Functional API
+
+### Canonical before/after delta
 
 ```python
 import torch
-import insightspike.gedig.functional as F_gedig
+from insightspike.gedig import compute_delta_f_score
 
-# attention: (Batch, Heads, Seq, Seq)
-f_score, metrics = F_gedig.compute_f_score(
-    attention_matrix, 
-    mask=None,
-    lambda_param=1.0,  # コスト/価値のバランス
-    gamma=0.5          # 通信効率(SP)の重み
+before = torch.softmax(torch.rand(1, 12, 64, 64), dim=-1)
+after = torch.softmax(torch.rand(1, 12, 64, 64), dim=-1)
+mask = torch.ones(1, 64)
+
+result = compute_delta_f_score(
+    before,
+    after,
+    mask=mask,
+    lambda_param=1.0,
+    gamma=0.5,
 )
 
-print(f"Structure Score: {f_score.mean().item()}")
-# metrics['epc'] -> 配線コスト
-# metrics['entropy'] -> エントロピー（迷い）
-# metrics['sp'] -> 通信効率
+print(result.F_mean)       # scalar; lower is better
+print(result.delta_epc)
+print(result.delta_h)
+print(result.delta_sp)
 ```
 
-### 2.2. Modular API (nn.Module)
-学習ループやモデルの一部として組み込むためのクラス。
+このAPIは`gedig.adapters.transformer.TransformerFEval`へ直接委譲する。
+identical before/afterでは全delta項とFが0になる。
+
+### Single-state structural profile
+
+```python
+from insightspike.gedig import compute_structural_profile
+
+profile, metrics = compute_structural_profile(
+    after,
+    attention_mask=mask,
+    temperature=0.1,
+    percentile=0.9,
+)
+
+print(profile.mean())
+print(metrics["epc"], metrics["h"], metrics["sp"])
+```
+
+`compute_f_score(attention, ...)`は旧利用者のために残す互換wrapperであり、
+同じ数値を歴史的な`delta_epc` / `delta_h` / `delta_sp`キーで返す。
+新規コードでは用途に応じて上の2 APIを選ぶ。
+
+## Loss API
 
 ```python
 from insightspike.gedig import FlashGeDIGLoss
 
-# 前処理でインスタンス化（パラメータ設定済み）
-gedig_loss = FlashGeDIGLoss(alpha=0.01)
+# 旧挙動を明示: single-state profileを最大化
+regularizer = FlashGeDIGLoss(
+    alpha=0.01,
+    objective="maximize",
+)
 
-# Training Loop
-outputs = model(inputs)
-loss = outputs.loss + gedig_loss(outputs.attentions)
-loss.backward()  # 構造化への圧力をかけて逆伝播
+outputs = model(inputs, output_attentions=True)
+loss = outputs.loss + regularizer(
+    outputs.attentions,
+    attention_mask=inputs["attention_mask"],
+)
+loss.backward()
 ```
 
-## 3. Core Algorithms (High-Speed Approximations)
+`FlashGeDIGLoss`はsingle-state profile用であり、返り値は次のとおり。
 
-GPU高速化のために、グラフ理論指標を「微分可能な行列演算」に近似翻訳します。
+| `objective` | 返す値 | 用途 |
+|---|---:|---|
+| `"minimize"` | `+alpha * profile_mean` | profileを下げる実験 |
+| `"maximize"` | `-alpha * profile_mean` | profileを上げる実験。後方互換の既定 |
 
-| 指標 | 厳密な定義 (NetworkX) | **Flash-geDIG (Tensor Approx)** | 計算オーダー |
-| :--- | :--- | :--- | :--- |
-| **Edges** | 閾値カットと本数カウント | **Soft Thresholding** (Sigmoid関数による連続的な重み和) | $O(N^2)$ |
-| **Entropy** | 確率分布のシャノンエントロピー | **Normalized Entropy** (Tensor演算) | $O(N^2)$ |
-| **SP (Efficiency)** | 全点間最短パス長の平均 (BFS/Dijkstra) | **Matrix Powers** (隣接行列の累乗 $A^k$ による到達性近似) | $O(k \cdot N^3)$ |
+canonical delta Fを最小化する場合は`compute_delta_f_score(...).F_mean`を
+直接task lossへ加える。profile最大化という実験固有の構成は、canonicalな
+「lower delta F is better」という判断規約を変更しない。
 
-*   **SP近似の補足**: $N$が大きい場合、行列累乗は重いため、デフォルトでは $k=4$ 程度の「局所的な効率性（Local Efficiency）」で代用し、超高速化を図ります。
+## Flash Profile Approximation
 
-## 4. Use Cases
+| 成分 | Flash profile近似 | 計算量 |
+|---|---|---:|
+| EPC-like density | sigmoid soft threshold後のedge密度 | $O(N^2)$ |
+| Entropy | attention行列全体の正規化Shannon entropy | $O(N^2)$ |
+| SP-like efficiency | 隣接行列の有限回matrix power | $O(kN^3)$ |
+| Clustering | soft adjacencyの`trace(A^3)` | $O(N^3)$ |
 
-1.  **診断 (Diagnostics)**: 学習済みモデルの「思考の深さ」を層ごとに可視化。
-2.  **正則化 (Regularization)**: 学習時にF値を最大化し、汎化性能と解釈性を向上。
-3.  **剪定 (Pruning)**: F値が低い（構造化されていない）Headを自動的に削除し、モデルを軽量化。
-4.  **RAG Reranking**: 検索結果の中で「最も構造的に整合する（F値が高い）」情報を採用。
+profileとcanonical delta adapterは、percentile、temperature、entropy、SPの
+定義が異なる。profileを2回計算して差し引く方法でdelta Fを作ってはならない。
 
-## 5. Next Steps
-1.  `src/insightspike/gedig/` パッケージを作成。
-2.  `functional.py` と `module.py` を実装。
-3.  `train_f_regularized.py` からロジックを移植・純化。
-4.  ユニットテストで勾配（Gradient）が流れることを確認。
+## Compatibility
+
+- `compute_f_score`の引数、tuple戻り値、歴史的metricキーは維持する。
+- `FlashGeDIGLoss`の既存5位置引数は維持し、`alpha`と`objective`はkeyword-only。
+- 数値固定、identical delta、adapter値/勾配、loss符号を回帰テストで検証する。

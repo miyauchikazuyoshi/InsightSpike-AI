@@ -62,14 +62,18 @@ def test_controller_uses_optimized_when_enabled(monkeypatch):
     import sys
 
     # Dummy optimized implementation
-    dummy_mod = types.ModuleType("insightspike.implementations.graph.message_passing_optimized")
+    dummy_mod = types.ModuleType("insightspike.graph.message_passing_optimized")
 
     class DummyOptMP:
         def __init__(self, **kwargs):
             self.kwargs = kwargs
 
     dummy_mod.OptimizedMessagePassing = DummyOptMP
-    sys.modules["insightspike.implementations.graph.message_passing_optimized"] = dummy_mod
+    monkeypatch.setitem(
+        sys.modules,
+        "insightspike.graph.message_passing_optimized",
+        dummy_mod,
+    )
 
     # Use batch_computation=True to trigger optimized path
     ctrl = ctrl_mod.MessagePassingController(
@@ -77,7 +81,12 @@ def test_controller_uses_optimized_when_enabled(monkeypatch):
         original_config={
             "graph": {
                 "enable_message_passing": True,
-                "message_passing": {"enable_batch_computation": True, "max_hops": 2},
+                "message_passing": {
+                    "enable_batch_computation": True,
+                    "max_hops": 2,
+                    "cache_similarities": False,
+                    "top_k_relevance_percentile": 85,
+                },
             }
         },
     )
@@ -85,3 +94,5 @@ def test_controller_uses_optimized_when_enabled(monkeypatch):
     assert ctrl.message_passing_enabled is True
     assert isinstance(ctrl.message_passing, DummyOptMP)
     assert ctrl.message_passing.kwargs.get("max_hops") == 2
+    assert ctrl.message_passing.kwargs.get("cache_similarities") is False
+    assert ctrl.message_passing.kwargs.get("top_k_relevance_percentile") == 85

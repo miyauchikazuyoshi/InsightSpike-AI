@@ -24,7 +24,7 @@ setup-models:
 
 # Run tests
 test:
-	pytest tests/
+	PYTHONPATH=src pytest tests/ src/gedig/tests/
 
 # Ultra-lightweight A/B logger selftest (no heavy deps)
 selftest-ab:
@@ -85,8 +85,9 @@ quickstart: install setup-models
 # Coverage run (lightweight env flags)
 .PHONY: coverage
 coverage:
-	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 INSIGHTSPIKE_MIN_IMPORT=1 INSIGHTSPIKE_LITE_MODE=1 \
-		pytest -q --cov=insightspike --cov-report=term-missing tests/
+	INSIGHTSPIKE_MIN_IMPORT=1 INSIGHTSPIKE_LITE_MODE=1 \
+		PYTHONPATH=src pytest -q --cov=insightspike --cov-report=term-missing \
+		tests/ src/gedig/tests/
 
 # ---------------------------------------------------------------------
 # Dockerized maze experiments (Linux/OpenBLAS for stability)

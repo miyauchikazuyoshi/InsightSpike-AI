@@ -50,8 +50,11 @@ class L2MemoryAdapter:
                 }
             )
 
-        # Save episodes
-        success = self.datastore.save_episodes(episode_dicts, namespace=self.namespace)
+        # This adapter receives the complete L2 state, so persist a snapshot.
+        success = self.datastore.replace_episodes(
+            episode_dicts,
+            namespace=self.namespace,
+        )
 
         if success:
             # Also save vectors for search

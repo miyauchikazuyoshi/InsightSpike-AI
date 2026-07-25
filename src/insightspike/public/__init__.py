@@ -39,13 +39,15 @@ def get_config_summary(config=None):
 def create_datastore(kind: str = "filesystem", **kwargs):
     """Create a simple, safe DataStore instance.
 
-    Allowed kinds: "filesystem", "memory". Additional kwargs are passed to the
-    underlying implementation (e.g., root path for filesystem).
+    Allowed kinds: "filesystem", "memory", "in_memory", and "sqlite".
+    Additional kwargs are passed to the underlying implementation.
     """
-    allowed = {"filesystem", "memory"}
+    allowed = {"filesystem", "memory", "in_memory", "sqlite"}
     k = (kind or "filesystem").lower()
     if k not in allowed:
         raise ValueError(f"Unsupported datastore kind: {kind}. Allowed: {sorted(allowed)}")
+    if k == "sqlite" and not kwargs.get("db_path"):
+        raise ValueError("SQLite datastore requires db_path")
     return _DSFactory.create(k, **kwargs)
 
 

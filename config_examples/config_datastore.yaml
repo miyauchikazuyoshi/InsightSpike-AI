@@ -1,58 +1,46 @@
-# InsightSpike Configuration with DataStore
-# =========================================
-# This configuration uses DataStore to prevent memory explosion
+# SQLite-backed configuration for durable episode storage.
 
-# Agent configuration
-agent:
-  type: "datastore_main"  # Use new DataStore-based agent
-  debug: false
+environment: development
+pre_warm_models: false
 
-# DataStore configuration
-datastore:
-  type: "sqlite"
-  path: "data/insight.db"
-  
-# Memory management
-memory:
-  # Cache configuration
-  cache_size: 100  # Maximum episodes in memory cache
-  
-  # Memory monitoring thresholds
-  warning_threshold_mb: 500
-  critical_threshold_mb: 1000
-  check_interval_seconds: 60
-  
-  # No more in-memory episode limits!
-  # max_episodes: 10000  # REMOVED - DataStore handles this
-
-# Embedding configuration
-embedding:
-  dimension: 768
-  model: "sentence-transformers/all-MiniLM-L6-v2"
-
-# LLM Provider
-llm_provider:
-  type: "mock"  # Change to "openai" or "anthropic" for real usage
-  model: "gpt-3.5-turbo"
+llm:
+  provider: mock
+  model: mock
   temperature: 0.7
   max_tokens: 500
 
-# Graph configuration
+embedding:
+  model_name: sentence-transformers/all-MiniLM-L6-v2
+  dimension: 768
+  device: cpu
+
+datastore:
+  type: sqlite
+  db_path: ./data/insight.db
+  vector_dim: 768
+
+memory:
+  max_episodes: 10000
+  cache_size: 100
+  max_retrieved_docs: 20
+  search_k: 20
+
 graph:
   similarity_threshold: 0.7
-  max_neighbors: 50
-  
-# Spike detection
-spike_detection:
-  uncertainty_threshold: 0.7
-  novelty_threshold: 0.5
+  enable_graph_search: true
+  hop_limit: 2
+  neighbor_threshold: 0.7
+  path_decay: 0.8
 
-# Performance
 performance:
-  batch_size: 32
-  async_processing: true
+  enable_cache: true
+  parallel_workers: 4
 
-# Logging
+monitoring:
+  enabled: true
+  performance_tracking: true
+
 logging:
-  level: "INFO"
-  show_memory_stats: true
+  level: INFO
+  file_path: ./logs/insightspike.log
+  log_to_console: true

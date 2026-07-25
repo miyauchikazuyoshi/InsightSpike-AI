@@ -28,6 +28,13 @@ if deps_app:
     app.add_typer(deps_app, name="deps")
 
 
+def _result_value(result, name: str, default=None):
+    """Read a result field from either CycleResult or a legacy mapping."""
+    if isinstance(result, dict):
+        return result.get(name, default)
+    return getattr(result, name, default)
+
+
 @app.command("legacy-ask")
 def ask(question: str = typer.Argument(..., help="Ask a question to the AI agent")):
     """[DEPRECATED] Use 'spike ask' instead. Legacy ask command."""
@@ -39,7 +46,7 @@ def ask(question: str = typer.Argument(..., help="Ask a question to the AI agent
         print("[yellow]Initializing AI agent...[/yellow]")
 
         # Create and initialize agent
-        agent = MainAgent()
+        agent = MainAgent(get_config())
         if not agent.initialize():
             print("[red]Failed to initialize agent[/red]")
             raise typer.Exit(code=1)
@@ -50,15 +57,16 @@ def ask(question: str = typer.Argument(..., help="Ask a question to the AI agent
 
         # Display results
         print(
-            f"\n[bold green]Answer:[/bold green] {result.get('response', 'No response generated')}"
+            f"\n[bold green]Answer:[/bold green] "
+            f"{_result_value(result, 'response', 'No response generated')}"
         )
         print(
-            f"[dim]Quality: {result.get('reasoning_quality', 0):.3f}, "
-            f"Cycles: {result.get('total_cycles', 0)}, "
-            f"Spike: {result.get('spike_detected', False)}[/dim]"
+            f"[dim]Quality: {_result_value(result, 'reasoning_quality', 0):.3f}, "
+            f"Cycles: {_result_value(result, 'total_cycles', _result_value(result, 'cycle_number', 0))}, "
+            f"Spike: {_result_value(result, 'spike_detected', False)}[/dim]"
         )
 
-        if result.get("success", False):
+        if _result_value(result, "success", False):
             print("[green]✓ Successfully processed question[/green]")
         else:
             print("[red]✗ Processing failed[/red]")
@@ -80,7 +88,7 @@ def load_documents(
         print(f"[yellow]Loading documents from: {path}[/yellow]")
 
         # Create agent
-        agent = MainAgent()
+        agent = MainAgent(get_config())
         if not agent.initialize():
             print("[red]Failed to initialize agent[/red]")
             raise typer.Exit(code=1)
@@ -119,7 +127,7 @@ def stats():
         "[yellow]⚠️  This command is deprecated. Please use 'spike stats' instead.[/yellow]\n"
     )
     try:
-        agent = MainAgent()
+        agent = MainAgent(get_config())
         if not agent.initialize():
             print("[red]Failed to initialize agent[/red]")
             raise typer.Exit(code=1)

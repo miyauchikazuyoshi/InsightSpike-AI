@@ -8,38 +8,23 @@ Clean Pydantic-based configuration models without backward compatibility.
 from pathlib import Path
 from typing import Any, Dict, Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
-# Pydantic v1/v2 互換シム
-_PYDANTIC_V2 = True
-try:  # v2
-    from pydantic import field_validator, model_validator, ConfigDict  # type: ignore
-except ImportError:  # v1 fallback
-    _PYDANTIC_V2 = False
-    from pydantic import validator, root_validator  # type: ignore
+from .pydantic_compat import (
+    AssignableStrictConfigModel,
+    PYDANTIC_V2 as _PYDANTIC_V2,
+    StrictConfigModel,
+)
 
-    # v2 style API の簡易ラッパ
-    def field_validator(field_name: str, mode: str = "before"):  # type: ignore
-        pre = mode == "before"
-        def deco(fn):
-            return validator(field_name, pre=pre, allow_reuse=True)(fn)  # type: ignore
-        return deco
+if _PYDANTIC_V2:
+    from pydantic import field_validator, model_validator
+else:
+    from pydantic import root_validator, validator
 
-    def model_validator(*, mode: str):  # type: ignore
-        # ここでは after のみ使用。v1では root_validator で代替。
-        def wrap(fn):
-            def _root(cls, values):  # type: ignore
-                # values は dict。検証のみ行いそのまま返す。
-                # fn は self を受けるため v1 では辞書経由の検証に変換。
-                # HybridWeightsConfig 用に total チェックを values で再現。
-                return values
-            return root_validator(pre=False, allow_reuse=True)(_root)  # type: ignore
-        return wrap
-
-    class ConfigDict(dict):  # type: ignore
-        pass
-
+from .message_passing_config import EdgeReevaluationConfig, MessagePassingConfig
 from .wake_sleep_config import WakeSleepConfig
+
+BaseModel = StrictConfigModel
 # Maze config moved to maze_experimental
 try:
     from ..maze_experimental.maze_config import MazeConfig, MazeNavigatorConfig, MazeExperimentConfig
@@ -66,6 +51,10 @@ class MemoryConfig(BaseModel):
     working_memory_capacity: int = Field(default=20, ge=1)
     episodic_memory_capacity: int = Field(default=60, ge=1)
     pattern_cache_capacity: int = Field(default=15, ge=1)
+    max_episodes: int = Field(default=10000, ge=1)
+    cache_size: int = Field(default=100, ge=1)
+    working_memory_size: int = Field(default=100, ge=1)
+    search_k: int = Field(default=20, ge=1)
     # Vector index parameters (normalized across code paths)
     faiss_index_type: str = Field(default="FlatL2")
     metric: str = Field(default="l2")
@@ -102,7 +91,11 @@ class HybridWeightsConfig(BaseModel):
                 raise ValueError(f"Weights must sum to 1.0, got {total}")
             return self
     else:
-        @root_validator(pre=False, allow_reuse=True)  # type: ignore
+        @root_validator(  # type: ignore
+            pre=False,
+            allow_reuse=True,
+            skip_on_failure=True,
+        )
         def _check_sum(cls, values):  # type: ignore[no-untyped-def]
             total = (values.get("structure", 0) + values.get("semantic", 0) + values.get("quality", 0))
             if not 0.99 <= total <= 1.01:
@@ -255,9 +248,13 @@ class GraphConfig(BaseModel):
         default=False,
         description="Enable question-aware message passing"
     )
-    message_passing: Optional[Dict[str, Any]] = Field(
+    message_passing: Optional[MessagePassingConfig] = Field(
         default=None,
         description="Message passing configuration"
+    )
+    edge_reevaluation: EdgeReevaluationConfig = Field(
+        default_factory=EdgeReevaluationConfig,
+        description="Edge rebuilding thresholds after message passing",
     )
     
     # geDIG formula parameters
@@ -273,6 +270,14 @@ class GraphConfig(BaseModel):
         le=10.0,
         description="Temperature parameter for exploration-exploitation balance",
     )
+    optimal_graph_size: int = Field(default=10, ge=1)
+    centers_count: int = Field(default=3, ge=1)
+    candidate_topk: int = Field(default=16, ge=1)
+    sp_engine: Literal["core", "cached", "cached_incr"] = Field(default="core")
+    norm_spec: Optional[Dict[str, Any]] = Field(default=None)
+    episode_merge_threshold: float = Field(default=0.8, ge=0.0, le=1.0)
+    episode_split_threshold: float = Field(default=0.3, ge=0.0, le=1.0)
+    episode_prune_threshold: float = Field(default=0.1, ge=0.0, le=1.0)
 
     # Structural similarity for analogy detection
     structural_similarity: StructuralSimilarityConfig = Field(
@@ -291,10 +296,13 @@ class PathsConfig(BaseModel):
     cache_dir: Path = Field(default=Path("data/cache"))
     models_dir: Path = Field(default=Path("data/models"))
     # Use user-home based default to avoid machine-specific absolute paths
-    logs_dir: Path = Field(default="~/.insightspike/logs")
+    logs_dir: Path = Field(
+        default_factory=lambda: Path("~/.insightspike/logs").expanduser()
+    )
 
     if _PYDANTIC_V2:
         @field_validator("logs_dir", mode="before")  # type: ignore[misc]
+        @classmethod
         def expand_home_path(cls, v):  # type: ignore[no-untyped-def]
             if isinstance(v, str) and v.startswith("~"):
                 return Path(v).expanduser()
@@ -315,6 +323,7 @@ class ProcessingConfig(BaseModel):
     chunk_size: int = Field(default=500, ge=50)
     overlap: int = Field(default=50, ge=0)
     min_chunk_size: int = Field(default=100, ge=10)
+    mode: str = Field(default="standard")
     
     # Processing cycle settings
     max_cycles: int = Field(default=10, ge=1)
@@ -352,7 +361,6 @@ class ProcessingConfig(BaseModel):
     max_insights_per_query: int = Field(
         default=5,
         ge=0,
-        le=20,
         description="Maximum number of insights to retrieve per query"
     )
     
@@ -510,8 +518,19 @@ class LoggingConfig(BaseModel):
 class DataStoreConfig(BaseModel):
     """DataStore configuration"""
     
-    type: Literal["filesystem", "in_memory"] = Field(default="filesystem")
+    type: Literal["filesystem", "memory", "in_memory", "sqlite"] = Field(
+        default="filesystem"
+    )
     root_path: str = Field(default="./data/insight_store")
+    db_path: Optional[str] = Field(
+        default=None,
+        description="SQLite database file; derived from root_path when omitted",
+    )
+    vector_dim: Optional[int] = Field(
+        default=None,
+        ge=1,
+        description="SQLite vector dimension; defaults to embedding.dimension",
+    )
     # True if user explicitly set root_path (tracked by loader)
     explicit_root_path: bool = Field(default=False, exclude=True)
 
@@ -573,7 +592,13 @@ class VectorSearchConfig(BaseModel):
     batch_size: int = Field(default=1000, ge=1, description="Batch size for operations")
 
 
-class InsightSpikeConfig(BaseModel):
+class GeDIGModeConfig(BaseModel):
+    """Runtime selection between canonical geDIG implementations."""
+
+    mode: Literal["full", "pure", "ab"] = Field(default="full")
+
+
+class InsightSpikeConfig(AssignableStrictConfigModel):
     """Complete InsightSpike configuration - clean structure without backward compatibility"""
 
     # Top-level settings
@@ -609,11 +634,4 @@ class InsightSpikeConfig(BaseModel):
     performance: PerformanceConfig = Field(default_factory=PerformanceConfig)
     vector_search: VectorSearchConfig = Field(default_factory=VectorSearchConfig)
     wake_sleep: WakeSleepConfig = Field(default_factory=WakeSleepConfig)
-
-    # Strict extra handling across pydantic versions
-    # v2: use model_config; v1: provide inner Config
-    model_config = ConfigDict(validate_assignment=True, extra='forbid')
-    if not _PYDANTIC_V2:  # pydantic v1 compatibility
-        class Config:  # type: ignore
-            validate_assignment = True
-            extra = 'forbid'
+    gedig: GeDIGModeConfig = Field(default_factory=GeDIGModeConfig)

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from importlib.util import find_spec
 from types import SimpleNamespace
 
 import pytest
@@ -58,7 +59,7 @@ def test_layer3_reexports_conflict_and_graph_builder():
 
 
 def test_layer3_reexports_message_passing():
-    """Ensure message passing stubs are re-exported and callable."""
+    """Ensure the wrapper re-exports the real message-passing classes."""
     from insightspike.implementations.layers.layer3 import (
         EdgeReevaluator,
         MessagePassing,
@@ -66,9 +67,14 @@ def test_layer3_reexports_message_passing():
 
     mp = MessagePassing()
     er = EdgeReevaluator()
-    # Stubs should be callable without raising
-    assert mp.run() is None
-    assert er.reevaluate() is None
+    if find_spec("torch_geometric") is None:
+        assert mp.run() is None
+        assert er.reevaluate() is None
+    else:
+        assert hasattr(mp, "forward")
+        assert hasattr(er, "reevaluate")
+        assert MessagePassing.__module__ == "insightspike.graph.message_passing"
+        assert EdgeReevaluator.__module__ == "insightspike.graph.edge_reevaluator"
 
 
 def test_layer3_reexports_analysis_components():

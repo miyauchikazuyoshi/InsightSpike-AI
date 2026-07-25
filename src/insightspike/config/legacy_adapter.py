@@ -44,7 +44,7 @@ class LegacyConfigAdapter:
                 DeprecationWarning,
                 stacklevel=2
             )
-            return ConfigNormalizer.normalize(config)
+            return ConfigNormalizer.normalize(config, source="legacy-dict")
         
         # SimpleNamespace or other object with __dict__
         if hasattr(config, '__dict__'):
@@ -53,15 +53,10 @@ class LegacyConfigAdapter:
                 DeprecationWarning,
                 stacklevel=2
             )
-            # Convert to dict first, then normalize
-            config_dict = {}
-            for key, value in config.__dict__.items():
-                if hasattr(value, '__dict__') and not isinstance(value, (str, int, float, bool, list)):
-                    # Nested object, convert recursively
-                    config_dict[key] = value.__dict__
-                else:
-                    config_dict[key] = value
-            return ConfigNormalizer.normalize(config_dict)
+            return ConfigNormalizer.normalize(
+                config,
+                source=f"legacy-{type(config).__name__}",
+            )
         
         # Unknown format
         raise ValueError(f"Unsupported config type: {type(config)}")

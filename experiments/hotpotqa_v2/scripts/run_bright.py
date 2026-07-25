@@ -243,7 +243,7 @@ def main():
     parser.add_argument("--aght-f-lambda", type=float, default=1.0,
                         help="F-eval lambda for AGHT QKV attention (default 1.0)")
     parser.add_argument("--aght-use-unified", action="store_true",
-                        help="Use unified gedig core (src/gedig/) for AGHT F-eval")
+                        help="Deprecated no-op: AGHT already always uses src/gedig/")
     # Entity graph F-eval parameters (Spec O)
     parser.add_argument("--entity-feval", action="store_true",
                         help="Enable entity graph F-eval cross-doc walk score (Spec O)")

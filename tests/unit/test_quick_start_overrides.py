@@ -11,16 +11,26 @@ from insightspike.config import InsightSpikeConfig
 def stub_agent_env(monkeypatch):
     """Provide a lightweight MainAgent + config loader for quick_start tests."""
 
+    datastore = object()
+
     def fake_load_config(*_, **__):
         return InsightSpikeConfig()
 
     class DummyAgent:
-        def __init__(self, config):
+        datastore_sentinel = datastore
+
+        def __init__(self, config, datastore=None):
             self.config = config
+            self.datastore = datastore
             self.initialized = True
 
     monkeypatch.setattr(quick_start, "load_config", fake_load_config)
     monkeypatch.setattr(quick_start, "MainAgent", DummyAgent)
+    monkeypatch.setattr(
+        quick_start,
+        "_create_datastore_for_config",
+        lambda config: datastore,
+    )
     return DummyAgent
 
 
@@ -36,6 +46,7 @@ def test_create_agent_applies_nested_overrides(stub_agent_env):
     assert agent.config.llm.temperature == 0.7
     assert agent.config.processing.max_cycles == 5
     assert agent.config.llm.model == "custom-mini"
+    assert agent.datastore is stub_agent_env.datastore_sentinel
 
 
 def test_create_agent_invalid_override_raises(stub_agent_env):

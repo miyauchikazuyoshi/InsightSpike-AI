@@ -29,6 +29,7 @@ pytest -q \
   tests/unit/test_core_metrics.py \
   tests/unit/test_gedig_ab_logger.py \
   tests/unit/test_gedig_ab_logger_alerts_csv.py \
+  tests/unit/test_message_passing_aggregation_contract.py \
   tests/unit/test_quick_start_overrides.py
 
 echo "[codex-smoke] OK" >&2

@@ -16,6 +16,8 @@ import torch_geometric
 from sklearn.metrics.pairwise import cosine_similarity
 import logging
 
+from .message_passing_common import normalize_message_aggregation
+
 logger = logging.getLogger(__name__)
 
 
@@ -38,7 +40,9 @@ class OptimizedMessagePassing:
                  self_loop_weight: float = 0.5,
                  decay_factor: float = 0.8,
                  convergence_threshold: float = 1e-4,
-                 similarity_threshold: float = 0.3):
+                 similarity_threshold: float = 0.3,
+                 cache_similarities: bool = True,
+                 top_k_relevance_percentile: int = 75):
         """
         Initialize optimized message passing module.
         
@@ -46,20 +50,25 @@ class OptimizedMessagePassing:
             alpha: Weight for question influence (0-1)
             iterations: Maximum number of message passing iterations
             max_hops: Maximum hops from query-relevant nodes (default 2)
-            aggregation: Aggregation method ('weighted_mean', 'max')
+            aggregation: Aggregation method ('weighted_mean', 'mean', 'max').
+                The legacy 'attention' value is a deprecated alias for 'mean'.
             self_loop_weight: Weight for self-loop in propagation
             decay_factor: Decay factor for question relevance over distance
             convergence_threshold: Threshold for early stopping
             similarity_threshold: Minimum similarity to maintain edges
+            cache_similarities: Cache pair similarities for the forward pass
+            top_k_relevance_percentile: Relevance percentile for seed nodes
         """
         self.alpha = alpha
         self.iterations = iterations
         self.max_hops = max_hops
-        self.aggregation = aggregation
+        self.aggregation = normalize_message_aggregation(aggregation)
         self.self_loop_weight = self_loop_weight
         self.decay_factor = decay_factor
         self.convergence_threshold = convergence_threshold
         self.similarity_threshold = similarity_threshold
+        self.cache_similarities = cache_similarities
+        self.top_k_relevance_percentile = top_k_relevance_percentile
         
         logger.info(f"Initialized OptimizedMessagePassing with alpha={alpha}, "
                    f"iterations={iterations}, max_hops={max_hops}")
@@ -90,9 +99,12 @@ class OptimizedMessagePassing:
             for node in current_nodes:
                 next_nodes.update(adjacency.get(node, []))
             
-            # Add new nodes
-            all_nodes.update(next_nodes)
-            current_nodes = next_nodes - all_nodes
+            # Advance only through nodes that were not reached at an earlier
+            # depth. Computing the difference after updating ``all_nodes``
+            # made every traversal stop at exactly one hop.
+            new_nodes = next_nodes - all_nodes
+            all_nodes.update(new_nodes)
+            current_nodes = new_nodes
             
             if not current_nodes:  # No new nodes found
                 break
@@ -162,7 +174,10 @@ class OptimizedMessagePassing:
         relevance_scores = cosine_similarity(node_embeddings, query_vector).flatten()
         
         # Step 2: Find highly relevant nodes (starting points)
-        relevant_threshold = np.percentile(relevance_scores, 75)  # Top 25%
+        relevant_threshold = np.percentile(
+            relevance_scores,
+            self.top_k_relevance_percentile,
+        )
         start_nodes = set(np.where(relevance_scores >= relevant_threshold)[0])
         
         logger.debug(f"Starting with {len(start_nodes)} highly relevant nodes")
@@ -197,12 +212,12 @@ class OptimizedMessagePassing:
                    (self.alpha * relevance_scores[i]) * query_vector.flatten()
         
         # Step 6: Precompute all similarities for active nodes (batch)
-        if active_indices:
+        sim_lookup = {}
+        if self.cache_similarities and active_indices:
             active_embeddings = h[active_indices]
             all_similarities = cosine_similarity(active_embeddings)
             
             # Create similarity lookup
-            sim_lookup = {}
             for i, idx_i in enumerate(active_indices):
                 for j, idx_j in enumerate(active_indices):
                     if idx_i != idx_j:
@@ -223,7 +238,18 @@ class OptimizedMessagePassing:
                     
                     for neighbor_idx in neighbors:
                         # Use precomputed similarity
-                        similarity = sim_lookup.get((node_idx, neighbor_idx), 0)
+                        if self.cache_similarities:
+                            similarity = sim_lookup.get(
+                                (node_idx, neighbor_idx),
+                                0,
+                            )
+                        else:
+                            similarity = float(
+                                cosine_similarity(
+                                    h[node_idx].reshape(1, -1),
+                                    h[neighbor_idx].reshape(1, -1),
+                                )[0, 0]
+                            )
                         
                         # Skip weak connections
                         if similarity < self.similarity_threshold:
@@ -243,7 +269,7 @@ class OptimizedMessagePassing:
                             aggregated = np.average(neighbor_messages, axis=0, weights=weights)
                         elif self.aggregation == "max":
                             aggregated = np.max(neighbor_messages, axis=0)
-                        else:
+                        elif self.aggregation == "mean":
                             aggregated = np.mean(neighbor_messages, axis=0)
                         
                         # Update with self-loop
@@ -271,7 +297,11 @@ class OptimizedMessagePassing:
                                   query_vector: np.ndarray,
                                   key_vectors: np.ndarray) -> np.ndarray:
         """
-        Compute attention weights for aggregation.
+        Compute legacy standalone dot-product weights.
+
+        This utility is not wired to an aggregation mode. In particular,
+        deprecated ``aggregation="attention"`` preserves its historical
+        simple-mean behavior.
         
         Args:
             query_vector: Query embedding

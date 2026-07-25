@@ -28,6 +28,7 @@ except ImportError:  # pragma: no cover
 from ...core.base.async_datastore import AsyncDataStore
 from ...core.base.datastore import VectorIndex
 from ...vector_index import VectorIndexFactory
+from .episode_codec import episode_to_record
 
 logger = logging.getLogger(__name__)
 
@@ -343,7 +344,8 @@ class SQLiteDataStore(AsyncDataStore):
         self, episode: Dict[str, Any], namespace: str = "default"
     ) -> str:
         """Add a single episode"""
-        episode_id = episode.get("id", str(uuid4()))
+        normalized = episode_to_record(episode)
+        episode_id = normalized.get("id", str(uuid4()))
 
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
@@ -354,18 +356,16 @@ class SQLiteDataStore(AsyncDataStore):
                 (
                     episode_id,
                     namespace,
-                    episode["text"],
-                    episode["vec"].tobytes()
-                    if isinstance(episode["vec"], np.ndarray)
-                    else episode["vec"],
-                    episode.get("c", 0.5),
-                    json.dumps(episode.get("metadata", {})),
+                    normalized["text"],
+                    normalized["vec"].tobytes(),
+                    normalized["c"],
+                    json.dumps(normalized["metadata"]),
                 ),
             )
             await db.commit()
 
         # Update vector index
-        await self._update_vector_index(namespace, episode_id, episode["vec"])
+        await self._update_vector_index(namespace, episode_id, normalized["vec"])
 
         return episode_id
 
@@ -373,10 +373,14 @@ class SQLiteDataStore(AsyncDataStore):
         self, episodes: List[Dict[str, Any]], namespace: str = "default"
     ) -> List[str]:
         """Add multiple episodes in batch"""
+        normalized_episodes = [episode_to_record(episode) for episode in episodes]
+        if not normalized_episodes:
+            return []
+
         episode_ids = []
 
         async with aiosqlite.connect(self.db_path) as db:
-            for episode in episodes:
+            for episode in normalized_episodes:
                 episode_id = episode.get("id", str(uuid4()))
                 episode_ids.append(episode_id)
 
@@ -389,18 +393,16 @@ class SQLiteDataStore(AsyncDataStore):
                         episode_id,
                         namespace,
                         episode["text"],
-                        episode["vec"].tobytes()
-                        if isinstance(episode["vec"], np.ndarray)
-                        else episode["vec"],
-                        episode.get("c", 0.5),
-                        json.dumps(episode.get("metadata", {})),
+                        episode["vec"].tobytes(),
+                        episode["c"],
+                        json.dumps(episode["metadata"]),
                     ),
                 )
 
             await db.commit()
 
         # Update vector index in batch
-        vectors = np.array([ep["vec"] for ep in episodes])
+        vectors = np.stack([ep["vec"] for ep in normalized_episodes])
         await self._batch_update_vector_index(namespace, episode_ids, vectors)
 
         return episode_ids
@@ -569,20 +571,18 @@ class SQLiteDataStore(AsyncDataStore):
     # ========== Vector Index Management ==========
 
     async def _get_vector_index(self, namespace: str) -> Optional[ConfigurableVectorIndex]:
-        """Get or create vector index for namespace"""
+        """Get an index, rebuilding its cache from authoritative DB rows."""
         if namespace not in self.vector_indices:
-            # Try to load from disk
-            index_path = f"{self.db_path}.{namespace}.faiss"
-            if os.path.exists(index_path):
-                index = ConfigurableVectorIndex(self.vector_dim)
-                if index.load_index(index_path):
-                    self.vector_indices[namespace] = index
-                else:
-                    # Create new index
-                    self.vector_indices[namespace] = ConfigurableVectorIndex(self.vector_dim)
-            else:
-                # Create new index
-                self.vector_indices[namespace] = ConfigurableVectorIndex(self.vector_dim)
+            index = ConfigurableVectorIndex(self.vector_dim)
+            episodes = await self._load_all_episodes(namespace)
+            if episodes:
+                vectors = np.stack([episode["vec"] for episode in episodes])
+                ids = [episode["id"] for episode in episodes]
+                if not index.add_vectors(vectors, ids):
+                    raise RuntimeError(
+                        f"Failed to rebuild vector index for namespace {namespace!r}"
+                    )
+            self.vector_indices[namespace] = index
 
         return self.vector_indices.get(namespace)
 
@@ -602,6 +602,19 @@ class SQLiteDataStore(AsyncDataStore):
         if index:
             index.add_vectors(vectors, episode_ids)
 
+    def _discard_index_artifacts(self, namespace: str) -> None:
+        """Remove obsolete derived-index files without touching DB records."""
+        index_path = Path(f"{self.db_path}.{namespace}.faiss")
+        for artifact in (index_path, Path(f"{index_path}.mapping")):
+            try:
+                artifact.unlink(missing_ok=True)
+            except OSError as exc:
+                logger.warning(
+                    "Could not remove stale vector-index artifact %s: %s",
+                    artifact,
+                    exc,
+                )
+
     # ========== Sync Methods (from base class) ==========
 
     def save_episodes(
@@ -619,6 +632,77 @@ class SQLiteDataStore(AsyncDataStore):
         except Exception as e:
             logger.error(f"Failed to save episodes: {e}")
             return False
+
+    def replace_episodes(
+        self, episodes: List[Dict[str, Any]], namespace: str = "default"
+    ) -> bool:
+        """Replace a namespace transactionally and swap its derived index."""
+        try:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                loop.run_until_complete(
+                    self._replace_all_episodes(episodes, namespace)
+                )
+                return True
+            finally:
+                loop.close()
+        except Exception as e:
+            logger.error(f"Failed to replace episodes: {e}")
+            return False
+
+    async def _replace_all_episodes(
+        self, episodes: List[Dict[str, Any]], namespace: str
+    ) -> None:
+        """Install an exact DB snapshot after fully validating its index."""
+        normalized = [episode_to_record(episode) for episode in episodes]
+        episode_ids = [
+            episode.get("id", str(uuid4())) for episode in normalized
+        ]
+
+        candidate = ConfigurableVectorIndex(self.vector_dim)
+        if normalized:
+            vectors = np.stack([episode["vec"] for episode in normalized])
+            if not candidate.add_vectors(vectors, episode_ids):
+                raise RuntimeError(
+                    f"Failed to build replacement index for namespace {namespace!r}"
+                )
+
+        rows = [
+            (
+                episode_id,
+                namespace,
+                episode["text"],
+                episode["vec"].tobytes(),
+                episode["c"],
+                json.dumps(episode["metadata"]),
+            )
+            for episode_id, episode in zip(episode_ids, normalized)
+        ]
+
+        async with aiosqlite.connect(self.db_path) as db:
+            try:
+                await db.execute("BEGIN IMMEDIATE")
+                await db.execute(
+                    "DELETE FROM episodes WHERE namespace = ?",
+                    (namespace,),
+                )
+                if rows:
+                    await db.executemany(
+                        """
+                        INSERT INTO episodes
+                            (id, namespace, text, vector, c_value, metadata)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                        """,
+                        rows,
+                    )
+                await db.commit()
+            except Exception:
+                await db.rollback()
+                raise
+
+        self.vector_indices[namespace] = candidate
+        self._discard_index_artifacts(namespace)
 
     def load_episodes(self, namespace: str = "default") -> List[Dict[str, Any]]:
         """Sync version of load_episodes"""
@@ -1314,13 +1398,8 @@ class SQLiteDataStore(AsyncDataStore):
             await db.commit()
 
         # Clear vector index
-        if namespace in self.vector_indices:
-            del self.vector_indices[namespace]
-            # Remove index file
-            index_path = f"{self.db_path}.{namespace}.faiss"
-            if os.path.exists(index_path):
-                os.remove(index_path)
-                os.remove(f"{index_path}.mapping")
+        self.vector_indices.pop(namespace, None)
+        self._discard_index_artifacts(namespace)
 
     def get_stats(self) -> Dict[str, Any]:
         """Get storage statistics"""
@@ -1593,11 +1672,15 @@ class SQLiteDataStore(AsyncDataStore):
     # ========== Utility Methods ==========
 
     def save_indices(self):
-        """Save all vector indices to disk"""
-        for namespace, index in self.vector_indices.items():
-            index_path = f"{self.db_path}.{namespace}.faiss"
-            index.save_index(index_path)
-            logger.info(f"Saved index for namespace {namespace} to {index_path}")
+        """Retain DB-authoritative indices for backward-compatible callers.
+
+        SQLite episode rows are the source of truth and indices are rebuilt
+        lazily.  Avoid writing backend-specific FAISS artifacts that cannot be
+        loaded by the NumPy fallback.
+        """
+        logger.debug(
+            "SQLite vector indices are derived from DB rows; no cache files saved"
+        )
 
     def close(self):
         """Close datastore and save indices"""

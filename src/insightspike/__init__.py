@@ -30,18 +30,32 @@ LITE_MODE = (
     or os.environ.get("INSIGHTSPIKE_MIN_IMPORT", "0") == "1"
 )
 
-# ---- Placeholders (always defined to keep attribute existence stable) -----
-class MainAgent:
+# ---- Lite-mode placeholders ------------------------------------------------
+class _LiteMainAgent:
     def __init__(self, *_, **__):
         pass
+
     def initialize(self):
         return False
-    def process_question(self, question, **kwargs):  # pragma: no cover - trivial
-        return {"response": "MainAgent not available (lite mode)" if LITE_MODE else "MainAgent placeholder", "success": False}
 
-class CycleResult:
+    def process_question(self, question, **kwargs):  # pragma: no cover - trivial
+        return {
+            "response": "MainAgent not available (lite mode)",
+            "success": False,
+        }
+
+
+class _LiteCycleResult:
     def __init__(self, **kwargs):
         pass
+
+
+# In full mode these names must remain absent so PEP 562 ``__getattr__`` can
+# resolve the real implementation lazily. Defining placeholders unconditionally
+# prevents __getattr__ from ever running.
+if LITE_MODE:
+    MainAgent = _LiteMainAgent
+    CycleResult = _LiteCycleResult
 
 ErrorMonitor = None
 L2MemoryManager = None
@@ -60,6 +74,7 @@ InsightMoment = None
 StandaloneL3GraphReasoner = None
 create_standalone_reasoner = None
 analyze_documents_simple = None
+Config = None
 
 # config や utils は Lite モードでは遅延 import (実際に必要になるまで読み込まない)
 def _lazy_get_config():  # pragma: no cover (軽量経路でのダミー)

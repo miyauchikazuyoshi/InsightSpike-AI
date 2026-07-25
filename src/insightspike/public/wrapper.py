@@ -87,23 +87,27 @@ class InsightAppWrapper:
             processing__enable_learning=True
         )
         
-        # Ensure we load any existing state if the agent supports it
-        # (Assuming agents auto-load or have a load method)
-        if hasattr(self.agent, "load"):
-             try:
-                 self.agent.load()
-                 logger.info("Agent state loaded.")
-             except Exception as e:
-                 logger.warning(f"Could not load agent state: {e}")
+        # Prefer the current state API while retaining the legacy fallback.
+        load_method = getattr(self.agent, "load_state", None)
+        if not callable(load_method):
+            load_method = getattr(self.agent, "load", None)
+        if callable(load_method):
+            try:
+                if load_method():
+                    logger.info("Agent state loaded.")
+            except Exception as e:
+                logger.warning(f"Could not load agent state: {e}")
         
         logger.info(f"InsightAppWrapper initialized with {provider}/{model} at {data_dir}")
 
     def save(self):
         """Save the current state of the knowledge base."""
-        if hasattr(self.agent, "save"):
+        save_method = getattr(self.agent, "save_state", None)
+        if not callable(save_method):
+            save_method = getattr(self.agent, "save", None)
+        if callable(save_method):
             try:
-                self.agent.save()
-                return True
+                return bool(save_method())
             except Exception as e:
                 logger.error(f"Failed to save agent: {e}")
                 return False

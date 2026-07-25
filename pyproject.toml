@@ -189,7 +189,7 @@ markers = [
     "benchmark: marks micro/throughput benchmark style tests",
     "calibration: marks tests related to calibration analysis",
 ]
-testpaths = ["tests"]
+testpaths = ["tests", "src/gedig/tests"]
 norecursedirs = ["tests/development"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]

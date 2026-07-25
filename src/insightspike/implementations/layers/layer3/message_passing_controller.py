@@ -3,13 +3,25 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Mapping
 from typing import Any, Dict, Optional
+
+from pydantic import BaseModel
 
 from ....config import get_config
 from ....config.legacy_adapter import LegacyConfigAdapter
+from ....config.pydantic_compat import model_dump_compat
 from .message_passing import EdgeReevaluator, MessagePassing
 
 logger = logging.getLogger(__name__)
+
+
+def _as_mapping(value: Any) -> Mapping[str, Any]:
+    if isinstance(value, Mapping):
+        return value
+    if isinstance(value, BaseModel):
+        return model_dump_compat(value)
+    return {}
 
 
 class MessagePassingController:
@@ -26,7 +38,7 @@ class MessagePassingController:
         """Configure message passing and edge reevaluation."""
         try:
             # Config flags (dict or pydantic)
-            if isinstance(self._original_config, dict):
+            if isinstance(self._original_config, dict) and self._original_config:
                 self.message_passing_enabled = self._original_config.get("graph", {}).get(
                     "enable_message_passing", False
                 )
@@ -43,12 +55,17 @@ class MessagePassingController:
                 logger.info("Message passing disabled in config")
                 return
 
+            mp_config = _as_mapping(mp_config)
+            er_config = _as_mapping(er_config)
+
             # Choose implementation
             use_optimized = mp_config.get("enable_batch_computation", True)
             max_hops = mp_config.get("max_hops", 1)
 
             if use_optimized:
-                from ...graph.message_passing_optimized import OptimizedMessagePassing
+                from insightspike.graph.message_passing_optimized import (
+                    OptimizedMessagePassing,
+                )
 
                 self.message_passing = OptimizedMessagePassing(
                     alpha=mp_config.get("alpha", 0.3),
@@ -59,6 +76,11 @@ class MessagePassingController:
                     decay_factor=mp_config.get("decay_factor", 0.8),
                     convergence_threshold=mp_config.get("convergence_threshold", 1e-4),
                     similarity_threshold=mp_config.get("similarity_threshold", 0.3),
+                    cache_similarities=mp_config.get("cache_similarities", True),
+                    top_k_relevance_percentile=mp_config.get(
+                        "top_k_relevance_percentile",
+                        75,
+                    ),
                 )
                 logger.info("Using OptimizedMessagePassing with max_hops=%s", max_hops)
             else:

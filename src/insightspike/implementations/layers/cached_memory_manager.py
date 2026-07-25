@@ -660,7 +660,10 @@ class CachedMemoryManager:
                 # Get existing episodes and append the new one
                 existing_episodes = self.datastore.load_episodes(namespace="episodes")
                 existing_episodes.append(branch_episode_dict)
-                self.datastore.save_episodes(existing_episodes, namespace="episodes")
+                self.datastore.replace_episodes(
+                    existing_episodes,
+                    namespace="episodes",
+                )
                 
                 # Cache if parent was cached
                 if episode_id in self.cache:
@@ -982,7 +985,10 @@ class CachedMemoryManager:
             # Get existing episodes and append the new one
             existing_episodes = self.datastore.load_episodes(namespace="episodes")
             existing_episodes.append(merged_episode_dict)
-            self.datastore.save_episodes(existing_episodes, namespace="episodes")
+            self.datastore.replace_episodes(
+                existing_episodes,
+                namespace="episodes",
+            )
             
             # Cache if any source was cached
             if any(ep_id in self.cache for ep_id in episode_ids):
@@ -998,7 +1004,10 @@ class CachedMemoryManager:
             # Need to reload episodes and filter out the ones to delete
             all_episodes = self.datastore.load_episodes(namespace="episodes")
             filtered_episodes = [ep for ep in all_episodes if ep.get("id") not in episode_ids]
-            self.datastore.save_episodes(filtered_episodes, namespace="episodes")
+            self.datastore.replace_episodes(
+                filtered_episodes,
+                namespace="episodes",
+            )
             
             # Remove from cache
             for ep_id in episode_ids:

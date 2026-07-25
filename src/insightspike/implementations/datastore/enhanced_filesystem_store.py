@@ -82,6 +82,32 @@ class EnhancedFileSystemDataStore(FileSystemDataStore):
                 logger.error(f"統合インデックスへの保存でエラー: {e}")
         
         return success
+
+    def replace_episodes(
+        self,
+        episodes: List[Dict[str, Any]],
+        namespace: str = "episodes",
+    ) -> bool:
+        """Replace both filesystem state and the optional integrated index."""
+        success = super().replace_episodes(episodes, namespace)
+
+        if self.use_integrated_index:
+            try:
+                dimension = self.config.get("dimension", 768)
+                self._integrated_index = IntegratedVectorGraphIndex(
+                    dimension=dimension
+                )
+                self._wrapper = BackwardCompatibleWrapper(
+                    self._integrated_index
+                )
+                success = (
+                    self._wrapper.save_episodes(episodes, namespace) and success
+                )
+            except Exception as e:
+                logger.error(f"統合インデックスの置換でエラー: {e}")
+                return False
+
+        return success
     
     def load_episodes(self, namespace: str = "episodes") -> List[Dict[str, Any]]:
         """エピソードの読み込み（統合インデックス対応）"""

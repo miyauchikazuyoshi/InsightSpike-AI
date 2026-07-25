@@ -324,6 +324,9 @@ class TestDependencyFactory:
             dev_agent = factory.get_agent("development")
             assert dev_agent is not None
             MockMainAgent.assert_called_once()
+            assert (
+                MockMainAgent.call_args.kwargs["datastore"] is mock_datastore
+            )
 
             # Should return cached instance
             dev_agent2 = factory.get_agent("development")
@@ -353,6 +356,7 @@ class TestDependencyFactory:
             # Check that the merged config was passed
             call_args = MockMainAgent.call_args[1]
             passed_config = call_args["config"]
+            assert call_args["datastore"] is mock_datastore
 
             # Should have development preset values
             assert passed_config.environment == "development"
