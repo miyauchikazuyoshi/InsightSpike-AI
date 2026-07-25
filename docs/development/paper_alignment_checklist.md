@@ -1,3 +1,9 @@
+---
+status: active
+created: 2025-12-10
+updated: 2025-12-10
+---
+
 # Paper v5 → Code Alignment Checklist (Step 1)
 
 Purpose

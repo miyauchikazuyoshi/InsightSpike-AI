@@ -317,6 +317,13 @@ def _determine_centers(current_graph) -> List[int]:
 
 
 def _select_sp_engine(cfg, env_fallback: bool = True) -> str:
+    if env_fallback:
+        try:
+            env_engine = os.getenv("INSIGHTSPIKE_SP_ENGINE")
+            if env_engine:
+                return str(env_engine).lower()
+        except Exception:
+            pass
     try:
         cfg_engine = getattr(getattr(cfg, "graph", None) or {}, "sp_engine", None)
     except Exception:
@@ -326,11 +333,6 @@ def _select_sp_engine(cfg, env_fallback: bool = True) -> str:
             return str(cfg_engine).lower()
         except Exception:
             pass
-    if env_fallback:
-        try:
-            return str(os.getenv("INSIGHTSPIKE_SP_ENGINE", "core")).lower()
-        except Exception:
-            return "core"
     return "core"
 
 

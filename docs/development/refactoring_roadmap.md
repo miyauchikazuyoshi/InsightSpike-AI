@@ -1,3 +1,9 @@
+---
+status: proposal
+created: 2025-11-28
+updated: 2025-11-28
+---
+
 # InsightSpike-AI リファクタリングロードマップ
 
 **Version**: 1.0

@@ -11,6 +11,10 @@ os.environ.setdefault("INSIGHTSPIKE_LITE_MODE", "1")
 os.environ.setdefault("INSIGHTSPIKE_MIN_IMPORT", "1")
 
 torch = pytest.importorskip("torch")
+pytest.importorskip(
+    "torch.nn.functional",
+    reason="Flash geDIG API tests require a real PyTorch installation",
+)
 
 from gedig.adapters.transformer import TransformerFEval
 from insightspike.gedig import (

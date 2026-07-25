@@ -14,6 +14,14 @@ class DummyGraph:
         self.x = None
 
 
+def test_select_sp_engine_env_overrides_config(monkeypatch):
+    config = SimpleNamespace(graph=SimpleNamespace(sp_engine="core"))
+    monkeypatch.setenv("INSIGHTSPIKE_SP_ENGINE", "cached_incr")
+
+    assert ar._select_sp_engine(config) == "cached_incr"
+    assert ar._select_sp_engine(config, env_fallback=False) == "core"
+
+
 def test_run_analysis_basic():
     documents = [{"text": "a"}, {"text": "b"}]
 

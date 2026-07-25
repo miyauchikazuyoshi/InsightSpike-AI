@@ -26,7 +26,60 @@ jobs:
           python scripts/build_plan_index.py
       - name: Verify front matter presence & statuses
         run: |
-          python -c "import pathlib,sys;\nroot=pathlib.Path('docs/development');\nallowed={'canonical','proposal','active','deprecated','archive','research'};\ninvalid=[];\n\nfor md in root.glob('*.md'):\n    txt=md.read_text(encoding='utf-8');\n    if not txt.startswith('---'):\n        invalid.append((str(md),'missing_front_matter'));\n        continue;\n    fm_end=txt.find('\n---\n',3);\n    if fm_end==-1: invalid.append((str(md),'unterminated_front_matter')); continue;\n    fm=txt[0:fm_end].splitlines()[1:];\n    status_line=[l for l in fm if l.startswith('status:')];\n    if not status_line: invalid.append((str(md),'missing_status')); continue;\n    status=status_line[0].split(':',1)[1].strip();\n    if status not in allowed: invalid.append((str(md),f'bad_status:{status}'));\nidx=root/'PLAN_INDEX.md';\nif idx.exists():\n    t=idx.read_text(encoding='utf-8');\n    if '<!-- AUTO-SECTION:BEGIN -->' not in t or '<!-- AUTO-SECTION:END -->' not in t: invalid.append(('PLAN_INDEX.md','missing_auto_section'));\nif invalid:\n    [print(f'{f}: {r}') for f,r in invalid];\nelse: print('All docs passed basic front matter checks.');"
+          python - <<'PY'
+          import pathlib
+
+          root = pathlib.Path("docs/development")
+          allowed = {
+              "canonical",
+              "proposal",
+              "active",
+              "completed",
+              "deprecated",
+              "archive",
+              "research",
+          }
+          invalid = []
+
+          for md in root.glob("*.md"):
+              text = md.read_text(encoding="utf-8")
+              if not text.startswith("---"):
+                  invalid.append((str(md), "missing_front_matter"))
+                  continue
+
+              front_matter_end = text.find("\n---\n", 3)
+              if front_matter_end == -1:
+                  invalid.append((str(md), "unterminated_front_matter"))
+                  continue
+
+              front_matter = text[:front_matter_end].splitlines()[1:]
+              status_lines = [
+                  line for line in front_matter if line.startswith("status:")
+              ]
+              if not status_lines:
+                  invalid.append((str(md), "missing_status"))
+                  continue
+
+              status = status_lines[0].split(":", 1)[1].strip()
+              if status not in allowed:
+                  invalid.append((str(md), f"bad_status:{status}"))
+
+          index = root / "PLAN_INDEX.md"
+          if index.exists():
+              index_text = index.read_text(encoding="utf-8")
+              if (
+                  "<!-- AUTO-SECTION:BEGIN -->" not in index_text
+                  or "<!-- AUTO-SECTION:END -->" not in index_text
+              ):
+                  invalid.append((str(index), "missing_auto_section"))
+
+          if invalid:
+              for filename, reason in invalid:
+                  print(f"{filename}: {reason}")
+              raise SystemExit(1)
+
+          print("All docs passed basic front matter checks.")
+          PY
       - name: Decision schedule report
         run: |
           python scripts/doc_issue_scheduler.py > decision_schedule.jsonl

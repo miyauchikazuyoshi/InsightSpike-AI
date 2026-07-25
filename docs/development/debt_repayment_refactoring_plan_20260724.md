@@ -351,6 +351,12 @@ owner: repository-maintenance
 | 2026-07-24 | P6 | final `compileall src tests` / public import・config smoke / `git diff --check` | 問題なし |
 | 2026-07-25 | コミット前 | `PATH="$PWD/.venv311/bin:$PATH" bash scripts/codex_smoke.sh` | 16 passed |
 | 2026-07-25 | コミット前 | README契約・検証値の同期 / `git diff --cached --check` | 問題なし |
+| 2026-07-25 | CI修復 | Python 3.13・TorchなしのGitHub Unit相当コマンド | 656 passed、59 skipped |
+| 2026-07-25 | CI修復 | Torchなしの正準core | 57 passed、23 skipped |
+| 2026-07-25 | CI修復 | Pydantic v1 / v2 設定suite | 各62 passed |
+| 2026-07-25 | CI修復 | TorchありのFlash・L3・MainAgent対象suite | 20 passed |
+| 2026-07-25 | CI修復 | Docs workflowのindex・front matter・schedule各step | 全step exit 0、front matter検証成功 |
+| 2026-07-25 | CI修復 | `PATH="$PWD/.venv/bin:$PATH" bash scripts/codex_smoke.sh` | 16 passed |
 
 ## 7. 変更履歴
 
@@ -368,3 +374,4 @@ owner: repository-maintenance
 | 2026-07-24 | 最終横断検証で既知baselineの`MainAgent`統合失敗11件中8件が残存していることを再確認。公開compatibility debtを追加返済するためP6を再開 |
 | 2026-07-24 | P6再完了。legacy document入力、learn結果、L3 no-op報告、Insight registry、Lite/L4統合テスト契約を修復し、既知MainAgent統合失敗を22件全通過へ改善。本計画を最終`COMPLETED`へ更新 |
 | 2026-07-25 | README / README_ENを最終契約と検証結果へ同期。コミット対象110ファイルを確定し、利用者のv7作業中6ファイルは除外したまま最終化 |
+| 2026-07-25 | push後のCI失敗を修復。Docs validatorを実行可能かつfail-closedにし、既存4文書へfront matterを補完。Torch stubのoptional依存判定、SP engineの`ENV > config > default`優先順位、MainAgent smokeの正準設定契約を回帰テスト付きで修正し、CI相当ローカル検証を完了 |
