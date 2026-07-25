@@ -195,6 +195,57 @@ link-radius を上げると想起がどこまで伸びるかを sweep(lr 0.05/0.
 - **→ v7 の次の load-bearing = σ(dg) 読み出しの配線**(§4 の3ゲートで β₁ を行動に結合)。それが無い限り
   link-radius も ①/② も behaviorally testable にならない。**構造探索は完了、次は読み出し実装。**
 
+### 追探索: DG action readout smoke(2026-07-25、seed 118)
+
+[runner](../../../experiments/maze/run_v7_dgwire_smoke.sh)で ring5
+(`link-radius=0.20`)・replay・guide-off・softmaxを固定し、
+`dg-action-alpha=0`対`3`、`dg-action-scale=10`を単一seedで比較した。
+これは**readout配線の操作確認smoke**であり、行動効果の確証実験ではない。
+
+#### 先行v0成果物の監査と修正
+
+最初のa00/a30成果物は両armとも180歩だったが、次の理由で**操作未確認・解釈不能**として破棄した。
+
+- 非局所想起edge `Q(x) -- D(y,a)` のcycle sizeを遠隔側`D(y,a)`へ置きながら、policyは
+  `D(x,a)`を読んでいた。信号を書いたedgeとreadoutが一致していなかった。
+- 結果JSONにalpha/scaleがなく、step telemetryもなかったため、成果物単体でarmとゲート作動を証明できなかった。
+- replayだけがannotationされ、`sleep-propagate=on/off`ではalphaを有効にしてもsilent no-opだった。
+
+v1では一次値を非局所edgeの`dg_size`へ置き、`Q(x)["dg_action_sizes"][a]`へmax投影して、
+現在のquery状態から同じedge信号を読む。alpha=0は厳密no-op、annotationは全sleep mode、
+readoutはsoftmax・argmax・fallbackの全経路に配線した。結果JSONにはprojection version・alpha・scaleを、
+step logには候補遭遇・ゲート露出・選択actionのDG値/log-biasを保存する。
+
+#### v1 実測結果
+
+両armのsleep graphはbyte-identical(**542 nodes / 675 edges**)。
+正のcycle sizeを持つ非局所edgeは**62本**、投影先は**57 query状態 / 62 state-action**、最大sizeは**105**だった。
+
+| 指標 | alpha=0 | alpha=3 |
+|---|---:|---:|
+| eval success / steps | 1 / 180 | 1 / 180 |
+| dead-end steps | 0 | 0 |
+| 正のDG候補が実行可能だったstep(anti-backtrack前) | 9 | 9 |
+| policy候補に正のDGが残ったstep(同mask後) | 1 | 1 |
+| DG gateへ実露出したstep | 0 | **1** |
+| 複数action間でDG差があった競合露出step | 0 | **0** |
+| 選択action自身に正のDGがあったstep | 1（gate off） | **1（gate on）** |
+| 選択actionの最大 normalized DG | 0.5370 | 0.5370 |
+| 選択actionの最大log-bias / 倍率 | 0 / 1.000 | **1.6111 / 5.009** |
+| action route | baseline | **baselineと完全一致** |
+
+**readout配線の操作チェックはPASS**: active armではanti-backtrack後にも残った正DG action 1件で
+log-bias 1.6111(約5倍)が実際に計算・適用された。ただし、そのstepでは反対actionがmaskされて
+**eligible actionは1本だけ**だった。倍率はsoftmax正規化後の選択確率を変えられず、
+複数action間のDG差へ露出したstepは0だった。
+
+従って、route・success・180歩・dead-end 0が同一という**観測事実**は残るが、
+`alpha=3, scale=10`の行動効果評価は**競合露出なしで未成立(inconclusive)**。
+単一seed nullとしても扱わず、β₁-DG一般の棄却・有効性のどちらも主張しない。
+次はanti-backtrack後にもDG差を持つ複数actionが残るseed/stepを事前に層別化するか、
+anti-backtrack自体を両armでoffにした探索を先に行う。その操作成立後にalpha/scaleをsweepし、
+経路分岐率・歩数・dead-endのpaired差を評価する。旧v0の180/180はv1の対照へ流用しない。
+
 ## 10. 先行研究との整合(2026-02 3att、なぜ今度は違うか)
 
 本設計は [l1_three_attention_design.md](../../design/l1_three_attention_design.md)(2026-02-10)の**改訂・復活**。

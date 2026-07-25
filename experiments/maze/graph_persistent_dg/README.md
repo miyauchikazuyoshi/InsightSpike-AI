@@ -74,7 +74,7 @@ flowchart TB
 | 分割は失敗層(一括 warmup 全滅の迷路)を救済する | ❌ **再現せず**(v5 −212 → v6 新シードで中立 +10.9、救済 2/損失 5/引分 4。v5 はシード群特異) | v5 §8・[v6 §8](../../../docs/prereg/maze_sleep_v6_split_reset.md) |
 | 分割の発見喪失コスト(warmup >250 の迷路) | ✅ 実在(>250 成功層 6 中 5 が発見喪失、reset では不可避 — §6 登録済み) | [v6 §8](../../../docs/prereg/maze_sleep_v6_split_reset.md) |
 | `--sleep-q-episode-reset`(多サイクル時の汚染除去) | ✅ 有効・**残置**(単一サイクルでは no-op、既定オフ) | v6 §8 |
-| **v7: 11D 三信号 + β₁-DG(抜本改訂)** | 🔵 **設計起動**(正例=Hebb・負例=罠深さ・DG=β₁サイズ。第一手=DG正規化アブレーション) | [v7 設計ノート](../../../docs/research/thinking/v7_three_signal_edge_propagation_20260706.md) |
+| **v7: 11D 三信号 + β₁-DG(抜本改訂)** | 🔵 **設計進行中**(source-query readout配線PASS。seed 118は競合露出0で効果未評価・inconclusive) | [v7 設計ノート §9.5](../../../docs/research/thinking/v7_three_signal_edge_propagation_20260706.md) |
 | readout 分解(dim9 は行動バイアスに対し冗長か) | ⬜ v7 に統合(11D materialize と同時に決着) | v7 設計ノート §4 |
 | F 駆動 sleep・51×51・curl 診断 | ⬜ 未着手(各々新規事前登録で) | — |
 
@@ -160,6 +160,8 @@ PYTHONPATH=../../src INSIGHTSPIKE_MIN_IMPORT=1 INSIGHTSPIKE_LITE_MODE=1 \
 | `--wsw-cycles` | 1 | 2 で予算分割 W-S-W-S-E(総 warmup 予算固定・均等分割) |
 | `--vector-mode` | standard | extended(10D)が実験標準 |
 | `--propagated-mode` | abs | gradient(V 差)は候補比較で abs と等価(v4 期に証明) |
+| `--dg-action-alpha` | 0 | **v7探索用**。`exp(alpha × tanh(dg_size/scale))`でsource query×actionをbias。0は厳密no-op |
+| `--dg-action-scale` | 10 | **v7探索用**。正の有限値のみ。単一seed smokeを超える効果主張はまだない |
 | `--sleep-q-*` | 各種 | replay の Q 学習パラメータ(γ=0.99, α=0.4, iters=50 等) |
 
 ## ファイル構成
@@ -173,5 +175,6 @@ graph_persistent_dg/
 関連:
 ├── ../test/test_sleep_propagate_semantics.py  ← 意味論の正典(実装挙動+SPEC意図のxfail)
 ├── ../qhlib/sleep.py                          ← build_sleep_q_table(replayのQ源)
+├── ../run_v7_dgwire_smoke.sh                  ← v7 DG readoutの単一seed操作確認
 └── ../run_sleep_ablation*.sh ほか             ← 事前登録実験のランナー群
 ```

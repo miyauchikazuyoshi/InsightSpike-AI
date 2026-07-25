@@ -82,12 +82,14 @@ from qhlib.sleep import (
 )
 from qhlib.aggregate import aggregate
 from graph_persistent_dg.sleep_propagate import (
+    annotate_dg_size as _annotate_dg_size,
     sleep_optimize as _sleep_graph_optimize,
     sleep_replay_optimize as _sleep_replay_optimize,
 )
 from qhlib.cli import parse_args, build_config, build_selector_params
 
 StepLog = Dict[str, Any]
+DG_ACTION_LOG_BIAS_LIMIT = 60.0
 
 
 # --------------------------------------------------------------------------------------
@@ -103,6 +105,94 @@ def _run_seed_worker(args_tuple):
     seed, config = args_tuple
     artifacts = run_episode_query(seed=seed, config=config)
     return (seed, artifacts)
+
+
+def dg_action_size(
+    graph: Optional[nx.Graph],
+    position: Tuple[int, int],
+    action_id: int,
+) -> float:
+    """Return the shortcut-cycle size projected onto ``position × action``.
+
+    ``annotate_dg_size`` stores this cache on query nodes. The edge scan keeps
+    the readout compatible with an annotated graph whose cache was stripped
+    during serialisation while preserving the same source-query semantics.
+    """
+    if graph is None:
+        return 0.0
+    try:
+        query_node = make_query_node((int(position[0]), int(position[1])))
+        action = int(action_id)
+        if not graph.has_node(query_node):
+            return 0.0
+
+        action_sizes = graph.nodes[query_node].get("dg_action_sizes", {}) or {}
+        raw = action_sizes.get(action, action_sizes.get(str(action), 0.0))
+        size = float(raw)
+        if math.isfinite(size) and size > 0.0:
+            return size
+
+        best = 0.0
+        for neighbor in graph.neighbors(query_node):
+            try:
+                if int(neighbor[2]) != action:
+                    continue
+                edge_size = float(graph.edges[query_node, neighbor].get("dg_size", 0.0))
+                if math.isfinite(edge_size) and edge_size > best:
+                    best = edge_size
+            except (IndexError, TypeError, ValueError):
+                continue
+        return best
+    except (KeyError, TypeError, ValueError, nx.NetworkXError):
+        return 0.0
+
+
+def dg_action_signal(
+    graph: Optional[nx.Graph],
+    position: Tuple[int, int],
+    action_id: int,
+    scale: float,
+) -> float:
+    """Return ``tanh(dg_size / scale)`` in ``[0, 1)`` for a valid scale."""
+    try:
+        norm_scale = float(scale)
+    except (TypeError, ValueError):
+        return 0.0
+    if not math.isfinite(norm_scale) or norm_scale <= 0.0:
+        return 0.0
+    size = dg_action_size(graph, position, action_id)
+    return math.tanh(size / norm_scale) if size > 0.0 else 0.0
+
+
+def dg_action_log_bias(
+    graph: Optional[nx.Graph],
+    position: Tuple[int, int],
+    action_id: int,
+    alpha: float,
+    scale: float,
+) -> float:
+    """Return a finite, overflow-safe log multiplier for the v7 DG gate."""
+    try:
+        weight = float(alpha)
+    except (TypeError, ValueError):
+        return 0.0
+    if not math.isfinite(weight):
+        return 0.0
+    log_bias = weight * dg_action_signal(graph, position, action_id, scale)
+    if not math.isfinite(log_bias):
+        return 0.0
+    return max(-DG_ACTION_LOG_BIAS_LIMIT, min(DG_ACTION_LOG_BIAS_LIMIT, log_bias))
+
+
+def dg_action_multiplier(
+    graph: Optional[nx.Graph],
+    position: Tuple[int, int],
+    action_id: int,
+    alpha: float,
+    scale: float,
+) -> float:
+    """Return the multiplicative form of :func:`dg_action_log_bias`."""
+    return math.exp(dg_action_log_bias(graph, position, action_id, alpha, scale))
 
 
 def run_episode_query(
@@ -540,6 +630,97 @@ def run_episode_query(
                     if best is None or val > best:
                         best = val
             return best if best is not None else 0.0
+
+        # v7 DG action gate: read the sleep-annotated β₁ cycle size projected
+        # from Q(current)--D(memory, action) shortcut edges onto current
+        # query-state/action pairs. This wires the same structural edge signal
+        # into ACTION SELECTION, rather than the behaviorally silent L1 search.
+        dg_action_alpha = 0.0
+        dg_action_scale = 10.0
+        dg_action_bias = False
+        if inherited_graph is not None:
+            try:
+                dg_action_alpha = float(getattr(config, "dg_action_alpha", 0.0))
+                dg_action_scale = float(getattr(config, "dg_action_scale", 10.0))
+            except (TypeError, ValueError):
+                dg_action_alpha = 0.0
+                dg_action_scale = 10.0
+            if (
+                math.isfinite(dg_action_alpha)
+                and abs(dg_action_alpha) > 1e-12
+                and math.isfinite(dg_action_scale)
+                and dg_action_scale > 0.0
+            ):
+                dg_action_bias = True
+
+        def _dg_for_action(action_id: int) -> float:
+            """Normalized DG (β₁ cycle-size) signal for an action, in [0,1)."""
+            return dg_action_signal(
+                inherited_graph,
+                current_position,
+                int(action_id),
+                dg_action_scale,
+            )
+
+        def _dg_log_bias_for_action(action_id: int) -> float:
+            return dg_action_log_bias(
+                inherited_graph,
+                current_position,
+                int(action_id),
+                dg_action_alpha,
+                dg_action_scale,
+            )
+
+        def _dg_multiplier_for_action(action_id: int) -> float:
+            return dg_action_multiplier(
+                inherited_graph,
+                current_position,
+                int(action_id),
+                dg_action_alpha,
+                dg_action_scale,
+            )
+
+        # Filled by the action policy after anti-backtrack masking. Keeping this
+        # separate from possible_moves avoids claiming that a masked signal was
+        # actually evaluated by the policy.
+        dg_action_eligible_actions: Set[int] = set()
+        dg_action_eligible_signal_actions: Set[int] = set()
+        dg_action_eligible_candidate_max = 0.0
+        dg_action_eligible_signal_spread = 0.0
+        dg_action_eligible_log_bias_spread = 0.0
+
+        def _record_dg_policy_candidates(actions: Iterable[Any]) -> None:
+            nonlocal dg_action_eligible_actions
+            nonlocal dg_action_eligible_signal_actions
+            nonlocal dg_action_eligible_candidate_max
+            nonlocal dg_action_eligible_signal_spread
+            nonlocal dg_action_eligible_log_bias_spread
+            eligible: Set[int] = set()
+            for raw_action in actions:
+                try:
+                    if raw_action is not None:
+                        eligible.add(int(raw_action))
+                except (TypeError, ValueError):
+                    continue
+            signals = {action: _dg_for_action(action) for action in eligible}
+            dg_action_eligible_actions = eligible
+            dg_action_eligible_signal_actions = {
+                action for action, value in signals.items() if value > 0.0
+            }
+            dg_action_eligible_candidate_max = max(signals.values(), default=0.0)
+            dg_action_eligible_signal_spread = (
+                max(signals.values()) - min(signals.values())
+                if len(signals) > 1
+                else 0.0
+            )
+            log_biases = {
+                action: _dg_log_bias_for_action(action) for action in eligible
+            }
+            dg_action_eligible_log_bias_spread = (
+                max(log_biases.values()) - min(log_biases.values())
+                if len(log_biases) > 1
+                else 0.0
+            )
 
         def _propagated_for_action(action_id: int) -> float:
             if not propagated_bias:
@@ -988,6 +1169,9 @@ def run_episode_query(
                         filtered.append(x)
                     if filtered:
                         items = filtered
+                _record_dg_policy_candidates(
+                    item.get("action") for item in items
+                )
                 # Action policy: argmax or softmax over similarity
                 policy = str(getattr(config, 'action_policy', 'argmax') or 'argmax').lower()
                 if policy == 'softmax':
@@ -1039,6 +1223,12 @@ def run_episode_query(
                                     w *= math.exp(float(propagated_alpha) * _propagated_for_action(act))
                                 except Exception:
                                     pass
+                            if dg_action_bias and item.get("action") is not None:
+                                try:
+                                    act = int(item.get("action"))
+                                    w *= _dg_multiplier_for_action(act)
+                                except Exception:
+                                    pass
                             weights.append(float(w))
                         total = sum(weights)
                         if not (total > 0 and math.isfinite(total)):
@@ -1061,7 +1251,15 @@ def run_episode_query(
                                 return item
                     except Exception:
                         pass  # fallback to argmax
-                if not (sleep_q_bias or sleep_plan_bias or event_bias_enabled or affordance_bias_enabled or sleep_edge_bias or propagated_bias):
+                if not (
+                    sleep_q_bias
+                    or sleep_plan_bias
+                    or event_bias_enabled
+                    or affordance_bias_enabled
+                    or sleep_edge_bias
+                    or propagated_bias
+                    or dg_action_bias
+                ):
                     return max(items, key=lambda entry: float(entry.get("similarity", 0.0)))
                 def _score(entry: Dict[str, Any]) -> float:
                     base = float(entry.get("similarity", 0.0) or 0.0)
@@ -1104,6 +1302,11 @@ def run_episode_query(
                     try:
                         if propagated_bias:
                             bonus += float(propagated_alpha) * _propagated_for_action(act)
+                    except Exception:
+                        pass
+                    try:
+                        if dg_action_bias:
+                            bonus += _dg_log_bias_for_action(act)
                     except Exception:
                         pass
                     return float(base + bonus)
@@ -2571,7 +2774,16 @@ def run_episode_query(
                     pm2 = [x for x in pm if x != opp_action]
                     if pm2:
                         pm = pm2
-            if (sleep_q_bias or sleep_plan_bias or event_bias_enabled or affordance_bias_enabled or sleep_edge_bias or propagated_bias) and pm:
+            _record_dg_policy_candidates(pm)
+            if (
+                sleep_q_bias
+                or sleep_plan_bias
+                or event_bias_enabled
+                or affordance_bias_enabled
+                or sleep_edge_bias
+                or propagated_bias
+                or dg_action_bias
+            ) and pm:
                 try:
                     tau = float(getattr(config, 'action_temp', 0.1) or 0.1)
                     if not (math.isfinite(tau) and tau > 1e-9):
@@ -2594,6 +2806,8 @@ def run_episode_query(
                             w *= _sleep_edge_multiplier(edge_weight)
                         if propagated_bias:
                             w *= math.exp(float(propagated_alpha) * _propagated_for_action(int(a)))
+                        if dg_action_bias:
+                            w *= _dg_multiplier_for_action(int(a))
                         weights.append(float(w))
                     total = sum(weights)
                     if total > 0 and math.isfinite(total):
@@ -2681,6 +2895,39 @@ def run_episode_query(
             except Exception:
                 affordance_bias_value = 0.0
                 affordance_bias_applied = False
+
+        # v7 manipulation telemetry. ``feasible`` is pre-mask availability;
+        # ``candidate`` and ``exposed`` use the actual post-mask policy set.
+        # Both signal counts are retained for alpha=0 control runs.
+        dg_action_feasible_values = [
+            _dg_for_action(int(a)) for a in possible_moves
+        ]
+        dg_action_feasible_candidate_count = sum(
+            value > 0.0 for value in dg_action_feasible_values
+        )
+        dg_action_eligible_action_count = len(dg_action_eligible_actions)
+        dg_action_candidate_count = len(dg_action_eligible_signal_actions)
+        dg_action_candidate_max = float(dg_action_eligible_candidate_max)
+        dg_action_size_value = dg_action_size(
+            inherited_graph,
+            current_position,
+            int(action),
+        )
+        dg_action_value = _dg_for_action(int(action))
+        dg_action_log_bias_value = _dg_log_bias_for_action(int(action))
+        dg_action_enabled = bool(dg_action_bias)
+        dg_action_overridden = bool(guide_mode == "override" and sleep_guided)
+        dg_action_exposed = bool(
+            dg_action_enabled
+            and dg_action_candidate_count > 0
+            and not dg_action_overridden
+        )
+        dg_action_competitive = bool(
+            dg_action_exposed
+            and dg_action_eligible_action_count > 1
+            and dg_action_eligible_log_bias_spread > 1e-12
+        )
+        dg_action_applied = bool(dg_action_exposed and dg_action_value > 0.0)
 
         last_query_node = current_query_node
         last_position = current_position
@@ -3616,6 +3863,19 @@ def run_episode_query(
                 sleep_edge_applied=bool(sleep_edge_applied),
                 sleep_edge_weight=float(sleep_edge_weight_value),
                 sleep_edge_mode=str(sleep_edge_mode_used),
+                dg_action_enabled=bool(dg_action_enabled),
+                dg_action_exposed=bool(dg_action_exposed),
+                dg_action_competitive=bool(dg_action_competitive),
+                dg_action_applied=bool(dg_action_applied),
+                dg_action_feasible_candidate_count=int(dg_action_feasible_candidate_count),
+                dg_action_eligible_action_count=int(dg_action_eligible_action_count),
+                dg_action_candidate_count=int(dg_action_candidate_count),
+                dg_action_candidate_max=float(dg_action_candidate_max),
+                dg_action_signal_spread=float(dg_action_eligible_signal_spread),
+                dg_action_log_bias_spread=float(dg_action_eligible_log_bias_spread),
+                dg_action_size=float(dg_action_size_value),
+                dg_action_value=float(dg_action_value),
+                dg_action_log_bias=float(dg_action_log_bias_value),
                 event_bias=float(event_bias_value),
                 event_bias_applied=bool(event_bias_applied),
                 affordance_bias=float(affordance_bias_value),
@@ -3747,6 +4007,45 @@ def run_episode_query(
         "node_count_series": [rec.graph_node_count for rec in step_records],
         "edge_count_series": [rec.graph_edge_count for rec in step_records],
         "betti1_series": [rec.betti_1 for rec in step_records],
+        "dg_action_enabled_steps": sum(
+            bool(getattr(rec, "dg_action_enabled", False)) for rec in step_records
+        ),
+        "dg_action_exposed_steps": sum(
+            bool(getattr(rec, "dg_action_exposed", False)) for rec in step_records
+        ),
+        "dg_action_competitive_steps": sum(
+            bool(getattr(rec, "dg_action_competitive", False)) for rec in step_records
+        ),
+        "dg_action_applied_steps": sum(
+            bool(getattr(rec, "dg_action_applied", False)) for rec in step_records
+        ),
+        "dg_action_feasible_candidate_count_total": sum(
+            int(getattr(rec, "dg_action_feasible_candidate_count", 0))
+            for rec in step_records
+        ),
+        "dg_action_candidate_count_total": sum(
+            int(getattr(rec, "dg_action_candidate_count", 0)) for rec in step_records
+        ),
+        "dg_action_candidate_max": max(
+            (float(getattr(rec, "dg_action_candidate_max", 0.0)) for rec in step_records),
+            default=0.0,
+        ),
+        "dg_action_signal_spread_max": max(
+            (float(getattr(rec, "dg_action_signal_spread", 0.0)) for rec in step_records),
+            default=0.0,
+        ),
+        "dg_action_log_bias_spread_max": max(
+            (float(getattr(rec, "dg_action_log_bias_spread", 0.0)) for rec in step_records),
+            default=0.0,
+        ),
+        "dg_action_selected_value_max": max(
+            (float(getattr(rec, "dg_action_value", 0.0)) for rec in step_records),
+            default=0.0,
+        ),
+        "dg_action_selected_log_bias_max": max(
+            (float(getattr(rec, "dg_action_log_bias", 0.0)) for rec in step_records),
+            default=0.0,
+        ),
     }
 
     return EpisodeArtifacts(
@@ -3932,6 +4231,8 @@ def main() -> None:
             force_sp_gain_eval=bool(getattr(args, 'force_sp_gain_eval', False)),
             vector_mode=str(getattr(args, "vector_mode", "standard")),
             propagated_alpha=float(getattr(args, "propagated_alpha", 1.0)),
+            dg_action_alpha=float(getattr(args, "dg_action_alpha", 0.0)),
+            dg_action_scale=float(getattr(args, "dg_action_scale", 10.0)),
             sleep_propagate_gamma=float(getattr(args, "sleep_propagate_gamma", 0.95)),
             sleep_propagate_iters=int(getattr(args, "sleep_propagate_iters", 50)),
             sleep_propagate=str(getattr(args, "sleep_propagate", "on")),
@@ -4050,6 +4351,25 @@ def main() -> None:
                 "sleep_edge_applied": bool(getattr(record, "sleep_edge_applied", False)),
                 "sleep_edge_weight": float(getattr(record, "sleep_edge_weight", 0.0)),
                 "sleep_edge_mode": str(getattr(record, "sleep_edge_mode", "")),
+                "dg_action_enabled": bool(getattr(record, "dg_action_enabled", False)),
+                "dg_action_exposed": bool(getattr(record, "dg_action_exposed", False)),
+                "dg_action_competitive": bool(getattr(record, "dg_action_competitive", False)),
+                "dg_action_applied": bool(getattr(record, "dg_action_applied", False)),
+                "dg_action_feasible_candidate_count": int(
+                    getattr(record, "dg_action_feasible_candidate_count", 0)
+                ),
+                "dg_action_eligible_action_count": int(
+                    getattr(record, "dg_action_eligible_action_count", 0)
+                ),
+                "dg_action_candidate_count": int(getattr(record, "dg_action_candidate_count", 0)),
+                "dg_action_candidate_max": float(getattr(record, "dg_action_candidate_max", 0.0)),
+                "dg_action_signal_spread": float(getattr(record, "dg_action_signal_spread", 0.0)),
+                "dg_action_log_bias_spread": float(
+                    getattr(record, "dg_action_log_bias_spread", 0.0)
+                ),
+                "dg_action_size": float(getattr(record, "dg_action_size", 0.0)),
+                "dg_action_value": float(getattr(record, "dg_action_value", 0.0)),
+                "dg_action_log_bias": float(getattr(record, "dg_action_log_bias", 0.0)),
                 "event_bias": float(getattr(record, "event_bias", 0.0)),
                 "event_bias_applied": bool(getattr(record, "event_bias_applied", False)),
                 "affordance_bias": float(getattr(record, "affordance_bias", 0.0)),
@@ -4380,8 +4700,9 @@ def main() -> None:
                         _sp_mode = str(getattr(warm_cfg, "sleep_propagate", "on"))
                         if _sp_mode == "off":
                             # Ablation control: inherit the raw Wake1 graph unchanged
-                            # (no reward propagation, no isolate removal, dim9 stays at init)
+                            # (no reward propagation/pruning; DG is metadata-only).
                             optimized_graph = accumulated_graph.copy()
+                            _annotate_dg_size(optimized_graph)
                         elif _sp_mode == "replay":
                             try:
                                 optimized_graph = _sleep_replay_optimize(accumulated_graph, sleep_q)
@@ -4456,6 +4777,7 @@ def main() -> None:
                             _sp_mode2 = str(getattr(warm_cfg, "sleep_propagate", "on"))
                             if _sp_mode2 == "off":
                                 optimized_graph = accumulated_graph.copy()
+                                _annotate_dg_size(optimized_graph)
                             elif _sp_mode2 == "replay":
                                 try:
                                     optimized_graph = _sleep_replay_optimize(accumulated_graph, sleep_q)
@@ -4481,12 +4803,59 @@ def main() -> None:
                             _dump_dir = _os.environ["INSIGHTSPIKE_DUMP_GRAPH"]
                             _os.makedirs(_dump_dir, exist_ok=True)
                             _gd = json_graph.node_link_data(optimized_graph)
-                            _gd = {"nodes": [[list(n["id"]) if isinstance(n["id"], tuple) else n["id"],
-                                              float(n.get("propagated", 0.0))] for n in _gd["nodes"]],
-                                   "edges": [[list(e["source"]) if isinstance(e["source"], tuple) else e["source"],
-                                              list(e["target"]) if isinstance(e["target"], tuple) else e["target"]]
-                                             for e in _gd["links"]],
-                                   "goal_pos": list(gp), "start_pos": list(sp)}
+                            _gd_links = _gd.get("links", _gd.get("edges", []))
+                            _dg_edges = [
+                                [
+                                    list(e["source"]) if isinstance(e["source"], tuple) else e["source"],
+                                    list(e["target"]) if isinstance(e["target"], tuple) else e["target"],
+                                    float(e.get("dg_size", 0.0)),
+                                ]
+                                for e in _gd_links
+                                if float(e.get("dg_size", 0.0)) > 0.0
+                            ]
+                            _dg_actions = [
+                                [
+                                    list(n["id"]) if isinstance(n["id"], tuple) else n["id"],
+                                    {
+                                        str(action): float(size)
+                                        for action, size in (n.get("dg_action_sizes", {}) or {}).items()
+                                        if float(size) > 0.0
+                                    },
+                                ]
+                                for n in _gd["nodes"]
+                                if any(
+                                    float(size) > 0.0
+                                    for size in (n.get("dg_action_sizes", {}) or {}).values()
+                                )
+                            ]
+                            _gd = {
+                                "schema_version": 2,
+                                "node_fields": ["id", "propagated", "dg_remote_endpoint_max"],
+                                "nodes": [
+                                    [
+                                        list(n["id"]) if isinstance(n["id"], tuple) else n["id"],
+                                        float(n.get("propagated", 0.0)),
+                                        float(n.get("dg_remote_endpoint_max", 0.0)),
+                                    ]
+                                    for n in _gd["nodes"]
+                                ],
+                                "edge_fields": ["source", "target"],
+                                "edges": [
+                                    [
+                                        list(e["source"]) if isinstance(e["source"], tuple) else e["source"],
+                                        list(e["target"]) if isinstance(e["target"], tuple) else e["target"],
+                                    ]
+                                    for e in _gd_links
+                                ],
+                                "dg_edge_fields": ["source", "target", "dg_size"],
+                                "dg_edges": _dg_edges,
+                                "dg_action_fields": ["query_node", "action_size_map"],
+                                "dg_actions": _dg_actions,
+                                "dg_annotation_version": 1,
+                                "dg_projection": "source-query-action",
+                                "goal_pos": list(gp),
+                                "start_pos": list(sp),
+                            }
                             with open(_os.path.join(_dump_dir, f"graph_seed{seed}.json"), "w") as _gf:
                                 json.dump(_gd, _gf)
                         except Exception as _e:
@@ -4598,6 +4967,18 @@ def main() -> None:
                 "action_policy": str(args.action_policy),
                 "action_temp": float(args.action_temp),
                 "action_source": str(getattr(args, "action_source", "obs")),
+                "graph_persistent_dg": {
+                    "vector_mode": str(getattr(args, "vector_mode", "standard")),
+                    "propagated_alpha": float(getattr(args, "propagated_alpha", 1.0)),
+                    "propagated_mode": str(getattr(args, "propagated_mode", "abs")),
+                    "sleep_propagate": str(getattr(args, "sleep_propagate", "on")),
+                    "dg_action_alpha": float(getattr(args, "dg_action_alpha", 0.0)),
+                    "dg_action_scale": float(getattr(args, "dg_action_scale", 10.0)),
+                    "dg_annotation_version": 1,
+                    "dg_projection": "source-query-action",
+                    "dg_telemetry_version": 2,
+                    "dg_log_bias_clip": float(DG_ACTION_LOG_BIAS_LIMIT),
+                },
                 # Also expose whether main L3 lite path was used (query-centric hop0)
                 "use_main_l3": bool(getattr(args, 'use_main_l3', False)),
                 "sp_cache_mode": str(getattr(args, 'sp_cache_mode', 'core')),

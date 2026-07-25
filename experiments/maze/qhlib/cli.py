@@ -2,10 +2,25 @@
 from __future__ import annotations
 
 import argparse
+import math
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 from .models import QueryHubConfig
+
+
+def _finite_float(value: str) -> float:
+    parsed = float(value)
+    if not math.isfinite(parsed):
+        raise argparse.ArgumentTypeError("must be a finite number")
+    return parsed
+
+
+def _positive_finite_float(value: str) -> float:
+    parsed = _finite_float(value)
+    if parsed <= 0.0:
+        raise argparse.ArgumentTypeError("must be greater than zero")
+    return parsed
 
 
 def parse_args() -> argparse.Namespace:
@@ -191,6 +206,11 @@ def parse_args() -> argparse.Namespace:
                         help="Vector mode: standard (8D) or extended (10D with reward/propagated dims).")
     parser.add_argument("--propagated-alpha", type=float, default=1.0,
                         help="Scalar bonus weight for propagated values in action selection.")
+    parser.add_argument("--dg-action-alpha", type=_finite_float, default=0.0,
+                        help="v7: weight of the DG (β₁ cycle-size) gate in action selection "
+                             "(w *= exp(alpha*tanh(dg_size/scale))). 0 = off (no-op).")
+    parser.add_argument("--dg-action-scale", type=_positive_finite_float, default=10.0,
+                        help="v7: normalization scale for dg_size in the DG action gate.")
     parser.add_argument("--propagated-mode", type=str, default="abs", choices=["abs", "gradient"],
                         help="How to use propagated values: abs (raw value) or gradient (prop(next) - prop(here)).")
     parser.add_argument("--wsw-cycles", type=int, default=1,
@@ -379,6 +399,8 @@ def build_config(
         vector_mode=str(getattr(args, "vector_mode", "standard")),
         propagated_alpha=float(getattr(args, "propagated_alpha", 1.0)),
         propagated_mode=str(getattr(args, "propagated_mode", "abs")),
+        dg_action_alpha=float(getattr(args, "dg_action_alpha", 0.0)),
+        dg_action_scale=float(getattr(args, "dg_action_scale", 10.0)),
         advantage_commit=float(getattr(args, "advantage_commit", 0.0)),
         sleep_propagate_gamma=float(getattr(args, "sleep_propagate_gamma", 0.95)),
         sleep_propagate_iters=int(getattr(args, "sleep_propagate_iters", 50)),

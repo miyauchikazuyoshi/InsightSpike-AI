@@ -93,6 +93,10 @@ def sleep_optimize(
         # Clean up newly isolated nodes
         optimized.remove_nodes_from(list(nx.isolates(optimized)))
 
+    # v7: materialise β₁ cycle-size signals on shortcut edges and project
+    # them to the source query-state/action pairs used during Wake2.
+    annotate_dg_size(optimized)
+
     # 4. Sync propagated values into abs_vector dim9 (for extended vector mode)
     sync_vectors(optimized)
 
@@ -148,6 +152,10 @@ def sleep_replay_optimize(
     # Same cleanup as sleep_optimize step 2
     optimized.remove_nodes_from(list(nx.isolates(optimized)))
 
+    # v7: annotate β₁ cycle size per shortcut (DG signal for action bias).
+    # Computed here at sleep (offline, affordable); read at action selection.
+    annotate_dg_size(optimized)
+
     # Same vector sync as sleep_optimize step 4
     sync_vectors(optimized)
 
@@ -161,6 +169,94 @@ def sleep_replay_optimize(
             pass
 
     return optimized
+
+
+def annotate_dg_size(graph: nx.Graph) -> None:
+    """Materialise the v7 β₁ cycle-size proxy in-place.
+
+    A shortcut is an abstract graph edge whose endpoint cells are not spatially
+    adjacent. Its size is the corridor-only shortest path between those cells
+    plus the closing shortcut edge. The value is stored on the shortcut edge.
+
+    Query/direction graphs encode a recall as ``Q(current) -- D(memory, action)``.
+    For action selection, the edge value is therefore also projected onto the
+    query node as ``dg_action_sizes[action]`` (maximum when several recalled
+    direction nodes suggest the same action). ``dg_size`` on direction nodes is
+    retained as an endpoint-level diagnostic, but Wake2 readout uses the query
+    projection so it evaluates the same shortcut edge that created the signal.
+
+    Manhattan-1 edges are treated as corridor edges by this lightweight proxy;
+    same-cell wiring is ignored. This is an exploratory approximation because
+    the graph does not currently retain physical-corridor provenance.
+    """
+    for node, data in graph.nodes(data=True):
+        data["dg_size"] = 0.0
+        data["dg_remote_endpoint_max"] = 0.0
+        data.pop("dg_action_sizes", None)
+        try:
+            if int(node[2]) < 0:
+                data["dg_action_sizes"] = {}
+        except Exception:
+            pass
+    for _u, _v, data in graph.edges(data=True):
+        data["dg_size"] = 0.0
+
+    corridor = nx.Graph()
+    shortcuts = []  # (node_u, node_v, cell_u, cell_v)
+    for u, v in graph.edges():
+        try:
+            cu = (int(u[0]), int(u[1]))
+            cv = (int(v[0]), int(v[1]))
+        except Exception:
+            continue
+        if cu == cv:
+            continue
+        if abs(cu[0] - cv[0]) + abs(cu[1] - cv[1]) == 1:
+            corridor.add_edge(cu, cv)
+        else:
+            shortcuts.append((u, v, cu, cv))
+    for _u, _v, cu, cv in shortcuts:
+        corridor.add_node(cu)
+        corridor.add_node(cv)
+
+    size_by_cells = {}
+    for u, v, cu, cv in shortcuts:
+        cell_key = tuple(sorted((cu, cv)))
+        if cell_key not in size_by_cells:
+            try:
+                size_by_cells[cell_key] = float(
+                    nx.shortest_path_length(corridor, cu, cv) + 1
+                )
+            except (nx.NetworkXNoPath, nx.NodeNotFound):
+                size_by_cells[cell_key] = 0.0
+        size = float(size_by_cells[cell_key])
+        graph.edges[u, v]["dg_size"] = size
+
+        for node in (u, v):
+            try:
+                if int(node[2]) >= 0:
+                    prev = float(graph.nodes[node].get("dg_size", 0.0))
+                    endpoint_max = max(prev, size)
+                    # ``dg_size`` is kept for compatibility with the first v7
+                    # graph dumps; policy readout never consumes this value.
+                    graph.nodes[node]["dg_size"] = endpoint_max
+                    graph.nodes[node]["dg_remote_endpoint_max"] = endpoint_max
+            except Exception:
+                pass
+
+        # Project Q(current)--D(memory, action) onto Q(current)'s action gate.
+        for query_node, direction_node in ((u, v), (v, u)):
+            try:
+                if int(query_node[2]) >= 0 or int(direction_node[2]) < 0:
+                    continue
+                action = int(direction_node[2])
+                action_sizes = graph.nodes[query_node].setdefault(
+                    "dg_action_sizes", {}
+                )
+                previous = float(action_sizes.get(action, action_sizes.get(str(action), 0.0)))
+                action_sizes[action] = max(previous, size)
+            except Exception:
+                continue
 
 
 def sync_vectors(graph: nx.Graph) -> None:

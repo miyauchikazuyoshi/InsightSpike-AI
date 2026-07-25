@@ -164,6 +164,20 @@ class StepRecord:
     sleep_edge_applied: bool = False
     sleep_edge_weight: float = 0.0
     sleep_edge_mode: str = ""
+    # v7 β₁ DG action-gate diagnostics
+    dg_action_enabled: bool = False
+    dg_action_exposed: bool = False
+    dg_action_competitive: bool = False
+    dg_action_applied: bool = False
+    dg_action_feasible_candidate_count: int = 0
+    dg_action_eligible_action_count: int = 0
+    dg_action_candidate_count: int = 0
+    dg_action_candidate_max: float = 0.0
+    dg_action_signal_spread: float = 0.0
+    dg_action_log_bias_spread: float = 0.0
+    dg_action_size: float = 0.0
+    dg_action_value: float = 0.0
+    dg_action_log_bias: float = 0.0
     # Event-based prior diagnostics
     event_bias: float = 0.0
     event_bias_applied: bool = False
@@ -345,6 +359,8 @@ class QueryHubConfig:
     vector_mode: str = "standard"  # 'standard' (8D) or 'extended' (10D)
     propagated_alpha: float = 1.0
     propagated_mode: str = "abs"  # 'abs' or 'gradient'
+    dg_action_alpha: float = 0.0  # v7: DG (β₁ cycle-size) gate weight in action selection (0=off)
+    dg_action_scale: float = 10.0  # v7: dg_size normalization scale for the DG action gate
     advantage_commit: float = 0.0  # if > 1.0, argmax when best/second >= threshold
     sleep_propagate_gamma: float = 0.95
     sleep_propagate_iters: int = 50

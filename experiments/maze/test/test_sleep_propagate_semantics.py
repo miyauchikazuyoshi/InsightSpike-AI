@@ -36,8 +36,10 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from graph_persistent_dg.sleep_propagate import (  # noqa: E402
+    annotate_dg_size,
     propagate_rewards,
     sleep_optimize,
+    sleep_replay_optimize,
 )
 
 GAMMA = 0.95
@@ -224,6 +226,77 @@ class TestSleepOptimizePackage:
         g = build_spec_example()
         sleep_optimize(g, gamma=GAMMA, n_iters=N_ITERS)
         assert all("propagated" not in d for _, d in g.nodes(data=True))
+
+
+class TestDgSizeAnnotation:
+    """v7 contract: edge β₁ proxy -> source query-state/action projection."""
+
+    @staticmethod
+    def build_projection_graph() -> nx.Graph:
+        graph = nx.Graph()
+        query = (0, 0, -1)
+        mid = (0, 1, -1)
+        direction_small = (0, 2, 3)
+        direction_large = (1, 2, 3)
+        unrelated_direction = (0, 1, 1)
+        disconnected_query = (10, 10, -1)
+        disconnected_direction = (12, 12, 2)
+        graph.add_edges_from(
+            [
+                # Corridor path: query--mid--small--large.
+                (query, mid),
+                (mid, direction_small),
+                (direction_small, direction_large),
+                # Two shortcuts suggest action 3 at the same source query.
+                (query, direction_small),  # corridor distance 2 + close = 3
+                (query, direction_large),  # corridor distance 3 + close = 4
+                # Same-cell wiring is never a shortcut.
+                (mid, unrelated_direction),
+                # No corridor path between these endpoints.
+                (disconnected_query, disconnected_direction),
+            ]
+        )
+        graph.nodes[query]["dg_action_sizes"] = {3: 99.0}
+        graph.nodes[direction_small]["dg_size"] = 99.0
+        graph.edges[query, mid]["dg_size"] = 99.0
+        return graph
+
+    def test_projects_edge_cycle_size_to_source_query_action(self):
+        graph = self.build_projection_graph()
+        query = (0, 0, -1)
+        direction_small = (0, 2, 3)
+        direction_large = (1, 2, 3)
+
+        annotate_dg_size(graph)
+
+        assert graph.edges[query, direction_small]["dg_size"] == pytest.approx(3.0)
+        assert graph.edges[query, direction_large]["dg_size"] == pytest.approx(4.0)
+        assert graph.nodes[query]["dg_action_sizes"] == {3: pytest.approx(4.0)}
+        assert graph.nodes[query]["dg_size"] == 0.0
+        assert graph.nodes[direction_small]["dg_remote_endpoint_max"] == pytest.approx(3.0)
+        assert graph.nodes[direction_large]["dg_remote_endpoint_max"] == pytest.approx(4.0)
+
+    def test_resets_stale_values_and_ignores_non_cycles(self):
+        graph = self.build_projection_graph()
+        annotate_dg_size(graph)
+
+        assert graph.edges[(0, 0, -1), (0, 1, -1)]["dg_size"] == 0.0
+        assert graph.nodes[(0, 1, 1)]["dg_size"] == 0.0
+        assert graph.edges[(10, 10, -1), (12, 12, 2)]["dg_size"] == 0.0
+        assert graph.nodes[(10, 10, -1)]["dg_action_sizes"].get(2, 0.0) == 0.0
+
+    @pytest.mark.parametrize(
+        "optimizer",
+        [
+            lambda graph: sleep_optimize(graph, gamma=GAMMA, n_iters=1),
+            lambda graph: sleep_replay_optimize(graph, sleep_q={}),
+        ],
+    )
+    def test_all_sleep_optimizers_materialise_dg(self, optimizer):
+        graph = self.build_projection_graph()
+        out = optimizer(graph)
+        assert out.edges[(0, 0, -1), (1, 2, 3)]["dg_size"] == pytest.approx(4.0)
+        assert out.nodes[(0, 0, -1)]["dg_action_sizes"][3] == pytest.approx(4.0)
 
 
 if __name__ == "__main__":
