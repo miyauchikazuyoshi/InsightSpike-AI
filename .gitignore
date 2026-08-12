@@ -27,7 +27,7 @@ node_modules/
 *.log
 *.out
 *.dvi
-*.bbl
+# NOTE: *.bbl is intentionally NOT ignored — arXiv source submissions require it
 *.blg
 *.fdb_latexmk
 *.fls
