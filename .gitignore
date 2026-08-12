@@ -14,7 +14,6 @@ results/
 tmp/
 test_results/
 nohup.out
-None
 
 # Paper temp / local notes
 docs/paper/_tmp/
@@ -28,10 +27,13 @@ node_modules/
 *.log
 *.out
 *.dvi
+*.bbl
+*.blg
 *.fdb_latexmk
 *.fls
 *.xdv
 texput.*
+.texmf-var/
 
 # Experiment caches and models
 experiments/**/__pycache__/
@@ -39,8 +41,6 @@ experiments/**/cache/
 experiments/**/results/
 experiments/**/data_snapshots/
 experiments/rag_cross_genre/
-!experiments/hotpotqa-benchmark/results/
-!experiments/hotpotqa-benchmark/results/**
 pruned_model/
 
 # Archived content (code/docs/experiments)

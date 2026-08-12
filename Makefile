@@ -1,12 +1,11 @@
 # InsightSpike-AI Makefile
 # =======================
 
-.PHONY: install install-dev test clean setup-models
+.PHONY: install install-dev test clean
 
 # Install the package
 install:
 	pip install -e .
-	@echo "Skipping model setup (no scripts/setup_models.py)"
 
 # Install with development dependencies
 install-dev:
@@ -17,10 +16,6 @@ install-dev:
 		black isort flake8 mypy \
 		types-pyyaml types-requests pillow
 	@echo "Dev dependencies installed via pip."
-
-# Setup models only
-setup-models:
-	@echo "No model setup script present. Nothing to do."
 
 # Run tests
 test:
@@ -38,11 +33,6 @@ pytest-fast:
 pytest-sqlite:
 	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 INSIGHTSPIKE_MIN_IMPORT=1 INSIGHTSPIKE_LITE_MODE=1 PYTHONPATH=src \
 		pytest -k "datastore_sqlite" -q
-
-# geDIG Pure API test (lightweight)
-pytest-gedig-pure:
-	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 INSIGHTSPIKE_MIN_IMPORT=1 INSIGHTSPIKE_LITE_MODE=1 PYTHONPATH=src \
-		pytest -k "gedig_pure_api" -q
 
 # Codex Cloud smoke: tiny, deterministic subset
 .PHONY: codex-smoke
