@@ -35,26 +35,33 @@ jobs:
         PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
       run: |
         echo "🔍 Running geDIG health checks..."
-        
-        # Test geDIG selector
+
+        # Test geDIG selector. A failing mode must fail the job — the whole
+        # point of a monitoring run is a non-zero exit on breakage.
         python -c "
+        import sys
         from insightspike.algorithms.gedig.selector import compute_gedig
         import networkx as nx
-        
+
         # Create simple test graphs
         g1 = nx.Graph()
         g1.add_edge(1, 2)
-        g2 = nx.Graph() 
+        g2 = nx.Graph()
         g2.add_edges_from([(1, 2), (2, 3)])
-        
+
         # Test all modes
+        failures = []
         for mode in ['pure', 'full', 'ab']:
             try:
                 result = compute_gedig(g1, g2, mode=mode)
                 print(f'✅ geDIG {mode} mode: {result[\"gedig\"]:.3f}')
             except Exception as e:
                 print(f'❌ geDIG {mode} mode failed: {e}')
-        
+                failures.append(mode)
+
+        if failures:
+            print(f'💥 geDIG health check FAILED for modes: {failures}')
+            sys.exit(1)
         print('🎉 geDIG health check completed')
         "
     

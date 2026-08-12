@@ -17,14 +17,17 @@ export MPLCONFIGDIR=${MPLCONFIGDIR:-results/mpl}
 echo "[codex-smoke] Running minimal test subset..." >&2
 
 # 1) Ultra-light AB logger self-test (no heavy deps)
+# NOTE: no "|| true" here — a failing selftest must fail the smoke run.
 if [ -f scripts/selftest_ab_logger.py ]; then
   echo "[codex-smoke] AB logger selftest" >&2
-  INSIGHTSPIKE_MIN_IMPORT=1 python scripts/selftest_ab_logger.py || true
+  INSIGHTSPIKE_MIN_IMPORT=1 python scripts/selftest_ab_logger.py
 fi
 
 # 2) Focused pytest subset (explicit files to avoid importing heavy modules)
+# "python -m pytest" (not bare "pytest") so the test runner is guaranteed to
+# share the interpreter that has this project's dependencies installed.
 echo "[codex-smoke] pytest minimal subset (explicit files)" >&2
-pytest -q \
+python -m pytest -q \
   tests/test_minimal_healthcheck.py \
   tests/unit/test_core_metrics.py \
   tests/unit/test_gedig_ab_logger.py \

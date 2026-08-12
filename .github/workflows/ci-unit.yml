@@ -73,12 +73,19 @@ jobs:
       - name: Install test deps
         run: |
           python -m pip install --upgrade pip
-          pip install -U pytest "numpy>=1.26.0,<3.0" "pydantic>=1.10,<3.0" \
+          pip install -U pytest pytest-cov "numpy>=1.26.0,<3.0" "pydantic>=1.10,<3.0" \
             "networkx>=3.1" "pyyaml>=6.0" "typer>=0.9,<1.0" "scikit-learn>=1.3"
 
-      - name: Run unit subset
+      # Coverage is measured over both shipped packages (src/insightspike +
+      # src/gedig, see [tool.coverage.run] in pyproject.toml) and the
+      # fail_under gate from pyproject is actually enforced here.
+      # Baseline at gate introduction: 32.9% in this torch-less lite-mode job.
+      # "-p pytest_cov" is required because PYTEST_DISABLE_PLUGIN_AUTOLOAD=1.
+      - name: Run unit subset (with enforced coverage gate)
         run: |
-          pytest -q tests/unit tests/test_minimal_healthcheck.py tests/test__minimal_probe.py -m "not slow and not integration and not performance and not benchmark and not calibration"
+          pytest -q -p pytest_cov tests/unit tests/test_minimal_healthcheck.py tests/test__minimal_probe.py \
+            -m "not slow and not integration and not performance and not benchmark and not calibration" \
+            --cov --cov-report=term --cov-fail-under=30
 
       # Unified geDIG Core. Torch is absent in this job, so 57 pass and
       # 23 skip; all 80 pass in the local torch-enabled environment.

@@ -205,7 +205,9 @@ filterwarnings = [
 ]
 
 [tool.coverage.run]
-source = ["src/insightspike"]
+# Both shipped packages are measured; excluding src/gedig (the scientific
+# core) made the coverage number describe only half the distribution.
+source = ["src/insightspike", "src/gedig"]
 omit = [
     "*/tests/*",
     "*/__pycache__/*",

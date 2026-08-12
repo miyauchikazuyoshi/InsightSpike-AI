@@ -40,18 +40,20 @@ _NAV_AVAILABLE = _safe_find_spec("navigation") is not None
 _MAZE_CORE_AVAILABLE = _safe_find_spec("core.eviction_policy") is not None  # legacy path
 
 # 依存欠如時に収集で失敗するテストをデフォルトで無視
+# NOTE: pytest resolves collect_ignore_glob relative to THIS conftest's
+# directory (tests/), so entries must NOT carry a "tests/" prefix — the old
+# prefixed form resolved to tests/tests/... and silently matched nothing.
 collect_ignore_glob = []  # pytest picks this up at collection time
 if not _NAV_AVAILABLE:
     collect_ignore_glob.extend([
-        "tests/maze/*",
-        "tests/maze-query-hub-prototype/*",
-        "tests/test_macro_target_adaptive_p*.py",
-        "tests/test_macro_target_metrics.py",
-        "tests/test_maze_navigator_smoke.py",
-        "tests/unit/test_maze_simple_mode.py",
+        "maze/*",
+        "test_macro_target_adaptive_p*.py",
+        "test_macro_target_metrics.py",
+        "test_maze_navigator_smoke.py",
+        "unit/test_maze_simple_mode.py",
     ])
 if not _MAZE_CORE_AVAILABLE:
-    collect_ignore_glob.append("tests/maze/test_eviction_policy.py")
+    collect_ignore_glob.append("maze/test_eviction_policy.py")
 
 # 遅延 import 用ヘルパ (必要になった時点でのみ import)
 def _load_config_types():

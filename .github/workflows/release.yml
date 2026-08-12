@@ -17,8 +17,10 @@ jobs:
         with:
           draft: false
           prerelease: false
+          # Paths must exist in the tagged tree; keep in sync with docs/paper/<latest>/
           files: |
-            docs/paper/geDIG_onegauge_improved_v4.pdf
+            docs/paper/v6.1/geDIG_onegauge_improved_v6_1.pdf
+            docs/paper/v6.1/arxiv_en/geDIG_onegauge_improved_v6_1_en.pdf
             docs/paper/data/maze_25x25_*_s500.json
           body_path: docs/releases/RELEASE_NOTES_v0.1.md
         env:

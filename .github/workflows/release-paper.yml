@@ -1,5 +1,10 @@
 name: Release (Paper PDFs)
 
+# Attaches the committed paper PDFs to a draft release when a paper tag is
+# pushed. PDFs are built locally and committed alongside the .tex source
+# (see paper-build.yml for the rationale), so this workflow attaches rather
+# than rebuilds — a CI LaTeX build here previously broke on every paper
+# version rename (v4 -> v5 -> v6).
 on:
   push:
     tags:
@@ -7,8 +12,8 @@ on:
       - 'paper-*'
 
 jobs:
-  build_and_release:
-    name: Build and attach PDFs to Release
+  attach_pdfs:
+    name: Attach paper PDFs to draft Release
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -16,27 +21,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build JA
-        uses: xu-cheng/latex-action@v3
-        with:
-          root_file: geDIG_onegauge_improved_v4.tex
-          working_directory: docs/paper
-          latexmk_use_xelatex: true
-
-      - name: Build EN
-        uses: xu-cheng/latex-action@v3
-        with:
-          root_file: geDIG_onegauge_improved_v4_en.tex
-          working_directory: docs/paper
-          latexmk_use_xelatex: true
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           draft: true
+          # Paths must exist in the tagged tree; keep in sync with docs/paper/<latest>/
           files: |
-            docs/paper/geDIG_onegauge_improved_v4.pdf
-            docs/paper/geDIG_onegauge_improved_v4_en.pdf
+            docs/paper/v6.1/geDIG_onegauge_improved_v6_1.pdf
+            docs/paper/v6.1/arxiv_en/geDIG_onegauge_improved_v6_1_en.pdf
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
