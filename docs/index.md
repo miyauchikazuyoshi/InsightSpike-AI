@@ -29,7 +29,7 @@ Three independent mathematical structures. One dimensionless, scale-invariant sc
 
 <br>
 
-[Paper (PDF)](paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf) ・ [DOI: 10.5281/zenodo.19454110](https://zenodo.org/record/19454110) ・ [GitHub](https://github.com/miyauchikazuyoshi/InsightSpike-AI) ・ [Demo](https://huggingface.co/spaces/miyaukaz/gedig-demo) ・ [Interactive Visualizer](demo.html)
+[Paper (PDF)](paper/v6.1/arxiv_en/geDIG_onegauge_improved_v6_1_en.pdf) ・ [DOI: 10.5281/zenodo.19454110](https://zenodo.org/record/19454110) ・ [GitHub](https://github.com/miyauchikazuyoshi/InsightSpike-AI) ・ [Demo](https://huggingface.co/spaces/miyaukaz/gedig-demo) ・ [Interactive Visualizer](demo.html)
 
 ---
 
@@ -239,8 +239,8 @@ These are **open research questions**, not claims. We welcome critical feedback.
 
 | Type | Link |
 |:-----|:-----|
-| **Paper (English)** | [geDIG v6 (PDF)](paper/arxiv_v6_en/geDIG_onegauge_improved_v6_en.pdf) |
-| **Paper (Japanese)** | [geDIG v6 (PDF)](paper/geDIG_onegauge_improved_v6.pdf) |
+| **Paper (English)** | [geDIG v6.1 (PDF)](paper/v6.1/arxiv_en/geDIG_onegauge_improved_v6_1_en.pdf) |
+| **Paper (Japanese)** | [geDIG v6.1 (PDF)](paper/v6.1/geDIG_onegauge_improved_v6_1.pdf) |
 | **DOI** | [10.5281/zenodo.19454110](https://zenodo.org/record/19454110) |
 | **GitHub** | [InsightSpike-AI](https://github.com/miyauchikazuyoshi/InsightSpike-AI) |
 | **Release** | [v0.6.0](https://github.com/miyauchikazuyoshi/InsightSpike-AI/releases/tag/v0.6.0) |

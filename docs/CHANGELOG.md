@@ -15,7 +15,7 @@
 
 - L3 Graph Reasoner now exposes the latest analyzed graph via `L3GraphReasoner.current_graph` to support Query-as-Node workflows.
 - ConfigurableAgent aligns `QueryTransformer(use_gnn)` with L3 `graph.use_gnn` setting for consistent GNN behavior.
-- CI: Non-selector `compute_gedig` calls are now enforced in STRICT mode in `.github/workflows/test.yml` (set `STRICT_GEDIG_SELECTOR=1`).
+- CI: Non-selector `compute_gedig` calls are now enforced in STRICT mode in the CI workflows (now `.github/workflows/ci-lite.yml` / `ci-unit.yml`; set `STRICT_GEDIG_SELECTOR=1`, check script: `scripts/ci/check_nonselector_compute_gedig.sh`).
 - MainAgent の geDIG モード分岐を単一ファサード (`full|pure|ab`) へ整理し分岐密度削減。
 - A/B CSV エクスポート `export_gedig_ab_csv` でヘッダのみ状態でも 1 行とカウントしテスト安定化。
 

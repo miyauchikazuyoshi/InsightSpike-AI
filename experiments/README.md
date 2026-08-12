@@ -7,7 +7,7 @@ geDIG フレームワークを検証する実験群。**リポジトリ全体の
 
 | ライン | 場所 | 内容と状態(2026-07 時点) |
 |---|---|---|
-| **迷路(主力)** | [`maze/`](maze/) | stage-1 PoC(創発制御+~98% 圧縮、実証済み)。stage-2 sleep は事前登録 3 連: v1 敗北 → v2 成立(replay 伝播 −39% 歩数)→ v3 実行中。実行定型・CLI は [maze/README.md](maze/README.md) |
+| **迷路(主力)** | [`maze/`](maze/) | stage-1 PoC(創発制御+~98% 圧縮、実証済み)。stage-2 sleep は事前登録 v1–v6 完了(2026-07-06): v1 敗北 → v2 成立(replay 伝播 −39% 歩数)→ v3 新シード再現(−51%)→ v4 敗北 → v5 採用見送り → v6 棄却(cycles=1 既定維持)。台帳は [docs/prereg/README.md](../docs/prereg/README.md)。実行定型・CLI は [maze/README.md](maze/README.md) |
 | **RAG / ルーティング** | [`hotpotqa_v2/`](hotpotqa_v2/) | BRIGHT(nDCG 0.439 biology 単一ドメイン)、HotpotQA dual-process(非有意)、MuSiQue v10/v11。F-routing は Stage A 敗北記録済み、Stage B は DECISION 待ちで凍結 |
 | **Transformer** | [`transformer/`](transformer/) | F-trajectory 観測(8 モデル)。F-regularization は予備的・符号未確定([f_sign 監査](../docs/audits/f_sign_audit.md)) |
 | **maze β₁** | [`maze_b1/`](maze_b1/) | β₁ ベース評価の実験(v7 Phase 0 関連) |

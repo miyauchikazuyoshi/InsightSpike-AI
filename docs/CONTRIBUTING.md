@@ -132,10 +132,11 @@ Internal modules may change between minors. If you need stability guarantees, op
 
 ## Docs Internationalization (i18n)
 
-- Policy: English‑first documentation; Japanese (JP) pages are welcomed as supplemental aids.
+- Policy: the primary language depends on the document's role.
+  - Public-facing docs (README, CANONICAL, index, theory, contributing) are English‑first: update EN first, then mirror changes into JP.
+  - The research record (pre-registrations in `docs/prereg/`, audits in `docs/audits/`, internal maps and thinking notes such as `docs/MAP.md`) is Japanese‑first; English summaries are welcome, but the JA text is the source.
+  - `docs/CANONICAL.md` (EN) remains the tie-breaker when documents disagree.
 - PR tips for translations:
-  - Keep the English source canonical; update EN first, then mirror changes into JP.
-  - Place JP pages alongside EN where appropriate (e.g., `docs/ja/...`), or add JP sections to the same page with clear headings.
   - Avoid diverging technical meaning; if a term is ambiguous, prefer the English technical term in parentheses.
   - Screenshots/GIFs may be reused; text in images should have captions in EN.
   - Add reviewers familiar with both languages when proposing nuanced theory translations.
@@ -443,8 +444,6 @@ We value all contributions! Contributors are recognized through:
 - **Community mentions**: Highlighted in project communications
 
 ## Development Roadmap
-
-See our [project roadmap](documentation/ARCHITECTURE_EVOLUTION_ROADMAP.md) for planned features and improvements.
 
 ### Areas for Contribution
 

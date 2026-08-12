@@ -106,7 +106,7 @@ Notes:
     *   **Zero-Copy**: No CPU transfer, pure Tensor operations.
     *   **Approximation**: Matrix powers $A^k$ for SP, Soft Thresholding for EPC.
     *   **End-to-End**: Fully differentiable, usable as a loss function.
-*   **[Neuro-Pruning Tool](../design/neuro_pruning_spec.md)** - Structural lobotomy for Transformers.
+*   **[Neuro-Pruning Tool](../archive/design/neuro_pruning_spec.md)** - Structural lobotomy for Transformers.
     *   **Diagnosis**: Measures the single-state Flash structural profile of every attention head.
     *   **Action**: Applies an experiment-specific ranking rule; profile direction is not the canonical delta-F judgment direction.
     *   **Result**: 10% pruning achieved with <1% accuracy drop on BERT-base.
@@ -118,7 +118,6 @@ Notes:
 - **Weight Vector Management** - Task-specific dimension importance adjustment
 - **Separation of Concerns** - Clean separation between evaluation and confidence updates
 - **Memory Management** - Confidence-based pruning and experience tracking
-- See details in [C-Value Refactoring](../development/c_value_refactoring_plan.md) and [Vector Weights](../development/vector_weight_complete_plan.md)
 
 ### Query Storage System
 - **Automatic query persistence** - All queries saved with rich metadata
@@ -139,7 +138,6 @@ Notes:
 - **Removed hard dependency on FAISS** - Resolved segmentation fault issues
 - **NumPy backend implementation** - Pure Python alternative
 - **VectorIndexFactory** - Automatic backend selection
-- See migration guide in [faiss_removal_complete.md](../development/done/faiss_removal_complete.md)
 
 ### DataStore Abstraction
 - **Unified data access layer** - Consistent API for all data operations

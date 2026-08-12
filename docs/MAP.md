@@ -2,7 +2,8 @@
 
 > **対象読者**: このリポジトリに初めて入る AI エージェント・共同研究者。
 > **目的**: 探索なしで「どこに何があるか」「どの主張が生きているか」「用語の罠」に答える。
-> **最終更新**: 2026-07-03(古くなっていたら疑って、README の Project Status を正とする)
+> **最終更新**: 2026-08-12(古くなっていたら疑って、README の Project Status を正とする)
+> 2026-07-25 に P0–P6 負債返済プログラム完了 — 詳細は [development/debt_repayment_refactoring_plan_20260724.md](development/debt_repayment_refactoring_plan_20260724.md)
 
 ## 1. 60 秒サマリ
 
@@ -19,8 +20,8 @@ geDIG は「知識グラフをいつ再構築すべきか」を単一ゲージ *
 
 | 場所 | 中身 | 状態メモ |
 |---|---|---|
-| `src/insightspike/` | 本体パッケージ(~74k 行) | **geDIG 実装が 2 つある**(§5) |
-| `src/gedig/` | 統一 F-eval コア(71 テスト) | 3 実験ラインの共有コア |
+| `src/insightspike/` | 本体パッケージ(~74k 行) | **geDIG 実装が 3 系統ある**(§5) |
+| `src/gedig/` | 統一 F-eval コア(80 テスト、torch なし環境は 57 pass + 23 skip) | 3 実験ラインの共有コア |
 | `experiments/maze/` | 迷路ライン(主力)。`run_experiment_query.py` + `qhlib/` + `graph_persistent_dg/`(sleep) | 実行定型は [experiments/maze/README.md](../experiments/maze/README.md) |
 | `experiments/hotpotqa_v2/` | RAG/ルーティングライン(BRIGHT、MuSiQue、dual-process) | Stage B は凍結中(DECISION 待ち) |
 | `experiments/transformer/` | Transformer F-trajectory / F-regularization | F 符号問題は未確定(監査参照) |

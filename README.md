@@ -5,7 +5,7 @@
 $$\mathcal{F} = \Delta \text{EPC}_{norm} - \lambda \left(\Delta H_{norm} + \gamma\,\Delta \text{SP}_{rel}\right)$$
 
 [![CI (Lite)](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci-lite.yml/badge.svg)](https://github.com/miyauchikazuyoshi/InsightSpike-AI/actions/workflows/ci-lite.yml)
-[![Paper](https://img.shields.io/badge/paper-PDF-blue)](docs/paper/v6/arxiv_en/geDIG_onegauge_improved_v6_en.pdf)
+[![Paper](https://img.shields.io/badge/paper-PDF-blue)](docs/paper/v6.1/arxiv_en/geDIG_onegauge_improved_v6_1_en.pdf)
 [![Pages](https://img.shields.io/badge/docs-GitHub%20Pages-green)](https://miyauchikazuyoshi.github.io/InsightSpike-AI)
 
 ---
@@ -52,7 +52,7 @@ It is not a production library.
 | Component | Status | Location |
 |-----------|--------|----------|
 | **Unified geDIG Core** | 80 core regression tests (all 80 pass locally; a CI-compatible torch import-block simulation produces 57 passes and 23 expected skips). Transformer values/gradients are compared with the frozen independent oracle; RAG has independent formula checks; Maze has adapter contracts plus an active-legacy golden trace, not a full equivalence claim | [`src/gedig/`](src/gedig/) |
-| geDIG theory (v6 paper) | Pre-print — position paper + proof-of-concept | [`docs/paper/`](docs/paper/v6/arxiv_en/geDIG_onegauge_improved_v6_en.pdf) |
+| geDIG theory (v6.1 paper) | Pre-print — position paper + proof-of-concept | [`docs/paper/`](docs/paper/v6.1/arxiv_en/geDIG_onegauge_improved_v6_1_en.pdf) |
 | BRIGHT reasoning-intensive retrieval | nDCG@10 = 0.439 on **biology, 50 queries, single seed** (preliminary; full 3-domain ≈ 0.19; SOTA ≈ 0.63) | [`experiments/hotpotqa_v2/`](experiments/hotpotqa_v2/) |
 | AGHT (Graph Transformer) | HotpotQA R@2 = 0.405, **+170% over an internal PageRank baseline** (zero-shot, 100q, single seed) | [`experiments/hotpotqa_v2/src/unified_graph.py`](experiments/hotpotqa_v2/src/unified_graph.py) |
 | Transformer Flash-profile regularization (Exp4) | **Preliminary, single seed**: single-state profile maximize > baseline under the SP profile only — *not* confirmed under β₁ or against a random-regularization control | [`experiments/transformer/`](experiments/transformer/) |
@@ -330,7 +330,7 @@ $$\mathcal{F} = E - TS \quad\longleftrightarrow\quad \mathcal{F} = \Delta\text{E
 
 > *The neurotransmitter correspondence is a computational analogy, not a physiological claim.*
 
-For formal definitions, see [`docs/gedig_spec.md`](docs/gedig_spec.md). For the full paper, see the [v6 pre-print (PDF)](docs/paper/v6/arxiv_en/geDIG_onegauge_improved_v6_en.pdf).
+For formal definitions, see [`docs/gedig_spec.md`](docs/gedig_spec.md). For the full paper, see the [v6.1 pre-print (PDF)](docs/paper/v6.1/arxiv_en/geDIG_onegauge_improved_v6_1_en.pdf).
 
 ---
 
@@ -366,7 +366,7 @@ Specific, actionable research questions where external collaboration would be va
 ## References
 
 **Core theory**:
-- geDIG v6 paper: [`docs/paper/arxiv_v6_en/`](docs/paper/v6/arxiv_en/geDIG_onegauge_improved_v6_en.pdf)
+- geDIG v6.1 paper: [`docs/paper/v6.1/arxiv_en/`](docs/paper/v6.1/arxiv_en/geDIG_onegauge_improved_v6_1_en.pdf)
 - Canonical spec: [`docs/gedig_spec.md`](docs/gedig_spec.md)
 
 **Each term of $\mathcal{F}$ is grounded in independent prior work**:
@@ -385,7 +385,7 @@ Specific, actionable research questions where external collaboration would be va
 
 ## Citation, License, and Patent
 
-**Paper**: [geDIG v6 (pre-print)](docs/paper/v6/arxiv_en/geDIG_onegauge_improved_v6_en.pdf)
+**Paper**: [geDIG v6.1 (pre-print)](docs/paper/v6.1/arxiv_en/geDIG_onegauge_improved_v6_1_en.pdf)
 
 **Patent**: JP 2025-082988, JP 2025-082989
 

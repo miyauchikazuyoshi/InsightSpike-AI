@@ -15,10 +15,10 @@ New to InsightSpike? Start here!
 
 ### 📖 [User Guide](./user-guide/)
 Learn how to use InsightSpike effectively
-- [July 2024 Features Quick Start](./user-guide/july_2024_features_quickstart.md) - Get started with the latest features
+- [July 2024 Features Quick Start](./archive/user-guide/july_2024_features_quickstart.md) - Get started with the latest features (archived)
 - [Configuration Guide](./user-guide/configuration_guide.md) - Configure InsightSpike for your needs
-- [CLI Commands](./user-guide/cli_commands.md) - Complete command reference
-- [Spike Commands Summary](./user-guide/spike_commands_summary.md) - Quick reference for spike commands
+- [CLI Commands](./archive/user-guide/cli_commands.md) - Complete command reference (archived)
+- [Spike Commands Summary](./archive/user-guide/spike_commands_summary.md) - Quick reference for spike commands (archived)
 - [LLM Providers Guide](./user-guide/llm_providers_guide.md) - Setting up different LLM providers
 
 ### 🔧 [API Reference](./api-reference/)
@@ -30,7 +30,7 @@ Detailed API documentation for developers
 Understanding InsightSpike's design
 - [Overview](./architecture/README.md) - System architecture introduction
 - [Layer Architecture](./architecture/layer_architecture.md) - 4-layer brain-inspired design
-- [Agent Types](./architecture/agent_types.md) - Available agent implementations
+- [Agent Types](./archive/architecture/agent_types.md) - Available agent implementations (archived)
 - [Directory Structure](./architecture/directory_structure.md) - Code organization
 - [Configuration System](./architecture/configuration.md) - Config architecture
 - [Data Management](./architecture/data_management_strategy.md) - Data handling strategies
@@ -55,19 +55,18 @@ Formal specification and theory background
 - **Paper v6.1 (current; claim–evidence consistency revision, 2026-06)**:
   JA `docs/paper/v6.1/geDIG_onegauge_improved_v6_1.pdf` / EN `docs/paper/v6.1/arxiv_en/geDIG_onegauge_improved_v6_1_en.pdf`
 - Paper v6 (arXiv/Zenodo DOI-pinned): `docs/paper/v6/arxiv_en/geDIG_onegauge_improved_v6_en.pdf`
-- Paper v5 (historical): `docs/paper/geDIG_onegauge_improved_v5.pdf`
+- Paper v5 (historical): `docs/paper/v5/geDIG_onegauge_improved_v5.pdf`
 - v7 plan (β₁ generalization, in progress): [paper/v7/plan.md](./paper/v7/plan.md) + [Tier 1 drafts](./paper/v7/draft_sections/)
 - **Audits (2026-06, external review)**: [audits/](./audits/) — F-sign, PER metric, oracle routing ceiling
 - **Pre-registrations**: [prereg/](./prereg/) — router duel (Stage A defeat recorded), maze sleep ablation
 
 ### 🗂️ Research Notes (Long‑Term / AGI)
 Exploratory notes on AGI foundations, governance, and Phase‑2 ideas
-- [AGI / Governance Notes](./research-notes/appendix/README.md)
-- [Phase‑2 Offline Optimization (JA/EN)](./research-notes/appendix/phase2/phase2_offline_appendix_ja_en.md)
+- [AGI / Governance Notes](./research/README.md)
+- [Phase‑2 Offline Optimization (JA/EN)](./research/phase2/phase2_offline_appendix_ja_en.md)
 
 ### 🖼️ [Images](./images/)
 Documentation images and animations
-- [Animations](./images/animations/) - Animated demonstrations
 
 ## 🔍 Finding What You Need
 

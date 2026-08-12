@@ -11,8 +11,8 @@ title: geDIG — Unified Gauge Control
 > A discrete free‑energy perspective bridging FEP, MDL, and information thermodynamics to govern When/What in dynamic knowledge graphs.
 
 - Landing (JA, overview slide): [geDIG unified gauge (JA overview)](images/gedig_unified_gauge_ja_landing.pdf)
-- Paper v5 (JA): [geDIG_onegauge_improved_v5.pdf](paper/geDIG_onegauge_improved_v5.pdf)
-- Paper v5 (EN, full): [geDIG_onegauge_improved_v5_full_en.pdf](paper/arxiv_v5_en/geDIG_onegauge_improved_v5_full_en.pdf)
+- Paper v6.1 (JA): [geDIG_onegauge_improved_v6_1.pdf](paper/v6.1/geDIG_onegauge_improved_v6_1.pdf)
+- Paper v6.1 (EN): [geDIG_onegauge_improved_v6_1_en.pdf](paper/v6.1/arxiv_en/geDIG_onegauge_improved_v6_1_en.pdf)
 - Quick start: `python examples/public_quick_start.py`
 - CLI: `python -m insightspike.cli.spike --help`
 - Smoke tests: `make codex-smoke`
@@ -43,7 +43,7 @@ How to engage:
 - Or DM on X (Twitter): @kazuyoshim5436
 
 ## Links
-- Spec: [geDIG spec]({{ site.baseurl }}/gedig_spec/)
-- Phase‑1: [maze & RAG]({{ site.baseurl }}/phase1/)
-- Tutorial (trace): [trace a spike]({{ site.baseurl }}/tutorials/trace/)
+- Spec: [geDIG spec](gedig_spec.md)
+- Phase‑1: [maze & RAG](phase1.md)
+- Tutorial (trace): [trace a spike](tutorials/trace.md)
 - GitHub repo: [InsightSpike-AI](https://github.com/miyauchikazuyoshi/InsightSpike-AI)

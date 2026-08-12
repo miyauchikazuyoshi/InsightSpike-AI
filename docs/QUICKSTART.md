@@ -89,4 +89,4 @@ F = -0.42  (ΔEPC_norm=0.15,  ΔIG=0.57,  spike=True)
 
 - CONCEPTS.md で用語/理論（ΔEPC/ΔIG, One‑Gauge, AG/DG）を把握
 - EXPERIMENTS.md で迷路やRAGの再現を進める
-- 論文 v3（EPC基準）: docs/paper/geDIG_onegauge_improved_v3.tex
+- 論文 v6.1（現行）: docs/paper/v6.1/geDIG_onegauge_improved_v6_1.tex
