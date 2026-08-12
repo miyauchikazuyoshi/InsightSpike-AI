@@ -1,0 +1,39 @@
+name: Docs Link Check
+
+# Internal-link integrity for the documentation tree. Offline mode checks
+# file-to-file links only — external URLs are deliberately excluded so the
+# job cannot flake on third-party outages. This exists because doc rot was
+# found repeatedly (moved paper versions, renamed experiment dirs) with
+# nothing in CI to catch it.
+on:
+  push:
+    paths:
+      - '**.md'
+      - '.github/workflows/docs-links.yml'
+  pull_request:
+    paths:
+      - '**.md'
+      - '.github/workflows/docs-links.yml'
+  workflow_dispatch:
+
+jobs:
+  lychee:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check internal links (offline)
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --offline
+            --no-progress
+            --include-fragments
+            README.md README_EN.md QUICKSTART.md
+            docs/README.md docs/index.md docs/home.md docs/MAP.md
+            docs/CANONICAL.md docs/QUICKSTART.md docs/EXPERIMENTS.md
+            docs/CONTRIBUTING.md docs/prereg/
+            experiments/README.md
+          fail: true

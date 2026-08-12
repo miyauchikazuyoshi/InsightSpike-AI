@@ -33,6 +33,7 @@ from gedig.backends.torch_backend import (
     TorchSP,
     TorchBetti,
 )
+from gedig.core.f_eval import FEval
 
 
 @dataclass
@@ -96,6 +97,16 @@ class TransformerFEval:
         self.sp = TorchSP()
         self.betti = TorchBetti()
 
+        # The F formula itself lives in the core FEval — this adapter only
+        # chooses which structure-potential backend (SP or β₁) is injected.
+        self._f_eval = FEval(
+            epc=self.epc,
+            entropy=self.entropy,
+            sp=self.betti if use_betti else self.sp,
+            lambda_param=lambda_param,
+            gamma=gamma,
+        )
+
     def compute(
         self,
         before_attention: "torch.Tensor",
@@ -129,17 +140,19 @@ class TransformerFEval:
             temperature=self.temperature,
         )
 
-        # Compute components
-        delta_epc = self.epc.compute(before, after)    # (B, H)
-        delta_h = self.entropy.compute(before, after)  # (B, H)
-        delta_sp = self.sp.compute(before, after)      # (B, H)
+        # Delegate F = ΔEPC - λ(ΔH + γΔB) to the unified core; components
+        # come back per-(B, H) because the injected backends are torch.
+        core = self._f_eval.compute(before, after)
+        F = core.f_value
+        delta_epc = core.delta_epc  # (B, H)
+        delta_h = core.delta_h      # (B, H)
 
         if self.use_betti:
-            delta_b1 = self.betti.compute(before, after)  # (B, H)
-            F = delta_epc - self.lambda_param * (delta_h + self.gamma * delta_b1)
+            delta_b1 = core.delta_b                   # (B, H)
+            delta_sp = self.sp.compute(before, after)  # reported for comparison
         else:
+            delta_sp = core.delta_b                   # (B, H)
             delta_b1 = torch.zeros_like(delta_sp)
-            F = delta_epc - self.lambda_param * (delta_h + self.gamma * delta_sp)
 
         return TransformerFEvalResult(
             F=F,
